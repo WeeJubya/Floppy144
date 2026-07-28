@@ -1,18 +1,18 @@
-# Floppy144 Static Runtime Baseline
+# Floppy144 Static Renderer Baseline
 
 ## Purpose
 
-This measurement records the first standalone Floppy144 Windows executable
-with the river2D software renderer compiled directly into the application.
+This measurement records the first working one-file Floppy144 Windows runtime.
 
-No river2D renderer DLL or external game resources are required.
+The river2D software renderer is compiled directly into Floppy144.exe.
+The executable does not load or require river2Dsoftware.dll.
 
 ## Build
 
 - Configuration: Release
 - Platform: Windows x64
-- Source branch: floppy144/vs001-static-win32
-- Source commit: b4240befdcdad162fc3d5957e1ba66c9d9a96087
+- Compiler: Microsoft Visual C
+- Branch: floppy144/vs001-static-win32
 - Internal canvas: 640 x 360
 - Application type: Windows GUI application
 - Runtime files: 1
@@ -21,48 +21,55 @@ No river2D renderer DLL or external game resources are required.
 
 | File | Bytes | SHA-256 |
 |---|---:|---|
-| Floppy144.exe | 15872 | 574AEFEB87A7120C29718D063A3E859F845580911F718EE75AD4A04087546436 |
+| Floppy144.exe | 15,872 | 3E55C0685CB74A20F02E3A3C8E4A4B3DED4F4621E54158DF1D18A1ACDEC3F7BF |
 
 ## Comparison
 
-- Previous two-file runtime: 29184 bytes
-- Standalone executable: 15872 bytes
-- Space saved: 13312 bytes
-- Runtime reduction: 45.61%
-- Contest ceiling: 1474560 bytes
-- Remaining capacity: 1458688 bytes
-- Disk capacity used: 1.08%
+| Build | Bytes |
+|---|---:|
+| Stock EXE plus renderer DLL | 29,184 |
+| Static renderer EXE | 15,872 |
+| Saving | 13,312 |
 
-## Runtime Dependencies
+The static renderer build is 45.61 percent smaller than the original
+two-file runtime.
+
+## Capacity
+
+- Contest ceiling: 1,474,560 bytes
+- Runtime size: 15,872 bytes
+- Remaining capacity: 1,458,688 bytes
+- Disk capacity used: 1.08 percent
+- Prototype red line: 307,200 bytes
+- Space below prototype red line: 291,328 bytes
+
+## Verified Dependencies
+
+The executable depends on standard Windows and Microsoft runtime components:
 
 - USER32.dll
 - GDI32.dll
 - KERNEL32.dll
 - VCRUNTIME140.dll
-- api-ms-win-crt-stdio-l1-1-0.dll
-- api-ms-win-crt-heap-l1-1-0.dll
-- api-ms-win-crt-runtime-l1-1-0.dll
-- api-ms-win-crt-math-l1-1-0.dll
-- api-ms-win-crt-locale-l1-1-0.dll
+- Universal C Runtime API sets
 
-These are operating-system or Microsoft runtime dependencies. The executable
-does not depend on river2Dsoftware.dll.
+It does not depend on river2Dsoftware.dll.
 
 ## Verification
 
-The executable was tested from a clean directory containing only
-Floppy144.exe.
+A clean directory containing only Floppy144.exe was tested successfully.
 
-The application successfully:
+The application:
 
-- created the software framebuffer
 - opened a window titled Floppy//144
-- displayed and resized the framebuffer
+- created and displayed the software framebuffer
+- resized correctly
 - closed normally
-- ran without river2Dsoftware.dll
-- built with no warnings or errors
+- produced no compiler warnings or errors
 
-## Next Experiment
+## Next Investigation
 
-Remove imgsurf.lib from the Floppy144 link and build process while retaining
-the existing source tree for compatibility and rollback.
+Test whether imgsurf.lib is genuinely required by the current executable.
+
+Floppy144 does not currently load external images. Its visuals are generated
+procedurally in memory.
