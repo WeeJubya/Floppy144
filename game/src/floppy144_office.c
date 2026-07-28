@@ -321,7 +321,7 @@ static void Floppy144OfficeDrawTerminal(
         surface,
         299,
         66,
-        "OFFLINE",
+        "READY",
         1,
         amber
     );
@@ -468,7 +468,7 @@ void Floppy144OfficeDraw(
 
     const char *prompt =
         Floppy144OfficeNearTerminal(player)
-            ? "TERMINAL OFFLINE - COLLECTION REQUIRED"
+            ? "PRESS E TO ACCESS ARCHIVE TERMINAL"
             : "WASD OR ARROWS TO MOVE";
 
     uint32_t grid_x;
@@ -760,6 +760,7 @@ void Floppy144OfficeDraw(
         muted_colour
     );
 }
+
 
 
 

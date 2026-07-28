@@ -6,19 +6,22 @@
 
 #include "floppy144_office.h"
 #include "floppy144_recovery.h"
+#include "floppy144_terminal.h"
 
 #include <stdbool.h>
 
 typedef enum Floppy144Screen
 {
     FLOPPY144_SCREEN_RECOVERY,
-    FLOPPY144_SCREEN_OFFICE
+    FLOPPY144_SCREEN_OFFICE,
+    FLOPPY144_SCREEN_TERMINAL
 } Floppy144Screen;
 
 static EngineData *global_engine;
 
 static Floppy144Screen global_screen;
 static Floppy144Player global_player;
+static Floppy144TerminalState global_terminal;
 
 static bool global_recovery_started;
 
@@ -54,6 +57,16 @@ static void Floppy144Redraw(
             Floppy144OfficeDraw(
                 global_engine,
                 &global_player
+            );
+
+            break;
+        }
+
+        case FLOPPY144_SCREEN_TERMINAL:
+        {
+            Floppy144TerminalDraw(
+                global_engine,
+                &global_terminal
             );
 
             break;
@@ -207,7 +220,7 @@ static LRESULT CALLBACK Floppy144WindowProc(
                             Floppy144MovePlayer(
                                 window,
                                 0,
-                                -4
+                                -8
                             );
 
                             return 0;
@@ -219,8 +232,31 @@ static LRESULT CALLBACK Floppy144WindowProc(
                             Floppy144MovePlayer(
                                 window,
                                 0,
-                                4
+                                8
                             );
+
+                            return 0;
+                        }
+
+                        case 'E':
+                        {
+                            if(
+                                Floppy144OfficeNearTerminal(
+                                    &global_player
+                                )
+                            )
+                            {
+                                global_screen =
+                                    FLOPPY144_SCREEN_TERMINAL;
+
+                                Floppy144TerminalReset(
+                                    &global_terminal
+                                );
+
+                                Floppy144Redraw(
+                                    window
+                                );
+                            }
 
                             return 0;
                         }
@@ -229,6 +265,90 @@ static LRESULT CALLBACK Floppy144WindowProc(
                         {
                             global_screen =
                                 FLOPPY144_SCREEN_RECOVERY;
+
+                            Floppy144Redraw(
+                                window
+                            );
+
+                            return 0;
+                        }
+                    }
+
+                    break;
+                }
+
+                case FLOPPY144_SCREEN_TERMINAL:
+                {
+                    switch(w_param)
+                    {
+                        case VK_UP:
+                        case 'W':
+                        {
+                            Floppy144TerminalMoveSelection(
+                                &global_terminal,
+                                -1
+                            );
+
+                            Floppy144Redraw(
+                                window
+                            );
+
+                            return 0;
+                        }
+
+                        case VK_DOWN:
+                        case 'S':
+                        {
+                            Floppy144TerminalMoveSelection(
+                                &global_terminal,
+                                1
+                            );
+
+                            Floppy144Redraw(
+                                window
+                            );
+
+                            return 0;
+                        }
+
+                        case VK_RETURN:
+                        {
+                            Floppy144TerminalOpenSelection(
+                                &global_terminal
+                            );
+
+                            Floppy144Redraw(
+                                window
+                            );
+
+                            return 0;
+                        }
+
+                        case VK_ESCAPE:
+                        {
+                            switch(
+                                Floppy144TerminalDetailOpen(
+                                    &global_terminal
+                                )
+                            )
+                            {
+                                case true:
+                                {
+                                    Floppy144TerminalCloseDetail(
+                                        &global_terminal
+                                    );
+
+                                    break;
+                                }
+
+                                case false:
+                                {
+                                    global_screen =
+                                        FLOPPY144_SCREEN_OFFICE;
+
+                                    break;
+                                }
+                            }
 
                             Floppy144Redraw(
                                 window
@@ -406,6 +526,10 @@ int CALLBACK WinMain(
         &global_player
     );
 
+    Floppy144TerminalReset(
+        &global_terminal
+    );
+
     engine.init(
         &engine,
         planes
@@ -465,4 +589,3 @@ int CALLBACK WinMain(
         &engine
     );
 }
-
