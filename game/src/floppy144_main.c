@@ -4,33 +4,12 @@
 #include "river2D_main.h"
 #include "win32_river2Dsoftware_platform.h"
 
+#include "floppy144_recovery.h"
+
+#include <stdbool.h>
+
 static EngineData *global_engine;
-
-static void Floppy144FillBackbuffer(
-    EngineData *engine,
-    uint32_t colour
-)
-{
-    uint32_t *pixels;
-    size_t pixel_count;
-    size_t pixel_index;
-
-    if(!engine || !engine->backbuffer.data)
-    {
-        return;
-    }
-
-    pixels = (uint32_t *)engine->backbuffer.data;
-
-    pixel_count =
-        (size_t)engine->backbuffer.width *
-        (size_t)engine->backbuffer.height;
-
-    for(pixel_index = 0; pixel_index < pixel_count; ++pixel_index)
-    {
-        pixels[pixel_index] = colour;
-    }
-}
+static bool global_recovery_started;
 
 static void Floppy144BindStaticRenderer(
     EngineData *engine
@@ -50,7 +29,6 @@ static LRESULT CALLBACK Floppy144WindowProc(
     LPARAM l_param
 )
 {
-    (void)w_param;
     (void)l_param;
 
     switch(message)
@@ -77,6 +55,44 @@ static LRESULT CALLBACK Floppy144WindowProc(
             return 0;
         }
 
+        case WM_KEYDOWN:
+        {
+            switch(w_param)
+            {
+                case VK_RETURN:
+                {
+                    global_recovery_started = true;
+
+                    Floppy144RecoveryDraw(
+                        global_engine,
+                        global_recovery_started
+                    );
+
+                    InvalidateRect(
+                        window,
+                        0,
+                        FALSE
+                    );
+
+                    return 0;
+                }
+
+                case VK_ESCAPE:
+                {
+                    PostMessageA(
+                        window,
+                        WM_CLOSE,
+                        0,
+                        0
+                    );
+
+                    return 0;
+                }
+            }
+
+            return 0;
+        }
+
         case WM_ERASEBKGND:
         {
             return 1;
@@ -84,14 +100,21 @@ static LRESULT CALLBACK Floppy144WindowProc(
 
         case WM_SIZE:
         {
-            InvalidateRect(window, 0, FALSE);
+            InvalidateRect(
+                window,
+                0,
+                FALSE
+            );
+
             return 0;
         }
 
         case WM_PAINT:
         {
             PAINTSTRUCT paint = {0};
-            HDC device_context = BeginPaint(window, &paint);
+
+            HDC device_context =
+                BeginPaint(window, &paint);
 
             if(
                 global_engine &&
@@ -99,16 +122,29 @@ static LRESULT CALLBACK Floppy144WindowProc(
                 global_engine->backbuffer.data
             )
             {
-                global_engine->context = device_context;
-                global_engine->bltBuffer(global_engine);
+                global_engine->context =
+                    device_context;
+
+                global_engine->bltBuffer(
+                    global_engine
+                );
             }
 
-            EndPaint(window, &paint);
+            EndPaint(
+                window,
+                &paint
+            );
+
             return 0;
         }
     }
 
-    return DefWindowProcA(window, message, w_param, l_param);
+    return DefWindowProcA(
+        window,
+        message,
+        w_param,
+        l_param
+    );
 }
 
 int CALLBACK WinMain(
@@ -118,13 +154,25 @@ int CALLBACK WinMain(
     int show_command
 )
 {
-    const char *class_name = "Floppy144WindowClass";
+    const char *class_name =
+        "Floppy144WindowClass";
 
     EngineData engine = {0};
-    RiverImage planes[RV_MAX_PLANES] = {0};
+
+    RiverImage planes[
+        RV_MAX_PLANES
+    ] = {0};
 
     WNDCLASSA window_class = {0};
-    RECT window_rect = {0, 0, 640, 360};
+
+    RECT window_rect =
+    {
+        0,
+        0,
+        640,
+        360
+    };
+
     MSG message = {0};
 
     (void)previous_instance;
@@ -133,21 +181,35 @@ int CALLBACK WinMain(
     engine.instance = instance;
     engine.windowName = "Floppy//144";
 
-    engine.config.renderer = RV_RENDERER_SOFTWARE;
-    engine.config.choices = RV_CHOICE_STATIC_CANVAS_BIT;
+    engine.config.renderer =
+        RV_RENDERER_SOFTWARE;
+
+    engine.config.choices =
+        RV_CHOICE_STATIC_CANVAS_BIT;
 
     engine.config.window_width = 640;
     engine.config.window_height = 360;
     engine.config.canvas_width = 640;
     engine.config.canvas_height = 360;
 
-    Floppy144BindStaticRenderer(&engine);
+    Floppy144BindStaticRenderer(
+        &engine
+    );
 
-    window_class.style = CS_HREDRAW | CS_VREDRAW;
-    window_class.lpfnWndProc = Floppy144WindowProc;
-    window_class.hInstance = instance;
-    window_class.hCursor = LoadCursorW(0, IDC_ARROW);
-    window_class.lpszClassName = class_name;
+    window_class.style =
+        CS_HREDRAW | CS_VREDRAW;
+
+    window_class.lpfnWndProc =
+        Floppy144WindowProc;
+
+    window_class.hInstance =
+        instance;
+
+    window_class.hCursor =
+        LoadCursorW(0, IDC_ARROW);
+
+    window_class.lpszClassName =
+        class_name;
 
     if(!RegisterClassA(&window_class))
     {
@@ -181,8 +243,12 @@ int CALLBACK WinMain(
     }
 
     global_engine = &engine;
+    global_recovery_started = false;
 
-    engine.init(&engine, planes);
+    engine.init(
+        &engine,
+        planes
+    );
 
     if(!engine.backbuffer.data)
     {
@@ -193,25 +259,48 @@ int CALLBACK WinMain(
             MB_OK | MB_ICONERROR
         );
 
-        DestroyWindow(engine.window);
+        DestroyWindow(
+            engine.window
+        );
+
         return 3;
     }
 
-    Floppy144FillBackbuffer(
+    Floppy144RecoveryDraw(
         &engine,
-        0x00261F18
+        global_recovery_started
     );
 
-    ShowWindow(engine.window, show_command);
-    UpdateWindow(engine.window);
+    ShowWindow(
+        engine.window,
+        show_command
+    );
 
-    while(GetMessageA(&message, 0, 0, 0) > 0)
+    UpdateWindow(
+        engine.window
+    );
+
+    while(
+        GetMessageA(
+            &message,
+            0,
+            0,
+            0
+        ) > 0
+    )
     {
-        TranslateMessage(&message);
-        DispatchMessageA(&message);
+        TranslateMessage(
+            &message
+        );
+
+        DispatchMessageA(
+            &message
+        );
     }
 
     global_engine = 0;
 
-    return engine.shutdown(&engine);
+    return engine.shutdown(
+        &engine
+    );
 }
