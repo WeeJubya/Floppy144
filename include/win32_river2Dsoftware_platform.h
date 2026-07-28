@@ -4,7 +4,11 @@
 
 #include <stdint.h>
 
-#define EXPORT __declspec(dllexport)
+#if defined(RIVER2D_STATIC_RENDERER)
+    #define EXPORT
+#else
+    #define EXPORT __declspec(dllexport)
+#endif
 
 EXPORT void init
 (
@@ -47,3 +51,4 @@ EXPORT void loadText
     uint32_t   offsetX,
     uint32_t   offsetY
 );
+

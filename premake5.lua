@@ -157,6 +157,7 @@ project("river2D software renderer")
         linkoptions("/NODEFAULTLIB:MSVCRTD")
 
 
+
 project("Floppy144")
     language("C")
     cdialect("C99")
@@ -169,7 +170,9 @@ project("Floppy144")
 
     files({
         "./game/src/**.c",
-        "./game/src/**.h"
+        "./game/src/**.h",
+        "./src/win32_river2Dsoftware_platform.c",
+        "./include/win32_river2Dsoftware_platform.h"
     })
 
     includedirs({
@@ -184,13 +187,16 @@ project("Floppy144")
     })
 
     dependson({
-        "river2D common functions",
-        "river2D software renderer"
+        "river2D common functions"
     })
 
     filter("platforms:Windows")
         system("Windows")
-        defines("BUILD_WINDOWS")
+
+        defines({
+            "BUILD_WINDOWS",
+            "RIVER2D_STATIC_RENDERER"
+        })
 
         links({
             "river2Dcommon.lib",

@@ -2,6 +2,7 @@
 #include <windows.h>
 
 #include "river2D_main.h"
+#include "win32_river2Dsoftware_platform.h"
 
 static EngineData *global_engine;
 
@@ -29,6 +30,17 @@ static void Floppy144FillBackbuffer(
     {
         pixels[pixel_index] = colour;
     }
+}
+
+static void Floppy144BindStaticRenderer(
+    EngineData *engine
+)
+{
+    engine->init = init;
+    engine->shutdown = shutdown;
+    engine->bltBuffer = bltBuffer;
+    engine->loadText = loadText;
+    engine->compositeImage = compositeImage;
 }
 
 static LRESULT CALLBACK Floppy144WindowProc(
@@ -110,7 +122,6 @@ int CALLBACK WinMain(
 
     EngineData engine = {0};
     RiverImage planes[RV_MAX_PLANES] = {0};
-    StringView renderer_path = {".", 1};
 
     WNDCLASSA window_class = {0};
     RECT window_rect = {0, 0, 640, 360};
@@ -130,27 +141,7 @@ int CALLBACK WinMain(
     engine.config.canvas_width = 640;
     engine.config.canvas_height = 360;
 
-    rvResolveRenderer(
-        &engine,
-        renderer_path,
-        RV_RENDERER_SOFTWARE
-    );
-
-    if(
-        !engine.init ||
-        !engine.shutdown ||
-        !engine.bltBuffer
-    )
-    {
-        MessageBoxA(
-            0,
-            "river2Dsoftware.dll could not be loaded.",
-            "Floppy//144",
-            MB_OK | MB_ICONERROR
-        );
-
-        return 1;
-    }
+    Floppy144BindStaticRenderer(&engine);
 
     window_class.style = CS_HREDRAW | CS_VREDRAW;
     window_class.lpfnWndProc = Floppy144WindowProc;
@@ -160,7 +151,7 @@ int CALLBACK WinMain(
 
     if(!RegisterClassA(&window_class))
     {
-        return 2;
+        return 1;
     }
 
     AdjustWindowRect(
@@ -186,7 +177,7 @@ int CALLBACK WinMain(
 
     if(!engine.window)
     {
-        return 3;
+        return 2;
     }
 
     global_engine = &engine;
@@ -203,7 +194,7 @@ int CALLBACK WinMain(
         );
 
         DestroyWindow(engine.window);
-        return 4;
+        return 3;
     }
 
     Floppy144FillBackbuffer(
