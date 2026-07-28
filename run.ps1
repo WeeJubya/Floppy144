@@ -22,3 +22,4 @@ cmd /d /c "premake5 vs2022 && MSBuild build\river2D.sln /t:Floppy144 /p:Configur
 
 exit $LASTEXITCODE
 
+

@@ -4,11 +4,22 @@
 #include "river2D_main.h"
 #include "win32_river2Dsoftware_platform.h"
 
+#include "floppy144_office.h"
 #include "floppy144_recovery.h"
 
 #include <stdbool.h>
 
+typedef enum Floppy144Screen
+{
+    FLOPPY144_SCREEN_RECOVERY,
+    FLOPPY144_SCREEN_OFFICE
+} Floppy144Screen;
+
 static EngineData *global_engine;
+
+static Floppy144Screen global_screen;
+static Floppy144Player global_player;
+
 static bool global_recovery_started;
 
 static void Floppy144BindStaticRenderer(
@@ -20,6 +31,57 @@ static void Floppy144BindStaticRenderer(
     engine->bltBuffer = bltBuffer;
     engine->loadText = loadText;
     engine->compositeImage = compositeImage;
+}
+
+static void Floppy144Redraw(
+    HWND window
+)
+{
+    switch(global_screen)
+    {
+        case FLOPPY144_SCREEN_RECOVERY:
+        {
+            Floppy144RecoveryDraw(
+                global_engine,
+                global_recovery_started
+            );
+
+            break;
+        }
+
+        case FLOPPY144_SCREEN_OFFICE:
+        {
+            Floppy144OfficeDraw(
+                global_engine,
+                &global_player
+            );
+
+            break;
+        }
+    }
+
+    InvalidateRect(
+        window,
+        0,
+        FALSE
+    );
+}
+
+static void Floppy144MovePlayer(
+    HWND window,
+    int32_t movement_x,
+    int32_t movement_y
+)
+{
+    Floppy144OfficeMove(
+        &global_player,
+        movement_x,
+        movement_y
+    );
+
+    Floppy144Redraw(
+        window
+    );
 }
 
 static LRESULT CALLBACK Floppy144WindowProc(
@@ -57,36 +119,126 @@ static LRESULT CALLBACK Floppy144WindowProc(
 
         case WM_KEYDOWN:
         {
-            switch(w_param)
+            switch(global_screen)
             {
-                case VK_RETURN:
+                case FLOPPY144_SCREEN_RECOVERY:
                 {
-                    global_recovery_started = true;
+                    switch(w_param)
+                    {
+                        case VK_RETURN:
+                        {
+                            switch(global_recovery_started)
+                            {
+                                case false:
+                                {
+                                    global_recovery_started =
+                                        true;
 
-                    Floppy144RecoveryDraw(
-                        global_engine,
-                        global_recovery_started
-                    );
+                                    break;
+                                }
 
-                    InvalidateRect(
-                        window,
-                        0,
-                        FALSE
-                    );
+                                case true:
+                                {
+                                    global_screen =
+                                        FLOPPY144_SCREEN_OFFICE;
 
-                    return 0;
+                                    Floppy144OfficeReset(
+                                        &global_player
+                                    );
+
+                                    break;
+                                }
+                            }
+
+                            Floppy144Redraw(
+                                window
+                            );
+
+                            return 0;
+                        }
+
+                        case VK_ESCAPE:
+                        {
+                            PostMessageA(
+                                window,
+                                WM_CLOSE,
+                                0,
+                                0
+                            );
+
+                            return 0;
+                        }
+                    }
+
+                    break;
                 }
 
-                case VK_ESCAPE:
+                case FLOPPY144_SCREEN_OFFICE:
                 {
-                    PostMessageA(
-                        window,
-                        WM_CLOSE,
-                        0,
-                        0
-                    );
+                    switch(w_param)
+                    {
+                        case VK_LEFT:
+                        case 'A':
+                        {
+                            Floppy144MovePlayer(
+                                window,
+                                -8,
+                                0
+                            );
 
-                    return 0;
+                            return 0;
+                        }
+
+                        case VK_RIGHT:
+                        case 'D':
+                        {
+                            Floppy144MovePlayer(
+                                window,
+                                8,
+                                0
+                            );
+
+                            return 0;
+                        }
+
+                        case VK_UP:
+                        case 'W':
+                        {
+                            Floppy144MovePlayer(
+                                window,
+                                0,
+                                -4
+                            );
+
+                            return 0;
+                        }
+
+                        case VK_DOWN:
+                        case 'S':
+                        {
+                            Floppy144MovePlayer(
+                                window,
+                                0,
+                                4
+                            );
+
+                            return 0;
+                        }
+
+                        case VK_ESCAPE:
+                        {
+                            global_screen =
+                                FLOPPY144_SCREEN_RECOVERY;
+
+                            Floppy144Redraw(
+                                window
+                            );
+
+                            return 0;
+                        }
+                    }
+
+                    break;
                 }
             }
 
@@ -243,7 +395,16 @@ int CALLBACK WinMain(
     }
 
     global_engine = &engine;
-    global_recovery_started = false;
+
+    global_screen =
+        FLOPPY144_SCREEN_RECOVERY;
+
+    global_recovery_started =
+        false;
+
+    Floppy144OfficeReset(
+        &global_player
+    );
 
     engine.init(
         &engine,
@@ -304,3 +465,4 @@ int CALLBACK WinMain(
         &engine
     );
 }
+

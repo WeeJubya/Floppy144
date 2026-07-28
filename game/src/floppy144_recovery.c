@@ -62,12 +62,12 @@ void Floppy144RecoveryDraw(
 
     const char *prompt_text =
         recovery_started
-            ? "RECOVERY REQUEST ACCEPTED"
+            ? "OFFICE RECONSTRUCTION READY"
             : "PRESS ENTER TO BEGIN RECOVERY";
 
     const char *sub_prompt_text =
         recovery_started
-            ? "OFFICE RECONSTRUCTION MODULE PENDING"
+            ? "PRESS ENTER TO ENTER SITE"
             : "ESC TO TERMINATE SESSION";
 
     uint32_t progress_width =
@@ -315,4 +315,5 @@ void Floppy144RecoveryDraw(
         muted
     );
 }
+
 
