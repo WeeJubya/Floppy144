@@ -54,7 +54,11 @@ project("river2D common functions")
 
     filter("platforms:Windows")
         system("Windows")
-        defines("BUILD_WINDOWS")
+        defines({
+            "BUILD_WINDOWS",
+            "RIVER2D_NO_IMAGE_IO",
+            "RIVER2D_NO_TILEMAP"
+        })
         targetdir("bin/%{cfg.buildcfg}")
         objdir("obj/")
         files({"./src/river2D_*",
@@ -62,8 +66,8 @@ project("river2D common functions")
                "./src/win32_river2Dcommon*",
                "./include/win32_river2Dcommon*",
                "./src/river2Dcommon*",
-               "./include/river2Dcommon*" })
-        links({"imgsurf.lib"})
+               "./include/river2Dcommon*",
+               "./vendor/imgsurf/vendor/puddle/src/string_view.c" })
         buildoptions({"/wd4068"})
 
     filter({"platforms:Linux", "configurations:debug or asan"})
@@ -183,7 +187,6 @@ project("Floppy144")
 
     libdirs({
         "./bin/%{cfg.buildcfg}/",
-        "./vendor/imgsurf/bin/%{cfg.buildcfg}/"
     })
 
     dependson({
@@ -200,7 +203,6 @@ project("Floppy144")
 
         links({
             "river2Dcommon.lib",
-            "imgsurf.lib",
             "user32",
             "gdi32"
         })
@@ -216,3 +218,8 @@ project("Floppy144")
         optimize("Size")
 
     filter({})
+
+
+
+
+
