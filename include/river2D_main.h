@@ -37,6 +37,9 @@
 #endif
 
 #ifdef BUILD_WINDOWS
+    #ifndef WIN32_LEAN_AND_MEAN
+        #define WIN32_LEAN_AND_MEAN
+    #endif
     #include "Windows.h"
     #define  RV_CONFIG_PATH "./river2D.ini"
 

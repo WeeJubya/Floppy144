@@ -160,7 +160,7 @@ void bltBuffer
 void loadText
 (
     EngineData    *engine,
-    River2D_Image *image,
+    RiverImage *image,
     StringView    *sv,
     uint8_t       font,
     uint16_t      charsize,

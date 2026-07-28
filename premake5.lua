@@ -2,7 +2,7 @@
 
 workspace("river2D")
     configurations({"debug", "asan", "release"})
-    platforms({"linux", "windows"})
+    platforms({"windows"})
     location("build")
     architecture("x86_64")
 

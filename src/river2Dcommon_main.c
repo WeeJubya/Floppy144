@@ -248,9 +248,16 @@ void rvAppendImage
     dst->data     = tmp.data;
     dst->width    = tmp.width;
     dst->height   = tmp.height;
-    dst->pixmap   = tmp.pixmap;
     dst->channels = tmp.channels;
-    dst->picture  = tmp.picture;
+
+    #ifdef BUILD_LINUX
+    dst->pixmap  = tmp.pixmap;
+    dst->picture = tmp.picture;
+    #endif
+
+    #ifdef BUILD_WINDOWS
+    dst->info = tmp.info;
+    #endif
 }
 
 void rvDestroyImage

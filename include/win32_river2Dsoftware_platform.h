@@ -28,10 +28,10 @@ EXPORT void compositeImage
     RiverImage *src,
     RiverImage *dst,
     uint8_t    pictop,
-    uint32_t   offsetDstX,
-    uint32_t   offsetDstY,
     uint32_t   offsetSrcX,
     uint32_t   offsetSrcY,
+    uint32_t   offsetDstX,
+    uint32_t   offsetDstY,
     uint32_t   cropWidth,
     uint32_t   cropHeight
 );
@@ -40,7 +40,7 @@ EXPORT void loadText
 (
     EngineData *engine,
     RiverImage *image,
-    const char *text,
+    StringView *sv,
     uint8_t    font,
     uint16_t   charsize,
     uint32_t   spacing,

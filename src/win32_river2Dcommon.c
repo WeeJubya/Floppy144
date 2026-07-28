@@ -29,7 +29,9 @@ void rvResolveRenderer
     StringView libpath,
     uint8_t    renderer
 ){
-    SetDllDirectoryA(libpath);
+    char libpath_cstr[4096] = {0};
+    sv_cstr(libpath, libpath_cstr);
+    SetDllDirectoryA(libpath_cstr);
 
     if(renderer == RV_RENDERER_SOFTWARE)
     {
@@ -37,7 +39,7 @@ void rvResolveRenderer
         if(!software)
         {
             fprintf(stderr, "\n\033[31;1;7mERROR: Unable to load software renderer!\n");
-            fprintf(stderr, "Tried to load from library path:%s ", libpath);
+            fprintf(stderr, "Tried to load from library path:%s ", libpath_cstr);
             fprintf(stderr, "\033[0m\n");
             return;
         }
@@ -85,18 +87,29 @@ f_internal void writeMissingTexture
 void rvLoadImage_file
 (
     EngineData *engine,
-    char       *path,
+    StringView path,
     RiverImage *image,
     uint8_t    format,
     uint8_t    bitdepth
 ){
     (void)engine;
-    image->data = imgsurf_load_file(path, &image->width, &image->height,
-                                    format, bitdepth);
+
+    char path_cstr[4096] = {0};
+    sv_cstr(path, path_cstr);
+
+    image->data = imgsurf_load_file(
+        path_cstr,
+        &image->width,
+        &image->height,
+        format,
+        bitdepth
+    );
+
+    image->path = path;
 
     if(!image->data)
     {
-        fprintf(stderr, "Failed to load image from file: %s\n", path);
+        fprintf(stderr, "Failed to load image from file: %s\n", path_cstr);
         writeMissingTexture(image);
     }
 }
@@ -160,7 +173,7 @@ RiverTime rvQueryTime
 
     uint64_t nanoseconds = (remainder * 1000000000ULL) / freq.QuadPart;
 
-    River2D_Time time;
+    RiverTime time;
     time.s  = seconds;
     time.ns = nanoseconds;
 
@@ -210,7 +223,7 @@ Dimensions rvGetWindowSize
 void rvChangeCursor
 (
     EngineData    *engine,
-    River2D_Image *image
+    RiverImage *image
 ){
     if(engine->currentCursor == image)
     {
@@ -262,10 +275,69 @@ void rvChangeCursor
     SetCursor(engine->hCursor);
 }
 
+// Renderer-agnostic wrapper functions.
+void rvInit
+(
+    EngineData *engine,
+    RiverImage *planes
+){
+    engine->init(engine, planes);
+}
+
+int32_t rvShutdown
+(
+    EngineData *engine
+){
+    return engine->shutdown(engine);
+}
+
+void rvBltBuffer
+(
+    EngineData *engine
+){
+    engine->bltBuffer(engine);
+}
+
+void rvLoadText
+(
+    EngineData         *engine,
+    rvLoadTextSettings *settings
+){
+    engine->loadText(
+        engine,
+        settings->image,
+        settings->sv,
+        settings->font,
+        settings->charsize,
+        settings->spacing,
+        settings->offsetX,
+        settings->offsetY
+    );
+}
+
+void rvCompositeImage
+(
+    EngineData          *engine,
+    rvCompositeSettings *settings
+){
+    engine->compositeImage(
+        engine,
+        settings->src,
+        settings->dst,
+        settings->pictop,
+        settings->offsetSrcX,
+        settings->offsetSrcY,
+        settings->offsetDstX,
+        settings->offsetDstY,
+        settings->cropWidth,
+        settings->cropHeight
+    );
+}
+
 void rvSyncImage
 (
     EngineData    *engine,
-    River2D_Image *image,
+    RiverImage *image,
     bool          CPU_to_GPU
 ){
     return;
