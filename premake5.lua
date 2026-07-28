@@ -155,3 +155,58 @@ project("river2D software renderer")
 
     filter({"platforms:Windows", "configurations:release"})
         linkoptions("/NODEFAULTLIB:MSVCRTD")
+
+
+project("Floppy144")
+    language("C")
+    cdialect("C99")
+    kind("WindowedApp")
+    targetname("Floppy144")
+    warnings("Extra")
+
+    targetdir("bin/%{cfg.buildcfg}")
+    objdir("obj/Floppy144/%{cfg.buildcfg}/%{cfg.platform}")
+
+    files({
+        "./game/src/**.c",
+        "./game/src/**.h"
+    })
+
+    includedirs({
+        "./include/",
+        "./vendor/imgsurf/include/",
+        "./vendor/imgsurf/vendor/puddle/include/"
+    })
+
+    libdirs({
+        "./bin/%{cfg.buildcfg}/",
+        "./vendor/imgsurf/bin/%{cfg.buildcfg}/"
+    })
+
+    dependson({
+        "river2D common functions",
+        "river2D software renderer"
+    })
+
+    filter("platforms:Windows")
+        system("Windows")
+        defines("BUILD_WINDOWS")
+
+        links({
+            "river2Dcommon.lib",
+            "imgsurf.lib",
+            "user32",
+            "gdi32"
+        })
+
+    filter("configurations:debug")
+        runtime("debug")
+        symbols("On")
+        optimize("Off")
+
+    filter("configurations:release")
+        runtime("release")
+        symbols("Off")
+        optimize("Size")
+
+    filter({})
