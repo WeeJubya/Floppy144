@@ -28,7 +28,8 @@ static void Floppy144RecoveryTextCentred(
 
 void Floppy144RecoveryDraw(
     EngineData *engine,
-    bool recovery_started
+    bool recovery_started,
+    const Floppy144WorldState *world
 )
 {
     const uint32_t background =
@@ -56,9 +57,11 @@ void Floppy144RecoveryDraw(
         FLOPPY144_RGB(100, 156, 111);
 
     const char *status_text =
-        recovery_started
-            ? "SITE RECONSTRUCTION STATUS: 04%"
-            : "SITE RECONSTRUCTION STATUS: 00%";
+        !recovery_started
+            ? "SITE RECONSTRUCTION STATUS: 00%"
+            : world->hr02_restored
+                ? "SITE RECONSTRUCTION STATUS: 12%"
+                : "SITE RECONSTRUCTION STATUS: 04%";
 
     const char *prompt_text =
         recovery_started
@@ -71,7 +74,11 @@ void Floppy144RecoveryDraw(
             : "ESC TO TERMINATE SESSION";
 
     uint32_t progress_width =
-        recovery_started ? 20U : 2U;
+        !recovery_started
+            ? 2U
+            : world->hr02_restored
+                ? 63U
+                : 20U;
 
     Floppy144Surface surface =
     {
@@ -315,5 +322,6 @@ void Floppy144RecoveryDraw(
         muted
     );
 }
+
 
 

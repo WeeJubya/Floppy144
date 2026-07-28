@@ -108,7 +108,8 @@ static void Floppy144TerminalDrawCollection(
 
 static void Floppy144TerminalDrawDetail(
     Floppy144Surface *surface,
-    const Floppy144TerminalState *terminal
+    const Floppy144TerminalState *terminal,
+    const Floppy144WorldState *world
 )
 {
     const uint32_t background =
@@ -132,38 +133,53 @@ static void Floppy144TerminalDrawDetail(
     const uint32_t amber =
         FLOPPY144_RGB(194, 153, 76);
 
+    bool hr02_selected =
+        terminal->selected_collection == 1;
+
+    bool collection_restored =
+        hr02_selected
+            ? world->hr02_restored
+            : true;
+
     const char *code =
-        terminal->selected_collection == 0
-            ? "COLLECTION XX-01"
-            : "COLLECTION HR-02";
+        hr02_selected
+            ? "COLLECTION HR-02"
+            : "COLLECTION XX-01";
 
     const char *title =
-        terminal->selected_collection == 0
-            ? "SITE RECOVERY INDEX"
-            : "PERSONNEL LIFECYCLE RECORDS";
+        hr02_selected
+            ? "PERSONNEL LIFECYCLE RECORDS"
+            : "SITE RECOVERY INDEX";
 
     const char *status =
-        terminal->selected_collection == 0
+        collection_restored
             ? "STATUS: RESTORED"
             : "STATUS: AVAILABLE";
 
     const char *collection_class =
-        terminal->selected_collection == 0
-            ? "CLASS: MANDATORY"
-            : "CLASS: ADMINISTRATIVE";
+        hr02_selected
+            ? "CLASS: ADMINISTRATIVE"
+            : "CLASS: MANDATORY";
 
     const char *description_one =
-        terminal->selected_collection == 0
-            ? "MINIMUM INDEX REQUIRED TO RECONSTRUCT A PARTIAL SITE."
-            : "CONTAINS STAFF ALLOCATION AND DESK ASSIGNMENT RECORDS.";
+        hr02_selected
+            ? "CONTAINS STAFF ALLOCATION AND DESK ASSIGNMENT RECORDS."
+            : "MINIMUM INDEX REQUIRED TO RECONSTRUCT A PARTIAL SITE.";
 
     const char *description_two =
-        terminal->selected_collection == 0
-            ? "THIS COLLECTION WAS RESTORED AUTOMATICALLY."
-            : "RESTORATION CONTROL IS NOT YET ENABLED.";
+        terminal->restoration_notice
+            ? "RESTORATION COMPLETE. OFFICE PERSONNEL DATA UPDATED."
+            : collection_restored
+                ? "COLLECTION DATA IS PRESENT IN THE RECONSTRUCTED SITE."
+                : "PRESS ENTER TO RESTORE THIS COLLECTION.";
+
+    const char *footer =
+        hr02_selected && !collection_restored
+            ? "ENTER RESTORE COLLECTION   ESC CLOSE"
+            : "ESC CLOSE COLLECTION";
 
     uint32_t status_colour =
-        terminal->selected_collection == 0
+        collection_restored
             ? green
             : amber;
 
@@ -254,7 +270,9 @@ static void Floppy144TerminalDrawDetail(
         228,
         description_two,
         1,
-        muted
+        terminal->restoration_notice
+            ? green
+            : muted
     );
 
     Floppy144DrawFillRect(
@@ -269,9 +287,11 @@ static void Floppy144TerminalDrawDetail(
     Floppy144TerminalTextCentred(
         surface,
         268,
-        "ESC CLOSE COLLECTION",
+        footer,
         1,
-        amber
+        collection_restored
+            ? amber
+            : green
     );
 }
 
@@ -281,6 +301,7 @@ void Floppy144TerminalReset(
 {
     terminal->selected_collection = 0;
     terminal->detail_open = false;
+    terminal->restoration_notice = false;
 }
 
 void Floppy144TerminalMoveSelection(
@@ -314,10 +335,25 @@ void Floppy144TerminalMoveSelection(
 }
 
 void Floppy144TerminalOpenSelection(
-    Floppy144TerminalState *terminal
+    Floppy144TerminalState *terminal,
+    Floppy144WorldState *world
 )
 {
-    terminal->detail_open = true;
+    if(!terminal->detail_open)
+    {
+        terminal->detail_open = true;
+        terminal->restoration_notice = false;
+        return;
+    }
+
+    if(
+        terminal->selected_collection == 1 &&
+        !world->hr02_restored
+    )
+    {
+        world->hr02_restored = true;
+        terminal->restoration_notice = true;
+    }
 }
 
 void Floppy144TerminalCloseDetail(
@@ -325,6 +361,7 @@ void Floppy144TerminalCloseDetail(
 )
 {
     terminal->detail_open = false;
+    terminal->restoration_notice = false;
 }
 
 bool Floppy144TerminalDetailOpen(
@@ -336,7 +373,8 @@ bool Floppy144TerminalDetailOpen(
 
 void Floppy144TerminalDraw(
     EngineData *engine,
-    const Floppy144TerminalState *terminal
+    const Floppy144TerminalState *terminal,
+    const Floppy144WorldState *world
 )
 {
     const uint32_t background =
@@ -360,6 +398,21 @@ void Floppy144TerminalDraw(
     const uint32_t amber =
         FLOPPY144_RGB(194, 153, 76);
 
+    const char *site_status =
+        world->hr02_restored
+            ? "SITE 12%"
+            : "SITE 04%";
+
+    const char *hr02_status =
+        world->hr02_restored
+            ? "RESTORED"
+            : "AVAILABLE";
+
+    uint32_t hr02_colour =
+        world->hr02_restored
+            ? green
+            : amber;
+
     Floppy144Surface surface =
     {
         (uint32_t *)engine->backbuffer.data,
@@ -369,15 +422,6 @@ void Floppy144TerminalDraw(
 
     Floppy144DrawClear(
         &surface,
-        background
-    );
-
-    Floppy144DrawFillRect(
-        &surface,
-        0,
-        0,
-        640,
-        16,
         background
     );
 
@@ -394,7 +438,7 @@ void Floppy144TerminalDraw(
         &surface,
         538,
         5,
-        "READY",
+        site_status,
         1,
         green
     );
@@ -425,68 +469,16 @@ void Floppy144TerminalDraw(
         text
     );
 
-    Floppy144DrawText(
-        &surface,
-        44,
-        72,
-        "SITE:",
-        1,
-        muted
-    );
+    Floppy144DrawText(&surface, 44, 72, "SITE:", 1, muted);
+    Floppy144DrawText(&surface, 122, 72, "PARTIAL RECONSTRUCTION", 1, text);
 
-    Floppy144DrawText(
-        &surface,
-        122,
-        72,
-        "PARTIAL RECONSTRUCTION",
-        1,
-        text
-    );
+    Floppy144DrawText(&surface, 44, 88, "MEDIA:", 1, muted);
+    Floppy144DrawText(&surface, 122, 88, "DISK 144", 1, text);
 
-    Floppy144DrawText(
-        &surface,
-        44,
-        88,
-        "MEDIA:",
-        1,
-        muted
-    );
+    Floppy144DrawText(&surface, 44, 104, "PROTOCOL:", 1, muted);
+    Floppy144DrawText(&surface, 122, 104, "APS-12", 1, amber);
 
-    Floppy144DrawText(
-        &surface,
-        122,
-        88,
-        "DISK 144",
-        1,
-        text
-    );
-
-    Floppy144DrawText(
-        &surface,
-        44,
-        104,
-        "PROTOCOL:",
-        1,
-        muted
-    );
-
-    Floppy144DrawText(
-        &surface,
-        122,
-        104,
-        "APS-12",
-        1,
-        amber
-    );
-
-    Floppy144DrawFillRect(
-        &surface,
-        40,
-        124,
-        560,
-        1,
-        border
-    );
+    Floppy144DrawFillRect(&surface, 40, 124, 560, 1, border);
 
     Floppy144DrawText(
         &surface,
@@ -511,7 +503,9 @@ void Floppy144TerminalDraw(
         &surface,
         44,
         184,
-        "AVAILABLE COLLECTIONS",
+        world->hr02_restored
+            ? "RESTORED COLLECTIONS"
+            : "AVAILABLE COLLECTIONS",
         1,
         muted
     );
@@ -520,25 +514,18 @@ void Floppy144TerminalDraw(
         &surface,
         198,
         terminal->selected_collection == 1,
-        "AVAILABLE",
+        hr02_status,
         "HR-02",
         "PERSONNEL LIFECYCLE RECORDS",
-        amber
+        hr02_colour
     );
 
-    Floppy144DrawFillRect(
-        &surface,
-        40,
-        238,
-        560,
-        1,
-        border
-    );
+    Floppy144DrawFillRect(&surface, 40, 238, 560, 1, border);
 
     Floppy144TerminalTextCentred(
         &surface,
         258,
-        "ENTER OPENS COLLECTION INFORMATION",
+        "ENTER OPENS OR RESTORES SELECTED COLLECTION",
         1,
         muted
     );
@@ -561,38 +548,16 @@ void Floppy144TerminalDraw(
         border
     );
 
-    Floppy144DrawText(
-        &surface,
-        32,
-        326,
-        "UP DOWN SELECT",
-        1,
-        text
-    );
-
-    Floppy144DrawText(
-        &surface,
-        250,
-        326,
-        "ENTER OPEN",
-        1,
-        amber
-    );
-
-    Floppy144DrawText(
-        &surface,
-        490,
-        326,
-        "ESC RETURN",
-        1,
-        muted
-    );
+    Floppy144DrawText(&surface, 32, 326, "UP DOWN SELECT", 1, text);
+    Floppy144DrawText(&surface, 250, 326, "ENTER OPEN", 1, amber);
+    Floppy144DrawText(&surface, 490, 326, "ESC RETURN", 1, muted);
 
     if(terminal->detail_open)
     {
         Floppy144TerminalDrawDetail(
             &surface,
-            terminal
+            terminal,
+            world
         );
     }
 }

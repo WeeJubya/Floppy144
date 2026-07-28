@@ -422,9 +422,166 @@ static void Floppy144OfficeDrawPlayer(
     );
 }
 
+static void Floppy144OfficeDrawPersonnelDetails(
+    Floppy144Surface *surface,
+    const Floppy144WorldState *world,
+    uint32_t paper_colour,
+    uint32_t mug_colour,
+    uint32_t edge_colour
+)
+{
+    if(!world->hr02_restored)
+    {
+        return;
+    }
+
+    /*
+     * Desk 01: mug.
+     */
+
+    Floppy144DrawFillRect(
+        surface,
+        198,
+        124,
+        12,
+        12,
+        mug_colour
+    );
+
+    Floppy144DrawRect(
+        surface,
+        198,
+        124,
+        12,
+        12,
+        edge_colour
+    );
+
+    Floppy144DrawRect(
+        surface,
+        210,
+        127,
+        5,
+        7,
+        mug_colour
+    );
+
+    Floppy144DrawFillRect(
+        surface,
+        200,
+        126,
+        8,
+        2,
+        edge_colour
+    );
+
+    Floppy144DrawFillRect(
+        surface,
+        201,
+        119,
+        2,
+        3,
+        paper_colour
+    );
+
+    Floppy144DrawFillRect(
+        surface,
+        205,
+        117,
+        2,
+        4,
+        paper_colour
+    );
+
+    /*
+     * Desk 04: personnel forms.
+     */
+
+    Floppy144DrawFillRect(
+        surface,
+        496,
+        240,
+        30,
+        15,
+        paper_colour
+    );
+
+    Floppy144DrawRect(
+        surface,
+        496,
+        240,
+        30,
+        15,
+        edge_colour
+    );
+
+    Floppy144DrawFillRect(
+        surface,
+        500,
+        236,
+        30,
+        15,
+        paper_colour
+    );
+
+    Floppy144DrawRect(
+        surface,
+        500,
+        236,
+        30,
+        15,
+        edge_colour
+    );
+
+    Floppy144DrawFillRect(
+        surface,
+        504,
+        232,
+        30,
+        15,
+        paper_colour
+    );
+
+    Floppy144DrawRect(
+        surface,
+        504,
+        232,
+        30,
+        15,
+        edge_colour
+    );
+
+    Floppy144DrawFillRect(
+        surface,
+        508,
+        236,
+        20,
+        1,
+        edge_colour
+    );
+
+    Floppy144DrawFillRect(
+        surface,
+        508,
+        240,
+        16,
+        1,
+        edge_colour
+    );
+
+    Floppy144DrawFillRect(
+        surface,
+        508,
+        244,
+        18,
+        1,
+        edge_colour
+    );
+}
 void Floppy144OfficeDraw(
     EngineData *engine,
-    const Floppy144Player *player
+    const Floppy144Player *player,
+    const Floppy144WorldState *world
 )
 {
     const uint32_t background =
@@ -468,8 +625,40 @@ void Floppy144OfficeDraw(
 
     const char *prompt =
         Floppy144OfficeNearTerminal(player)
-            ? "PRESS E TO ACCESS ARCHIVE TERMINAL"
+            ? world->hr02_restored
+                ? "PRESS E TO REVIEW RESTORED COLLECTIONS"
+                : "PRESS E TO ACCESS ARCHIVE TERMINAL"
             : "WASD OR ARROWS TO MOVE";
+
+    const char *status_text =
+        world->hr02_restored
+            ? "STATUS 12%"
+            : "STATUS 04%";
+
+    const char *desk_one_label =
+        world->hr02_restored
+            ? "SENIOR ARCHIVIST"
+            : "DESK 01";
+
+    const char *desk_two_label =
+        world->hr02_restored
+            ? "RECORDS OFFICER"
+            : "DESK 02";
+
+    const char *desk_three_label =
+        world->hr02_restored
+            ? "ADMINISTRATOR"
+            : "DESK 03";
+
+    const char *desk_four_label =
+        world->hr02_restored
+            ? "IT SUPPORT"
+            : "DESK 04";
+
+    const char *room_label =
+        world->hr02_restored
+            ? "RECORDS OFFICE - PERSONNEL RECORDS RESTORED"
+            : "RECORDS OFFICE - PARTIAL RECONSTRUCTION";
 
     uint32_t grid_x;
     uint32_t grid_y;
@@ -508,7 +697,7 @@ void Floppy144OfficeDraw(
         &surface,
         526,
         5,
-        "STATUS 04%",
+        status_text,
         1,
         green
     );
@@ -643,7 +832,7 @@ void Floppy144OfficeDraw(
         &surface,
         92,
         100,
-        "DESK 01",
+        desk_one_label,
         desk_colour,
         wall_edge,
         desk_detail
@@ -653,7 +842,7 @@ void Floppy144OfficeDraw(
         &surface,
         416,
         100,
-        "DESK 02",
+        desk_two_label,
         desk_colour,
         wall_edge,
         desk_detail
@@ -663,7 +852,7 @@ void Floppy144OfficeDraw(
         &surface,
         92,
         220,
-        "DESK 03",
+        desk_three_label,
         desk_colour,
         wall_edge,
         desk_detail
@@ -673,7 +862,7 @@ void Floppy144OfficeDraw(
         &surface,
         416,
         220,
-        "DESK 04",
+        desk_four_label,
         desk_colour,
         wall_edge,
         desk_detail
@@ -719,9 +908,17 @@ void Floppy144OfficeDraw(
         &surface,
         36,
         306,
-        "RECORDS OFFICE - PARTIAL RECONSTRUCTION",
+        room_label,
         1,
         muted_colour
+    );
+
+    Floppy144OfficeDrawPersonnelDetails(
+        &surface,
+        world,
+        text_colour,
+        amber,
+        background
     );
 
     Floppy144OfficeDrawPlayer(
@@ -760,6 +957,15 @@ void Floppy144OfficeDraw(
         muted_colour
     );
 }
+
+
+
+
+
+
+
+
+
 
 
 

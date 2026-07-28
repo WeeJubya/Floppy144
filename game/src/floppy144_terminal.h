@@ -2,6 +2,8 @@
 
 #include "river2D_main.h"
 
+#include "floppy144_world.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -9,6 +11,7 @@ typedef struct Floppy144TerminalState
 {
     uint32_t selected_collection;
     bool detail_open;
+    bool restoration_notice;
 } Floppy144TerminalState;
 
 void Floppy144TerminalReset(
@@ -21,7 +24,8 @@ void Floppy144TerminalMoveSelection(
 );
 
 void Floppy144TerminalOpenSelection(
-    Floppy144TerminalState *terminal
+    Floppy144TerminalState *terminal,
+    Floppy144WorldState *world
 );
 
 void Floppy144TerminalCloseDetail(
@@ -34,5 +38,6 @@ bool Floppy144TerminalDetailOpen(
 
 void Floppy144TerminalDraw(
     EngineData *engine,
-    const Floppy144TerminalState *terminal
+    const Floppy144TerminalState *terminal,
+    const Floppy144WorldState *world
 );

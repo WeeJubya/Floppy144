@@ -2,6 +2,8 @@
 
 #include "river2D_main.h"
 
+#include "floppy144_world.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -27,5 +29,6 @@ bool Floppy144OfficeNearTerminal(
 
 void Floppy144OfficeDraw(
     EngineData *engine,
-    const Floppy144Player *player
+    const Floppy144Player *player,
+    const Floppy144WorldState *world
 );

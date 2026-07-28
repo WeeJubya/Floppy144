@@ -7,6 +7,7 @@
 #include "floppy144_office.h"
 #include "floppy144_recovery.h"
 #include "floppy144_terminal.h"
+#include "floppy144_world.h"
 
 #include <stdbool.h>
 
@@ -22,6 +23,7 @@ static EngineData *global_engine;
 static Floppy144Screen global_screen;
 static Floppy144Player global_player;
 static Floppy144TerminalState global_terminal;
+static Floppy144WorldState global_world;
 
 static bool global_recovery_started;
 
@@ -46,7 +48,8 @@ static void Floppy144Redraw(
         {
             Floppy144RecoveryDraw(
                 global_engine,
-                global_recovery_started
+                global_recovery_started,
+                &global_world
             );
 
             break;
@@ -56,7 +59,8 @@ static void Floppy144Redraw(
         {
             Floppy144OfficeDraw(
                 global_engine,
-                &global_player
+                &global_player,
+                &global_world
             );
 
             break;
@@ -66,7 +70,8 @@ static void Floppy144Redraw(
         {
             Floppy144TerminalDraw(
                 global_engine,
-                &global_terminal
+                &global_terminal,
+                &global_world
             );
 
             break;
@@ -314,7 +319,8 @@ static LRESULT CALLBACK Floppy144WindowProc(
                         case VK_RETURN:
                         {
                             Floppy144TerminalOpenSelection(
-                                &global_terminal
+                                &global_terminal,
+                                &global_world
                             );
 
                             Floppy144Redraw(
@@ -526,6 +532,10 @@ int CALLBACK WinMain(
         &global_player
     );
 
+    Floppy144WorldReset(
+        &global_world
+    );
+
     Floppy144TerminalReset(
         &global_terminal
     );
@@ -553,7 +563,8 @@ int CALLBACK WinMain(
 
     Floppy144RecoveryDraw(
         &engine,
-        global_recovery_started
+        global_recovery_started,
+        &global_world
     );
 
     ShowWindow(
@@ -589,3 +600,4 @@ int CALLBACK WinMain(
         &engine
     );
 }
+
