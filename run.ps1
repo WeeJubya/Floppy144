@@ -52,7 +52,7 @@ if($build -eq "asan" -or $build -eq "debug" -or $build -eq "release")
     Get-CompiledImgloader
     Get-Compileprep
     pushd ".\build\"
-    &MSBuild river2D.sln -p:Configuration=$build -p:Platform=windows
+    &MSBuild river2D.sln /t:Floppy144 -p:Configuration=$build -p:Platform=windows
     if(0 -ne $LASTEXITCODE)
     {
         Write-Host "`033[31m`nERROR: failed to compile river2D.`n`033[0m"
@@ -75,3 +75,4 @@ if($compile_only)
 }
 
 popd
+
