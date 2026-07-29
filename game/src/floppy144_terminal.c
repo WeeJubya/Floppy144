@@ -472,7 +472,7 @@ void Floppy144TerminalDraw(
                 : terminal->selected_collection ==
                     FLOPPY144_COLLECTION_FA03
                     ? world->fa03_restored
-                        ? "COLLECTION RESTORED"
+                        ? "ENTER VIEW RECORDS"
                         : "ENTER RESTORE"
                     : ""
             : "ENTER OPEN";
@@ -657,6 +657,7 @@ void Floppy144TerminalDraw(
         );
     }
 }
+
 
 
 

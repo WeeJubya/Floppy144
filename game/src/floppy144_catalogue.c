@@ -679,14 +679,15 @@ static void Floppy144CatalogueDrawDocument(
 }
 
 void Floppy144CatalogueReset(
-    Floppy144CatalogueState *catalogue
+    Floppy144CatalogueState *catalogue,
+    Floppy144CollectionId collection
 )
 {
+    catalogue->collection = collection;
     catalogue->selected_index = 0;
     catalogue->top_index = 0;
     catalogue->document_open = false;
 }
-
 void Floppy144CatalogueMove(
     Floppy144CatalogueState *catalogue,
     int32_t direction
@@ -764,10 +765,11 @@ bool Floppy144CatalogueSelectedProvidesEvidence(
 )
 {
     return
+        catalogue->collection ==
+            FLOPPY144_COLLECTION_HR02 &&
         catalogue->selected_index ==
-        FLOPPY144_AUTHORED_RECORD;
+            FLOPPY144_AUTHORED_RECORD;
 }
-
 void Floppy144CatalogueCloseDocument(
     Floppy144CatalogueState *catalogue
 )
@@ -817,5 +819,7 @@ void Floppy144CatalogueDraw(
         }
     }
 }
+
+
 
 

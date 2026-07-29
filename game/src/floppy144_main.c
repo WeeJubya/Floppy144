@@ -123,15 +123,25 @@ static bool Floppy144CanOpenCatalogue(
     void
 )
 {
+    bool hr02_available =
+        global_terminal.selected_collection ==
+            FLOPPY144_COLLECTION_HR02 &&
+        global_world.hr02_restored;
+
+    bool fa03_available =
+        global_terminal.selected_collection ==
+            FLOPPY144_COLLECTION_FA03 &&
+        global_world.fa03_restored;
+
     return
         Floppy144TerminalDetailOpen(
             &global_terminal
         ) &&
-        global_terminal.selected_collection ==
-        FLOPPY144_COLLECTION_HR02 &&
-        global_world.hr02_restored;
+        (
+            hr02_available ||
+            fa03_available
+        );
 }
-
 static LRESULT CALLBACK Floppy144WindowProc(
     HWND window,
     UINT message,
@@ -367,7 +377,8 @@ static LRESULT CALLBACK Floppy144WindowProc(
                                 case true:
                                 {
                                     Floppy144CatalogueReset(
-                                        &global_catalogue
+                                        &global_catalogue,
+                                        global_terminal.selected_collection
                                     );
 
                                     global_screen =
@@ -703,7 +714,8 @@ int CALLBACK WinMain(
     );
 
     Floppy144CatalogueReset(
-        &global_catalogue
+        &global_catalogue,
+        FLOPPY144_COLLECTION_XX01
     );
 
     engine.init(
@@ -766,6 +778,9 @@ int CALLBACK WinMain(
         &engine
     );
 }
+
+
+
 
 
 

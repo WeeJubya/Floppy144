@@ -2,18 +2,22 @@
 
 #include "river2D_main.h"
 
+#include "floppy144_collection.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 
 typedef struct Floppy144CatalogueState
 {
+    Floppy144CollectionId collection;
     uint32_t selected_index;
     uint32_t top_index;
     bool document_open;
 } Floppy144CatalogueState;
 
 void Floppy144CatalogueReset(
-    Floppy144CatalogueState *catalogue
+    Floppy144CatalogueState *catalogue,
+    Floppy144CollectionId collection
 );
 
 void Floppy144CatalogueMove(
@@ -46,4 +50,3 @@ void Floppy144CatalogueDraw(
     EngineData *engine,
     const Floppy144CatalogueState *catalogue
 );
-
