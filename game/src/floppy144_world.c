@@ -5,6 +5,7 @@ void Floppy144WorldReset(
 )
 {
     world->hr02_restored = false;
+    world->hr02_desk_reallocation_read = false;
 }
 
 uint32_t Floppy144WorldReconstructionPercent(
@@ -13,3 +14,4 @@ uint32_t Floppy144WorldReconstructionPercent(
 {
     return world->hr02_restored ? 12U : 4U;
 }
+

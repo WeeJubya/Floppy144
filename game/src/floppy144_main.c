@@ -28,6 +28,7 @@ static Floppy144TerminalState global_terminal;
 static Floppy144CatalogueState global_catalogue;
 static Floppy144WorldState global_world;
 
+static const char *global_office_notice;
 static bool global_recovery_started;
 
 static void Floppy144BindStaticRenderer(
@@ -63,7 +64,8 @@ static void Floppy144Redraw(
             Floppy144OfficeDraw(
                 global_engine,
                 &global_player,
-                &global_world
+                &global_world,
+                global_office_notice
             );
 
             break;
@@ -104,6 +106,8 @@ static void Floppy144MovePlayer(
     int32_t movement_y
 )
 {
+    global_office_notice = 0;
+
     Floppy144OfficeMove(
         &global_player,
         movement_x,
@@ -273,12 +277,38 @@ static LRESULT CALLBACK Floppy144WindowProc(
                                 )
                             )
                             {
+                                global_office_notice = 0;
+
                                 global_screen =
                                     FLOPPY144_SCREEN_TERMINAL;
 
                                 Floppy144TerminalReset(
                                     &global_terminal
                                 );
+
+                                Floppy144Redraw(window);
+                            }
+                            else if(
+                                global_world.hr02_desk_reallocation_read &&
+                                Floppy144OfficeNearDeskOne(
+                                    &global_player
+                                )
+                            )
+                            {
+                                global_office_notice =
+                                    "DESK 01: MUG IS NOT AN ARCHIVE ITEM. FORM AR-7 NOT REQUIRED.";
+
+                                Floppy144Redraw(window);
+                            }
+                            else if(
+                                global_world.hr02_desk_reallocation_read &&
+                                Floppy144OfficeNearDeskFour(
+                                    &global_player
+                                )
+                            )
+                            {
+                                global_office_notice =
+                                    "DESK 04: IT SUPPORT MOVED HERE PENDING TERMINAL CABLE REPLACEMENT.";
 
                                 Floppy144Redraw(window);
                             }
@@ -449,6 +479,16 @@ static LRESULT CALLBACK Floppy144WindowProc(
                             Floppy144CatalogueOpenDocument(
                                 &global_catalogue
                             );
+
+                            if(
+                                Floppy144CatalogueSelectedProvidesEvidence(
+                                    &global_catalogue
+                                )
+                            )
+                            {
+                                global_world.hr02_desk_reallocation_read =
+                                    true;
+                            }
 
                             Floppy144Redraw(window);
                             return 0;
@@ -725,4 +765,9 @@ int CALLBACK WinMain(
         &engine
     );
 }
+
+
+
+
+
 

@@ -73,6 +73,27 @@ static bool Floppy144RectsOverlap(
         first_y + first_height > second_y;
 }
 
+static bool Floppy144OfficeNearObstacle(
+    const Floppy144Player *player,
+    size_t obstacle_index,
+    int32_t margin
+)
+{
+    const Floppy144Rect *obstacle =
+        &floppy144_obstacles[obstacle_index];
+
+    return Floppy144RectsOverlap(
+        player->x,
+        player->y,
+        FLOPPY144_PLAYER_WIDTH,
+        FLOPPY144_PLAYER_HEIGHT,
+        obstacle->x - margin,
+        obstacle->y - margin,
+        obstacle->width + margin * 2,
+        obstacle->height + margin * 2
+    );
+}
+
 static bool Floppy144OfficePositionValid(
     int32_t x,
     int32_t y
@@ -179,6 +200,26 @@ bool Floppy144OfficeNearTerminal(
         player_centre_y < 108;
 }
 
+bool Floppy144OfficeNearDeskOne(
+    const Floppy144Player *player
+)
+{
+    return Floppy144OfficeNearObstacle(
+        player,
+        1,
+        8
+    );
+}
+bool Floppy144OfficeNearDeskFour(
+    const Floppy144Player *player
+)
+{
+    return Floppy144OfficeNearObstacle(
+        player,
+        4,
+        8
+    );
+}
 static void Floppy144OfficeDrawDesk(
     Floppy144Surface *surface,
     uint32_t x,
@@ -605,7 +646,8 @@ static void Floppy144OfficeDrawPersonnelDetails(
 void Floppy144OfficeDraw(
     EngineData *engine,
     const Floppy144Player *player,
-    const Floppy144WorldState *world
+    const Floppy144WorldState *world,
+    const char *notice
 )
 {
     const uint32_t background =
@@ -647,12 +689,21 @@ void Floppy144OfficeDraw(
     const uint32_t player_colour =
         FLOPPY144_RGB(177, 190, 181);
 
+    bool near_evidence_desk =
+        world->hr02_desk_reallocation_read &&
+        (
+            Floppy144OfficeNearDeskOne(player) ||
+            Floppy144OfficeNearDeskFour(player)
+        );
+
     const char *prompt =
         Floppy144OfficeNearTerminal(player)
             ? world->hr02_restored
                 ? "PRESS E TO REVIEW RESTORED COLLECTIONS"
                 : "PRESS E TO ACCESS ARCHIVE TERMINAL"
-            : "WASD OR ARROWS TO MOVE";
+            : near_evidence_desk
+                ? "PRESS E TO INSPECT RECONSTRUCTED DESK"
+                : "WASD OR ARROWS TO MOVE";
 
     const char *status_text =
         world->hr02_restored
@@ -679,10 +730,15 @@ void Floppy144OfficeDraw(
             ? "IT SUPPORT"
             : "DESK 04";
 
-    const char *room_label =
+    const char *default_room_label =
         world->hr02_restored
             ? "RECORDS OFFICE - PERSONNEL RECORDS RESTORED"
             : "RECORDS OFFICE - PARTIAL RECONSTRUCTION";
+
+    const char *room_label =
+        notice
+            ? notice
+            : default_room_label;
 
     uint32_t grid_x;
     uint32_t grid_y;
@@ -976,7 +1032,10 @@ void Floppy144OfficeDraw(
         322,
         prompt,
         1,
-        Floppy144OfficeNearTerminal(player)
+        (
+            Floppy144OfficeNearTerminal(player) ||
+            near_evidence_desk
+        )
             ? amber
             : text_colour
     );
@@ -990,6 +1049,25 @@ void Floppy144OfficeDraw(
         muted_colour
     );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

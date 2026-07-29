@@ -759,6 +759,15 @@ void Floppy144CatalogueOpenDocument(
     catalogue->document_open = true;
 }
 
+bool Floppy144CatalogueSelectedProvidesEvidence(
+    const Floppy144CatalogueState *catalogue
+)
+{
+    return
+        catalogue->selected_index ==
+        FLOPPY144_AUTHORED_RECORD;
+}
+
 void Floppy144CatalogueCloseDocument(
     Floppy144CatalogueState *catalogue
 )
@@ -808,4 +817,5 @@ void Floppy144CatalogueDraw(
         }
     }
 }
+
 

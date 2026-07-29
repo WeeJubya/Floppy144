@@ -6,6 +6,7 @@
 typedef struct Floppy144WorldState
 {
     bool hr02_restored;
+    bool hr02_desk_reallocation_read;
 } Floppy144WorldState;
 
 void Floppy144WorldReset(
@@ -15,3 +16,4 @@ void Floppy144WorldReset(
 uint32_t Floppy144WorldReconstructionPercent(
     const Floppy144WorldState *world
 );
+

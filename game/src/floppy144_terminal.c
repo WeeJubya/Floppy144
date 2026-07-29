@@ -141,6 +141,10 @@ static void Floppy144TerminalDrawDetail(
             ? world->hr02_restored
             : true;
 
+    bool evidence_found =
+        hr02_selected &&
+        world->hr02_desk_reallocation_read;
+
     const char *code =
         hr02_selected
             ? "COLLECTION HR-02"
@@ -152,9 +156,11 @@ static void Floppy144TerminalDrawDetail(
             : "SITE RECOVERY INDEX";
 
     const char *status =
-        collection_restored
-            ? "STATUS: RESTORED"
-            : "STATUS: AVAILABLE";
+        evidence_found
+            ? "STATUS: EVIDENCE FOUND"
+            : collection_restored
+                ? "STATUS: RESTORED"
+                : "STATUS: AVAILABLE";
 
     const char *collection_class =
         hr02_selected
@@ -169,19 +175,19 @@ static void Floppy144TerminalDrawDetail(
     const char *description_two =
         terminal->restoration_notice
             ? "RESTORATION COMPLETE. OFFICE PERSONNEL DATA UPDATED."
-            : collection_restored
-                ? "COLLECTION DATA IS PRESENT IN THE RECONSTRUCTED SITE."
-                : "PRESS ENTER TO RESTORE THIS COLLECTION.";
+            : evidence_found
+                ? "EVIDENCE FOUND: DESK REALLOCATION MEMORANDUM."
+                : collection_restored
+                    ? "COLLECTION DATA IS PRESENT IN THE RECONSTRUCTED SITE."
+                    : "PRESS ENTER TO RESTORE THIS COLLECTION.";
 
-    const char *footer =
-        hr02_selected && !collection_restored
-            ? "ENTER RESTORE COLLECTION   ESC CLOSE"
-            : "ESC CLOSE COLLECTION";
 
     uint32_t status_colour =
-        collection_restored
-            ? green
-            : amber;
+        evidence_found
+            ? amber
+            : collection_restored
+                ? green
+                : amber;
 
     Floppy144DrawFillRect(
         surface,
@@ -284,15 +290,7 @@ static void Floppy144TerminalDrawDetail(
         border
     );
 
-    Floppy144TerminalTextCentred(
-        surface,
-        268,
-        footer,
-        1,
-        collection_restored
-            ? amber
-            : green
-    );
+
 }
 
 void Floppy144TerminalReset(
@@ -404,14 +402,37 @@ void Floppy144TerminalDraw(
             : "SITE 04%";
 
     const char *hr02_status =
-        world->hr02_restored
-            ? "RESTORED"
-            : "AVAILABLE";
+        world->hr02_desk_reallocation_read
+            ? "EVIDENCE"
+            : world->hr02_restored
+                ? "RESTORED"
+                : "AVAILABLE";
 
     uint32_t hr02_colour =
-        world->hr02_restored
-            ? green
-            : amber;
+        world->hr02_desk_reallocation_read
+            ? amber
+            : world->hr02_restored
+                ? green
+                : amber;
+
+    const char *footer_left =
+        terminal->detail_open
+            ? ""
+            : "UP DOWN SELECT";
+
+    const char *footer_middle =
+        terminal->detail_open
+            ? terminal->selected_collection == 1
+                ? world->hr02_restored
+                    ? "ENTER VIEW RECORDS"
+                    : "ENTER RESTORE"
+                : ""
+            : "ENTER OPEN";
+
+    const char *footer_right =
+        terminal->detail_open
+            ? "ESC CLOSE"
+            : "ESC RETURN";
 
     Floppy144Surface surface =
     {
@@ -522,13 +543,6 @@ void Floppy144TerminalDraw(
 
     Floppy144DrawFillRect(&surface, 40, 238, 560, 1, border);
 
-    Floppy144TerminalTextCentred(
-        &surface,
-        258,
-        "ENTER OPENS OR RESTORES SELECTED COLLECTION",
-        1,
-        muted
-    );
 
     Floppy144DrawFillRect(
         &surface,
@@ -548,9 +562,32 @@ void Floppy144TerminalDraw(
         border
     );
 
-    Floppy144DrawText(&surface, 32, 326, "UP DOWN SELECT", 1, text);
-    Floppy144DrawText(&surface, 250, 326, "ENTER OPEN", 1, amber);
-    Floppy144DrawText(&surface, 490, 326, "ESC RETURN", 1, muted);
+    Floppy144DrawText(
+        &surface,
+        32,
+        326,
+        footer_left,
+        1,
+        text
+    );
+
+    Floppy144DrawText(
+        &surface,
+        250,
+        326,
+        footer_middle,
+        1,
+        amber
+    );
+
+    Floppy144DrawText(
+        &surface,
+        490,
+        326,
+        footer_right,
+        1,
+        muted
+    );
 
     if(terminal->detail_open)
     {
@@ -561,3 +598,13 @@ void Floppy144TerminalDraw(
         );
     }
 }
+
+
+
+
+
+
+
+
+
+

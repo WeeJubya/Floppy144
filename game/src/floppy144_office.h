@@ -27,8 +27,18 @@ bool Floppy144OfficeNearTerminal(
     const Floppy144Player *player
 );
 
+bool Floppy144OfficeNearDeskOne(
+    const Floppy144Player *player
+);
+
+bool Floppy144OfficeNearDeskFour(
+    const Floppy144Player *player
+);
+
 void Floppy144OfficeDraw(
     EngineData *engine,
     const Floppy144Player *player,
-    const Floppy144WorldState *world
+    const Floppy144WorldState *world,
+    const char *notice
 );
+
