@@ -4,6 +4,7 @@
 #include "river2D_main.h"
 #include "win32_river2Dsoftware_platform.h"
 
+#include "floppy144_catalogue.h"
 #include "floppy144_office.h"
 #include "floppy144_recovery.h"
 #include "floppy144_terminal.h"
@@ -15,7 +16,8 @@ typedef enum Floppy144Screen
 {
     FLOPPY144_SCREEN_RECOVERY,
     FLOPPY144_SCREEN_OFFICE,
-    FLOPPY144_SCREEN_TERMINAL
+    FLOPPY144_SCREEN_TERMINAL,
+    FLOPPY144_SCREEN_CATALOGUE
 } Floppy144Screen;
 
 static EngineData *global_engine;
@@ -23,6 +25,7 @@ static EngineData *global_engine;
 static Floppy144Screen global_screen;
 static Floppy144Player global_player;
 static Floppy144TerminalState global_terminal;
+static Floppy144CatalogueState global_catalogue;
 static Floppy144WorldState global_world;
 
 static bool global_recovery_started;
@@ -76,6 +79,16 @@ static void Floppy144Redraw(
 
             break;
         }
+
+        case FLOPPY144_SCREEN_CATALOGUE:
+        {
+            Floppy144CatalogueDraw(
+                global_engine,
+                &global_catalogue
+            );
+
+            break;
+        }
     }
 
     InvalidateRect(
@@ -100,6 +113,18 @@ static void Floppy144MovePlayer(
     Floppy144Redraw(
         window
     );
+}
+
+static bool Floppy144CanOpenCatalogue(
+    void
+)
+{
+    return
+        Floppy144TerminalDetailOpen(
+            &global_terminal
+        ) &&
+        global_terminal.selected_collection == 1U &&
+        global_world.hr02_restored;
 }
 
 static LRESULT CALLBACK Floppy144WindowProc(
@@ -168,10 +193,7 @@ static LRESULT CALLBACK Floppy144WindowProc(
                                 }
                             }
 
-                            Floppy144Redraw(
-                                window
-                            );
-
+                            Floppy144Redraw(window);
                             return 0;
                         }
 
@@ -258,9 +280,7 @@ static LRESULT CALLBACK Floppy144WindowProc(
                                     &global_terminal
                                 );
 
-                                Floppy144Redraw(
-                                    window
-                                );
+                                Floppy144Redraw(window);
                             }
 
                             return 0;
@@ -271,10 +291,7 @@ static LRESULT CALLBACK Floppy144WindowProc(
                             global_screen =
                                 FLOPPY144_SCREEN_RECOVERY;
 
-                            Floppy144Redraw(
-                                window
-                            );
-
+                            Floppy144Redraw(window);
                             return 0;
                         }
                     }
@@ -294,10 +311,7 @@ static LRESULT CALLBACK Floppy144WindowProc(
                                 -1
                             );
 
-                            Floppy144Redraw(
-                                window
-                            );
-
+                            Floppy144Redraw(window);
                             return 0;
                         }
 
@@ -309,24 +323,40 @@ static LRESULT CALLBACK Floppy144WindowProc(
                                 1
                             );
 
-                            Floppy144Redraw(
-                                window
-                            );
-
+                            Floppy144Redraw(window);
                             return 0;
                         }
 
                         case VK_RETURN:
                         {
-                            Floppy144TerminalOpenSelection(
-                                &global_terminal,
-                                &global_world
-                            );
+                            switch(
+                                Floppy144CanOpenCatalogue()
+                            )
+                            {
+                                case true:
+                                {
+                                    Floppy144CatalogueReset(
+                                        &global_catalogue
+                                    );
 
-                            Floppy144Redraw(
-                                window
-                            );
+                                    global_screen =
+                                        FLOPPY144_SCREEN_CATALOGUE;
 
+                                    break;
+                                }
+
+                                case false:
+                                {
+                                    Floppy144TerminalOpenSelection(
+                                        &global_terminal,
+                                        &global_world
+                                    );
+
+                                    break;
+                                }
+                            }
+
+                            Floppy144Redraw(window);
                             return 0;
                         }
 
@@ -356,10 +386,101 @@ static LRESULT CALLBACK Floppy144WindowProc(
                                 }
                             }
 
-                            Floppy144Redraw(
-                                window
+                            Floppy144Redraw(window);
+                            return 0;
+                        }
+                    }
+
+                    break;
+                }
+
+                case FLOPPY144_SCREEN_CATALOGUE:
+                {
+                    switch(w_param)
+                    {
+                        case VK_UP:
+                        case 'W':
+                        {
+                            Floppy144CatalogueMove(
+                                &global_catalogue,
+                                -1
                             );
 
+                            Floppy144Redraw(window);
+                            return 0;
+                        }
+
+                        case VK_DOWN:
+                        case 'S':
+                        {
+                            Floppy144CatalogueMove(
+                                &global_catalogue,
+                                1
+                            );
+
+                            Floppy144Redraw(window);
+                            return 0;
+                        }
+
+                        case VK_PRIOR:
+                        {
+                            Floppy144CataloguePage(
+                                &global_catalogue,
+                                -1
+                            );
+
+                            Floppy144Redraw(window);
+                            return 0;
+                        }
+
+                        case VK_NEXT:
+                        {
+                            Floppy144CataloguePage(
+                                &global_catalogue,
+                                1
+                            );
+
+                            Floppy144Redraw(window);
+                            return 0;
+                        }
+
+                        case VK_RETURN:
+                        {
+                            Floppy144CatalogueOpenDocument(
+                                &global_catalogue
+                            );
+
+                            Floppy144Redraw(window);
+                            return 0;
+                        }
+
+                        case VK_ESCAPE:
+                        {
+                            switch(
+                                Floppy144CatalogueDocumentOpen(
+                                    &global_catalogue
+                                )
+                            )
+                            {
+                                case true:
+                                {
+                                    Floppy144CatalogueCloseDocument(
+                                        &global_catalogue
+                                    );
+
+                                    break;
+                                }
+
+                                case false:
+                                {
+                                    global_screen =
+                                        FLOPPY144_SCREEN_TERMINAL;
+
+                                    break;
+                                }
+                            }
+
+                            Floppy144Redraw(window);
                             return 0;
                         }
                     }
@@ -447,8 +568,8 @@ int CALLBACK WinMain(
     {
         0,
         0,
-        640,
-        360
+        1280,
+        720
     };
 
     MSG message = {0};
@@ -465,8 +586,8 @@ int CALLBACK WinMain(
     engine.config.choices =
         RV_CHOICE_STATIC_CANVAS_BIT;
 
-    engine.config.window_width = 640;
-    engine.config.window_height = 360;
+    engine.config.window_width = 1280;
+    engine.config.window_height = 720;
     engine.config.canvas_width = 640;
     engine.config.canvas_height = 360;
 
@@ -538,6 +659,10 @@ int CALLBACK WinMain(
 
     Floppy144TerminalReset(
         &global_terminal
+    );
+
+    Floppy144CatalogueReset(
+        &global_catalogue
     );
 
     engine.init(
