@@ -7,6 +7,30 @@
 #define FLOPPY144_PLAYER_WIDTH  18
 #define FLOPPY144_PLAYER_HEIGHT 22
 
+enum Floppy144OfficeLayout
+{
+    FLOPPY144_HEADER_TOP = 0,
+    FLOPPY144_HEADER_HEIGHT = 20,
+
+    FLOPPY144_OFFICE_TOP = 20,
+    FLOPPY144_OFFICE_BOTTOM = 296,
+    FLOPPY144_OFFICE_HEIGHT = 276,
+
+    FLOPPY144_INTERIOR_TOP = 32,
+    FLOPPY144_INTERIOR_BOTTOM = 284,
+
+    FLOPPY144_LABEL_TOP = 296,
+    FLOPPY144_LABEL_TEXT_Y = 300,
+    FLOPPY144_LABEL_HEIGHT = 16,
+
+    FLOPPY144_FOOTER_TOP = 312,
+    FLOPPY144_FOOTER_TEXT_Y = 323,
+    FLOPPY144_FOOTER_HEIGHT = 32,
+
+    FLOPPY144_BOTTOM_SHIM_TOP = 344,
+    FLOPPY144_BOTTOM_SHIM_HEIGHT = 16
+};
+
 typedef struct Floppy144Rect
 {
     int32_t x;
@@ -17,18 +41,18 @@ typedef struct Floppy144Rect
 
 static const Floppy144Rect floppy144_obstacles[] =
 {
-    {274, 54, 92, 36},
+    {274, 46, 92, 36},
 
-    {92, 100, 132, 42},
-    {416, 100, 132, 42},
-    {92, 220, 132, 42},
-    {416, 220, 132, 42},
+    {92, 92, 132, 42},
+    {416, 92, 132, 42},
+    {92, 212, 132, 42},
+    {416, 212, 132, 42},
 
-    {42, 76, 34, 60},
-    {42, 148, 34, 60},
+    {42, 68, 34, 60},
+    {42, 140, 34, 60},
 
-    {564, 76, 30, 60},
-    {564, 148, 30, 60}
+    {564, 68, 30, 60},
+    {564, 140, 30, 60}
 };
 
 static bool Floppy144RectsOverlap(
@@ -58,9 +82,9 @@ static bool Floppy144OfficePositionValid(
 
     if(
         x < 32 ||
-        y < 40 ||
+        y < 32 ||
         x + FLOPPY144_PLAYER_WIDTH > 608 ||
-        y + FLOPPY144_PLAYER_HEIGHT > 292
+        y + FLOPPY144_PLAYER_HEIGHT > 284
     )
     {
         return false;
@@ -102,7 +126,7 @@ void Floppy144OfficeReset(
 )
 {
     player->x = 316;
-    player->y = 176;
+    player->y = 168;
 }
 
 void Floppy144OfficeMove(
@@ -151,8 +175,8 @@ bool Floppy144OfficeNearTerminal(
     return
         player_centre_x >= 254 &&
         player_centre_x < 386 &&
-        player_centre_y >= 88 &&
-        player_centre_y < 116;
+        player_centre_y >= 80 &&
+        player_centre_y < 108;
 }
 
 static void Floppy144OfficeDrawDesk(
@@ -284,7 +308,7 @@ static void Floppy144OfficeDrawTerminal(
     Floppy144DrawFillRect(
         surface,
         274,
-        54,
+        46,
         92,
         36,
         desk_colour
@@ -293,7 +317,7 @@ static void Floppy144OfficeDrawTerminal(
     Floppy144DrawRect(
         surface,
         274,
-        54,
+        46,
         92,
         36,
         edge_colour
@@ -302,7 +326,7 @@ static void Floppy144OfficeDrawTerminal(
     Floppy144DrawFillRect(
         surface,
         292,
-        59,
+        51,
         56,
         20,
         screen_colour
@@ -311,7 +335,7 @@ static void Floppy144OfficeDrawTerminal(
     Floppy144DrawRect(
         surface,
         292,
-        59,
+        51,
         56,
         20,
         edge_colour
@@ -320,7 +344,7 @@ static void Floppy144OfficeDrawTerminal(
     Floppy144DrawText(
         surface,
         299,
-        66,
+        58,
         "READY",
         1,
         amber
@@ -329,7 +353,7 @@ static void Floppy144OfficeDrawTerminal(
     Floppy144DrawFillRect(
         surface,
         308,
-        82,
+        74,
         24,
         3,
         edge_colour
@@ -442,7 +466,7 @@ static void Floppy144OfficeDrawPersonnelDetails(
     Floppy144DrawFillRect(
         surface,
         198,
-        124,
+        116,
         12,
         12,
         mug_colour
@@ -451,7 +475,7 @@ static void Floppy144OfficeDrawPersonnelDetails(
     Floppy144DrawRect(
         surface,
         198,
-        124,
+        116,
         12,
         12,
         edge_colour
@@ -460,7 +484,7 @@ static void Floppy144OfficeDrawPersonnelDetails(
     Floppy144DrawRect(
         surface,
         210,
-        127,
+        119,
         5,
         7,
         mug_colour
@@ -469,7 +493,7 @@ static void Floppy144OfficeDrawPersonnelDetails(
     Floppy144DrawFillRect(
         surface,
         200,
-        126,
+        118,
         8,
         2,
         edge_colour
@@ -478,7 +502,7 @@ static void Floppy144OfficeDrawPersonnelDetails(
     Floppy144DrawFillRect(
         surface,
         201,
-        119,
+        111,
         2,
         3,
         paper_colour
@@ -487,7 +511,7 @@ static void Floppy144OfficeDrawPersonnelDetails(
     Floppy144DrawFillRect(
         surface,
         205,
-        117,
+        109,
         2,
         4,
         paper_colour
@@ -500,7 +524,7 @@ static void Floppy144OfficeDrawPersonnelDetails(
     Floppy144DrawFillRect(
         surface,
         496,
-        240,
+        232,
         30,
         15,
         paper_colour
@@ -509,7 +533,7 @@ static void Floppy144OfficeDrawPersonnelDetails(
     Floppy144DrawRect(
         surface,
         496,
-        240,
+        232,
         30,
         15,
         edge_colour
@@ -518,7 +542,7 @@ static void Floppy144OfficeDrawPersonnelDetails(
     Floppy144DrawFillRect(
         surface,
         500,
-        236,
+        228,
         30,
         15,
         paper_colour
@@ -527,7 +551,7 @@ static void Floppy144OfficeDrawPersonnelDetails(
     Floppy144DrawRect(
         surface,
         500,
-        236,
+        228,
         30,
         15,
         edge_colour
@@ -536,7 +560,7 @@ static void Floppy144OfficeDrawPersonnelDetails(
     Floppy144DrawFillRect(
         surface,
         504,
-        232,
+        224,
         30,
         15,
         paper_colour
@@ -545,7 +569,7 @@ static void Floppy144OfficeDrawPersonnelDetails(
     Floppy144DrawRect(
         surface,
         504,
-        232,
+        224,
         30,
         15,
         edge_colour
@@ -554,7 +578,7 @@ static void Floppy144OfficeDrawPersonnelDetails(
     Floppy144DrawFillRect(
         surface,
         508,
-        236,
+        228,
         20,
         1,
         edge_colour
@@ -563,7 +587,7 @@ static void Floppy144OfficeDrawPersonnelDetails(
     Floppy144DrawFillRect(
         surface,
         508,
-        240,
+        232,
         16,
         1,
         edge_colour
@@ -572,7 +596,7 @@ static void Floppy144OfficeDrawPersonnelDetails(
     Floppy144DrawFillRect(
         surface,
         508,
-        244,
+        236,
         18,
         1,
         edge_colour
@@ -704,10 +728,10 @@ void Floppy144OfficeDraw(
 
     Floppy144DrawFillRect(
         &surface,
-        20,
-        28,
-        600,
-        276,
+        32,
+        32,
+        576,
+        252,
         floor_colour
     );
 
@@ -718,15 +742,15 @@ void Floppy144OfficeDraw(
         Floppy144DrawFillRect(
             &surface,
             grid_x,
-            40,
+            32,
             1,
-            252,
+            260,
             floor_line
         );
     }
 
-    for(grid_y = 40;
-        grid_y < 292;
+    for(grid_y = 32;
+        grid_y < 284;
         grid_y += 24)
     {
         Floppy144DrawFillRect(
@@ -742,7 +766,7 @@ void Floppy144OfficeDraw(
     Floppy144DrawFillRect(
         &surface,
         20,
-        28,
+        20,
         600,
         12,
         wall_colour
@@ -751,7 +775,7 @@ void Floppy144OfficeDraw(
     Floppy144DrawFillRect(
         &surface,
         20,
-        292,
+        284,
         600,
         12,
         wall_colour
@@ -760,7 +784,7 @@ void Floppy144OfficeDraw(
     Floppy144DrawFillRect(
         &surface,
         20,
-        28,
+        20,
         12,
         276,
         wall_colour
@@ -769,7 +793,7 @@ void Floppy144OfficeDraw(
     Floppy144DrawFillRect(
         &surface,
         608,
-        28,
+        20,
         12,
         276,
         wall_colour
@@ -778,7 +802,7 @@ void Floppy144OfficeDraw(
     Floppy144DrawRect(
         &surface,
         20,
-        28,
+        20,
         600,
         276,
         wall_edge
@@ -787,7 +811,7 @@ void Floppy144OfficeDraw(
     Floppy144DrawFillRect(
         &surface,
         500,
-        28,
+        20,
         72,
         12,
         background
@@ -796,7 +820,7 @@ void Floppy144OfficeDraw(
     Floppy144DrawRect(
         &surface,
         500,
-        28,
+        20,
         72,
         12,
         amber
@@ -805,7 +829,7 @@ void Floppy144OfficeDraw(
     Floppy144DrawText(
         &surface,
         506,
-        31,
+        23,
         "SEALED EXIT",
         1,
         amber
@@ -822,7 +846,7 @@ void Floppy144OfficeDraw(
     Floppy144DrawText(
         &surface,
         286,
-        44,
+        36,
         "ARCHIVE TERMINAL",
         1,
         muted_colour
@@ -831,7 +855,7 @@ void Floppy144OfficeDraw(
     Floppy144OfficeDrawDesk(
         &surface,
         92,
-        100,
+        92,
         desk_one_label,
         desk_colour,
         wall_edge,
@@ -841,7 +865,7 @@ void Floppy144OfficeDraw(
     Floppy144OfficeDrawDesk(
         &surface,
         416,
-        100,
+        92,
         desk_two_label,
         desk_colour,
         wall_edge,
@@ -851,7 +875,7 @@ void Floppy144OfficeDraw(
     Floppy144OfficeDrawDesk(
         &surface,
         92,
-        220,
+        212,
         desk_three_label,
         desk_colour,
         wall_edge,
@@ -861,7 +885,7 @@ void Floppy144OfficeDraw(
     Floppy144OfficeDrawDesk(
         &surface,
         416,
-        220,
+        212,
         desk_four_label,
         desk_colour,
         wall_edge,
@@ -871,7 +895,7 @@ void Floppy144OfficeDraw(
     Floppy144OfficeDrawCabinet(
         &surface,
         42,
-        76,
+        68,
         34,
         cabinet_colour,
         wall_edge
@@ -880,7 +904,7 @@ void Floppy144OfficeDraw(
     Floppy144OfficeDrawCabinet(
         &surface,
         42,
-        148,
+        140,
         34,
         cabinet_colour,
         wall_edge
@@ -889,7 +913,7 @@ void Floppy144OfficeDraw(
     Floppy144OfficeDrawCabinet(
         &surface,
         564,
-        76,
+        68,
         30,
         cabinet_colour,
         wall_edge
@@ -898,7 +922,7 @@ void Floppy144OfficeDraw(
     Floppy144OfficeDrawCabinet(
         &surface,
         564,
-        148,
+        140,
         30,
         cabinet_colour,
         wall_edge
@@ -907,7 +931,7 @@ void Floppy144OfficeDraw(
     Floppy144DrawText(
         &surface,
         36,
-        306,
+        300,
         room_label,
         1,
         muted_colour
@@ -930,17 +954,26 @@ void Floppy144OfficeDraw(
 
     Floppy144DrawFillRect(
         &surface,
-        0,
-        336,
-        640,
-        24,
+        20,
+        312,
+        600,
+        28,
         background
+    );
+
+    Floppy144DrawRect(
+        &surface,
+        20,
+        312,
+        600,
+        28,
+        wall_edge
     );
 
     Floppy144DrawText(
         &surface,
         32,
-        324,
+        322,
         prompt,
         1,
         Floppy144OfficeNearTerminal(player)
@@ -951,23 +984,12 @@ void Floppy144OfficeDraw(
     Floppy144DrawText(
         &surface,
         526,
-        324,
+        322,
         "ESC RECOVERY",
         1,
         muted_colour
     );
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 
