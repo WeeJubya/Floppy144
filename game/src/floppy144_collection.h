@@ -1,0 +1,9 @@
+#pragma once
+
+typedef enum Floppy144CollectionId
+{
+    FLOPPY144_COLLECTION_XX01 = 0,
+    FLOPPY144_COLLECTION_HR02 = 1,
+    FLOPPY144_COLLECTION_FA03 = 2,
+    FLOPPY144_COLLECTION_COUNT = 3
+} Floppy144CollectionId;

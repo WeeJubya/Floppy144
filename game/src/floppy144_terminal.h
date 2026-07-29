@@ -2,6 +2,7 @@
 
 #include "river2D_main.h"
 
+#include "floppy144_collection.h"
 #include "floppy144_world.h"
 
 #include <stdbool.h>
@@ -9,7 +10,7 @@
 
 typedef struct Floppy144TerminalState
 {
-    uint32_t selected_collection;
+    Floppy144CollectionId selected_collection;
     bool detail_open;
     bool restoration_notice;
 } Floppy144TerminalState;

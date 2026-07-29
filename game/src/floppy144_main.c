@@ -127,7 +127,8 @@ static bool Floppy144CanOpenCatalogue(
         Floppy144TerminalDetailOpen(
             &global_terminal
         ) &&
-        global_terminal.selected_collection == 1U &&
+        global_terminal.selected_collection ==
+        FLOPPY144_COLLECTION_HR02 &&
         global_world.hr02_restored;
 }
 
@@ -765,6 +766,7 @@ int CALLBACK WinMain(
         &engine
     );
 }
+
 
 
 

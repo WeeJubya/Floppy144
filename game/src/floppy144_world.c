@@ -6,12 +6,24 @@ void Floppy144WorldReset(
 {
     world->hr02_restored = false;
     world->hr02_desk_reallocation_read = false;
+    world->fa03_restored = false;
 }
 
 uint32_t Floppy144WorldReconstructionPercent(
     const Floppy144WorldState *world
 )
 {
-    return world->hr02_restored ? 12U : 4U;
-}
+    uint32_t percentage = 4U;
 
+    percentage +=
+        world->hr02_restored
+            ? 8U
+            : 0U;
+
+    percentage +=
+        world->fa03_restored
+            ? 8U
+            : 0U;
+
+    return percentage;
+}

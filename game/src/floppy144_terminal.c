@@ -134,12 +134,19 @@ static void Floppy144TerminalDrawDetail(
         FLOPPY144_RGB(194, 153, 76);
 
     bool hr02_selected =
-        terminal->selected_collection == 1;
+        terminal->selected_collection ==
+        FLOPPY144_COLLECTION_HR02;
+
+    bool fa03_selected =
+        terminal->selected_collection ==
+        FLOPPY144_COLLECTION_FA03;
 
     bool collection_restored =
         hr02_selected
             ? world->hr02_restored
-            : true;
+            : fa03_selected
+                ? world->fa03_restored
+                : true;
 
     bool evidence_found =
         hr02_selected &&
@@ -148,12 +155,16 @@ static void Floppy144TerminalDrawDetail(
     const char *code =
         hr02_selected
             ? "COLLECTION HR-02"
-            : "COLLECTION XX-01";
+            : fa03_selected
+                ? "COLLECTION FA-03"
+                : "COLLECTION XX-01";
 
     const char *title =
         hr02_selected
             ? "PERSONNEL LIFECYCLE RECORDS"
-            : "SITE RECOVERY INDEX";
+            : fa03_selected
+                ? "SITE SAFETY AND SUPPRESSION SYSTEMS"
+                : "SITE RECOVERY INDEX";
 
     const char *status =
         evidence_found
@@ -165,22 +176,25 @@ static void Floppy144TerminalDrawDetail(
     const char *collection_class =
         hr02_selected
             ? "CLASS: ADMINISTRATIVE"
-            : "CLASS: MANDATORY";
+            : fa03_selected
+                ? "CLASS: OPERATIONAL"
+                : "CLASS: MANDATORY";
 
     const char *description_one =
         hr02_selected
             ? "CONTAINS STAFF ALLOCATION AND DESK ASSIGNMENT RECORDS."
-            : "MINIMUM INDEX REQUIRED TO RECONSTRUCT A PARTIAL SITE.";
+            : fa03_selected
+                ? "CONTAINS FIRE SAFETY AND SUPPRESSION MAINTENANCE RECORDS."
+                : "MINIMUM INDEX REQUIRED TO RECONSTRUCT A PARTIAL SITE.";
 
     const char *description_two =
         terminal->restoration_notice
-            ? "RESTORATION COMPLETE. OFFICE PERSONNEL DATA UPDATED."
+            ? "RESTORATION COMPLETE. SITE SYSTEM DATA UPDATED."
             : evidence_found
                 ? "EVIDENCE FOUND: DESK REALLOCATION MEMORANDUM."
                 : collection_restored
                     ? "COLLECTION DATA IS PRESENT IN THE RECONSTRUCTED SITE."
                     : "PRESS ENTER TO RESTORE THIS COLLECTION.";
-
 
     uint32_t status_colour =
         evidence_found
@@ -297,7 +311,7 @@ void Floppy144TerminalReset(
     Floppy144TerminalState *terminal
 )
 {
-    terminal->selected_collection = 0;
+    terminal->selected_collection = FLOPPY144_COLLECTION_XX01;
     terminal->detail_open = false;
     terminal->restoration_notice = false;
 }
@@ -320,18 +334,21 @@ void Floppy144TerminalMoveSelection(
 
     if(next_selection < 0)
     {
-        next_selection = 1;
+        next_selection =
+            (int32_t)FLOPPY144_COLLECTION_COUNT - 1;
     }
 
-    if(next_selection > 1)
+    if(
+        next_selection >=
+        (int32_t)FLOPPY144_COLLECTION_COUNT
+    )
     {
         next_selection = 0;
     }
 
     terminal->selected_collection =
-        (uint32_t)next_selection;
+        (Floppy144CollectionId)next_selection;
 }
-
 void Floppy144TerminalOpenSelection(
     Floppy144TerminalState *terminal,
     Floppy144WorldState *world
@@ -345,15 +362,26 @@ void Floppy144TerminalOpenSelection(
     }
 
     if(
-        terminal->selected_collection == 1 &&
+        terminal->selected_collection ==
+            FLOPPY144_COLLECTION_HR02 &&
         !world->hr02_restored
     )
     {
         world->hr02_restored = true;
         terminal->restoration_notice = true;
+        return;
+    }
+
+    if(
+        terminal->selected_collection ==
+            FLOPPY144_COLLECTION_FA03 &&
+        !world->fa03_restored
+    )
+    {
+        world->fa03_restored = true;
+        terminal->restoration_notice = true;
     }
 }
-
 void Floppy144TerminalCloseDetail(
     Floppy144TerminalState *terminal
 )
@@ -397,9 +425,13 @@ void Floppy144TerminalDraw(
         FLOPPY144_RGB(194, 153, 76);
 
     const char *site_status =
-        world->hr02_restored
-            ? "SITE 12%"
-            : "SITE 04%";
+        world->hr02_restored &&
+        world->fa03_restored
+            ? "SITE 20%"
+            : world->hr02_restored ||
+              world->fa03_restored
+                ? "SITE 12%"
+                : "SITE 04%";
 
     const char *hr02_status =
         world->hr02_desk_reallocation_read
@@ -415,6 +447,16 @@ void Floppy144TerminalDraw(
                 ? green
                 : amber;
 
+    const char *fa03_status =
+        world->fa03_restored
+            ? "RESTORED"
+            : "AVAILABLE";
+
+    uint32_t fa03_colour =
+        world->fa03_restored
+            ? green
+            : amber;
+
     const char *footer_left =
         terminal->detail_open
             ? ""
@@ -422,11 +464,17 @@ void Floppy144TerminalDraw(
 
     const char *footer_middle =
         terminal->detail_open
-            ? terminal->selected_collection == 1
+            ? terminal->selected_collection ==
+                FLOPPY144_COLLECTION_HR02
                 ? world->hr02_restored
                     ? "ENTER VIEW RECORDS"
                     : "ENTER RESTORE"
-                : ""
+                : terminal->selected_collection ==
+                    FLOPPY144_COLLECTION_FA03
+                    ? world->fa03_restored
+                        ? "COLLECTION RESTORED"
+                        : "ENTER RESTORE"
+                    : ""
             : "ENTER OPEN";
 
     const char *footer_right =
@@ -541,7 +589,18 @@ void Floppy144TerminalDraw(
         hr02_colour
     );
 
-    Floppy144DrawFillRect(&surface, 40, 238, 560, 1, border);
+    Floppy144TerminalDrawCollection(
+        &surface,
+        246,
+        terminal->selected_collection ==
+            FLOPPY144_COLLECTION_FA03,
+        fa03_status,
+        "FA-03",
+        "SITE SAFETY AND SUPPRESSION SYSTEMS",
+        fa03_colour
+    );
+
+    Floppy144DrawFillRect(&surface, 40, 286, 560, 1, border);
 
 
     Floppy144DrawFillRect(
@@ -598,6 +657,11 @@ void Floppy144TerminalDraw(
         );
     }
 }
+
+
+
+
+
 
 
 
