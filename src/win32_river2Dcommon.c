@@ -1,5 +1,7 @@
 #include "river2D_main.h"
+#if !defined(RIVER2D_NO_IMAGE_IO)
 #include "imgsurf_main.h"
+#endif
 
 #include <sys/stat.h>
 #include <stdio.h>
@@ -72,6 +74,7 @@ void rvResolveRenderer
     }
 }
 
+#if !defined(RIVER2D_NO_IMAGE_IO)
 f_internal void writeMissingTexture
 (
     RiverImage *image
@@ -131,6 +134,8 @@ void rvLoadImage_ptr
 
     image->path = cstr_sv("rvLoadImage_ptr");
 }
+
+#endif
 
 void rvCreateImage
 (
@@ -342,3 +347,5 @@ void rvSyncImage
 ){
     return;
 }
+
+

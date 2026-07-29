@@ -1,5 +1,7 @@
 #include "river2D_main.h"
+#ifndef RIVER2D_NO_TILEMAP
 #include "imgsurf_main.h"
+#endif
 
 #include <stdlib.h>
 
@@ -277,6 +279,7 @@ void rvDestroyImage
     }
 }
 
+#ifndef RIVER2D_NO_TILEMAP
 TileMap rvLoadTilemap
 (
     EngineData        *engine,
@@ -396,3 +399,6 @@ void rvSaveTilemap
         return;
     }
 }
+
+#endif /* RIVER2D_NO_TILEMAP */
+
