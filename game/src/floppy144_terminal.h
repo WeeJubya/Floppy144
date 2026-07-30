@@ -1,3 +1,10 @@
+/*
+ * Floppy//144 - archive terminal interface
+ *
+ * Owns terminal navigation and collection-detail UI state. Permanent facts
+ * such as restored collections are written to Floppy144WorldState.
+ */
+
 #pragma once
 
 #include "river2D_main.h"
@@ -8,12 +15,26 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+/*
+ * Terminal-local state
+ *
+ * selected_collection tracks the highlighted row. detail_open controls
+ * the collection overlay. restoration_notice is a temporary success message.
+ */
+
 typedef struct Floppy144TerminalState
 {
     Floppy144CollectionId selected_collection;
     bool detail_open;
     bool restoration_notice;
 } Floppy144TerminalState;
+
+/*
+ * Terminal operations
+ *
+ * These functions reset and navigate the terminal, restore the selected
+ * collection, close details, query UI state and draw the complete screen.
+ */
 
 void Floppy144TerminalReset(
     Floppy144TerminalState *terminal

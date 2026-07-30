@@ -1,8 +1,22 @@
+/*
+ * Floppy//144 - reconstructed office implementation
+ *
+ * Defines room geometry, collision, interaction ranges and all procedural office
+ * art. World-state flags decide which reconstructed details are visible.
+ */
+
 #include "floppy144_office.h"
 
 #include "floppy144_draw.h"
 
 #include <stddef.h>
+
+/*
+ * Player and screen geometry
+ *
+ * All dimensions use the 640x360 logical canvas. The Win32 window doubles
+ * that canvas without changing collision coordinates.
+ */
 
 #define FLOPPY144_PLAYER_WIDTH  18
 #define FLOPPY144_PLAYER_HEIGHT 22
@@ -31,6 +45,13 @@ enum Floppy144OfficeLayout
     FLOPPY144_BOTTOM_SHIM_HEIGHT = 16
 };
 
+/*
+ * Collision rectangles
+ *
+ * A rectangle represents the solid area of furniture. The obstacle array order
+ * is significant because Desk 01 and Desk 04 proximity checks use indices 1 and 4.
+ */
+
 typedef struct Floppy144Rect
 {
     int32_t x;
@@ -39,21 +60,38 @@ typedef struct Floppy144Rect
     int32_t height;
 } Floppy144Rect;
 
+/*
+ * Solid furniture layout
+ *
+ * Order: terminal, four desks, two left cabinets, two right cabinets.
+ */
+
 static const Floppy144Rect floppy144_obstacles[] =
+/* Terminal */
 {
     {274, 46, 92, 36},
 
+    /* Desks 01-04 */
     {92, 92, 132, 42},
     {416, 92, 132, 42},
     {92, 212, 132, 42},
     {416, 212, 132, 42},
 
+    /* West-wall filing cabinets */
     {42, 68, 34, 60},
     {42, 140, 34, 60},
 
+    /* East-wall filing cabinets */
     {564, 68, 30, 60},
     {564, 140, 30, 60}
 };
+
+/*
+ * Axis-aligned rectangle overlap test
+ *
+ * Used by both collision and interaction proximity. Touching edges are not
+ * considered overlap, which lets the player stand immediately beside furniture.
+ */
 
 static bool Floppy144RectsOverlap(
     int32_t first_x,
@@ -72,6 +110,13 @@ static bool Floppy144RectsOverlap(
         first_y < second_y + second_height &&
         first_y + first_height > second_y;
 }
+
+/*
+ * Test an interaction halo around furniture
+ *
+ * The margin expands a solid obstacle only for proximity checks. It does not
+ * make the physical collision box larger.
+ */
 
 static bool Floppy144OfficeNearObstacle(
     const Floppy144Player *player,
@@ -93,6 +138,13 @@ static bool Floppy144OfficeNearObstacle(
         obstacle->height + margin * 2
     );
 }
+
+/*
+ * Validate a proposed player position
+ *
+ * First keeps the player inside the office interior, then rejects overlap with
+ * every solid item in the obstacle table.
+ */
 
 static bool Floppy144OfficePositionValid(
     int32_t x,
@@ -142,6 +194,10 @@ static bool Floppy144OfficePositionValid(
     return true;
 }
 
+/*
+ * Place the player at the office spawn point
+ */
+
 void Floppy144OfficeReset(
     Floppy144Player *player
 )
@@ -149,6 +205,13 @@ void Floppy144OfficeReset(
     player->x = 316;
     player->y = 168;
 }
+
+/*
+ * Move with sliding collision
+ *
+ * Horizontal and vertical movement are tested separately. If one axis is blocked,
+ * the other can still move, allowing the player to slide around furniture.
+ */
 
 void Floppy144OfficeMove(
     Floppy144Player *player,
@@ -183,6 +246,12 @@ void Floppy144OfficeMove(
     }
 }
 
+/*
+ * Terminal interaction zone
+ *
+ * Uses the player centre and a hand-tuned rectangle in front of the terminal.
+ */
+
 bool Floppy144OfficeNearTerminal(
     const Floppy144Player *player
 )
@@ -199,6 +268,12 @@ bool Floppy144OfficeNearTerminal(
         player_centre_y >= 80 &&
         player_centre_y < 108;
 }
+
+/*
+ * Evidence-driven desk interaction zones
+ *
+ * These use the corresponding collision rectangle plus an eight-pixel halo.
+ */
 
 bool Floppy144OfficeNearDeskOne(
     const Floppy144Player *player
@@ -220,6 +295,13 @@ bool Floppy144OfficeNearDeskFour(
         8
     );
 }
+/*
+ * Procedural furniture and player drawing helpers
+ *
+ * Simple rectangles build desks, cabinets, the archive terminal and the player.
+ * No external image files are required.
+ */
+
 static void Floppy144OfficeDrawDesk(
     Floppy144Surface *surface,
     uint32_t x,
@@ -285,6 +367,12 @@ static void Floppy144OfficeDrawDesk(
     );
 }
 
+/*
+ * Draw one filing cabinet
+ *
+ * A loop adds repeated drawer separators and handles.
+ */
+
 static void Floppy144OfficeDrawCabinet(
     Floppy144Surface *surface,
     uint32_t x,
@@ -337,6 +425,10 @@ static void Floppy144OfficeDrawCabinet(
         );
     }
 }
+
+/*
+ * Draw the archive terminal desk and READY screen
+ */
 
 static void Floppy144OfficeDrawTerminal(
     Floppy144Surface *surface,
@@ -400,6 +492,10 @@ static void Floppy144OfficeDrawTerminal(
         edge_colour
     );
 }
+
+/*
+ * Draw the player as a compact top-down human figure
+ */
 
 static void Floppy144OfficeDrawPlayer(
     Floppy144Surface *surface,
@@ -486,6 +582,13 @@ static void Floppy144OfficeDrawPlayer(
         body_colour
     );
 }
+
+/*
+ * Draw HR-02 restoration details
+ *
+ * Before HR-02 is restored this function exits immediately. Afterwards it adds
+ * the Desk 01 mug and Desk 04 personnel forms referenced by record 038.
+ */
 
 static void Floppy144OfficeDrawPersonnelDetails(
     Floppy144Surface *surface,
@@ -643,6 +746,13 @@ static void Floppy144OfficeDrawPersonnelDetails(
         edge_colour
     );
 }
+/*
+ * Draw the complete reconstructed office
+ *
+ * Derives prompts and labels from world state, paints the room shell and furniture,
+ * adds restored evidence details, then draws the player and footer last.
+ */
+
 void Floppy144OfficeDraw(
     EngineData *engine,
     const Floppy144Player *player,
@@ -650,6 +760,12 @@ void Floppy144OfficeDraw(
     const char *notice
 )
 {
+    /*
+     * Office palette
+     *
+     * Muted institutional colours are defined locally and compiled as constants.
+     */
+
     const uint32_t background =
         FLOPPY144_RGB(12, 17, 21);
 
@@ -688,6 +804,13 @@ void Floppy144OfficeDraw(
 
     const uint32_t player_colour =
         FLOPPY144_RGB(177, 190, 181);
+
+    /*
+     * Context-sensitive interface state
+     *
+     * Evidence must be read before desk inspection prompts appear. A temporary notice
+     * replaces the normal room label until the player moves again.
+     */
 
     bool near_evidence_desk =
         world->hr02_desk_reallocation_read &&
@@ -743,6 +866,13 @@ void Floppy144OfficeDraw(
     uint32_t grid_x;
     uint32_t grid_y;
 
+    /*
+     * Room paint order
+     *
+     * Draw from back to front: background, floor grid, walls, fixtures, furniture,
+     * restored details, player and interface footer.
+     */
+
     Floppy144Surface surface =
     {
         (uint32_t *)engine->backbuffer.data,
@@ -791,6 +921,7 @@ void Floppy144OfficeDraw(
         floor_colour
     );
 
+    /* Draw a subtle floor grid to make the room shape and movement easier to read. */
     for(grid_x = 32;
         grid_x < 608;
         grid_x += 24)
@@ -891,6 +1022,7 @@ void Floppy144OfficeDraw(
         amber
     );
 
+    /* Place permanent fixtures and furniture at the same coordinates as collision. */
     Floppy144OfficeDrawTerminal(
         &surface,
         desk_colour,
@@ -993,6 +1125,7 @@ void Floppy144OfficeDraw(
         muted_colour
     );
 
+    /* Collection-specific overlays are drawn after the base furniture. */
     Floppy144OfficeDrawPersonnelDetails(
         &surface,
         world,
@@ -1001,6 +1134,7 @@ void Floppy144OfficeDraw(
         background
     );
 
+    /* Draw the player above room objects and evidence overlays. */
     Floppy144OfficeDrawPlayer(
         &surface,
         player,
@@ -1026,6 +1160,7 @@ void Floppy144OfficeDraw(
         wall_edge
     );
 
+    /* Footer shows the action available at the player's current position. */
     Floppy144DrawText(
         &surface,
         32,
@@ -1049,29 +1184,3 @@ void Floppy144OfficeDraw(
         muted_colour
     );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

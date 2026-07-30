@@ -1,4 +1,19 @@
+/*
+ * Floppy//144 - collection identifiers
+ *
+ * Defines the stable IDs used to tell the terminal, catalogue and world
+ * state which archive collection is being handled.
+ */
+
 #pragma once
+
+/*
+ * Collection identity
+ *
+ * XX-01 is mandatory recovery data. HR-02 and FA-03 are optional
+ * collections currently implemented by the technical slice.
+ * COUNT is used as the terminal navigation limit.
+ */
 
 typedef enum Floppy144CollectionId
 {

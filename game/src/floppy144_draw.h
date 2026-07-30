@@ -1,6 +1,20 @@
+/*
+ * Floppy//144 - tiny software drawing API
+ *
+ * Provides the platform-neutral pixel primitives used by every game screen.
+ * All art and text are generated directly into river2D's backbuffer.
+ */
+
 #pragma once
 
 #include <stdint.h>
+
+/*
+ * Pixel surface
+ *
+ * A lightweight view of a 32-bit pixel buffer. The renderer owns the
+ * memory; these routines only write colours into it.
+ */
 
 typedef struct Floppy144Surface
 {
@@ -9,10 +23,24 @@ typedef struct Floppy144Surface
     uint32_t height;
 } Floppy144Surface;
 
+/*
+ * Colour packing
+ *
+ * Combines red, green and blue bytes into the 0x00RRGGBB format used by
+ * the software renderer.
+ */
+
 #define FLOPPY144_RGB(red, green, blue) \
     (((uint32_t)(red) << 16) | \
      ((uint32_t)(green) << 8) | \
      ((uint32_t)(blue)))
+
+/*
+ * Drawing primitives
+ *
+ * Clear fills the whole surface. FillRect draws a clipped solid block.
+ * Rect draws a one-pixel outline. Text uses the embedded 5x7 font.
+ */
 
 void Floppy144DrawClear(
     Floppy144Surface *surface,

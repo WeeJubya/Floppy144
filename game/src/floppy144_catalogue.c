@@ -1,3 +1,10 @@
+/*
+ * Floppy//144 - record catalogue implementation
+ *
+ * Generates deterministic record listings for each collection, renders the
+ * scrollable catalogue, displays recovered documents and identifies evidence.
+ */
+
 #include "floppy144_catalogue.h"
 
 #include "floppy144_draw.h"
@@ -5,11 +12,27 @@
 #include <stddef.h>
 #include <stdio.h>
 
-#define FLOPPY144_CATALOGUE_COUNT 100U
-#define FLOPPY144_CATALOGUE_ROWS  10U
-#define FLOPPY144_AUTHORED_RECORD 37U
+/*
+ * Catalogue size and authored-record positions
+ *
+ * Each collection exposes 100 deterministic index entries in this slice.
+ * The authored constants are zero-based, so 37 is visible record 038 and
+ * 62 is visible record 063.
+ */
 
-static const char *floppy144_record_subjects[10] =
+#define FLOPPY144_CATALOGUE_COUNT       100U
+#define FLOPPY144_CATALOGUE_ROWS         10U
+#define FLOPPY144_HR02_AUTHORED_RECORD   37U
+#define FLOPPY144_FA03_AUTHORED_RECORD   62U
+
+/*
+ * Procedural title vocabulary
+ *
+ * Subjects vary by collection while document forms are shared. Combining
+ * the two tables produces plausible archive titles without storing 200 strings.
+ */
+
+static const char *floppy144_hr02_record_subjects[10] =
 {
     "APPOINTMENT",
     "TRANSFER",
@@ -21,6 +44,20 @@ static const char *floppy144_record_subjects[10] =
     "DESK ALLOCATION",
     "APPRAISAL",
     "EXIT"
+};
+
+static const char *floppy144_fa03_record_subjects[10] =
+{
+    "SUPPRESSION PANEL",
+    "HALON CYLINDER",
+    "ALARM CIRCUIT",
+    "SERVER ROOM SAFETY",
+    "EMERGENCY CONTROL",
+    "VENTILATION SYSTEM",
+    "FIRE DOOR",
+    "DETECTOR LOOP",
+    "MAINTENANCE ACCESS",
+    "PRESSURE SENSOR"
 };
 
 static const char *floppy144_record_forms[10] =
@@ -37,7 +74,16 @@ static const char *floppy144_record_forms[10] =
     "CHECKLIST"
 };
 
+/*
+ * Build a deterministic record ID and title
+ *
+ * The same collection and index always produce the same output. Different
+ * multipliers give HR-02 and FA-03 distinct record-number sequences.
+ * FA-03 record 063 is overridden with its stable authored identity.
+ */
+
 static void Floppy144CatalogueBuildRecord(
+    Floppy144CollectionId collection,
     uint32_t index,
     char *record_id,
     size_t record_id_size,
@@ -45,6 +91,13 @@ static void Floppy144CatalogueBuildRecord(
     size_t title_size
 )
 {
+    /* Select the collection-specific vocabulary table. */
+    const char *const *subjects =
+        collection == FLOPPY144_COLLECTION_FA03
+            ? floppy144_fa03_record_subjects
+            : floppy144_hr02_record_subjects;
+
+    /* Turn the index into repeatable subject, form and record-number components. */
     uint32_t subject_index =
         index % 10U;
 
@@ -55,12 +108,37 @@ static void Floppy144CatalogueBuildRecord(
         (group_index + subject_index * 3U) % 10U;
 
     uint32_t record_number =
-        1400U + ((index * 37U + 19U) % 1000U);
+        collection == FLOPPY144_COLLECTION_FA03
+            ? 2400U + ((index * 53U + 11U) % 1000U)
+            : 1400U + ((index * 37U + 19U) % 1000U);
+
+    /* Stable authored records override the procedural ID and title. */
+    if(
+        collection == FLOPPY144_COLLECTION_FA03 &&
+        index == FLOPPY144_FA03_AUTHORED_RECORD
+    )
+    {
+        snprintf(
+            record_id,
+            record_id_size,
+            "FA-03-RS-0063"
+        );
+
+        snprintf(
+            title,
+            title_size,
+            "SUPPRESSION CONTROL PANEL SERVICE NOTE"
+        );
+
+        return;
+    }
 
     snprintf(
         record_id,
         record_id_size,
-        "HR-02-RS-%04u",
+        collection == FLOPPY144_COLLECTION_FA03
+            ? "FA-03-RS-%04u"
+            : "HR-02-RS-%04u",
         (unsigned)record_number
     );
 
@@ -68,10 +146,15 @@ static void Floppy144CatalogueBuildRecord(
         title,
         title_size,
         "%s %s",
-        floppy144_record_subjects[subject_index],
+        subjects[subject_index],
         floppy144_record_forms[form_index]
     );
 }
+/*
+ * Catalogue drawing helpers
+ *
+ * TextCentred positions headings. DrawRow builds and paints one record entry.
+ */
 
 static void Floppy144CatalogueTextCentred(
     Floppy144Surface *surface,
@@ -97,8 +180,16 @@ static void Floppy144CatalogueTextCentred(
     );
 }
 
+/*
+ * Draw one record row
+ *
+ * The active collection is passed to the generator so HR and FA rows can
+ * share all layout code.
+ */
+
 static void Floppy144CatalogueDrawRow(
     Floppy144Surface *surface,
+    Floppy144CollectionId collection,
     uint32_t index,
     uint32_t y,
     bool selected,
@@ -114,6 +205,7 @@ static void Floppy144CatalogueDrawRow(
     char title[48];
 
     Floppy144CatalogueBuildRecord(
+        collection,
         index,
         record_id,
         sizeof(record_id),
@@ -171,6 +263,13 @@ static void Floppy144CatalogueDrawRow(
     );
 }
 
+/*
+ * Draw the scrollable catalogue list
+ *
+ * Shows ten entries at a time, a position label, a proportional scrollbar
+ * and context instructions in the footer.
+ */
+
 static void Floppy144CatalogueDrawList(
     Floppy144Surface *surface,
     const Floppy144CatalogueState *catalogue
@@ -208,6 +307,7 @@ static void Floppy144CatalogueDrawList(
     uint32_t visible_row;
     uint32_t thumb_y;
 
+    /* Display uses one-based record numbers even though state uses zero-based indices. */
     snprintf(
         position_text,
         sizeof(position_text),
@@ -259,7 +359,9 @@ static void Floppy144CatalogueDrawList(
     Floppy144CatalogueTextCentred(
         surface,
         32,
-        "PERSONNEL LIFECYCLE RECORDS",
+        catalogue->collection == FLOPPY144_COLLECTION_FA03
+            ? "SITE SAFETY AND SUPPRESSION SYSTEMS"
+            : "PERSONNEL LIFECYCLE RECORDS",
         2,
         text
     );
@@ -268,7 +370,9 @@ static void Floppy144CatalogueDrawList(
         surface,
         40,
         60,
-        "COLLECTION: HR-02",
+        catalogue->collection == FLOPPY144_COLLECTION_FA03
+            ? "COLLECTION: FA-03"
+            : "COLLECTION: HR-02",
         1,
         muted
     );
@@ -300,6 +404,7 @@ static void Floppy144CatalogueDrawList(
         border
     );
 
+    /* Render only the ten rows in the current viewport. */
     for(
         visible_row = 0;
         visible_row < FLOPPY144_CATALOGUE_ROWS;
@@ -311,6 +416,7 @@ static void Floppy144CatalogueDrawList(
 
         Floppy144CatalogueDrawRow(
             surface,
+            catalogue->collection,
             record_index,
             98U + visible_row * 19U,
             record_index == catalogue->selected_index,
@@ -332,6 +438,7 @@ static void Floppy144CatalogueDrawList(
         border
     );
 
+    /* Map top_index onto the scrollbar track so the thumb follows the viewport. */
     thumb_y =
         98U +
         catalogue->top_index *
@@ -403,11 +510,272 @@ static void Floppy144CatalogueDrawList(
     );
 }
 
+/*
+ * Draw the recovered FA-03 authored document
+ *
+ * This record is laid out directly because its complete contents exist on
+ * Disk 144. Reading it unlocks the suppression-service evidence flag.
+ */
+
+static void Floppy144CatalogueDrawFa03ServiceNote(
+    Floppy144Surface *surface
+)
+{
+    const uint32_t background =
+        FLOPPY144_RGB(12, 17, 21);
+
+    const uint32_t panel =
+        FLOPPY144_RGB(24, 33, 39);
+
+    const uint32_t document =
+        FLOPPY144_RGB(31, 40, 44);
+
+    const uint32_t border =
+        FLOPPY144_RGB(86, 103, 107);
+
+    const uint32_t text =
+        FLOPPY144_RGB(202, 211, 205);
+
+    const uint32_t muted =
+        FLOPPY144_RGB(118, 133, 132);
+
+    const uint32_t green =
+        FLOPPY144_RGB(100, 156, 111);
+
+    const uint32_t amber =
+        FLOPPY144_RGB(194, 153, 76);
+
+    Floppy144DrawClear(
+        surface,
+        background
+    );
+
+    Floppy144DrawText(
+        surface,
+        10,
+        5,
+        "GDR ARCHIVE DOCUMENT VIEWER",
+        1,
+        muted
+    );
+
+    Floppy144DrawText(
+        surface,
+        538,
+        5,
+        "FA-03",
+        1,
+        green
+    );
+
+    Floppy144DrawFillRect(
+        surface,
+        20,
+        20,
+        600,
+        284,
+        panel
+    );
+
+    Floppy144DrawRect(
+        surface,
+        20,
+        20,
+        600,
+        284,
+        border
+    );
+
+    Floppy144DrawFillRect(
+        surface,
+        36,
+        36,
+        568,
+        252,
+        document
+    );
+
+    Floppy144DrawRect(
+        surface,
+        36,
+        36,
+        568,
+        252,
+        border
+    );
+
+    Floppy144DrawText(
+        surface,
+        52,
+        50,
+        "FA-03-RS-0063",
+        1,
+        amber
+    );
+
+    Floppy144DrawText(
+        surface,
+        52,
+        68,
+        "SUPPRESSION CONTROL PANEL SERVICE NOTE",
+        1,
+        text
+    );
+
+    Floppy144DrawFillRect(
+        surface,
+        52,
+        84,
+        536,
+        1,
+        border
+    );
+
+    Floppy144DrawText(
+        surface,
+        52,
+        98,
+        "CLASS: OPERATIONAL MAINTENANCE RECORD",
+        1,
+        muted
+    );
+
+    Floppy144DrawText(
+        surface,
+        52,
+        114,
+        "LOCATION: SERVER ROOM CABLE RISER / SUPPRESSION CONTROL",
+        1,
+        muted
+    );
+
+    Floppy144DrawText(
+        surface,
+        52,
+        130,
+        "DATE: FRIDAY - FINAL WORKING DAY BEFORE BANK HOLIDAY",
+        1,
+        muted
+    );
+
+    Floppy144DrawText(
+        surface,
+        52,
+        158,
+        "MANUAL DISCHARGE CONTROL RETAINED PENDING REPLACEMENT",
+        1,
+        text
+    );
+
+    Floppy144DrawText(
+        surface,
+        52,
+        174,
+        "OF THE SERVER-ROOM CABLE RISER.",
+        1,
+        text
+    );
+
+    Floppy144DrawText(
+        surface,
+        52,
+        198,
+        "INTERMITTENT PANEL INPUT RECORDED DURING MAINTENANCE ACCESS.",
+        1,
+        text
+    );
+
+    Floppy144DrawText(
+        surface,
+        52,
+        222,
+        "NO DISCHARGE COMMAND CONFIRMED DURING THE TEST WINDOW.",
+        1,
+        text
+    );
+
+    Floppy144DrawText(
+        surface,
+        52,
+        246,
+        "FURTHER TESTING DEFERRED UNTIL TUESDAY AFTER BANK HOLIDAY.",
+        1,
+        amber
+    );
+
+    Floppy144DrawText(
+        surface,
+        52,
+        270,
+        "ENGINEERING NOTE: ISOLATE CONTROL BEFORE CABLE WORK.",
+        1,
+        muted
+    );
+
+    Floppy144DrawFillRect(
+        surface,
+        20,
+        316,
+        600,
+        28,
+        background
+    );
+
+    Floppy144DrawRect(
+        surface,
+        20,
+        316,
+        600,
+        28,
+        border
+    );
+
+    Floppy144DrawText(
+        surface,
+        32,
+        326,
+        "RECOVERED AUTHORED RECORD",
+        1,
+        green
+    );
+
+    Floppy144DrawText(
+        surface,
+        526,
+        326,
+        "ESC BACK",
+        1,
+        muted
+    );
+}
+/*
+ * Draw the selected document
+ *
+ * FA-03 record 063 has a dedicated renderer. Other entries use this shared
+ * viewer, which either shows the HR-02 authored memorandum or explains that
+ * only the index entry was recovered.
+ */
+
 static void Floppy144CatalogueDrawDocument(
     Floppy144Surface *surface,
     const Floppy144CatalogueState *catalogue
 )
 {
+    /* Route the special FA-03 authored record before drawing the generic viewer. */
+    if(
+        catalogue->collection ==
+            FLOPPY144_COLLECTION_FA03 &&
+        catalogue->selected_index ==
+            FLOPPY144_FA03_AUTHORED_RECORD
+    )
+    {
+        Floppy144CatalogueDrawFa03ServiceNote(
+            surface
+        );
+
+        return;
+    }
+
     const uint32_t background =
         FLOPPY144_RGB(12, 17, 21);
 
@@ -435,11 +803,15 @@ static void Floppy144CatalogueDrawDocument(
     char record_id[24];
     char title[48];
 
+    /* Only HR-02 record 038 is fully authored in the shared viewer. */
     bool authored =
+        catalogue->collection ==
+            FLOPPY144_COLLECTION_HR02 &&
         catalogue->selected_index ==
-        FLOPPY144_AUTHORED_RECORD;
+            FLOPPY144_HR02_AUTHORED_RECORD;
 
     Floppy144CatalogueBuildRecord(
+        catalogue->collection,
         catalogue->selected_index,
         record_id,
         sizeof(record_id),
@@ -533,6 +905,7 @@ static void Floppy144CatalogueDrawDocument(
         border
     );
 
+    /* Choose between recovered content and the standard missing-content notice. */
     switch(authored)
     {
         case true:
@@ -678,6 +1051,13 @@ static void Floppy144CatalogueDrawDocument(
     );
 }
 
+/*
+ * Catalogue state management
+ *
+ * The following functions initialise navigation, move the viewport, open and
+ * close documents, and report whether the selected record supplies evidence.
+ */
+
 void Floppy144CatalogueReset(
     Floppy144CatalogueState *catalogue,
     Floppy144CollectionId collection
@@ -688,6 +1068,13 @@ void Floppy144CatalogueReset(
     catalogue->top_index = 0;
     catalogue->document_open = false;
 }
+/*
+ * Move selection and keep it visible
+ *
+ * Selection is clamped to 0-99. top_index follows when the highlight leaves
+ * the current ten-row viewport.
+ */
+
 void Floppy144CatalogueMove(
     Floppy144CatalogueState *catalogue,
     int32_t direction
@@ -741,6 +1128,12 @@ void Floppy144CatalogueMove(
     }
 }
 
+/*
+ * Move by one visible page
+ *
+ * Reuses the single-row movement logic with a ten-record step.
+ */
+
 void Floppy144CataloguePage(
     Floppy144CatalogueState *catalogue,
     int32_t direction
@@ -753,6 +1146,12 @@ void Floppy144CataloguePage(
     );
 }
 
+/*
+ * Open the selected record
+ *
+ * The evidence flag is set separately by main.c after this state change.
+ */
+
 void Floppy144CatalogueOpenDocument(
     Floppy144CatalogueState *catalogue
 )
@@ -760,16 +1159,37 @@ void Floppy144CatalogueOpenDocument(
     catalogue->document_open = true;
 }
 
+/*
+ * Identify primary evidence records
+ *
+ * Collection and record index are both checked so identically numbered records
+ * in other collections cannot unlock the wrong evidence.
+ */
+
 bool Floppy144CatalogueSelectedProvidesEvidence(
     const Floppy144CatalogueState *catalogue
 )
 {
-    return
+    bool hr02_evidence =
         catalogue->collection ==
             FLOPPY144_COLLECTION_HR02 &&
         catalogue->selected_index ==
-            FLOPPY144_AUTHORED_RECORD;
+            FLOPPY144_HR02_AUTHORED_RECORD;
+
+    bool fa03_evidence =
+        catalogue->collection ==
+            FLOPPY144_COLLECTION_FA03 &&
+        catalogue->selected_index ==
+            FLOPPY144_FA03_AUTHORED_RECORD;
+
+    return
+        hr02_evidence ||
+        fa03_evidence;
 }
+/*
+ * Return from document view to the current catalogue position
+ */
+
 void Floppy144CatalogueCloseDocument(
     Floppy144CatalogueState *catalogue
 )
@@ -777,12 +1197,24 @@ void Floppy144CatalogueCloseDocument(
     catalogue->document_open = false;
 }
 
+/*
+ * Query the current catalogue depth
+ *
+ * main.c uses this to make Escape close a document before leaving the catalogue.
+ */
+
 bool Floppy144CatalogueDocumentOpen(
     const Floppy144CatalogueState *catalogue
 )
 {
     return catalogue->document_open;
 }
+
+/*
+ * Catalogue draw dispatcher
+ *
+ * Chooses list or document rendering from a single boolean state flag.
+ */
 
 void Floppy144CatalogueDraw(
     EngineData *engine,
@@ -819,7 +1251,3 @@ void Floppy144CatalogueDraw(
         }
     }
 }
-
-
-
-

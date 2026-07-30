@@ -1,6 +1,20 @@
+/*
+ * Floppy//144 - archive terminal implementation
+ *
+ * Renders the collection list and detail overlay, handles terminal-local
+ * navigation, and writes collection restoration into the shared world state.
+ */
+
 #include "floppy144_terminal.h"
 
 #include "floppy144_draw.h"
+
+/*
+ * Small terminal drawing helpers
+ *
+ * The first helper centres headings. The second draws one selectable
+ * collection row with status, code, title and selection border.
+ */
 
 static void Floppy144TerminalTextCentred(
     Floppy144Surface *surface,
@@ -25,6 +39,13 @@ static void Floppy144TerminalTextCentred(
         colour
     );
 }
+
+/*
+ * Draw one collection row
+ *
+ * All rows share the same geometry. The caller supplies only the row-specific
+ * content and status colour.
+ */
 
 static void Floppy144TerminalDrawCollection(
     Floppy144Surface *surface,
@@ -106,6 +127,13 @@ static void Floppy144TerminalDrawCollection(
     );
 }
 
+/*
+ * Draw the selected collection overlay
+ *
+ * This translates the selected collection plus world flags into human-readable
+ * code, title, class, restoration status and evidence messages.
+ */
+
 static void Floppy144TerminalDrawDetail(
     Floppy144Surface *surface,
     const Floppy144TerminalState *terminal,
@@ -133,6 +161,13 @@ static void Floppy144TerminalDrawDetail(
     const uint32_t amber =
         FLOPPY144_RGB(194, 153, 76);
 
+    /*
+     * Derive collection-specific state
+     *
+     * These booleans keep the rendering expressions readable and ensure that
+     * the same evidence flag controls both list and detail views.
+     */
+
     bool hr02_selected =
         terminal->selected_collection ==
         FLOPPY144_COLLECTION_HR02;
@@ -149,8 +184,14 @@ static void Floppy144TerminalDrawDetail(
                 : true;
 
     bool evidence_found =
-        hr02_selected &&
-        world->hr02_desk_reallocation_read;
+        (
+            hr02_selected &&
+            world->hr02_desk_reallocation_read
+        ) ||
+        (
+            fa03_selected &&
+            world->fa03_suppression_service_read
+        );
 
     const char *code =
         hr02_selected
@@ -191,7 +232,9 @@ static void Floppy144TerminalDrawDetail(
         terminal->restoration_notice
             ? "RESTORATION COMPLETE. SITE SYSTEM DATA UPDATED."
             : evidence_found
-                ? "EVIDENCE FOUND: DESK REALLOCATION MEMORANDUM."
+                ? hr02_selected
+                    ? "EVIDENCE FOUND: DESK REALLOCATION MEMORANDUM."
+                    : "EVIDENCE FOUND: SUPPRESSION PANEL SERVICE NOTE."
                 : collection_restored
                     ? "COLLECTION DATA IS PRESENT IN THE RECONSTRUCTED SITE."
                     : "PRESS ENTER TO RESTORE THIS COLLECTION.";
@@ -203,6 +246,7 @@ static void Floppy144TerminalDrawDetail(
                 ? green
                 : amber;
 
+    /* Paint the modal panel over the already-drawn terminal list. */
     Floppy144DrawFillRect(
         surface,
         64,
@@ -307,6 +351,13 @@ static void Floppy144TerminalDrawDetail(
 
 }
 
+/*
+ * Terminal state management
+ *
+ * Reset selects XX-01 and closes overlays. Navigation wraps around the
+ * collection enum while details are closed.
+ */
+
 void Floppy144TerminalReset(
     Floppy144TerminalState *terminal
 )
@@ -315,6 +366,12 @@ void Floppy144TerminalReset(
     terminal->detail_open = false;
     terminal->restoration_notice = false;
 }
+
+/*
+ * Move the highlighted collection
+ *
+ * direction is normally -1 or +1. Selection wraps from either end.
+ */
 
 void Floppy144TerminalMoveSelection(
     Floppy144TerminalState *terminal,
@@ -349,6 +406,13 @@ void Floppy144TerminalMoveSelection(
     terminal->selected_collection =
         (Floppy144CollectionId)next_selection;
 }
+/*
+ * Open details or restore a collection
+ *
+ * First Enter opens the detail overlay. A later Enter restores HR-02 or
+ * FA-03 if needed. Restoring changes the persistent world state.
+ */
+
 void Floppy144TerminalOpenSelection(
     Floppy144TerminalState *terminal,
     Floppy144WorldState *world
@@ -382,6 +446,12 @@ void Floppy144TerminalOpenSelection(
         terminal->restoration_notice = true;
     }
 }
+/*
+ * Close collection details
+ *
+ * Also clears the temporary restoration-complete message.
+ */
+
 void Floppy144TerminalCloseDetail(
     Floppy144TerminalState *terminal
 )
@@ -390,12 +460,25 @@ void Floppy144TerminalCloseDetail(
     terminal->restoration_notice = false;
 }
 
+/*
+ * Query whether the detail overlay is active
+ *
+ * main.c uses this to decide whether Escape closes details or leaves the terminal.
+ */
+
 bool Floppy144TerminalDetailOpen(
     const Floppy144TerminalState *terminal
 )
 {
     return terminal->detail_open;
 }
+
+/*
+ * Draw the complete terminal screen
+ *
+ * Builds collection status labels from world state, draws the base list and
+ * footer, then overlays details when detail_open is true.
+ */
 
 void Floppy144TerminalDraw(
     EngineData *engine,
@@ -424,6 +507,13 @@ void Floppy144TerminalDraw(
     const uint32_t amber =
         FLOPPY144_RGB(194, 153, 76);
 
+    /*
+     * Dynamic list and footer text
+     *
+     * Restored collections display green. Evidence-bearing collections display
+     * amber. Footer instructions change with the current navigation depth.
+     */
+
     const char *site_status =
         world->hr02_restored &&
         world->fa03_restored
@@ -448,14 +538,18 @@ void Floppy144TerminalDraw(
                 : amber;
 
     const char *fa03_status =
-        world->fa03_restored
-            ? "RESTORED"
-            : "AVAILABLE";
+        world->fa03_suppression_service_read
+            ? "EVIDENCE"
+            : world->fa03_restored
+                ? "RESTORED"
+                : "AVAILABLE";
 
     uint32_t fa03_colour =
-        world->fa03_restored
-            ? green
-            : amber;
+        world->fa03_suppression_service_read
+            ? amber
+            : world->fa03_restored
+                ? green
+                : amber;
 
     const char *footer_left =
         terminal->detail_open
@@ -481,6 +575,13 @@ void Floppy144TerminalDraw(
         terminal->detail_open
             ? "ESC CLOSE"
             : "ESC RETURN";
+
+    /*
+     * Draw the terminal base layer
+     *
+     * The list remains underneath the detail overlay, making close-detail a simple
+     * state change followed by a redraw.
+     */
 
     Floppy144Surface surface =
     {
@@ -558,6 +659,7 @@ void Floppy144TerminalDraw(
         muted
     );
 
+    /* XX-01 is mandatory and is therefore always shown as restored. */
     Floppy144TerminalDrawCollection(
         &surface,
         150,
@@ -579,6 +681,7 @@ void Floppy144TerminalDraw(
         muted
     );
 
+    /* Optional collection rows reflect restoration and evidence flags. */
     Floppy144TerminalDrawCollection(
         &surface,
         198,
@@ -648,6 +751,7 @@ void Floppy144TerminalDraw(
         muted
     );
 
+    /* Draw the modal detail panel last so it appears above the collection list. */
     if(terminal->detail_open)
     {
         Floppy144TerminalDrawDetail(
@@ -657,19 +761,3 @@ void Floppy144TerminalDraw(
         );
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

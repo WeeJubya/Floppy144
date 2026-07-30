@@ -1,3 +1,10 @@
+/*
+ * Floppy//144 - Win32 entry point and game coordinator
+ *
+ * Connects river2D to Win32, owns the active screen and top-level session state,
+ * routes keyboard input and asks the appropriate module to redraw.
+ */
+
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
@@ -12,6 +19,13 @@
 
 #include <stdbool.h>
 
+/*
+ * Top-level screen state
+ *
+ * Only one of the recovery screen, office, terminal or catalogue is active.
+ * This enum is the game's small screen-state machine.
+ */
+
 typedef enum Floppy144Screen
 {
     FLOPPY144_SCREEN_RECOVERY,
@@ -19,6 +33,13 @@ typedef enum Floppy144Screen
     FLOPPY144_SCREEN_TERMINAL,
     FLOPPY144_SCREEN_CATALOGUE
 } Floppy144Screen;
+
+/*
+ * Shared application state
+ *
+ * The Win32 callback cannot receive custom game arguments directly, so this
+ * small prototype stores the engine and screen states at file scope.
+ */
 
 static EngineData *global_engine;
 
@@ -28,8 +49,22 @@ static Floppy144TerminalState global_terminal;
 static Floppy144CatalogueState global_catalogue;
 static Floppy144WorldState global_world;
 
+/*
+ * Short-lived interface state
+ *
+ * The office notice points to static text shown after an inspection. Movement
+ * clears it. recovery_started controls the two-step boot sequence.
+ */
+
 static const char *global_office_notice;
 static bool global_recovery_started;
+
+/*
+ * Bind river2D's statically linked software renderer
+ *
+ * The original engine can resolve a renderer DLL. This build assigns the function
+ * pointers directly so Floppy144 ships as one game executable.
+ */
 
 static void Floppy144BindStaticRenderer(
     EngineData *engine
@@ -41,6 +76,13 @@ static void Floppy144BindStaticRenderer(
     engine->loadText = loadText;
     engine->compositeImage = compositeImage;
 }
+
+/*
+ * Redraw the active screen
+ *
+ * Each screen module writes a complete 640x360 frame into the backbuffer.
+ * InvalidateRect then asks Windows to present that frame through WM_PAINT.
+ */
 
 static void Floppy144Redraw(
     HWND window
@@ -100,6 +142,12 @@ static void Floppy144Redraw(
     );
 }
 
+/*
+ * Move the player and clear inspection text
+ *
+ * All movement keys pass through this helper so the behaviour is consistent.
+ */
+
 static void Floppy144MovePlayer(
     HWND window,
     int32_t movement_x,
@@ -118,6 +166,13 @@ static void Floppy144MovePlayer(
         window
     );
 }
+
+/*
+ * Check whether Enter should open records
+ *
+ * A catalogue is available only from an open detail view for a restored optional
+ * collection. Otherwise Enter opens details or performs restoration.
+ */
 
 static bool Floppy144CanOpenCatalogue(
     void
@@ -142,6 +197,13 @@ static bool Floppy144CanOpenCatalogue(
             fa03_available
         );
 }
+/*
+ * Win32 message handler
+ *
+ * Windows sends close, keyboard, resize and paint messages here. Keyboard handling
+ * is routed first by active game screen, then by the key pressed.
+ */
+
 static LRESULT CALLBACK Floppy144WindowProc(
     HWND window,
     UINT message,
@@ -153,6 +215,7 @@ static LRESULT CALLBACK Floppy144WindowProc(
 
     switch(message)
     {
+        /* Window lifetime: stop the engine loop and post the process quit message. */
         case WM_CLOSE:
         {
             if(global_engine)
@@ -175,10 +238,18 @@ static LRESULT CALLBACK Floppy144WindowProc(
             return 0;
         }
 
+        /*
+         * Keyboard input
+         *
+         * The same key can mean different things on different screens, so each screen
+         * owns a nested key switch.
+         */
+
         case WM_KEYDOWN:
         {
             switch(global_screen)
             {
+                /* Recovery: Enter starts reconstruction, then enters the office. Escape quits. */
                 case FLOPPY144_SCREEN_RECOVERY:
                 {
                     switch(w_param)
@@ -228,6 +299,7 @@ static LRESULT CALLBACK Floppy144WindowProc(
                     break;
                 }
 
+                /* Office: movement uses eight-pixel steps; E interacts; Escape returns to recovery. */
                 case FLOPPY144_SCREEN_OFFICE:
                 {
                     switch(w_param)
@@ -280,6 +352,7 @@ static LRESULT CALLBACK Floppy144WindowProc(
                             return 0;
                         }
 
+                        /* Interaction priority: terminal first, then evidence-unlocked desk inspections. */
                         case 'E':
                         {
                             if(
@@ -340,6 +413,7 @@ static LRESULT CALLBACK Floppy144WindowProc(
                     break;
                 }
 
+                /* Terminal: move selection, open/restore/view records, or back out one level. */
                 case FLOPPY144_SCREEN_TERMINAL:
                 {
                     switch(w_param)
@@ -436,6 +510,7 @@ static LRESULT CALLBACK Floppy144WindowProc(
                     break;
                 }
 
+                /* Catalogue: move or page through records, open a document, or back out. */
                 case FLOPPY144_SCREEN_CATALOGUE:
                 {
                     switch(w_param)
@@ -492,14 +567,36 @@ static LRESULT CALLBACK Floppy144WindowProc(
                                 &global_catalogue
                             );
 
+                            /* Opening a primary record immediately records that knowledge in world state. */
                             if(
                                 Floppy144CatalogueSelectedProvidesEvidence(
                                     &global_catalogue
                                 )
                             )
                             {
-                                global_world.hr02_desk_reallocation_read =
-                                    true;
+                                switch(global_catalogue.collection)
+                                {
+                                    case FLOPPY144_COLLECTION_HR02:
+                                    {
+                                        global_world.hr02_desk_reallocation_read =
+                                            true;
+
+                                        break;
+                                    }
+
+                                    case FLOPPY144_COLLECTION_FA03:
+                                    {
+                                        global_world.fa03_suppression_service_read =
+                                            true;
+
+                                        break;
+                                    }
+
+                                    default:
+                                    {
+                                        break;
+                                    }
+                                }
                             }
 
                             Floppy144Redraw(window);
@@ -543,6 +640,13 @@ static LRESULT CALLBACK Floppy144WindowProc(
 
             return 0;
         }
+
+        /*
+         * Window painting
+         *
+         * Suppress Windows background erasing to avoid flicker. WM_PAINT asks river2D
+         * to scale and copy the logical backbuffer into the window.
+         */
 
         case WM_ERASEBKGND:
         {
@@ -598,6 +702,13 @@ static LRESULT CALLBACK Floppy144WindowProc(
     );
 }
 
+/*
+ * Application entry point
+ *
+ * Creates the Win32 window, configures the 640x360 logical canvas inside a
+ * 1280x720 window, initialises game state and runs the Windows message loop.
+ */
+
 int CALLBACK WinMain(
     HINSTANCE instance,
     HINSTANCE previous_instance,
@@ -605,6 +716,13 @@ int CALLBACK WinMain(
     int show_command
 )
 {
+    /*
+     * Local Win32 and river2D objects
+     *
+     * All engine storage lives for the duration of WinMain. global_engine points to
+     * this engine only while the application is running.
+     */
+
     const char *class_name =
         "Floppy144WindowClass";
 
@@ -629,6 +747,13 @@ int CALLBACK WinMain(
     (void)previous_instance;
     (void)command_line;
 
+    /*
+     * Configure river2D
+     *
+     * Static-canvas mode preserves a crisp 640x360 internal image while the window
+     * is twice that size.
+     */
+
     engine.instance = instance;
     engine.windowName = "Floppy//144";
 
@@ -646,6 +771,13 @@ int CALLBACK WinMain(
     Floppy144BindStaticRenderer(
         &engine
     );
+
+    /*
+     * Register and create the native Win32 window
+     *
+     * AdjustWindowRect expands the requested client area to include borders and the
+     * title bar before CreateWindowExA is called.
+     */
 
     window_class.style =
         CS_HREDRAW | CS_VREDRAW;
@@ -693,6 +825,12 @@ int CALLBACK WinMain(
         return 2;
     }
 
+    /*
+     * Initialise game state
+     *
+     * Every subsystem is reset before the renderer is asked to allocate its backbuffer.
+     */
+
     global_engine = &engine;
 
     global_screen =
@@ -717,6 +855,12 @@ int CALLBACK WinMain(
         &global_catalogue,
         FLOPPY144_COLLECTION_XX01
     );
+
+    /*
+     * Initialise rendering and show the first frame
+     *
+     * A missing backbuffer is fatal because every screen draws directly into it.
+     */
 
     engine.init(
         &engine,
@@ -754,6 +898,13 @@ int CALLBACK WinMain(
         engine.window
     );
 
+    /*
+     * Standard Windows message loop
+     *
+     * GetMessage waits for input, TranslateMessage handles key translation and
+     * DispatchMessage sends each event to Floppy144WindowProc.
+     */
+
     while(
         GetMessageA(
             &message,
@@ -772,19 +923,15 @@ int CALLBACK WinMain(
         );
     }
 
+    /*
+     * Shutdown
+     *
+     * Clear the callback-visible pointer, then let the renderer release its resources.
+     */
+
     global_engine = 0;
 
     return engine.shutdown(
         &engine
     );
 }
-
-
-
-
-
-
-
-
-
-

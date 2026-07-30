@@ -1,6 +1,20 @@
+/*
+ * Floppy//144 - software drawing implementation
+ *
+ * A deliberately small renderer for rectangles and bitmap text. Keeping these
+ * primitives local avoids external art assets and supports the floppy-size goal.
+ */
+
 #include "floppy144_draw.h"
 
 #include <stddef.h>
+
+/*
+ * Embedded 5x7 font format
+ *
+ * Seven five-bit rows are packed into one 64-bit integer. A set bit means
+ * that pixel in the glyph should be drawn.
+ */
 
 #define FLOPPY144_GLYPH(row0, row1, row2, row3, row4, row5, row6) \
     ((uint64_t)(row0)       | \
@@ -10,6 +24,13 @@
     ((uint64_t)(row4) << 20) | \
     ((uint64_t)(row5) << 25) | \
     ((uint64_t)(row6) << 30))
+
+/*
+ * Look up a character glyph
+ *
+ * The switch stores uppercase letters, digits and the punctuation needed
+ * by the interface. Unsupported characters use a question-mark glyph.
+ */
 
 static uint64_t Floppy144Glyph(
     char character
@@ -67,6 +88,13 @@ static uint64_t Floppy144Glyph(
     }
 }
 
+/*
+ * Clear the entire backbuffer
+ *
+ * Uses a 64-bit count so width multiplied by height cannot overflow a
+ * 32-bit intermediate value on larger surfaces.
+ */
+
 void Floppy144DrawClear(
     Floppy144Surface *surface,
     uint32_t colour
@@ -84,6 +112,13 @@ void Floppy144DrawClear(
         surface->pixels[pixel_index] = colour;
     }
 }
+
+/*
+ * Draw a clipped solid rectangle
+ *
+ * Rejects empty or off-screen rectangles, clips the far edges to the
+ * surface, then writes each covered pixel.
+ */
 
 void Floppy144DrawFillRect(
     Floppy144Surface *surface,
@@ -132,6 +167,12 @@ void Floppy144DrawFillRect(
         }
     }
 }
+
+/*
+ * Draw a one-pixel rectangle outline
+ *
+ * Reuses FillRect for the top, bottom, left and right edges.
+ */
 
 void Floppy144DrawRect(
     Floppy144Surface *surface,
@@ -183,7 +224,292 @@ void Floppy144DrawRect(
         colour
     );
 }
+/*
+ * Circle primitives
+ *
+ * Circle draws a one-pixel outline. FillCircle draws a solid disc.
+ * Signed coordinates allow circles to extend beyond the screen edges.
+ */
 
+void Floppy144DrawCircle(
+    Floppy144Surface *surface,
+    int32_t centre_x,
+    int32_t centre_y,
+    int32_t radius,
+    uint32_t colour
+);
+
+void Floppy144DrawFillCircle(
+    Floppy144Surface *surface,
+    int32_t centre_x,
+    int32_t centre_y,
+    int32_t radius,
+    uint32_t colour
+);
+/*
+ * Draw one clipped pixel
+ *
+ * Circle coordinates are signed because part of a circle may lie beyond
+ * the surface. Pixels outside the backbuffer are simply ignored.
+ */
+
+static void Floppy144DrawPixel(
+    Floppy144Surface *surface,
+    int32_t x,
+    int32_t y,
+    uint32_t colour
+)
+{
+    if(
+        x < 0 ||
+        y < 0 ||
+        (uint32_t)x >= surface->width ||
+        (uint32_t)y >= surface->height
+    )
+    {
+        return;
+    }
+
+    surface->pixels[
+        (uint64_t)(uint32_t)y * surface->width +
+        (uint32_t)x
+    ] = colour;
+}
+
+/*
+ * Draw a clipped horizontal line
+ *
+ * Filled circles are assembled from horizontal spans. Drawing spans rather
+ * than individual interior pixels keeps the algorithm compact and clear.
+ */
+
+static void Floppy144DrawHorizontalSpan(
+    Floppy144Surface *surface,
+    int32_t start_x,
+    int32_t end_x,
+    int32_t y,
+    uint32_t colour
+)
+{
+    int32_t draw_x;
+
+    if(
+        y < 0 ||
+        (uint32_t)y >= surface->height ||
+        end_x < 0 ||
+        start_x >= (int32_t)surface->width
+    )
+    {
+        return;
+    }
+
+    if(start_x < 0)
+    {
+        start_x = 0;
+    }
+
+    if((uint32_t)end_x >= surface->width)
+    {
+        end_x =
+        (int32_t)surface->width - 1;
+    }
+
+    for(draw_x = start_x; draw_x <= end_x; ++draw_x)
+    {
+        surface->pixels[
+            (uint64_t)(uint32_t)y * surface->width +
+            (uint32_t)draw_x
+        ] = colour;
+    }
+}
+
+/*
+ * Draw a one-pixel circle outline
+ *
+ * The midpoint-circle algorithm calculates one eighth of the circle and
+ * mirrors each point into the other seven sections.
+ */
+
+void Floppy144DrawCircle(
+    Floppy144Surface *surface,
+    int32_t centre_x,
+    int32_t centre_y,
+    int32_t radius,
+    uint32_t colour
+)
+{
+    int32_t x;
+    int32_t y;
+    int32_t error;
+
+    if(radius < 0)
+    {
+        return;
+    }
+
+    x = radius;
+    y = 0;
+    error = 1 - radius;
+
+    while(x >= y)
+    {
+        Floppy144DrawPixel(
+            surface,
+            centre_x + x,
+            centre_y + y,
+            colour
+        );
+
+        Floppy144DrawPixel(
+            surface,
+            centre_x + y,
+            centre_y + x,
+            colour
+        );
+
+        Floppy144DrawPixel(
+            surface,
+            centre_x - y,
+            centre_y + x,
+            colour
+        );
+
+        Floppy144DrawPixel(
+            surface,
+            centre_x - x,
+            centre_y + y,
+            colour
+        );
+
+        Floppy144DrawPixel(
+            surface,
+            centre_x - x,
+            centre_y - y,
+            colour
+        );
+
+        Floppy144DrawPixel(
+            surface,
+            centre_x - y,
+            centre_y - x,
+            colour
+        );
+
+        Floppy144DrawPixel(
+            surface,
+            centre_x + y,
+            centre_y - x,
+            colour
+        );
+
+        Floppy144DrawPixel(
+            surface,
+            centre_x + x,
+            centre_y - y,
+            colour
+        );
+
+        ++y;
+
+        if(error < 0)
+        {
+            error +=
+            2 * y + 1;
+        }
+        else
+        {
+            --x;
+
+            error +=
+            2 * (y - x) + 1;
+        }
+    }
+}
+
+/*
+ * Draw a solid circle
+ *
+ * The same midpoint calculation is used, but each symmetrical pair becomes
+ * a horizontal span. Overlapping spans are harmless and leave no gaps.
+ */
+
+void Floppy144DrawFillCircle(
+    Floppy144Surface *surface,
+    int32_t centre_x,
+    int32_t centre_y,
+    int32_t radius,
+    uint32_t colour
+)
+{
+    int32_t x;
+    int32_t y;
+    int32_t error;
+
+    if(radius < 0)
+    {
+        return;
+    }
+
+    x = radius;
+    y = 0;
+    error = 1 - radius;
+
+    while(x >= y)
+    {
+        Floppy144DrawHorizontalSpan(
+            surface,
+            centre_x - x,
+            centre_x + x,
+            centre_y + y,
+            colour
+        );
+
+        Floppy144DrawHorizontalSpan(
+            surface,
+            centre_x - x,
+            centre_x + x,
+            centre_y - y,
+            colour
+        );
+
+        Floppy144DrawHorizontalSpan(
+            surface,
+            centre_x - y,
+            centre_x + y,
+            centre_y + x,
+            colour
+        );
+
+        Floppy144DrawHorizontalSpan(
+            surface,
+            centre_x - y,
+            centre_x + y,
+            centre_y - x,
+            colour
+        );
+
+        ++y;
+
+        if(error < 0)
+        {
+            error +=
+            2 * y + 1;
+        }
+        else
+        {
+            --x;
+
+            error +=
+            2 * (y - x) + 1;
+        }
+    }
+}
+/*
+ * Measure bitmap text
+ *
+ * Each glyph is five pixels wide with one pixel of spacing. The final
+ * character does not need trailing spacing.
+ */
 uint32_t Floppy144DrawTextWidth(
     const char *text,
     uint32_t scale
@@ -204,6 +530,13 @@ uint32_t Floppy144DrawTextWidth(
     return character_count * 6 * scale - scale;
 }
 
+/*
+ * Render bitmap text
+ *
+ * Lowercase input is converted to uppercase. Each set glyph bit becomes a
+ * scale-by-scale rectangle, allowing crisp integer-sized text.
+ */
+
 void Floppy144DrawText(
     Floppy144Surface *surface,
     uint32_t x,
@@ -222,6 +555,7 @@ void Floppy144DrawText(
         uint32_t glyph_row;
         uint32_t glyph_column;
 
+        /* The font table is uppercase-only, so normalise lowercase input. */
         if(character >= 'a' && character <= 'z')
         {
             character =
@@ -230,6 +564,7 @@ void Floppy144DrawText(
 
         glyph = Floppy144Glyph(character);
 
+        /* Unpack the seven rows, then test each of the five bits in a row. */
         for(glyph_row = 0; glyph_row < 7; ++glyph_row)
         {
             uint32_t row_bits =

@@ -1,6 +1,19 @@
+/*
+ * Floppy//144 - recovery screen implementation
+ *
+ * Builds the boot-like recovery interface entirely from drawing primitives.
+ * This screen introduces Disk 144, APS-12 and the partial reconstruction.
+ */
+
 #include "floppy144_recovery.h"
 
 #include "floppy144_draw.h"
+
+/*
+ * Centred-text helper
+ *
+ * Measures a string and converts its width into a horizontal start point.
+ */
 
 static void Floppy144RecoveryTextCentred(
     Floppy144Surface *surface,
@@ -26,12 +39,26 @@ static void Floppy144RecoveryTextCentred(
     );
 }
 
+/*
+ * Draw the recovery screen
+ *
+ * The function derives dynamic labels first, wraps the river2D backbuffer
+ * as a Floppy144Surface, then paints the interface from back to front.
+ */
+
 void Floppy144RecoveryDraw(
     EngineData *engine,
     bool recovery_started,
     const Floppy144WorldState *world
 )
 {
+    /*
+     * Screen palette
+     *
+     * Colours are local constants so the compiler can fold them into the draw
+     * calls without requiring a theme object.
+     */
+
     const uint32_t background =
         FLOPPY144_RGB(17, 23, 28);
 
@@ -55,6 +82,13 @@ void Floppy144RecoveryDraw(
 
     const uint32_t green =
         FLOPPY144_RGB(100, 156, 111);
+
+    /*
+     * Dynamic recovery messages
+     *
+     * Text and progress width depend on whether recovery has begun and how
+     * much of the site has been restored.
+     */
 
     const char *status_text =
         !recovery_started
@@ -80,6 +114,13 @@ void Floppy144RecoveryDraw(
                 ? 63U
                 : 20U;
 
+    /*
+     * Backbuffer view
+     *
+     * river2D owns the memory. The game supplies width, height and pixel pointer
+     * to the compact drawing layer.
+     */
+
     Floppy144Surface surface =
     {
         (uint32_t *)engine->backbuffer.data,
@@ -87,6 +128,7 @@ void Floppy144RecoveryDraw(
         engine->backbuffer.height
     };
 
+    /* Paint order: background, system header, main panel, metadata, progress and prompts. */
     Floppy144DrawClear(
         &surface,
         background
@@ -166,6 +208,7 @@ void Floppy144RecoveryDraw(
         &surface,
         56,
         106,
+    /* Static metadata identifies the recovered disk and governing protocol. */
         "REMOVABLE MEDIA:",
         1,
         muted
@@ -229,6 +272,7 @@ void Floppy144RecoveryDraw(
         &surface,
         56,
         190,
+    /* XX-01 is always available and supplies the minimum site reconstruction. */
         "MANDATORY COLLECTION XX-01: RESTORED",
         1,
         green
@@ -291,6 +335,7 @@ void Floppy144RecoveryDraw(
     Floppy144RecoveryTextCentred(
         &surface,
         278,
+    /* The lower panel tells the player what Enter will do next. */
         prompt_text,
         1,
         recovery_started ? green : amber
@@ -322,6 +367,3 @@ void Floppy144RecoveryDraw(
         muted
     );
 }
-
-
-

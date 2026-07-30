@@ -1,3 +1,10 @@
+/*
+ * Floppy//144 - record catalogue interface
+ *
+ * Provides the shared browser used by restored collections. The catalogue
+ * generates record listings and opens the few records recovered in full.
+ */
+
 #pragma once
 
 #include "river2D_main.h"
@@ -7,6 +14,14 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+/*
+ * Catalogue-local state
+ *
+ * collection selects the active archive vocabulary and authored records.
+ * selected_index is the highlighted record, top_index controls scrolling,
+ * and document_open switches between list and document views.
+ */
+
 typedef struct Floppy144CatalogueState
 {
     Floppy144CollectionId collection;
@@ -14,6 +29,14 @@ typedef struct Floppy144CatalogueState
     uint32_t top_index;
     bool document_open;
 } Floppy144CatalogueState;
+
+/*
+ * Catalogue operations
+ *
+ * Reset opens a collection at its first record. Move and Page navigate.
+ * The evidence query tells main.c whether opening the selected record
+ * should unlock knowledge in the world state.
+ */
 
 void Floppy144CatalogueReset(
     Floppy144CatalogueState *catalogue,
