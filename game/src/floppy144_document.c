@@ -7,8 +7,7 @@
 #include <stddef.h>
 
 /*
- * Effects declared by the two primary-evidence documents in the technical
- * slice.
+ * Effects declared by the primary-evidence documents in the technical slice.
  */
 
 static const Floppy144Effect floppy144_hr02_038_effects[] =
@@ -19,7 +18,7 @@ static const Floppy144Effect floppy144_hr02_038_effects[] =
     }
 };
 
-static const Floppy144Effect floppy144_fa03_063_effects[] =
+static const Floppy144Effect floppy144_fa03_047_effects[] =
 {
     {
         FLOPPY144_EFFECT_FIND_COLLECTION_EVIDENCE,
@@ -30,8 +29,8 @@ static const Floppy144Effect floppy144_fa03_063_effects[] =
 /*
  * Master authored-document table
  *
- * Adding another standard evidence document requires another effect sequence
- * and one table entry. Catalogue input and main-loop code remain unchanged.
+ * HR-02 record 038 retains its procedurally generated catalogue ID and title.
+ * FA-03 record 047 uses a stable recovered-record identity.
  */
 
 static const Floppy144DocumentDefinition
@@ -40,14 +39,20 @@ static const Floppy144DocumentDefinition
     {
         FLOPPY144_COLLECTION_HR02,
         37U,
+        NULL,
+        NULL,
+        FLOPPY144_DOCUMENT_VIEW_HR02_DESK_REALLOCATION,
         floppy144_hr02_038_effects,
         1U
     },
 
     {
         FLOPPY144_COLLECTION_FA03,
-        62U,
-        floppy144_fa03_063_effects,
+        46U,
+        "FA-03-RS-0047",
+        "SUPPRESSION CONTROL PANEL SERVICE NOTE",
+        FLOPPY144_DOCUMENT_VIEW_FA03_SUPPRESSION_SERVICE,
+        floppy144_fa03_047_effects,
         1U
     }
 };

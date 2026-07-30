@@ -34,8 +34,8 @@ typedef struct Floppy144CatalogueState
  * Catalogue operations
  *
  * Reset opens a collection at its first record. Move and Page navigate.
- * Authored records obtain their metadata and effects from the document
- * registry rather than exposing collection-specific queries here.
+ * The evidence query tells main.c whether opening the selected record
+ * should unlock knowledge in the world state.
  */
 
 void Floppy144CatalogueReset(
