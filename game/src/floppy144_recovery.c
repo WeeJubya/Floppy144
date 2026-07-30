@@ -9,6 +9,8 @@
 
 #include "floppy144_draw.h"
 
+#include <stdio.h>
+
 /*
  * Centred-text helper
  *
@@ -90,12 +92,19 @@ void Floppy144RecoveryDraw(
      * much of the site has been restored.
      */
 
-    const char *status_text =
-        !recovery_started
-            ? "SITE RECONSTRUCTION STATUS: 00%"
-            : Floppy144WorldCollectionRestored(world, FLOPPY144_COLLECTION_HR02)
-                ? "SITE RECONSTRUCTION STATUS: 12%"
-                : "SITE RECONSTRUCTION STATUS: 04%";
+    uint32_t reconstruction_percent =
+        recovery_started
+            ? Floppy144WorldReconstructionPercent(world)
+            : 0U;
+
+    char status_text[48];
+
+    snprintf(
+        status_text,
+        sizeof(status_text),
+        "SITE RECONSTRUCTION STATUS: %02u%%",
+        (unsigned)reconstruction_percent
+    );
 
     const char *prompt_text =
         recovery_started
@@ -108,11 +117,12 @@ void Floppy144RecoveryDraw(
             : "ESC TO TERMINATE SESSION";
 
     uint32_t progress_width =
-        !recovery_started
-            ? 2U
-            : Floppy144WorldCollectionRestored(world, FLOPPY144_COLLECTION_HR02)
-                ? 63U
-                : 20U;
+        recovery_started
+            ? (
+                522U *
+                reconstruction_percent
+              ) / 100U
+            : 2U;
 
     /*
      * Backbuffer view
