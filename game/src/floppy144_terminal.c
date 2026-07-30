@@ -8,6 +8,9 @@
 #include "floppy144_terminal.h"
 
 #include "floppy144_draw.h"
+#include "floppy144_collection_registry.h"
+
+#include <stdio.h>
 
 /*
  * Small terminal drawing helpers
@@ -134,6 +137,124 @@ static void Floppy144TerminalDrawCollection(
  * code, title, class, restoration status and evidence messages.
  */
 
+/*
+ * Temporary collection-state bridge
+ *
+ * Collection metadata now comes from the registry, but the technical slice
+ * still stores restoration and evidence in separate HR-02 and FA-03 fields.
+ *
+ * The next refactor phase replaces these switches with indexed collection
+ * state. Until then, all legacy state knowledge is contained here.
+ */
+
+static bool Floppy144TerminalCollectionRestored(
+    const Floppy144WorldState *world,
+    Floppy144CollectionId collection
+)
+{
+    switch(collection)
+    {
+        case FLOPPY144_COLLECTION_HR02:
+        {
+            return world->hr02_restored;
+        }
+
+        case FLOPPY144_COLLECTION_FA03:
+        {
+            return world->fa03_restored;
+        }
+
+        case FLOPPY144_COLLECTION_XX01:
+        {
+            return true;
+        }
+
+        default:
+        {
+            return
+                Floppy144CollectionGet(collection)->
+                    auto_restored;
+        }
+    }
+}
+
+static bool Floppy144TerminalCollectionEvidenceFound(
+    const Floppy144WorldState *world,
+    Floppy144CollectionId collection
+)
+{
+    switch(collection)
+    {
+        case FLOPPY144_COLLECTION_HR02:
+        {
+            return
+                world->hr02_desk_reallocation_read;
+        }
+
+        case FLOPPY144_COLLECTION_FA03:
+        {
+            return
+                world->fa03_suppression_service_read;
+        }
+
+        default:
+        {
+            return false;
+        }
+    }
+}
+
+static const char *Floppy144TerminalEvidenceDescription(
+    Floppy144CollectionId collection
+)
+{
+    switch(collection)
+    {
+        case FLOPPY144_COLLECTION_HR02:
+        {
+            return
+                "EVIDENCE FOUND: DESK REALLOCATION MEMORANDUM.";
+        }
+
+        case FLOPPY144_COLLECTION_FA03:
+        {
+            return
+                "EVIDENCE FOUND: SUPPRESSION PANEL SERVICE NOTE.";
+        }
+
+        default:
+        {
+            return
+                "EVIDENCE FOUND: RECOVERED AUTHORED RECORD.";
+        }
+    }
+}
+
+static bool Floppy144TerminalRestoreCollection(
+    Floppy144WorldState *world,
+    Floppy144CollectionId collection
+)
+{
+    switch(collection)
+    {
+        case FLOPPY144_COLLECTION_HR02:
+        {
+            world->hr02_restored = true;
+            return true;
+        }
+
+        case FLOPPY144_COLLECTION_FA03:
+        {
+            world->fa03_restored = true;
+            return true;
+        }
+
+        default:
+        {
+            return false;
+        }
+    }
+}
 static void Floppy144TerminalDrawDetail(
     Floppy144Surface *surface,
     const Floppy144TerminalState *terminal,
@@ -168,44 +289,44 @@ static void Floppy144TerminalDrawDetail(
      * the same evidence flag controls both list and detail views.
      */
 
-    bool hr02_selected =
-        terminal->selected_collection ==
-        FLOPPY144_COLLECTION_HR02;
-
-    bool fa03_selected =
-        terminal->selected_collection ==
-        FLOPPY144_COLLECTION_FA03;
-
-    bool collection_restored =
-        hr02_selected
-            ? world->hr02_restored
-            : fa03_selected
-                ? world->fa03_restored
-                : true;
-
-    bool evidence_found =
-        (
-            hr02_selected &&
-            world->hr02_desk_reallocation_read
-        ) ||
-        (
-            fa03_selected &&
-            world->fa03_suppression_service_read
+    const Floppy144CollectionDefinition *definition =
+        Floppy144CollectionGet(
+            terminal->selected_collection
         );
 
-    const char *code =
-        hr02_selected
-            ? "COLLECTION HR-02"
-            : fa03_selected
-                ? "COLLECTION FA-03"
-                : "COLLECTION XX-01";
+    bool collection_restored =
+        Floppy144TerminalCollectionRestored(
+            world,
+            terminal->selected_collection
+        );
+
+    bool evidence_found =
+        Floppy144TerminalCollectionEvidenceFound(
+            world,
+            terminal->selected_collection
+        );
+
+    char code[32];
+    char collection_class[32];
+
+    snprintf(
+        code,
+        sizeof(code),
+        "COLLECTION %s",
+        definition->code
+    );
+
+    snprintf(
+        collection_class,
+        sizeof(collection_class),
+        "CLASS: %s",
+        Floppy144CollectionClassText(
+            definition->collection_class
+        )
+    );
 
     const char *title =
-        hr02_selected
-            ? "PERSONNEL LIFECYCLE RECORDS"
-            : fa03_selected
-                ? "SITE SAFETY AND SUPPRESSION SYSTEMS"
-                : "SITE RECOVERY INDEX";
+        definition->title;
 
     const char *status =
         evidence_found
@@ -214,31 +335,19 @@ static void Floppy144TerminalDrawDetail(
                 ? "STATUS: RESTORED"
                 : "STATUS: AVAILABLE";
 
-    const char *collection_class =
-        hr02_selected
-            ? "CLASS: ADMINISTRATIVE"
-            : fa03_selected
-                ? "CLASS: OPERATIONAL"
-                : "CLASS: MANDATORY";
-
     const char *description_one =
-        hr02_selected
-            ? "CONTAINS STAFF ALLOCATION AND DESK ASSIGNMENT RECORDS."
-            : fa03_selected
-                ? "CONTAINS FIRE SAFETY AND SUPPRESSION MAINTENANCE RECORDS."
-                : "MINIMUM INDEX REQUIRED TO RECONSTRUCT A PARTIAL SITE.";
+        definition->description;
 
     const char *description_two =
         terminal->restoration_notice
             ? "RESTORATION COMPLETE. SITE SYSTEM DATA UPDATED."
             : evidence_found
-                ? hr02_selected
-                    ? "EVIDENCE FOUND: DESK REALLOCATION MEMORANDUM."
-                    : "EVIDENCE FOUND: SUPPRESSION PANEL SERVICE NOTE."
+                ? Floppy144TerminalEvidenceDescription(
+                    terminal->selected_collection
+                )
                 : collection_restored
                     ? "COLLECTION DATA IS PRESENT IN THE RECONSTRUCTED SITE."
                     : "PRESS ENTER TO RESTORE THIS COLLECTION.";
-
     uint32_t status_colour =
         evidence_found
             ? amber
@@ -426,32 +535,19 @@ void Floppy144TerminalOpenSelection(
     }
 
     if(
-        terminal->selected_collection ==
-            FLOPPY144_COLLECTION_HR02 &&
-        !world->hr02_restored
+        !Floppy144TerminalCollectionRestored(
+            world,
+            terminal->selected_collection
+        ) &&
+        Floppy144TerminalRestoreCollection(
+            world,
+            terminal->selected_collection
+        )
     )
     {
-        world->hr02_restored = true;
-        terminal->restoration_notice = true;
-        return;
-    }
-
-    if(
-        terminal->selected_collection ==
-            FLOPPY144_COLLECTION_FA03 &&
-        !world->fa03_restored
-    )
-    {
-        world->fa03_restored = true;
         terminal->restoration_notice = true;
     }
 }
-/*
- * Close collection details
- *
- * Also clears the temporary restoration-complete message.
- */
-
 void Floppy144TerminalCloseDetail(
     Floppy144TerminalState *terminal
 )
@@ -761,3 +857,7 @@ void Floppy144TerminalDraw(
         );
     }
 }
+
+
+
+
