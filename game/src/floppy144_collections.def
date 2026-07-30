@@ -1,0 +1,48 @@
+/*
+ * Master collection list
+ *
+ * This file intentionally has no include guard. It is an X-macro definition
+ * file and is included several times with FLOPPY144_COLLECTION defined
+ * differently.
+ *
+ * Adding a standard collection begins here.
+ *
+ * Arguments:
+ *   symbol
+ *   player-facing code
+ *   official title
+ *   game act
+ *   collection class
+ *   restored automatically
+ *   terminal description
+ */
+
+FLOPPY144_COLLECTION(
+    XX01,
+    "XX-01",
+    "SITE RECOVERY INDEX",
+    FLOPPY144_ACT_PROLOGUE,
+    FLOPPY144_COLLECTION_CLASS_MANDATORY,
+    true,
+    "MINIMUM INDEX REQUIRED TO RECONSTRUCT A PARTIAL SITE."
+)
+
+FLOPPY144_COLLECTION(
+    HR02,
+    "HR-02",
+    "PERSONNEL LIFECYCLE RECORDS",
+    FLOPPY144_ACT_ONE,
+    FLOPPY144_COLLECTION_CLASS_ADMINISTRATIVE,
+    false,
+    "CONTAINS STAFF ALLOCATION AND DESK ASSIGNMENT RECORDS."
+)
+
+FLOPPY144_COLLECTION(
+    FA03,
+    "FA-03",
+    "SITE SAFETY AND SUPPRESSION SYSTEMS",
+    FLOPPY144_ACT_ONE,
+    FLOPPY144_COLLECTION_CLASS_OPERATIONAL,
+    false,
+    "CONTAINS FIRE SAFETY AND SUPPRESSION MAINTENANCE RECORDS."
+)

@@ -7,6 +7,8 @@
 
 #include "floppy144_office.h"
 
+#include <stdio.h>
+
 #include "floppy144_draw.h"
 
 #include <stddef.h>
@@ -828,10 +830,14 @@ void Floppy144OfficeDraw(
                 ? "PRESS E TO INSPECT RECONSTRUCTED DESK"
                 : "WASD OR ARROWS TO MOVE";
 
-    const char *status_text =
-        world->hr02_restored
-            ? "STATUS 12%"
-            : "STATUS 04%";
+    char status_text[16];
+
+    snprintf(
+        status_text,
+        sizeof(status_text),
+        "STATUS %02u%%",
+        (unsigned)Floppy144WorldReconstructionPercent(world)
+    );
 
     const char *desk_one_label =
         world->hr02_restored
@@ -1184,3 +1190,4 @@ void Floppy144OfficeDraw(
         muted_colour
     );
 }
+

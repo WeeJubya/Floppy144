@@ -1,24 +1,59 @@
-/*
- * Floppy//144 - collection identifiers
- *
- * Defines the stable IDs used to tell the terminal, catalogue and world
- * state which archive collection is being handled.
- */
-
 #pragma once
 
+#include <stdbool.h>
+#include <stdint.h>
+
 /*
- * Collection identity
+ * Narrative stage in which a collection becomes available.
  *
- * XX-01 is mandatory recovery data. HR-02 and FA-03 are optional
- * collections currently implemented by the technical slice.
- * COUNT is used as the terminal navigation limit.
+ * The technical slice currently uses the Prologue and Act One. The remaining
+ * values are included now so future collections can be registered without
+ * changing this type.
+ */
+
+typedef enum Floppy144Act
+{
+    FLOPPY144_ACT_PROLOGUE,
+    FLOPPY144_ACT_ONE,
+    FLOPPY144_ACT_TWO,
+    FLOPPY144_ACT_THREE
+} Floppy144Act;
+
+/*
+ * Departmental classification shown in the archive terminal.
+ */
+
+typedef enum Floppy144CollectionClass
+{
+    FLOPPY144_COLLECTION_CLASS_MANDATORY,
+    FLOPPY144_COLLECTION_CLASS_OPERATIONAL,
+    FLOPPY144_COLLECTION_CLASS_ADMINISTRATIVE,
+    FLOPPY144_COLLECTION_CLASS_REPORTING
+} Floppy144CollectionClass;
+
+/*
+ * Generate one enum value for every entry in floppy144_collections.def.
+ *
+ * The definition order is also the terminal display order. XX-01, HR-02 and
+ * FA-03 therefore retain their existing numeric IDs of zero, one and two.
  */
 
 typedef enum Floppy144CollectionId
 {
-    FLOPPY144_COLLECTION_XX01 = 0,
-    FLOPPY144_COLLECTION_HR02 = 1,
-    FLOPPY144_COLLECTION_FA03 = 2,
-    FLOPPY144_COLLECTION_COUNT = 3
+#define FLOPPY144_COLLECTION(                                      \
+    symbol,                                                        \
+    code,                                                          \
+    title,                                                         \
+    act,                                                           \
+    collection_class,                                              \
+    auto_restored,                                                 \
+    description                                                    \
+)                                                                  \
+    FLOPPY144_COLLECTION_##symbol,
+
+#include "floppy144_collections.def"
+
+#undef FLOPPY144_COLLECTION
+
+    FLOPPY144_COLLECTION_COUNT
 } Floppy144CollectionId;
