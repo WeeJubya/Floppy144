@@ -57,10 +57,6 @@ void Floppy144CatalogueOpenDocument(
     Floppy144CatalogueState *catalogue
 );
 
-bool Floppy144CatalogueSelectedProvidesEvidence(
-    const Floppy144CatalogueState *catalogue
-);
-
 void Floppy144CatalogueCloseDocument(
     Floppy144CatalogueState *catalogue
 );

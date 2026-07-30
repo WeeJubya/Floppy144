@@ -1158,34 +1158,6 @@ void Floppy144CatalogueOpenDocument(
 {
     catalogue->document_open = true;
 }
-
-/*
- * Identify primary evidence records
- *
- * Collection and record index are both checked so identically numbered records
- * in other collections cannot unlock the wrong evidence.
- */
-
-bool Floppy144CatalogueSelectedProvidesEvidence(
-    const Floppy144CatalogueState *catalogue
-)
-{
-    bool hr02_evidence =
-        catalogue->collection ==
-            FLOPPY144_COLLECTION_HR02 &&
-        catalogue->selected_index ==
-            FLOPPY144_HR02_AUTHORED_RECORD;
-
-    bool fa03_evidence =
-        catalogue->collection ==
-            FLOPPY144_COLLECTION_FA03 &&
-        catalogue->selected_index ==
-            FLOPPY144_FA03_AUTHORED_RECORD;
-
-    return
-        hr02_evidence ||
-        fa03_evidence;
-}
 /*
  * Return from document view to the current catalogue position
  */
