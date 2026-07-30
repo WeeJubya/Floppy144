@@ -181,12 +181,12 @@ static bool Floppy144CanOpenCatalogue(
     bool hr02_available =
         global_terminal.selected_collection ==
             FLOPPY144_COLLECTION_HR02 &&
-        global_world.hr02_restored;
+        Floppy144WorldCollectionRestored(&global_world, FLOPPY144_COLLECTION_HR02);
 
     bool fa03_available =
         global_terminal.selected_collection ==
             FLOPPY144_COLLECTION_FA03 &&
-        global_world.fa03_restored;
+        Floppy144WorldCollectionRestored(&global_world, FLOPPY144_COLLECTION_FA03);
 
     return
         Floppy144TerminalDetailOpen(
@@ -373,7 +373,7 @@ static LRESULT CALLBACK Floppy144WindowProc(
                                 Floppy144Redraw(window);
                             }
                             else if(
-                                global_world.hr02_desk_reallocation_read &&
+                                Floppy144WorldCollectionEvidenceFound(&global_world, FLOPPY144_COLLECTION_HR02) &&
                                 Floppy144OfficeNearDeskOne(
                                     &global_player
                                 )
@@ -385,7 +385,7 @@ static LRESULT CALLBACK Floppy144WindowProc(
                                 Floppy144Redraw(window);
                             }
                             else if(
-                                global_world.hr02_desk_reallocation_read &&
+                                Floppy144WorldCollectionEvidenceFound(&global_world, FLOPPY144_COLLECTION_HR02) &&
                                 Floppy144OfficeNearDeskFour(
                                     &global_player
                                 )
@@ -578,16 +578,22 @@ static LRESULT CALLBACK Floppy144WindowProc(
                                 {
                                     case FLOPPY144_COLLECTION_HR02:
                                     {
-                                        global_world.hr02_desk_reallocation_read =
-                                            true;
+                                        Floppy144WorldSetCollectionEvidenceFound(
+                                            &global_world,
+                                            FLOPPY144_COLLECTION_HR02,
+                                            true
+                                        );
 
                                         break;
                                     }
 
                                     case FLOPPY144_COLLECTION_FA03:
                                     {
-                                        global_world.fa03_suppression_service_read =
-                                            true;
+                                        Floppy144WorldSetCollectionEvidenceFound(
+                                            &global_world,
+                                            FLOPPY144_COLLECTION_FA03,
+                                            true
+                                        );
 
                                         break;
                                     }

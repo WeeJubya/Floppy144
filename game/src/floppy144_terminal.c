@@ -131,78 +131,12 @@ static void Floppy144TerminalDrawCollection(
 }
 
 /*
- * Draw the selected collection overlay
+ * Return the player-facing description for evidence found within a
+ * collection.
  *
- * This translates the selected collection plus world flags into human-readable
- * code, title, class, restoration status and evidence messages.
+ * Evidence state is stored generically by the world, while this text remains
+ * collection-specific narrative content.
  */
-
-/*
- * Temporary collection-state bridge
- *
- * Collection metadata now comes from the registry, but the technical slice
- * still stores restoration and evidence in separate HR-02 and FA-03 fields.
- *
- * The next refactor phase replaces these switches with indexed collection
- * state. Until then, all legacy state knowledge is contained here.
- */
-
-static bool Floppy144TerminalCollectionRestored(
-    const Floppy144WorldState *world,
-    Floppy144CollectionId collection
-)
-{
-    switch(collection)
-    {
-        case FLOPPY144_COLLECTION_HR02:
-        {
-            return world->hr02_restored;
-        }
-
-        case FLOPPY144_COLLECTION_FA03:
-        {
-            return world->fa03_restored;
-        }
-
-        case FLOPPY144_COLLECTION_XX01:
-        {
-            return true;
-        }
-
-        default:
-        {
-            return
-                Floppy144CollectionGet(collection)->
-                    auto_restored;
-        }
-    }
-}
-
-static bool Floppy144TerminalCollectionEvidenceFound(
-    const Floppy144WorldState *world,
-    Floppy144CollectionId collection
-)
-{
-    switch(collection)
-    {
-        case FLOPPY144_COLLECTION_HR02:
-        {
-            return
-                world->hr02_desk_reallocation_read;
-        }
-
-        case FLOPPY144_COLLECTION_FA03:
-        {
-            return
-                world->fa03_suppression_service_read;
-        }
-
-        default:
-        {
-            return false;
-        }
-    }
-}
 
 static const char *Floppy144TerminalEvidenceDescription(
     Floppy144CollectionId collection
@@ -230,31 +164,13 @@ static const char *Floppy144TerminalEvidenceDescription(
     }
 }
 
-static bool Floppy144TerminalRestoreCollection(
-    Floppy144WorldState *world,
-    Floppy144CollectionId collection
-)
-{
-    switch(collection)
-    {
-        case FLOPPY144_COLLECTION_HR02:
-        {
-            world->hr02_restored = true;
-            return true;
-        }
+/*
+ * Draw the selected collection overlay
+ *
+ * This translates registered metadata plus indexed world state into
+ * player-facing code, title, class, restoration status and evidence messages.
+ */
 
-        case FLOPPY144_COLLECTION_FA03:
-        {
-            world->fa03_restored = true;
-            return true;
-        }
-
-        default:
-        {
-            return false;
-        }
-    }
-}
 static void Floppy144TerminalDrawDetail(
     Floppy144Surface *surface,
     const Floppy144TerminalState *terminal,
@@ -283,10 +199,10 @@ static void Floppy144TerminalDrawDetail(
         FLOPPY144_RGB(194, 153, 76);
 
     /*
-     * Derive collection-specific state
+     * Derive selected collection state
      *
-     * These booleans keep the rendering expressions readable and ensure that
-     * the same evidence flag controls both list and detail views.
+     * These values keep the rendering expressions readable and ensure that
+     * the same indexed state controls both list and detail views.
      */
 
     const Floppy144CollectionDefinition *definition =
@@ -295,13 +211,13 @@ static void Floppy144TerminalDrawDetail(
         );
 
     bool collection_restored =
-        Floppy144TerminalCollectionRestored(
+        Floppy144WorldCollectionRestored(
             world,
             terminal->selected_collection
         );
 
     bool evidence_found =
-        Floppy144TerminalCollectionEvidenceFound(
+        Floppy144WorldCollectionEvidenceFound(
             world,
             terminal->selected_collection
         );
@@ -518,8 +434,8 @@ void Floppy144TerminalMoveSelection(
 /*
  * Open details or restore a collection
  *
- * First Enter opens the detail overlay. A later Enter restores HR-02 or
- * FA-03 if needed. Restoring changes the persistent world state.
+ * First Enter opens the detail overlay. A later Enter asks the world-state
+ * system to restore whichever registered collection is selected.
  */
 
 void Floppy144TerminalOpenSelection(
@@ -535,26 +451,16 @@ void Floppy144TerminalOpenSelection(
     }
 
     if(
-        terminal->selected_collection ==
-            FLOPPY144_COLLECTION_HR02 &&
-        !world->hr02_restored
+        Floppy144WorldRestoreCollection(
+            world,
+            terminal->selected_collection
+        )
     )
     {
-        world->hr02_restored = true;
-        terminal->restoration_notice = true;
-        return;
-    }
-
-    if(
-        terminal->selected_collection ==
-            FLOPPY144_COLLECTION_FA03 &&
-        !world->fa03_restored
-    )
-    {
-        world->fa03_restored = true;
         terminal->restoration_notice = true;
     }
 }
+
 /*
  * Close collection details
  *
@@ -592,9 +498,8 @@ bool Floppy144TerminalDetailOpen(
 /*
  * Derive the compact status displayed beside a collection.
  *
- * Runtime state currently passes through the temporary collection-state
- * bridge. Once world state becomes indexed, this function will remain
- * unchanged while the bridge becomes fully generic.
+ * Runtime state comes from the indexed world-state API, so this helper does
+ * not need collection-specific branches.
  */
 
 static const char *Floppy144TerminalCollectionStatusText(
@@ -603,7 +508,7 @@ static const char *Floppy144TerminalCollectionStatusText(
 )
 {
     if(
-        Floppy144TerminalCollectionEvidenceFound(
+        Floppy144WorldCollectionEvidenceFound(
             world,
             collection
         )
@@ -613,7 +518,7 @@ static const char *Floppy144TerminalCollectionStatusText(
     }
 
     if(
-        Floppy144TerminalCollectionRestored(
+        Floppy144WorldCollectionRestored(
             world,
             collection
         )
@@ -643,11 +548,12 @@ static bool Floppy144TerminalCollectionCanViewRecords(
     return
         definition->collection_class !=
             FLOPPY144_COLLECTION_CLASS_MANDATORY &&
-        Floppy144TerminalCollectionRestored(
+        Floppy144WorldCollectionRestored(
             world,
             collection
         );
 }
+
 void Floppy144TerminalDraw(
     EngineData *engine,
     const Floppy144TerminalState *terminal,
@@ -692,7 +598,7 @@ void Floppy144TerminalDraw(
     );
 
     bool selected_restored =
-        Floppy144TerminalCollectionRestored(
+        Floppy144WorldCollectionRestored(
             world,
             terminal->selected_collection
         );
@@ -702,6 +608,7 @@ void Floppy144TerminalDraw(
             world,
             terminal->selected_collection
         );
+
     const char *footer_left =
         terminal->detail_open
             ? ""
@@ -715,6 +622,7 @@ void Floppy144TerminalDraw(
                     ? "ENTER VIEW RECORDS"
                     : ""
             : "ENTER OPEN";
+
     const char *footer_right =
         terminal->detail_open
             ? "ESC CLOSE"
@@ -840,7 +748,7 @@ void Floppy144TerminalDraw(
             ++optional_count;
 
             if(
-                Floppy144TerminalCollectionRestored(
+                Floppy144WorldCollectionRestored(
                     world,
                     collection
                 )
@@ -895,13 +803,13 @@ void Floppy144TerminalDraw(
         }
 
         restored =
-            Floppy144TerminalCollectionRestored(
+            Floppy144WorldCollectionRestored(
                 world,
                 collection
             );
 
         evidence_found =
-            Floppy144TerminalCollectionEvidenceFound(
+            Floppy144WorldCollectionEvidenceFound(
                 world,
                 collection
             );
@@ -977,13 +885,13 @@ void Floppy144TerminalDraw(
         }
 
         restored =
-            Floppy144TerminalCollectionRestored(
+            Floppy144WorldCollectionRestored(
                 world,
                 collection
             );
 
         evidence_found =
-            Floppy144TerminalCollectionEvidenceFound(
+            Floppy144WorldCollectionEvidenceFound(
                 world,
                 collection
             );

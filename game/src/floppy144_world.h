@@ -82,25 +82,3 @@ void Floppy144WorldSetCollectionEvidenceFound(
 uint32_t Floppy144WorldReconstructionPercent(
     const Floppy144WorldState *world
 );
-
-/*
- * Temporary migration aliases
- *
- * These allow the existing technical-slice code to continue compiling while
- * each subsystem is converted to the generic world-state API.
- *
- * They will be removed once main, office, recovery and terminal no longer
- * reference collection-specific field names.
- */
-
-#define hr02_restored                                             \
-    collections[FLOPPY144_COLLECTION_HR02].restored
-
-#define hr02_desk_reallocation_read                               \
-    collections[FLOPPY144_COLLECTION_HR02].evidence_found
-
-#define fa03_restored                                             \
-    collections[FLOPPY144_COLLECTION_FA03].restored
-
-#define fa03_suppression_service_read                             \
-    collections[FLOPPY144_COLLECTION_FA03].evidence_found

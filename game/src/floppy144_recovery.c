@@ -93,7 +93,7 @@ void Floppy144RecoveryDraw(
     const char *status_text =
         !recovery_started
             ? "SITE RECONSTRUCTION STATUS: 00%"
-            : world->hr02_restored
+            : Floppy144WorldCollectionRestored(world, FLOPPY144_COLLECTION_HR02)
                 ? "SITE RECONSTRUCTION STATUS: 12%"
                 : "SITE RECONSTRUCTION STATUS: 04%";
 
@@ -110,7 +110,7 @@ void Floppy144RecoveryDraw(
     uint32_t progress_width =
         !recovery_started
             ? 2U
-            : world->hr02_restored
+            : Floppy144WorldCollectionRestored(world, FLOPPY144_COLLECTION_HR02)
                 ? 63U
                 : 20U;
 

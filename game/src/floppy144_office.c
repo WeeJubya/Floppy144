@@ -600,7 +600,7 @@ static void Floppy144OfficeDrawPersonnelDetails(
     uint32_t edge_colour
 )
 {
-    if(!world->hr02_restored)
+    if(!Floppy144WorldCollectionRestored(world, FLOPPY144_COLLECTION_HR02))
     {
         return;
     }
@@ -815,7 +815,7 @@ void Floppy144OfficeDraw(
      */
 
     bool near_evidence_desk =
-        world->hr02_desk_reallocation_read &&
+        Floppy144WorldCollectionEvidenceFound(world, FLOPPY144_COLLECTION_HR02) &&
         (
             Floppy144OfficeNearDeskOne(player) ||
             Floppy144OfficeNearDeskFour(player)
@@ -823,7 +823,7 @@ void Floppy144OfficeDraw(
 
     const char *prompt =
         Floppy144OfficeNearTerminal(player)
-            ? world->hr02_restored
+            ? Floppy144WorldCollectionRestored(world, FLOPPY144_COLLECTION_HR02)
                 ? "PRESS E TO REVIEW RESTORED COLLECTIONS"
                 : "PRESS E TO ACCESS ARCHIVE TERMINAL"
             : near_evidence_desk
@@ -840,27 +840,27 @@ void Floppy144OfficeDraw(
     );
 
     const char *desk_one_label =
-        world->hr02_restored
+        Floppy144WorldCollectionRestored(world, FLOPPY144_COLLECTION_HR02)
             ? "SENIOR ARCHIVIST"
             : "DESK 01";
 
     const char *desk_two_label =
-        world->hr02_restored
+        Floppy144WorldCollectionRestored(world, FLOPPY144_COLLECTION_HR02)
             ? "RECORDS OFFICER"
             : "DESK 02";
 
     const char *desk_three_label =
-        world->hr02_restored
+        Floppy144WorldCollectionRestored(world, FLOPPY144_COLLECTION_HR02)
             ? "ADMINISTRATOR"
             : "DESK 03";
 
     const char *desk_four_label =
-        world->hr02_restored
+        Floppy144WorldCollectionRestored(world, FLOPPY144_COLLECTION_HR02)
             ? "IT SUPPORT"
             : "DESK 04";
 
     const char *default_room_label =
-        world->hr02_restored
+        Floppy144WorldCollectionRestored(world, FLOPPY144_COLLECTION_HR02)
             ? "RECORDS OFFICE - PERSONNEL RECORDS RESTORED"
             : "RECORDS OFFICE - PARTIAL RECONSTRUCTION";
 
