@@ -12,6 +12,7 @@
 #include "win32_river2Dsoftware_platform.h"
 
 #include "floppy144_catalogue.h"
+#include "floppy144_document.h"
 #include "floppy144_office.h"
 #include "floppy144_recovery.h"
 #include "floppy144_terminal.h"
@@ -567,43 +568,15 @@ static LRESULT CALLBACK Floppy144WindowProc(
                                 &global_catalogue
                             );
 
-                            /* Opening a primary record immediately records that knowledge in world state. */
-                            if(
-                                Floppy144CatalogueSelectedProvidesEvidence(
-                                    &global_catalogue
-                                )
-                            )
-                            {
-                                switch(global_catalogue.collection)
-                                {
-                                    case FLOPPY144_COLLECTION_HR02:
-                                    {
-                                        Floppy144WorldSetCollectionEvidenceFound(
-                                            &global_world,
-                                            FLOPPY144_COLLECTION_HR02,
-                                            true
-                                        );
-
-                                        break;
-                                    }
-
-                                    case FLOPPY144_COLLECTION_FA03:
-                                    {
-                                        Floppy144WorldSetCollectionEvidenceFound(
-                                            &global_world,
-                                            FLOPPY144_COLLECTION_FA03,
-                                            true
-                                        );
-
-                                        break;
-                                    }
-
-                                    default:
-                                    {
-                                        break;
-                                    }
-                                }
-                            }
+                            /*
+                             * Authored records declare their own effects.
+                             * Index-only records have no registered effects.
+                             */
+                            Floppy144DocumentApplyEffects(
+                                &global_world,
+                                global_catalogue.collection,
+                                global_catalogue.selected_index
+                            );
 
                             Floppy144Redraw(window);
                             return 0;
