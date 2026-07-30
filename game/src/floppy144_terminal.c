@@ -535,19 +535,32 @@ void Floppy144TerminalOpenSelection(
     }
 
     if(
-        !Floppy144TerminalCollectionRestored(
-            world,
-            terminal->selected_collection
-        ) &&
-        Floppy144TerminalRestoreCollection(
-            world,
-            terminal->selected_collection
-        )
+        terminal->selected_collection ==
+            FLOPPY144_COLLECTION_HR02 &&
+        !world->hr02_restored
     )
     {
+        world->hr02_restored = true;
+        terminal->restoration_notice = true;
+        return;
+    }
+
+    if(
+        terminal->selected_collection ==
+            FLOPPY144_COLLECTION_FA03 &&
+        !world->fa03_restored
+    )
+    {
+        world->fa03_restored = true;
         terminal->restoration_notice = true;
     }
 }
+/*
+ * Close collection details
+ *
+ * Also clears the temporary restoration-complete message.
+ */
+
 void Floppy144TerminalCloseDetail(
     Floppy144TerminalState *terminal
 )
@@ -576,6 +589,65 @@ bool Floppy144TerminalDetailOpen(
  * footer, then overlays details when detail_open is true.
  */
 
+/*
+ * Derive the compact status displayed beside a collection.
+ *
+ * Runtime state currently passes through the temporary collection-state
+ * bridge. Once world state becomes indexed, this function will remain
+ * unchanged while the bridge becomes fully generic.
+ */
+
+static const char *Floppy144TerminalCollectionStatusText(
+    const Floppy144WorldState *world,
+    Floppy144CollectionId collection
+)
+{
+    if(
+        Floppy144TerminalCollectionEvidenceFound(
+            world,
+            collection
+        )
+    )
+    {
+        return "EVIDENCE";
+    }
+
+    if(
+        Floppy144TerminalCollectionRestored(
+            world,
+            collection
+        )
+    )
+    {
+        return "RESTORED";
+    }
+
+    return "AVAILABLE";
+}
+
+/*
+ * Determine whether a restored collection exposes catalogue records.
+ *
+ * XX-01 is currently a mandatory terminal index rather than a browsable
+ * catalogue. Optional restored collections expose their generated records.
+ */
+
+static bool Floppy144TerminalCollectionCanViewRecords(
+    const Floppy144WorldState *world,
+    Floppy144CollectionId collection
+)
+{
+    const Floppy144CollectionDefinition *definition =
+        Floppy144CollectionGet(collection);
+
+    return
+        definition->collection_class !=
+            FLOPPY144_COLLECTION_CLASS_MANDATORY &&
+        Floppy144TerminalCollectionRestored(
+            world,
+            collection
+        );
+}
 void Floppy144TerminalDraw(
     EngineData *engine,
     const Floppy144TerminalState *terminal,
@@ -610,43 +682,26 @@ void Floppy144TerminalDraw(
      * amber. Footer instructions change with the current navigation depth.
      */
 
-    const char *site_status =
-        world->hr02_restored &&
-        world->fa03_restored
-            ? "SITE 20%"
-            : world->hr02_restored ||
-              world->fa03_restored
-                ? "SITE 12%"
-                : "SITE 04%";
+    char site_status[16];
 
-    const char *hr02_status =
-        world->hr02_desk_reallocation_read
-            ? "EVIDENCE"
-            : world->hr02_restored
-                ? "RESTORED"
-                : "AVAILABLE";
+    snprintf(
+        site_status,
+        sizeof(site_status),
+        "SITE %02u%%",
+        (unsigned)Floppy144WorldReconstructionPercent(world)
+    );
 
-    uint32_t hr02_colour =
-        world->hr02_desk_reallocation_read
-            ? amber
-            : world->hr02_restored
-                ? green
-                : amber;
+    bool selected_restored =
+        Floppy144TerminalCollectionRestored(
+            world,
+            terminal->selected_collection
+        );
 
-    const char *fa03_status =
-        world->fa03_suppression_service_read
-            ? "EVIDENCE"
-            : world->fa03_restored
-                ? "RESTORED"
-                : "AVAILABLE";
-
-    uint32_t fa03_colour =
-        world->fa03_suppression_service_read
-            ? amber
-            : world->fa03_restored
-                ? green
-                : amber;
-
+    bool selected_can_view_records =
+        Floppy144TerminalCollectionCanViewRecords(
+            world,
+            terminal->selected_collection
+        );
     const char *footer_left =
         terminal->detail_open
             ? ""
@@ -654,19 +709,12 @@ void Floppy144TerminalDraw(
 
     const char *footer_middle =
         terminal->detail_open
-            ? terminal->selected_collection ==
-                FLOPPY144_COLLECTION_HR02
-                ? world->hr02_restored
+            ? !selected_restored
+                ? "ENTER RESTORE"
+                : selected_can_view_records
                     ? "ENTER VIEW RECORDS"
-                    : "ENTER RESTORE"
-                : terminal->selected_collection ==
-                    FLOPPY144_COLLECTION_FA03
-                    ? world->fa03_restored
-                        ? "ENTER VIEW RECORDS"
-                        : "ENTER RESTORE"
                     : ""
             : "ENTER OPEN";
-
     const char *footer_right =
         terminal->detail_open
             ? "ESC CLOSE"
@@ -746,6 +794,68 @@ void Floppy144TerminalDraw(
 
     Floppy144DrawFillRect(&surface, 40, 124, 560, 1, border);
 
+    /*
+     * Draw collections from the central registry
+     *
+     * Mandatory and optional collections are identified from their registered
+     * class. Codes, titles and ordering all come from the master definition
+     * file rather than being repeated here.
+     */
+
+    uint32_t collection_index;
+    uint32_t mandatory_y = 150;
+    uint32_t optional_heading_y;
+    uint32_t optional_y;
+    uint32_t optional_count = 0;
+    uint32_t optional_spacing;
+    uint32_t last_row_y = 150;
+    uint32_t separator_y;
+    bool any_optional_restored = false;
+
+    /*
+     * Count optional collections before drawing.
+     *
+     * This allows the current two-row layout to retain its original spacing,
+     * while three optional collections use a more compact arrangement.
+     */
+
+    for(
+        collection_index = 0;
+        collection_index <
+            (uint32_t)FLOPPY144_COLLECTION_COUNT;
+        ++collection_index
+    )
+    {
+        Floppy144CollectionId collection =
+            (Floppy144CollectionId)collection_index;
+
+        const Floppy144CollectionDefinition *definition =
+            Floppy144CollectionGet(collection);
+
+        if(
+            definition->collection_class !=
+            FLOPPY144_COLLECTION_CLASS_MANDATORY
+        )
+        {
+            ++optional_count;
+
+            if(
+                Floppy144TerminalCollectionRestored(
+                    world,
+                    collection
+                )
+            )
+            {
+                any_optional_restored = true;
+            }
+        }
+    }
+
+    optional_spacing =
+        optional_count > 2
+            ? 30
+            : 48;
+
     Floppy144DrawText(
         &surface,
         44,
@@ -755,51 +865,169 @@ void Floppy144TerminalDraw(
         muted
     );
 
-    /* XX-01 is mandatory and is therefore always shown as restored. */
-    Floppy144TerminalDrawCollection(
-        &surface,
-        150,
-        terminal->selected_collection == 0,
-        "RESTORED",
-        "XX-01",
-        "SITE RECOVERY INDEX",
-        green
-    );
+    /*
+     * Draw mandatory collections in registry order.
+     */
+
+    for(
+        collection_index = 0;
+        collection_index <
+            (uint32_t)FLOPPY144_COLLECTION_COUNT;
+        ++collection_index
+    )
+    {
+        Floppy144CollectionId collection =
+            (Floppy144CollectionId)collection_index;
+
+        const Floppy144CollectionDefinition *definition =
+            Floppy144CollectionGet(collection);
+
+        bool restored;
+        bool evidence_found;
+        uint32_t status_colour;
+
+        if(
+            definition->collection_class !=
+            FLOPPY144_COLLECTION_CLASS_MANDATORY
+        )
+        {
+            continue;
+        }
+
+        restored =
+            Floppy144TerminalCollectionRestored(
+                world,
+                collection
+            );
+
+        evidence_found =
+            Floppy144TerminalCollectionEvidenceFound(
+                world,
+                collection
+            );
+
+        status_colour =
+            evidence_found
+                ? amber
+                : restored
+                    ? green
+                    : amber;
+
+        Floppy144TerminalDrawCollection(
+            &surface,
+            mandatory_y,
+            terminal->selected_collection == collection,
+            Floppy144TerminalCollectionStatusText(
+                world,
+                collection
+            ),
+            definition->code,
+            definition->title,
+            status_colour
+        );
+
+        last_row_y = mandatory_y;
+        mandatory_y += 30;
+    }
+
+    optional_heading_y =
+        last_row_y + 34;
 
     Floppy144DrawText(
         &surface,
         44,
-        184,
-        world->hr02_restored
+        optional_heading_y,
+        any_optional_restored
             ? "RESTORED COLLECTIONS"
             : "AVAILABLE COLLECTIONS",
         1,
         muted
     );
 
-    /* Optional collection rows reflect restoration and evidence flags. */
-    Floppy144TerminalDrawCollection(
-        &surface,
-        198,
-        terminal->selected_collection == 1,
-        hr02_status,
-        "HR-02",
-        "PERSONNEL LIFECYCLE RECORDS",
-        hr02_colour
-    );
+    optional_y =
+        optional_heading_y + 14;
 
-    Floppy144TerminalDrawCollection(
-        &surface,
-        246,
-        terminal->selected_collection ==
-            FLOPPY144_COLLECTION_FA03,
-        fa03_status,
-        "FA-03",
-        "SITE SAFETY AND SUPPRESSION SYSTEMS",
-        fa03_colour
-    );
+    /*
+     * Draw optional collections in registry order.
+     */
 
-    Floppy144DrawFillRect(&surface, 40, 286, 560, 1, border);
+    for(
+        collection_index = 0;
+        collection_index <
+            (uint32_t)FLOPPY144_COLLECTION_COUNT;
+        ++collection_index
+    )
+    {
+        Floppy144CollectionId collection =
+            (Floppy144CollectionId)collection_index;
+
+        const Floppy144CollectionDefinition *definition =
+            Floppy144CollectionGet(collection);
+
+        bool restored;
+        bool evidence_found;
+        uint32_t status_colour;
+
+        if(
+            definition->collection_class ==
+            FLOPPY144_COLLECTION_CLASS_MANDATORY
+        )
+        {
+            continue;
+        }
+
+        restored =
+            Floppy144TerminalCollectionRestored(
+                world,
+                collection
+            );
+
+        evidence_found =
+            Floppy144TerminalCollectionEvidenceFound(
+                world,
+                collection
+            );
+
+        status_colour =
+            evidence_found
+                ? amber
+                : restored
+                    ? green
+                    : amber;
+
+        Floppy144TerminalDrawCollection(
+            &surface,
+            optional_y,
+            terminal->selected_collection == collection,
+            Floppy144TerminalCollectionStatusText(
+                world,
+                collection
+            ),
+            definition->code,
+            definition->title,
+            status_colour
+        );
+
+        last_row_y = optional_y;
+        optional_y += optional_spacing;
+    }
+
+    separator_y =
+        last_row_y +
+        (
+            optional_count > 2
+                ? 28
+                : 40
+        );
+
+    Floppy144DrawFillRect(
+        &surface,
+        40,
+        separator_y,
+        560,
+        1,
+        border
+    );
 
 
     Floppy144DrawFillRect(
@@ -857,7 +1085,5 @@ void Floppy144TerminalDraw(
         );
     }
 }
-
-
 
 
