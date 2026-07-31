@@ -54,6 +54,11 @@ void Floppy144TerminalCloseDetail(
     Floppy144TerminalState *terminal
 );
 
+bool Floppy144TerminalCanOpenCatalogue(
+    const Floppy144TerminalState *terminal,
+    const Floppy144WorldState *world
+);
+
 bool Floppy144TerminalDetailOpen(
     const Floppy144TerminalState *terminal
 );

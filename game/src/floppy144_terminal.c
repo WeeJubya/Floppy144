@@ -533,8 +533,8 @@ static const char *Floppy144TerminalCollectionStatusText(
 /*
  * Determine whether a restored collection exposes catalogue records.
  *
- * XX-01 is currently a mandatory terminal index rather than a browsable
- * catalogue. Optional restored collections expose their generated records.
+ * Catalogue availability comes entirely from registered collection metadata.
+ * Mandatory and optional collections follow the same rule.
  */
 
 static bool Floppy144TerminalCollectionCanViewRecords(
@@ -546,11 +546,37 @@ static bool Floppy144TerminalCollectionCanViewRecords(
         Floppy144CollectionGet(collection);
 
     return
-        definition->collection_class !=
-            FLOPPY144_COLLECTION_CLASS_MANDATORY &&
+        definition->catalogue.record_count > 0U &&
         Floppy144WorldCollectionRestored(
             world,
             collection
+        );
+}
+
+/*
+ * Determine whether Enter should open the selected collection catalogue.
+ */
+
+bool Floppy144TerminalCanOpenCatalogue(
+    const Floppy144TerminalState *terminal,
+    const Floppy144WorldState *world
+)
+{
+    if(
+        terminal == NULL ||
+        world == NULL
+    )
+    {
+        return false;
+    }
+
+    return
+        Floppy144TerminalDetailOpen(
+            terminal
+        ) &&
+        Floppy144TerminalCollectionCanViewRecords(
+            world,
+            terminal->selected_collection
         );
 }
 

@@ -239,36 +239,7 @@ static void Floppy144InteractOffice(
         }
     }
 }
-/*
- * Check whether Enter should open records
- *
- * A catalogue is available only from an open detail view for a restored optional
- * collection. Otherwise Enter opens details or performs restoration.
- */
 
-static bool Floppy144CanOpenCatalogue(
-    void
-)
-{
-    bool hr02_available =
-        global_terminal.selected_collection ==
-            FLOPPY144_COLLECTION_HR02 &&
-        Floppy144WorldCollectionRestored(&global_world, FLOPPY144_COLLECTION_HR02);
-
-    bool fa03_available =
-        global_terminal.selected_collection ==
-            FLOPPY144_COLLECTION_FA03 &&
-        Floppy144WorldCollectionRestored(&global_world, FLOPPY144_COLLECTION_FA03);
-
-    return
-        Floppy144TerminalDetailOpen(
-            &global_terminal
-        ) &&
-        (
-            hr02_available ||
-            fa03_available
-        );
-}
 /*
  * Win32 message handler
  *
@@ -478,7 +449,10 @@ static LRESULT CALLBACK Floppy144WindowProc(
                         case VK_RETURN:
                         {
                             switch(
-                                Floppy144CanOpenCatalogue()
+                                Floppy144TerminalCanOpenCatalogue(
+                                    &global_terminal,
+                                    &global_world
+                                )
                             )
                             {
                                 case true:
