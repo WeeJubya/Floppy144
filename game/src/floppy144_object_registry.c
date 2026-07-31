@@ -84,28 +84,40 @@ static const Floppy144ObjectDefinition
 {
 #define FLOPPY144_OBJECT(                                          \
     symbol,                                                        \
+    name_value,                                                    \
     scene_value,                                                   \
     parent_value,                                                  \
     local_x_value,                                                 \
     local_y_value,                                                 \
+    draw_layer_value,                                              \
     collision_x_value,                                             \
     collision_y_value,                                             \
     collision_width_value,                                         \
     collision_height_value,                                        \
+    interaction_x_value,                                           \
+    interaction_y_value,                                           \
+    interaction_width_value,                                       \
+    interaction_height_value,                                      \
     flags_value,                                                   \
     initially_visible_value,                                       \
     primitive_values                                               \
 )                                                                  \
     {                                                              \
         FLOPPY144_OBJECT_##symbol,                                 \
+        name_value,                                                \
         scene_value,                                               \
         parent_value,                                              \
         local_x_value,                                             \
         local_y_value,                                             \
+        draw_layer_value,                                          \
         collision_x_value,                                         \
         collision_y_value,                                         \
         collision_width_value,                                     \
         collision_height_value,                                    \
+        interaction_x_value,                                       \
+        interaction_y_value,                                       \
+        interaction_width_value,                                   \
+        interaction_height_value,                                  \
         flags_value,                                               \
         initially_visible_value,                                   \
         primitive_values,                                          \

@@ -187,7 +187,7 @@ static bool Floppy144OfficeRegisteredObjectBlocks(
                 definition->flags &
                 FLOPPY144_OBJECT_FLAG_SOLID
             ) == 0U ||
-            !Floppy144WorldObjectVisible(
+            !Floppy144WorldObjectEffectivelyVisible(
                 world,
                 object
             ) ||
@@ -653,123 +653,135 @@ static void Floppy144OfficeDrawRegisteredObjects(
     uint32_t warning_colour
 )
 {
-    uint32_t object_index;
+    int32_t draw_layer;
 
     for(
-        object_index = 0U;
-        object_index <
-            (uint32_t)FLOPPY144_OBJECT_COUNT;
-        ++object_index
+        draw_layer = 0;
+        draw_layer <=
+            FLOPPY144_OBJECT_LAYER_MAX;
+        ++draw_layer
     )
     {
-        Floppy144ObjectId object =
-            (Floppy144ObjectId)object_index;
-
-        const Floppy144ObjectDefinition *definition =
-            Floppy144ObjectGet(object);
-
-        int32_t object_x;
-        int32_t object_y;
-
-        uint32_t primitive_index;
-
-        if(
-            definition == NULL ||
-            definition->scene !=
-                FLOPPY144_SCENE_OFFICE ||
-            !Floppy144WorldObjectVisible(
-                world,
-                object
-            ) ||
-            !Floppy144ObjectWorldPosition(
-                object,
-                &object_x,
-                &object_y
-            )
-        )
-        {
-            continue;
-        }
+        uint32_t object_index;
 
         for(
-            primitive_index = 0U;
-            primitive_index <
-                definition->primitive_count;
-            ++primitive_index
+            object_index = 0U;
+            object_index <
+                (uint32_t)FLOPPY144_OBJECT_COUNT;
+            ++object_index
         )
         {
-            const Floppy144ObjectPrimitive *primitive =
-                &definition->primitives[primitive_index];
+            Floppy144ObjectId object =
+                (Floppy144ObjectId)object_index;
 
-            uint32_t colour =
-                Floppy144OfficeObjectColour(
-                    primitive->colour_role,
-                    body_colour,
-                    edge_colour,
-                    screen_colour,
-                    warning_colour
-                );
+            const Floppy144ObjectDefinition *definition =
+                Floppy144ObjectGet(object);
 
-            switch(primitive->type)
+            int32_t object_x;
+            int32_t object_y;
+
+            uint32_t primitive_index;
+
+            if(
+                definition == NULL ||
+                definition->scene !=
+                    FLOPPY144_SCENE_OFFICE ||
+                definition->draw_layer !=
+                    draw_layer ||
+                !Floppy144WorldObjectEffectivelyVisible(
+                    world,
+                    object
+                ) ||
+                !Floppy144ObjectWorldPosition(
+                    object,
+                    &object_x,
+                    &object_y
+                )
+            )
             {
-                case FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT:
-                {
-                    Floppy144DrawFillRect(
-                        surface,
-                        (uint32_t)(
-                            object_x +
-                            primitive->x
-                        ),
-                        (uint32_t)(
-                            object_y +
-                            primitive->y
-                        ),
-                        (uint32_t)primitive->width,
-                        (uint32_t)primitive->height,
-                        colour
+                continue;
+            }
+
+            for(
+                primitive_index = 0U;
+                primitive_index <
+                    definition->primitive_count;
+                ++primitive_index
+            )
+            {
+                const Floppy144ObjectPrimitive *primitive =
+                    &definition->primitives[primitive_index];
+
+                uint32_t colour =
+                    Floppy144OfficeObjectColour(
+                        primitive->colour_role,
+                        body_colour,
+                        edge_colour,
+                        screen_colour,
+                        warning_colour
                     );
 
-                    break;
-                }
-
-                case FLOPPY144_OBJECT_PRIMITIVE_RECT:
+                switch(primitive->type)
                 {
-                    Floppy144DrawRect(
-                        surface,
-                        (uint32_t)(
-                            object_x +
-                            primitive->x
-                        ),
-                        (uint32_t)(
-                            object_y +
-                            primitive->y
-                        ),
-                        (uint32_t)primitive->width,
-                        (uint32_t)primitive->height,
-                        colour
-                    );
+                    case FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT:
+                    {
+                        Floppy144DrawFillRect(
+                            surface,
+                            (uint32_t)(
+                                object_x +
+                                primitive->x
+                            ),
+                            (uint32_t)(
+                                object_y +
+                                primitive->y
+                            ),
+                            (uint32_t)primitive->width,
+                            (uint32_t)primitive->height,
+                            colour
+                        );
 
-                    break;
-                }
+                        break;
+                    }
 
-                case FLOPPY144_OBJECT_PRIMITIVE_TEXT:
-                {
-                    Floppy144DrawText(
-                        surface,
-                        (uint32_t)(
-                            object_x +
-                            primitive->x
-                        ),
-                        (uint32_t)(
-                            object_y +
-                            primitive->y
-                        ),
-                        primitive->text,
-                        1,
-                        colour
-                    );
+                    case FLOPPY144_OBJECT_PRIMITIVE_RECT:
+                    {
+                        Floppy144DrawRect(
+                            surface,
+                            (uint32_t)(
+                                object_x +
+                                primitive->x
+                            ),
+                            (uint32_t)(
+                                object_y +
+                                primitive->y
+                            ),
+                            (uint32_t)primitive->width,
+                            (uint32_t)primitive->height,
+                            colour
+                        );
 
-                    break;
+                        break;
+                    }
+
+                    case FLOPPY144_OBJECT_PRIMITIVE_TEXT:
+                    {
+                        Floppy144DrawText(
+                            surface,
+                            (uint32_t)(
+                                object_x +
+                                primitive->x
+                            ),
+                            (uint32_t)(
+                                object_y +
+                                primitive->y
+                            ),
+                            primitive->text,
+                            1,
+                            colour
+                        );
+
+                        break;
+                    }
                 }
             }
         }

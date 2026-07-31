@@ -1,17 +1,13 @@
 /*
  * Floppy//144 - world-state implementation
- *
- * Initialises persistent session facts and provides generic collection and
- * reconstructed-object operations. It contains no drawing or input code.
  */
 
 #include "floppy144_world.h"
 
 #include "floppy144_collection_registry.h"
+#include "floppy144_object_registry.h"
 
-/*
- * Check whether a collection ID can safely index world state.
- */
+#include <stddef.h>
 
 static bool Floppy144WorldCollectionValid(
     Floppy144CollectionId collection
@@ -22,22 +18,15 @@ static bool Floppy144WorldCollectionValid(
         (uint32_t)FLOPPY144_COLLECTION_COUNT;
 }
 
-/*
- * Check whether an object ID can safely index world state.
- */
-
 static bool Floppy144WorldObjectValid(
     Floppy144ObjectId object
 )
 {
     return
+        object >= 0 &&
         (uint32_t)object <
-        (uint32_t)FLOPPY144_OBJECT_COUNT;
+            (uint32_t)FLOPPY144_OBJECT_COUNT;
 }
-
-/*
- * Start a fresh reconstruction session
- */
 
 void Floppy144WorldReset(
     Floppy144WorldState *world
@@ -46,8 +35,13 @@ void Floppy144WorldReset(
     uint32_t collection_index;
     uint32_t object_index;
 
+    if(world == NULL)
+    {
+        return;
+    }
+
     for(
-        collection_index = 0;
+        collection_index = 0U;
         collection_index <
             (uint32_t)FLOPPY144_COLLECTION_COUNT;
         ++collection_index
@@ -67,27 +61,32 @@ void Floppy144WorldReset(
     }
 
     for(
-        object_index = 0;
+        object_index = 0U;
         object_index <
             (uint32_t)FLOPPY144_OBJECT_COUNT;
         ++object_index
     )
     {
+        const Floppy144ObjectDefinition *definition =
+            Floppy144ObjectGet(
+                (Floppy144ObjectId)object_index
+            );
+
         world->objects[object_index].visible =
-            false;
+            definition != NULL &&
+            definition->initially_visible;
     }
 }
-
-/*
- * Query whether a collection has been restored.
- */
 
 bool Floppy144WorldCollectionRestored(
     const Floppy144WorldState *world,
     Floppy144CollectionId collection
 )
 {
-    if(!Floppy144WorldCollectionValid(collection))
+    if(
+        world == NULL ||
+        !Floppy144WorldCollectionValid(collection)
+    )
     {
         return false;
     }
@@ -96,18 +95,15 @@ bool Floppy144WorldCollectionRestored(
         world->collections[collection].restored;
 }
 
-/*
- * Restore a collection.
- *
- * Returns true only when this call changed its state.
- */
-
 bool Floppy144WorldRestoreCollection(
     Floppy144WorldState *world,
     Floppy144CollectionId collection
 )
 {
-    if(!Floppy144WorldCollectionValid(collection))
+    if(
+        world == NULL ||
+        !Floppy144WorldCollectionValid(collection)
+    )
     {
         return false;
     }
@@ -123,16 +119,15 @@ bool Floppy144WorldRestoreCollection(
     return true;
 }
 
-/*
- * Query whether authored evidence has been found in a collection.
- */
-
 bool Floppy144WorldCollectionEvidenceFound(
     const Floppy144WorldState *world,
     Floppy144CollectionId collection
 )
 {
-    if(!Floppy144WorldCollectionValid(collection))
+    if(
+        world == NULL ||
+        !Floppy144WorldCollectionValid(collection)
+    )
     {
         return false;
     }
@@ -141,17 +136,16 @@ bool Floppy144WorldCollectionEvidenceFound(
         world->collections[collection].evidence_found;
 }
 
-/*
- * Update the authored-evidence flag belonging to a collection.
- */
-
 void Floppy144WorldSetCollectionEvidenceFound(
     Floppy144WorldState *world,
     Floppy144CollectionId collection,
     bool evidence_found
 )
 {
-    if(!Floppy144WorldCollectionValid(collection))
+    if(
+        world == NULL ||
+        !Floppy144WorldCollectionValid(collection)
+    )
     {
         return;
     }
@@ -160,16 +154,15 @@ void Floppy144WorldSetCollectionEvidenceFound(
         evidence_found;
 }
 
-/*
- * Query whether a reconstructed object is currently visible.
- */
-
 bool Floppy144WorldObjectVisible(
     const Floppy144WorldState *world,
     Floppy144ObjectId object
 )
 {
-    if(!Floppy144WorldObjectValid(object))
+    if(
+        world == NULL ||
+        !Floppy144WorldObjectValid(object)
+    )
     {
         return false;
     }
@@ -179,17 +172,65 @@ bool Floppy144WorldObjectVisible(
 }
 
 /*
- * Reveal one reconstructed object.
- *
- * Returns true only when this call changed the object's state.
+ * Test an object's complete parent chain.
  */
+
+bool Floppy144WorldObjectEffectivelyVisible(
+    const Floppy144WorldState *world,
+    Floppy144ObjectId object
+)
+{
+    Floppy144ObjectId current =
+        object;
+
+    uint32_t depth =
+        0U;
+
+    if(world == NULL)
+    {
+        return false;
+    }
+
+    while(current != FLOPPY144_OBJECT_NONE)
+    {
+        const Floppy144ObjectDefinition *definition;
+
+        if(
+            depth >=
+                (uint32_t)FLOPPY144_OBJECT_COUNT ||
+            !Floppy144WorldObjectValid(current) ||
+            !world->objects[current].visible
+        )
+        {
+            return false;
+        }
+
+        definition =
+            Floppy144ObjectGet(current);
+
+        if(definition == NULL)
+        {
+            return false;
+        }
+
+        current =
+            definition->parent;
+
+        ++depth;
+    }
+
+    return true;
+}
 
 bool Floppy144WorldRevealObject(
     Floppy144WorldState *world,
     Floppy144ObjectId object
 )
 {
-    if(!Floppy144WorldObjectValid(object))
+    if(
+        world == NULL ||
+        !Floppy144WorldObjectValid(object)
+    )
     {
         return false;
     }
@@ -205,19 +246,21 @@ bool Floppy144WorldRevealObject(
     return true;
 }
 
-/*
- * Calculate technical-slice reconstruction progress.
- */
-
 uint32_t Floppy144WorldReconstructionPercent(
     const Floppy144WorldState *world
 )
 {
     uint32_t collection_index;
-    uint32_t percentage = 0U;
+    uint32_t percentage =
+        0U;
+
+    if(world == NULL)
+    {
+        return 0U;
+    }
 
     for(
-        collection_index = 0;
+        collection_index = 0U;
         collection_index <
             (uint32_t)FLOPPY144_COLLECTION_COUNT;
         ++collection_index

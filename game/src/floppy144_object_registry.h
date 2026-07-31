@@ -2,7 +2,7 @@
  * Floppy//144 - immutable scene-object registry
  *
  * Defines where reconstructed objects belong, how they are drawn and which
- * physical bounds are consumed by collision and interaction systems.
+ * bounds are consumed by collision and interaction systems.
  */
 
 #pragma once
@@ -33,9 +33,31 @@ typedef enum Floppy144ObjectFlags
     FLOPPY144_OBJECT_FLAG_SOLID =
         1U << 0,
 
+    FLOPPY144_OBJECT_FLAG_INTERACTABLE =
+        1U << 1,
+
     FLOPPY144_OBJECT_FLAG_INSPECTABLE =
-        1U << 1
+        1U << 2
 } Floppy144ObjectFlags;
+
+/*
+ * Scene drawing layers
+ *
+ * Parenting controls relative position and inherited visibility. It does not
+ * dictate drawing order.
+ */
+
+typedef enum Floppy144ObjectLayer
+{
+    FLOPPY144_OBJECT_LAYER_BACKGROUND = 0,
+    FLOPPY144_OBJECT_LAYER_FIXTURE = 10,
+    FLOPPY144_OBJECT_LAYER_FURNITURE = 20,
+    FLOPPY144_OBJECT_LAYER_CONTENT = 30,
+    FLOPPY144_OBJECT_LAYER_FOREGROUND = 40,
+
+    FLOPPY144_OBJECT_LAYER_MAX =
+        FLOPPY144_OBJECT_LAYER_FOREGROUND
+} Floppy144ObjectLayer;
 
 /*
  * Asset-free drawing primitives
@@ -57,7 +79,8 @@ typedef enum Floppy144ObjectColourRole
     FLOPPY144_OBJECT_COLOUR_BODY = 0,
     FLOPPY144_OBJECT_COLOUR_EDGE,
     FLOPPY144_OBJECT_COLOUR_SCREEN,
-    FLOPPY144_OBJECT_COLOUR_WARNING
+    FLOPPY144_OBJECT_COLOUR_WARNING,
+    FLOPPY144_OBJECT_COLOUR_LABEL
 } Floppy144ObjectColourRole;
 
 typedef struct Floppy144ObjectPrimitive
@@ -85,16 +108,25 @@ typedef struct Floppy144ObjectDefinition
 {
     Floppy144ObjectId id;
 
+    const char *name;
+
     Floppy144SceneId scene;
     Floppy144ObjectId parent;
 
     int32_t local_x;
     int32_t local_y;
 
+    int32_t draw_layer;
+
     int32_t collision_x;
     int32_t collision_y;
     int32_t collision_width;
     int32_t collision_height;
+
+    int32_t interaction_x;
+    int32_t interaction_y;
+    int32_t interaction_width;
+    int32_t interaction_height;
 
     uint32_t flags;
     bool initially_visible;

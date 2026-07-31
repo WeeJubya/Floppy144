@@ -6,14 +6,20 @@
  *
  * Arguments:
  *   symbol
+ *   semantic name
  *   owning scene
  *   parent object
  *   local x
  *   local y
+ *   draw layer
  *   collision x
  *   collision y
  *   collision width
  *   collision height
+ *   interaction x
+ *   interaction y
+ *   interaction width
+ *   interaction height
  *   object flags
  *   initially visible
  *   primitive array
@@ -21,15 +27,21 @@
 
 FLOPPY144_OBJECT(
     SUPPRESSION_CONTROL_PANEL,
+    "SUPPRESSION CONTROL PANEL",
     FLOPPY144_SCENE_OFFICE,
     FLOPPY144_OBJECT_NONE,
     376,
     46,
+    FLOPPY144_OBJECT_LAYER_FIXTURE,
     0,
     0,
-    34,
-    34,
-    FLOPPY144_OBJECT_FLAG_SOLID,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    FLOPPY144_OBJECT_FLAG_NONE,
     false,
     floppy144_suppression_control_panel_primitives
 )

@@ -13,17 +13,23 @@ typedef enum Floppy144ObjectId
 
 #define FLOPPY144_OBJECT(                                          \
     symbol,                                                        \
+    name,                                                          \
     scene,                                                         \
     parent,                                                        \
     local_x,                                                       \
     local_y,                                                       \
+    draw_layer,                                                    \
     collision_x,                                                   \
     collision_y,                                                   \
     collision_width,                                               \
     collision_height,                                              \
+    interaction_x,                                                 \
+    interaction_y,                                                 \
+    interaction_width,                                             \
+    interaction_height,                                            \
     flags,                                                         \
     initially_visible,                                             \
-    primitives                                                    \
+    primitives                                                     \
 )                                                                  \
     FLOPPY144_OBJECT_##symbol,
 

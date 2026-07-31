@@ -13,10 +13,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-/*
- * Runtime state belonging to one registered collection
- */
-
 typedef struct Floppy144CollectionState
 {
     bool restored;
@@ -24,23 +20,13 @@ typedef struct Floppy144CollectionState
 } Floppy144CollectionState;
 
 /*
- * Runtime state belonging to one reconstructed world object
- *
- * Dynamic objects begin hidden and can be revealed by document effects or
- * other registered game events.
+ * Runtime state belonging to one reconstructed object.
  */
 
 typedef struct Floppy144ObjectState
 {
     bool visible;
 } Floppy144ObjectState;
-
-/*
- * Persistent session state
- *
- * Collection and object IDs are stable array indices generated from their
- * respective master definition files.
- */
 
 typedef struct Floppy144WorldState
 {
@@ -51,20 +37,9 @@ typedef struct Floppy144WorldState
         objects[FLOPPY144_OBJECT_COUNT];
 } Floppy144WorldState;
 
-/*
- * Start a fresh reconstruction session.
- *
- * Automatically restored collections are restored during reset. Evidence is
- * cleared and all dynamic reconstructed objects begin hidden.
- */
-
 void Floppy144WorldReset(
     Floppy144WorldState *world
 );
-
-/*
- * Generic collection-state operations
- */
 
 bool Floppy144WorldCollectionRestored(
     const Floppy144WorldState *world,
@@ -88,10 +63,18 @@ void Floppy144WorldSetCollectionEvidenceFound(
 );
 
 /*
- * Generic reconstructed-object operations
+ * Direct visibility is the object's own runtime flag.
+ *
+ * Effective visibility also requires every parent in the hierarchy to be
+ * effectively visible.
  */
 
 bool Floppy144WorldObjectVisible(
+    const Floppy144WorldState *world,
+    Floppy144ObjectId object
+);
+
+bool Floppy144WorldObjectEffectivelyVisible(
     const Floppy144WorldState *world,
     Floppy144ObjectId object
 );
@@ -100,11 +83,6 @@ bool Floppy144WorldRevealObject(
     Floppy144WorldState *world,
     Floppy144ObjectId object
 );
-
-/*
- * Convert restored collection state into the reconstruction percentage shown
- * by the recovery interface, terminal and office.
- */
 
 uint32_t Floppy144WorldReconstructionPercent(
     const Floppy144WorldState *world
