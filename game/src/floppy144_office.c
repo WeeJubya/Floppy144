@@ -64,16 +64,13 @@ typedef struct Floppy144Rect
 } Floppy144Rect;
 
 /*
- * Solid furniture layout
+ * Permanent furniture awaiting migration into the object registry
  *
- * Order: terminal, four desks, two left cabinets, two right cabinets.
+ * Order: four desks, two left cabinets, two right cabinets.
  */
 
 static const Floppy144Rect floppy144_obstacles[] =
-/* Terminal */
 {
-    {274, 46, 92, 36},
-
     /* Desks 01-04 */
     {92, 92, 132, 42},
     {416, 92, 132, 42},
@@ -88,7 +85,6 @@ static const Floppy144Rect floppy144_obstacles[] =
     {564, 68, 30, 60},
     {564, 140, 30, 60}
 };
-
 /*
  * Axis-aligned rectangle overlap test
  *
@@ -353,32 +349,81 @@ void Floppy144OfficeMove(
     }
 }
 /*
- * Terminal interaction zone
+ * Test whether the player is inside one registered object's interaction zone
  *
- * Uses the player centre and a hand-tuned rectangle in front of the terminal.
+ * The player centre is tested against the object's parent-resolved interaction
+ * rectangle. Hidden and non-interactable objects are ignored.
  */
 
-bool Floppy144OfficeNearTerminal(
-    const Floppy144Player *player
+bool Floppy144OfficeNearObject(
+    const Floppy144WorldState *world,
+    const Floppy144Player *player,
+    Floppy144ObjectId object
 )
 {
-    int32_t player_centre_x =
-        player->x + FLOPPY144_PLAYER_WIDTH / 2;
+    const Floppy144ObjectDefinition *definition =
+        Floppy144ObjectGet(object);
 
-    int32_t player_centre_y =
-        player->y + FLOPPY144_PLAYER_HEIGHT / 2;
+    int32_t object_x;
+    int32_t object_y;
+
+    int32_t player_centre_x;
+    int32_t player_centre_y;
+
+    if(
+        player == NULL ||
+        definition == NULL ||
+        definition->scene !=
+            FLOPPY144_SCENE_OFFICE ||
+        (
+            definition->flags &
+            FLOPPY144_OBJECT_FLAG_INTERACTABLE
+        ) == 0U ||
+        definition->interaction_width <= 0 ||
+        definition->interaction_height <= 0 ||
+        !Floppy144WorldObjectEffectivelyVisible(
+            world,
+            object
+        ) ||
+        !Floppy144ObjectWorldPosition(
+            object,
+            &object_x,
+            &object_y
+        )
+    )
+    {
+        return false;
+    }
+
+    player_centre_x =
+        player->x +
+        FLOPPY144_PLAYER_WIDTH / 2;
+
+    player_centre_y =
+        player->y +
+        FLOPPY144_PLAYER_HEIGHT / 2;
 
     return
-        player_centre_x >= 254 &&
-        player_centre_x < 386 &&
-        player_centre_y >= 80 &&
-        player_centre_y < 108;
+        player_centre_x >=
+            object_x +
+            definition->interaction_x &&
+        player_centre_x <
+            object_x +
+            definition->interaction_x +
+            definition->interaction_width &&
+        player_centre_y >=
+            object_y +
+            definition->interaction_y &&
+        player_centre_y <
+            object_y +
+            definition->interaction_y +
+            definition->interaction_height;
 }
-
 /*
  * Evidence-driven desk interaction zones
  *
- * These use the corresponding collision rectangle plus an eight-pixel halo.
+ * These remain tied to the transitional obstacle table until the desks and
+ * their reconstructed child objects are migrated.
  */
 
 bool Floppy144OfficeNearDeskOne(
@@ -387,17 +432,18 @@ bool Floppy144OfficeNearDeskOne(
 {
     return Floppy144OfficeNearObstacle(
         player,
-        1,
+        0,
         8
     );
 }
+
 bool Floppy144OfficeNearDeskFour(
     const Floppy144Player *player
 )
 {
     return Floppy144OfficeNearObstacle(
         player,
-        4,
+        3,
         8
     );
 }
@@ -533,82 +579,17 @@ static void Floppy144OfficeDrawCabinet(
 }
 
 /*
- * Draw the archive terminal desk and READY screen
- */
-
-static void Floppy144OfficeDrawTerminal(
-    Floppy144Surface *surface,
-    uint32_t desk_colour,
-    uint32_t edge_colour,
-    uint32_t screen_colour,
-    uint32_t amber
-)
-{
-    Floppy144DrawFillRect(
-        surface,
-        274,
-        46,
-        92,
-        36,
-        desk_colour
-    );
-
-    Floppy144DrawRect(
-        surface,
-        274,
-        46,
-        92,
-        36,
-        edge_colour
-    );
-
-    Floppy144DrawFillRect(
-        surface,
-        292,
-        51,
-        56,
-        20,
-        screen_colour
-    );
-
-    Floppy144DrawRect(
-        surface,
-        292,
-        51,
-        56,
-        20,
-        edge_colour
-    );
-
-    Floppy144DrawText(
-        surface,
-        299,
-        58,
-        "READY",
-        1,
-        amber
-    );
-
-    Floppy144DrawFillRect(
-        surface,
-        308,
-        74,
-        24,
-        3,
-        edge_colour
-    );
-}
-
-/*
  * Resolve an object palette role into an office colour.
  */
 
 static uint32_t Floppy144OfficeObjectColour(
     Floppy144ObjectColourRole role,
     uint32_t body_colour,
+    uint32_t furniture_colour,
     uint32_t edge_colour,
     uint32_t screen_colour,
-    uint32_t warning_colour
+    uint32_t warning_colour,
+    uint32_t label_colour
 )
 {
     switch(role)
@@ -616,6 +597,11 @@ static uint32_t Floppy144OfficeObjectColour(
         case FLOPPY144_OBJECT_COLOUR_BODY:
         {
             return body_colour;
+        }
+
+        case FLOPPY144_OBJECT_COLOUR_FURNITURE:
+        {
+            return furniture_colour;
         }
 
         case FLOPPY144_OBJECT_COLOUR_EDGE:
@@ -632,25 +618,29 @@ static uint32_t Floppy144OfficeObjectColour(
         {
             return warning_colour;
         }
+
+        case FLOPPY144_OBJECT_COLOUR_LABEL:
+        {
+            return label_colour;
+        }
     }
 
     return edge_colour;
 }
 
 /*
- * Draw every visible registered object belonging to the office scene.
- *
- * Geometry and visual primitives come from the object registry. The office
- * supplies only its palette and the current persistent object state.
+ * Draw every effectively visible registered object in scene-layer order.
  */
 
 static void Floppy144OfficeDrawRegisteredObjects(
     Floppy144Surface *surface,
     const Floppy144WorldState *world,
     uint32_t body_colour,
+    uint32_t furniture_colour,
     uint32_t edge_colour,
     uint32_t screen_colour,
-    uint32_t warning_colour
+    uint32_t warning_colour,
+    uint32_t label_colour
 )
 {
     int32_t draw_layer;
@@ -716,9 +706,11 @@ static void Floppy144OfficeDrawRegisteredObjects(
                     Floppy144OfficeObjectColour(
                         primitive->colour_role,
                         body_colour,
+                        furniture_colour,
                         edge_colour,
                         screen_colour,
-                        warning_colour
+                        warning_colour,
+                        label_colour
                     );
 
                 switch(primitive->type)
@@ -1114,7 +1106,11 @@ void Floppy144OfficeDraw(
         );
 
     const char *prompt =
-        Floppy144OfficeNearTerminal(player)
+        Floppy144OfficeNearObject(
+                world,
+                player,
+                FLOPPY144_OBJECT_ARCHIVE_TERMINAL
+            )
             ? Floppy144WorldCollectionRestored(world, FLOPPY144_COLLECTION_HR02)
                 ? "PRESS E TO REVIEW RESTORED COLLECTIONS"
                 : "PRESS E TO ACCESS ARCHIVE TERMINAL"
@@ -1321,31 +1317,16 @@ void Floppy144OfficeDraw(
     );
 
     /* Place permanent fixtures and furniture at the same coordinates as collision. */
-    Floppy144OfficeDrawTerminal(
-        &surface,
-        desk_colour,
-        wall_edge,
-        background,
-        amber
-    );
     Floppy144OfficeDrawRegisteredObjects(
         &surface,
         world,
         cabinet_colour,
+        desk_colour,
         wall_edge,
         background,
-        amber
-    );
-
-    Floppy144DrawText(
-        &surface,
-        286,
-        36,
-        "ARCHIVE TERMINAL",
-        1,
+        amber,
         muted_colour
     );
-
     Floppy144OfficeDrawDesk(
         &surface,
         92,
@@ -1474,7 +1455,11 @@ void Floppy144OfficeDraw(
         prompt,
         1,
         (
-            Floppy144OfficeNearTerminal(player) ||
+            Floppy144OfficeNearObject(
+                world,
+                player,
+                FLOPPY144_OBJECT_ARCHIVE_TERMINAL
+            ) ||
             near_evidence_desk
         )
             ? amber

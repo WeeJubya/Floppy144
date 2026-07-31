@@ -45,3 +45,25 @@ FLOPPY144_OBJECT(
     false,
     floppy144_suppression_control_panel_primitives
 )
+
+FLOPPY144_OBJECT(
+    ARCHIVE_TERMINAL,
+    "ARCHIVE TERMINAL",
+    FLOPPY144_SCENE_OFFICE,
+    FLOPPY144_OBJECT_NONE,
+    274,
+    46,
+    FLOPPY144_OBJECT_LAYER_FURNITURE,
+    0,
+    0,
+    92,
+    36,
+    -20,
+    34,
+    132,
+    28,
+    FLOPPY144_OBJECT_FLAG_SOLID |
+        FLOPPY144_OBJECT_FLAG_INTERACTABLE,
+    true,
+    floppy144_archive_terminal_primitives
+)

@@ -77,12 +77,12 @@ typedef enum Floppy144ObjectPrimitiveType
 typedef enum Floppy144ObjectColourRole
 {
     FLOPPY144_OBJECT_COLOUR_BODY = 0,
+    FLOPPY144_OBJECT_COLOUR_FURNITURE,
     FLOPPY144_OBJECT_COLOUR_EDGE,
     FLOPPY144_OBJECT_COLOUR_SCREEN,
     FLOPPY144_OBJECT_COLOUR_WARNING,
     FLOPPY144_OBJECT_COLOUR_LABEL
 } Floppy144ObjectColourRole;
-
 typedef struct Floppy144ObjectPrimitive
 {
     Floppy144ObjectPrimitiveType type;

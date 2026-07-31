@@ -358,8 +358,10 @@ static LRESULT CALLBACK Floppy144WindowProc(
                         case 'E':
                         {
                             if(
-                                Floppy144OfficeNearTerminal(
-                                    &global_player
+                                Floppy144OfficeNearObject(
+                                    &global_world,
+                                    &global_player,
+                                    FLOPPY144_OBJECT_ARCHIVE_TERMINAL
                                 )
                             )
                             {

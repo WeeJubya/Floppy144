@@ -45,8 +45,10 @@ void Floppy144OfficeMove(
     int32_t movement_y
 );
 
-bool Floppy144OfficeNearTerminal(
-    const Floppy144Player *player
+bool Floppy144OfficeNearObject(
+    const Floppy144WorldState *world,
+    const Floppy144Player *player,
+    Floppy144ObjectId object
 );
 
 bool Floppy144OfficeNearDeskOne(

@@ -10,6 +10,66 @@
     ((uint32_t)(sizeof(values) / sizeof((values)[0])))
 
 /*
+ * Archive terminal visual recipe
+ *
+ * Coordinates are relative to the terminal's registered position. The label
+ * uses a negative local Y coordinate so that it remains attached above the
+ * terminal whenever the object is repositioned.
+ */
+
+static const Floppy144ObjectPrimitive
+    floppy144_archive_terminal_primitives[] =
+{
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        0, 0, 92, 36,
+        FLOPPY144_OBJECT_COLOUR_FURNITURE,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_RECT,
+        0, 0, 92, 36,
+        FLOPPY144_OBJECT_COLOUR_EDGE,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        18, 5, 56, 20,
+        FLOPPY144_OBJECT_COLOUR_SCREEN,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_RECT,
+        18, 5, 56, 20,
+        FLOPPY144_OBJECT_COLOUR_EDGE,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_TEXT,
+        25, 12, 0, 0,
+        FLOPPY144_OBJECT_COLOUR_WARNING,
+        "READY"
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        34, 28, 24, 3,
+        FLOPPY144_OBJECT_COLOUR_EDGE,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_TEXT,
+        12, -10, 0, 0,
+        FLOPPY144_OBJECT_COLOUR_LABEL,
+        "ARCHIVE TERMINAL"
+    }
+};
+/*
  * Suppression control panel visual recipe
  *
  * Every coordinate is relative to the object's registered position.
