@@ -159,6 +159,7 @@ static void Floppy144MovePlayer(
 
     Floppy144OfficeMove(
         &global_player,
+        &global_world,
         movement_x,
         movement_y
     );

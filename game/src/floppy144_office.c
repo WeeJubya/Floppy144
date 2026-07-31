@@ -143,13 +143,103 @@ static bool Floppy144OfficeNearObstacle(
 }
 
 /*
+ * Test visible solid objects from the reconstructed-object registry
+ *
+ * Rendering and collision consume the same object definition. Hidden objects
+ * do not block movement. Parent-relative coordinates are resolved by the
+ * object registry before collision bounds are applied.
+ */
+
+static bool Floppy144OfficeRegisteredObjectBlocks(
+    const Floppy144WorldState *world,
+    int32_t x,
+    int32_t y
+)
+{
+    uint32_t object_index;
+
+    if(world == NULL)
+    {
+        return false;
+    }
+
+    for(
+        object_index = 0U;
+        object_index <
+            (uint32_t)FLOPPY144_OBJECT_COUNT;
+        ++object_index
+    )
+    {
+        Floppy144ObjectId object =
+            (Floppy144ObjectId)object_index;
+
+        const Floppy144ObjectDefinition *definition =
+            Floppy144ObjectGet(object);
+
+        int32_t object_x;
+        int32_t object_y;
+
+        if(
+            definition == NULL ||
+            definition->scene !=
+                FLOPPY144_SCENE_OFFICE ||
+            (
+                definition->flags &
+                FLOPPY144_OBJECT_FLAG_SOLID
+            ) == 0U ||
+            !Floppy144WorldObjectVisible(
+                world,
+                object
+            ) ||
+            !Floppy144ObjectWorldPosition(
+                object,
+                &object_x,
+                &object_y
+            )
+        )
+        {
+            continue;
+        }
+
+        if(
+            definition->collision_width <= 0 ||
+            definition->collision_height <= 0
+        )
+        {
+            continue;
+        }
+
+        if(
+            Floppy144RectsOverlap(
+                x,
+                y,
+                FLOPPY144_PLAYER_WIDTH,
+                FLOPPY144_PLAYER_HEIGHT,
+                object_x +
+                    definition->collision_x,
+                object_y +
+                    definition->collision_y,
+                definition->collision_width,
+                definition->collision_height
+            )
+        )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/*
  * Validate a proposed player position
  *
  * First keeps the player inside the office interior, then rejects overlap with
- * every solid item in the obstacle table.
+ * permanent furniture and visible registered objects marked as solid.
  */
 
 static bool Floppy144OfficePositionValid(
+    const Floppy144WorldState *world,
     int32_t x,
     int32_t y
 )
@@ -194,9 +284,19 @@ static bool Floppy144OfficePositionValid(
         }
     }
 
+    if(
+        Floppy144OfficeRegisteredObjectBlocks(
+            world,
+            x,
+            y
+        )
+    )
+    {
+        return false;
+    }
+
     return true;
 }
-
 /*
  * Place the player at the office spawn point
  */
@@ -212,12 +312,14 @@ void Floppy144OfficeReset(
 /*
  * Move with sliding collision
  *
- * Horizontal and vertical movement are tested separately. If one axis is blocked,
- * the other can still move, allowing the player to slide around furniture.
+ * Horizontal and vertical movement are tested separately. Permanent furniture
+ * and currently visible solid reconstructed objects share the same validation
+ * path.
  */
 
 void Floppy144OfficeMove(
     Floppy144Player *player,
+    const Floppy144WorldState *world,
     int32_t movement_x,
     int32_t movement_y
 )
@@ -230,6 +332,7 @@ void Floppy144OfficeMove(
 
     if(
         Floppy144OfficePositionValid(
+            world,
             candidate_x,
             player->y
         )
@@ -240,6 +343,7 @@ void Floppy144OfficeMove(
 
     if(
         Floppy144OfficePositionValid(
+            world,
             player->x,
             candidate_y
         )
@@ -248,7 +352,6 @@ void Floppy144OfficeMove(
         player->y = candidate_y;
     }
 }
-
 /*
  * Terminal interaction zone
  *

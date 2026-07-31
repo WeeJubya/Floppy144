@@ -40,6 +40,7 @@ void Floppy144OfficeReset(
 
 void Floppy144OfficeMove(
     Floppy144Player *player,
+    const Floppy144WorldState *world,
     int32_t movement_x,
     int32_t movement_y
 );
