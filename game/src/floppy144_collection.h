@@ -48,6 +48,7 @@ typedef enum Floppy144CollectionId
     collection_class,                                              \
     auto_restored,                                                 \
     description,                                                   \
+    evidence_description,                                          \
     catalogue_record_count,                                        \
     catalogue_heading,                                             \
     catalogue_record_id_prefix,                                    \

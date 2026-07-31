@@ -130,39 +130,6 @@ static void Floppy144TerminalDrawCollection(
     );
 }
 
-/*
- * Return the player-facing description for evidence found within a
- * collection.
- *
- * Evidence state is stored generically by the world, while this text remains
- * collection-specific narrative content.
- */
-
-static const char *Floppy144TerminalEvidenceDescription(
-    Floppy144CollectionId collection
-)
-{
-    switch(collection)
-    {
-        case FLOPPY144_COLLECTION_HR02:
-        {
-            return
-                "EVIDENCE FOUND: DESK REALLOCATION MEMORANDUM.";
-        }
-
-        case FLOPPY144_COLLECTION_FA03:
-        {
-            return
-                "EVIDENCE FOUND: SUPPRESSION PANEL SERVICE NOTE.";
-        }
-
-        default:
-        {
-            return
-                "EVIDENCE FOUND: RECOVERED AUTHORED RECORD.";
-        }
-    }
-}
 
 /*
  * Draw the selected collection overlay
@@ -258,9 +225,9 @@ static void Floppy144TerminalDrawDetail(
         terminal->restoration_notice
             ? "RESTORATION COMPLETE. SITE SYSTEM DATA UPDATED."
             : evidence_found
-                ? Floppy144TerminalEvidenceDescription(
-                    terminal->selected_collection
-                )
+                ? definition->evidence_description != NULL
+                    ? definition->evidence_description
+                    : "EVIDENCE FOUND: RECOVERED AUTHORED RECORD."
                 : collection_restored
                     ? "COLLECTION DATA IS PRESENT IN THE RECONSTRUCTED SITE."
                     : "PRESS ENTER TO RESTORE THIS COLLECTION.";

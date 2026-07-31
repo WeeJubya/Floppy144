@@ -56,6 +56,7 @@ const Floppy144CollectionDefinition
     class_value,                                                   \
     auto_restored_value,                                           \
     description_text,                                              \
+    evidence_description_text,                                     \
     catalogue_record_count,                                        \
     catalogue_heading_text,                                        \
     catalogue_record_id_prefix,                                    \
@@ -73,6 +74,7 @@ const Floppy144CollectionDefinition
         class_value,                                               \
         auto_restored_value,                                       \
         description_text,                                          \
+        evidence_description_text,                                 \
         {                                                          \
             catalogue_record_count,                                \
             catalogue_heading_text,                                \

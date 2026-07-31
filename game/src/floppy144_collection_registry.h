@@ -47,6 +47,7 @@ typedef struct Floppy144CollectionDefinition
     bool auto_restored;
 
     const char *description;
+    const char *evidence_description;
 
     Floppy144CatalogueDefinition catalogue;
 } Floppy144CollectionDefinition;
