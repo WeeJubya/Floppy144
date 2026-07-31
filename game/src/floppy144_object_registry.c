@@ -162,6 +162,132 @@ static const Floppy144ObjectPrimitive
 };
 
 /*
+ * Desk 01 mug
+ *
+ * The object origin is the highest point of the steam. All coordinates are
+ * relative to Desk 01 through the parent relationship.
+ */
+
+static const Floppy144ObjectPrimitive
+    floppy144_desk_one_mug_primitives[] =
+{
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        0, 7, 12, 12,
+        FLOPPY144_OBJECT_COLOUR_WARNING,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_RECT,
+        0, 7, 12, 12,
+        FLOPPY144_OBJECT_COLOUR_BACKGROUND,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_RECT,
+        12, 10, 5, 7,
+        FLOPPY144_OBJECT_COLOUR_WARNING,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        2, 9, 8, 2,
+        FLOPPY144_OBJECT_COLOUR_BACKGROUND,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        3, 2, 2, 3,
+        FLOPPY144_OBJECT_COLOUR_PAPER,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        7, 0, 2, 4,
+        FLOPPY144_OBJECT_COLOUR_PAPER,
+        NULL
+    }
+};
+
+/*
+ * Desk 04 personnel forms
+ *
+ * Three overlapping sheets and their recovered text markings are positioned
+ * relative to Desk 04.
+ */
+
+static const Floppy144ObjectPrimitive
+    floppy144_desk_four_personnel_forms_primitives[] =
+{
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        0, 8, 30, 15,
+        FLOPPY144_OBJECT_COLOUR_PAPER,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_RECT,
+        0, 8, 30, 15,
+        FLOPPY144_OBJECT_COLOUR_BACKGROUND,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        4, 4, 30, 15,
+        FLOPPY144_OBJECT_COLOUR_PAPER,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_RECT,
+        4, 4, 30, 15,
+        FLOPPY144_OBJECT_COLOUR_BACKGROUND,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        8, 0, 30, 15,
+        FLOPPY144_OBJECT_COLOUR_PAPER,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_RECT,
+        8, 0, 30, 15,
+        FLOPPY144_OBJECT_COLOUR_BACKGROUND,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        12, 4, 20, 1,
+        FLOPPY144_OBJECT_COLOUR_BACKGROUND,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        12, 8, 16, 1,
+        FLOPPY144_OBJECT_COLOUR_BACKGROUND,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        12, 12, 18, 1,
+        FLOPPY144_OBJECT_COLOUR_BACKGROUND,
+        NULL
+    }
+};
+/*
  * Suppression control panel visual recipe
  */
 
@@ -244,6 +370,7 @@ static const Floppy144ObjectDefinition
     interaction_y_value,                                           \
     interaction_width_value,                                       \
     interaction_height_value,                                      \
+    required_collection_value,                                     \
     flags_value,                                                   \
     initially_visible_value,                                       \
     label_value,                                                   \
@@ -265,6 +392,7 @@ static const Floppy144ObjectDefinition
         interaction_y_value,                                       \
         interaction_width_value,                                   \
         interaction_height_value,                                  \
+        required_collection_value,                                 \
         flags_value,                                               \
         initially_visible_value,                                   \
         label_value,                                               \

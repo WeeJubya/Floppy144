@@ -57,8 +57,10 @@ typedef enum Floppy144ObjectColourRole
     FLOPPY144_OBJECT_COLOUR_BODY = 0,
     FLOPPY144_OBJECT_COLOUR_FURNITURE,
     FLOPPY144_OBJECT_COLOUR_DETAIL,
+    FLOPPY144_OBJECT_COLOUR_PAPER,
     FLOPPY144_OBJECT_COLOUR_EDGE,
     FLOPPY144_OBJECT_COLOUR_SCREEN,
+    FLOPPY144_OBJECT_COLOUR_BACKGROUND,
     FLOPPY144_OBJECT_COLOUR_WARNING,
     FLOPPY144_OBJECT_COLOUR_LABEL
 } Floppy144ObjectColourRole;
@@ -120,6 +122,8 @@ typedef struct Floppy144ObjectDefinition
     int32_t interaction_y;
     int32_t interaction_width;
     int32_t interaction_height;
+
+    Floppy144CollectionId required_collection;
 
     uint32_t flags;
     bool initially_visible;

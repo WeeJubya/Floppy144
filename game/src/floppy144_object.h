@@ -27,6 +27,7 @@ typedef enum Floppy144ObjectId
     interaction_y,                                                 \
     interaction_width,                                             \
     interaction_height,                                            \
+    required_collection,                                          \
     flags,                                                         \
     initially_visible,                                             \
     label,                                                         \

@@ -20,6 +20,7 @@
  *   interaction y
  *   interaction width
  *   interaction height
+ *   required restored collection
  *   object flags
  *   initially visible
  *   label definition
@@ -42,6 +43,7 @@ FLOPPY144_OBJECT(
     0,
     0,
     0,
+    FLOPPY144_COLLECTION_COUNT,
     FLOPPY144_OBJECT_FLAG_NONE,
     false,
     NULL,
@@ -64,6 +66,7 @@ FLOPPY144_OBJECT(
     34,
     132,
     28,
+    FLOPPY144_COLLECTION_COUNT,
     FLOPPY144_OBJECT_FLAG_SOLID |
         FLOPPY144_OBJECT_FLAG_INTERACTABLE,
     true,
@@ -87,6 +90,7 @@ FLOPPY144_OBJECT(
     -18,
     165,
     79,
+    FLOPPY144_COLLECTION_COUNT,
     FLOPPY144_OBJECT_FLAG_SOLID |
         FLOPPY144_OBJECT_FLAG_INTERACTABLE,
     true,
@@ -110,6 +114,7 @@ FLOPPY144_OBJECT(
     0,
     0,
     0,
+    FLOPPY144_COLLECTION_COUNT,
     FLOPPY144_OBJECT_FLAG_SOLID,
     true,
     &floppy144_desk_two_label,
@@ -132,6 +137,7 @@ FLOPPY144_OBJECT(
     0,
     0,
     0,
+    FLOPPY144_COLLECTION_COUNT,
     FLOPPY144_OBJECT_FLAG_SOLID,
     true,
     &floppy144_desk_three_label,
@@ -154,9 +160,56 @@ FLOPPY144_OBJECT(
     -18,
     165,
     79,
+    FLOPPY144_COLLECTION_COUNT,
     FLOPPY144_OBJECT_FLAG_SOLID |
         FLOPPY144_OBJECT_FLAG_INTERACTABLE,
     true,
     &floppy144_desk_four_label,
     floppy144_desk_primitives
+)
+
+FLOPPY144_OBJECT(
+    DESK_ONE_MUG,
+    "DESK 01 MUG",
+    FLOPPY144_SCENE_OFFICE,
+    FLOPPY144_OBJECT_DESK_ONE,
+    106,
+    17,
+    FLOPPY144_OBJECT_LAYER_CONTENT,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    FLOPPY144_COLLECTION_HR02,
+    FLOPPY144_OBJECT_FLAG_NONE,
+    true,
+    NULL,
+    floppy144_desk_one_mug_primitives
+)
+
+FLOPPY144_OBJECT(
+    DESK_FOUR_PERSONNEL_FORMS,
+    "PERSONNEL FORMS",
+    FLOPPY144_SCENE_OFFICE,
+    FLOPPY144_OBJECT_DESK_FOUR,
+    80,
+    12,
+    FLOPPY144_OBJECT_LAYER_CONTENT,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    FLOPPY144_COLLECTION_HR02,
+    FLOPPY144_OBJECT_FLAG_NONE,
+    true,
+    NULL,
+    floppy144_desk_four_personnel_forms_primitives
 )

@@ -213,6 +213,18 @@ bool Floppy144WorldObjectEffectivelyVisible(
             return false;
         }
 
+        if(
+            definition->required_collection !=
+                FLOPPY144_COLLECTION_COUNT &&
+            !Floppy144WorldCollectionRestored(
+                world,
+                definition->required_collection
+            )
+        )
+        {
+            return false;
+        }
+
         current =
             definition->parent;
 
@@ -221,7 +233,6 @@ bool Floppy144WorldObjectEffectivelyVisible(
 
     return true;
 }
-
 bool Floppy144WorldRevealObject(
     Floppy144WorldState *world,
     Floppy144ObjectId object

@@ -459,8 +459,10 @@ static uint32_t Floppy144OfficeObjectColour(
     uint32_t body_colour,
     uint32_t furniture_colour,
     uint32_t detail_colour,
+    uint32_t paper_colour,
     uint32_t edge_colour,
     uint32_t screen_colour,
+    uint32_t background_colour,
     uint32_t warning_colour,
     uint32_t label_colour
 )
@@ -482,6 +484,11 @@ static uint32_t Floppy144OfficeObjectColour(
             return detail_colour;
         }
 
+        case FLOPPY144_OBJECT_COLOUR_PAPER:
+        {
+            return paper_colour;
+        }
+
         case FLOPPY144_OBJECT_COLOUR_EDGE:
         {
             return edge_colour;
@@ -490,6 +497,11 @@ static uint32_t Floppy144OfficeObjectColour(
         case FLOPPY144_OBJECT_COLOUR_SCREEN:
         {
             return screen_colour;
+        }
+
+        case FLOPPY144_OBJECT_COLOUR_BACKGROUND:
+        {
+            return background_colour;
         }
 
         case FLOPPY144_OBJECT_COLOUR_WARNING:
@@ -516,8 +528,10 @@ static void Floppy144OfficeDrawRegisteredObjects(
     uint32_t body_colour,
     uint32_t furniture_colour,
     uint32_t detail_colour,
+    uint32_t paper_colour,
     uint32_t edge_colour,
     uint32_t screen_colour,
+    uint32_t background_colour,
     uint32_t warning_colour,
     uint32_t label_colour
 )
@@ -587,8 +601,10 @@ static void Floppy144OfficeDrawRegisteredObjects(
                         body_colour,
                         furniture_colour,
                         detail_colour,
+                        paper_colour,
                         edge_colour,
                         screen_colour,
+                        background_colour,
                         warning_colour,
                         label_colour
                     );
@@ -685,8 +701,10 @@ static void Floppy144OfficeDrawRegisteredObjects(
                         body_colour,
                         furniture_colour,
                         detail_colour,
+                        paper_colour,
                         edge_colour,
                         screen_colour,
+                        background_colour,
                         warning_colour,
                         label_colour
                     );
@@ -799,169 +817,6 @@ static void Floppy144OfficeDrawPlayer(
     );
 }
 
-/*
- * Draw HR-02 restoration details
- *
- * Before HR-02 is restored this function exits immediately. Afterwards it adds
- * the Desk 01 mug and Desk 04 personnel forms referenced by record 038.
- */
-
-static void Floppy144OfficeDrawPersonnelDetails(
-    Floppy144Surface *surface,
-    const Floppy144WorldState *world,
-    uint32_t paper_colour,
-    uint32_t mug_colour,
-    uint32_t edge_colour
-)
-{
-    if(!Floppy144WorldCollectionRestored(world, FLOPPY144_COLLECTION_HR02))
-    {
-        return;
-    }
-
-    /*
-     * Desk 01: mug.
-     */
-
-    Floppy144DrawFillRect(
-        surface,
-        198,
-        116,
-        12,
-        12,
-        mug_colour
-    );
-
-    Floppy144DrawRect(
-        surface,
-        198,
-        116,
-        12,
-        12,
-        edge_colour
-    );
-
-    Floppy144DrawRect(
-        surface,
-        210,
-        119,
-        5,
-        7,
-        mug_colour
-    );
-
-    Floppy144DrawFillRect(
-        surface,
-        200,
-        118,
-        8,
-        2,
-        edge_colour
-    );
-
-    Floppy144DrawFillRect(
-        surface,
-        201,
-        111,
-        2,
-        3,
-        paper_colour
-    );
-
-    Floppy144DrawFillRect(
-        surface,
-        205,
-        109,
-        2,
-        4,
-        paper_colour
-    );
-
-    /*
-     * Desk 04: personnel forms.
-     */
-
-    Floppy144DrawFillRect(
-        surface,
-        496,
-        232,
-        30,
-        15,
-        paper_colour
-    );
-
-    Floppy144DrawRect(
-        surface,
-        496,
-        232,
-        30,
-        15,
-        edge_colour
-    );
-
-    Floppy144DrawFillRect(
-        surface,
-        500,
-        228,
-        30,
-        15,
-        paper_colour
-    );
-
-    Floppy144DrawRect(
-        surface,
-        500,
-        228,
-        30,
-        15,
-        edge_colour
-    );
-
-    Floppy144DrawFillRect(
-        surface,
-        504,
-        224,
-        30,
-        15,
-        paper_colour
-    );
-
-    Floppy144DrawRect(
-        surface,
-        504,
-        224,
-        30,
-        15,
-        edge_colour
-    );
-
-    Floppy144DrawFillRect(
-        surface,
-        508,
-        228,
-        20,
-        1,
-        edge_colour
-    );
-
-    Floppy144DrawFillRect(
-        surface,
-        508,
-        232,
-        16,
-        1,
-        edge_colour
-    );
-
-    Floppy144DrawFillRect(
-        surface,
-        508,
-        236,
-        18,
-        1,
-        edge_colour
-    );
-}
 /*
  * Draw the complete reconstructed office
  *
@@ -1244,7 +1099,9 @@ void Floppy144OfficeDraw(
         cabinet_colour,
         desk_colour,
         desk_detail,
+        text_colour,
         wall_edge,
+        background,
         background,
         amber,
         muted_colour
@@ -1292,15 +1149,6 @@ void Floppy144OfficeDraw(
         room_label,
         1,
         muted_colour
-    );
-
-    /* Collection-specific overlays are drawn after the base furniture. */
-    Floppy144OfficeDrawPersonnelDetails(
-        &surface,
-        world,
-        text_colour,
-        amber,
-        background
     );
 
     /* Draw the player above room objects and evidence overlays. */
