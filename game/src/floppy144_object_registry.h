@@ -7,23 +7,16 @@
 
 #pragma once
 
+#include "floppy144_collection.h"
 #include "floppy144_object.h"
 
 #include <stdbool.h>
 #include <stdint.h>
 
-/*
- * Scene ownership
- */
-
 typedef enum Floppy144SceneId
 {
     FLOPPY144_SCENE_OFFICE = 0
 } Floppy144SceneId;
-
-/*
- * Object behaviour flags
- */
 
 typedef enum Floppy144ObjectFlags
 {
@@ -40,13 +33,6 @@ typedef enum Floppy144ObjectFlags
         1U << 2
 } Floppy144ObjectFlags;
 
-/*
- * Scene drawing layers
- *
- * Parenting controls relative position and inherited visibility. It does not
- * dictate drawing order.
- */
-
 typedef enum Floppy144ObjectLayer
 {
     FLOPPY144_OBJECT_LAYER_BACKGROUND = 0,
@@ -59,10 +45,6 @@ typedef enum Floppy144ObjectLayer
         FLOPPY144_OBJECT_LAYER_FOREGROUND
 } Floppy144ObjectLayer;
 
-/*
- * Asset-free drawing primitives
- */
-
 typedef enum Floppy144ObjectPrimitiveType
 {
     FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT = 0,
@@ -70,19 +52,17 @@ typedef enum Floppy144ObjectPrimitiveType
     FLOPPY144_OBJECT_PRIMITIVE_TEXT
 } Floppy144ObjectPrimitiveType;
 
-/*
- * Palette roles are converted into actual colours by the owning scene.
- */
-
 typedef enum Floppy144ObjectColourRole
 {
     FLOPPY144_OBJECT_COLOUR_BODY = 0,
     FLOPPY144_OBJECT_COLOUR_FURNITURE,
+    FLOPPY144_OBJECT_COLOUR_DETAIL,
     FLOPPY144_OBJECT_COLOUR_EDGE,
     FLOPPY144_OBJECT_COLOUR_SCREEN,
     FLOPPY144_OBJECT_COLOUR_WARNING,
     FLOPPY144_OBJECT_COLOUR_LABEL
 } Floppy144ObjectColourRole;
+
 typedef struct Floppy144ObjectPrimitive
 {
     Floppy144ObjectPrimitiveType type;
@@ -98,11 +78,24 @@ typedef struct Floppy144ObjectPrimitive
 } Floppy144ObjectPrimitive;
 
 /*
- * Immutable object definition
+ * Object-attached label
  *
- * Local coordinates are relative to the parent. Objects without a parent are
- * positioned relative to their owning scene.
+ * The optional restored text replaces the default text when its associated
+ * collection has been restored. Position remains relative to the object.
  */
+
+typedef struct Floppy144ObjectLabelDefinition
+{
+    int32_t x;
+    int32_t y;
+
+    Floppy144ObjectColourRole colour_role;
+
+    const char *default_text;
+
+    Floppy144CollectionId restored_collection;
+    const char *restored_text;
+} Floppy144ObjectLabelDefinition;
 
 typedef struct Floppy144ObjectDefinition
 {
@@ -131,23 +124,15 @@ typedef struct Floppy144ObjectDefinition
     uint32_t flags;
     bool initially_visible;
 
+    const Floppy144ObjectLabelDefinition *label;
+
     const Floppy144ObjectPrimitive *primitives;
     uint32_t primitive_count;
 } Floppy144ObjectDefinition;
 
-/*
- * Registry access
- */
-
 const Floppy144ObjectDefinition *Floppy144ObjectGet(
     Floppy144ObjectId object
 );
-
-/*
- * Resolve parent-relative coordinates into scene coordinates.
- *
- * Returns false for an invalid ID or a circular parent chain.
- */
 
 bool Floppy144ObjectWorldPosition(
     Floppy144ObjectId object,

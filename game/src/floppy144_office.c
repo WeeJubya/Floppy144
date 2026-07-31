@@ -66,17 +66,11 @@ typedef struct Floppy144Rect
 /*
  * Permanent furniture awaiting migration into the object registry
  *
- * Order: four desks, two left cabinets, two right cabinets.
+ * Only the four filing cabinets remain in the transitional collision table.
  */
 
 static const Floppy144Rect floppy144_obstacles[] =
 {
-    /* Desks 01-04 */
-    {92, 92, 132, 42},
-    {416, 92, 132, 42},
-    {92, 212, 132, 42},
-    {416, 212, 132, 42},
-
     /* West-wall filing cabinets */
     {42, 68, 34, 60},
     {42, 140, 34, 60},
@@ -108,34 +102,6 @@ static bool Floppy144RectsOverlap(
         first_x + first_width > second_x &&
         first_y < second_y + second_height &&
         first_y + first_height > second_y;
-}
-
-/*
- * Test an interaction halo around furniture
- *
- * The margin expands a solid obstacle only for proximity checks. It does not
- * make the physical collision box larger.
- */
-
-static bool Floppy144OfficeNearObstacle(
-    const Floppy144Player *player,
-    size_t obstacle_index,
-    int32_t margin
-)
-{
-    const Floppy144Rect *obstacle =
-        &floppy144_obstacles[obstacle_index];
-
-    return Floppy144RectsOverlap(
-        player->x,
-        player->y,
-        FLOPPY144_PLAYER_WIDTH,
-        FLOPPY144_PLAYER_HEIGHT,
-        obstacle->x - margin,
-        obstacle->y - margin,
-        obstacle->width + margin * 2,
-        obstacle->height + margin * 2
-    );
 }
 
 /*
@@ -420,105 +386,11 @@ bool Floppy144OfficeNearObject(
             definition->interaction_height;
 }
 /*
- * Evidence-driven desk interaction zones
+ * Transitional cabinet and player drawing helpers
  *
- * These remain tied to the transitional obstacle table until the desks and
- * their reconstructed child objects are migrated.
+ * Desks and the archive terminal now come from the object registry. Filing
+ * cabinets remain procedural until their own migration checkpoint.
  */
-
-bool Floppy144OfficeNearDeskOne(
-    const Floppy144Player *player
-)
-{
-    return Floppy144OfficeNearObstacle(
-        player,
-        0,
-        8
-    );
-}
-
-bool Floppy144OfficeNearDeskFour(
-    const Floppy144Player *player
-)
-{
-    return Floppy144OfficeNearObstacle(
-        player,
-        3,
-        8
-    );
-}
-/*
- * Procedural furniture and player drawing helpers
- *
- * Simple rectangles build desks, cabinets, the archive terminal and the player.
- * No external image files are required.
- */
-
-static void Floppy144OfficeDrawDesk(
-    Floppy144Surface *surface,
-    uint32_t x,
-    uint32_t y,
-    const char *label,
-    uint32_t desk_colour,
-    uint32_t edge_colour,
-    uint32_t detail_colour
-)
-{
-    Floppy144DrawFillRect(
-        surface,
-        x,
-        y,
-        132,
-        42,
-        desk_colour
-    );
-
-    Floppy144DrawRect(
-        surface,
-        x,
-        y,
-        132,
-        42,
-        edge_colour
-    );
-
-    Floppy144DrawFillRect(
-        surface,
-        x + 8,
-        y + 7,
-        28,
-        18,
-        detail_colour
-    );
-
-    Floppy144DrawRect(
-        surface,
-        x + 8,
-        y + 7,
-        28,
-        18,
-        edge_colour
-    );
-
-    Floppy144DrawText(
-        surface,
-        x + 45,
-        y + 10,
-        label,
-        1,
-        edge_colour
-    );
-
-    Floppy144DrawFillRect(
-        surface,
-        x + 45,
-        y + 27,
-        74,
-        2,
-        detail_colour
-    );
-}
-
 /*
  * Draw one filing cabinet
  *
@@ -586,6 +458,7 @@ static uint32_t Floppy144OfficeObjectColour(
     Floppy144ObjectColourRole role,
     uint32_t body_colour,
     uint32_t furniture_colour,
+    uint32_t detail_colour,
     uint32_t edge_colour,
     uint32_t screen_colour,
     uint32_t warning_colour,
@@ -602,6 +475,11 @@ static uint32_t Floppy144OfficeObjectColour(
         case FLOPPY144_OBJECT_COLOUR_FURNITURE:
         {
             return furniture_colour;
+        }
+
+        case FLOPPY144_OBJECT_COLOUR_DETAIL:
+        {
+            return detail_colour;
         }
 
         case FLOPPY144_OBJECT_COLOUR_EDGE:
@@ -637,6 +515,7 @@ static void Floppy144OfficeDrawRegisteredObjects(
     const Floppy144WorldState *world,
     uint32_t body_colour,
     uint32_t furniture_colour,
+    uint32_t detail_colour,
     uint32_t edge_colour,
     uint32_t screen_colour,
     uint32_t warning_colour,
@@ -707,6 +586,7 @@ static void Floppy144OfficeDrawRegisteredObjects(
                         primitive->colour_role,
                         body_colour,
                         furniture_colour,
+                        detail_colour,
                         edge_colour,
                         screen_colour,
                         warning_colour,
@@ -775,6 +655,56 @@ static void Floppy144OfficeDrawRegisteredObjects(
                         break;
                     }
                 }
+            }
+
+            if(
+                definition->label != NULL &&
+                definition->label->default_text != NULL
+            )
+            {
+                const char *label_text =
+                    definition->label->default_text;
+
+                uint32_t label_colour_value;
+
+                if(
+                    definition->label->restored_text != NULL &&
+                    Floppy144WorldCollectionRestored(
+                        world,
+                        definition->label->restored_collection
+                    )
+                )
+                {
+                    label_text =
+                        definition->label->restored_text;
+                }
+
+                label_colour_value =
+                    Floppy144OfficeObjectColour(
+                        definition->label->colour_role,
+                        body_colour,
+                        furniture_colour,
+                        detail_colour,
+                        edge_colour,
+                        screen_colour,
+                        warning_colour,
+                        label_colour
+                    );
+
+                Floppy144DrawText(
+                    surface,
+                    (uint32_t)(
+                        object_x +
+                        definition->label->x
+                    ),
+                    (uint32_t)(
+                        object_y +
+                        definition->label->y
+                    ),
+                    label_text,
+                    1,
+                    label_colour_value
+                );
             }
         }
     }
@@ -1099,10 +1029,21 @@ void Floppy144OfficeDraw(
      */
 
     bool near_evidence_desk =
-        Floppy144WorldCollectionEvidenceFound(world, FLOPPY144_COLLECTION_HR02) &&
+        Floppy144WorldCollectionEvidenceFound(
+            world,
+            FLOPPY144_COLLECTION_HR02
+        ) &&
         (
-            Floppy144OfficeNearDeskOne(player) ||
-            Floppy144OfficeNearDeskFour(player)
+            Floppy144OfficeNearObject(
+                world,
+                player,
+                FLOPPY144_OBJECT_DESK_ONE
+            ) ||
+            Floppy144OfficeNearObject(
+                world,
+                player,
+                FLOPPY144_OBJECT_DESK_FOUR
+            )
         );
 
     const char *prompt =
@@ -1126,26 +1067,6 @@ void Floppy144OfficeDraw(
         "STATUS %02u%%",
         (unsigned)Floppy144WorldReconstructionPercent(world)
     );
-
-    const char *desk_one_label =
-        Floppy144WorldCollectionRestored(world, FLOPPY144_COLLECTION_HR02)
-            ? "SENIOR ARCHIVIST"
-            : "DESK 01";
-
-    const char *desk_two_label =
-        Floppy144WorldCollectionRestored(world, FLOPPY144_COLLECTION_HR02)
-            ? "RECORDS OFFICER"
-            : "DESK 02";
-
-    const char *desk_three_label =
-        Floppy144WorldCollectionRestored(world, FLOPPY144_COLLECTION_HR02)
-            ? "ADMINISTRATOR"
-            : "DESK 03";
-
-    const char *desk_four_label =
-        Floppy144WorldCollectionRestored(world, FLOPPY144_COLLECTION_HR02)
-            ? "IT SUPPORT"
-            : "DESK 04";
 
     const char *default_room_label =
         Floppy144WorldCollectionRestored(world, FLOPPY144_COLLECTION_HR02)
@@ -1322,51 +1243,12 @@ void Floppy144OfficeDraw(
         world,
         cabinet_colour,
         desk_colour,
+        desk_detail,
         wall_edge,
         background,
         amber,
         muted_colour
     );
-    Floppy144OfficeDrawDesk(
-        &surface,
-        92,
-        92,
-        desk_one_label,
-        desk_colour,
-        wall_edge,
-        desk_detail
-    );
-
-    Floppy144OfficeDrawDesk(
-        &surface,
-        416,
-        92,
-        desk_two_label,
-        desk_colour,
-        wall_edge,
-        desk_detail
-    );
-
-    Floppy144OfficeDrawDesk(
-        &surface,
-        92,
-        212,
-        desk_three_label,
-        desk_colour,
-        wall_edge,
-        desk_detail
-    );
-
-    Floppy144OfficeDrawDesk(
-        &surface,
-        416,
-        212,
-        desk_four_label,
-        desk_colour,
-        wall_edge,
-        desk_detail
-    );
-
     Floppy144OfficeDrawCabinet(
         &surface,
         42,

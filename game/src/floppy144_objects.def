@@ -22,6 +22,7 @@
  *   interaction height
  *   object flags
  *   initially visible
+ *   label definition
  *   primitive array
  */
 
@@ -43,6 +44,7 @@ FLOPPY144_OBJECT(
     0,
     FLOPPY144_OBJECT_FLAG_NONE,
     false,
+    NULL,
     floppy144_suppression_control_panel_primitives
 )
 
@@ -65,5 +67,96 @@ FLOPPY144_OBJECT(
     FLOPPY144_OBJECT_FLAG_SOLID |
         FLOPPY144_OBJECT_FLAG_INTERACTABLE,
     true,
+    &floppy144_archive_terminal_label,
     floppy144_archive_terminal_primitives
+)
+
+FLOPPY144_OBJECT(
+    DESK_ONE,
+    "DESK 01",
+    FLOPPY144_SCENE_OFFICE,
+    FLOPPY144_OBJECT_NONE,
+    92,
+    92,
+    FLOPPY144_OBJECT_LAYER_FURNITURE,
+    0,
+    0,
+    132,
+    42,
+    -16,
+    -18,
+    165,
+    79,
+    FLOPPY144_OBJECT_FLAG_SOLID |
+        FLOPPY144_OBJECT_FLAG_INTERACTABLE,
+    true,
+    &floppy144_desk_one_label,
+    floppy144_desk_primitives
+)
+
+FLOPPY144_OBJECT(
+    DESK_TWO,
+    "DESK 02",
+    FLOPPY144_SCENE_OFFICE,
+    FLOPPY144_OBJECT_NONE,
+    416,
+    92,
+    FLOPPY144_OBJECT_LAYER_FURNITURE,
+    0,
+    0,
+    132,
+    42,
+    0,
+    0,
+    0,
+    0,
+    FLOPPY144_OBJECT_FLAG_SOLID,
+    true,
+    &floppy144_desk_two_label,
+    floppy144_desk_primitives
+)
+
+FLOPPY144_OBJECT(
+    DESK_THREE,
+    "DESK 03",
+    FLOPPY144_SCENE_OFFICE,
+    FLOPPY144_OBJECT_NONE,
+    92,
+    212,
+    FLOPPY144_OBJECT_LAYER_FURNITURE,
+    0,
+    0,
+    132,
+    42,
+    0,
+    0,
+    0,
+    0,
+    FLOPPY144_OBJECT_FLAG_SOLID,
+    true,
+    &floppy144_desk_three_label,
+    floppy144_desk_primitives
+)
+
+FLOPPY144_OBJECT(
+    DESK_FOUR,
+    "DESK 04",
+    FLOPPY144_SCENE_OFFICE,
+    FLOPPY144_OBJECT_NONE,
+    416,
+    212,
+    FLOPPY144_OBJECT_LAYER_FURNITURE,
+    0,
+    0,
+    132,
+    42,
+    -16,
+    -18,
+    165,
+    79,
+    FLOPPY144_OBJECT_FLAG_SOLID |
+        FLOPPY144_OBJECT_FLAG_INTERACTABLE,
+    true,
+    &floppy144_desk_four_label,
+    floppy144_desk_primitives
 )

@@ -10,11 +10,66 @@
     ((uint32_t)(sizeof(values) / sizeof((values)[0])))
 
 /*
+ * Object-attached labels
+ */
+
+static const Floppy144ObjectLabelDefinition
+    floppy144_archive_terminal_label =
+{
+    12,
+    -10,
+    FLOPPY144_OBJECT_COLOUR_LABEL,
+    "ARCHIVE TERMINAL",
+    FLOPPY144_COLLECTION_COUNT,
+    NULL
+};
+
+static const Floppy144ObjectLabelDefinition
+    floppy144_desk_one_label =
+{
+    45,
+    10,
+    FLOPPY144_OBJECT_COLOUR_EDGE,
+    "DESK 01",
+    FLOPPY144_COLLECTION_HR02,
+    "SENIOR ARCHIVIST"
+};
+
+static const Floppy144ObjectLabelDefinition
+    floppy144_desk_two_label =
+{
+    45,
+    10,
+    FLOPPY144_OBJECT_COLOUR_EDGE,
+    "DESK 02",
+    FLOPPY144_COLLECTION_HR02,
+    "RECORDS OFFICER"
+};
+
+static const Floppy144ObjectLabelDefinition
+    floppy144_desk_three_label =
+{
+    45,
+    10,
+    FLOPPY144_OBJECT_COLOUR_EDGE,
+    "DESK 03",
+    FLOPPY144_COLLECTION_HR02,
+    "ADMINISTRATOR"
+};
+
+static const Floppy144ObjectLabelDefinition
+    floppy144_desk_four_label =
+{
+    45,
+    10,
+    FLOPPY144_OBJECT_COLOUR_EDGE,
+    "DESK 04",
+    FLOPPY144_COLLECTION_HR02,
+    "IT SUPPORT"
+};
+
+/*
  * Archive terminal visual recipe
- *
- * Coordinates are relative to the terminal's registered position. The label
- * uses a negative local Y coordinate so that it remains attached above the
- * terminal whenever the object is repositioned.
  */
 
 static const Floppy144ObjectPrimitive
@@ -60,19 +115,54 @@ static const Floppy144ObjectPrimitive
         34, 28, 24, 3,
         FLOPPY144_OBJECT_COLOUR_EDGE,
         NULL
+    }
+};
+
+/*
+ * Shared desk visual recipe
+ */
+
+static const Floppy144ObjectPrimitive
+    floppy144_desk_primitives[] =
+{
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        0, 0, 132, 42,
+        FLOPPY144_OBJECT_COLOUR_FURNITURE,
+        NULL
     },
 
     {
-        FLOPPY144_OBJECT_PRIMITIVE_TEXT,
-        12, -10, 0, 0,
-        FLOPPY144_OBJECT_COLOUR_LABEL,
-        "ARCHIVE TERMINAL"
+        FLOPPY144_OBJECT_PRIMITIVE_RECT,
+        0, 0, 132, 42,
+        FLOPPY144_OBJECT_COLOUR_EDGE,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        8, 7, 28, 18,
+        FLOPPY144_OBJECT_COLOUR_DETAIL,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_RECT,
+        8, 7, 28, 18,
+        FLOPPY144_OBJECT_COLOUR_EDGE,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        45, 27, 74, 2,
+        FLOPPY144_OBJECT_COLOUR_DETAIL,
+        NULL
     }
 };
+
 /*
  * Suppression control panel visual recipe
- *
- * Every coordinate is relative to the object's registered position.
  */
 
 static const Floppy144ObjectPrimitive
@@ -135,10 +225,6 @@ static const Floppy144ObjectPrimitive
     }
 };
 
-/*
- * Generate immutable object metadata from the master declaration file.
- */
-
 static const Floppy144ObjectDefinition
     floppy144_object_definitions[FLOPPY144_OBJECT_COUNT] =
 {
@@ -160,6 +246,7 @@ static const Floppy144ObjectDefinition
     interaction_height_value,                                      \
     flags_value,                                                   \
     initially_visible_value,                                       \
+    label_value,                                                   \
     primitive_values                                               \
 )                                                                  \
     {                                                              \
@@ -180,6 +267,7 @@ static const Floppy144ObjectDefinition
         interaction_height_value,                                  \
         flags_value,                                               \
         initially_visible_value,                                   \
+        label_value,                                               \
         primitive_values,                                          \
         FLOPPY144_ARRAY_COUNT(primitive_values)                    \
     },
@@ -188,10 +276,6 @@ static const Floppy144ObjectDefinition
 
 #undef FLOPPY144_OBJECT
 };
-
-/*
- * Retrieve immutable object metadata.
- */
 
 const Floppy144ObjectDefinition *Floppy144ObjectGet(
     Floppy144ObjectId object
@@ -209,12 +293,6 @@ const Floppy144ObjectDefinition *Floppy144ObjectGet(
     return
         &floppy144_object_definitions[object];
 }
-
-/*
- * Resolve parent-relative coordinates.
- *
- * The depth limit prevents malformed data from creating an infinite loop.
- */
 
 bool Floppy144ObjectWorldPosition(
     Floppy144ObjectId object,

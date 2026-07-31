@@ -51,13 +51,7 @@ bool Floppy144OfficeNearObject(
     Floppy144ObjectId object
 );
 
-bool Floppy144OfficeNearDeskOne(
-    const Floppy144Player *player
-);
 
-bool Floppy144OfficeNearDeskFour(
-    const Floppy144Player *player
-);
 
 void Floppy144OfficeDraw(
     EngineData *engine,

@@ -378,8 +378,10 @@ static LRESULT CALLBACK Floppy144WindowProc(
                             }
                             else if(
                                 Floppy144WorldCollectionEvidenceFound(&global_world, FLOPPY144_COLLECTION_HR02) &&
-                                Floppy144OfficeNearDeskOne(
-                                    &global_player
+                                Floppy144OfficeNearObject(
+                                    &global_world,
+                                    &global_player,
+                                    FLOPPY144_OBJECT_DESK_ONE
                                 )
                             )
                             {
@@ -390,8 +392,10 @@ static LRESULT CALLBACK Floppy144WindowProc(
                             }
                             else if(
                                 Floppy144WorldCollectionEvidenceFound(&global_world, FLOPPY144_COLLECTION_HR02) &&
-                                Floppy144OfficeNearDeskFour(
-                                    &global_player
+                                Floppy144OfficeNearObject(
+                                    &global_world,
+                                    &global_player,
+                                    FLOPPY144_OBJECT_DESK_FOUR
                                 )
                             )
                             {

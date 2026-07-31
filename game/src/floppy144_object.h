@@ -29,6 +29,7 @@ typedef enum Floppy144ObjectId
     interaction_height,                                            \
     flags,                                                         \
     initially_visible,                                             \
+    label,                                                         \
     primitives                                                     \
 )                                                                  \
     FLOPPY144_OBJECT_##symbol,
