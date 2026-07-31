@@ -24,53 +24,11 @@
 #define FLOPPY144_CATALOGUE_ROWS         10U
 
 /*
- * Obtain catalogue configuration from the selected collection.
- */
-
-static const Floppy144CatalogueDefinition *
-Floppy144CatalogueGetDefinition(
-    Floppy144CollectionId collection
-)
-{
-    return
-        &Floppy144CollectionGet(collection)->catalogue;
-}
-
-/*
- * Procedural title vocabulary
+ * Shared procedural document forms
  *
- * Subjects vary by collection while document forms are shared. Combining
- * the two tables produces plausible archive titles without storing 200 strings.
+ * Collection-specific subjects and numbering rules belong to the collection
+ * registry. These forms are shared by every generated catalogue.
  */
-
-static const char *floppy144_hr02_record_subjects[10] =
-{
-    "APPOINTMENT",
-    "TRANSFER",
-    "ABSENCE",
-    "TRAINING",
-    "ACCESS",
-    "PAYROLL",
-    "LEAVE",
-    "DESK ALLOCATION",
-    "APPRAISAL",
-    "EXIT"
-};
-
-static const char *floppy144_fa03_record_subjects[10] =
-{
-    "SUPPRESSION PANEL",
-    "HALON CYLINDER",
-    "ALARM CIRCUIT",
-    "SERVER ROOM SAFETY",
-    "EMERGENCY CONTROL",
-    "VENTILATION SYSTEM",
-    "FIRE DOOR",
-    "DETECTOR LOOP",
-    "MAINTENANCE ACCESS",
-    "PRESSURE SENSOR"
-};
-
 static const char *floppy144_record_forms[10] =
 {
     "FILE",
@@ -84,6 +42,10 @@ static const char *floppy144_record_forms[10] =
     "CONFIRMATION",
     "CHECKLIST"
 };
+
+#define FLOPPY144_RECORD_FORM_COUNT                                \
+    ((uint32_t)(sizeof(floppy144_record_forms) /                   \
+                sizeof(floppy144_record_forms[0])))
 
 /*
  * Build a deterministic record ID and title
@@ -102,33 +64,68 @@ static void Floppy144CatalogueBuildRecord(
     size_t title_size
 )
 {
-    const char *const *subjects =
-        collection == FLOPPY144_COLLECTION_FA03
-            ? floppy144_fa03_record_subjects
-            : floppy144_hr02_record_subjects;
-
-    uint32_t subject_index =
-        index % 10U;
-
-    uint32_t group_index =
-        index / 10U;
-
-    uint32_t form_index =
-        (group_index + subject_index * 3U) % 10U;
-
-    uint32_t record_number =
-        collection == FLOPPY144_COLLECTION_FA03
-            ? 2400U + ((index * 53U + 11U) % 1000U)
-            : 1400U + ((index * 37U + 19U) % 1000U);
+    const Floppy144CatalogueDefinition *definition =
+        &Floppy144CollectionGet(collection)->catalogue;
 
     const Floppy144DocumentDefinition *authored_document;
+
+    uint32_t subject_index;
+    uint32_t group_index;
+    uint32_t form_index;
+    uint32_t record_number;
+
+    if(
+        definition->record_id_prefix == NULL ||
+        definition->subjects == NULL ||
+        definition->subject_count == 0U
+    )
+    {
+        snprintf(
+            record_id,
+            record_id_size,
+            "UNAVAILABLE"
+        );
+
+        snprintf(
+            title,
+            title_size,
+            "CATALOGUE CONFIGURATION UNAVAILABLE"
+        );
+
+        return;
+    }
+
+    subject_index =
+        index %
+        definition->subject_count;
+
+    group_index =
+        index /
+        definition->subject_count;
+
+    form_index =
+        (
+            group_index +
+            subject_index * 3U
+        ) %
+        FLOPPY144_RECORD_FORM_COUNT;
+
+    record_number =
+        definition->record_number_base +
+        (
+            (
+                index *
+                definition->record_number_multiplier
+            ) +
+            definition->record_number_offset
+        ) %
+        1000U;
 
     snprintf(
         record_id,
         record_id_size,
-        collection == FLOPPY144_COLLECTION_FA03
-            ? "FA-03-RS-%04u"
-            : "HR-02-RS-%04u",
+        "%s-%04u",
+        definition->record_id_prefix,
         (unsigned)record_number
     );
 
@@ -136,7 +133,7 @@ static void Floppy144CatalogueBuildRecord(
         title,
         title_size,
         "%s %s",
-        subjects[subject_index],
+        definition->subjects[subject_index],
         floppy144_record_forms[form_index]
     );
 
@@ -170,7 +167,8 @@ static void Floppy144CatalogueBuildRecord(
             authored_document->title_override
         );
     }
-}/*
+}
+/*
  * Catalogue drawing helpers
  *
  * TextCentred positions headings. DrawRow builds and paints one record entry.
@@ -322,19 +320,26 @@ static void Floppy144CatalogueDrawList(
     const uint32_t amber =
         FLOPPY144_RGB(194, 153, 76);
 
-    const Floppy144CatalogueDefinition *definition =
-        Floppy144CatalogueGetDefinition(
+    const Floppy144CollectionDefinition *collection_definition =
+        Floppy144CollectionGet(
             catalogue->collection
         );
+
+    const Floppy144CatalogueDefinition *definition =
+        &collection_definition->catalogue;
 
     uint32_t record_count =
         definition->record_count;
 
     char position_text[32];
     char index_count_text[40];
+    char collection_text[32];
 
     uint32_t visible_row;
     uint32_t thumb_y;
+    uint32_t thumb_height;
+    uint32_t thumb_travel;
+    uint32_t max_top_index;
 
     /* Display uses one-based record numbers while state remains zero-based. */
     snprintf(
@@ -350,6 +355,13 @@ static void Floppy144CatalogueDrawList(
         sizeof(index_count_text),
         "GENERATED INDEX ENTRIES: %u",
         (unsigned)record_count
+    );
+
+    snprintf(
+        collection_text,
+        sizeof(collection_text),
+        "COLLECTION: %s",
+        collection_definition->code
     );
 
     Floppy144DrawClear(
@@ -370,7 +382,7 @@ static void Floppy144CatalogueDrawList(
         surface,
         538,
         5,
-        "HR-02",
+        collection_definition->code,
         1,
         green
     );
@@ -396,9 +408,7 @@ static void Floppy144CatalogueDrawList(
     Floppy144CatalogueTextCentred(
         surface,
         32,
-        catalogue->collection == FLOPPY144_COLLECTION_FA03
-            ? "SITE SAFETY AND SUPPRESSION SYSTEMS"
-            : "PERSONNEL LIFECYCLE RECORDS",
+        definition->heading,
         2,
         text
     );
@@ -407,9 +417,7 @@ static void Floppy144CatalogueDrawList(
         surface,
         40,
         60,
-        catalogue->collection == FLOPPY144_COLLECTION_FA03
-            ? "COLLECTION: FA-03"
-            : "COLLECTION: HR-02",
+        collection_text,
         1,
         muted
     );
@@ -451,6 +459,11 @@ static void Floppy144CatalogueDrawList(
         uint32_t record_index =
             catalogue->top_index + visible_row;
 
+        if(record_index >= record_count)
+        {
+            break;
+        }
+
         Floppy144CatalogueDrawRow(
             surface,
             catalogue->collection,
@@ -475,20 +488,50 @@ static void Floppy144CatalogueDrawList(
         border
     );
 
-    /* Map top_index onto the scrollbar track so the thumb follows the viewport. */
+    /*
+     * Size and position the scrollbar from the registered record count.
+     */
+
+    thumb_height =
+        record_count > 0U
+            ? (
+                188U *
+                FLOPPY144_CATALOGUE_ROWS
+              ) / record_count
+            : 188U;
+
+    if(thumb_height < 20U)
+    {
+        thumb_height = 20U;
+    }
+
+    if(thumb_height > 188U)
+    {
+        thumb_height = 188U;
+    }
+
+    max_top_index =
+        record_count > FLOPPY144_CATALOGUE_ROWS
+            ? record_count - FLOPPY144_CATALOGUE_ROWS
+            : 0U;
+
+    thumb_travel =
+        188U - thumb_height;
+
     thumb_y =
-        98U +
-        catalogue->top_index *
-        168U /
-        (record_count -
-         FLOPPY144_CATALOGUE_ROWS);
+        max_top_index > 0U
+            ? 98U +
+                catalogue->top_index *
+                thumb_travel /
+                max_top_index
+            : 98U;
 
     Floppy144DrawFillRect(
         surface,
         592,
         thumb_y,
         8,
-        20,
+        thumb_height,
         amber
     );
 
@@ -804,6 +847,11 @@ static void Floppy144CatalogueDrawDocument(
             catalogue->selected_index
         );
 
+    const Floppy144CollectionDefinition *collection_definition =
+        Floppy144CollectionGet(
+            catalogue->collection
+        );
+
     if(
         authored_document != NULL &&
         authored_document->view ==
@@ -876,7 +924,7 @@ static void Floppy144CatalogueDrawDocument(
         surface,
         538,
         5,
-        "HR-02",
+        collection_definition->code,
         1,
         green
     );
@@ -1110,8 +1158,8 @@ void Floppy144CatalogueReset(
 /*
  * Move selection and keep it visible
  *
- * Selection is clamped to 0-49. top_index follows when the highlight leaves
- * the current ten-row viewport.
+ * Selection is clamped to the registered record count. top_index follows
+ * when the highlight leaves the current ten-row viewport.
  */
 
 void Floppy144CatalogueMove(
@@ -1120,16 +1168,19 @@ void Floppy144CatalogueMove(
 )
 {
     const Floppy144CatalogueDefinition *definition =
-        Floppy144CatalogueGetDefinition(
+        &Floppy144CollectionGet(
             catalogue->collection
-        );
+        )->catalogue;
 
     uint32_t record_count =
         definition->record_count;
 
     int32_t next_index;
 
-    if(catalogue->document_open)
+    if(
+        catalogue->document_open ||
+        record_count == 0U
+    )
     {
         return;
     }
@@ -1143,8 +1194,7 @@ void Floppy144CatalogueMove(
         next_index = 0;
     }
 
-    if(next_index >=
-       (int32_t)record_count)
+    if(next_index >= (int32_t)record_count)
     {
         next_index =
             (int32_t)record_count - 1;
@@ -1174,7 +1224,6 @@ void Floppy144CatalogueMove(
             1U;
     }
 }
-
 /*
  * Move by one visible page
  *
