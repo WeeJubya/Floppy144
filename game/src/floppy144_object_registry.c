@@ -10,6 +10,48 @@
     ((uint32_t)(sizeof(values) / sizeof((values)[0])))
 
 /*
+ * Object interactions
+ *
+ * Priority resolves overlapping interaction zones. Eligibility requirements,
+ * prompts and resulting notices live beside the objects that use them.
+ */
+
+static const Floppy144ObjectInteractionDefinition
+    floppy144_archive_terminal_interaction =
+{
+    FLOPPY144_OBJECT_ACTION_OPEN_TERMINAL,
+    100U,
+    FLOPPY144_COLLECTION_COUNT,
+    "PRESS E TO ACCESS ARCHIVE TERMINAL",
+    FLOPPY144_COLLECTION_HR02,
+    "PRESS E TO REVIEW RESTORED COLLECTIONS",
+    NULL
+};
+
+static const Floppy144ObjectInteractionDefinition
+    floppy144_desk_one_interaction =
+{
+    FLOPPY144_OBJECT_ACTION_SHOW_NOTICE,
+    50U,
+    FLOPPY144_COLLECTION_HR02,
+    "PRESS E TO INSPECT RECONSTRUCTED DESK",
+    FLOPPY144_COLLECTION_COUNT,
+    NULL,
+    "DESK 01: MUG IS NOT AN ARCHIVE ITEM. FORM AR-7 NOT REQUIRED."
+};
+
+static const Floppy144ObjectInteractionDefinition
+    floppy144_desk_four_interaction =
+{
+    FLOPPY144_OBJECT_ACTION_SHOW_NOTICE,
+    50U,
+    FLOPPY144_COLLECTION_HR02,
+    "PRESS E TO INSPECT RECONSTRUCTED DESK",
+    FLOPPY144_COLLECTION_COUNT,
+    NULL,
+    "DESK 04: IT SUPPORT MOVED HERE PENDING TERMINAL CABLE REPLACEMENT."
+};
+/*
  * Object-attached labels
  */
 
@@ -500,6 +542,7 @@ static const Floppy144ObjectDefinition
     flags_value,                                                   \
     initially_visible_value,                                       \
     label_value,                                                   \
+    interaction_value,                                             \
     primitive_values                                               \
 )                                                                  \
     {                                                              \
@@ -522,6 +565,7 @@ static const Floppy144ObjectDefinition
         flags_value,                                               \
         initially_visible_value,                                   \
         label_value,                                               \
+        interaction_value,                                         \
         primitive_values,                                          \
         FLOPPY144_ARRAY_COUNT(primitive_values)                    \
     },

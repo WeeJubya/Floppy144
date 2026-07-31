@@ -253,7 +253,7 @@ void Floppy144OfficeMove(
  * rectangle. Hidden and non-interactable objects are ignored.
  */
 
-bool Floppy144OfficeNearObject(
+static bool Floppy144OfficeNearObject(
     const Floppy144WorldState *world,
     const Floppy144Player *player,
     Floppy144ObjectId object
@@ -273,10 +273,7 @@ bool Floppy144OfficeNearObject(
         definition == NULL ||
         definition->scene !=
             FLOPPY144_SCENE_OFFICE ||
-        (
-            definition->flags &
-            FLOPPY144_OBJECT_FLAG_INTERACTABLE
-        ) == 0U ||
+        definition->interaction == NULL ||
         definition->interaction_width <= 0 ||
         definition->interaction_height <= 0 ||
         !Floppy144WorldObjectEffectivelyVisible(
@@ -316,6 +313,87 @@ bool Floppy144OfficeNearObject(
             object_y +
             definition->interaction_y +
             definition->interaction_height;
+}
+/*
+ * Find the highest-priority eligible interaction at the player's position.
+ */
+
+Floppy144ObjectId Floppy144OfficeInteractionTarget(
+    const Floppy144WorldState *world,
+    const Floppy144Player *player
+)
+{
+    Floppy144ObjectId best_object =
+        FLOPPY144_OBJECT_NONE;
+
+    uint32_t best_priority =
+        0U;
+
+    uint32_t object_index;
+
+    for(
+        object_index = 0U;
+        object_index <
+            (uint32_t)FLOPPY144_OBJECT_COUNT;
+        ++object_index
+    )
+    {
+        Floppy144ObjectId object =
+            (Floppy144ObjectId)object_index;
+
+        const Floppy144ObjectDefinition *definition =
+            Floppy144ObjectGet(object);
+
+        const Floppy144ObjectInteractionDefinition *interaction;
+
+        if(
+            definition == NULL ||
+            definition->interaction == NULL
+        )
+        {
+            continue;
+        }
+
+        interaction =
+            definition->interaction;
+
+        if(
+            interaction->required_evidence_collection !=
+                FLOPPY144_COLLECTION_COUNT &&
+            !Floppy144WorldCollectionEvidenceFound(
+                world,
+                interaction->required_evidence_collection
+            )
+        )
+        {
+            continue;
+        }
+
+        if(
+            !Floppy144OfficeNearObject(
+                world,
+                player,
+                object
+            )
+        )
+        {
+            continue;
+        }
+
+        if(
+            best_object == FLOPPY144_OBJECT_NONE ||
+            interaction->priority > best_priority
+        )
+        {
+            best_object =
+                object;
+
+            best_priority =
+                interaction->priority;
+        }
+    }
+
+    return best_object;
 }
 /*
  * Resolve an object palette role into an office colour.
@@ -750,37 +828,47 @@ void Floppy144OfficeDraw(
      * replaces the normal room label until the player moves again.
      */
 
-    bool near_evidence_desk =
-        Floppy144WorldCollectionEvidenceFound(
+    Floppy144ObjectId interaction_object =
+        Floppy144OfficeInteractionTarget(
             world,
-            FLOPPY144_COLLECTION_HR02
-        ) &&
-        (
-            Floppy144OfficeNearObject(
-                world,
-                player,
-                FLOPPY144_OBJECT_DESK_ONE
-            ) ||
-            Floppy144OfficeNearObject(
-                world,
-                player,
-                FLOPPY144_OBJECT_DESK_FOUR
-            )
+            player
         );
 
-    const char *prompt =
-        Floppy144OfficeNearObject(
-                world,
-                player,
-                FLOPPY144_OBJECT_ARCHIVE_TERMINAL
-            )
-            ? Floppy144WorldCollectionRestored(world, FLOPPY144_COLLECTION_HR02)
-                ? "PRESS E TO REVIEW RESTORED COLLECTIONS"
-                : "PRESS E TO ACCESS ARCHIVE TERMINAL"
-            : near_evidence_desk
-                ? "PRESS E TO INSPECT RECONSTRUCTED DESK"
-                : "WASD OR ARROWS TO MOVE";
+    const Floppy144ObjectDefinition *interaction_definition =
+        Floppy144ObjectGet(
+            interaction_object
+        );
 
+    const Floppy144ObjectInteractionDefinition *interaction =
+        interaction_definition != NULL
+            ? interaction_definition->interaction
+            : NULL;
+
+    const char *prompt =
+        "WASD OR ARROWS TO MOVE";
+
+    if(
+        interaction != NULL &&
+        interaction->prompt != NULL
+    )
+    {
+        prompt =
+            interaction->prompt;
+
+        if(
+            interaction->alternate_prompt != NULL &&
+            interaction->alternate_prompt_collection !=
+                FLOPPY144_COLLECTION_COUNT &&
+            Floppy144WorldCollectionRestored(
+                world,
+                interaction->alternate_prompt_collection
+            )
+        )
+        {
+            prompt =
+                interaction->alternate_prompt;
+        }
+    }
     char status_text[16];
 
     snprintf(
@@ -1015,14 +1103,7 @@ void Floppy144OfficeDraw(
         322,
         prompt,
         1,
-        (
-            Floppy144OfficeNearObject(
-                world,
-                player,
-                FLOPPY144_OBJECT_ARCHIVE_TERMINAL
-            ) ||
-            near_evidence_desk
-        )
+        interaction != NULL
             ? amber
             : text_colour
     );

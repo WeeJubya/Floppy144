@@ -14,6 +14,7 @@
 #include "floppy144_catalogue.h"
 #include "floppy144_document.h"
 #include "floppy144_office.h"
+#include "floppy144_object_registry.h"
 #include "floppy144_recovery.h"
 #include "floppy144_terminal.h"
 #include "floppy144_world.h"
@@ -169,6 +170,75 @@ static void Floppy144MovePlayer(
     );
 }
 
+/*
+ * Execute the action declared by the best eligible nearby object.
+ */
+
+static void Floppy144InteractOffice(
+    HWND window
+)
+{
+    Floppy144ObjectId object =
+        Floppy144OfficeInteractionTarget(
+            &global_world,
+            &global_player
+        );
+
+    const Floppy144ObjectDefinition *definition =
+        Floppy144ObjectGet(
+            object
+        );
+
+    const Floppy144ObjectInteractionDefinition *interaction =
+        definition != NULL
+            ? definition->interaction
+            : NULL;
+
+    if(interaction == NULL)
+    {
+        return;
+    }
+
+    switch(interaction->action)
+    {
+        case FLOPPY144_OBJECT_ACTION_OPEN_TERMINAL:
+        {
+            global_office_notice =
+                0;
+
+            global_screen =
+                FLOPPY144_SCREEN_TERMINAL;
+
+            Floppy144TerminalReset(
+                &global_terminal
+            );
+
+            Floppy144Redraw(
+                window
+            );
+
+            return;
+        }
+
+        case FLOPPY144_OBJECT_ACTION_SHOW_NOTICE:
+        {
+            global_office_notice =
+                interaction->notice;
+
+            Floppy144Redraw(
+                window
+            );
+
+            return;
+        }
+
+        case FLOPPY144_OBJECT_ACTION_NONE:
+        default:
+        {
+            return;
+        }
+    }
+}
 /*
  * Check whether Enter should open records
  *
@@ -354,60 +424,15 @@ static LRESULT CALLBACK Floppy144WindowProc(
                             return 0;
                         }
 
-                        /* Interaction priority: terminal first, then evidence-unlocked desk inspections. */
+                        /* Resolve and execute the registry-declared nearby interaction. */
                         case 'E':
                         {
-                            if(
-                                Floppy144OfficeNearObject(
-                                    &global_world,
-                                    &global_player,
-                                    FLOPPY144_OBJECT_ARCHIVE_TERMINAL
-                                )
-                            )
-                            {
-                                global_office_notice = 0;
-
-                                global_screen =
-                                    FLOPPY144_SCREEN_TERMINAL;
-
-                                Floppy144TerminalReset(
-                                    &global_terminal
-                                );
-
-                                Floppy144Redraw(window);
-                            }
-                            else if(
-                                Floppy144WorldCollectionEvidenceFound(&global_world, FLOPPY144_COLLECTION_HR02) &&
-                                Floppy144OfficeNearObject(
-                                    &global_world,
-                                    &global_player,
-                                    FLOPPY144_OBJECT_DESK_ONE
-                                )
-                            )
-                            {
-                                global_office_notice =
-                                    "DESK 01: MUG IS NOT AN ARCHIVE ITEM. FORM AR-7 NOT REQUIRED.";
-
-                                Floppy144Redraw(window);
-                            }
-                            else if(
-                                Floppy144WorldCollectionEvidenceFound(&global_world, FLOPPY144_COLLECTION_HR02) &&
-                                Floppy144OfficeNearObject(
-                                    &global_world,
-                                    &global_player,
-                                    FLOPPY144_OBJECT_DESK_FOUR
-                                )
-                            )
-                            {
-                                global_office_notice =
-                                    "DESK 04: IT SUPPORT MOVED HERE PENDING TERMINAL CABLE REPLACEMENT.";
-
-                                Floppy144Redraw(window);
-                            }
+                            Floppy144InteractOffice(
+                                window
+                            );
 
                             return 0;
                         }
-
                         case VK_ESCAPE:
                         {
                             global_screen =

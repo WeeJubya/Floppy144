@@ -31,6 +31,7 @@ typedef enum Floppy144ObjectId
     flags,                                                         \
     initially_visible,                                             \
     label,                                                         \
+    interaction,                                                   \
     primitives                                                     \
 )                                                                  \
     FLOPPY144_OBJECT_##symbol,

@@ -24,6 +24,7 @@
  *   object flags
  *   initially visible
  *   label definition
+ *   interaction definition
  *   primitive array
  */
 
@@ -47,6 +48,7 @@ FLOPPY144_OBJECT(
     FLOPPY144_OBJECT_FLAG_NONE,
     false,
     NULL,
+    NULL,
     floppy144_suppression_control_panel_primitives
 )
 
@@ -67,10 +69,10 @@ FLOPPY144_OBJECT(
     132,
     28,
     FLOPPY144_COLLECTION_COUNT,
-    FLOPPY144_OBJECT_FLAG_SOLID |
-        FLOPPY144_OBJECT_FLAG_INTERACTABLE,
+    FLOPPY144_OBJECT_FLAG_SOLID,
     true,
     &floppy144_archive_terminal_label,
+    &floppy144_archive_terminal_interaction,
     floppy144_archive_terminal_primitives
 )
 
@@ -91,10 +93,10 @@ FLOPPY144_OBJECT(
     165,
     79,
     FLOPPY144_COLLECTION_COUNT,
-    FLOPPY144_OBJECT_FLAG_SOLID |
-        FLOPPY144_OBJECT_FLAG_INTERACTABLE,
+    FLOPPY144_OBJECT_FLAG_SOLID,
     true,
     &floppy144_desk_one_label,
+    &floppy144_desk_one_interaction,
     floppy144_desk_primitives
 )
 
@@ -118,6 +120,7 @@ FLOPPY144_OBJECT(
     FLOPPY144_OBJECT_FLAG_SOLID,
     true,
     &floppy144_desk_two_label,
+    NULL,
     floppy144_desk_primitives
 )
 
@@ -141,6 +144,7 @@ FLOPPY144_OBJECT(
     FLOPPY144_OBJECT_FLAG_SOLID,
     true,
     &floppy144_desk_three_label,
+    NULL,
     floppy144_desk_primitives
 )
 
@@ -161,10 +165,10 @@ FLOPPY144_OBJECT(
     165,
     79,
     FLOPPY144_COLLECTION_COUNT,
-    FLOPPY144_OBJECT_FLAG_SOLID |
-        FLOPPY144_OBJECT_FLAG_INTERACTABLE,
+    FLOPPY144_OBJECT_FLAG_SOLID,
     true,
     &floppy144_desk_four_label,
+    &floppy144_desk_four_interaction,
     floppy144_desk_primitives
 )
 
@@ -187,6 +191,7 @@ FLOPPY144_OBJECT(
     FLOPPY144_COLLECTION_HR02,
     FLOPPY144_OBJECT_FLAG_NONE,
     true,
+    NULL,
     NULL,
     floppy144_desk_one_mug_primitives
 )
@@ -211,6 +216,7 @@ FLOPPY144_OBJECT(
     FLOPPY144_OBJECT_FLAG_NONE,
     true,
     NULL,
+    NULL,
     floppy144_desk_four_personnel_forms_primitives
 )
 
@@ -233,6 +239,7 @@ FLOPPY144_OBJECT(
     FLOPPY144_COLLECTION_COUNT,
     FLOPPY144_OBJECT_FLAG_SOLID,
     true,
+    NULL,
     NULL,
     floppy144_west_cabinet_primitives
 )
@@ -257,6 +264,7 @@ FLOPPY144_OBJECT(
     FLOPPY144_OBJECT_FLAG_SOLID,
     true,
     NULL,
+    NULL,
     floppy144_west_cabinet_primitives
 )
 
@@ -280,6 +288,7 @@ FLOPPY144_OBJECT(
     FLOPPY144_OBJECT_FLAG_SOLID,
     true,
     NULL,
+    NULL,
     floppy144_east_cabinet_primitives
 )
 
@@ -302,6 +311,7 @@ FLOPPY144_OBJECT(
     FLOPPY144_COLLECTION_COUNT,
     FLOPPY144_OBJECT_FLAG_SOLID,
     true,
+    NULL,
     NULL,
     floppy144_east_cabinet_primitives
 )

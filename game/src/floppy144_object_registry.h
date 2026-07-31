@@ -24,13 +24,7 @@ typedef enum Floppy144ObjectFlags
         0U,
 
     FLOPPY144_OBJECT_FLAG_SOLID =
-        1U << 0,
-
-    FLOPPY144_OBJECT_FLAG_INTERACTABLE =
-        1U << 1,
-
-    FLOPPY144_OBJECT_FLAG_INSPECTABLE =
-        1U << 2
+        1U << 0
 } Floppy144ObjectFlags;
 
 typedef enum Floppy144ObjectLayer
@@ -45,6 +39,28 @@ typedef enum Floppy144ObjectLayer
         FLOPPY144_OBJECT_LAYER_FOREGROUND
 } Floppy144ObjectLayer;
 
+typedef enum Floppy144ObjectAction
+{
+    FLOPPY144_OBJECT_ACTION_NONE = 0,
+    FLOPPY144_OBJECT_ACTION_OPEN_TERMINAL,
+    FLOPPY144_OBJECT_ACTION_SHOW_NOTICE
+} Floppy144ObjectAction;
+
+typedef struct Floppy144ObjectInteractionDefinition
+{
+    Floppy144ObjectAction action;
+
+    uint32_t priority;
+
+    Floppy144CollectionId required_evidence_collection;
+
+    const char *prompt;
+
+    Floppy144CollectionId alternate_prompt_collection;
+    const char *alternate_prompt;
+
+    const char *notice;
+} Floppy144ObjectInteractionDefinition;
 typedef enum Floppy144ObjectPrimitiveType
 {
     FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT = 0,
@@ -129,6 +145,8 @@ typedef struct Floppy144ObjectDefinition
     bool initially_visible;
 
     const Floppy144ObjectLabelDefinition *label;
+
+    const Floppy144ObjectInteractionDefinition *interaction;
 
     const Floppy144ObjectPrimitive *primitives;
     uint32_t primitive_count;
