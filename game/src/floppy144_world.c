@@ -1,8 +1,8 @@
 /*
  * Floppy//144 - world-state implementation
  *
- * Initialises persistent session facts and provides generic collection-state
- * operations. It deliberately contains no drawing or input code.
+ * Initialises persistent session facts and provides generic collection and
+ * reconstructed-object operations. It contains no drawing or input code.
  */
 
 #include "floppy144_world.h"
@@ -23,11 +23,20 @@ static bool Floppy144WorldCollectionValid(
 }
 
 /*
+ * Check whether an object ID can safely index world state.
+ */
+
+static bool Floppy144WorldObjectValid(
+    Floppy144ObjectId object
+)
+{
+    return
+        (uint32_t)object <
+        (uint32_t)FLOPPY144_OBJECT_COUNT;
+}
+
+/*
  * Start a fresh reconstruction session
- *
- * Runtime state is initialised by looping over the collection registry.
- * Automatically restored collections, currently XX-01, therefore require no
- * special case in the world-state structure.
  */
 
 void Floppy144WorldReset(
@@ -35,6 +44,7 @@ void Floppy144WorldReset(
 )
 {
     uint32_t collection_index;
+    uint32_t object_index;
 
     for(
         collection_index = 0;
@@ -53,6 +63,17 @@ void Floppy144WorldReset(
             definition->auto_restored;
 
         world->collections[collection_index].evidence_found =
+            false;
+    }
+
+    for(
+        object_index = 0;
+        object_index <
+            (uint32_t)FLOPPY144_OBJECT_COUNT;
+        ++object_index
+    )
+    {
+        world->objects[object_index].visible =
             false;
     }
 }
@@ -76,11 +97,9 @@ bool Floppy144WorldCollectionRestored(
 }
 
 /*
- * Restore a collection
+ * Restore a collection.
  *
- * Returns true only when this call changed the collection from unrestored to
- * restored. This lets the terminal decide whether to show its completion
- * notice without knowing which collection was selected.
+ * Returns true only when this call changed its state.
  */
 
 bool Floppy144WorldRestoreCollection(
@@ -105,7 +124,7 @@ bool Floppy144WorldRestoreCollection(
 }
 
 /*
- * Query whether meaningful authored evidence has been found in a collection.
+ * Query whether authored evidence has been found in a collection.
  */
 
 bool Floppy144WorldCollectionEvidenceFound(
@@ -142,13 +161,52 @@ void Floppy144WorldSetCollectionEvidenceFound(
 }
 
 /*
- * Calculate technical-slice reconstruction progress
+ * Query whether a reconstructed object is currently visible.
+ */
+
+bool Floppy144WorldObjectVisible(
+    const Floppy144WorldState *world,
+    Floppy144ObjectId object
+)
+{
+    if(!Floppy144WorldObjectValid(object))
+    {
+        return false;
+    }
+
+    return
+        world->objects[object].visible;
+}
+
+/*
+ * Reveal one reconstructed object.
  *
- * Mandatory restored collections contribute the four-percent recovery
- * baseline. Each restored optional collection contributes eight percent.
- *
- * The full game can later replace this calculation with act-specific progress
- * without changing any terminal, office or recovery drawing code.
+ * Returns true only when this call changed the object's state.
+ */
+
+bool Floppy144WorldRevealObject(
+    Floppy144WorldState *world,
+    Floppy144ObjectId object
+)
+{
+    if(!Floppy144WorldObjectValid(object))
+    {
+        return false;
+    }
+
+    if(world->objects[object].visible)
+    {
+        return false;
+    }
+
+    world->objects[object].visible =
+        true;
+
+    return true;
+}
+
+/*
+ * Calculate technical-slice reconstruction progress.
  */
 
 uint32_t Floppy144WorldReconstructionPercent(

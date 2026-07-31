@@ -8,15 +8,13 @@
 #pragma once
 
 #include "floppy144_collection.h"
+#include "floppy144_object.h"
 
 #include <stdbool.h>
 #include <stdint.h>
 
 /*
  * Runtime state belonging to one registered collection
- *
- * Every collection receives one entry automatically. Adding another
- * collection therefore does not require another named field here.
  */
 
 typedef struct Floppy144CollectionState
@@ -26,23 +24,38 @@ typedef struct Floppy144CollectionState
 } Floppy144CollectionState;
 
 /*
+ * Runtime state belonging to one reconstructed world object
+ *
+ * Dynamic objects begin hidden and can be revealed by document effects or
+ * other registered game events.
+ */
+
+typedef struct Floppy144ObjectState
+{
+    bool visible;
+} Floppy144ObjectState;
+
+/*
  * Persistent session state
  *
- * Collection IDs are stable array indices generated from the master
- * collection definition file.
+ * Collection and object IDs are stable array indices generated from their
+ * respective master definition files.
  */
 
 typedef struct Floppy144WorldState
 {
     Floppy144CollectionState
         collections[FLOPPY144_COLLECTION_COUNT];
+
+    Floppy144ObjectState
+        objects[FLOPPY144_OBJECT_COUNT];
 } Floppy144WorldState;
 
 /*
  * Start a fresh reconstruction session.
  *
- * Collections registered as automatically restored are restored during reset.
- * All evidence flags begin cleared.
+ * Automatically restored collections are restored during reset. Evidence is
+ * cleared and all dynamic reconstructed objects begin hidden.
  */
 
 void Floppy144WorldReset(
@@ -75,8 +88,22 @@ void Floppy144WorldSetCollectionEvidenceFound(
 );
 
 /*
- * Convert restored collection state into the technical-slice reconstruction
- * percentage displayed by the recovery interface, terminal and office.
+ * Generic reconstructed-object operations
+ */
+
+bool Floppy144WorldObjectVisible(
+    const Floppy144WorldState *world,
+    Floppy144ObjectId object
+);
+
+bool Floppy144WorldRevealObject(
+    Floppy144WorldState *world,
+    Floppy144ObjectId object
+);
+
+/*
+ * Convert restored collection state into the reconstruction percentage shown
+ * by the recovery interface, terminal and office.
  */
 
 uint32_t Floppy144WorldReconstructionPercent(

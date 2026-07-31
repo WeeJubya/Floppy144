@@ -1,0 +1,13 @@
+/*
+ * Master reconstructed-object list
+ *
+ * This file intentionally has no include guard. It generates stable object
+ * identifiers through the FLOPPY144_OBJECT X-macro.
+ *
+ * Only objects whose reconstructed state can change belong here. Permanent
+ * room furniture remains part of the office layout.
+ */
+
+FLOPPY144_OBJECT(
+    SUPPRESSION_CONTROL_PANEL
+)
