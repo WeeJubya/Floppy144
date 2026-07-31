@@ -1,5 +1,42 @@
 #include "floppy144_collection_registry.h"
 
+#include <stddef.h>
+
+/*
+ * Collection-specific procedural title vocabularies
+ *
+ * These tables are immutable catalogue design data. Their owning collection
+ * declarations reference them from floppy144_collections.def.
+ */
+
+static const char *const floppy144_hr02_record_subjects[] =
+{
+    "APPOINTMENT",
+    "TRANSFER",
+    "ABSENCE",
+    "TRAINING",
+    "ACCESS",
+    "PAYROLL",
+    "LEAVE",
+    "DESK ALLOCATION",
+    "APPRAISAL",
+    "EXIT"
+};
+
+static const char *const floppy144_fa03_record_subjects[] =
+{
+    "SUPPRESSION PANEL",
+    "HALON CYLINDER",
+    "ALARM CIRCUIT",
+    "SERVER ROOM SAFETY",
+    "EMERGENCY CONTROL",
+    "VENTILATION SYSTEM",
+    "FIRE DOOR",
+    "DETECTOR LOOP",
+    "MAINTENANCE ACCESS",
+    "PRESSURE SENSOR"
+};
+
 /*
  * Generate the metadata table from the same master list used to generate the
  * collection enum.
@@ -18,7 +55,15 @@ const Floppy144CollectionDefinition
     act_value,                                                     \
     class_value,                                                   \
     auto_restored_value,                                           \
-    description_text                                               \
+    description_text,                                              \
+    catalogue_record_count,                                        \
+    catalogue_heading_text,                                        \
+    catalogue_record_id_prefix,                                    \
+    catalogue_subjects,                                            \
+    catalogue_subject_count,                                       \
+    catalogue_record_number_base,                                  \
+    catalogue_record_number_multiplier,                            \
+    catalogue_record_number_offset                                 \
 )                                                                  \
     {                                                              \
         FLOPPY144_COLLECTION_##symbol,                             \
@@ -27,7 +72,17 @@ const Floppy144CollectionDefinition
         act_value,                                                 \
         class_value,                                               \
         auto_restored_value,                                       \
-        description_text                                           \
+        description_text,                                          \
+        {                                                          \
+            catalogue_record_count,                                \
+            catalogue_heading_text,                                \
+            catalogue_record_id_prefix,                            \
+            catalogue_subjects,                                    \
+            catalogue_subject_count,                               \
+            catalogue_record_number_base,                          \
+            catalogue_record_number_multiplier,                    \
+            catalogue_record_number_offset                         \
+        }                                                          \
     },
 
 #include "floppy144_collections.def"

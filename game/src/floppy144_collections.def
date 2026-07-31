@@ -15,6 +15,14 @@
  *   collection class
  *   restored automatically
  *   terminal description
+ *   catalogue record count
+ *   catalogue heading
+ *   generated record ID prefix
+ *   procedural subject vocabulary
+ *   procedural subject count
+ *   generated record-number base
+ *   generated record-number multiplier
+ *   generated record-number offset
  */
 
 FLOPPY144_COLLECTION(
@@ -24,7 +32,15 @@ FLOPPY144_COLLECTION(
     FLOPPY144_ACT_PROLOGUE,
     FLOPPY144_COLLECTION_CLASS_MANDATORY,
     true,
-    "MINIMUM INDEX REQUIRED TO RECONSTRUCT A PARTIAL SITE."
+    "MINIMUM INDEX REQUIRED TO RECONSTRUCT A PARTIAL SITE.",
+    0U,
+    NULL,
+    NULL,
+    NULL,
+    0U,
+    0U,
+    0U,
+    0U
 )
 
 FLOPPY144_COLLECTION(
@@ -34,7 +50,15 @@ FLOPPY144_COLLECTION(
     FLOPPY144_ACT_ONE,
     FLOPPY144_COLLECTION_CLASS_ADMINISTRATIVE,
     false,
-    "CONTAINS STAFF ALLOCATION AND DESK ASSIGNMENT RECORDS."
+    "CONTAINS STAFF ALLOCATION AND DESK ASSIGNMENT RECORDS.",
+    50U,
+    "PERSONNEL LIFECYCLE RECORDS",
+    "HR-02-RS",
+    floppy144_hr02_record_subjects,
+    10U,
+    1400U,
+    37U,
+    19U
 )
 
 FLOPPY144_COLLECTION(
@@ -44,5 +68,13 @@ FLOPPY144_COLLECTION(
     FLOPPY144_ACT_ONE,
     FLOPPY144_COLLECTION_CLASS_OPERATIONAL,
     false,
-    "CONTAINS FIRE SAFETY AND SUPPRESSION MAINTENANCE RECORDS."
+    "CONTAINS FIRE SAFETY AND SUPPRESSION MAINTENANCE RECORDS.",
+    50U,
+    "SITE SAFETY AND SUPPRESSION SYSTEMS",
+    "FA-03-RS",
+    floppy144_fa03_record_subjects,
+    10U,
+    2400U,
+    53U,
+    11U
 )

@@ -47,7 +47,15 @@ typedef enum Floppy144CollectionId
     act,                                                           \
     collection_class,                                              \
     auto_restored,                                                 \
-    description                                                    \
+    description,                                                   \
+    catalogue_record_count,                                        \
+    catalogue_heading,                                             \
+    catalogue_record_id_prefix,                                    \
+    catalogue_subjects,                                            \
+    catalogue_subject_count,                                       \
+    catalogue_record_number_base,                                  \
+    catalogue_record_number_multiplier,                            \
+    catalogue_record_number_offset                                 \
 )                                                                  \
     FLOPPY144_COLLECTION_##symbol,
 

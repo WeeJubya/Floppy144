@@ -8,6 +8,7 @@
 #include "floppy144_catalogue.h"
 
 #include "floppy144_draw.h"
+#include "floppy144_collection_registry.h"
 #include "floppy144_document.h"
 
 #include <stddef.h>
@@ -20,8 +21,20 @@
  * positions are supplied by the central document registry.
  */
 
-#define FLOPPY144_CATALOGUE_COUNT        50U
 #define FLOPPY144_CATALOGUE_ROWS         10U
+
+/*
+ * Obtain catalogue configuration from the selected collection.
+ */
+
+static const Floppy144CatalogueDefinition *
+Floppy144CatalogueGetDefinition(
+    Floppy144CollectionId collection
+)
+{
+    return
+        &Floppy144CollectionGet(collection)->catalogue;
+}
 
 /*
  * Procedural title vocabulary
@@ -309,17 +322,34 @@ static void Floppy144CatalogueDrawList(
     const uint32_t amber =
         FLOPPY144_RGB(194, 153, 76);
 
-    char position_text[24];
+    const Floppy144CatalogueDefinition *definition =
+        Floppy144CatalogueGetDefinition(
+            catalogue->collection
+        );
+
+    uint32_t record_count =
+        definition->record_count;
+
+    char position_text[32];
+    char index_count_text[40];
 
     uint32_t visible_row;
     uint32_t thumb_y;
 
-    /* Display uses one-based record numbers even though state uses zero-based indices. */
+    /* Display uses one-based record numbers while state remains zero-based. */
     snprintf(
         position_text,
         sizeof(position_text),
-        "RECORD %03u OF 100",
-        (unsigned)(catalogue->selected_index + 1U)
+        "RECORD %03u OF %03u",
+        (unsigned)(catalogue->selected_index + 1U),
+        (unsigned)record_count
+    );
+
+    snprintf(
+        index_count_text,
+        sizeof(index_count_text),
+        "GENERATED INDEX ENTRIES: %u",
+        (unsigned)record_count
     );
 
     Floppy144DrawClear(
@@ -397,7 +427,7 @@ static void Floppy144CatalogueDrawList(
         surface,
         40,
         76,
-        "GENERATED INDEX ENTRIES: 50",
+        index_count_text,
         1,
         muted
     );
@@ -450,7 +480,7 @@ static void Floppy144CatalogueDrawList(
         98U +
         catalogue->top_index *
         168U /
-        (FLOPPY144_CATALOGUE_COUNT -
+        (record_count -
          FLOPPY144_CATALOGUE_ROWS);
 
     Floppy144DrawFillRect(
@@ -1089,6 +1119,14 @@ void Floppy144CatalogueMove(
     int32_t direction
 )
 {
+    const Floppy144CatalogueDefinition *definition =
+        Floppy144CatalogueGetDefinition(
+            catalogue->collection
+        );
+
+    uint32_t record_count =
+        definition->record_count;
+
     int32_t next_index;
 
     if(catalogue->document_open)
@@ -1106,10 +1144,10 @@ void Floppy144CatalogueMove(
     }
 
     if(next_index >=
-       (int32_t)FLOPPY144_CATALOGUE_COUNT)
+       (int32_t)record_count)
     {
         next_index =
-            (int32_t)FLOPPY144_CATALOGUE_COUNT - 1;
+            (int32_t)record_count - 1;
     }
 
     catalogue->selected_index =
