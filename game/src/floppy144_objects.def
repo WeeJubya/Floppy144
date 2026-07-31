@@ -1,13 +1,35 @@
 /*
  * Master reconstructed-object list
  *
- * This file intentionally has no include guard. It generates stable object
- * identifiers through the FLOPPY144_OBJECT X-macro.
+ * This file intentionally has no include guard. It is an X-macro definition
+ * file used to generate stable IDs and immutable scene-object metadata.
  *
- * Only objects whose reconstructed state can change belong here. Permanent
- * room furniture remains part of the office layout.
+ * Arguments:
+ *   symbol
+ *   owning scene
+ *   parent object
+ *   local x
+ *   local y
+ *   collision x
+ *   collision y
+ *   collision width
+ *   collision height
+ *   object flags
+ *   initially visible
+ *   primitive array
  */
 
 FLOPPY144_OBJECT(
-    SUPPRESSION_CONTROL_PANEL
+    SUPPRESSION_CONTROL_PANEL,
+    FLOPPY144_SCENE_OFFICE,
+    FLOPPY144_OBJECT_NONE,
+    376,
+    46,
+    0,
+    0,
+    34,
+    34,
+    FLOPPY144_OBJECT_FLAG_SOLID,
+    false,
+    floppy144_suppression_control_panel_primitives
 )

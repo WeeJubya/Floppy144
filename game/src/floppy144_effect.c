@@ -30,8 +30,18 @@ void Floppy144ApplyEffect(
         {
             Floppy144WorldSetCollectionEvidenceFound(
                 world,
-                effect->collection,
+                (Floppy144CollectionId)effect->target_id,
                 true
+            );
+
+            break;
+        }
+
+        case FLOPPY144_EFFECT_REVEAL_OBJECT:
+        {
+            Floppy144WorldRevealObject(
+                world,
+                (Floppy144ObjectId)effect->target_id
             );
 
             break;

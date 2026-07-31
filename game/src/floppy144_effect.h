@@ -15,28 +15,29 @@
 /*
  * Supported effect operations
  *
- * The technical slice initially needs only collection evidence. Additional
- * effect types can later reveal objects, change variants, unlock routes and
- * record final-report facts without changing document-handling code.
+ * The effect type determines how target_id is interpreted. This keeps effect
+ * declarations compact while allowing collections, objects and later world
+ * systems to share the same processing path.
  */
 
 typedef enum Floppy144EffectType
 {
     FLOPPY144_EFFECT_NONE = 0,
-    FLOPPY144_EFFECT_FIND_COLLECTION_EVIDENCE
+    FLOPPY144_EFFECT_FIND_COLLECTION_EVIDENCE,
+    FLOPPY144_EFFECT_REVEAL_OBJECT
 } Floppy144EffectType;
 
 /*
  * One data-driven world-state operation
  *
- * collection identifies the collection affected by the operation. Future
- * effect types may interpret this field differently or add compact arguments.
+ * FIND_COLLECTION_EVIDENCE interprets target_id as Floppy144CollectionId.
+ * REVEAL_OBJECT interprets target_id as Floppy144ObjectId.
  */
 
 typedef struct Floppy144Effect
 {
     Floppy144EffectType type;
-    Floppy144CollectionId collection;
+    uint32_t target_id;
 } Floppy144Effect;
 
 /*

@@ -9,7 +9,22 @@
 
 typedef enum Floppy144ObjectId
 {
-#define FLOPPY144_OBJECT(symbol)                                   \
+    FLOPPY144_OBJECT_NONE = -1,
+
+#define FLOPPY144_OBJECT(                                          \
+    symbol,                                                        \
+    scene,                                                         \
+    parent,                                                        \
+    local_x,                                                       \
+    local_y,                                                       \
+    collision_x,                                                   \
+    collision_y,                                                   \
+    collision_width,                                               \
+    collision_height,                                              \
+    flags,                                                         \
+    initially_visible,                                             \
+    primitives                                                    \
+)                                                                  \
     FLOPPY144_OBJECT_##symbol,
 
 #include "floppy144_objects.def"

@@ -10,6 +10,7 @@
 #include <stdio.h>
 
 #include "floppy144_draw.h"
+#include "floppy144_object_registry.h"
 
 #include <stddef.h>
 
@@ -495,6 +496,182 @@ static void Floppy144OfficeDrawTerminal(
     );
 }
 
+/*
+ * Resolve an object palette role into an office colour.
+ */
+
+static uint32_t Floppy144OfficeObjectColour(
+    Floppy144ObjectColourRole role,
+    uint32_t body_colour,
+    uint32_t edge_colour,
+    uint32_t screen_colour,
+    uint32_t warning_colour
+)
+{
+    switch(role)
+    {
+        case FLOPPY144_OBJECT_COLOUR_BODY:
+        {
+            return body_colour;
+        }
+
+        case FLOPPY144_OBJECT_COLOUR_EDGE:
+        {
+            return edge_colour;
+        }
+
+        case FLOPPY144_OBJECT_COLOUR_SCREEN:
+        {
+            return screen_colour;
+        }
+
+        case FLOPPY144_OBJECT_COLOUR_WARNING:
+        {
+            return warning_colour;
+        }
+    }
+
+    return edge_colour;
+}
+
+/*
+ * Draw every visible registered object belonging to the office scene.
+ *
+ * Geometry and visual primitives come from the object registry. The office
+ * supplies only its palette and the current persistent object state.
+ */
+
+static void Floppy144OfficeDrawRegisteredObjects(
+    Floppy144Surface *surface,
+    const Floppy144WorldState *world,
+    uint32_t body_colour,
+    uint32_t edge_colour,
+    uint32_t screen_colour,
+    uint32_t warning_colour
+)
+{
+    uint32_t object_index;
+
+    for(
+        object_index = 0U;
+        object_index <
+            (uint32_t)FLOPPY144_OBJECT_COUNT;
+        ++object_index
+    )
+    {
+        Floppy144ObjectId object =
+            (Floppy144ObjectId)object_index;
+
+        const Floppy144ObjectDefinition *definition =
+            Floppy144ObjectGet(object);
+
+        int32_t object_x;
+        int32_t object_y;
+
+        uint32_t primitive_index;
+
+        if(
+            definition == NULL ||
+            definition->scene !=
+                FLOPPY144_SCENE_OFFICE ||
+            !Floppy144WorldObjectVisible(
+                world,
+                object
+            ) ||
+            !Floppy144ObjectWorldPosition(
+                object,
+                &object_x,
+                &object_y
+            )
+        )
+        {
+            continue;
+        }
+
+        for(
+            primitive_index = 0U;
+            primitive_index <
+                definition->primitive_count;
+            ++primitive_index
+        )
+        {
+            const Floppy144ObjectPrimitive *primitive =
+                &definition->primitives[primitive_index];
+
+            uint32_t colour =
+                Floppy144OfficeObjectColour(
+                    primitive->colour_role,
+                    body_colour,
+                    edge_colour,
+                    screen_colour,
+                    warning_colour
+                );
+
+            switch(primitive->type)
+            {
+                case FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT:
+                {
+                    Floppy144DrawFillRect(
+                        surface,
+                        (uint32_t)(
+                            object_x +
+                            primitive->x
+                        ),
+                        (uint32_t)(
+                            object_y +
+                            primitive->y
+                        ),
+                        (uint32_t)primitive->width,
+                        (uint32_t)primitive->height,
+                        colour
+                    );
+
+                    break;
+                }
+
+                case FLOPPY144_OBJECT_PRIMITIVE_RECT:
+                {
+                    Floppy144DrawRect(
+                        surface,
+                        (uint32_t)(
+                            object_x +
+                            primitive->x
+                        ),
+                        (uint32_t)(
+                            object_y +
+                            primitive->y
+                        ),
+                        (uint32_t)primitive->width,
+                        (uint32_t)primitive->height,
+                        colour
+                    );
+
+                    break;
+                }
+
+                case FLOPPY144_OBJECT_PRIMITIVE_TEXT:
+                {
+                    Floppy144DrawText(
+                        surface,
+                        (uint32_t)(
+                            object_x +
+                            primitive->x
+                        ),
+                        (uint32_t)(
+                            object_y +
+                            primitive->y
+                        ),
+                        primitive->text,
+                        1,
+                        colour
+                    );
+
+                    break;
+                }
+            }
+        }
+    }
+}
 /*
  * Draw the player as a compact top-down human figure
  */
@@ -1032,6 +1209,14 @@ void Floppy144OfficeDraw(
     Floppy144OfficeDrawTerminal(
         &surface,
         desk_colour,
+        wall_edge,
+        background,
+        amber
+    );
+    Floppy144OfficeDrawRegisteredObjects(
+        &surface,
+        world,
+        cabinet_colour,
         wall_edge,
         background,
         amber

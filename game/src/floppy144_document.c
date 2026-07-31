@@ -6,6 +6,9 @@
 
 #include <stddef.h>
 
+#define FLOPPY144_ARRAY_COUNT(values)                              \
+    ((uint32_t)(sizeof(values) / sizeof((values)[0])))
+
 /*
  * Effects declared by the primary-evidence documents in the technical slice.
  */
@@ -14,7 +17,7 @@ static const Floppy144Effect floppy144_hr02_038_effects[] =
 {
     {
         FLOPPY144_EFFECT_FIND_COLLECTION_EVIDENCE,
-        FLOPPY144_COLLECTION_HR02
+        (uint32_t)FLOPPY144_COLLECTION_HR02
     }
 };
 
@@ -22,7 +25,12 @@ static const Floppy144Effect floppy144_fa03_047_effects[] =
 {
     {
         FLOPPY144_EFFECT_FIND_COLLECTION_EVIDENCE,
-        FLOPPY144_COLLECTION_FA03
+        (uint32_t)FLOPPY144_COLLECTION_FA03
+    },
+
+    {
+        FLOPPY144_EFFECT_REVEAL_OBJECT,
+        (uint32_t)FLOPPY144_OBJECT_SUPPRESSION_CONTROL_PANEL
     }
 };
 
@@ -43,7 +51,7 @@ static const Floppy144DocumentDefinition
         NULL,
         FLOPPY144_DOCUMENT_VIEW_HR02_DESK_REALLOCATION,
         floppy144_hr02_038_effects,
-        1U
+        FLOPPY144_ARRAY_COUNT(floppy144_hr02_038_effects)
     },
 
     {
@@ -53,13 +61,12 @@ static const Floppy144DocumentDefinition
         "SUPPRESSION CONTROL PANEL SERVICE NOTE",
         FLOPPY144_DOCUMENT_VIEW_FA03_SUPPRESSION_SERVICE,
         floppy144_fa03_047_effects,
-        1U
+        FLOPPY144_ARRAY_COUNT(floppy144_fa03_047_effects)
     }
 };
 
-#define FLOPPY144_DOCUMENT_COUNT                                  \
-    ((uint32_t)(sizeof(floppy144_documents) /                     \
-                sizeof(floppy144_documents[0])))
+#define FLOPPY144_DOCUMENT_COUNT                                   \
+    FLOPPY144_ARRAY_COUNT(floppy144_documents)
 
 /*
  * Locate one authored document.
