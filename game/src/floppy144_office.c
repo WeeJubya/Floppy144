@@ -12,7 +12,6 @@
 #include "floppy144_draw.h"
 #include "floppy144_object_registry.h"
 
-#include <stddef.h>
 
 /*
  * Player and screen geometry
@@ -48,37 +47,6 @@ enum Floppy144OfficeLayout
     FLOPPY144_BOTTOM_SHIM_HEIGHT = 16
 };
 
-/*
- * Collision rectangles
- *
- * A rectangle represents the solid area of furniture. The obstacle array order
- * is significant because Desk 01 and Desk 04 proximity checks use indices 1 and 4.
- */
-
-typedef struct Floppy144Rect
-{
-    int32_t x;
-    int32_t y;
-    int32_t width;
-    int32_t height;
-} Floppy144Rect;
-
-/*
- * Permanent furniture awaiting migration into the object registry
- *
- * Only the four filing cabinets remain in the transitional collision table.
- */
-
-static const Floppy144Rect floppy144_obstacles[] =
-{
-    /* West-wall filing cabinets */
-    {42, 68, 34, 60},
-    {42, 140, 34, 60},
-
-    /* East-wall filing cabinets */
-    {564, 68, 30, 60},
-    {564, 140, 30, 60}
-};
 /*
  * Axis-aligned rectangle overlap test
  *
@@ -206,8 +174,6 @@ static bool Floppy144OfficePositionValid(
     int32_t y
 )
 {
-    size_t obstacle_index;
-
     if(
         x < 32 ||
         y < 32 ||
@@ -218,46 +184,12 @@ static bool Floppy144OfficePositionValid(
         return false;
     }
 
-    for(
-        obstacle_index = 0;
-        obstacle_index <
-            sizeof(floppy144_obstacles) /
-            sizeof(floppy144_obstacles[0]);
-        ++obstacle_index
-    )
-    {
-        const Floppy144Rect *obstacle =
-            &floppy144_obstacles[obstacle_index];
-
-        if(
-            Floppy144RectsOverlap(
-                x,
-                y,
-                FLOPPY144_PLAYER_WIDTH,
-                FLOPPY144_PLAYER_HEIGHT,
-                obstacle->x,
-                obstacle->y,
-                obstacle->width,
-                obstacle->height
-            )
-        )
-        {
-            return false;
-        }
-    }
-
-    if(
-        Floppy144OfficeRegisteredObjectBlocks(
+    return
+        !Floppy144OfficeRegisteredObjectBlocks(
             world,
             x,
             y
-        )
-    )
-    {
-        return false;
-    }
-
-    return true;
+        );
 }
 /*
  * Place the player at the office spawn point
@@ -385,71 +317,6 @@ bool Floppy144OfficeNearObject(
             definition->interaction_y +
             definition->interaction_height;
 }
-/*
- * Transitional cabinet and player drawing helpers
- *
- * Desks and the archive terminal now come from the object registry. Filing
- * cabinets remain procedural until their own migration checkpoint.
- */
-/*
- * Draw one filing cabinet
- *
- * A loop adds repeated drawer separators and handles.
- */
-
-static void Floppy144OfficeDrawCabinet(
-    Floppy144Surface *surface,
-    uint32_t x,
-    uint32_t y,
-    uint32_t width,
-    uint32_t cabinet_colour,
-    uint32_t edge_colour
-)
-{
-    uint32_t drawer_y;
-
-    Floppy144DrawFillRect(
-        surface,
-        x,
-        y,
-        width,
-        60,
-        cabinet_colour
-    );
-
-    Floppy144DrawRect(
-        surface,
-        x,
-        y,
-        width,
-        60,
-        edge_colour
-    );
-
-    for(drawer_y = y + 15;
-        drawer_y < y + 60;
-        drawer_y += 15)
-    {
-        Floppy144DrawFillRect(
-            surface,
-            x,
-            drawer_y,
-            width,
-            1,
-            edge_colour
-        );
-
-        Floppy144DrawFillRect(
-            surface,
-            x + width / 2 - 3,
-            drawer_y - 8,
-            6,
-            2,
-            edge_colour
-        );
-    }
-}
-
 /*
  * Resolve an object palette role into an office colour.
  */
@@ -1106,42 +973,6 @@ void Floppy144OfficeDraw(
         amber,
         muted_colour
     );
-    Floppy144OfficeDrawCabinet(
-        &surface,
-        42,
-        68,
-        34,
-        cabinet_colour,
-        wall_edge
-    );
-
-    Floppy144OfficeDrawCabinet(
-        &surface,
-        42,
-        140,
-        34,
-        cabinet_colour,
-        wall_edge
-    );
-
-    Floppy144OfficeDrawCabinet(
-        &surface,
-        564,
-        68,
-        30,
-        cabinet_colour,
-        wall_edge
-    );
-
-    Floppy144OfficeDrawCabinet(
-        &surface,
-        564,
-        140,
-        30,
-        cabinet_colour,
-        wall_edge
-    );
-
     Floppy144DrawText(
         &surface,
         36,

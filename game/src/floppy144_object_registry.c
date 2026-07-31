@@ -288,6 +288,132 @@ static const Floppy144ObjectPrimitive
     }
 };
 /*
+ * Filing cabinet visual recipes
+ *
+ * The west and east cabinets have slightly different widths, so each side
+ * shares one immutable recipe.
+ */
+
+static const Floppy144ObjectPrimitive
+    floppy144_west_cabinet_primitives[] =
+{
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        0, 0, 34, 60,
+        FLOPPY144_OBJECT_COLOUR_BODY,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_RECT,
+        0, 0, 34, 60,
+        FLOPPY144_OBJECT_COLOUR_EDGE,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        0, 15, 34, 1,
+        FLOPPY144_OBJECT_COLOUR_EDGE,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        0, 30, 34, 1,
+        FLOPPY144_OBJECT_COLOUR_EDGE,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        0, 45, 34, 1,
+        FLOPPY144_OBJECT_COLOUR_EDGE,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        14, 7, 6, 2,
+        FLOPPY144_OBJECT_COLOUR_EDGE,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        14, 22, 6, 2,
+        FLOPPY144_OBJECT_COLOUR_EDGE,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        14, 37, 6, 2,
+        FLOPPY144_OBJECT_COLOUR_EDGE,
+        NULL
+    }
+};
+
+static const Floppy144ObjectPrimitive
+    floppy144_east_cabinet_primitives[] =
+{
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        0, 0, 30, 60,
+        FLOPPY144_OBJECT_COLOUR_BODY,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_RECT,
+        0, 0, 30, 60,
+        FLOPPY144_OBJECT_COLOUR_EDGE,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        0, 15, 30, 1,
+        FLOPPY144_OBJECT_COLOUR_EDGE,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        0, 30, 30, 1,
+        FLOPPY144_OBJECT_COLOUR_EDGE,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        0, 45, 30, 1,
+        FLOPPY144_OBJECT_COLOUR_EDGE,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        12, 7, 6, 2,
+        FLOPPY144_OBJECT_COLOUR_EDGE,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        12, 22, 6, 2,
+        FLOPPY144_OBJECT_COLOUR_EDGE,
+        NULL
+    },
+
+    {
+        FLOPPY144_OBJECT_PRIMITIVE_FILL_RECT,
+        12, 37, 6, 2,
+        FLOPPY144_OBJECT_COLOUR_EDGE,
+        NULL
+    }
+};
+/*
  * Suppression control panel visual recipe
  */
 

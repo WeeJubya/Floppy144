@@ -213,3 +213,95 @@ FLOPPY144_OBJECT(
     NULL,
     floppy144_desk_four_personnel_forms_primitives
 )
+
+FLOPPY144_OBJECT(
+    CABINET_WEST_ONE,
+    "WEST FILING CABINET 01",
+    FLOPPY144_SCENE_OFFICE,
+    FLOPPY144_OBJECT_NONE,
+    42,
+    68,
+    FLOPPY144_OBJECT_LAYER_FURNITURE,
+    0,
+    0,
+    34,
+    60,
+    0,
+    0,
+    0,
+    0,
+    FLOPPY144_COLLECTION_COUNT,
+    FLOPPY144_OBJECT_FLAG_SOLID,
+    true,
+    NULL,
+    floppy144_west_cabinet_primitives
+)
+
+FLOPPY144_OBJECT(
+    CABINET_WEST_TWO,
+    "WEST FILING CABINET 02",
+    FLOPPY144_SCENE_OFFICE,
+    FLOPPY144_OBJECT_NONE,
+    42,
+    140,
+    FLOPPY144_OBJECT_LAYER_FURNITURE,
+    0,
+    0,
+    34,
+    60,
+    0,
+    0,
+    0,
+    0,
+    FLOPPY144_COLLECTION_COUNT,
+    FLOPPY144_OBJECT_FLAG_SOLID,
+    true,
+    NULL,
+    floppy144_west_cabinet_primitives
+)
+
+FLOPPY144_OBJECT(
+    CABINET_EAST_ONE,
+    "EAST FILING CABINET 01",
+    FLOPPY144_SCENE_OFFICE,
+    FLOPPY144_OBJECT_NONE,
+    564,
+    68,
+    FLOPPY144_OBJECT_LAYER_FURNITURE,
+    0,
+    0,
+    30,
+    60,
+    0,
+    0,
+    0,
+    0,
+    FLOPPY144_COLLECTION_COUNT,
+    FLOPPY144_OBJECT_FLAG_SOLID,
+    true,
+    NULL,
+    floppy144_east_cabinet_primitives
+)
+
+FLOPPY144_OBJECT(
+    CABINET_EAST_TWO,
+    "EAST FILING CABINET 02",
+    FLOPPY144_SCENE_OFFICE,
+    FLOPPY144_OBJECT_NONE,
+    564,
+    140,
+    FLOPPY144_OBJECT_LAYER_FURNITURE,
+    0,
+    0,
+    30,
+    60,
+    0,
+    0,
+    0,
+    0,
+    FLOPPY144_COLLECTION_COUNT,
+    FLOPPY144_OBJECT_FLAG_SOLID,
+    true,
+    NULL,
+    floppy144_east_cabinet_primitives
+)
