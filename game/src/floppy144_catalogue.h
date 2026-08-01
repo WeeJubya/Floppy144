@@ -12,6 +12,7 @@
 #include "floppy144_collection.h"
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 /*
@@ -38,6 +39,14 @@ typedef struct Floppy144CatalogueState
  * registry rather than exposing collection-specific queries here.
  */
 
+void Floppy144CatalogueBuildRecord(
+    Floppy144CollectionId collection,
+    uint32_t index,
+    char *record_id,
+    size_t record_id_size,
+    char *title,
+    size_t title_size
+);
 void Floppy144CatalogueReset(
     Floppy144CatalogueState *catalogue,
     Floppy144CollectionId collection

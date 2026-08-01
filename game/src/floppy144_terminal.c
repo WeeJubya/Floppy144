@@ -6,6 +6,7 @@
  */
 
 #include "floppy144_terminal.h"
+#include "floppy144_catalogue.h"
 
 #include "floppy144_draw.h"
 #include "floppy144_collection_registry.h"
@@ -753,6 +754,16 @@ static void Floppy144TerminalPrintHelp(
 
         Floppy144TerminalPushLine(
             terminal,
+            "  LIST CODE      DISPLAY FIRST RECORD PAGE"
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "  LIST CODE PAGE DISPLAY NUMBERED RECORD PAGE"
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
             "  OPEN RECORD    OPEN AN ARCHIVE RECORD"
         );
     }
@@ -838,6 +849,330 @@ static void Floppy144TerminalPrintCollections(
  * Restore one collection identified by its registered code.
  */
 
+#define FLOPPY144_TERMINAL_RECORDS_PER_PAGE 7U
+
+/*
+ * Parse LIST arguments into a collection code and optional page number.
+ *
+ * LIST HR-02 defaults to page one.
+ * LIST HR-02 3 requests page three.
+ */
+
+static bool Floppy144TerminalParseListRequest(
+    const char *arguments,
+    char *code,
+    uint32_t code_capacity,
+    uint32_t *page
+)
+{
+    uint32_t code_length =
+        0U;
+
+    uint32_t page_value =
+        0U;
+
+    if(
+        arguments == NULL ||
+        code == NULL ||
+        code_capacity == 0U ||
+        page == NULL
+    )
+    {
+        return false;
+    }
+
+    while(arguments[0] == ' ')
+    {
+        ++arguments;
+    }
+
+    while(
+        arguments[0] != '\0' &&
+        arguments[0] != ' '
+    )
+    {
+        if(code_length + 1U >= code_capacity)
+        {
+            return false;
+        }
+
+        code[code_length] =
+            arguments[0];
+
+        ++code_length;
+        ++arguments;
+    }
+
+    if(code_length == 0U)
+    {
+        return false;
+    }
+
+    code[code_length] =
+        '\0';
+
+    while(arguments[0] == ' ')
+    {
+        ++arguments;
+    }
+
+    if(arguments[0] == '\0')
+    {
+        *page =
+            1U;
+
+        return true;
+    }
+
+    while(
+        arguments[0] >= '0' &&
+        arguments[0] <= '9'
+    )
+    {
+        page_value =
+            page_value * 10U +
+            (uint32_t)(arguments[0] - '0');
+
+        if(page_value > 999U)
+        {
+            return false;
+        }
+
+        ++arguments;
+    }
+
+    while(arguments[0] == ' ')
+    {
+        ++arguments;
+    }
+
+    if(
+        arguments[0] != '\0' ||
+        page_value == 0U
+    )
+    {
+        return false;
+    }
+
+    *page =
+        page_value;
+
+    return true;
+}
+
+/*
+ * Print one page of records belonging to a restored collection.
+ */
+
+static void Floppy144TerminalPrintCollectionRecords(
+    Floppy144TerminalState *terminal,
+    const Floppy144WorldState *world,
+    const char *arguments
+)
+{
+    Floppy144CollectionId collection;
+
+    const Floppy144CollectionDefinition *definition;
+
+    char code[16];
+    char line[FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
+    char record_id[24];
+    char title[48];
+
+    uint32_t page;
+    uint32_t page_count;
+    uint32_t first_index;
+    uint32_t final_index;
+    uint32_t record_index;
+
+    if(
+        !Floppy144TerminalParseListRequest(
+            arguments,
+            code,
+            sizeof(code),
+            &page
+        )
+    )
+    {
+        Floppy144TerminalPushLine(
+            terminal,
+            "USE LIST CODE OR LIST CODE PAGE."
+        );
+
+        return;
+    }
+
+    if(
+        !Floppy144TerminalFindCollection(
+            code,
+            &collection
+        )
+    )
+    {
+        snprintf(
+            line,
+            sizeof(line),
+            "COLLECTION %s NOT FOUND ON DISK 144.",
+            code
+        );
+
+        Floppy144TerminalPushWrappedLine(
+            terminal,
+            line
+        );
+
+        return;
+    }
+
+    definition =
+        Floppy144CollectionGet(
+            collection
+        );
+
+    if(
+        !Floppy144WorldCollectionRestored(
+            world,
+            collection
+        )
+    )
+    {
+        snprintf(
+            line,
+            sizeof(line),
+            "COLLECTION %s HAS NOT BEEN RESTORED.",
+            definition->code
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            line
+        );
+
+        return;
+    }
+
+    if(definition->catalogue.record_count == 0U)
+    {
+        snprintf(
+            line,
+            sizeof(line),
+            "COLLECTION %s HAS NO RECORD INDEX.",
+            definition->code
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            line
+        );
+
+        return;
+    }
+
+    page_count =
+        (
+            definition->catalogue.record_count +
+            FLOPPY144_TERMINAL_RECORDS_PER_PAGE -
+            1U
+        ) /
+        FLOPPY144_TERMINAL_RECORDS_PER_PAGE;
+
+    if(page > page_count)
+    {
+        snprintf(
+            line,
+            sizeof(line),
+            "PAGE %u OUT OF RANGE. VALID RANGE: 1 TO %u.",
+            (unsigned)page,
+            (unsigned)page_count
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            line
+        );
+
+        return;
+    }
+
+    first_index =
+        (page - 1U) *
+        FLOPPY144_TERMINAL_RECORDS_PER_PAGE;
+
+    final_index =
+        first_index +
+        FLOPPY144_TERMINAL_RECORDS_PER_PAGE;
+
+    if(final_index > definition->catalogue.record_count)
+    {
+        final_index =
+            definition->catalogue.record_count;
+    }
+
+    Floppy144TerminalPushLine(
+        terminal,
+        ""
+    );
+
+    snprintf(
+        line,
+        sizeof(line),
+        "COLLECTION %s: %s",
+        definition->code,
+        definition->title
+    );
+
+    Floppy144TerminalPushWrappedLine(
+        terminal,
+        line
+    );
+
+    snprintf(
+        line,
+        sizeof(line),
+        "PAGE %u OF %u",
+        (unsigned)page,
+        (unsigned)page_count
+    );
+
+    Floppy144TerminalPushLine(
+        terminal,
+        line
+    );
+
+    Floppy144TerminalPushLine(
+        terminal,
+        ""
+    );
+
+    for(
+        record_index = first_index;
+        record_index < final_index;
+        ++record_index
+    )
+    {
+        Floppy144CatalogueBuildRecord(
+            collection,
+            record_index,
+            record_id,
+            sizeof(record_id),
+            title,
+            sizeof(title)
+        );
+
+        snprintf(
+            line,
+            sizeof(line),
+            "%s  %s",
+            record_id,
+            title
+        );
+
+        Floppy144TerminalPushWrappedLine(
+            terminal,
+            line
+        );
+    }
+}
 static void Floppy144TerminalRestoreCollection(
     Floppy144TerminalState *terminal,
     Floppy144WorldState *world,
@@ -1092,9 +1427,10 @@ void Floppy144TerminalSubmitInput(
         }
         else if(list_arguments[0] != '\0')
         {
-            Floppy144TerminalPushLine(
+            Floppy144TerminalPrintCollectionRecords(
                 terminal,
-                "COLLECTION RECORD LISTING NOT YET LINKED."
+                world,
+                list_arguments
             );
         }
         else

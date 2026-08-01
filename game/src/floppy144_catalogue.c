@@ -55,7 +55,7 @@ static const char *floppy144_record_forms[10] =
  * FA-03 record 047 is overridden with its stable authored identity.
  */
 
-static void Floppy144CatalogueBuildRecord(
+void Floppy144CatalogueBuildRecord(
     Floppy144CollectionId collection,
     uint32_t index,
     char *record_id,
