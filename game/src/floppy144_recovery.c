@@ -282,8 +282,8 @@ void Floppy144RecoveryDraw(
         &surface,
         56,
         190,
-    /* XX-01 is always available and supplies the minimum site reconstruction. */
-        "MANDATORY COLLECTION XX-01: RESTORED",
+    /* DR-01 is always available and supplies the minimum site reconstruction. */
+        "MANDATORY COLLECTION DR-01: RESTORED",
         1,
         green
     );

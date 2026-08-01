@@ -36,7 +36,7 @@ typedef enum Floppy144CollectionClass
 /*
  * Generate one enum value for every entry in floppy144_collections.def.
  *
- * The definition order is also the terminal display order. XX-01, HR-02 and
+ * The definition order is also the terminal display order. DR-01, HR-02 and
  * FA-03 therefore retain their existing numeric IDs of zero, one and two.
  */
 
@@ -56,6 +56,7 @@ typedef enum Floppy144CollectionId
     catalogue_record_id_prefix,                                    \
     catalogue_subjects,                                            \
     catalogue_subject_count,                                       \
+    catalogue_exact_titles,                                        \
     catalogue_record_number_base,                                  \
     catalogue_record_number_multiplier,                            \
     catalogue_record_number_offset                                 \

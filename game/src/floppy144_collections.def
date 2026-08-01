@@ -21,28 +21,30 @@
  *   generated record ID prefix
  *   procedural subject vocabulary
  *   procedural subject count
+ *   subjects are complete titles
  *   generated record-number base
  *   generated record-number multiplier
  *   generated record-number offset
  */
 
 FLOPPY144_COLLECTION(
-    XX01,
-    "XX-01",
-    "SITE RECOVERY INDEX",
+    DR01,
+    "DR-01",
+    "DISK RECOVERY INDEX",
     FLOPPY144_ACT_PROLOGUE,
     FLOPPY144_COLLECTION_CLASS_MANDATORY,
     true,
-    "MINIMUM INDEX REQUIRED TO RECONSTRUCT A PARTIAL SITE.",
+    "CONTAINS DISK MANIFEST, OPERATING GUIDANCE AND RECOVERY NOTES.",
     NULL,
+    15U,
+    "DISK RECOVERY INDEX",
+    "DR-01-RS",
+    floppy144_dr01_record_titles,
+    15U,
+    true,
     0U,
-    NULL,
-    NULL,
-    NULL,
-    0U,
-    0U,
-    0U,
-    0U
+    1U,
+    1U
 )
 
 FLOPPY144_COLLECTION(
@@ -59,6 +61,7 @@ FLOPPY144_COLLECTION(
     "HR-02-RS",
     floppy144_hr02_record_subjects,
     10U,
+    false,
     1400U,
     37U,
     19U
@@ -78,6 +81,7 @@ FLOPPY144_COLLECTION(
     "FA-03-RS",
     floppy144_fa03_record_subjects,
     10U,
+    false,
     2400U,
     53U,
     11U

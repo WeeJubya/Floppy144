@@ -129,13 +129,25 @@ void Floppy144CatalogueBuildRecord(
         (unsigned)record_number
     );
 
-    snprintf(
-        title,
-        title_size,
-        "%s %s",
-        definition->subjects[subject_index],
-        floppy144_record_forms[form_index]
-    );
+    if(definition->exact_titles)
+    {
+        snprintf(
+            title,
+            title_size,
+            "%s",
+            definition->subjects[subject_index]
+        );
+    }
+    else
+    {
+        snprintf(
+            title,
+            title_size,
+            "%s %s",
+            definition->subjects[subject_index],
+            floppy144_record_forms[form_index]
+        );
+    }
 
     authored_document =
         Floppy144DocumentGet(
@@ -1094,7 +1106,7 @@ static void Floppy144CatalogueDrawDocument(
             Floppy144CatalogueTextCentred(
                 surface,
                 166,
-                "INDEX ENTRY RECONSTRUCTED FROM XX-01 CROSS REFERENCES.",
+                "INDEX ENTRY RECONSTRUCTED FROM DISK 144 CROSS REFERENCES.",
                 1,
                 text
             );

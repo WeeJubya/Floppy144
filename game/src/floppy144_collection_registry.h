@@ -22,6 +22,8 @@ typedef struct Floppy144CatalogueDefinition
     const char *const *subjects;
     uint32_t subject_count;
 
+    bool exact_titles;
+
     uint32_t record_number_base;
     uint32_t record_number_multiplier;
     uint32_t record_number_offset;
@@ -62,7 +64,7 @@ extern const Floppy144CollectionDefinition
 /*
  * Return collection metadata for an ID.
  *
- * An invalid ID safely falls back to XX-01.
+ * An invalid ID safely falls back to DR-01.
  */
 
 const Floppy144CollectionDefinition *Floppy144CollectionGet(

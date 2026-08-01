@@ -9,6 +9,24 @@
  * declarations reference them from floppy144_collections.def.
  */
 
+static const char *const floppy144_dr01_record_titles[] =
+{
+    "DISK RECOVERY INDEX",
+    "PLAYER HELP 1 - TERMINAL ACCESS",
+    "PLAYER HELP 2 - RESTORING COLLECTIONS",
+    "PLAYER HELP 3 - LISTING AND OPENING RECORDS",
+    "DISK 144 MEDIA MANIFEST",
+    "ARCHIVE SERVICE STARTUP NOTE",
+    "COLLECTION CODE DIRECTORY",
+    "RECORD IDENTIFIER GUIDE",
+    "SITE RECONSTRUCTION STATUS SUMMARY",
+    "RECOVERED DATA LIMITATIONS",
+    "ARCHIVE ACCESS NOTICE",
+    "DATA INTEGRITY CHECK",
+    "RECOVERY SESSION REGISTER",
+    "SOURCE MEDIA HANDLING NOTE",
+    "END OF RECOVERY INDEX"
+};
 static const char *const floppy144_hr02_record_subjects[] =
 {
     "APPOINTMENT",
@@ -62,6 +80,7 @@ const Floppy144CollectionDefinition
     catalogue_record_id_prefix,                                    \
     catalogue_subjects,                                            \
     catalogue_subject_count,                                       \
+    catalogue_exact_titles,                                        \
     catalogue_record_number_base,                                  \
     catalogue_record_number_multiplier,                            \
     catalogue_record_number_offset                                 \
@@ -81,6 +100,7 @@ const Floppy144CollectionDefinition
             catalogue_record_id_prefix,                            \
             catalogue_subjects,                                    \
             catalogue_subject_count,                               \
+            catalogue_exact_titles,                                \
             catalogue_record_number_base,                          \
             catalogue_record_number_multiplier,                    \
             catalogue_record_number_offset                         \
@@ -102,7 +122,7 @@ const Floppy144CollectionDefinition *Floppy144CollectionGet(
     if(index >= (uint32_t)FLOPPY144_COLLECTION_COUNT)
     {
         index =
-            (uint32_t)FLOPPY144_COLLECTION_XX01;
+            (uint32_t)FLOPPY144_COLLECTION_DR01;
     }
 
     return

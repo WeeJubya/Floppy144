@@ -866,7 +866,7 @@ int CALLBACK WinMain(
 
     Floppy144CatalogueReset(
         &global_catalogue,
-        FLOPPY144_COLLECTION_XX01
+        FLOPPY144_COLLECTION_DR01
     );
 
     /*

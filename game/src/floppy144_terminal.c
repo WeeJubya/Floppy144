@@ -1718,7 +1718,7 @@ static Floppy144CollectionId Floppy144TerminalFirstCollectionInAct(
         }
     }
 
-    return FLOPPY144_COLLECTION_XX01;
+    return FLOPPY144_COLLECTION_DR01;
 }
 
 void Floppy144TerminalReset(
@@ -1752,7 +1752,7 @@ void Floppy144TerminalReset(
         false;
 
     terminal->requested_collection =
-        FLOPPY144_COLLECTION_XX01;
+        FLOPPY144_COLLECTION_DR01;
 
     terminal->requested_record_index =
         0U;
@@ -2092,6 +2092,8 @@ bool Floppy144TerminalCanOpenCatalogue(
     const Floppy144WorldState *world
 )
 {
+    const Floppy144CollectionDefinition *definition;
+
     if(
         terminal == NULL ||
         world == NULL
@@ -2100,11 +2102,14 @@ bool Floppy144TerminalCanOpenCatalogue(
         return false;
     }
 
+    definition =
+        Floppy144CollectionGet(
+            terminal->selected_collection
+        );
+
     return
-        Floppy144TerminalDetailOpen(
-            terminal
-        ) &&
-        Floppy144TerminalCollectionCanViewRecords(
+        definition->catalogue.record_count > 0U &&
+        Floppy144WorldCollectionRestored(
             world,
             terminal->selected_collection
         );
