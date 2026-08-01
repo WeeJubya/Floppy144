@@ -288,6 +288,59 @@ static LRESULT CALLBACK Floppy144WindowProc(
          * owns a nested key switch.
          */
 
+        case WM_CHAR:
+        {
+            if(
+                global_screen !=
+                FLOPPY144_SCREEN_TERMINAL
+            )
+            {
+                break;
+            }
+
+            switch(w_param)
+            {
+                case '\b':
+                {
+                    Floppy144TerminalBackspace(
+                        &global_terminal
+                    );
+
+                    break;
+                }
+
+                case '\r':
+                {
+                    Floppy144TerminalSubmitInput(
+                        &global_terminal
+                    );
+
+                    break;
+                }
+
+                default:
+                {
+                    if(
+                        w_param >= 32U &&
+                        w_param <= 126U
+                    )
+                    {
+                        Floppy144TerminalInputCharacter(
+                            &global_terminal,
+                            (char)w_param
+                        );
+                    }
+
+                    break;
+                }
+            }
+
+            Floppy144Redraw(
+                window
+            );
+
+            return 0;
+        }
         case WM_KEYDOWN:
         {
             switch(global_screen)
@@ -417,135 +470,23 @@ static LRESULT CALLBACK Floppy144WindowProc(
                     break;
                 }
 
-                /* Terminal: move selection, open/restore/view records, or back out one level. */
+                /* Terminal: printable input arrives through WM_CHAR. */
                 case FLOPPY144_SCREEN_TERMINAL:
                 {
-                    switch(w_param)
+                    if(w_param == VK_ESCAPE)
                     {
-                        case VK_LEFT:
-                        case 'A':
-                        {
-                            Floppy144TerminalMoveAct(
-                                &global_terminal,
-                                -1
-                            );
+                        global_screen =
+                            FLOPPY144_SCREEN_OFFICE;
 
-                            Floppy144Redraw(
-                                window
-                            );
+                        Floppy144Redraw(
+                            window
+                        );
 
-                            return 0;
-                        }
-
-                        case VK_RIGHT:
-                        case 'D':
-                        {
-                            Floppy144TerminalMoveAct(
-                                &global_terminal,
-                                1
-                            );
-
-                            Floppy144Redraw(
-                                window
-                            );
-
-                            return 0;
-                        }
-                        case VK_UP:
-                        case 'W':
-                        {
-                            Floppy144TerminalMoveSelection(
-                                &global_terminal,
-                                -1
-                            );
-
-                            Floppy144Redraw(window);
-                            return 0;
-                        }
-
-                        case VK_DOWN:
-                        case 'S':
-                        {
-                            Floppy144TerminalMoveSelection(
-                                &global_terminal,
-                                1
-                            );
-
-                            Floppy144Redraw(window);
-                            return 0;
-                        }
-
-                        case VK_RETURN:
-                        {
-                            switch(
-                                Floppy144TerminalCanOpenCatalogue(
-                                    &global_terminal,
-                                    &global_world
-                                )
-                            )
-                            {
-                                case true:
-                                {
-                                    Floppy144CatalogueReset(
-                                        &global_catalogue,
-                                        global_terminal.selected_collection
-                                    );
-
-                                    global_screen =
-                                        FLOPPY144_SCREEN_CATALOGUE;
-
-                                    break;
-                                }
-
-                                case false:
-                                {
-                                    Floppy144TerminalOpenSelection(
-                                        &global_terminal,
-                                        &global_world
-                                    );
-
-                                    break;
-                                }
-                            }
-
-                            Floppy144Redraw(window);
-                            return 0;
-                        }
-
-                        case VK_ESCAPE:
-                        {
-                            switch(
-                                Floppy144TerminalDetailOpen(
-                                    &global_terminal
-                                )
-                            )
-                            {
-                                case true:
-                                {
-                                    Floppy144TerminalCloseDetail(
-                                        &global_terminal
-                                    );
-
-                                    break;
-                                }
-
-                                case false:
-                                {
-                                    global_screen =
-                                        FLOPPY144_SCREEN_OFFICE;
-
-                                    break;
-                                }
-                            }
-
-                            Floppy144Redraw(window);
-                            return 0;
-                        }
+                        return 0;
                     }
 
                     break;
                 }
-
                 /* Catalogue: move or page through records, open a document, or back out. */
                 case FLOPPY144_SCREEN_CATALOGUE:
                 {

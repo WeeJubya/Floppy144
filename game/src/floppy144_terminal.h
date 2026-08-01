@@ -15,6 +15,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#define FLOPPY144_TERMINAL_INPUT_CAPACITY 81U
+#define FLOPPY144_TERMINAL_OUTPUT_LINES 12U
+#define FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY 96U
+
 /*
  * Terminal-local state
  *
@@ -30,6 +34,16 @@ typedef struct Floppy144TerminalState
 
     bool detail_open;
     bool restoration_notice;
+    bool suppress_next_character;
+
+    char input[FLOPPY144_TERMINAL_INPUT_CAPACITY];
+    uint32_t input_length;
+
+    char output
+        [FLOPPY144_TERMINAL_OUTPUT_LINES]
+        [FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
+
+    uint32_t output_count;
 } Floppy144TerminalState;
 
 /*
@@ -51,6 +65,19 @@ void Floppy144TerminalMoveSelection(
 void Floppy144TerminalMoveAct(
     Floppy144TerminalState *terminal,
     int32_t direction
+);
+
+void Floppy144TerminalInputCharacter(
+    Floppy144TerminalState *terminal,
+    char character
+);
+
+void Floppy144TerminalBackspace(
+    Floppy144TerminalState *terminal
+);
+
+void Floppy144TerminalSubmitInput(
+    Floppy144TerminalState *terminal
 );
 
 void Floppy144TerminalOpenSelection(

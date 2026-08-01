@@ -344,6 +344,280 @@ static void Floppy144TerminalDrawDetail(
 }
 
 /*
+ * Command-shell output
+ *
+ * The fixed line buffer avoids allocation and retains only the most recent
+ * terminal output that can be displayed.
+ */
+
+static void Floppy144TerminalPushLine(
+    Floppy144TerminalState *terminal,
+    const char *text
+)
+{
+    uint32_t line_index;
+
+    if(
+        terminal == NULL ||
+        text == NULL
+    )
+    {
+        return;
+    }
+
+    if(
+        terminal->output_count >=
+        FLOPPY144_TERMINAL_OUTPUT_LINES
+    )
+    {
+        for(
+            line_index = 1U;
+            line_index <
+                FLOPPY144_TERMINAL_OUTPUT_LINES;
+            ++line_index
+        )
+        {
+            snprintf(
+                terminal->output[line_index - 1U],
+                FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY,
+                "%s",
+                terminal->output[line_index]
+            );
+        }
+
+        terminal->output_count =
+            FLOPPY144_TERMINAL_OUTPUT_LINES - 1U;
+    }
+
+    snprintf(
+        terminal->output[terminal->output_count],
+        FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY,
+        "%s",
+        text
+    );
+
+    ++terminal->output_count;
+}
+
+/*
+ * Push text into terminal history, wrapping it to the visible panel width.
+ */
+
+static void Floppy144TerminalPushWrappedLine(
+    Floppy144TerminalState *terminal,
+    const char *text
+)
+{
+    const char *cursor;
+    char line[FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
+    uint32_t length;
+
+    if(
+        terminal == NULL ||
+        text == NULL
+    )
+    {
+        return;
+    }
+
+    if(text[0] == '\0')
+    {
+        Floppy144TerminalPushLine(
+            terminal,
+            ""
+        );
+
+        return;
+    }
+
+    cursor =
+        text;
+
+    while(cursor[0] != '\0')
+    {
+        length =
+            0U;
+
+        line[0] =
+            '\0';
+
+        while(
+            cursor[length] != '\0' &&
+            length + 1U <
+                FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY
+        )
+        {
+            line[length] =
+                cursor[length];
+
+            line[length + 1U] =
+                '\0';
+
+            if(
+                Floppy144DrawTextWidth(
+                    line,
+                    1U
+                ) >
+                540U
+            )
+            {
+                line[length] =
+                    '\0';
+
+                break;
+            }
+
+            ++length;
+        }
+
+        if(length == 0U)
+        {
+            line[0] =
+                cursor[0];
+
+            line[1] =
+                '\0';
+
+            length =
+                1U;
+        }
+
+        Floppy144TerminalPushLine(
+            terminal,
+            line
+        );
+
+        cursor +=
+            length;
+    }
+}
+/*
+ * Append one printable character to the command line.
+ */
+
+void Floppy144TerminalInputCharacter(
+    Floppy144TerminalState *terminal,
+    char character
+)
+{
+    if(terminal == NULL)
+    {
+        return;
+    }
+
+    if(terminal->suppress_next_character)
+    {
+        terminal->suppress_next_character =
+            false;
+
+        return;
+    }
+
+    if(
+        character >= 'a' &&
+        character <= 'z'
+    )
+    {
+        character =
+            (char)(
+                character -
+                'a' +
+                'A'
+            );
+    }
+
+    if(
+        character < 32 ||
+        character > 126
+    )
+    {
+        return;
+    }
+
+    if(
+        terminal->input_length + 1U >=
+        FLOPPY144_TERMINAL_INPUT_CAPACITY
+    )
+    {
+        return;
+    }
+
+    terminal->input[terminal->input_length] =
+        character;
+
+    ++terminal->input_length;
+
+    terminal->input[terminal->input_length] =
+        '\0';
+}
+
+/*
+ * Remove the final command-line character.
+ */
+
+void Floppy144TerminalBackspace(
+    Floppy144TerminalState *terminal
+)
+{
+    if(
+        terminal == NULL ||
+        terminal->input_length == 0U
+    )
+    {
+        return;
+    }
+
+    --terminal->input_length;
+
+    terminal->input[terminal->input_length] =
+        '\0';
+}
+
+/*
+ * Echo the current command line.
+ *
+ * Command parsing is introduced in the next checkpoint.
+ */
+
+void Floppy144TerminalSubmitInput(
+    Floppy144TerminalState *terminal
+)
+{
+    char submitted_line
+        [FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
+
+    if(
+        terminal == NULL ||
+        terminal->input_length == 0U
+    )
+    {
+        return;
+    }
+
+    snprintf(
+        submitted_line,
+        sizeof(submitted_line),
+        "A:\\GDR> %s",
+        terminal->input
+    );
+
+    Floppy144TerminalPushLine(
+        terminal,
+        submitted_line
+    );
+
+    Floppy144TerminalPushLine(
+        terminal,
+        "COMMAND PROCESSOR OFFLINE."
+    );
+
+    terminal->input_length =
+        0U;
+
+    terminal->input[0] =
+        '\0';
+}
+/*
  * Terminal state management
  *
  * The terminal displays one narrative act at a time. Selection remains within
@@ -412,6 +686,8 @@ void Floppy144TerminalReset(
     Floppy144TerminalState *terminal
 )
 {
+    uint32_t line_index;
+
     terminal->selected_act =
         FLOPPY144_ACT_PROLOGUE;
 
@@ -425,6 +701,54 @@ void Floppy144TerminalReset(
 
     terminal->restoration_notice =
         false;
+
+    terminal->suppress_next_character =
+        true;
+
+    terminal->input_length =
+        0U;
+
+    terminal->input[0] =
+        '\0';
+
+    terminal->output_count =
+        0U;
+
+    for(
+        line_index = 0U;
+        line_index <
+            FLOPPY144_TERMINAL_OUTPUT_LINES;
+        ++line_index
+    )
+    {
+        terminal->output[line_index][0] =
+            '\0';
+    }
+
+    Floppy144TerminalPushLine(
+        terminal,
+        "GDR ARCHIVE RECOVERY ENVIRONMENT"
+    );
+
+    Floppy144TerminalPushLine(
+        terminal,
+        "MEDIA DETECTED: DISK 144"
+    );
+
+    Floppy144TerminalPushLine(
+        terminal,
+        "SITE STATE: PARTIAL RECONSTRUCTION"
+    );
+
+    Floppy144TerminalPushLine(
+        terminal,
+        ""
+    );
+
+    Floppy144TerminalPushLine(
+        terminal,
+        "TYPE HELP FOR OPERATING GUIDANCE."
+    );
 }
 
 /*
@@ -732,79 +1056,22 @@ void Floppy144TerminalDraw(
 )
 {
     const uint32_t background =
-        FLOPPY144_RGB(12, 17, 21);
+        FLOPPY144_RGB(8, 13, 11);
 
     const uint32_t panel =
-        FLOPPY144_RGB(24, 33, 39);
+        FLOPPY144_RGB(13, 24, 19);
 
     const uint32_t border =
-        FLOPPY144_RGB(86, 103, 107);
+        FLOPPY144_RGB(55, 92, 72);
 
     const uint32_t text =
-        FLOPPY144_RGB(202, 211, 205);
+        FLOPPY144_RGB(127, 196, 146);
 
     const uint32_t muted =
-        FLOPPY144_RGB(118, 133, 132);
+        FLOPPY144_RGB(76, 119, 91);
 
-    const uint32_t green =
-        FLOPPY144_RGB(100, 156, 111);
-
-    const uint32_t amber =
-        FLOPPY144_RGB(194, 153, 76);
-
-    /*
-     * Dynamic list and footer text
-     *
-     * Restored collections display green. Evidence-bearing collections display
-     * amber. Footer instructions change with the current navigation depth.
-     */
-
-    char site_status[16];
-
-    snprintf(
-        site_status,
-        sizeof(site_status),
-        "SITE %02u%%",
-        (unsigned)Floppy144WorldReconstructionPercent(world)
-    );
-
-    bool selected_restored =
-        Floppy144WorldCollectionRestored(
-            world,
-            terminal->selected_collection
-        );
-
-    bool selected_can_view_records =
-        Floppy144TerminalCollectionCanViewRecords(
-            world,
-            terminal->selected_collection
-        );
-
-    const char *footer_left =
-        terminal->detail_open
-            ? ""
-            : "LEFT RIGHT ACT";
-
-    const char *footer_middle =
-        terminal->detail_open
-            ? !selected_restored
-                ? "ENTER RESTORE"
-                : selected_can_view_records
-                    ? "ENTER VIEW RECORDS"
-                    : ""
-            : "UP DOWN SELECT";
-
-    const char *footer_right =
-        terminal->detail_open
-            ? "ESC CLOSE"
-            : "ENTER OPEN  ESC RETURN";
-
-    /*
-     * Draw the terminal base layer
-     *
-     * The list remains underneath the detail overlay, making close-detail a simple
-     * state change followed by a redraw.
-     */
+    const uint32_t bright =
+        FLOPPY144_RGB(172, 231, 183);
 
     Floppy144Surface surface =
     {
@@ -812,6 +1079,31 @@ void Floppy144TerminalDraw(
         engine->backbuffer.width,
         engine->backbuffer.height
     };
+
+    char site_status[16];
+
+    char prompt
+        [FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
+
+    uint32_t line_index;
+    uint32_t output_y =
+        84U;
+
+    snprintf(
+        site_status,
+        sizeof(site_status),
+        "SITE %02u%%",
+        (unsigned)Floppy144WorldReconstructionPercent(
+            world
+        )
+    );
+
+    snprintf(
+        prompt,
+        sizeof(prompt),
+        "A:\\GDR> %s",
+        terminal->input
+    );
 
     Floppy144DrawClear(
         &surface,
@@ -822,7 +1114,7 @@ void Floppy144TerminalDraw(
         &surface,
         10,
         5,
-        "GDR ARCHIVE RESTORATION TERMINAL",
+        "GDR ARCHIVE RECOVERY TERMINAL",
         1,
         muted
     );
@@ -833,7 +1125,7 @@ void Floppy144TerminalDraw(
         5,
         site_status,
         1,
-        green
+        text
     );
 
     Floppy144DrawFillRect(
@@ -857,125 +1149,71 @@ void Floppy144TerminalDraw(
     Floppy144TerminalTextCentred(
         &surface,
         42,
-        "GDR ARCHIVE RESTORATION TERMINAL",
+        "GDR ARCHIVE RECOVERY TERMINAL",
         2,
-        text
+        bright
     );
 
-    Floppy144DrawText(&surface, 44, 72, "SITE:", 1, muted);
-    Floppy144DrawText(&surface, 122, 72, "PARTIAL RECONSTRUCTION", 1, text);
-
-    Floppy144DrawText(&surface, 44, 88, "MEDIA:", 1, muted);
-    Floppy144DrawText(&surface, 122, 88, "DISK 144", 1, text);
-
-    Floppy144DrawText(&surface, 44, 104, "PROTOCOL:", 1, muted);
-    Floppy144DrawText(&surface, 122, 104, "APS-12", 1, amber);
-
-    Floppy144DrawFillRect(&surface, 40, 124, 560, 1, border);
-
-    /*
-     * Draw the selected narrative act
-     *
-     * Collections remain in registry order. Only rows belonging to the
-     * terminal's selected act are painted.
-     */
-
-    char act_heading[32];
-
-    uint32_t collection_index;
-    uint32_t collection_y =
-        154U;
-
-    snprintf(
-        act_heading,
-        sizeof(act_heading),
-        "COLLECTIONS: %s",
-        Floppy144CollectionActText(
-            terminal->selected_act
-        )
-    );
-
-    Floppy144DrawText(
+    Floppy144DrawFillRect(
         &surface,
-        44,
-        136,
-        act_heading,
+        40,
+        68,
+        560,
         1,
-        muted
+        border
     );
 
     for(
-        collection_index = 0U;
-        collection_index <
-            (uint32_t)FLOPPY144_COLLECTION_COUNT;
-        ++collection_index
+        line_index = 0U;
+        line_index <
+            terminal->output_count;
+        ++line_index
     )
     {
-        Floppy144CollectionId collection =
-            (Floppy144CollectionId)collection_index;
-
-        const Floppy144CollectionDefinition *definition =
-            Floppy144CollectionGet(
-                collection
-            );
-
-        bool restored;
-        bool evidence_found;
-        uint32_t status_colour;
-
-        if(
-            definition->act !=
-            terminal->selected_act
-        )
-        {
-            continue;
-        }
-
-        restored =
-            Floppy144WorldCollectionRestored(
-                world,
-                collection
-            );
-
-        evidence_found =
-            Floppy144WorldCollectionEvidenceFound(
-                world,
-                collection
-            );
-
-        status_colour =
-            evidence_found
-                ? amber
-                : restored
-                    ? green
-                    : amber;
-
-        Floppy144TerminalDrawCollection(
+        Floppy144DrawText(
             &surface,
-            collection_y,
-            terminal->selected_collection ==
-                collection,
-            Floppy144TerminalCollectionStatusText(
-                world,
-                collection
-            ),
-            definition->code,
-            definition->title,
-            status_colour
+            44,
+            output_y,
+            terminal->output[line_index],
+            1,
+            text
         );
 
-        collection_y +=
-            26U;
+        output_y +=
+            15U;
     }
 
     Floppy144DrawFillRect(
         &surface,
         40,
-        300,
+        270,
         560,
         1,
         border
     );
+
+    Floppy144DrawText(
+        &surface,
+        44,
+        284,
+        prompt,
+        1,
+        bright
+    );
+
+    Floppy144DrawFillRect(
+        &surface,
+        44 +
+            Floppy144DrawTextWidth(
+                prompt,
+                1
+            ),
+        284,
+        5,
+        8,
+        bright
+    );
+
     Floppy144DrawFillRect(
         &surface,
         20,
@@ -998,38 +1236,17 @@ void Floppy144TerminalDraw(
         &surface,
         32,
         326,
-        footer_left,
+        "TYPE COMMAND   BACKSPACE EDIT   ENTER SUBMIT",
         1,
         text
     );
 
     Floppy144DrawText(
         &surface,
-        250,
+        526,
         326,
-        footer_middle,
-        1,
-        amber
-    );
-
-    Floppy144DrawText(
-        &surface,
-        490,
-        326,
-        footer_right,
+        "ESC RETURN",
         1,
         muted
     );
-
-    /* Draw the modal detail panel last so it appears above the collection list. */
-    if(terminal->detail_open)
-    {
-        Floppy144TerminalDrawDetail(
-            &surface,
-            terminal,
-            world
-        );
-    }
 }
-
-
