@@ -848,6 +848,266 @@ static void Floppy144CatalogueDrawFa03ServiceNote(
  * only the index entry was recovered.
  */
 
+static const char *const floppy144_dr01_help_terminal_lines[] =
+{
+    "COMMANDS ARE ENTERED AT THE TERMINAL PROMPT.",
+    "TYPE HELP TO DISPLAY AVAILABLE COMMANDS.",
+    "TYPE EXIT TO CLOSE THE TERMINAL SESSION.",
+    "USE BACKSPACE TO CORRECT THE CURRENT ENTRY.",
+    "PRESS ENTER TO SUBMIT A COMMAND.",
+    "ESC MAY BE USED FOR AN IMMEDIATE RETURN.",
+    NULL
+};
+
+static const char *const floppy144_dr01_help_restoration_lines[] =
+{
+    "ARCHIVE SERVICES MAY INITIALLY BE OFFLINE.",
+    "TYPE RESTORE TO INITIALISE RECOVERY SERVICES.",
+    "TYPE LIST TO DISPLAY COLLECTIONS ON DISK 144.",
+    "TYPE RESTORE CODE TO RESTORE A COLLECTION.",
+    "EXAMPLE: RESTORE HR-02",
+    "RESTORED COLLECTIONS REMAIN AVAILABLE.",
+    "SOME COLLECTIONS MAY REVEAL PARTS OF THE SITE.",
+    NULL
+};
+
+static const char *const floppy144_dr01_help_record_lines[] =
+{
+    "TYPE LIST CODE TO DISPLAY THE FIRST RECORD PAGE.",
+    "TYPE LIST CODE PAGE TO DISPLAY ANOTHER PAGE.",
+    "EXAMPLE: LIST HR-02 2",
+    "TYPE OPEN RECORD-ID TO RETRIEVE A RECORD.",
+    "EXAMPLE: OPEN HR-02-RS-1419",
+    "ONLY RESTORED COLLECTIONS MAY BE SEARCHED.",
+    "ESC RETURNS FROM A RECORD TO THE TERMINAL.",
+    NULL
+};
+
+/*
+ * Draw one DR-01 operating-guidance page.
+ */
+
+static void Floppy144CatalogueDrawDr01HelpDocument(
+    Floppy144Surface *surface,
+    const Floppy144CatalogueState *catalogue,
+    Floppy144DocumentView view
+)
+{
+    const uint32_t background =
+        FLOPPY144_RGB(12, 17, 21);
+
+    const uint32_t panel =
+        FLOPPY144_RGB(24, 33, 39);
+
+    const uint32_t document =
+        FLOPPY144_RGB(31, 40, 44);
+
+    const uint32_t border =
+        FLOPPY144_RGB(86, 103, 107);
+
+    const uint32_t text =
+        FLOPPY144_RGB(202, 211, 205);
+
+    const uint32_t muted =
+        FLOPPY144_RGB(118, 133, 132);
+
+    const uint32_t green =
+        FLOPPY144_RGB(100, 156, 111);
+
+    const uint32_t amber =
+        FLOPPY144_RGB(194, 153, 76);
+
+    const Floppy144CollectionDefinition *collection_definition =
+        Floppy144CollectionGet(
+            catalogue->collection
+        );
+
+    const char *const *lines =
+        NULL;
+
+    char record_id[24];
+    char title[48];
+
+    uint32_t line_index;
+
+    switch(view)
+    {
+        case FLOPPY144_DOCUMENT_VIEW_DR01_HELP_TERMINAL_ACCESS:
+        {
+            lines =
+                floppy144_dr01_help_terminal_lines;
+
+            break;
+        }
+
+        case FLOPPY144_DOCUMENT_VIEW_DR01_HELP_RESTORATION:
+        {
+            lines =
+                floppy144_dr01_help_restoration_lines;
+
+            break;
+        }
+
+        case FLOPPY144_DOCUMENT_VIEW_DR01_HELP_RECORDS:
+        {
+            lines =
+                floppy144_dr01_help_record_lines;
+
+            break;
+        }
+
+        default:
+        {
+            return;
+        }
+    }
+
+    Floppy144CatalogueBuildRecord(
+        catalogue->collection,
+        catalogue->selected_index,
+        record_id,
+        sizeof(record_id),
+        title,
+        sizeof(title)
+    );
+
+    Floppy144DrawClear(
+        surface,
+        background
+    );
+
+    Floppy144DrawText(
+        surface,
+        10,
+        5,
+        "GDR ARCHIVE DOCUMENT VIEWER",
+        1,
+        muted
+    );
+
+    Floppy144DrawText(
+        surface,
+        538,
+        5,
+        collection_definition->code,
+        1,
+        green
+    );
+
+    Floppy144DrawFillRect(
+        surface,
+        20,
+        20,
+        600,
+        284,
+        panel
+    );
+
+    Floppy144DrawRect(
+        surface,
+        20,
+        20,
+        600,
+        284,
+        border
+    );
+
+    Floppy144DrawFillRect(
+        surface,
+        36,
+        36,
+        568,
+        252,
+        document
+    );
+
+    Floppy144DrawRect(
+        surface,
+        36,
+        36,
+        568,
+        252,
+        border
+    );
+
+    Floppy144DrawText(
+        surface,
+        52,
+        50,
+        record_id,
+        1,
+        amber
+    );
+
+    Floppy144DrawText(
+        surface,
+        52,
+        68,
+        title,
+        1,
+        text
+    );
+
+    Floppy144DrawFillRect(
+        surface,
+        52,
+        86,
+        536,
+        1,
+        border
+    );
+
+    Floppy144DrawText(
+        surface,
+        52,
+        102,
+        "GDR OPERATING GUIDANCE",
+        1,
+        muted
+    );
+
+    for(
+        line_index = 0U;
+        lines[line_index] != NULL;
+        ++line_index
+    )
+    {
+        Floppy144DrawText(
+            surface,
+            52,
+            124 + line_index * 18U,
+            lines[line_index],
+            1,
+            text
+        );
+    }
+
+    Floppy144DrawFillRect(
+        surface,
+        20,
+        312,
+        600,
+        28,
+        background
+    );
+
+    Floppy144DrawRect(
+        surface,
+        20,
+        312,
+        600,
+        28,
+        border
+    );
+
+    Floppy144CatalogueTextCentred(
+        surface,
+        322,
+        "ESC RETURN",
+        1,
+        amber
+    );
+}
 static void Floppy144CatalogueDrawDocument(
     Floppy144Surface *surface,
     const Floppy144CatalogueState *catalogue
@@ -872,6 +1132,27 @@ static void Floppy144CatalogueDrawDocument(
     {
         Floppy144CatalogueDrawFa03ServiceNote(
             surface
+        );
+
+        return;
+    }
+
+    if(
+        authored_document != NULL &&
+        (
+            authored_document->view ==
+                FLOPPY144_DOCUMENT_VIEW_DR01_HELP_TERMINAL_ACCESS ||
+            authored_document->view ==
+                FLOPPY144_DOCUMENT_VIEW_DR01_HELP_RESTORATION ||
+            authored_document->view ==
+                FLOPPY144_DOCUMENT_VIEW_DR01_HELP_RECORDS
+        )
+    )
+    {
+        Floppy144CatalogueDrawDr01HelpDocument(
+            surface,
+            catalogue,
+            authored_document->view
         );
 
         return;
@@ -1144,7 +1425,7 @@ static void Floppy144CatalogueDrawDocument(
     Floppy144CatalogueTextCentred(
         surface,
         322,
-        "ESC RETURN TO RECORD CATALOGUE",
+        "ESC RETURN",
         1,
         amber
     );

@@ -45,6 +45,35 @@ static const Floppy144DocumentDefinition
     floppy144_documents[] =
 {
     {
+        FLOPPY144_COLLECTION_DR01,
+        1U,
+        NULL,
+        NULL,
+        FLOPPY144_DOCUMENT_VIEW_DR01_HELP_TERMINAL_ACCESS,
+        NULL,
+        0U
+    },
+
+    {
+        FLOPPY144_COLLECTION_DR01,
+        2U,
+        NULL,
+        NULL,
+        FLOPPY144_DOCUMENT_VIEW_DR01_HELP_RESTORATION,
+        NULL,
+        0U
+    },
+
+    {
+        FLOPPY144_COLLECTION_DR01,
+        3U,
+        NULL,
+        NULL,
+        FLOPPY144_DOCUMENT_VIEW_DR01_HELP_RECORDS,
+        NULL,
+        0U
+    },
+    {
         FLOPPY144_COLLECTION_HR02,
         37U,
         NULL,
@@ -121,11 +150,14 @@ bool Floppy144DocumentApplyEffects(
         return false;
     }
 
-    Floppy144ApplyEffects(
-        world,
-        document->effects,
-        document->effect_count
-    );
+    if(document->effect_count > 0U)
+    {
+        Floppy144ApplyEffects(
+            world,
+            document->effects,
+            document->effect_count
+        );
+    }
 
     return true;
 }
