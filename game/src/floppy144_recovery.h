@@ -12,6 +12,7 @@
 #include "floppy144_world.h"
 
 #include <stdbool.h>
+#include <stdint.h>
 
 /*
  * Recovery-screen renderer
@@ -20,6 +21,17 @@
  * world supplies the current restoration percentage.
  */
 
+/*
+ * Opening splash renderer
+ *
+ * elapsed_milliseconds drives the disk-flight animation independently of the
+ * display refresh rate.
+ */
+
+void Floppy144SplashDraw(
+    EngineData *engine,
+    uint32_t elapsed_milliseconds
+);
 void Floppy144RecoveryDraw(
     EngineData *engine,
     bool recovery_started,

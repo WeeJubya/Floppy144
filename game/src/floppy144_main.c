@@ -30,6 +30,7 @@
 
 typedef enum Floppy144Screen
 {
+    FLOPPY144_SCREEN_SPLASH,
     FLOPPY144_SCREEN_RECOVERY,
     FLOPPY144_SCREEN_OFFICE,
     FLOPPY144_SCREEN_TERMINAL,
@@ -62,6 +63,12 @@ static const char *global_office_notice;
 static bool global_recovery_started;
 static bool global_catalogue_direct_document;
 
+static DWORD global_splash_started_ticks;
+
+#define FLOPPY144_SPLASH_TIMER_ID          144U
+#define FLOPPY144_SPLASH_FRAME_MS           16U
+#define FLOPPY144_SPLASH_ANIMATION_MS     3700U
+
 /*
  * Bind river2D's statically linked software renderer
  *
@@ -93,6 +100,19 @@ static void Floppy144Redraw(
 {
     switch(global_screen)
     {
+        case FLOPPY144_SCREEN_SPLASH:
+        {
+            DWORD elapsed_milliseconds =
+                GetTickCount() -
+                global_splash_started_ticks;
+
+            Floppy144SplashDraw(
+                global_engine,
+                (uint32_t)elapsed_milliseconds
+            );
+
+            break;
+        }
         case FLOPPY144_SCREEN_RECOVERY:
         {
             Floppy144RecoveryDraw(
@@ -376,10 +396,91 @@ static LRESULT CALLBACK Floppy144WindowProc(
 
             return 0;
         }
+        /*
+         * Splash animation timer
+         *
+         * Elapsed time, rather than frame count, controls movement. The timer
+         * stops once the disk has settled.
+         */
+
+        case WM_TIMER:
+        {
+            if(
+                w_param ==
+                    FLOPPY144_SPLASH_TIMER_ID &&
+                global_screen ==
+                    FLOPPY144_SCREEN_SPLASH
+            )
+            {
+                DWORD elapsed_milliseconds =
+                    GetTickCount() -
+                    global_splash_started_ticks;
+
+                Floppy144Redraw(
+                    window
+                );
+
+                if(
+                    elapsed_milliseconds >=
+                        FLOPPY144_SPLASH_ANIMATION_MS
+                )
+                {
+                    KillTimer(
+                        window,
+                        FLOPPY144_SPLASH_TIMER_ID
+                    );
+                }
+
+                return 0;
+            }
+
+            break;
+        }
         case WM_KEYDOWN:
         {
             switch(global_screen)
             {
+                /*
+                 * Splash: Enter continues to recovery. Escape closes the
+                 * application. Other keys are ignored.
+                 */
+
+                case FLOPPY144_SCREEN_SPLASH:
+                {
+                    switch(w_param)
+                    {
+                        case VK_RETURN:
+                        {
+                            KillTimer(
+                                window,
+                                FLOPPY144_SPLASH_TIMER_ID
+                            );
+
+                            global_screen =
+                                FLOPPY144_SCREEN_RECOVERY;
+
+                            Floppy144Redraw(
+                                window
+                            );
+
+                            return 0;
+                        }
+
+                        case VK_ESCAPE:
+                        {
+                            PostMessageA(
+                                window,
+                                WM_CLOSE,
+                                0,
+                                0
+                            );
+
+                            return 0;
+                        }
+                    }
+
+                    break;
+                }
                 /* Recovery: Enter starts reconstruction, then enters the office. Escape quits. */
                 case FLOPPY144_SCREEN_RECOVERY:
                 {
@@ -846,7 +947,10 @@ int CALLBACK WinMain(
     global_engine = &engine;
 
     global_screen =
-        FLOPPY144_SCREEN_RECOVERY;
+        FLOPPY144_SCREEN_SPLASH;
+
+    global_splash_started_ticks =
+        0U;
 
     global_recovery_started =
         false;
@@ -896,15 +1000,29 @@ int CALLBACK WinMain(
         return 3;
     }
 
-    Floppy144RecoveryDraw(
+    Floppy144SplashDraw(
         &engine,
-        global_recovery_started,
-        &global_world
+        0U
     );
 
     ShowWindow(
         engine.window,
         show_command
+    );
+
+    global_splash_started_ticks =
+        GetTickCount();
+
+    Floppy144SplashDraw(
+        &engine,
+        0U
+    );
+
+    SetTimer(
+        engine.window,
+        FLOPPY144_SPLASH_TIMER_ID,
+        FLOPPY144_SPLASH_FRAME_MS,
+        NULL
     );
 
     UpdateWindow(

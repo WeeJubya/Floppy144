@@ -48,6 +48,608 @@ static void Floppy144RecoveryTextCentred(
  * as a Floppy144Surface, then paints the interface from back to front.
  */
 
+/*
+ * Draw the opening Floppy//144 splash
+ *
+ * The disk uses only rectangles and the embedded font. Its ascent uses an
+ * integer ease-out followed by a small settling movement.
+ */
+
+void Floppy144SplashDraw(
+    EngineData *engine,
+    uint32_t elapsed_milliseconds
+)
+{
+    const uint32_t background =
+        FLOPPY144_RGB(7, 10, 12);
+
+    const uint32_t text =
+        FLOPPY144_RGB(202, 211, 205);
+
+    const uint32_t muted =
+        FLOPPY144_RGB(118, 133, 132);
+
+    const uint32_t amber =
+        FLOPPY144_RGB(194, 153, 76);
+
+    const uint32_t disk_body =
+        FLOPPY144_RGB(38, 43, 46);
+
+    const uint32_t disk_inner =
+        FLOPPY144_RGB(25, 29, 31);
+
+    const uint32_t disk_edge =
+        FLOPPY144_RGB(104, 113, 115);
+
+    const uint32_t disk_label =
+        FLOPPY144_RGB(191, 193, 183);
+
+    const uint32_t disk_label_text =
+        FLOPPY144_RGB(49, 54, 53);
+
+    const uint32_t disk_metal =
+        FLOPPY144_RGB(151, 158, 157);
+
+    const uint32_t disk_metal_light =
+        FLOPPY144_RGB(193, 198, 195);
+
+    const char *title =
+        "FLOPPY//144";
+
+    const char *question =
+        "WHAT VERSION OF THE TRUTH ARE YOU WILLING TO ACCEPT?";
+
+    const uint32_t disk_x =
+        256U;
+
+    const uint32_t disk_start_y =
+        372U;
+
+    const uint32_t disk_target_y =
+        48U;
+
+    const uint32_t disk_width =
+        128U;
+
+    const uint32_t disk_height =
+        112U;
+
+    const uint32_t disk_flight_start =
+        0U;
+
+    const uint32_t disk_flight_duration =
+        1000U;
+
+    const uint32_t title_start =
+        1100U;
+
+    const uint32_t title_duration =
+        700U;
+
+    const uint32_t media_start =
+        1950U;
+
+    const uint32_t question_start =
+        2300U;
+
+    const uint32_t question_duration =
+        1200U;
+
+    const uint32_t prompt_start =
+        3600U;
+
+    uint32_t disk_y =
+        disk_start_y;
+
+    uint32_t title_x;
+    uint32_t title_target_x;
+    uint32_t title_width;
+
+    uint32_t question_x;
+    uint32_t question_target_x;
+    uint32_t question_width;
+
+    Floppy144Surface surface =
+    {
+        (uint32_t *)engine->backbuffer.data,
+        engine->backbuffer.width,
+        engine->backbuffer.height
+    };
+
+    /*
+     * Smoothstep disk flight.
+     *
+     * This starts gently, reaches full speed near the centre and eases into
+     * position without the abrupt initial leap produced by the old ease-out.
+     */
+
+    if(
+        elapsed_milliseconds >=
+            disk_flight_start &&
+        elapsed_milliseconds <
+            disk_flight_start +
+            disk_flight_duration
+    )
+    {
+        uint64_t time =
+            (uint64_t)(
+                elapsed_milliseconds -
+                disk_flight_start
+            );
+
+        uint64_t duration =
+            (uint64_t)disk_flight_duration;
+
+        uint64_t smooth_time =
+            time *
+            time *
+            (
+                3U * duration -
+                2U * time
+            );
+
+        uint64_t duration_cube =
+            duration *
+            duration *
+            duration;
+
+        uint32_t travelled =
+            (uint32_t)(
+                (
+                    (uint64_t)(
+                        disk_start_y -
+                        disk_target_y
+                    ) *
+                    smooth_time
+                ) /
+                duration_cube
+            );
+
+        disk_y =
+            disk_start_y -
+            travelled;
+    }
+    else if(
+        elapsed_milliseconds >=
+            disk_flight_start +
+            disk_flight_duration
+    )
+    {
+        disk_y =
+            disk_target_y;
+    }
+
+    /*
+     * Title roll-in.
+     */
+
+    title_width =
+        Floppy144DrawTextWidth(
+            title,
+            4U
+        );
+
+    title_target_x =
+        (
+            surface.width -
+            title_width
+        ) /
+        2U;
+
+    title_x =
+        0U;
+
+    if(elapsed_milliseconds >= title_start)
+    {
+        uint32_t title_time =
+            elapsed_milliseconds -
+            title_start;
+
+        if(title_time >= title_duration)
+        {
+            title_x =
+                title_target_x;
+        }
+        else
+        {
+            uint64_t time =
+                (uint64_t)title_time;
+
+            uint64_t duration =
+                (uint64_t)title_duration;
+
+            uint64_t smooth_time =
+                time *
+                time *
+                (
+                    3U * duration -
+                    2U * time
+                );
+
+            uint64_t duration_cube =
+                duration *
+                duration *
+                duration;
+
+            title_x =
+                (uint32_t)(
+                    (
+                        (uint64_t)title_target_x *
+                        smooth_time
+                    ) /
+                    duration_cube
+                );
+        }
+    }
+
+    /*
+     * Final question roll-in.
+     */
+
+    question_width =
+        Floppy144DrawTextWidth(
+            question,
+            1U
+        );
+
+    question_target_x =
+        (
+            surface.width -
+            question_width
+        ) /
+        2U;
+
+    question_x =
+        0U;
+
+    if(elapsed_milliseconds >= question_start)
+    {
+        uint32_t question_time =
+            elapsed_milliseconds -
+            question_start;
+
+        if(question_time >= question_duration)
+        {
+            question_x =
+                question_target_x;
+        }
+        else
+        {
+            uint64_t time =
+                (uint64_t)question_time;
+
+            uint64_t duration =
+                (uint64_t)question_duration;
+
+            uint64_t smooth_time =
+                time *
+                time *
+                (
+                    3U * duration -
+                    2U * time
+                );
+
+            uint64_t duration_cube =
+                duration *
+                duration *
+                duration;
+
+            question_x =
+                (uint32_t)(
+                    (
+                        (uint64_t)question_target_x *
+                        smooth_time
+                    ) /
+                    duration_cube
+                );
+        }
+    }
+
+    Floppy144DrawClear(
+        &surface,
+        background
+    );
+
+    /*
+     * Reversed 3.5-inch disk shell.
+     *
+     * The single clipped corner is at the lower left. The casing apertures are
+     * at the top, opposite the metal shutter.
+     */
+
+    Floppy144DrawFillRect(
+        &surface,
+        disk_x,
+        disk_y,
+        disk_width,
+        disk_height,
+        disk_body
+    );
+
+    /*
+     * Single stepped lower-left cut.
+     */
+
+    Floppy144DrawFillRect(
+        &surface,
+        disk_x,
+        disk_y + 100U,
+        4U,
+        12U,
+        background
+    );
+
+    Floppy144DrawFillRect(
+        &surface,
+        disk_x + 4U,
+        disk_y + 104U,
+        4U,
+        8U,
+        background
+    );
+
+    Floppy144DrawFillRect(
+        &surface,
+        disk_x + 8U,
+        disk_y + 108U,
+        4U,
+        4U,
+        background
+    );
+
+    /*
+     * Outer casing edges.
+     */
+
+    Floppy144DrawFillRect(
+        &surface,
+        disk_x,
+        disk_y,
+        disk_width,
+        2U,
+        disk_edge
+    );
+
+    Floppy144DrawFillRect(
+        &surface,
+        disk_x,
+        disk_y,
+        2U,
+        100U,
+        disk_edge
+    );
+
+    Floppy144DrawFillRect(
+        &surface,
+        disk_x + 126U,
+        disk_y,
+        2U,
+        disk_height,
+        disk_edge
+    );
+
+    Floppy144DrawFillRect(
+        &surface,
+        disk_x + 12U,
+        disk_y + 110U,
+        116U,
+        2U,
+        disk_edge
+    );
+
+    /*
+     * Stepped border around the clipped corner.
+     */
+
+    Floppy144DrawFillRect(
+        &surface,
+        disk_x + 2U,
+        disk_y + 100U,
+        4U,
+        2U,
+        disk_edge
+    );
+
+    Floppy144DrawFillRect(
+        &surface,
+        disk_x + 6U,
+        disk_y + 104U,
+        4U,
+        2U,
+        disk_edge
+    );
+
+    Floppy144DrawFillRect(
+        &surface,
+        disk_x + 10U,
+        disk_y + 108U,
+        4U,
+        2U,
+        disk_edge
+    );
+
+    /*
+     * Recessed body panel.
+     */
+
+    Floppy144DrawRect(
+        &surface,
+        disk_x + 10U,
+        disk_y + 10U,
+        108U,
+        94U,
+        disk_inner
+    );
+
+    /*
+     * Top casing apertures.
+     */
+
+    Floppy144DrawFillRect(
+        &surface,
+        disk_x + 8U,
+        disk_y + 7U,
+        9U,
+        8U,
+        disk_inner
+    );
+
+    Floppy144DrawRect(
+        &surface,
+        disk_x + 8U,
+        disk_y + 7U,
+        9U,
+        8U,
+        disk_edge
+    );
+
+    Floppy144DrawFillRect(
+        &surface,
+        disk_x + 112U,
+        disk_y + 7U,
+        8U,
+        8U,
+        disk_label
+    );
+
+    Floppy144DrawRect(
+        &surface,
+        disk_x + 112U,
+        disk_y + 7U,
+        8U,
+        8U,
+        disk_edge
+    );
+
+    /*
+     * Upper paper label.
+     */
+
+    Floppy144DrawFillRect(
+        &surface,
+        disk_x + 17U,
+        disk_y + 20U,
+        94U,
+        38U,
+        disk_label
+    );
+
+    Floppy144DrawRect(
+        &surface,
+        disk_x + 17U,
+        disk_y + 20U,
+        94U,
+        38U,
+        disk_edge
+    );
+
+    Floppy144DrawText(
+        &surface,
+        disk_x + 27U,
+        disk_y + 28U,
+        "DISK 144",
+        1U,
+        disk_label_text
+    );
+
+    Floppy144DrawText(
+        &surface,
+        disk_x + 27U,
+        disk_y + 44U,
+        "GDR RECOVERY",
+        1U,
+        disk_label_text
+    );
+
+    /*
+     * Lower metal shutter.
+     */
+
+    Floppy144DrawFillRect(
+        &surface,
+        disk_x + 20U,
+        disk_y + 70U,
+        88U,
+        32U,
+        disk_metal
+    );
+
+    Floppy144DrawRect(
+        &surface,
+        disk_x + 20U,
+        disk_y + 70U,
+        88U,
+        32U,
+        disk_metal_light
+    );
+
+    Floppy144DrawFillRect(
+        &surface,
+        disk_x + 75U,
+        disk_y + 75U,
+        16U,
+        22U,
+        disk_inner
+    );
+
+    Floppy144DrawRect(
+        &surface,
+        disk_x + 75U,
+        disk_y + 75U,
+        16U,
+        22U,
+        disk_edge
+    );
+    /*
+     * Staged text sequence.
+     */
+
+    if(elapsed_milliseconds >= title_start)
+    {
+        Floppy144DrawText(
+            &surface,
+            title_x,
+            184U,
+            title,
+            4U,
+            text
+        );
+    }
+
+    if(elapsed_milliseconds >= media_start)
+    {
+        Floppy144RecoveryTextCentred(
+            &surface,
+            232U,
+            "RECOVERY MEDIA DETECTED",
+            1U,
+            muted
+        );
+    }
+
+    if(elapsed_milliseconds >= question_start)
+    {
+        Floppy144DrawText(
+            &surface,
+            question_x,
+            286U,
+            question,
+            1U,
+            amber
+        );
+    }
+
+    if(elapsed_milliseconds >= prompt_start)
+    {
+        Floppy144RecoveryTextCentred(
+            &surface,
+            328U,
+            "PRESS ENTER",
+            1U,
+            muted
+        );
+    }
+}
 void Floppy144RecoveryDraw(
     EngineData *engine,
     bool recovery_started,

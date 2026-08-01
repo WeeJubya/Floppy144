@@ -85,6 +85,8 @@ static uint64_t Floppy144Glyph(
         case '_': return FLOPPY144_GLYPH(0, 0, 0, 0, 0, 0, 31);
         case '%': return FLOPPY144_GLYPH(17, 2, 4, 8, 16, 17, 0);
         case '>': return FLOPPY144_GLYPH(16, 8, 4, 2, 4, 8, 16);
+        case '<': return FLOPPY144_GLYPH(2, 4, 8, 16, 8, 4, 2);
+        case '@': return FLOPPY144_GLYPH(14, 17, 21, 29, 5, 1, 30);
         case ' ': return 0;
 
         default: return FLOPPY144_GLYPH(14, 17, 2, 4, 0, 4, 0);
