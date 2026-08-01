@@ -1,8 +1,7 @@
 /*
- * Floppy//144 - recovery screen interface
+ * Floppy//144 - splash and GDR main-menu interface
  *
- * Draws the first screen seen by the player and reflects reconstruction
- * progress from the shared world state.
+ * Draws the opening presentation and the session-control screen.
  */
 
 #pragma once
@@ -15,25 +14,47 @@
 #include <stdint.h>
 
 /*
- * Recovery-screen renderer
+ * Main-menu options
  *
- * recovery_started selects the pre-recovery or ready-to-enter message.
- * world supplies the current restoration percentage.
+ * Save and load remain represented from the beginning, even while their
+ * implementation is unavailable.
  */
 
+typedef enum Floppy144MainMenuOption
+{
+    FLOPPY144_MAIN_MENU_INITIATE_SESSION = 0,
+    FLOPPY144_MAIN_MENU_RETURN_TO_SITE,
+    FLOPPY144_MAIN_MENU_RECORD_SESSION,
+    FLOPPY144_MAIN_MENU_REINSTATE_SESSION,
+    FLOPPY144_MAIN_MENU_TERMINATE,
+    FLOPPY144_MAIN_MENU_OPTION_COUNT
+} Floppy144MainMenuOption;
+
 /*
- * Opening splash renderer
- *
- * elapsed_milliseconds drives the disk-flight animation independently of the
- * display refresh rate.
+ * Report whether a menu option is currently available.
+ */
+
+bool Floppy144MainMenuOptionEnabled(
+    Floppy144MainMenuOption option,
+    bool active_session
+);
+
+/*
+ * Opening splash renderer.
  */
 
 void Floppy144SplashDraw(
     EngineData *engine,
     uint32_t elapsed_milliseconds
 );
-void Floppy144RecoveryDraw(
+
+/*
+ * GDR session-control menu renderer.
+ */
+
+void Floppy144MainMenuDraw(
     EngineData *engine,
-    bool recovery_started,
+    Floppy144MainMenuOption selected_option,
+    bool active_session,
     const Floppy144WorldState *world
 );

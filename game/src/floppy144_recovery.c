@@ -650,19 +650,59 @@ void Floppy144SplashDraw(
         );
     }
 }
-void Floppy144RecoveryDraw(
+static const char *const floppy144_main_menu_labels[] =
+{
+    "INITIATE NEW RECOVERY SESSION",
+    "RETURN TO ACTIVE SITE",
+    "RECORD CURRENT SESSION",
+    "REINSTATE RECORDED SESSION",
+    "TERMINATE RECOVERY ENVIRONMENT"
+};
+
+/*
+ * Report whether one session-control option is available.
+ */
+
+bool Floppy144MainMenuOptionEnabled(
+    Floppy144MainMenuOption option,
+    bool active_session
+)
+{
+    switch(option)
+    {
+        case FLOPPY144_MAIN_MENU_INITIATE_SESSION:
+        case FLOPPY144_MAIN_MENU_TERMINATE:
+        {
+            return true;
+        }
+
+        case FLOPPY144_MAIN_MENU_RETURN_TO_SITE:
+        {
+            return active_session;
+        }
+
+        case FLOPPY144_MAIN_MENU_RECORD_SESSION:
+        case FLOPPY144_MAIN_MENU_REINSTATE_SESSION:
+        case FLOPPY144_MAIN_MENU_OPTION_COUNT:
+        {
+            return false;
+        }
+    }
+
+    return false;
+}
+
+/*
+ * Draw the GDR session-control menu.
+ */
+
+void Floppy144MainMenuDraw(
     EngineData *engine,
-    bool recovery_started,
+    Floppy144MainMenuOption selected_option,
+    bool active_session,
     const Floppy144WorldState *world
 )
 {
-    /*
-     * Screen palette
-     *
-     * Colours are local constants so the compiler can fold them into the draw
-     * calls without requiring a theme object.
-     */
-
     const uint32_t background =
         FLOPPY144_RGB(17, 23, 28);
 
@@ -687,51 +727,26 @@ void Floppy144RecoveryDraw(
     const uint32_t green =
         FLOPPY144_RGB(100, 156, 111);
 
-    /*
-     * Dynamic recovery messages
-     *
-     * Text and progress width depend on whether recovery has begun and how
-     * much of the site has been restored.
-     */
-
     uint32_t reconstruction_percent =
-        recovery_started
+        active_session
             ? Floppy144WorldReconstructionPercent(world)
             : 0U;
 
-    char status_text[48];
-
-    snprintf(
-        status_text,
-        sizeof(status_text),
-        "SITE RECONSTRUCTION STATUS: %02u%%",
-        (unsigned)reconstruction_percent
-    );
-
-    const char *prompt_text =
-        recovery_started
-            ? "OFFICE RECONSTRUCTION READY"
-            : "PRESS ENTER TO BEGIN RECOVERY";
-
-    const char *sub_prompt_text =
-        recovery_started
-            ? "PRESS ENTER TO ENTER SITE"
-            : "ESC TO TERMINATE SESSION";
-
     uint32_t progress_width =
-        recovery_started
-            ? (
-                522U *
-                reconstruction_percent
-              ) / 100U
-            : 2U;
+        (
+            522U *
+            reconstruction_percent
+        ) /
+        100U;
 
-    /*
-     * Backbuffer view
-     *
-     * river2D owns the memory. The game supplies width, height and pixel pointer
-     * to the compact drawing layer.
-     */
+    const char *session_status =
+        active_session
+            ? "SESSION STATUS: ACTIVE"
+            : "SESSION STATUS: NO ACTIVE SESSION";
+
+    char reconstruction_text[48];
+
+    uint32_t option_index;
 
     Floppy144Surface surface =
     {
@@ -740,7 +755,23 @@ void Floppy144RecoveryDraw(
         engine->backbuffer.height
     };
 
-    /* Paint order: background, system header, main panel, metadata, progress and prompts. */
+    if(
+        selected_option < 0 ||
+        selected_option >=
+            FLOPPY144_MAIN_MENU_OPTION_COUNT
+    )
+    {
+        selected_option =
+            FLOPPY144_MAIN_MENU_INITIATE_SESSION;
+    }
+
+    snprintf(
+        reconstruction_text,
+        sizeof(reconstruction_text),
+        "SITE RECONSTRUCTION: %02u%%",
+        (unsigned)reconstruction_percent
+    );
+
     Floppy144DrawClear(
         &surface,
         background
@@ -748,234 +779,286 @@ void Floppy144RecoveryDraw(
 
     Floppy144DrawFillRect(
         &surface,
-        0,
-        0,
-        640,
-        16,
+        0U,
+        0U,
+        640U,
+        16U,
         panel_dark
     );
 
     Floppy144DrawText(
         &surface,
-        10,
-        5,
-        "GDR ARCHIVE RECOVERY SYSTEM",
-        1,
+        10U,
+        5U,
+        "GDR SESSION CONTROL SYSTEM",
+        1U,
         muted
     );
 
     Floppy144DrawText(
         &surface,
-        556,
-        5,
+        556U,
+        5U,
         "APS-12",
-        1,
+        1U,
         amber
     );
 
     Floppy144DrawFillRect(
         &surface,
-        24,
-        28,
-        592,
-        306,
+        24U,
+        28U,
+        592U,
+        306U,
         panel
     );
 
     Floppy144DrawRect(
         &surface,
-        24,
-        28,
-        592,
-        306,
+        24U,
+        28U,
+        592U,
+        306U,
         border
     );
 
     Floppy144RecoveryTextCentred(
         &surface,
-        44,
+        40U,
         "GOVERNMENT DEPARTMENT OF RECORDS",
-        2,
+        2U,
         text
     );
 
     Floppy144RecoveryTextCentred(
         &surface,
-        66,
-        "ARCHIVE RECOVERY ENVIRONMENT",
-        1,
+        66U,
+        "SITE RECONSTRUCTION ENVIRONMENT",
+        1U,
         muted
     );
 
     Floppy144DrawFillRect(
         &surface,
-        48,
-        88,
-        544,
-        1,
+        48U,
+        88U,
+        544U,
+        1U,
         border
     );
 
     Floppy144DrawText(
         &surface,
-        56,
-        106,
-    /* Static metadata identifies the recovered disk and governing protocol. */
+        56U,
+        104U,
         "REMOVABLE MEDIA:",
-        1,
+        1U,
         muted
     );
 
     Floppy144DrawText(
         &surface,
-        196,
-        106,
+        196U,
+        104U,
         "DISK 144",
-        1,
+        1U,
         text
     );
 
     Floppy144DrawText(
         &surface,
-        56,
-        126,
+        56U,
+        122U,
         "MEDIA CLASS:",
-        1,
+        1U,
         muted
     );
 
     Floppy144DrawText(
         &surface,
-        196,
-        126,
+        196U,
+        122U,
         "RECOVERY",
-        1,
+        1U,
         text
     );
 
     Floppy144DrawText(
         &surface,
-        56,
-        146,
+        56U,
+        140U,
         "PROTOCOL:",
-        1,
+        1U,
         muted
     );
 
     Floppy144DrawText(
         &surface,
-        196,
-        146,
+        196U,
+        140U,
         "APS-12 PARTIAL SITE",
-        1,
+        1U,
         amber
     );
 
     Floppy144DrawFillRect(
         &surface,
-        48,
-        174,
-        544,
-        1,
+        48U,
+        160U,
+        544U,
+        1U,
         border
     );
 
     Floppy144DrawText(
         &surface,
-        56,
-        190,
-    /* DR-01 is always available and supplies the minimum site reconstruction. */
-        "MANDATORY COLLECTION DR-01: RESTORED",
-        1,
-        green
+        56U,
+        174U,
+        session_status,
+        1U,
+        active_session
+            ? green
+            : muted
     );
 
     Floppy144DrawText(
         &surface,
-        56,
-        210,
-        status_text,
-        1,
+        56U,
+        192U,
+        reconstruction_text,
+        1U,
         text
     );
 
     Floppy144DrawFillRect(
         &surface,
-        56,
-        232,
-        528,
-        16,
+        56U,
+        210U,
+        528U,
+        14U,
         panel_dark
     );
 
     Floppy144DrawRect(
         &surface,
-        56,
-        232,
-        528,
-        16,
+        56U,
+        210U,
+        528U,
+        14U,
         border
     );
 
     Floppy144DrawFillRect(
         &surface,
-        59,
-        235,
+        59U,
+        213U,
         progress_width,
-        10,
+        8U,
         green
     );
 
     Floppy144DrawFillRect(
         &surface,
-        48,
-        268,
-        544,
-        46,
-        panel_dark
-    );
-
-    Floppy144DrawRect(
-        &surface,
-        48,
-        268,
-        544,
-        46,
+        48U,
+        236U,
+        544U,
+        1U,
         border
     );
 
-    Floppy144RecoveryTextCentred(
-        &surface,
-        278,
-    /* The lower panel tells the player what Enter will do next. */
-        prompt_text,
-        1,
-        recovery_started ? green : amber
-    );
+    for(
+        option_index = 0U;
+        option_index <
+            (uint32_t)FLOPPY144_MAIN_MENU_OPTION_COUNT;
+        ++option_index
+    )
+    {
+        Floppy144MainMenuOption option =
+            (Floppy144MainMenuOption)option_index;
+
+        const char *label =
+            floppy144_main_menu_labels[option_index];
+
+        bool enabled =
+            Floppy144MainMenuOptionEnabled(
+                option,
+                active_session
+            );
+
+        bool selected =
+            option == selected_option;
+
+        uint32_t row_y =
+            248U +
+            option_index * 15U;
+
+        uint32_t label_width =
+            Floppy144DrawTextWidth(
+                label,
+                1U
+            );
+
+        uint32_t label_x =
+            (
+                surface.width -
+                label_width
+            ) /
+            2U;
+
+        if(selected && enabled)
+        {
+            Floppy144DrawFillRect(
+                &surface,
+                48U,
+                row_y - 4U,
+                544U,
+                14U,
+                panel_dark
+            );
+
+            Floppy144DrawText(
+                &surface,
+                label_x - 14U,
+                row_y,
+                ">",
+                1U,
+                amber
+            );
+        }
+
+        Floppy144DrawText(
+            &surface,
+            label_x,
+            row_y,
+            label,
+            1U,
+            enabled
+                ? (
+                    selected
+                        ? amber
+                        : text
+                  )
+                : muted
+        );
+
+        if(!enabled)
+        {
+            Floppy144DrawText(
+                &surface,
+                514U,
+                row_y,
+                "UNAVAILABLE",
+                1U,
+                muted
+            );
+        }
+    }
 
     Floppy144RecoveryTextCentred(
         &surface,
-        296,
-        sub_prompt_text,
-        1,
-        muted
-    );
-
-    Floppy144DrawText(
-        &surface,
-        34,
-        320,
-        "SESSION 144-REC",
-        1,
-        muted
-    );
-
-    Floppy144DrawText(
-        &surface,
-        529,
-        320,
-        "OFFLINE",
-        1,
+        323U,
+        "ENTER SELECT",
+        1U,
         muted
     );
 }

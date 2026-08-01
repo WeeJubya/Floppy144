@@ -24,14 +24,14 @@
 /*
  * Top-level screen state
  *
- * Only one of the recovery screen, office, terminal or catalogue is active.
+ * Only one of the splash, main menu, office, terminal or catalogue is active.
  * This enum is the game's small screen-state machine.
  */
 
 typedef enum Floppy144Screen
 {
     FLOPPY144_SCREEN_SPLASH,
-    FLOPPY144_SCREEN_RECOVERY,
+    FLOPPY144_SCREEN_MAIN_MENU,
     FLOPPY144_SCREEN_OFFICE,
     FLOPPY144_SCREEN_TERMINAL,
     FLOPPY144_SCREEN_CATALOGUE
@@ -56,12 +56,18 @@ static Floppy144WorldState global_world;
  * Short-lived interface state
  *
  * The office notice points to static text shown after an inspection. Movement
- * clears it. recovery_started controls the two-step boot sequence.
+ * clears it. session state controls menu availability and suspended-screen recovery.
  */
 
 static const char *global_office_notice;
-static bool global_recovery_started;
+static bool global_session_active;
 static bool global_catalogue_direct_document;
+
+static Floppy144MainMenuOption
+    global_main_menu_option;
+
+static Floppy144Screen
+    global_resume_screen;
 
 static DWORD global_splash_started_ticks;
 
@@ -113,11 +119,12 @@ static void Floppy144Redraw(
 
             break;
         }
-        case FLOPPY144_SCREEN_RECOVERY:
+        case FLOPPY144_SCREEN_MAIN_MENU:
         {
-            Floppy144RecoveryDraw(
+            Floppy144MainMenuDraw(
                 global_engine,
-                global_recovery_started,
+                global_main_menu_option,
+                global_session_active,
                 &global_world
             );
 
@@ -165,6 +172,192 @@ static void Floppy144Redraw(
     );
 }
 
+/*
+ * Return to the GDR main menu.
+ *
+ * An active session remembers the exact screen that was suspended.
+ */
+
+static void Floppy144OpenMainMenu(
+    HWND window
+)
+{
+    if(
+        global_session_active &&
+        global_screen != FLOPPY144_SCREEN_SPLASH &&
+        global_screen != FLOPPY144_SCREEN_MAIN_MENU
+    )
+    {
+        global_resume_screen =
+            global_screen;
+    }
+
+    global_screen =
+        FLOPPY144_SCREEN_MAIN_MENU;
+
+    global_main_menu_option =
+        global_session_active
+            ? FLOPPY144_MAIN_MENU_RETURN_TO_SITE
+            : FLOPPY144_MAIN_MENU_INITIATE_SESSION;
+
+    Floppy144Redraw(
+        window
+    );
+}
+
+/*
+ * Move to the next available session-control option.
+ */
+
+static void Floppy144MainMenuMoveSelection(
+    int32_t direction
+)
+{
+    int32_t next_option;
+    uint32_t attempts;
+
+    if(direction == 0)
+    {
+        return;
+    }
+
+    next_option =
+        (int32_t)global_main_menu_option;
+
+    for(
+        attempts = 0U;
+        attempts <
+            (uint32_t)FLOPPY144_MAIN_MENU_OPTION_COUNT;
+        ++attempts
+    )
+    {
+        next_option +=
+            direction;
+
+        if(next_option < 0)
+        {
+            next_option =
+                (int32_t)
+                    FLOPPY144_MAIN_MENU_OPTION_COUNT -
+                1;
+        }
+
+        if(
+            next_option >=
+                (int32_t)
+                    FLOPPY144_MAIN_MENU_OPTION_COUNT
+        )
+        {
+            next_option =
+                0;
+        }
+
+        if(
+            Floppy144MainMenuOptionEnabled(
+                (Floppy144MainMenuOption)next_option,
+                global_session_active
+            )
+        )
+        {
+            global_main_menu_option =
+                (Floppy144MainMenuOption)next_option;
+
+            return;
+        }
+    }
+}
+
+/*
+ * Execute the selected session-control option.
+ */
+
+static void Floppy144MainMenuActivate(
+    HWND window
+)
+{
+    switch(global_main_menu_option)
+    {
+        case FLOPPY144_MAIN_MENU_INITIATE_SESSION:
+        {
+            Floppy144WorldReset(
+                &global_world
+            );
+
+            Floppy144OfficeReset(
+                &global_player
+            );
+
+            Floppy144TerminalReset(
+                &global_terminal,
+                &global_world
+            );
+
+            Floppy144CatalogueReset(
+                &global_catalogue,
+                FLOPPY144_COLLECTION_DR01
+            );
+
+            global_office_notice =
+                NULL;
+
+            global_catalogue_direct_document =
+                false;
+
+            global_session_active =
+                true;
+
+            global_resume_screen =
+                FLOPPY144_SCREEN_TERMINAL;
+
+            global_screen =
+                FLOPPY144_SCREEN_TERMINAL;
+
+            Floppy144Redraw(
+                window
+            );
+
+            return;
+        }
+
+        case FLOPPY144_MAIN_MENU_RETURN_TO_SITE:
+        {
+            if(global_session_active)
+            {
+                global_screen =
+                    global_resume_screen;
+
+                Floppy144Redraw(
+                    window
+                );
+            }
+
+            return;
+        }
+
+        case FLOPPY144_MAIN_MENU_RECORD_SESSION:
+        case FLOPPY144_MAIN_MENU_REINSTATE_SESSION:
+        {
+            return;
+        }
+
+        case FLOPPY144_MAIN_MENU_TERMINATE:
+        {
+            PostMessageA(
+                window,
+                WM_CLOSE,
+                0,
+                0
+            );
+
+            return;
+        }
+
+        case FLOPPY144_MAIN_MENU_OPTION_COUNT:
+        {
+            return;
+        }
+    }
+}
 /*
  * Move the player and clear inspection text
  *
@@ -438,26 +631,73 @@ static LRESULT CALLBACK Floppy144WindowProc(
         }
         case WM_KEYDOWN:
         {
+            /*
+             * Escape never terminates the application.
+             *
+             * From every non-menu screen it suspends the current view and
+             * returns to GDR session control. On the menu it has no effect.
+             */
+
+            if(w_param == VK_ESCAPE)
+            {
+                if(global_screen == FLOPPY144_SCREEN_SPLASH)
+                {
+                    KillTimer(
+                        window,
+                        FLOPPY144_SPLASH_TIMER_ID
+                    );
+                }
+
+                if(global_screen != FLOPPY144_SCREEN_MAIN_MENU)
+                {
+                    Floppy144OpenMainMenu(
+                        window
+                    );
+                }
+
+                return 0;
+            }
+
             switch(global_screen)
             {
                 /*
-                 * Splash: Enter continues to recovery. Escape closes the
-                 * application. Other keys are ignored.
+                 * Splash: Enter advances to session control.
+                 * Escape is handled by the universal menu route.
                  */
 
                 case FLOPPY144_SCREEN_SPLASH:
                 {
+                    if(w_param == VK_RETURN)
+                    {
+                        KillTimer(
+                            window,
+                            FLOPPY144_SPLASH_TIMER_ID
+                        );
+
+                        Floppy144OpenMainMenu(
+                            window
+                        );
+
+                        return 0;
+                    }
+
+                    break;
+                }
+                /*
+                 * GDR main menu: move through available options and execute
+                 * the highlighted administrative action.
+                 */
+
+                case FLOPPY144_SCREEN_MAIN_MENU:
+                {
                     switch(w_param)
                     {
-                        case VK_RETURN:
+                        case VK_UP:
+                        case 'W':
                         {
-                            KillTimer(
-                                window,
-                                FLOPPY144_SPLASH_TIMER_ID
+                            Floppy144MainMenuMoveSelection(
+                                -1
                             );
-
-                            global_screen =
-                                FLOPPY144_SCREEN_RECOVERY;
 
                             Floppy144Redraw(
                                 window
@@ -466,62 +706,24 @@ static LRESULT CALLBACK Floppy144WindowProc(
                             return 0;
                         }
 
-                        case VK_ESCAPE:
+                        case VK_DOWN:
+                        case 'S':
                         {
-                            PostMessageA(
-                                window,
-                                WM_CLOSE,
-                                0,
-                                0
+                            Floppy144MainMenuMoveSelection(
+                                1
+                            );
+
+                            Floppy144Redraw(
+                                window
                             );
 
                             return 0;
                         }
-                    }
 
-                    break;
-                }
-                /* Recovery: Enter starts reconstruction, then enters the office. Escape quits. */
-                case FLOPPY144_SCREEN_RECOVERY:
-                {
-                    switch(w_param)
-                    {
                         case VK_RETURN:
                         {
-                            switch(global_recovery_started)
-                            {
-                                case false:
-                                {
-                                    global_recovery_started =
-                                        true;
-
-                                    break;
-                                }
-
-                                case true:
-                                {
-                                    global_screen =
-                                        FLOPPY144_SCREEN_OFFICE;
-
-                                    Floppy144OfficeReset(
-                                        &global_player
-                                    );
-
-                                    break;
-                                }
-                            }
-
-                            Floppy144Redraw(window);
-                            return 0;
-                        }
-
-                        case VK_ESCAPE:
-                        {
-                            PostMessageA(
-                                window,
-                                WM_CLOSE,
-                                0,
-                                0
+                            Floppy144MainMenuActivate(
+                                window
                             );
 
                             return 0;
@@ -596,7 +798,7 @@ static LRESULT CALLBACK Floppy144WindowProc(
                         case VK_ESCAPE:
                         {
                             global_screen =
-                                FLOPPY144_SCREEN_RECOVERY;
+                                FLOPPY144_SCREEN_MAIN_MENU;
 
                             Floppy144Redraw(window);
                             return 0;
@@ -952,8 +1154,14 @@ int CALLBACK WinMain(
     global_splash_started_ticks =
         0U;
 
-    global_recovery_started =
+    global_session_active =
         false;
+
+    global_main_menu_option =
+        FLOPPY144_MAIN_MENU_INITIATE_SESSION;
+
+    global_resume_screen =
+        FLOPPY144_SCREEN_TERMINAL;
 
     Floppy144OfficeReset(
         &global_player
