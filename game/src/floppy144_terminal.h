@@ -36,6 +36,10 @@ typedef struct Floppy144TerminalState
     bool restoration_notice;
     bool suppress_next_character;
     bool exit_requested;
+    bool open_record_requested;
+
+    Floppy144CollectionId requested_collection;
+    uint32_t requested_record_index;
 
     char input[FLOPPY144_TERMINAL_INPUT_CAPACITY];
     uint32_t input_length;

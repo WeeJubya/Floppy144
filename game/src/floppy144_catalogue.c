@@ -1248,6 +1248,52 @@ void Floppy144CataloguePage(
  * The evidence flag is set separately by main.c after this state change.
  */
 
+/*
+ * Open one exact catalogue record
+ *
+ * Command-driven record lookup uses this entry point to prepare the existing
+ * document viewer without exposing catalogue state changes to main.c.
+ */
+
+bool Floppy144CatalogueOpenRecord(
+    Floppy144CatalogueState *catalogue,
+    Floppy144CollectionId collection,
+    uint32_t record_index
+)
+{
+    const Floppy144CatalogueDefinition *definition =
+        &Floppy144CollectionGet(
+            collection
+        )->catalogue;
+
+    if(
+        catalogue == NULL ||
+        record_index >= definition->record_count
+    )
+    {
+        return false;
+    }
+
+    Floppy144CatalogueReset(
+        catalogue,
+        collection
+    );
+
+    catalogue->selected_index =
+        record_index;
+
+    catalogue->top_index =
+        (
+            record_index /
+            FLOPPY144_CATALOGUE_ROWS
+        ) *
+        FLOPPY144_CATALOGUE_ROWS;
+
+    catalogue->document_open =
+        true;
+
+    return true;
+}
 void Floppy144CatalogueOpenDocument(
     Floppy144CatalogueState *catalogue
 )

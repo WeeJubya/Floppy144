@@ -62,6 +62,11 @@ void Floppy144CataloguePage(
     int32_t direction
 );
 
+bool Floppy144CatalogueOpenRecord(
+    Floppy144CatalogueState *catalogue,
+    Floppy144CollectionId collection,
+    uint32_t record_index
+);
 void Floppy144CatalogueOpenDocument(
     Floppy144CatalogueState *catalogue
 );

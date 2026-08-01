@@ -1277,6 +1277,179 @@ static void Floppy144TerminalRestoreCollection(
     );
 }
 
+/*
+ * Locate a record by its complete player-facing ID.
+ *
+ * IDs are generated through the same catalogue function used by LIST and the
+ * graphical catalogue, including authored-document overrides.
+ */
+
+static bool Floppy144TerminalFindRecord(
+    const char *requested_record_id,
+    Floppy144CollectionId *collection,
+    uint32_t *record_index
+)
+{
+    uint32_t collection_index;
+
+    char generated_record_id[24];
+    char generated_title[48];
+
+    if(
+        requested_record_id == NULL ||
+        collection == NULL ||
+        record_index == NULL
+    )
+    {
+        return false;
+    }
+
+    for(
+        collection_index = 0U;
+        collection_index <
+            (uint32_t)FLOPPY144_COLLECTION_COUNT;
+        ++collection_index
+    )
+    {
+        Floppy144CollectionId candidate_collection =
+            (Floppy144CollectionId)collection_index;
+
+        const Floppy144CatalogueDefinition *catalogue_definition =
+            &Floppy144CollectionGet(
+                candidate_collection
+            )->catalogue;
+
+        uint32_t candidate_index;
+
+        for(
+            candidate_index = 0U;
+            candidate_index <
+                catalogue_definition->record_count;
+            ++candidate_index
+        )
+        {
+            Floppy144CatalogueBuildRecord(
+                candidate_collection,
+                candidate_index,
+                generated_record_id,
+                sizeof(generated_record_id),
+                generated_title,
+                sizeof(generated_title)
+            );
+
+            if(
+                Floppy144TerminalCommandMatches(
+                    requested_record_id,
+                    generated_record_id
+                )
+            )
+            {
+                *collection =
+                    candidate_collection;
+
+                *record_index =
+                    candidate_index;
+
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+/*
+ * Validate an OPEN request and pass the resolved catalogue position to main.
+ */
+
+static void Floppy144TerminalRequestOpenRecord(
+    Floppy144TerminalState *terminal,
+    const Floppy144WorldState *world,
+    const char *record_id
+)
+{
+    Floppy144CollectionId collection;
+    uint32_t record_index;
+
+    const Floppy144CollectionDefinition *definition;
+
+    char canonical_record_id[24];
+    char title[48];
+    char line[FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
+
+    if(
+        !Floppy144TerminalFindRecord(
+            record_id,
+            &collection,
+            &record_index
+        )
+    )
+    {
+        Floppy144TerminalPushLine(
+            terminal,
+            "RECORD ID NOT FOUND ON DISK 144."
+        );
+
+        return;
+    }
+
+    definition =
+        Floppy144CollectionGet(
+            collection
+        );
+
+    if(
+        !Floppy144WorldCollectionRestored(
+            world,
+            collection
+        )
+    )
+    {
+        snprintf(
+            line,
+            sizeof(line),
+            "COLLECTION %s HAS NOT BEEN RESTORED.",
+            definition->code
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            line
+        );
+
+        return;
+    }
+
+    Floppy144CatalogueBuildRecord(
+        collection,
+        record_index,
+        canonical_record_id,
+        sizeof(canonical_record_id),
+        title,
+        sizeof(title)
+    );
+
+    snprintf(
+        line,
+        sizeof(line),
+        "OPENING RECORD %s...",
+        canonical_record_id
+    );
+
+    Floppy144TerminalPushLine(
+        terminal,
+        line
+    );
+
+    terminal->requested_collection =
+        collection;
+
+    terminal->requested_record_index =
+        record_index;
+
+    terminal->open_record_requested =
+        true;
+}
 void Floppy144TerminalSubmitInput(
     Floppy144TerminalState *terminal,
     Floppy144WorldState *world
@@ -1299,6 +1472,9 @@ void Floppy144TerminalSubmitInput(
     {
         return;
     }
+
+    terminal->open_record_requested =
+        false;
 
     snprintf(
         submitted_line,
@@ -1459,9 +1635,10 @@ void Floppy144TerminalSubmitInput(
         }
         else
         {
-            Floppy144TerminalPushLine(
+            Floppy144TerminalRequestOpenRecord(
                 terminal,
-                "RECORD LOOKUP MODULE NOT YET LINKED."
+                world,
+                open_arguments
             );
         }
     }
@@ -1570,6 +1747,15 @@ void Floppy144TerminalReset(
 
     terminal->exit_requested =
         false;
+
+    terminal->open_record_requested =
+        false;
+
+    terminal->requested_collection =
+        FLOPPY144_COLLECTION_XX01;
+
+    terminal->requested_record_index =
+        0U;
 
     terminal->input_length =
         0U;

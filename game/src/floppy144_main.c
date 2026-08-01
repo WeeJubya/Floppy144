@@ -60,6 +60,7 @@ static Floppy144WorldState global_world;
 
 static const char *global_office_notice;
 static bool global_recovery_started;
+static bool global_catalogue_direct_document;
 
 /*
  * Bind river2D's statically linked software renderer
@@ -322,6 +323,32 @@ static LRESULT CALLBACK Floppy144WindowProc(
                         global_screen =
                             FLOPPY144_SCREEN_OFFICE;
                     }
+                    else if(global_terminal.open_record_requested)
+                    {
+                        if(
+                            Floppy144CatalogueOpenRecord(
+                                &global_catalogue,
+                                global_terminal.requested_collection,
+                                global_terminal.requested_record_index
+                            )
+                        )
+                        {
+                            Floppy144DocumentApplyEffects(
+                                &global_world,
+                                global_terminal.requested_collection,
+                                global_terminal.requested_record_index
+                            );
+
+                            global_catalogue_direct_document =
+                                true;
+
+                            global_screen =
+                                FLOPPY144_SCREEN_CATALOGUE;
+                        }
+
+                        global_terminal.open_record_requested =
+                            false;
+                    }
 
                     break;
                 }
@@ -568,27 +595,49 @@ static LRESULT CALLBACK Floppy144WindowProc(
 
                         case VK_ESCAPE:
                         {
-                            switch(
-                                Floppy144CatalogueDocumentOpen(
-                                    &global_catalogue
-                                )
-                            )
+                            if(global_catalogue_direct_document)
                             {
-                                case true:
+                                if(
+                                    Floppy144CatalogueDocumentOpen(
+                                        &global_catalogue
+                                    )
+                                )
                                 {
                                     Floppy144CatalogueCloseDocument(
                                         &global_catalogue
                                     );
-
-                                    break;
                                 }
 
-                                case false:
-                                {
-                                    global_screen =
-                                        FLOPPY144_SCREEN_TERMINAL;
+                                global_catalogue_direct_document =
+                                    false;
 
-                                    break;
+                                global_screen =
+                                    FLOPPY144_SCREEN_TERMINAL;
+                            }
+                            else
+                            {
+                                switch(
+                                    Floppy144CatalogueDocumentOpen(
+                                        &global_catalogue
+                                    )
+                                )
+                                {
+                                    case true:
+                                    {
+                                        Floppy144CatalogueCloseDocument(
+                                            &global_catalogue
+                                        );
+
+                                        break;
+                                    }
+
+                                    case false:
+                                    {
+                                        global_screen =
+                                            FLOPPY144_SCREEN_TERMINAL;
+
+                                        break;
+                                    }
                                 }
                             }
 
