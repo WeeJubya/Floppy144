@@ -346,23 +346,89 @@ static void Floppy144TerminalDrawDetail(
 /*
  * Terminal state management
  *
- * Reset selects XX-01 and closes overlays. Navigation wraps around the
- * collection enum while details are closed.
+ * The terminal displays one narrative act at a time. Selection remains within
+ * that act, while act navigation skips pages containing no registered
+ * collections.
  */
+
+static bool Floppy144TerminalActHasCollections(
+    Floppy144Act act
+)
+{
+    uint32_t collection_index;
+
+    for(
+        collection_index = 0U;
+        collection_index <
+            (uint32_t)FLOPPY144_COLLECTION_COUNT;
+        ++collection_index
+    )
+    {
+        const Floppy144CollectionDefinition *definition =
+            Floppy144CollectionGet(
+                (Floppy144CollectionId)collection_index
+            );
+
+        if(definition->act == act)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static Floppy144CollectionId Floppy144TerminalFirstCollectionInAct(
+    Floppy144Act act
+)
+{
+    uint32_t collection_index;
+
+    for(
+        collection_index = 0U;
+        collection_index <
+            (uint32_t)FLOPPY144_COLLECTION_COUNT;
+        ++collection_index
+    )
+    {
+        Floppy144CollectionId collection =
+            (Floppy144CollectionId)collection_index;
+
+        const Floppy144CollectionDefinition *definition =
+            Floppy144CollectionGet(
+                collection
+            );
+
+        if(definition->act == act)
+        {
+            return collection;
+        }
+    }
+
+    return FLOPPY144_COLLECTION_XX01;
+}
 
 void Floppy144TerminalReset(
     Floppy144TerminalState *terminal
 )
 {
-    terminal->selected_collection = FLOPPY144_COLLECTION_XX01;
-    terminal->detail_open = false;
-    terminal->restoration_notice = false;
+    terminal->selected_act =
+        FLOPPY144_ACT_PROLOGUE;
+
+    terminal->selected_collection =
+        Floppy144TerminalFirstCollectionInAct(
+            terminal->selected_act
+        );
+
+    terminal->detail_open =
+        false;
+
+    terminal->restoration_notice =
+        false;
 }
 
 /*
- * Move the highlighted collection
- *
- * direction is normally -1 or +1. Selection wraps from either end.
+ * Move the highlighted collection within the visible act.
  */
 
 void Floppy144TerminalMoveSelection(
@@ -371,32 +437,144 @@ void Floppy144TerminalMoveSelection(
 )
 {
     int32_t next_selection;
+    int32_t step;
+    uint32_t attempts;
 
-    if(terminal->detail_open)
+    if(
+        terminal->detail_open ||
+        direction == 0
+    )
     {
         return;
     }
 
+    step =
+        direction < 0
+            ? -1
+            : 1;
+
     next_selection =
-        (int32_t)terminal->selected_collection +
-        direction;
+        (int32_t)terminal->selected_collection;
 
-    if(next_selection < 0)
-    {
-        next_selection =
-            (int32_t)FLOPPY144_COLLECTION_COUNT - 1;
-    }
-
-    if(
-        next_selection >=
-        (int32_t)FLOPPY144_COLLECTION_COUNT
+    for(
+        attempts = 0U;
+        attempts <
+            (uint32_t)FLOPPY144_COLLECTION_COUNT;
+        ++attempts
     )
     {
-        next_selection = 0;
+        const Floppy144CollectionDefinition *definition;
+
+        next_selection +=
+            step;
+
+        if(next_selection < 0)
+        {
+            next_selection =
+                (int32_t)FLOPPY144_COLLECTION_COUNT - 1;
+        }
+
+        if(
+            next_selection >=
+            (int32_t)FLOPPY144_COLLECTION_COUNT
+        )
+        {
+            next_selection =
+                0;
+        }
+
+        definition =
+            Floppy144CollectionGet(
+                (Floppy144CollectionId)next_selection
+            );
+
+        if(
+            definition->act ==
+            terminal->selected_act
+        )
+        {
+            terminal->selected_collection =
+                (Floppy144CollectionId)next_selection;
+
+            return;
+        }
+    }
+}
+
+/*
+ * Move to the next populated act page.
+ */
+
+void Floppy144TerminalMoveAct(
+    Floppy144TerminalState *terminal,
+    int32_t direction
+)
+{
+    int32_t next_act;
+    int32_t step;
+    uint32_t attempts;
+
+    if(
+        terminal->detail_open ||
+        direction == 0
+    )
+    {
+        return;
     }
 
-    terminal->selected_collection =
-        (Floppy144CollectionId)next_selection;
+    step =
+        direction < 0
+            ? -1
+            : 1;
+
+    next_act =
+        (int32_t)terminal->selected_act;
+
+    for(
+        attempts = 0U;
+        attempts <
+            (uint32_t)FLOPPY144_ACT_COUNT;
+        ++attempts
+    )
+    {
+        next_act +=
+            step;
+
+        if(next_act < 0)
+        {
+            next_act =
+                (int32_t)FLOPPY144_ACT_COUNT - 1;
+        }
+
+        if(
+            next_act >=
+            (int32_t)FLOPPY144_ACT_COUNT
+        )
+        {
+            next_act =
+                0;
+        }
+
+        if(
+            Floppy144TerminalActHasCollections(
+                (Floppy144Act)next_act
+            )
+        )
+        {
+            terminal->selected_act =
+                (Floppy144Act)next_act;
+
+            terminal->selected_collection =
+                Floppy144TerminalFirstCollectionInAct(
+                    terminal->selected_act
+                );
+
+            terminal->restoration_notice =
+                false;
+
+            return;
+        }
+    }
 }
 /*
  * Open details or restore a collection
@@ -605,7 +783,7 @@ void Floppy144TerminalDraw(
     const char *footer_left =
         terminal->detail_open
             ? ""
-            : "UP DOWN SELECT";
+            : "LEFT RIGHT ACT";
 
     const char *footer_middle =
         terminal->detail_open
@@ -614,12 +792,12 @@ void Floppy144TerminalDraw(
                 : selected_can_view_records
                     ? "ENTER VIEW RECORDS"
                     : ""
-            : "ENTER OPEN";
+            : "UP DOWN SELECT";
 
     const char *footer_right =
         terminal->detail_open
             ? "ESC CLOSE"
-            : "ESC RETURN";
+            : "ENTER OPEN  ESC RETURN";
 
     /*
      * Draw the terminal base layer
@@ -696,82 +874,38 @@ void Floppy144TerminalDraw(
     Floppy144DrawFillRect(&surface, 40, 124, 560, 1, border);
 
     /*
-     * Draw collections from the central registry
+     * Draw the selected narrative act
      *
-     * Mandatory and optional collections are identified from their registered
-     * class. Codes, titles and ordering all come from the master definition
-     * file rather than being repeated here.
+     * Collections remain in registry order. Only rows belonging to the
+     * terminal's selected act are painted.
      */
+
+    char act_heading[32];
 
     uint32_t collection_index;
-    uint32_t mandatory_y = 150;
-    uint32_t optional_heading_y;
-    uint32_t optional_y;
-    uint32_t optional_count = 0;
-    uint32_t optional_spacing;
-    uint32_t last_row_y = 150;
-    uint32_t separator_y;
-    bool any_optional_restored = false;
+    uint32_t collection_y =
+        154U;
 
-    /*
-     * Count optional collections before drawing.
-     *
-     * This allows the current two-row layout to retain its original spacing,
-     * while three optional collections use a more compact arrangement.
-     */
-
-    for(
-        collection_index = 0;
-        collection_index <
-            (uint32_t)FLOPPY144_COLLECTION_COUNT;
-        ++collection_index
-    )
-    {
-        Floppy144CollectionId collection =
-            (Floppy144CollectionId)collection_index;
-
-        const Floppy144CollectionDefinition *definition =
-            Floppy144CollectionGet(collection);
-
-        if(
-            definition->collection_class !=
-            FLOPPY144_COLLECTION_CLASS_MANDATORY
+    snprintf(
+        act_heading,
+        sizeof(act_heading),
+        "COLLECTIONS: %s",
+        Floppy144CollectionActText(
+            terminal->selected_act
         )
-        {
-            ++optional_count;
-
-            if(
-                Floppy144WorldCollectionRestored(
-                    world,
-                    collection
-                )
-            )
-            {
-                any_optional_restored = true;
-            }
-        }
-    }
-
-    optional_spacing =
-        optional_count > 2
-            ? 30
-            : 48;
+    );
 
     Floppy144DrawText(
         &surface,
         44,
         136,
-        "MANDATORY COLLECTIONS",
+        act_heading,
         1,
         muted
     );
 
-    /*
-     * Draw mandatory collections in registry order.
-     */
-
     for(
-        collection_index = 0;
+        collection_index = 0U;
         collection_index <
             (uint32_t)FLOPPY144_COLLECTION_COUNT;
         ++collection_index
@@ -781,15 +915,17 @@ void Floppy144TerminalDraw(
             (Floppy144CollectionId)collection_index;
 
         const Floppy144CollectionDefinition *definition =
-            Floppy144CollectionGet(collection);
+            Floppy144CollectionGet(
+                collection
+            );
 
         bool restored;
         bool evidence_found;
         uint32_t status_colour;
 
         if(
-            definition->collection_class !=
-            FLOPPY144_COLLECTION_CLASS_MANDATORY
+            definition->act !=
+            terminal->selected_act
         )
         {
             continue;
@@ -816,8 +952,9 @@ void Floppy144TerminalDraw(
 
         Floppy144TerminalDrawCollection(
             &surface,
-            mandatory_y,
-            terminal->selected_collection == collection,
+            collection_y,
+            terminal->selected_collection ==
+                collection,
             Floppy144TerminalCollectionStatusText(
                 world,
                 collection
@@ -827,110 +964,18 @@ void Floppy144TerminalDraw(
             status_colour
         );
 
-        last_row_y = mandatory_y;
-        mandatory_y += 30;
+        collection_y +=
+            26U;
     }
-
-    optional_heading_y =
-        last_row_y + 34;
-
-    Floppy144DrawText(
-        &surface,
-        44,
-        optional_heading_y,
-        any_optional_restored
-            ? "RESTORED COLLECTIONS"
-            : "AVAILABLE COLLECTIONS",
-        1,
-        muted
-    );
-
-    optional_y =
-        optional_heading_y + 14;
-
-    /*
-     * Draw optional collections in registry order.
-     */
-
-    for(
-        collection_index = 0;
-        collection_index <
-            (uint32_t)FLOPPY144_COLLECTION_COUNT;
-        ++collection_index
-    )
-    {
-        Floppy144CollectionId collection =
-            (Floppy144CollectionId)collection_index;
-
-        const Floppy144CollectionDefinition *definition =
-            Floppy144CollectionGet(collection);
-
-        bool restored;
-        bool evidence_found;
-        uint32_t status_colour;
-
-        if(
-            definition->collection_class ==
-            FLOPPY144_COLLECTION_CLASS_MANDATORY
-        )
-        {
-            continue;
-        }
-
-        restored =
-            Floppy144WorldCollectionRestored(
-                world,
-                collection
-            );
-
-        evidence_found =
-            Floppy144WorldCollectionEvidenceFound(
-                world,
-                collection
-            );
-
-        status_colour =
-            evidence_found
-                ? amber
-                : restored
-                    ? green
-                    : amber;
-
-        Floppy144TerminalDrawCollection(
-            &surface,
-            optional_y,
-            terminal->selected_collection == collection,
-            Floppy144TerminalCollectionStatusText(
-                world,
-                collection
-            ),
-            definition->code,
-            definition->title,
-            status_colour
-        );
-
-        last_row_y = optional_y;
-        optional_y += optional_spacing;
-    }
-
-    separator_y =
-        last_row_y +
-        (
-            optional_count > 2
-                ? 28
-                : 40
-        );
 
     Floppy144DrawFillRect(
         &surface,
         40,
-        separator_y,
+        300,
         560,
         1,
         border
     );
-
-
     Floppy144DrawFillRect(
         &surface,
         20,

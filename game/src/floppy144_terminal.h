@@ -18,13 +18,16 @@
 /*
  * Terminal-local state
  *
- * selected_collection tracks the highlighted row. detail_open controls
- * the collection overlay. restoration_notice is a temporary success message.
+ * selected_act tracks the visible archive page. selected_collection tracks
+ * the highlighted row within that act. detail_open controls the collection
+ * overlay. restoration_notice is a temporary success message.
  */
 
 typedef struct Floppy144TerminalState
 {
+    Floppy144Act selected_act;
     Floppy144CollectionId selected_collection;
+
     bool detail_open;
     bool restoration_notice;
 } Floppy144TerminalState;
@@ -41,6 +44,11 @@ void Floppy144TerminalReset(
 );
 
 void Floppy144TerminalMoveSelection(
+    Floppy144TerminalState *terminal,
+    int32_t direction
+);
+
+void Floppy144TerminalMoveAct(
     Floppy144TerminalState *terminal,
     int32_t direction
 );

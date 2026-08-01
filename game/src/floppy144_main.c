@@ -422,6 +422,35 @@ static LRESULT CALLBACK Floppy144WindowProc(
                 {
                     switch(w_param)
                     {
+                        case VK_LEFT:
+                        case 'A':
+                        {
+                            Floppy144TerminalMoveAct(
+                                &global_terminal,
+                                -1
+                            );
+
+                            Floppy144Redraw(
+                                window
+                            );
+
+                            return 0;
+                        }
+
+                        case VK_RIGHT:
+                        case 'D':
+                        {
+                            Floppy144TerminalMoveAct(
+                                &global_terminal,
+                                1
+                            );
+
+                            Floppy144Redraw(
+                                window
+                            );
+
+                            return 0;
+                        }
                         case VK_UP:
                         case 'W':
                         {
