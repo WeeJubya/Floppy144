@@ -30,6 +30,8 @@ typedef struct Floppy144ObjectState
 
 typedef struct Floppy144WorldState
 {
+    bool archive_services_initialised;
+
     Floppy144CollectionState
         collections[FLOPPY144_COLLECTION_COUNT];
 
@@ -41,6 +43,13 @@ void Floppy144WorldReset(
     Floppy144WorldState *world
 );
 
+bool Floppy144WorldArchiveServicesInitialised(
+    const Floppy144WorldState *world
+);
+
+bool Floppy144WorldInitialiseArchiveServices(
+    Floppy144WorldState *world
+);
 bool Floppy144WorldCollectionRestored(
     const Floppy144WorldState *world,
     Floppy144CollectionId collection

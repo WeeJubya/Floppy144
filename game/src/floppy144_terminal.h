@@ -35,6 +35,7 @@ typedef struct Floppy144TerminalState
     bool detail_open;
     bool restoration_notice;
     bool suppress_next_character;
+    bool exit_requested;
 
     char input[FLOPPY144_TERMINAL_INPUT_CAPACITY];
     uint32_t input_length;
@@ -54,7 +55,8 @@ typedef struct Floppy144TerminalState
  */
 
 void Floppy144TerminalReset(
-    Floppy144TerminalState *terminal
+    Floppy144TerminalState *terminal,
+    const Floppy144WorldState *world
 );
 
 void Floppy144TerminalMoveSelection(
@@ -77,7 +79,8 @@ void Floppy144TerminalBackspace(
 );
 
 void Floppy144TerminalSubmitInput(
-    Floppy144TerminalState *terminal
+    Floppy144TerminalState *terminal,
+    Floppy144WorldState *world
 );
 
 void Floppy144TerminalOpenSelection(

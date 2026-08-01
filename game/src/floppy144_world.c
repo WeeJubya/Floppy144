@@ -40,6 +40,9 @@ void Floppy144WorldReset(
         return;
     }
 
+    world->archive_services_initialised =
+        false;
+
     for(
         collection_index = 0U;
         collection_index <
@@ -78,6 +81,32 @@ void Floppy144WorldReset(
     }
 }
 
+bool Floppy144WorldArchiveServicesInitialised(
+    const Floppy144WorldState *world
+)
+{
+    return
+        world != NULL &&
+        world->archive_services_initialised;
+}
+
+bool Floppy144WorldInitialiseArchiveServices(
+    Floppy144WorldState *world
+)
+{
+    if(
+        world == NULL ||
+        world->archive_services_initialised
+    )
+    {
+        return false;
+    }
+
+    world->archive_services_initialised =
+        true;
+
+    return true;
+}
 bool Floppy144WorldCollectionRestored(
     const Floppy144WorldState *world,
     Floppy144CollectionId collection

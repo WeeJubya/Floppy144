@@ -210,7 +210,8 @@ static void Floppy144InteractOffice(
                 FLOPPY144_SCREEN_TERMINAL;
 
             Floppy144TerminalReset(
-                &global_terminal
+                &global_terminal,
+                &global_world
             );
 
             Floppy144Redraw(
@@ -312,8 +313,15 @@ static LRESULT CALLBACK Floppy144WindowProc(
                 case '\r':
                 {
                     Floppy144TerminalSubmitInput(
-                        &global_terminal
+                        &global_terminal,
+                        &global_world
                     );
+
+                    if(global_terminal.exit_requested)
+                    {
+                        global_screen =
+                            FLOPPY144_SCREEN_OFFICE;
+                    }
 
                     break;
                 }
@@ -803,7 +811,8 @@ int CALLBACK WinMain(
     );
 
     Floppy144TerminalReset(
-        &global_terminal
+        &global_terminal,
+        &global_world
     );
 
     Floppy144CatalogueReset(

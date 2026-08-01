@@ -574,20 +574,391 @@ void Floppy144TerminalBackspace(
 }
 
 /*
- * Echo the current command line.
+ * Command processor
  *
- * Command parsing is introduced in the next checkpoint.
+ * Commands are matched without allocation. Input has already been converted
+ * to uppercase, while leading and trailing spaces remain acceptable.
  */
 
+static bool Floppy144TerminalCommandMatches(
+    const char *input,
+    const char *command
+)
+{
+    while(input[0] == ' ')
+    {
+        ++input;
+    }
+
+    while(
+        input[0] != '\0' &&
+        command[0] != '\0' &&
+        input[0] == command[0]
+    )
+    {
+        ++input;
+        ++command;
+    }
+
+    while(input[0] == ' ')
+    {
+        ++input;
+    }
+
+    return
+        input[0] == '\0' &&
+        command[0] == '\0';
+}
+
+/*
+ * Return the text following a command name.
+ *
+ * NULL means the command name did not match. An empty returned string means
+ * the command matched but no argument was supplied.
+ */
+
+static const char *Floppy144TerminalCommandArguments(
+    const char *input,
+    const char *command
+)
+{
+    while(input[0] == ' ')
+    {
+        ++input;
+    }
+
+    while(
+        input[0] != '\0' &&
+        command[0] != '\0' &&
+        input[0] == command[0]
+    )
+    {
+        ++input;
+        ++command;
+    }
+
+    if(command[0] != '\0')
+    {
+        return NULL;
+    }
+
+    if(
+        input[0] != '\0' &&
+        input[0] != ' '
+    )
+    {
+        return NULL;
+    }
+
+    while(input[0] == ' ')
+    {
+        ++input;
+    }
+
+    return input;
+}
+
+/*
+ * Resolve a player-facing collection code through the registry.
+ */
+
+static bool Floppy144TerminalFindCollection(
+    const char *code,
+    Floppy144CollectionId *collection
+)
+{
+    uint32_t collection_index;
+
+    if(
+        code == NULL ||
+        collection == NULL
+    )
+    {
+        return false;
+    }
+
+    for(
+        collection_index = 0U;
+        collection_index <
+            (uint32_t)FLOPPY144_COLLECTION_COUNT;
+        ++collection_index
+    )
+    {
+        Floppy144CollectionId candidate =
+            (Floppy144CollectionId)collection_index;
+
+        const Floppy144CollectionDefinition *definition =
+            Floppy144CollectionGet(
+                candidate
+            );
+
+        if(
+            Floppy144TerminalCommandMatches(
+                code,
+                definition->code
+            )
+        )
+        {
+            *collection =
+                candidate;
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static void Floppy144TerminalPrintHelp(
+    Floppy144TerminalState *terminal,
+    bool services_initialised
+)
+{
+    Floppy144TerminalPushLine(
+        terminal,
+        ""
+    );
+
+    Floppy144TerminalPushLine(
+        terminal,
+        "AVAILABLE COMMANDS:"
+    );
+
+    Floppy144TerminalPushLine(
+        terminal,
+        "  HELP           SHOW OPERATING GUIDANCE"
+    );
+
+    Floppy144TerminalPushLine(
+        terminal,
+        "  RESTORE        INITIALISE ARCHIVE SERVICES"
+    );
+
+    Floppy144TerminalPushLine(
+        terminal,
+        "  EXIT           CLOSE TERMINAL SESSION"
+    );
+
+    if(services_initialised)
+    {
+        Floppy144TerminalPushLine(
+            terminal,
+            "  RESTORE CODE   RESTORE ONE COLLECTION"
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "  LIST           DISPLAY COLLECTIONS"
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "  OPEN RECORD    OPEN AN ARCHIVE RECORD"
+        );
+    }
+    else
+    {
+        Floppy144TerminalPushLine(
+            terminal,
+            ""
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "USE RESTORE TO INITIALISE ARCHIVE SERVICES."
+        );
+    }
+}
+
+/*
+ * List every collection currently registered on Disk 144.
+ */
+
+static void Floppy144TerminalPrintCollections(
+    Floppy144TerminalState *terminal,
+    const Floppy144WorldState *world
+)
+{
+    uint32_t collection_index;
+
+    char line
+        [FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
+
+    Floppy144TerminalPushLine(
+        terminal,
+        ""
+    );
+
+    Floppy144TerminalPushLine(
+        terminal,
+        "COLLECTIONS AVAILABLE ON DISK 144:"
+    );
+
+    Floppy144TerminalPushLine(
+        terminal,
+        ""
+    );
+
+    for(
+        collection_index = 0U;
+        collection_index <
+            (uint32_t)FLOPPY144_COLLECTION_COUNT;
+        ++collection_index
+    )
+    {
+        Floppy144CollectionId collection =
+            (Floppy144CollectionId)collection_index;
+
+        const Floppy144CollectionDefinition *definition =
+            Floppy144CollectionGet(
+                collection
+            );
+
+        snprintf(
+            line,
+            sizeof(line),
+            "%s  %s",
+            definition->code,
+            Floppy144WorldCollectionRestored(
+                world,
+                collection
+            )
+                ? "RESTORED"
+                : "AVAILABLE"
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            line
+        );
+    }
+}
+
+/*
+ * Restore one collection identified by its registered code.
+ */
+
+static void Floppy144TerminalRestoreCollection(
+    Floppy144TerminalState *terminal,
+    Floppy144WorldState *world,
+    const char *code
+)
+{
+    Floppy144CollectionId collection;
+
+    const Floppy144CollectionDefinition *definition;
+
+    char line
+        [FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
+
+    if(
+        !Floppy144TerminalFindCollection(
+            code,
+            &collection
+        )
+    )
+    {
+        snprintf(
+            line,
+            sizeof(line),
+            "COLLECTION %s NOT FOUND ON DISK 144.",
+            code
+        );
+
+        Floppy144TerminalPushWrappedLine(
+            terminal,
+            line
+        );
+
+        return;
+    }
+
+    definition =
+        Floppy144CollectionGet(
+            collection
+        );
+
+    if(
+        Floppy144WorldCollectionRestored(
+            world,
+            collection
+        )
+    )
+    {
+        snprintf(
+            line,
+            sizeof(line),
+            "COLLECTION %s ALREADY RESTORED.",
+            definition->code
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            line
+        );
+
+        return;
+    }
+
+    snprintf(
+        line,
+        sizeof(line),
+        "RESTORING COLLECTION %s...",
+        definition->code
+    );
+
+    Floppy144TerminalPushLine(
+        terminal,
+        ""
+    );
+
+    Floppy144TerminalPushLine(
+        terminal,
+        line
+    );
+
+    Floppy144WorldRestoreCollection(
+        world,
+        collection
+    );
+
+    Floppy144TerminalPushLine(
+        terminal,
+        "COLLECTION RESTORED."
+    );
+
+    snprintf(
+        line,
+        sizeof(line),
+        "SITE RECONSTRUCTION STATUS: %02u%%",
+        (unsigned)Floppy144WorldReconstructionPercent(
+            world
+        )
+    );
+
+    Floppy144TerminalPushLine(
+        terminal,
+        line
+    );
+}
+
 void Floppy144TerminalSubmitInput(
-    Floppy144TerminalState *terminal
+    Floppy144TerminalState *terminal,
+    Floppy144WorldState *world
 )
 {
     char submitted_line
         [FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
 
+    bool services_initialised;
+
+    const char *restore_arguments;
+    const char *list_arguments;
+    const char *open_arguments;
+
     if(
         terminal == NULL ||
+        world == NULL ||
         terminal->input_length == 0U
     )
     {
@@ -601,15 +972,170 @@ void Floppy144TerminalSubmitInput(
         terminal->input
     );
 
-    Floppy144TerminalPushLine(
+    Floppy144TerminalPushWrappedLine(
         terminal,
         submitted_line
     );
 
-    Floppy144TerminalPushLine(
-        terminal,
-        "COMMAND PROCESSOR OFFLINE."
-    );
+    services_initialised =
+        Floppy144WorldArchiveServicesInitialised(
+            world
+        );
+
+    restore_arguments =
+        Floppy144TerminalCommandArguments(
+            terminal->input,
+            "RESTORE"
+        );
+
+    list_arguments =
+        Floppy144TerminalCommandArguments(
+            terminal->input,
+            "LIST"
+        );
+
+    open_arguments =
+        Floppy144TerminalCommandArguments(
+            terminal->input,
+            "OPEN"
+        );
+
+    if(
+        Floppy144TerminalCommandMatches(
+            terminal->input,
+            "EXIT"
+        )
+    )
+    {
+        terminal->exit_requested =
+            true;
+    }
+    else if(
+        Floppy144TerminalCommandMatches(
+            terminal->input,
+            "HELP"
+        )
+    )
+    {
+        Floppy144TerminalPrintHelp(
+            terminal,
+            services_initialised
+        );
+    }
+    else if(restore_arguments != NULL)
+    {
+        if(restore_arguments[0] == '\0')
+        {
+            if(
+                Floppy144WorldInitialiseArchiveServices(
+                    world
+                )
+            )
+            {
+                Floppy144TerminalPushLine(
+                    terminal,
+                    ""
+                );
+
+                Floppy144TerminalPushLine(
+                    terminal,
+                    "ARCHIVE SERVICES INITIALISED."
+                );
+
+                Floppy144TerminalPushLine(
+                    terminal,
+                    "RECOVERY INDEX AVAILABLE."
+                );
+
+                Floppy144TerminalPushLine(
+                    terminal,
+                    ""
+                );
+
+                Floppy144TerminalPushLine(
+                    terminal,
+                    "NEW COMMANDS: LIST, OPEN"
+                );
+            }
+            else
+            {
+                Floppy144TerminalPushLine(
+                    terminal,
+                    "ARCHIVE SERVICES ALREADY INITIALISED."
+                );
+            }
+        }
+        else if(!services_initialised)
+        {
+            Floppy144TerminalPushLine(
+                terminal,
+                "COMMAND UNAVAILABLE. RUN RESTORE."
+            );
+        }
+        else
+        {
+            Floppy144TerminalRestoreCollection(
+                terminal,
+                world,
+                restore_arguments
+            );
+        }
+    }
+    else if(list_arguments != NULL)
+    {
+        if(!services_initialised)
+        {
+            Floppy144TerminalPushLine(
+                terminal,
+                "COMMAND UNAVAILABLE. RUN RESTORE."
+            );
+        }
+        else if(list_arguments[0] != '\0')
+        {
+            Floppy144TerminalPushLine(
+                terminal,
+                "COLLECTION RECORD LISTING NOT YET LINKED."
+            );
+        }
+        else
+        {
+            Floppy144TerminalPrintCollections(
+                terminal,
+                world
+            );
+        }
+    }
+    else if(open_arguments != NULL)
+    {
+        if(!services_initialised)
+        {
+            Floppy144TerminalPushLine(
+                terminal,
+                "COMMAND UNAVAILABLE. RUN RESTORE."
+            );
+        }
+        else if(open_arguments[0] == '\0')
+        {
+            Floppy144TerminalPushLine(
+                terminal,
+                "OPEN REQUIRES A RECORD ID."
+            );
+        }
+        else
+        {
+            Floppy144TerminalPushLine(
+                terminal,
+                "RECORD LOOKUP MODULE NOT YET LINKED."
+            );
+        }
+    }
+    else
+    {
+        Floppy144TerminalPushLine(
+            terminal,
+            "UNRECOGNISED COMMAND. TYPE HELP."
+        );
+    }
 
     terminal->input_length =
         0U;
@@ -683,7 +1209,8 @@ static Floppy144CollectionId Floppy144TerminalFirstCollectionInAct(
 }
 
 void Floppy144TerminalReset(
-    Floppy144TerminalState *terminal
+    Floppy144TerminalState *terminal,
+    const Floppy144WorldState *world
 )
 {
     uint32_t line_index;
@@ -704,6 +1231,9 @@ void Floppy144TerminalReset(
 
     terminal->suppress_next_character =
         true;
+
+    terminal->exit_requested =
+        false;
 
     terminal->input_length =
         0U;
@@ -738,6 +1268,15 @@ void Floppy144TerminalReset(
     Floppy144TerminalPushLine(
         terminal,
         "SITE STATE: PARTIAL RECONSTRUCTION"
+    );
+
+    Floppy144TerminalPushLine(
+        terminal,
+        Floppy144WorldArchiveServicesInitialised(
+            world
+        )
+            ? "ARCHIVE SERVICES: ONLINE"
+            : "ARCHIVE SERVICES: OFFLINE"
     );
 
     Floppy144TerminalPushLine(
@@ -1243,9 +1782,9 @@ void Floppy144TerminalDraw(
 
     Floppy144DrawText(
         &surface,
-        526,
+        490,
         326,
-        "ESC RETURN",
+        "TYPE EXIT TO CLOSE",
         1,
         muted
     );
