@@ -82,6 +82,35 @@ static const Floppy144ObjectInteractionDefinition
     1U
 };
 /*
+ * FA-03 suppression-panel investigation
+ *
+ * The recovered service note reveals this fixture. Physical inspection then
+ * confirms the collection evidence through the generic interaction effects.
+ */
+
+static const Floppy144Effect
+    floppy144_suppression_panel_effects[] =
+{
+    {
+        FLOPPY144_EFFECT_FIND_COLLECTION_EVIDENCE,
+        (uint32_t)FLOPPY144_COLLECTION_FA03
+    }
+};
+
+static const Floppy144ObjectInteractionDefinition
+    floppy144_suppression_panel_interaction =
+{
+    FLOPPY144_OBJECT_ACTION_SHOW_NOTICE,
+    100U,
+    FLOPPY144_COLLECTION_COUNT,
+    "PRESS E TO INSPECT SUPPRESSION PANEL",
+    FLOPPY144_COLLECTION_COUNT,
+    NULL,
+    "SUPPRESSION PANEL: MANUAL DISCHARGE INPUT REMAINS CONNECTED.",
+    floppy144_suppression_panel_effects,
+    1U
+};
+/*
  * Object-attached labels
  */
 

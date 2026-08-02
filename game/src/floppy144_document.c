@@ -24,11 +24,6 @@ static const Floppy144Effect floppy144_hr02_038_effects[] =
 static const Floppy144Effect floppy144_fa03_047_effects[] =
 {
     {
-        FLOPPY144_EFFECT_FIND_COLLECTION_EVIDENCE,
-        (uint32_t)FLOPPY144_COLLECTION_FA03
-    },
-
-    {
         FLOPPY144_EFFECT_REVEAL_OBJECT,
         (uint32_t)FLOPPY144_OBJECT_SUPPRESSION_CONTROL_PANEL
     }

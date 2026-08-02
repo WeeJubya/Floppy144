@@ -41,14 +41,14 @@ FLOPPY144_OBJECT(
     0,
     0,
     0,
-    0,
-    0,
-    0,
-    FLOPPY144_COLLECTION_COUNT,
+    34,
+    34,
+    28,
+    FLOPPY144_COLLECTION_FA03,
     FLOPPY144_OBJECT_FLAG_NONE,
     false,
     NULL,
-    NULL,
+    &floppy144_suppression_panel_interaction,
     floppy144_suppression_control_panel_primitives
 )
 

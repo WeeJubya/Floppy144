@@ -606,7 +606,7 @@ static void Floppy144CatalogueDrawList(
  * Draw the recovered FA-03 authored document
  *
  * This record is laid out directly because its complete contents exist on
- * Disk 144. Reading it unlocks the suppression-service evidence flag.
+ * Disk 144. Reading it reveals the reconstructed suppression control panel.
  */
 
 static void Floppy144CatalogueDrawFa03ServiceNote(
