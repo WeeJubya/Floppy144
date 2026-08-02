@@ -541,6 +541,62 @@ static LRESULT CALLBACK Floppy144WindowProc(
 
                 return 0;
             }
+
+            /*
+             * The record pager temporarily owns terminal character input.
+             * Escape remains handled by WM_KEYDOWN and opens session control.
+             */
+
+            if(
+                Floppy144TerminalRecordPagerActive(
+                    &global_terminal
+                )
+            )
+            {
+                switch(w_param)
+                {
+                    case ' ':
+                    {
+                        Floppy144TerminalMoveRecordPager(
+                            &global_terminal,
+                            1
+                        );
+
+                        break;
+                    }
+
+                    case '\b':
+                    {
+                        Floppy144TerminalMoveRecordPager(
+                            &global_terminal,
+                            -1
+                        );
+
+                        break;
+                    }
+
+                    case '\r':
+                    {
+                        Floppy144TerminalCloseRecordPager(
+                            &global_terminal
+                        );
+
+                        break;
+                    }
+
+                    default:
+                    {
+                        break;
+                    }
+                }
+
+                Floppy144Redraw(
+                    window
+                );
+
+                return 0;
+            }
+
             switch(w_param)
             {
                 case '\b':

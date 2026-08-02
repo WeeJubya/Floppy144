@@ -38,8 +38,12 @@ typedef struct Floppy144TerminalState
     bool exit_requested;
     bool site_entry_requested;
     bool open_record_requested;
+    bool record_pager_active;
 
     Floppy144CollectionId requested_collection;
+
+    Floppy144CollectionId record_pager_collection;
+    uint32_t record_pager_page;
     uint32_t requested_record_index;
 
     char input[FLOPPY144_TERMINAL_INPUT_CAPACITY];
@@ -80,6 +84,19 @@ void Floppy144TerminalInputCharacter(
 );
 
 void Floppy144TerminalBackspace(
+    Floppy144TerminalState *terminal
+);
+
+bool Floppy144TerminalRecordPagerActive(
+    const Floppy144TerminalState *terminal
+);
+
+void Floppy144TerminalMoveRecordPager(
+    Floppy144TerminalState *terminal,
+    int32_t direction
+);
+
+void Floppy144TerminalCloseRecordPager(
     Floppy144TerminalState *terminal
 );
 

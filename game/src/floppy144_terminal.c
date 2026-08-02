@@ -705,7 +705,8 @@ static bool Floppy144TerminalFindCollection(
 
 static void Floppy144TerminalPrintHelp(
     Floppy144TerminalState *terminal,
-    bool services_initialised
+    bool services_initialised,
+    const char *topic
 )
 {
     Floppy144TerminalPushLine(
@@ -713,55 +714,16 @@ static void Floppy144TerminalPrintHelp(
         ""
     );
 
-    Floppy144TerminalPushLine(
-        terminal,
-        "AVAILABLE COMMANDS:"
-    );
-
-    Floppy144TerminalPushLine(
-        terminal,
-        "  HELP           SHOW OPERATING GUIDANCE"
-    );
-
-    Floppy144TerminalPushLine(
-        terminal,
-        "  RESTORE        INITIALISE ARCHIVE SERVICES"
-    );
-
-    Floppy144TerminalPushLine(
-        terminal,
-        "  EXIT           CLOSE TERMINAL SESSION"
-    );
-
-    if(services_initialised)
+    if(
+        topic == NULL ||
+        topic[0] == '\0'
+    )
     {
         Floppy144TerminalPushLine(
             terminal,
-            "  RESTORE CODE   RESTORE ONE COLLECTION"
+            "AVAILABLE COMMANDS:"
         );
 
-        Floppy144TerminalPushLine(
-            terminal,
-            "  LIST           DISPLAY COLLECTIONS"
-        );
-
-        Floppy144TerminalPushLine(
-            terminal,
-            "  LIST CODE      DISPLAY FIRST RECORD PAGE"
-        );
-
-        Floppy144TerminalPushLine(
-            terminal,
-            "  LIST CODE PAGE DISPLAY NUMBERED RECORD PAGE"
-        );
-
-        Floppy144TerminalPushLine(
-            terminal,
-            "  OPEN RECORD    OPEN AN ARCHIVE RECORD"
-        );
-    }
-    else
-    {
         Floppy144TerminalPushLine(
             terminal,
             ""
@@ -769,9 +731,312 @@ static void Floppy144TerminalPrintHelp(
 
         Floppy144TerminalPushLine(
             terminal,
-            "USE RESTORE TO INITIALISE ARCHIVE SERVICES."
+            "  HELP [COMMAND]"
         );
+
+        if(services_initialised)
+        {
+            Floppy144TerminalPushLine(
+                terminal,
+                "  RESTORE <CODE>"
+            );
+
+            Floppy144TerminalPushLine(
+                terminal,
+                "  LIST [CODE]"
+            );
+
+            Floppy144TerminalPushLine(
+                terminal,
+                "  OPEN <RECORD>"
+            );
+        }
+        else
+        {
+            Floppy144TerminalPushLine(
+                terminal,
+                "  INITIATE"
+            );
+        }
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "  EXIT"
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            ""
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "TYPE HELP <COMMAND> FOR DETAILED GUIDANCE."
+        );
+
+        return;
     }
+
+    if(
+        Floppy144TerminalCommandMatches(
+            topic,
+            "HELP"
+        )
+    )
+    {
+        Floppy144TerminalPushLine(
+            terminal,
+            "HELP HELP"
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            ""
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "HELP"
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "DISPLAY THE AVAILABLE COMMAND SUMMARY."
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "HELP <COMMAND>"
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "DISPLAY GUIDANCE FOR AN AVAILABLE COMMAND."
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            services_initialised
+                ? "TOPICS: RESTORE, LIST, OPEN, EXIT."
+                : "TOPICS: INITIATE, EXIT."
+        );
+
+        return;
+    }
+
+    if(
+        Floppy144TerminalCommandMatches(
+            topic,
+            "EXIT"
+        )
+    )
+    {
+        Floppy144TerminalPushLine(
+            terminal,
+            "HELP EXIT"
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            ""
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "EXIT FROM THE TERMINAL SESSION."
+        );
+
+        return;
+    }
+
+    if(
+        !services_initialised &&
+        Floppy144TerminalCommandMatches(
+            topic,
+            "INITIATE"
+        )
+    )
+    {
+        Floppy144TerminalPushLine(
+            terminal,
+            "HELP INITIATE"
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            ""
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "INITIATE"
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "INITIALISE ARCHIVE RECOVERY SERVICES."
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "AVAILABLE ONLY BEFORE SERVICES ARE ONLINE."
+        );
+
+        return;
+    }
+
+    if(
+        services_initialised &&
+        Floppy144TerminalCommandMatches(
+            topic,
+            "RESTORE"
+        )
+    )
+    {
+        Floppy144TerminalPushLine(
+            terminal,
+            "HELP RESTORE"
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            ""
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "RESTORE <CODE>"
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "RESTORE ONE COLLECTION FROM DISK 144."
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "EXAMPLE: RESTORE HR-02"
+        );
+
+        return;
+    }
+
+    if(
+        services_initialised &&
+        Floppy144TerminalCommandMatches(
+            topic,
+            "LIST"
+        )
+    )
+    {
+        Floppy144TerminalPushLine(
+            terminal,
+            "HELP LIST"
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            ""
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "LIST"
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "DISPLAY COLLECTION STATUS."
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "LIST <CODE>"
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "OPEN THE INTERACTIVE RECORD INDEX."
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "SPACE: NEXT PAGE."
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "BACKSPACE: PREVIOUS PAGE."
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "ENTER: RETURN TO COMMAND PROMPT."
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "ONLY RESTORED COLLECTIONS MAY BE SEARCHED."
+        );
+
+        return;
+    }
+
+    if(
+        services_initialised &&
+        Floppy144TerminalCommandMatches(
+            topic,
+            "OPEN"
+        )
+    )
+    {
+        Floppy144TerminalPushLine(
+            terminal,
+            "HELP OPEN"
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            ""
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "OPEN <RECORD>"
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "RETRIEVE ONE RECORD BY FULL ID."
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "EXAMPLE: OPEN HR-02-RS-0038"
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "ONLY RESTORED COLLECTIONS MAY BE SEARCHED."
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "BACKSPACE RETURNS FROM RECORD VIEW."
+        );
+
+        return;
+    }
+
+    Floppy144TerminalPushLine(
+        terminal,
+        "NO GUIDANCE AVAILABLE IN CURRENT RECOVERY STATE."
+    );
+
+    Floppy144TerminalPushLine(
+        terminal,
+        "TYPE HELP TO DISPLAY AVAILABLE COMMANDS."
+    );
 }
 
 /*
@@ -981,6 +1246,157 @@ static bool Floppy144TerminalParseListRequest(
  * Print one page of records belonging to a restored collection.
  */
 
+static uint32_t Floppy144TerminalRecordPageCount(
+    const Floppy144CollectionDefinition *definition
+)
+{
+    if(
+        definition == NULL ||
+        definition->catalogue.record_count == 0U
+    )
+    {
+        return 0U;
+    }
+
+    return
+        (
+            definition->catalogue.record_count +
+            FLOPPY144_TERMINAL_RECORDS_PER_PAGE -
+            1U
+        ) /
+        FLOPPY144_TERMINAL_RECORDS_PER_PAGE;
+}
+
+/*
+ * Replace terminal history with the active record-index page.
+ */
+
+static void Floppy144TerminalPrintRecordPage(
+    Floppy144TerminalState *terminal
+)
+{
+    const Floppy144CollectionDefinition *definition;
+
+    char line[FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
+    char record_id[24];
+    char title[48];
+
+    uint32_t page_count;
+    uint32_t first_index;
+    uint32_t final_index;
+    uint32_t record_index;
+
+    if(
+        terminal == NULL ||
+        !terminal->record_pager_active
+    )
+    {
+        return;
+    }
+
+    definition =
+        Floppy144CollectionGet(
+            terminal->record_pager_collection
+        );
+
+    page_count =
+        Floppy144TerminalRecordPageCount(
+            definition
+        );
+
+    if(page_count == 0U)
+    {
+        return;
+    }
+
+    first_index =
+        (
+            terminal->record_pager_page -
+            1U
+        ) *
+        FLOPPY144_TERMINAL_RECORDS_PER_PAGE;
+
+    final_index =
+        first_index +
+        FLOPPY144_TERMINAL_RECORDS_PER_PAGE;
+
+    if(final_index > definition->catalogue.record_count)
+    {
+        final_index =
+            definition->catalogue.record_count;
+    }
+
+    terminal->output_count =
+        0U;
+
+    snprintf(
+        line,
+        sizeof(line),
+        "COLLECTION %s: %s",
+        definition->code,
+        definition->title
+    );
+
+    Floppy144TerminalPushWrappedLine(
+        terminal,
+        line
+    );
+
+    snprintf(
+        line,
+        sizeof(line),
+        "PAGE %u OF %u",
+        (unsigned)terminal->record_pager_page,
+        (unsigned)page_count
+    );
+
+    Floppy144TerminalPushLine(
+        terminal,
+        line
+    );
+
+    Floppy144TerminalPushLine(
+        terminal,
+        ""
+    );
+
+    for(
+        record_index = first_index;
+        record_index < final_index;
+        ++record_index
+    )
+    {
+        Floppy144CatalogueBuildRecord(
+            terminal->record_pager_collection,
+            record_index,
+            record_id,
+            sizeof(record_id),
+            title,
+            sizeof(title)
+        );
+
+        snprintf(
+            line,
+            sizeof(line),
+            "%s  %s",
+            record_id,
+            title
+        );
+
+        Floppy144TerminalPushWrappedLine(
+            terminal,
+            line
+        );
+    }
+}
+
+/*
+ * Validate a LIST request and open the interactive record pager.
+ *
+ * A supplied page number remains supported, but ordinary use begins at page
+ * one and continues through Space and Backspace.
+ */
+
 static void Floppy144TerminalPrintCollectionRecords(
     Floppy144TerminalState *terminal,
     const Floppy144WorldState *world,
@@ -993,14 +1409,9 @@ static void Floppy144TerminalPrintCollectionRecords(
 
     char code[16];
     char line[FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
-    char record_id[24];
-    char title[48];
 
     uint32_t page;
     uint32_t page_count;
-    uint32_t first_index;
-    uint32_t final_index;
-    uint32_t record_index;
 
     if(
         !Floppy144TerminalParseListRequest(
@@ -1013,7 +1424,7 @@ static void Floppy144TerminalPrintCollectionRecords(
     {
         Floppy144TerminalPushLine(
             terminal,
-            "USE LIST CODE OR LIST CODE PAGE."
+            "USE LIST <CODE>."
         );
 
         return;
@@ -1068,7 +1479,12 @@ static void Floppy144TerminalPrintCollectionRecords(
         return;
     }
 
-    if(definition->catalogue.record_count == 0U)
+    page_count =
+        Floppy144TerminalRecordPageCount(
+            definition
+        );
+
+    if(page_count == 0U)
     {
         snprintf(
             line,
@@ -1084,14 +1500,6 @@ static void Floppy144TerminalPrintCollectionRecords(
 
         return;
     }
-
-    page_count =
-        (
-            definition->catalogue.record_count +
-            FLOPPY144_TERMINAL_RECORDS_PER_PAGE -
-            1U
-        ) /
-        FLOPPY144_TERMINAL_RECORDS_PER_PAGE;
 
     if(page > page_count)
     {
@@ -1111,84 +1519,110 @@ static void Floppy144TerminalPrintCollectionRecords(
         return;
     }
 
-    first_index =
-        (page - 1U) *
-        FLOPPY144_TERMINAL_RECORDS_PER_PAGE;
+    terminal->record_pager_active =
+        true;
 
-    final_index =
-        first_index +
-        FLOPPY144_TERMINAL_RECORDS_PER_PAGE;
+    terminal->record_pager_collection =
+        collection;
 
-    if(final_index > definition->catalogue.record_count)
-    {
-        final_index =
-            definition->catalogue.record_count;
-    }
+    terminal->record_pager_page =
+        page;
 
-    Floppy144TerminalPushLine(
-        terminal,
-        ""
+    Floppy144TerminalPrintRecordPage(
+        terminal
     );
+}
 
-    snprintf(
-        line,
-        sizeof(line),
-        "COLLECTION %s: %s",
-        definition->code,
-        definition->title
-    );
+/*
+ * Record-pager state and navigation
+ */
 
-    Floppy144TerminalPushWrappedLine(
-        terminal,
-        line
-    );
+bool Floppy144TerminalRecordPagerActive(
+    const Floppy144TerminalState *terminal
+)
+{
+    return
+        terminal != NULL &&
+        terminal->record_pager_active;
+}
 
-    snprintf(
-        line,
-        sizeof(line),
-        "PAGE %u OF %u",
-        (unsigned)page,
-        (unsigned)page_count
-    );
+void Floppy144TerminalMoveRecordPager(
+    Floppy144TerminalState *terminal,
+    int32_t direction
+)
+{
+    const Floppy144CollectionDefinition *definition;
 
-    Floppy144TerminalPushLine(
-        terminal,
-        line
-    );
+    uint32_t page_count;
+    int32_t next_page;
 
-    Floppy144TerminalPushLine(
-        terminal,
-        ""
-    );
-
-    for(
-        record_index = first_index;
-        record_index < final_index;
-        ++record_index
+    if(
+        terminal == NULL ||
+        !terminal->record_pager_active ||
+        direction == 0
     )
     {
-        Floppy144CatalogueBuildRecord(
-            collection,
-            record_index,
-            record_id,
-            sizeof(record_id),
-            title,
-            sizeof(title)
-        );
-
-        snprintf(
-            line,
-            sizeof(line),
-            "%s  %s",
-            record_id,
-            title
-        );
-
-        Floppy144TerminalPushWrappedLine(
-            terminal,
-            line
-        );
+        return;
     }
+
+    definition =
+        Floppy144CollectionGet(
+            terminal->record_pager_collection
+        );
+
+    page_count =
+        Floppy144TerminalRecordPageCount(
+            definition
+        );
+
+    if(page_count == 0U)
+    {
+        return;
+    }
+
+    next_page =
+        (int32_t)terminal->record_pager_page +
+        direction;
+
+    if(next_page < 1)
+    {
+        next_page =
+            1;
+    }
+
+    if(next_page > (int32_t)page_count)
+    {
+        next_page =
+            (int32_t)page_count;
+    }
+
+    if(
+        (uint32_t)next_page ==
+        terminal->record_pager_page
+    )
+    {
+        return;
+    }
+
+    terminal->record_pager_page =
+        (uint32_t)next_page;
+
+    Floppy144TerminalPrintRecordPage(
+        terminal
+    );
+}
+
+void Floppy144TerminalCloseRecordPager(
+    Floppy144TerminalState *terminal
+)
+{
+    if(terminal == NULL)
+    {
+        return;
+    }
+
+    terminal->record_pager_active =
+        false;
 }
 static void Floppy144TerminalRestoreCollection(
     Floppy144TerminalState *terminal,
@@ -1509,6 +1943,7 @@ void Floppy144TerminalSubmitInput(
 
     bool services_initialised;
 
+    const char *help_arguments;
     const char *restore_arguments;
     const char *list_arguments;
     const char *open_arguments;
@@ -1542,6 +1977,12 @@ void Floppy144TerminalSubmitInput(
             world
         );
 
+    help_arguments =
+        Floppy144TerminalCommandArguments(
+            terminal->input,
+            "HELP"
+        );
+
     restore_arguments =
         Floppy144TerminalCommandArguments(
             terminal->input,
@@ -1570,66 +2011,75 @@ void Floppy144TerminalSubmitInput(
         terminal->exit_requested =
             true;
     }
-    else if(
-        Floppy144TerminalCommandMatches(
-            terminal->input,
-            "HELP"
-        )
-    )
+    else if(help_arguments != NULL)
     {
         Floppy144TerminalPrintHelp(
             terminal,
-            services_initialised
+            services_initialised,
+            help_arguments
         );
     }
-    else if(restore_arguments != NULL)
+    else if(
+        !services_initialised &&
+        Floppy144TerminalCommandMatches(
+            terminal->input,
+            "INITIATE"
+        )
+    )
     {
-        if(restore_arguments[0] == '\0')
-        {
-            if(
-                Floppy144WorldInitialiseArchiveServices(
-                    world
-                )
+        if(
+            Floppy144WorldInitialiseArchiveServices(
+                world
             )
-            {
-                Floppy144TerminalPushLine(
-                    terminal,
-                    ""
-                );
-
-                Floppy144TerminalPushLine(
-                    terminal,
-                    "ARCHIVE SERVICES INITIALISED."
-                );
-
-                Floppy144TerminalPushLine(
-                    terminal,
-                    "RECOVERY INDEX AVAILABLE."
-                );
-
-                Floppy144TerminalPushLine(
-                    terminal,
-                    ""
-                );
-
-                Floppy144TerminalPushLine(
-                    terminal,
-                    "NEW COMMANDS: LIST, OPEN"
-                );
-            }
-            else
-            {
-                Floppy144TerminalPushLine(
-                    terminal,
-                    "ARCHIVE SERVICES ALREADY INITIALISED."
-                );
-            }
-        }
-        else if(!services_initialised)
+        )
         {
             Floppy144TerminalPushLine(
                 terminal,
-                "COMMAND UNAVAILABLE. RUN RESTORE."
+                ""
+            );
+
+            Floppy144TerminalPushLine(
+                terminal,
+                "ARCHIVE SERVICES INITIALISED."
+            );
+
+            Floppy144TerminalPushLine(
+                terminal,
+                "RECOVERY INDEX AVAILABLE."
+            );
+
+            Floppy144TerminalPushLine(
+                terminal,
+                ""
+            );
+
+            Floppy144TerminalPushLine(
+                terminal,
+                "NEW COMMANDS: RESTORE, LIST, OPEN"
+            );
+        }
+        else
+        {
+            Floppy144TerminalPushLine(
+                terminal,
+                "ARCHIVE SERVICES COULD NOT BE INITIALISED."
+            );
+        }
+    }
+    else if(restore_arguments != NULL)
+    {
+        if(!services_initialised)
+        {
+            Floppy144TerminalPushLine(
+                terminal,
+                "COMMAND UNAVAILABLE. RUN INITIATE."
+            );
+        }
+        else if(restore_arguments[0] == '\0')
+        {
+            Floppy144TerminalPushLine(
+                terminal,
+                "RESTORE REQUIRES A COLLECTION CODE."
             );
         }
         else
@@ -1647,7 +2097,7 @@ void Floppy144TerminalSubmitInput(
         {
             Floppy144TerminalPushLine(
                 terminal,
-                "COMMAND UNAVAILABLE. RUN RESTORE."
+                "COMMAND UNAVAILABLE. RUN INITIATE."
             );
         }
         else if(list_arguments[0] != '\0')
@@ -1672,7 +2122,7 @@ void Floppy144TerminalSubmitInput(
         {
             Floppy144TerminalPushLine(
                 terminal,
-                "COMMAND UNAVAILABLE. RUN RESTORE."
+                "COMMAND UNAVAILABLE. RUN INITIATE."
             );
         }
         else if(open_arguments[0] == '\0')
@@ -1802,6 +2252,15 @@ void Floppy144TerminalReset(
 
     terminal->open_record_requested =
         false;
+
+    terminal->record_pager_active =
+        false;
+
+    terminal->record_pager_collection =
+        FLOPPY144_COLLECTION_DR01;
+
+    terminal->record_pager_page =
+        1U;
 
     terminal->requested_collection =
         FLOPPY144_COLLECTION_DR01;
@@ -2230,12 +2689,23 @@ void Floppy144TerminalDraw(
         )
     );
 
-    snprintf(
-        prompt,
-        sizeof(prompt),
-        "A:\\GDR> %s",
-        terminal->input
-    );
+    if(terminal->record_pager_active)
+    {
+        snprintf(
+            prompt,
+            sizeof(prompt),
+            "SPACE NEXT  BACKSPACE PREVIOUS  ENTER RETURN"
+        );
+    }
+    else
+    {
+        snprintf(
+            prompt,
+            sizeof(prompt),
+            "A:\\GDR> %s",
+            terminal->input
+        );
+    }
 
     Floppy144DrawClear(
         &surface,
