@@ -913,7 +913,7 @@ void Floppy144MainMenuDraw(
     Floppy144DrawText(
         &surface,
         56U,
-        174U,
+        264U,
         session_status,
         1U,
         active_session
@@ -924,7 +924,7 @@ void Floppy144MainMenuDraw(
     Floppy144DrawText(
         &surface,
         56U,
-        192U,
+        282U,
         reconstruction_text,
         1U,
         text
@@ -933,7 +933,7 @@ void Floppy144MainMenuDraw(
     Floppy144DrawFillRect(
         &surface,
         56U,
-        210U,
+        300U,
         528U,
         14U,
         panel_dark
@@ -942,7 +942,7 @@ void Floppy144MainMenuDraw(
     Floppy144DrawRect(
         &surface,
         56U,
-        210U,
+        300U,
         528U,
         14U,
         border
@@ -951,7 +951,7 @@ void Floppy144MainMenuDraw(
     Floppy144DrawFillRect(
         &surface,
         59U,
-        213U,
+        303U,
         progress_width,
         8U,
         green
@@ -960,7 +960,7 @@ void Floppy144MainMenuDraw(
     Floppy144DrawFillRect(
         &surface,
         48U,
-        236U,
+        252U,
         544U,
         1U,
         border
@@ -989,8 +989,8 @@ void Floppy144MainMenuDraw(
             option == selected_option;
 
         uint32_t row_y =
-            248U +
-            option_index * 15U;
+            174U +
+            option_index * 16U;
 
         uint32_t label_width =
             Floppy144DrawTextWidth(
@@ -1056,7 +1056,7 @@ void Floppy144MainMenuDraw(
 
     Floppy144RecoveryTextCentred(
         &surface,
-        323U,
+        321U,
         "ENTER SELECT",
         1U,
         muted

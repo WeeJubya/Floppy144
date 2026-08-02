@@ -8,6 +8,7 @@
 #pragma once
 
 #include "floppy144_collection.h"
+#include "floppy144_effect.h"
 #include "floppy144_object.h"
 
 #include <stdbool.h>
@@ -60,6 +61,9 @@ typedef struct Floppy144ObjectInteractionDefinition
     const char *alternate_prompt;
 
     const char *notice;
+
+    const Floppy144Effect *effects;
+    uint32_t effect_count;
 } Floppy144ObjectInteractionDefinition;
 typedef enum Floppy144ObjectPrimitiveType
 {

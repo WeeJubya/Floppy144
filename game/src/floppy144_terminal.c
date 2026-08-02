@@ -506,13 +506,6 @@ void Floppy144TerminalInputCharacter(
         return;
     }
 
-    if(terminal->suppress_next_character)
-    {
-        terminal->suppress_next_character =
-            false;
-
-        return;
-    }
 
     if(
         character >= 'a' &&
@@ -825,17 +818,41 @@ static void Floppy144TerminalPrintCollections(
                 collection
             );
 
+        /*
+         * Before DR-01 reconstructs the site, the removable-media recovery
+         * environment exposes only its mandatory recovery index.
+         */
+
+        if(
+            collection != FLOPPY144_COLLECTION_DR01 &&
+            !Floppy144WorldCollectionRestored(
+                world,
+                FLOPPY144_COLLECTION_DR01
+            )
+        )
+        {
+            continue;
+        }
+
+        const char *status =
+            Floppy144WorldCollectionEvidenceFound(
+                world,
+                collection
+            )
+                ? "EVIDENCE"
+                : Floppy144WorldCollectionRestored(
+                    world,
+                    collection
+                )
+                    ? "RESTORED"
+                    : "AVAILABLE";
+
         snprintf(
             line,
             sizeof(line),
             "%s  %s",
             definition->code,
-            Floppy144WorldCollectionRestored(
-                world,
-                collection
-            )
-                ? "RESTORED"
-                : "AVAILABLE"
+            status
         );
 
         Floppy144TerminalPushLine(
@@ -1214,6 +1231,22 @@ static void Floppy144TerminalRestoreCollection(
         );
 
     if(
+        collection != FLOPPY144_COLLECTION_DR01 &&
+        !Floppy144WorldCollectionRestored(
+            world,
+            FLOPPY144_COLLECTION_DR01
+        )
+    )
+    {
+        Floppy144TerminalPushLine(
+            terminal,
+            "COLLECTION UNAVAILABLE IN INITIAL RECOVERY ENVIRONMENT."
+        );
+
+        return;
+    }
+
+    if(
         Floppy144WorldCollectionRestored(
             world,
             collection
@@ -1252,10 +1285,26 @@ static void Floppy144TerminalRestoreCollection(
         line
     );
 
-    Floppy144WorldRestoreCollection(
-        world,
-        collection
-    );
+    if(
+        !Floppy144WorldRestoreCollection(
+            world,
+            collection
+        )
+    )
+    {
+        Floppy144TerminalPushLine(
+            terminal,
+            "COLLECTION RESTORATION FAILED."
+        );
+
+        return;
+    }
+
+    if(collection == FLOPPY144_COLLECTION_DR01)
+    {
+        terminal->site_entry_requested =
+            true;
+    }
 
     Floppy144TerminalPushLine(
         terminal,
@@ -1748,6 +1797,9 @@ void Floppy144TerminalReset(
     terminal->exit_requested =
         false;
 
+    terminal->site_entry_requested =
+        false;
+
     terminal->open_record_requested =
         false;
 
@@ -1789,7 +1841,12 @@ void Floppy144TerminalReset(
 
     Floppy144TerminalPushLine(
         terminal,
-        "SITE STATE: PARTIAL RECONSTRUCTION"
+        Floppy144WorldCollectionRestored(
+            world,
+            FLOPPY144_COLLECTION_DR01
+        )
+            ? "SITE STATE: PARTIAL RECONSTRUCTION"
+            : "SITE STATE: UNAVAILABLE"
     );
 
     Floppy144TerminalPushLine(
@@ -1988,6 +2045,15 @@ void Floppy144TerminalOpenSelection(
     )
     {
         terminal->restoration_notice = true;
+
+        if(
+            terminal->selected_collection ==
+                FLOPPY144_COLLECTION_DR01
+        )
+        {
+            terminal->site_entry_requested =
+                true;
+        }
     }
 }
 

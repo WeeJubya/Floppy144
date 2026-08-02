@@ -36,6 +36,7 @@ typedef struct Floppy144TerminalState
     bool restoration_notice;
     bool suppress_next_character;
     bool exit_requested;
+    bool site_entry_requested;
     bool open_record_requested;
 
     Floppy144CollectionId requested_collection;

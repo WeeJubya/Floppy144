@@ -596,7 +596,7 @@ static void Floppy144CatalogueDrawList(
         surface,
         512,
         322,
-        "ESC RETURN",
+        "BACKSPACE RETURN",
         1,
         muted
     );
@@ -835,7 +835,7 @@ static void Floppy144CatalogueDrawFa03ServiceNote(
         surface,
         526,
         326,
-        "ESC BACK",
+        "BACKSPACE BACK",
         1,
         muted
     );
@@ -855,7 +855,7 @@ static const char *const floppy144_dr01_help_terminal_lines[] =
     "TYPE EXIT TO CLOSE THE TERMINAL SESSION.",
     "USE BACKSPACE TO CORRECT THE CURRENT ENTRY.",
     "PRESS ENTER TO SUBMIT A COMMAND.",
-    "ESC MAY BE USED FOR AN IMMEDIATE RETURN.",
+    "ESC OPENS GDR SESSION CONTROL.",
     NULL
 };
 
@@ -879,7 +879,7 @@ static const char *const floppy144_dr01_help_record_lines[] =
     "TYPE OPEN RECORD-ID TO RETRIEVE A RECORD.",
     "EXAMPLE: OPEN HR-02-RS-1419",
     "ONLY RESTORED COLLECTIONS MAY BE SEARCHED.",
-    "ESC RETURNS FROM A RECORD TO THE TERMINAL.",
+    "BACKSPACE RETURNS TO THE PREVIOUS VIEW.",
     NULL
 };
 
@@ -1103,7 +1103,7 @@ static void Floppy144CatalogueDrawDr01HelpDocument(
     Floppy144CatalogueTextCentred(
         surface,
         322,
-        "ESC RETURN",
+        "BACKSPACE BACK",
         1,
         amber
     );
@@ -1425,7 +1425,7 @@ static void Floppy144CatalogueDrawDocument(
     Floppy144CatalogueTextCentred(
         surface,
         322,
-        "ESC RETURN",
+        "BACKSPACE BACK",
         1,
         amber
     );
@@ -1607,7 +1607,7 @@ void Floppy144CatalogueCloseDocument(
 /*
  * Query the current catalogue depth
  *
- * main.c uses this to make Escape close a document before leaving the catalogue.
+ * main.c uses this to make Backspace close a document before leaving the catalogue.
  */
 
 bool Floppy144CatalogueDocumentOpen(

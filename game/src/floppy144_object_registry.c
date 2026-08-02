@@ -52,6 +52,36 @@ static const Floppy144ObjectInteractionDefinition
     "DESK 04: IT SUPPORT MOVED HERE PENDING TERMINAL CABLE REPLACEMENT."
 };
 /*
+ * Desk 04 personnel-form investigation
+ *
+ * Reading the HR-02 memorandum reveals these forms. Inspecting them confirms
+ * the collection evidence through the same generic effect system used by
+ * authored documents.
+ */
+
+static const Floppy144Effect
+    floppy144_personnel_forms_effects[] =
+{
+    {
+        FLOPPY144_EFFECT_FIND_COLLECTION_EVIDENCE,
+        (uint32_t)FLOPPY144_COLLECTION_HR02
+    }
+};
+
+static const Floppy144ObjectInteractionDefinition
+    floppy144_personnel_forms_interaction =
+{
+    FLOPPY144_OBJECT_ACTION_SHOW_NOTICE,
+    100U,
+    FLOPPY144_COLLECTION_COUNT,
+    "PRESS E TO INSPECT PERSONNEL FORMS",
+    FLOPPY144_COLLECTION_COUNT,
+    NULL,
+    "PERSONNEL FORMS CONFIRM DESK 04 WAS REALLOCATED TO IT SUPPORT.",
+    floppy144_personnel_forms_effects,
+    1U
+};
+/*
  * Object-attached labels
  */
 

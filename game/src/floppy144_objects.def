@@ -208,15 +208,15 @@ FLOPPY144_OBJECT(
     0,
     0,
     0,
-    0,
-    0,
-    0,
-    0,
+    -96,
+    -30,
+    165,
+    79,
     FLOPPY144_COLLECTION_HR02,
     FLOPPY144_OBJECT_FLAG_NONE,
-    true,
+    false,
     NULL,
-    NULL,
+    &floppy144_personnel_forms_interaction,
     floppy144_desk_four_personnel_forms_primitives
 )
 
