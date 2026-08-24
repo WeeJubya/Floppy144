@@ -1,27 +1,27 @@
 ---@diagnostic disable: undefined-global, undefined-field
 
-workspace("river2D")
+workspace("Floppy144")
 configurations({"debug", "asan", "release"})
 platforms({"windows"})
 location("build")
 architecture("x86_64")
 
-project("river2D common functions")
+project("F144 Runtime")
 language("C")
 cdialect("C99")
 warnings("Extra")
 kind("StaticLib")
-targetname("river2Dcommon")
+targetname("f144runtime")
 
 includedirs({
     "./include/"
 })
 
 files({
-    "./src/river2Dcommon_main.c",
-    "./src/win32_river2Dcommon.c",
+    "./src/f144_runtime.c",
+    "./src/f144_win32_runtime.c",
     "./src/string_view.c",
-    "./include/river2D_main.h",
+    "./include/f144_runtime.h",
     "./include/string_view.h"
 })
 
@@ -29,13 +29,11 @@ filter("platforms:Windows")
 system("Windows")
 
 defines({
-    "BUILD_WINDOWS",
-    "RIVER2D_NO_IMAGE_IO",
-    "RIVER2D_NO_TILEMAP"
+    "BUILD_WINDOWS"
 })
 
 targetdir("bin/%{cfg.buildcfg}")
-objdir("obj/river2Dcommon/%{cfg.buildcfg}/%{cfg.platform}")
+objdir("obj/Floppy144/%{cfg.buildcfg}/%{cfg.platform}")
 
 buildoptions({
     "/wd4068"
@@ -82,8 +80,8 @@ objdir("obj/Floppy144/%{cfg.buildcfg}/%{cfg.platform}")
 files({
     "./game/src/**.c",
     "./game/src/**.h",
-    "./src/win32_river2Dsoftware_platform.c",
-    "./include/win32_river2Dsoftware_platform.h"
+    "./src/f144_win32_platform.c",
+    "./include/f144_win32_platform.h"
 })
 
 includedirs({
@@ -94,20 +92,15 @@ libdirs({
     "./bin/%{cfg.buildcfg}/"
 })
 
-dependson({
-    "river2D common functions"
-})
-
 filter("platforms:Windows")
 system("Windows")
 
 defines({
     "BUILD_WINDOWS",
-    "RIVER2D_STATIC_RENDERER"
 })
 
 links({
-    "river2Dcommon.lib",
+    "F144 Runtime",
     "user32",
     "gdi32"
 })

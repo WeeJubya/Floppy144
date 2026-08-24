@@ -2,7 +2,7 @@
  * Floppy//144 - tiny software drawing API
  *
  * Provides the platform-neutral pixel primitives used by every game screen.
- * All art and text are generated directly into river2D's backbuffer.
+ * All art and text are generated directly into the renderer's backbuffer.
  */
 
 #pragma once

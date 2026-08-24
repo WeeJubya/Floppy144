@@ -1625,7 +1625,7 @@ bool Floppy144CatalogueDocumentOpen(
  */
 
 void Floppy144CatalogueDraw(
-    EngineData *engine,
+    F144Runtime *engine,
     const Floppy144CatalogueState *catalogue
 )
 {

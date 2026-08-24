@@ -56,7 +56,7 @@ static void Floppy144RecoveryTextCentred(
  */
 
 void Floppy144SplashDraw(
-    EngineData *engine,
+    F144Runtime *engine,
     uint32_t elapsed_milliseconds
 )
 {
@@ -697,7 +697,7 @@ bool Floppy144MainMenuOptionEnabled(
  */
 
 void Floppy144MainMenuDraw(
-    EngineData *engine,
+    F144Runtime *engine,
     Floppy144MainMenuOption selected_option,
     bool active_session,
     const Floppy144WorldState *world

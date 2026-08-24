@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "river2D_main.h"
+#include "f144_runtime.h"
 
 #include "floppy144_collection.h"
 
@@ -80,6 +80,6 @@ bool Floppy144CatalogueDocumentOpen(
 );
 
 void Floppy144CatalogueDraw(
-    EngineData *engine,
+    F144Runtime *engine,
     const Floppy144CatalogueState *catalogue
 );

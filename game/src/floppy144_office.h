@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "river2D_main.h"
+#include "f144_runtime.h"
 
 #include "floppy144_world.h"
 
@@ -53,7 +53,7 @@ Floppy144ObjectId Floppy144OfficeInteractionTarget(
 
 
 void Floppy144OfficeDraw(
-    EngineData *engine,
+    F144Runtime *engine,
     const Floppy144Player *player,
     const Floppy144WorldState *world,
     const char *notice

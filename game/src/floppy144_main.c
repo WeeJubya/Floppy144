@@ -1,15 +1,15 @@
 /*
  * Floppy//144 - Win32 entry point and game coordinator
  *
- * Connects river2D to Win32, owns the active screen and top-level session state,
+ * Connects Floppy144 to Win32, owns the active screen and top-level session state,
  * routes keyboard input and asks the appropriate module to redraw.
  */
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-#include "river2D_main.h"
-#include "win32_river2Dsoftware_platform.h"
+#include "f144_runtime.h"
+#include "f144_win32_platform.h"
 
 #include "floppy144_catalogue.h"
 #include "floppy144_document.h"
@@ -44,7 +44,7 @@ typedef enum Floppy144Screen
  * small prototype stores the engine and screen states at file scope.
  */
 
-static EngineData *global_engine;
+static F144Runtime *global_runtime;
 
 static Floppy144Screen global_screen;
 static Floppy144Player global_player;
@@ -76,21 +76,21 @@ static DWORD global_splash_started_ticks;
 #define FLOPPY144_SPLASH_ANIMATION_MS     3700U
 
 /*
- * Bind river2D's statically linked software renderer
+ * Bind Floppy144's statically linked software renderer
  *
  * The original engine can resolve a renderer DLL. This build assigns the function
  * pointers directly so Floppy144 ships as one game executable.
  */
 
 static void Floppy144BindStaticRenderer(
-    EngineData *engine
+    F144Runtime *engine
 )
 {
-    engine->init = init;
-    engine->shutdown = shutdown;
-    engine->bltBuffer = bltBuffer;
-    engine->loadText = loadText;
-    engine->compositeImage = compositeImage;
+    engine->init = f144Win32Init;
+    engine->shutdown = f144Win32Shutdown;
+    engine->bltBuffer = f144Win32BltBuffer;
+    engine->loadText = f144Win32LoadText;
+    engine->compositeImage = f144Win32CompositeImage;
 }
 
 /*
@@ -113,7 +113,7 @@ static void Floppy144Redraw(
                 global_splash_started_ticks;
 
             Floppy144SplashDraw(
-                global_engine,
+                global_runtime,
                 (uint32_t)elapsed_milliseconds
             );
 
@@ -122,7 +122,7 @@ static void Floppy144Redraw(
         case FLOPPY144_SCREEN_MAIN_MENU:
         {
             Floppy144MainMenuDraw(
-                global_engine,
+                global_runtime,
                 global_main_menu_option,
                 global_session_active,
                 &global_world
@@ -134,7 +134,7 @@ static void Floppy144Redraw(
         case FLOPPY144_SCREEN_OFFICE:
         {
             Floppy144OfficeDraw(
-                global_engine,
+                global_runtime,
                 &global_player,
                 &global_world,
                 global_office_notice
@@ -146,7 +146,7 @@ static void Floppy144Redraw(
         case FLOPPY144_SCREEN_TERMINAL:
         {
             Floppy144TerminalDraw(
-                global_engine,
+                global_runtime,
                 &global_terminal,
                 &global_world
             );
@@ -157,7 +157,7 @@ static void Floppy144Redraw(
         case FLOPPY144_SCREEN_CATALOGUE:
         {
             Floppy144CatalogueDraw(
-                global_engine,
+                global_runtime,
                 &global_catalogue
             );
 
@@ -491,9 +491,9 @@ static LRESULT CALLBACK Floppy144WindowProc(
         /* Window lifetime: stop the engine loop and post the process quit message. */
         case WM_CLOSE:
         {
-            if(global_engine)
+            if(global_runtime)
             {
-                global_engine->running = false;
+                global_runtime->running = false;
             }
 
             PostQuitMessage(0);
@@ -502,9 +502,9 @@ static LRESULT CALLBACK Floppy144WindowProc(
 
         case WM_DESTROY:
         {
-            if(global_engine)
+            if(global_runtime)
             {
-                global_engine->running = false;
+                global_runtime->running = false;
             }
 
             PostQuitMessage(0);
@@ -1090,7 +1090,7 @@ static LRESULT CALLBACK Floppy144WindowProc(
         /*
          * Window painting
          *
-         * Suppress Windows background erasing to avoid flicker. WM_PAINT asks river2D
+         * Suppress Windows background erasing to avoid flicker. WM_PAINT asks Floppy144
          * to scale and copy the logical backbuffer into the window.
          */
 
@@ -1118,16 +1118,16 @@ static LRESULT CALLBACK Floppy144WindowProc(
                 BeginPaint(window, &paint);
 
             if(
-                global_engine &&
-                global_engine->bltBuffer &&
-                global_engine->backbuffer.data
+                global_runtime &&
+                global_runtime->bltBuffer &&
+                global_runtime->backbuffer.data
             )
             {
-                global_engine->context =
+                global_runtime->context =
                     device_context;
 
-                global_engine->bltBuffer(
-                    global_engine
+                global_runtime->bltBuffer(
+                    global_runtime
                 );
             }
 
@@ -1163,19 +1163,19 @@ int CALLBACK WinMain(
 )
 {
     /*
-     * Local Win32 and river2D objects
+     * Local Win32 and Floppy144 objects
      *
-     * All engine storage lives for the duration of WinMain. global_engine points to
+     * All engine storage lives for the duration of WinMain. global_runtime points to
      * this engine only while the application is running.
      */
 
     const char *class_name =
         "Floppy144WindowClass";
 
-    EngineData engine = {0};
+    F144Runtime engine = {0};
 
-    RiverImage planes[
-        RV_MAX_PLANES
+    F144Image planes[
+        F144_MAX_PLANES
     ] = {0};
 
     WNDCLASSA window_class = {0};
@@ -1194,9 +1194,9 @@ int CALLBACK WinMain(
     (void)command_line;
 
     /*
-     * Configure river2D
+     * Configure Floppy144
      *
-     * Static-canvas mode preserves a crisp 640x360 internal image while the window
+     * Static-canvas mode presef144es a crisp 640x360 internal image while the window
      * is twice that size.
      */
 
@@ -1204,10 +1204,10 @@ int CALLBACK WinMain(
     engine.windowName = "Floppy//144";
 
     engine.config.renderer =
-        RV_RENDERER_SOFTWARE;
+        F144_RENDERER_SOFTWARE;
 
     engine.config.choices =
-        RV_CHOICE_STATIC_CANVAS_BIT;
+        F144_CHOICE_STATIC_CANVAS_BIT;
 
     engine.config.window_width = 1280;
     engine.config.window_height = 720;
@@ -1277,7 +1277,7 @@ int CALLBACK WinMain(
      * Every subsystem is reset before the renderer is asked to allocate its backbuffer.
      */
 
-    global_engine = &engine;
+    global_runtime = &engine;
 
     global_screen =
         FLOPPY144_SCREEN_SPLASH;
@@ -1327,7 +1327,7 @@ int CALLBACK WinMain(
     {
         MessageBoxA(
             engine.window,
-            "river2D could not create the software framebuffer.",
+            "Floppy144 could not create the software framebuffer.",
             "Floppy//144",
             MB_OK | MB_ICONERROR
         );
@@ -1399,7 +1399,7 @@ int CALLBACK WinMain(
      * Clear the callback-visible pointer, then let the renderer release its resources.
      */
 
-    global_engine = 0;
+    global_runtime = 0;
 
     return engine.shutdown(
         &engine

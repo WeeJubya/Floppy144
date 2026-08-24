@@ -2641,7 +2641,7 @@ bool Floppy144TerminalCanOpenCatalogue(
 }
 
 void Floppy144TerminalDraw(
-    EngineData *engine,
+    F144Runtime *engine,
     const Floppy144TerminalState *terminal,
     const Floppy144WorldState *world
 )

@@ -770,7 +770,7 @@ static void Floppy144OfficeDrawPlayer(
  */
 
 void Floppy144OfficeDraw(
-    EngineData *engine,
+    F144Runtime *engine,
     const Floppy144Player *player,
     const Floppy144WorldState *world,
     const char *notice

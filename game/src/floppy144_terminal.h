@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "river2D_main.h"
+#include "f144_runtime.h"
 
 #include "floppy144_collection.h"
 #include "floppy144_world.h"
@@ -124,7 +124,7 @@ bool Floppy144TerminalDetailOpen(
 );
 
 void Floppy144TerminalDraw(
-    EngineData *engine,
+    F144Runtime *engine,
     const Floppy144TerminalState *terminal,
     const Floppy144WorldState *world
 );

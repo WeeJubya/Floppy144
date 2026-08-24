@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "river2D_main.h"
+#include "f144_runtime.h"
 
 #include "floppy144_world.h"
 
@@ -44,7 +44,7 @@ bool Floppy144MainMenuOptionEnabled(
  */
 
 void Floppy144SplashDraw(
-    EngineData *engine,
+    F144Runtime *engine,
     uint32_t elapsed_milliseconds
 );
 
@@ -53,7 +53,7 @@ void Floppy144SplashDraw(
  */
 
 void Floppy144MainMenuDraw(
-    EngineData *engine,
+    F144Runtime *engine,
     Floppy144MainMenuOption selected_option,
     bool active_session,
     const Floppy144WorldState *world
