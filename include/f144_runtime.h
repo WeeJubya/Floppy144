@@ -18,7 +18,6 @@
         #define WIN32_LEAN_AND_MEAN
     #endif
     #include "Windows.h"
-    #define  F144_CONFIG_PATH "./river2D.ini"
 
     #define F144_MOUSE1 0x01
     #define F144_MOUSE2 0x02
@@ -41,11 +40,6 @@
 #define F144_PIXDEPTH                 32
 #define F144_MAX_PLANES               64
 #define F144_MAX_THREADS              8
-
-#define F144_RENDERER_SOFTWARE        0
-#define F144_RENDERER_OPENGL          1
-#define F144_RENDERER_VULKAN          2
-#define F144_RENDERER_DIRECTX         3
 
 #define F144_ASCII_CURSOR             0x01
 #define F144_ASCII_UP                 0x02
@@ -90,10 +84,6 @@
 #define F144_PICTOP_SATURATE          13
 #define F144_PICTOP_MAXIMUM           13
 
-#define F144_CHOICE_SHOW_FPS_BIT      1
-#define F144_CHOICE_STATIC_CANVAS_BIT 2
-#define F144_CHOICE_BACKGROUNDS_BYTE  0xFF000000
-
 #define F144_BIT_HOVER                0x01
 
 #define F144_ALIGN_TOPLEFT            1
@@ -114,9 +104,7 @@ PerformanceCounter;
 
 typedef struct F144Config
 {
-    uint32_t choices;
-    uint8_t  renderer;
-    uint8_t  backgrounds;
+    uint8_t static_canvas;
     uint32_t window_width;
     uint32_t window_height;
     uint32_t canvas_width;
@@ -276,7 +264,6 @@ f144ButtonSettings;
 
 extern void f144CreateImage
 (
-    F144Runtime *runtime,
     F144Image *image,
     uint32_t   width,
     uint32_t   height
@@ -288,13 +275,6 @@ extern void f144AppendImage
     F144Image *src,
     F144Image *dst,
     uint8_t    direction
-);
-
-extern void f144SyncImage
-(
-    F144Runtime *runtime,
-    F144Image *image,
-    bool       CPU_to_GPU
 );
 
 extern void f144ClearImage

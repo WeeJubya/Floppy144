@@ -41,7 +41,7 @@ typedef enum Floppy144Screen
  * Shared application state
  *
  * The Win32 callback cannot receive custom game arguments directly, so this
- * small prototype stores the engine and screen states at file scope.
+ * small prototype stores the runtime and screen states at file scope.
  */
 
 static F144Runtime *global_runtime;
@@ -78,19 +78,19 @@ static DWORD global_splash_started_ticks;
 /*
  * Bind Floppy144's statically linked software renderer
  *
- * The original engine can resolve a renderer DLL. This build assigns the function
- * pointers directly so Floppy144 ships as one game executable.
+ * F144 uses a single Win32 software renderer. These assignments connect the
+ * runtime directly to its platform implementation.
  */
 
 static void Floppy144BindStaticRenderer(
-    F144Runtime *engine
+    F144Runtime *runtime
 )
 {
-    engine->init = f144Win32Init;
-    engine->shutdown = f144Win32Shutdown;
-    engine->bltBuffer = f144Win32BltBuffer;
-    engine->loadText = f144Win32LoadText;
-    engine->compositeImage = f144Win32CompositeImage;
+    runtime->init = f144Win32Init;
+    runtime->shutdown = f144Win32Shutdown;
+    runtime->bltBuffer = f144Win32BltBuffer;
+    runtime->loadText = f144Win32LoadText;
+    runtime->compositeImage = f144Win32CompositeImage;
 }
 
 /*
@@ -488,7 +488,7 @@ static LRESULT CALLBACK Floppy144WindowProc(
 
     switch(message)
     {
-        /* Window lifetime: stop the engine loop and post the process quit message. */
+        /* Window lifetime: stop the runtime loop and post the process quit message. */
         case WM_CLOSE:
         {
             if(global_runtime)
@@ -1165,14 +1165,14 @@ int CALLBACK WinMain(
     /*
      * Local Win32 and Floppy144 objects
      *
-     * All engine storage lives for the duration of WinMain. global_runtime points to
-     * this engine only while the application is running.
+     * All runtime storage lives for the duration of WinMain. global_runtime points to
+     * this runtime only while the application is running.
      */
 
     const char *class_name =
         "Floppy144WindowClass";
 
-    F144Runtime engine = {0};
+    F144Runtime runtime = {0};
 
     F144Image planes[
         F144_MAX_PLANES
@@ -1196,26 +1196,22 @@ int CALLBACK WinMain(
     /*
      * Configure Floppy144
      *
-     * Static-canvas mode presef144es a crisp 640x360 internal image while the window
+     * Static-canvas mode preserves a crisp 640x360 internal image while the window
      * is twice that size.
      */
 
-    engine.instance = instance;
-    engine.windowName = "Floppy//144";
+    runtime.instance = instance;
+    runtime.windowName = "Floppy//144";
 
-    engine.config.renderer =
-        F144_RENDERER_SOFTWARE;
+    runtime.config.static_canvas = 1;
 
-    engine.config.choices =
-        F144_CHOICE_STATIC_CANVAS_BIT;
-
-    engine.config.window_width = 1280;
-    engine.config.window_height = 720;
-    engine.config.canvas_width = 640;
-    engine.config.canvas_height = 360;
+    runtime.config.window_width = 1280;
+    runtime.config.window_height = 720;
+    runtime.config.canvas_width = 640;
+    runtime.config.canvas_height = 360;
 
     Floppy144BindStaticRenderer(
-        &engine
+        &runtime
     );
 
     /*
@@ -1251,10 +1247,10 @@ int CALLBACK WinMain(
         FALSE
     );
 
-    engine.window = CreateWindowExA(
+    runtime.window = CreateWindowExA(
         0,
         class_name,
-        engine.windowName,
+        runtime.windowName,
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT,
         CW_USEDEFAULT,
@@ -1266,7 +1262,7 @@ int CALLBACK WinMain(
         0
     );
 
-    if(!engine.window)
+    if(!runtime.window)
     {
         return 2;
     }
@@ -1277,7 +1273,7 @@ int CALLBACK WinMain(
      * Every subsystem is reset before the renderer is asked to allocate its backbuffer.
      */
 
-    global_runtime = &engine;
+    global_runtime = &runtime;
 
     global_screen =
         FLOPPY144_SCREEN_SPLASH;
@@ -1318,34 +1314,34 @@ int CALLBACK WinMain(
      * A missing backbuffer is fatal because every screen draws directly into it.
      */
 
-    engine.init(
-        &engine,
+    runtime.init(
+        &runtime,
         planes
     );
 
-    if(!engine.backbuffer.data)
+    if(!runtime.backbuffer.data)
     {
         MessageBoxA(
-            engine.window,
+            runtime.window,
             "Floppy144 could not create the software framebuffer.",
             "Floppy//144",
             MB_OK | MB_ICONERROR
         );
 
         DestroyWindow(
-            engine.window
+            runtime.window
         );
 
         return 3;
     }
 
     Floppy144SplashDraw(
-        &engine,
+        &runtime,
         0U
     );
 
     ShowWindow(
-        engine.window,
+        runtime.window,
         show_command
     );
 
@@ -1353,19 +1349,19 @@ int CALLBACK WinMain(
         GetTickCount();
 
     Floppy144SplashDraw(
-        &engine,
+        &runtime,
         0U
     );
 
     SetTimer(
-        engine.window,
+        runtime.window,
         FLOPPY144_SPLASH_TIMER_ID,
         FLOPPY144_SPLASH_FRAME_MS,
         NULL
     );
 
     UpdateWindow(
-        engine.window
+        runtime.window
     );
 
     /*
@@ -1401,7 +1397,7 @@ int CALLBACK WinMain(
 
     global_runtime = 0;
 
-    return engine.shutdown(
-        &engine
+    return runtime.shutdown(
+        &runtime
     );
 }

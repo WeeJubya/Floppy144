@@ -44,7 +44,7 @@ static void Floppy144RecoveryTextCentred(
 /*
  * Draw the recovery screen
  *
- * The function derives dynamic labels first, wraps the river2D backbuffer
+ * The function derives dynamic labels first, wraps the F144 backbuffer
  * as a Floppy144Surface, then paints the interface from back to front.
  */
 

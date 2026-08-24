@@ -94,14 +94,14 @@ E displays the reconstructed meaning of that desk detail
 
 ## Drawing model
 
-Every screen creates a `Floppy144Surface` that points at river2D's software backbuffer. The game then draws a complete frame using only:
+Every screen creates a `Floppy144Surface` that points at F144's software backbuffer.
 
 - clear surface
 - filled rectangle
 - rectangle outline
 - 5x7 bitmap text
 
-The logical canvas is 640x360. river2D presents it in a 1280x720 Win32 window, preserving crisp two-times scaling.
+The logical canvas is 640x360. F144 presents it in a 1280x720 Win32 window, preserving crisp two-times scaling.
 
 ## Collision model
 

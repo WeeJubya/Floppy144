@@ -217,7 +217,7 @@ void f144AppendImage
     }
 
     F144Image tmp = {0};
-    f144CreateImage(runtime, &tmp, width, height);
+    f144CreateImage(&tmp, width, height);
 
     f144CompositeSettings comp = {0};
     comp.dst                 = &tmp;

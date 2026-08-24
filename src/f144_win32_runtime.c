@@ -1,30 +1,9 @@
 #include "f144_runtime.h"
 #include <sys/stat.h>
-#include <stdio.h>
 #include <stdlib.h>
-
-f_internal void resolveFunction
-(
-    void       **fptr,
-    HMODULE    renderer,
-    const char *name
-){
-    *fptr = GetProcAddress(renderer, name);
-    if(!(*fptr))
-    {
-        fprintf(stderr, "\033[31;1;7mERROR: Unable to load symbol %s!\033[0m\n", name);
-    }
-    #ifdef DEBUG
-    else
-    {
-        fprintf(stderr, "Loaded symbol: %s at 0x%x\n", name, *fptr);
-    }
-    #endif
-}
 
 void f144CreateImage
 (
-    F144Runtime *runtime,
     F144Image *image,
     uint32_t   width,
     uint32_t   height
@@ -222,15 +201,6 @@ void f144CompositeImage
         settings->cropWidth,
         settings->cropHeight
     );
-}
-
-void f144SyncImage
-(
-    F144Runtime  *runtime,
-    F144Image *image,
-    bool          CPU_to_GPU
-){
-    return;
 }
 
 

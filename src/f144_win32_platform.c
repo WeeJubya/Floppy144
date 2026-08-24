@@ -46,14 +46,14 @@ void f144Win32Init
         runtime->windowName = "Floppy//144";
     }
 
-    if(runtime->config.choices & F144_CHOICE_STATIC_CANVAS_BIT)
+    if(runtime->config.static_canvas)
     {
-        f144CreateImage(runtime, &runtime->backbuffer,
+        f144CreateImage(&runtime->backbuffer,
                             runtime->config.canvas_width, runtime->config.canvas_height);
     }
     else
     {
-        f144CreateImage(runtime, &runtime->backbuffer,
+        f144CreateImage(&runtime->backbuffer,
                             runtime->config.window_width, runtime->config.window_height);
     }
 }
@@ -190,7 +190,7 @@ void f144Win32LoadText
 
     if(!image->data)
     {
-        f144CreateImage(runtime, image, minTextWidth, charsize);
+        f144CreateImage(image, minTextWidth, charsize);
     }
 
     if(offsetX > image->width)
