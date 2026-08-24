@@ -1,225 +1,125 @@
 ---@diagnostic disable: undefined-global, undefined-field
 
 workspace("river2D")
-    configurations({"debug", "asan", "release"})
-    platforms({"windows"})
-    location("build")
-    architecture("x86_64")
+configurations({"debug", "asan", "release"})
+platforms({"windows"})
+location("build")
+architecture("x86_64")
 
 project("river2D common functions")
-    language("C")
-    cdialect("C99")
-    warnings("Extra")
-    kind("StaticLib")
-    targetname("river2Dcommon")
-    libdirs({"./vendor/imgsurf/bin/%{cfg.buildcfg}/"})
-    includedirs({"./include/",
-                 "/usr/include/",
-                 "./vendor/imgsurf/include/",
-                 "./vendor/imgsurf/vendor/puddle/include/"})
+language("C")
+cdialect("C99")
+warnings("Extra")
+kind("StaticLib")
+targetname("river2Dcommon")
 
-    filter("configurations:asan")
-        defines{"ASAN"}
+includedirs({
+    "./include/"
+})
 
-    filter("configurations:debug")
-        defines{"DEBUG"}
+files({
+    "./src/river2Dcommon_main.c",
+    "./src/win32_river2Dcommon.c",
+    "./src/string_view.c",
+    "./include/river2D_main.h",
+    "./include/string_view.h"
+})
 
-    filter("configurations:debug or asan")
-        runtime("debug")
-        symbols("On")
-        optimize("Off")
+filter("platforms:Windows")
+system("Windows")
 
-    filter("configurations:release")
-        staticruntime("off")
-        runtime("release")
-        symbols("Off")
-        optimize("Speed")
+defines({
+    "BUILD_WINDOWS",
+    "RIVER2D_NO_IMAGE_IO",
+    "RIVER2D_NO_TILEMAP"
+})
 
-    filter("platforms:Linux")
-        system("Linux")
-        defines("BUILD_LINUX")
-        targetdir("bin/%{cfg.buildcfg}")
-        objdir("obj/river2Dcommon/")
-        files({"./src/river2D_*",
-               "./include/river2D_*",
-               "./src/linux_river2Dcommon*",
-               "./include/linux_river2Dcommon*",
-               "./src/river2Dcommon*",
-               "./include/river2Dcommon*"})
-        links("imgsurf:static")
-        buildoptions({"-Wextra", "-Wall", "-Wpedantic", "-Wconversion", "-Wshadow",
-                      "-Wsign-compare"})
-        linkoptions({"-lX11", "-fuse-ld=mold"})
-        toolset("clang")
+targetdir("bin/%{cfg.buildcfg}")
+objdir("obj/river2Dcommon/%{cfg.buildcfg}/%{cfg.platform}")
 
-    filter("platforms:Windows")
-        system("Windows")
-        defines({
-            "BUILD_WINDOWS",
-            "RIVER2D_NO_IMAGE_IO",
-            "RIVER2D_NO_TILEMAP"
-        })
-        targetdir("bin/%{cfg.buildcfg}")
-        objdir("obj/")
-        files({"./src/river2D_*",
-               "./include/river2D_*",
-               "./src/win32_river2Dcommon*",
-               "./include/win32_river2Dcommon*",
-               "./src/river2Dcommon*",
-               "./include/river2Dcommon*",
-               "./vendor/imgsurf/vendor/puddle/src/string_view.c" })
-        buildoptions({"/wd4068"})
+buildoptions({
+    "/wd4068"
+})
 
-    filter({"platforms:Linux", "configurations:debug or asan"})
-        buildoptions({"-gfull", "-O1"})
-        linkoptions({"-gfull", "-O1"})
+filter("configurations:debug")
+defines({"DEBUG"})
+runtime("debug")
+symbols("On")
+optimize("Off")
 
-    filter({"platforms:Linux", "configurations:asan"})
-        buildoptions({"-fsanitize=address,leak,undefined", "-fno-omit-frame-pointer",
-                      "-static-libasan"})
-        linkoptions({"-fsanitize=address,leak,undefined", "-fno-omit-frame-pointer",
-                     "-static-libasan"})
+filter("configurations:asan")
+defines({"ASAN"})
+runtime("debug")
+symbols("On")
+optimize("Off")
+editandcontinue("Off")
+buildoptions({
+    "/fsanitize=address",
+    "/Zi",
+    "/INCREMENTAL:NO"
+})
 
-    filter({"platforms:Windows", "configurations:asan"})
-        editandcontinue("Off")
-        buildoptions({"/fsanitize=address", "/Zi", "/INCREMENTAL:NO"})
+filter("configurations:release")
+staticruntime("off")
+runtime("release")
+symbols("Off")
+optimize("Speed")
+linkoptions("/NODEFAULTLIB:MSVCRTD")
 
-    filter({"platforms:Windows", "configurations:release"})
-        linkoptions("/NODEFAULTLIB:MSVCRTD")
-
-project("river2D software renderer")
-    language("C")
-    cdialect("C99")
-    warnings("Extra")
-    kind("SharedLib")
-    targetname("river2Dsoftware")
-    libdirs({"./vendor/imgsurf/bin/%{cfg.buildcfg}/", "./bin/%{cfg.buildcfg}/"})
-    includedirs({"./include/",
-                 "/usr/include/",
-                 "./vendor/imgsurf/include/",
-                 "./vendor/imgsurf/vendor/puddle/include/"})
-
-    filter("configurations:asan")
-        defines{"ASAN"}
-
-    filter("configurations:debug")
-        defines{"DEBUG"}
-
-    filter("configurations:debug or asan")
-        runtime("debug")
-        symbols("On")
-        optimize("Off")
-
-    filter("configurations:release")
-        staticruntime("off")
-        runtime("release")
-        symbols("Off")
-        optimize("Speed")
-
-    filter("platforms:Linux")
-        system("Linux")
-        defines("BUILD_LINUX")
-        targetdir("bin/%{cfg.buildcfg}")
-        objdir("obj/river2Dsoftware/")
-        files({"./src/linux_river2Dsoftware*",
-               "./include/linux_river2Dsoftware*",
-               "./src/river2Dsoftware*",
-               "./include/river2Dsoftware*" })
-        links({"imgsurf:static", "river2Dcommon:static"})
-        buildoptions({"-Wextra", "-Wall", "-Wpedantic", "-Wconversion", "-Wshadow",
-                      "-Wsign-compare"})
-        linkoptions({"-lX11", "-lXrender", "-lriver2Dcommon", "-lm", "-fuse-ld=mold"})
-        toolset("clang")
-
-    filter("platforms:Windows")
-        system("Windows")
-        defines("BUILD_WINDOWS")
-        targetdir("bin/%{cfg.buildcfg}")
-        objdir("obj/")
-        files({"./src/win32_river2Dsoftware*",
-               "./include/win32_river2Dsoftware*",
-               "./src/river2Dsoftware*",
-               "./include/river2Dsoftware*" })
-        links({"imgsurf.lib", "river2Dcommon.lib"})
-        buildoptions({"/wd4068"})
-
-    filter({"platforms:Linux", "configurations:debug or asan"})
-        buildoptions({"-gfull", "-O1"})
-        linkoptions({"-gfull", "-O1"})
-
-    filter({"platforms:Linux", "configurations:asan"})
-        buildoptions({"-fsanitize=address,leak,undefined", "-fno-omit-frame-pointer",
-                      "-static-libasan"})
-        linkoptions({"-fsanitize=address,leak,undefined", "-fno-omit-frame-pointer",
-                     "-static-libasan"})
-
-    filter({"platforms:Windows", "configurations:asan"})
-        editandcontinue("Off")
-        buildoptions({"/fsanitize=address", "/Zi", "/INCREMENTAL:NO"})
-
-    filter({"platforms:Windows", "configurations:release"})
-        linkoptions("/NODEFAULTLIB:MSVCRTD")
-
+filter({})
 
 
 project("Floppy144")
-    language("C")
-    cdialect("C99")
-    kind("WindowedApp")
-    targetname("Floppy144")
-    warnings("Extra")
+language("C")
+cdialect("C99")
+kind("WindowedApp")
+targetname("Floppy144")
+warnings("Extra")
 
-    targetdir("bin/%{cfg.buildcfg}")
-    objdir("obj/Floppy144/%{cfg.buildcfg}/%{cfg.platform}")
+targetdir("bin/%{cfg.buildcfg}")
+objdir("obj/Floppy144/%{cfg.buildcfg}/%{cfg.platform}")
 
-    files({
-        "./game/src/**.c",
-        "./game/src/**.h",
-        "./src/win32_river2Dsoftware_platform.c",
-        "./include/win32_river2Dsoftware_platform.h"
-    })
+files({
+    "./game/src/**.c",
+    "./game/src/**.h",
+    "./src/win32_river2Dsoftware_platform.c",
+    "./include/win32_river2Dsoftware_platform.h"
+})
 
-    includedirs({
-        "./include/",
-        "./vendor/imgsurf/include/",
-        "./vendor/imgsurf/vendor/puddle/include/"
-    })
+includedirs({
+    "./include/"
+})
 
-    libdirs({
-        "./bin/%{cfg.buildcfg}/",
-    })
+libdirs({
+    "./bin/%{cfg.buildcfg}/"
+})
 
-    dependson({
-        "river2D common functions"
-    })
+dependson({
+    "river2D common functions"
+})
 
-    filter("platforms:Windows")
-        system("Windows")
+filter("platforms:Windows")
+system("Windows")
 
-        defines({
-            "BUILD_WINDOWS",
-            "RIVER2D_STATIC_RENDERER"
-        })
+defines({
+    "BUILD_WINDOWS",
+    "RIVER2D_STATIC_RENDERER"
+})
 
-        links({
-            "river2Dcommon.lib",
-            "user32",
-            "gdi32"
-        })
+links({
+    "river2Dcommon.lib",
+    "user32",
+    "gdi32"
+})
 
-    filter("configurations:debug")
-        runtime("debug")
-        symbols("On")
-        optimize("Off")
+filter("configurations:debug")
+runtime("debug")
+symbols("On")
+optimize("Off")
 
-    filter("configurations:release")
-        runtime("release")
-        symbols("Off")
-        optimize("Size")
+filter("configurations:release")
+runtime("release")
+symbols("Off")
+optimize("Size")
 
-    filter({})
-
-
-
-
-
+filter({})
