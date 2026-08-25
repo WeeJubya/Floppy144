@@ -18,6 +18,7 @@
 #include "floppy144_recovery.h"
 #include "floppy144_terminal.h"
 #include "floppy144_world.h"
+#include "floppy144_run_state.h"
 
 #include <stdbool.h>
 
@@ -51,6 +52,7 @@ static Floppy144Player global_player;
 static Floppy144TerminalState global_terminal;
 static Floppy144CatalogueState global_catalogue;
 static Floppy144WorldState global_world;
+static Floppy144RunState global_run_state;
 
 /*
  * Short-lived interface state
@@ -281,6 +283,10 @@ static void Floppy144MainMenuActivate(
         {
             Floppy144WorldReset(
                 &global_world
+            );
+
+            Floppy144RunStateReset(
+                &global_run_state
             );
 
             Floppy144OfficeReset(
@@ -1296,6 +1302,10 @@ int CALLBACK WinMain(
 
     Floppy144WorldReset(
         &global_world
+    );
+
+    Floppy144RunStateReset(
+        &global_run_state
     );
 
     Floppy144TerminalReset(
