@@ -1627,6 +1627,7 @@ void Floppy144TerminalCloseRecordPager(
 static void Floppy144TerminalRestoreCollection(
     Floppy144TerminalState *terminal,
     Floppy144WorldState *world,
+    Floppy144RunState *run_state,
     const char *code
 )
 {
@@ -1733,6 +1734,11 @@ static void Floppy144TerminalRestoreCollection(
 
         return;
     }
+
+    Floppy144RunStateRestoreCollection(
+        run_state,
+        collection
+    );
 
     if(collection == FLOPPY144_COLLECTION_DR01)
     {
@@ -1935,7 +1941,8 @@ static void Floppy144TerminalRequestOpenRecord(
 }
 void Floppy144TerminalSubmitInput(
     Floppy144TerminalState *terminal,
-    Floppy144WorldState *world
+    Floppy144WorldState *world,
+    Floppy144RunState *run_state
 )
 {
     char submitted_line
@@ -1951,6 +1958,7 @@ void Floppy144TerminalSubmitInput(
     if(
         terminal == NULL ||
         world == NULL ||
+        run_state == NULL ||
         terminal->input_length == 0U
     )
     {
@@ -2087,6 +2095,7 @@ void Floppy144TerminalSubmitInput(
             Floppy144TerminalRestoreCollection(
                 terminal,
                 world,
+                run_state,
                 restore_arguments
             );
         }

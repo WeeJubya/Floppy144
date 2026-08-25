@@ -618,7 +618,8 @@ static LRESULT CALLBACK Floppy144WindowProc(
                 {
                     Floppy144TerminalSubmitInput(
                         &global_terminal,
-                        &global_world
+                        &global_world,
+                        &global_run_state
                     );
 
                     if(global_terminal.site_entry_requested)

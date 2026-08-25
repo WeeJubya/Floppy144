@@ -1,0 +1,12 @@
+/*
+ * Floppy//144 Capability Registry
+ *
+ * This file intentionally has no include guard.
+ *
+ * Arguments:
+ *   symbol
+ */
+
+FLOPPY144_CAPABILITY(SITE_KEYS)
+FLOPPY144_CAPABILITY(MASTER_SECURE_CABINET_CODES)
+FLOPPY144_CAPABILITY(STATUS_DIAGNOSTIC)

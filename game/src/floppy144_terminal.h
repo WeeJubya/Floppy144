@@ -12,6 +12,8 @@
 #include "floppy144_collection.h"
 #include "floppy144_world.h"
 
+#include "floppy144_run_state.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -102,7 +104,8 @@ void Floppy144TerminalCloseRecordPager(
 
 void Floppy144TerminalSubmitInput(
     Floppy144TerminalState *terminal,
-    Floppy144WorldState *world
+    Floppy144WorldState *world,
+    Floppy144RunState *run_state
 );
 
 void Floppy144TerminalOpenSelection(
