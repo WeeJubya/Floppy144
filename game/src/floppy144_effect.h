@@ -9,6 +9,7 @@
 #pragma once
 
 #include "floppy144_world.h"
+#include "floppy144_run_state.h"
 
 #include <stdint.h>
 
@@ -46,11 +47,13 @@ typedef struct Floppy144Effect
 
 void Floppy144ApplyEffect(
     Floppy144WorldState *world,
+    Floppy144RunState *run_state,
     const Floppy144Effect *effect
 );
 
 void Floppy144ApplyEffects(
     Floppy144WorldState *world,
+    Floppy144RunState *run_state,
     const Floppy144Effect *effects,
     uint32_t effect_count
 );

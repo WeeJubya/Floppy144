@@ -700,7 +700,7 @@ void Floppy144MainMenuDraw(
     F144Runtime *engine,
     Floppy144MainMenuOption selected_option,
     bool active_session,
-    const Floppy144WorldState *world
+    const Floppy144RunState *run_state
 )
 {
     const uint32_t background =
@@ -727,10 +727,12 @@ void Floppy144MainMenuDraw(
     const uint32_t green =
         FLOPPY144_RGB(100, 156, 111);
 
-    uint32_t reconstruction_percent =
+        uint32_t reconstruction_percent =
         active_session
-            ? Floppy144WorldReconstructionPercent(world)
-            : 0U;
+        ? Floppy144RunStateReconstructionPercent(
+            run_state
+        )
+        : 0U;
 
     uint32_t progress_width =
         (

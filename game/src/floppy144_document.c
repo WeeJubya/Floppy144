@@ -130,6 +130,7 @@ const Floppy144DocumentDefinition *Floppy144DocumentGet(
 
 bool Floppy144DocumentApplyEffects(
     Floppy144WorldState *world,
+    Floppy144RunState *run_state,
     Floppy144CollectionId collection,
     uint32_t record_index
 )
@@ -149,6 +150,7 @@ bool Floppy144DocumentApplyEffects(
     {
         Floppy144ApplyEffects(
             world,
+            run_state,
             document->effects,
             document->effect_count
         );

@@ -7,6 +7,15 @@
 
 #pragma once
 
+typedef enum Floppy144ObjectAccessState
+{
+    FLOPPY144_OBJECT_ACCESS_NONE = 0,
+    FLOPPY144_OBJECT_ACCESS_LOCKED,
+    FLOPPY144_OBJECT_ACCESS_UNLOCKED,
+    FLOPPY144_OBJECT_ACCESS_OPEN
+}
+Floppy144ObjectAccessState;
+
 typedef enum Floppy144ObjectId
 {
     FLOPPY144_OBJECT_NONE = -1,

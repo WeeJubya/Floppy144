@@ -6,6 +6,9 @@
 #include "floppy144_evidence.h"
 #include "floppy144_notebook.h"
 #include "floppy144_capability.h"
+#include "floppy144_room.h"
+#include "floppy144_object.h"
+#include "floppy144_projection.h"
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -49,8 +52,28 @@ typedef struct Floppy144RunState
 
     uint8_t act;
     uint8_t branch;
-    uint8_t reconstruction_percent;
     uint8_t dirty;
+
+    uint8_t projection;
+
+    int32_t player_site_x;
+    int32_t player_site_y;
+
+    uint32_t rooms[
+        FLOPPY144_RUN_WORD_COUNT(FLOPPY144_ROOM_COUNT)
+    ];
+
+    uint32_t objects_visible[
+        FLOPPY144_RUN_WORD_COUNT(FLOPPY144_OBJECT_COUNT)
+    ];
+
+    uint32_t objects_unlocked[
+        FLOPPY144_RUN_WORD_COUNT(FLOPPY144_OBJECT_COUNT)
+    ];
+
+    uint32_t objects_open[
+        FLOPPY144_RUN_WORD_COUNT(FLOPPY144_OBJECT_COUNT)
+    ];
 
     uint32_t collections[
         FLOPPY144_RUN_WORD_COUNT(FLOPPY144_COLLECTION_COUNT)
@@ -77,6 +100,48 @@ typedef struct Floppy144RunState
     ];
 }
 Floppy144RunState;
+
+bool Floppy144RunStateRoomReconstructed
+(
+    const Floppy144RunState *state,
+ Floppy144RoomId room
+);
+
+bool Floppy144RunStateReconstructRoom
+(
+    Floppy144RunState *state,
+ Floppy144RoomId room
+);
+
+uint32_t Floppy144RunStateReconstructionPercent
+(
+    const Floppy144RunState *state
+);
+
+bool Floppy144RunStateObjectVisible
+(
+    const Floppy144RunState *state,
+ Floppy144ObjectId object
+);
+
+bool Floppy144RunStateRevealObject
+(
+    Floppy144RunState *state,
+ Floppy144ObjectId object
+);
+
+Floppy144ObjectAccessState Floppy144RunStateObjectAccessState
+(
+    const Floppy144RunState *state,
+ Floppy144ObjectId object
+);
+
+bool Floppy144RunStateSetObjectAccessState
+(
+    Floppy144RunState *state,
+ Floppy144ObjectId object,
+ Floppy144ObjectAccessState access_state
+);
 
 bool Floppy144RunStateBitGet
 (
@@ -168,6 +233,13 @@ bool Floppy144RunStateGrantCapability
  Floppy144CapabilityId capability
 );
 
+void Floppy144RunStateSetPlayerSitePosition
+(
+    Floppy144RunState *state,
+ int32_t x,
+ int32_t y
+);
+
 void Floppy144RunStateReset
 (
     Floppy144RunState *state
@@ -177,4 +249,15 @@ void Floppy144RunStateBegin
 (
     Floppy144RunState *state,
     uint32_t recovery_seed
+);
+
+Floppy144Projection Floppy144RunStateProjection
+(
+    const Floppy144RunState *state
+);
+
+bool Floppy144RunStateSetProjection
+(
+    Floppy144RunState *state,
+ Floppy144Projection projection
 );

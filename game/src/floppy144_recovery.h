@@ -7,7 +7,7 @@
 #pragma once
 
 #include "f144_runtime.h"
-
+#include "floppy144_run_state.h"
 #include "floppy144_world.h"
 
 #include <stdbool.h>
@@ -56,5 +56,5 @@ void Floppy144MainMenuDraw(
     F144Runtime *engine,
     Floppy144MainMenuOption selected_option,
     bool active_session,
-    const Floppy144WorldState *world
+    const Floppy144RunState *run_state
 );

@@ -92,7 +92,3 @@ bool Floppy144WorldRevealObject(
     Floppy144WorldState *world,
     Floppy144ObjectId object
 );
-
-uint32_t Floppy144WorldReconstructionPercent(
-    const Floppy144WorldState *world
-);

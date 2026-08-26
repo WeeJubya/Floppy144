@@ -22,11 +22,18 @@ typedef enum Floppy144SceneId
 typedef enum Floppy144ObjectFlags
 {
     FLOPPY144_OBJECT_FLAG_NONE =
-        0U,
+    0U,
 
     FLOPPY144_OBJECT_FLAG_SOLID =
-        1U << 0
-} Floppy144ObjectFlags;
+    1U << 0,
+
+    FLOPPY144_OBJECT_FLAG_OPENABLE =
+    1U << 1,
+
+    FLOPPY144_OBJECT_FLAG_INITIALLY_UNLOCKED =
+    1U << 2
+}
+Floppy144ObjectFlags;
 
 typedef enum Floppy144ObjectLayer
 {

@@ -773,6 +773,7 @@ void Floppy144OfficeDraw(
     F144Runtime *engine,
     const Floppy144Player *player,
     const Floppy144WorldState *world,
+    const Floppy144RunState *run_state,
     const char *notice
 )
 {
@@ -875,7 +876,9 @@ void Floppy144OfficeDraw(
         status_text,
         sizeof(status_text),
         "STATUS %02u%%",
-        (unsigned)Floppy144WorldReconstructionPercent(world)
+        (unsigned)Floppy144RunStateReconstructionPercent(
+            run_state
+        )
     );
 
     const char *default_room_label =

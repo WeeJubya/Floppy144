@@ -127,7 +127,7 @@ bool Floppy144TerminalDetailOpen(
 );
 
 void Floppy144TerminalDraw(
-    F144Runtime *engine,
+    F144Runtime *runtime,
     const Floppy144TerminalState *terminal,
-    const Floppy144WorldState *world
-);
+    const Floppy144RunState *run_state
+);;

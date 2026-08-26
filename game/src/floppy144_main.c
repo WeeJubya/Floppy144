@@ -127,7 +127,7 @@ static void Floppy144Redraw(
                 global_runtime,
                 global_main_menu_option,
                 global_session_active,
-                &global_world
+                &global_run_state
             );
 
             break;
@@ -139,6 +139,7 @@ static void Floppy144Redraw(
                 global_runtime,
                 &global_player,
                 &global_world,
+                &global_run_state,
                 global_office_notice
             );
 
@@ -150,7 +151,7 @@ static void Floppy144Redraw(
             Floppy144TerminalDraw(
                 global_runtime,
                 &global_terminal,
-                &global_world
+                &global_run_state
             );
 
             break;
@@ -429,6 +430,7 @@ static void Floppy144InteractOffice(
     {
         Floppy144ApplyEffects(
             &global_world,
+            &global_run_state,
             interaction->effects,
             interaction->effect_count
         );
@@ -679,6 +681,7 @@ static LRESULT CALLBACK Floppy144WindowProc(
                         {
                             Floppy144DocumentApplyEffects(
                                 &global_world,
+                                &global_run_state,
                                 global_terminal.requested_collection,
                                 global_terminal.requested_record_index
                             );
@@ -1019,6 +1022,7 @@ static LRESULT CALLBACK Floppy144WindowProc(
                              */
                             Floppy144DocumentApplyEffects(
                                 &global_world,
+                                &global_run_state,
                                 global_catalogue.collection,
                                 global_catalogue.selected_index
                             );

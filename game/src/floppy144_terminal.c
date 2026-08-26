@@ -1755,9 +1755,9 @@ static void Floppy144TerminalRestoreCollection(
         line,
         sizeof(line),
         "SITE RECONSTRUCTION STATUS: %02u%%",
-        (unsigned)Floppy144WorldReconstructionPercent(
-            world
-        )
+            (unsigned)Floppy144RunStateReconstructionPercent(
+                run_state
+            )
     );
 
     Floppy144TerminalPushLine(
@@ -2650,9 +2650,9 @@ bool Floppy144TerminalCanOpenCatalogue(
 }
 
 void Floppy144TerminalDraw(
-    F144Runtime *engine,
+    F144Runtime *runtime,
     const Floppy144TerminalState *terminal,
-    const Floppy144WorldState *world
+    const Floppy144RunState *run_state
 )
 {
     const uint32_t background =
@@ -2675,9 +2675,9 @@ void Floppy144TerminalDraw(
 
     Floppy144Surface surface =
     {
-        (uint32_t *)engine->backbuffer.data,
-        engine->backbuffer.width,
-        engine->backbuffer.height
+        (uint32_t *)runtime->backbuffer.data,
+        runtime->backbuffer.width,
+        runtime->backbuffer.height
     };
 
     char site_status[16];
@@ -2693,8 +2693,8 @@ void Floppy144TerminalDraw(
         site_status,
         sizeof(site_status),
         "SITE %02u%%",
-        (unsigned)Floppy144WorldReconstructionPercent(
-            world
+        (unsigned)Floppy144RunStateReconstructionPercent(
+            run_state
         )
     );
 

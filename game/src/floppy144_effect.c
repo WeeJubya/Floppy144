@@ -13,11 +13,13 @@
 
 void Floppy144ApplyEffect(
     Floppy144WorldState *world,
+    Floppy144RunState *run_state,
     const Floppy144Effect *effect
 )
 {
     if(
         world == 0 ||
+        run_state == 0 ||
         effect == 0
     )
     {
@@ -31,7 +33,7 @@ void Floppy144ApplyEffect(
             Floppy144WorldSetCollectionEvidenceFound(
                 world,
                 (Floppy144CollectionId)effect->target_id,
-                true
+                                                     true
             );
 
             break;
@@ -39,10 +41,21 @@ void Floppy144ApplyEffect(
 
         case FLOPPY144_EFFECT_REVEAL_OBJECT:
         {
-            Floppy144WorldRevealObject(
-                world,
-                (Floppy144ObjectId)effect->target_id
-            );
+            Floppy144ObjectId object =
+            (Floppy144ObjectId)effect->target_id;
+
+            if(
+                Floppy144WorldRevealObject(
+                    world,
+                    object
+                )
+            )
+            {
+                Floppy144RunStateRevealObject(
+                    run_state,
+                    object
+                );
+            }
 
             break;
         }
@@ -61,6 +74,7 @@ void Floppy144ApplyEffect(
 
 void Floppy144ApplyEffects(
     Floppy144WorldState *world,
+    Floppy144RunState *run_state,
     const Floppy144Effect *effects,
     uint32_t effect_count
 )
@@ -69,6 +83,7 @@ void Floppy144ApplyEffects(
 
     if(
         world == 0 ||
+        run_state == 0 ||
         effects == 0
     )
     {
@@ -77,12 +92,13 @@ void Floppy144ApplyEffects(
 
     for(
         effect_index = 0;
-        effect_index < effect_count;
-        ++effect_index
+    effect_index < effect_count;
+    ++effect_index
     )
     {
         Floppy144ApplyEffect(
             world,
+            run_state,
             &effects[effect_index]
         );
     }
