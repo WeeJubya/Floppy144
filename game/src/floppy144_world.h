@@ -9,6 +9,7 @@
 
 #include "floppy144_collection.h"
 #include "floppy144_object.h"
+#include "floppy144_run_state.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -69,6 +70,12 @@ void Floppy144WorldSetCollectionEvidenceFound(
     Floppy144WorldState *world,
     Floppy144CollectionId collection,
     bool evidence_found
+);
+
+void Floppy144WorldHydrateFromRunState
+(
+    Floppy144WorldState *world,
+ const Floppy144RunState *run_state
 );
 
 /*

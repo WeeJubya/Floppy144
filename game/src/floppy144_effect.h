@@ -24,14 +24,12 @@
 typedef enum Floppy144EffectType
 {
     FLOPPY144_EFFECT_NONE = 0,
-    FLOPPY144_EFFECT_FIND_COLLECTION_EVIDENCE,
+    FLOPPY144_EFFECT_ESTABLISH_EVIDENCE,
     FLOPPY144_EFFECT_REVEAL_OBJECT
-} Floppy144EffectType;
-
+}
+Floppy144EffectType;
 /*
- * One data-driven world-state operation
- *
- * FIND_COLLECTION_EVIDENCE interprets target_id as Floppy144CollectionId.
+ * ESTABLISH_EVIDENCE interprets target_id as Floppy144EvidenceId.
  * REVEAL_OBJECT interprets target_id as Floppy144ObjectId.
  */
 

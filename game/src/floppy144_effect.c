@@ -28,12 +28,11 @@ void Floppy144ApplyEffect(
 
     switch(effect->type)
     {
-        case FLOPPY144_EFFECT_FIND_COLLECTION_EVIDENCE:
+        case FLOPPY144_EFFECT_ESTABLISH_EVIDENCE:
         {
-            Floppy144WorldSetCollectionEvidenceFound(
-                world,
-                (Floppy144CollectionId)effect->target_id,
-                                                     true
+            Floppy144RunStateEstablishEvidence(
+                run_state,
+                (Floppy144EvidenceId)effect->target_id
             );
 
             break;

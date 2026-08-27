@@ -36,7 +36,8 @@ typedef enum Floppy144MainMenuOption
 
 bool Floppy144MainMenuOptionEnabled(
     Floppy144MainMenuOption option,
-    bool active_session
+    bool active_session,
+    bool recorded_session_available
 );
 
 /*
@@ -56,5 +57,6 @@ void Floppy144MainMenuDraw(
     F144Runtime *engine,
     Floppy144MainMenuOption selected_option,
     bool active_session,
+    bool recorded_session_available,
     const Floppy144RunState *run_state
 );

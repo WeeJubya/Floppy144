@@ -665,7 +665,8 @@ static const char *const floppy144_main_menu_labels[] =
 
 bool Floppy144MainMenuOptionEnabled(
     Floppy144MainMenuOption option,
-    bool active_session
+    bool active_session,
+    bool recorded_session_available
 )
 {
     switch(option)
@@ -677,12 +678,16 @@ bool Floppy144MainMenuOptionEnabled(
         }
 
         case FLOPPY144_MAIN_MENU_RETURN_TO_SITE:
+        case FLOPPY144_MAIN_MENU_RECORD_SESSION:
         {
             return active_session;
         }
 
-        case FLOPPY144_MAIN_MENU_RECORD_SESSION:
         case FLOPPY144_MAIN_MENU_REINSTATE_SESSION:
+        {
+            return recorded_session_available;
+        }
+
         case FLOPPY144_MAIN_MENU_OPTION_COUNT:
         {
             return false;
@@ -700,6 +705,7 @@ void Floppy144MainMenuDraw(
     F144Runtime *engine,
     Floppy144MainMenuOption selected_option,
     bool active_session,
+    bool recorded_session_available,
     const Floppy144RunState *run_state
 )
 {
@@ -984,7 +990,8 @@ void Floppy144MainMenuDraw(
         bool enabled =
             Floppy144MainMenuOptionEnabled(
                 option,
-                active_session
+                active_session,
+                recorded_session_available
             );
 
         bool selected =

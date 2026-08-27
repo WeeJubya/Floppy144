@@ -285,3 +285,83 @@ bool Floppy144WorldRevealObject(
 
     return true;
 }
+
+void Floppy144WorldHydrateFromRunState
+(
+    Floppy144WorldState *world,
+ const Floppy144RunState *run_state
+){
+    uint32_t collection_index;
+    uint32_t object_index;
+
+    if(
+        world == NULL ||
+        run_state == NULL
+    )
+    {
+        return;
+    }
+
+    Floppy144WorldReset(
+        world
+    );
+
+    if(
+        Floppy144RunStateArchiveServicesInitialised(
+            run_state
+        )
+    )
+    {
+        Floppy144WorldInitialiseArchiveServices(
+            world
+        );
+    }
+
+    for(
+        collection_index = 0U;
+    collection_index <
+    (uint32_t)FLOPPY144_COLLECTION_COUNT;
+    ++collection_index
+    )
+    {
+        Floppy144CollectionId collection =
+        (Floppy144CollectionId)collection_index;
+
+        if(
+            Floppy144RunStateCollectionRestored(
+                run_state,
+                collection
+            )
+        )
+        {
+            Floppy144WorldRestoreCollection(
+                world,
+                collection
+            );
+        }
+    }
+
+    for(
+        object_index = 0U;
+    object_index <
+    (uint32_t)FLOPPY144_OBJECT_COUNT;
+    ++object_index
+    )
+    {
+        Floppy144ObjectId object =
+        (Floppy144ObjectId)object_index;
+
+        if(
+            Floppy144RunStateObjectVisible(
+                run_state,
+                object
+            )
+        )
+        {
+            Floppy144WorldRevealObject(
+                world,
+                object
+            );
+        }
+    }
+}

@@ -19,6 +19,7 @@
 #include "floppy144_terminal.h"
 #include "floppy144_world.h"
 #include "floppy144_run_state.h"
+#include "floppy144_persistence.h"
 
 #include <stdbool.h>
 
@@ -53,6 +54,8 @@ static Floppy144TerminalState global_terminal;
 static Floppy144CatalogueState global_catalogue;
 static Floppy144WorldState global_world;
 static Floppy144RunState global_run_state;
+static const char floppy144_manual_save_path[] = "floppy144_manual.sav";
+static bool global_recorded_session_available;
 
 /*
  * Short-lived interface state
@@ -127,6 +130,7 @@ static void Floppy144Redraw(
                 global_runtime,
                 global_main_menu_option,
                 global_session_active,
+                global_recorded_session_available,
                 &global_run_state
             );
 
@@ -172,6 +176,19 @@ static void Floppy144Redraw(
         window,
         0,
         FALSE
+    );
+}
+
+static bool Floppy144RecordedSessionAvailable(
+    void
+)
+{
+    Floppy144RunState test_state;
+
+    return
+    Floppy144PersistenceLoadRunState(
+        floppy144_manual_save_path,
+        &test_state
     );
 }
 
@@ -258,7 +275,8 @@ static void Floppy144MainMenuMoveSelection(
         if(
             Floppy144MainMenuOptionEnabled(
                 (Floppy144MainMenuOption)next_option,
-                global_session_active
+                global_session_active,
+                global_recorded_session_available
             )
         )
         {
@@ -286,9 +304,21 @@ static void Floppy144MainMenuActivate(
                 &global_world
             );
 
-            Floppy144RunStateReset(
-                &global_run_state
-            );
+            {
+                uint32_t recovery_seed =
+                (uint32_t)GetTickCount();
+
+                if(recovery_seed == 0U)
+                {
+                    recovery_seed =
+                    1U;
+                }
+
+                Floppy144RunStateBegin(
+                    &global_run_state,
+                    recovery_seed
+                );
+            }
 
             Floppy144OfficeReset(
                 &global_player
@@ -342,8 +372,95 @@ static void Floppy144MainMenuActivate(
         }
 
         case FLOPPY144_MAIN_MENU_RECORD_SESSION:
+        {
+            if(
+                global_session_active &&
+                Floppy144PersistenceSaveRunState(
+                    floppy144_manual_save_path,
+                    &global_run_state
+                )
+            )
+            {
+                global_recorded_session_available =
+                true;
+            }
+
+            Floppy144Redraw(
+                window
+            );
+
+            return;
+        }
+
         case FLOPPY144_MAIN_MENU_REINSTATE_SESSION:
         {
+            if(
+                global_recorded_session_available &&
+                Floppy144PersistenceLoadRunState(
+                    floppy144_manual_save_path,
+                    &global_run_state
+                )
+            )
+            {
+                Floppy144WorldHydrateFromRunState(
+                    &global_world,
+                    &global_run_state
+                );
+
+                /*
+                 * The current technical-slice player uses transient 640x360
+                 * coordinates. Persistent 100x100 Site coordinates will replace
+                 * this reset when the final Site renderer is installed.
+                 */
+
+                Floppy144OfficeReset(
+                    &global_player
+                );
+
+                Floppy144TerminalReset(
+                    &global_terminal,
+                    &global_world
+                );
+
+                Floppy144CatalogueReset(
+                    &global_catalogue,
+                    FLOPPY144_COLLECTION_DR01
+                );
+
+                global_office_notice =
+                NULL;
+
+                global_catalogue_direct_document =
+                false;
+
+                global_session_active =
+                true;
+
+                global_resume_screen =
+                FLOPPY144_SCREEN_TERMINAL;
+
+                global_screen =
+                FLOPPY144_SCREEN_TERMINAL;
+
+                Floppy144Redraw(
+                    window
+                );
+
+                return;
+            }
+
+            /*
+             * A save which existed when the menu was opened may since have become
+             * invalid or unavailable.
+             */
+
+            global_recorded_session_available =
+            false;
+
+            Floppy144Redraw(
+                window
+            );
+
             return;
         }
 
@@ -1292,8 +1409,8 @@ int CALLBACK WinMain(
     global_splash_started_ticks =
         0U;
 
-    global_session_active =
-        false;
+    global_recorded_session_available =
+        Floppy144RecordedSessionAvailable();
 
     global_main_menu_option =
         FLOPPY144_MAIN_MENU_INITIATE_SESSION;

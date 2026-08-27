@@ -33,7 +33,7 @@ static const Floppy144ObjectInteractionDefinition
 {
     FLOPPY144_OBJECT_ACTION_SHOW_NOTICE,
     50U,
-    FLOPPY144_COLLECTION_HR02,
+    FLOPPY144_COLLECTION_COUNT,
     "PRESS E TO INSPECT RECONSTRUCTED DESK",
     FLOPPY144_COLLECTION_COUNT,
     NULL,
@@ -45,7 +45,7 @@ static const Floppy144ObjectInteractionDefinition
 {
     FLOPPY144_OBJECT_ACTION_SHOW_NOTICE,
     50U,
-    FLOPPY144_COLLECTION_HR02,
+    FLOPPY144_COLLECTION_COUNT,
     "PRESS E TO INSPECT RECONSTRUCTED DESK",
     FLOPPY144_COLLECTION_COUNT,
     NULL,
@@ -59,15 +59,6 @@ static const Floppy144ObjectInteractionDefinition
  * authored documents.
  */
 
-static const Floppy144Effect
-    floppy144_personnel_forms_effects[] =
-{
-    {
-        FLOPPY144_EFFECT_FIND_COLLECTION_EVIDENCE,
-        (uint32_t)FLOPPY144_COLLECTION_HR02
-    }
-};
-
 static const Floppy144ObjectInteractionDefinition
     floppy144_personnel_forms_interaction =
 {
@@ -78,8 +69,8 @@ static const Floppy144ObjectInteractionDefinition
     FLOPPY144_COLLECTION_COUNT,
     NULL,
     "PERSONNEL FORMS CONFIRM DESK 04 WAS REALLOCATED TO IT SUPPORT.",
-    floppy144_personnel_forms_effects,
-    1U
+    NULL,
+    0U
 };
 /*
  * FA-03 suppression-panel investigation
@@ -92,8 +83,8 @@ static const Floppy144Effect
     floppy144_suppression_panel_effects[] =
 {
     {
-        FLOPPY144_EFFECT_FIND_COLLECTION_EVIDENCE,
-        (uint32_t)FLOPPY144_COLLECTION_FA03
+        FLOPPY144_EFFECT_ESTABLISH_EVIDENCE,
+        (uint32_t)FLOPPY144_EVIDENCE_E001
     }
 };
 

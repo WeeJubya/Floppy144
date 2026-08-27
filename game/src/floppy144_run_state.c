@@ -938,3 +938,37 @@ uint32_t Floppy144RunStateReconstructionPercent
 
     return percentage;
 }
+
+bool Floppy144RunStateArchiveServicesInitialised
+(
+    const Floppy144RunState *state
+){
+    if(state == NULL)
+    {
+        return false;
+    }
+
+    return
+    state->archive_services_initialised != 0U;
+}
+
+bool Floppy144RunStateInitialiseArchiveServices
+(
+    Floppy144RunState *state
+){
+    if(
+        state == NULL ||
+        state->archive_services_initialised != 0U
+    )
+    {
+        return false;
+    }
+
+    state->archive_services_initialised =
+    1U;
+
+    state->dirty =
+    1U;
+
+    return true;
+}

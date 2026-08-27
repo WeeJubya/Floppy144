@@ -55,6 +55,7 @@ typedef struct Floppy144RunState
     uint8_t dirty;
 
     uint8_t projection;
+    uint8_t archive_services_initialised;
 
     int32_t player_site_x;
     int32_t player_site_y;
@@ -100,6 +101,16 @@ typedef struct Floppy144RunState
     ];
 }
 Floppy144RunState;
+
+bool Floppy144RunStateArchiveServicesInitialised
+(
+    const Floppy144RunState *state
+);
+
+bool Floppy144RunStateInitialiseArchiveServices
+(
+    Floppy144RunState *state
+);
 
 bool Floppy144RunStateRoomReconstructed
 (

@@ -2041,6 +2041,10 @@ void Floppy144TerminalSubmitInput(
             )
         )
         {
+            Floppy144RunStateInitialiseArchiveServices(
+                run_state
+            );
+
             Floppy144TerminalPushLine(
                 terminal,
                 ""
