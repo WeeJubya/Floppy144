@@ -2,6 +2,7 @@
 
 #include <stddef.h>
 #include <stdio.h>
+#include <string.h>
 
 static void Floppy144PersistenceWriteU32
 (
@@ -82,6 +83,42 @@ static void Floppy144PersistenceDecodeHeader
     Floppy144PersistenceReadU32(
         &source[12]
     );
+}
+
+static bool Floppy144PersistenceProfileHeaderValid
+(
+    const Floppy144SaveHeader *header
+){
+    if(header == NULL)
+    {
+        return false;
+    }
+
+    return
+    header->magic ==
+    FLOPPY144_PROFILE_MAGIC &&
+    header->version ==
+    FLOPPY144_PROFILE_VERSION &&
+    header->payload_size ==
+    FLOPPY144_PROFILE_PAYLOAD_V1_SIZE;
+}
+
+static bool Floppy144PersistenceSettingsHeaderValid
+(
+    const Floppy144SaveHeader *header
+){
+    if(header == NULL)
+    {
+        return false;
+    }
+
+    return
+    header->magic ==
+    FLOPPY144_SETTINGS_MAGIC &&
+    header->version ==
+    FLOPPY144_SETTINGS_VERSION &&
+    header->payload_size ==
+    FLOPPY144_SETTINGS_PAYLOAD_V1_SIZE;
 }
 
 bool Floppy144PersistenceEncodeRunState
@@ -554,6 +591,759 @@ bool Floppy144PersistenceLoadRunState
     }
 
     *state =
+    decoded;
+
+    return true;
+}
+
+bool Floppy144PersistenceEncodeProfile
+(
+    const Floppy144DiscoveryProfile *profile,
+ uint8_t *payload,
+ uint32_t payload_size
+){
+    uint32_t offset =
+    0U;
+
+    uint32_t index;
+
+    if(
+        profile == NULL ||
+        payload == NULL ||
+        payload_size !=
+        FLOPPY144_PROFILE_PAYLOAD_V1_SIZE
+    )
+    {
+        return false;
+    }
+
+    memset(
+        payload,
+        0,
+        payload_size
+    );
+
+    memcpy(
+        &payload[offset],
+        profile->operator_name,
+        FLOPPY144_PROFILE_NAME_CAPACITY
+    );
+
+    offset +=
+    FLOPPY144_PROFILE_NAME_CAPACITY;
+
+    payload[offset++] =
+    profile->body_style;
+
+    /*
+     * Three reserved scalar bytes.
+     */
+
+    offset +=
+    3U;
+
+    Floppy144PersistenceWriteU32(
+        &payload[offset],
+        profile->recovery_sessions_begun
+    );
+
+    offset +=
+    4U;
+
+    for(
+        index = 0U;
+    index <
+    (uint32_t)(
+        sizeof(
+            profile->collections_ever_restored
+        ) /
+        sizeof(
+            profile->collections_ever_restored[0]
+        )
+    );
+    ++index
+    )
+    {
+        Floppy144PersistenceWriteU32(
+            &payload[offset],
+            profile->collections_ever_restored[index]
+        );
+
+        offset +=
+        4U;
+    }
+
+    for(
+        index = 0U;
+    index <
+    (uint32_t)(
+        sizeof(
+            profile->evidence_ever_established
+        ) /
+        sizeof(
+            profile->evidence_ever_established[0]
+        )
+    );
+    ++index
+    )
+    {
+        Floppy144PersistenceWriteU32(
+            &payload[offset],
+            profile->evidence_ever_established[index]
+        );
+
+        offset +=
+        4U;
+    }
+
+    /*
+     * The remaining V1 bytes stay zero and are reserved for future
+     * cumulative discovery fields.
+     */
+
+    return
+    offset <=
+    FLOPPY144_PROFILE_PAYLOAD_V1_SIZE;
+}
+
+bool Floppy144PersistenceSaveProfile
+(
+    const char *path,
+ Floppy144DiscoveryProfile *profile
+){
+    uint8_t file_data[
+        FLOPPY144_PROFILE_FILE_V1_SIZE
+    ];
+
+    uint8_t *payload =
+    &file_data[FLOPPY144_SAVE_HEADER_SIZE];
+
+    Floppy144SaveHeader header;
+
+    FILE *file =
+    NULL;
+
+    size_t written;
+
+    if(
+        path == NULL ||
+        profile == NULL
+    )
+    {
+        return false;
+    }
+
+    if(
+        !Floppy144PersistenceEncodeProfile(
+            profile,
+            payload,
+            FLOPPY144_PROFILE_PAYLOAD_V1_SIZE
+        )
+    )
+    {
+        return false;
+    }
+
+    header.magic =
+    FLOPPY144_PROFILE_MAGIC;
+
+    header.version =
+    FLOPPY144_PROFILE_VERSION;
+
+    header.payload_size =
+    FLOPPY144_PROFILE_PAYLOAD_V1_SIZE;
+
+    header.checksum =
+    Floppy144PersistenceChecksum(
+        payload,
+        FLOPPY144_PROFILE_PAYLOAD_V1_SIZE
+    );
+
+    Floppy144PersistenceEncodeHeader(
+        file_data,
+        &header
+    );
+
+    if(
+        fopen_s(
+            &file,
+            path,
+            "wb"
+        ) != 0 ||
+        file == NULL
+    )
+    {
+        return false;
+    }
+
+    written =
+    fwrite(
+        file_data,
+        1U,
+        sizeof(file_data),
+           file
+    );
+
+    if(
+        fclose(file) != 0 ||
+        written != sizeof(file_data)
+    )
+    {
+        return false;
+    }
+
+    profile->dirty =
+    0U;
+
+    return true;
+}
+
+bool Floppy144PersistenceLoadProfile
+(
+    const char *path,
+ Floppy144DiscoveryProfile *profile
+){
+    uint8_t file_data[
+        FLOPPY144_PROFILE_FILE_V1_SIZE
+    ];
+
+    const uint8_t *payload =
+    &file_data[FLOPPY144_SAVE_HEADER_SIZE];
+
+    Floppy144SaveHeader header;
+
+    Floppy144DiscoveryProfile decoded;
+
+    FILE *file =
+    NULL;
+
+    size_t read;
+
+    int trailing_byte;
+
+    if(
+        path == NULL ||
+        profile == NULL
+    )
+    {
+        return false;
+    }
+
+    if(
+        fopen_s(
+            &file,
+            path,
+            "rb"
+        ) != 0 ||
+        file == NULL
+    )
+    {
+        return false;
+    }
+
+    read =
+    fread(
+        file_data,
+        1U,
+        sizeof(file_data),
+          file
+    );
+
+    trailing_byte =
+    fgetc(file);
+
+    if(fclose(file) != 0)
+    {
+        return false;
+    }
+
+    if(
+        read != sizeof(file_data) ||
+        trailing_byte != EOF
+    )
+    {
+        return false;
+    }
+
+    Floppy144PersistenceDecodeHeader(
+        &header,
+        file_data
+    );
+
+    if(
+        !Floppy144PersistenceProfileHeaderValid(
+            &header
+        )
+    )
+    {
+        return false;
+    }
+
+    if(
+        Floppy144PersistenceChecksum(
+            payload,
+            FLOPPY144_PROFILE_PAYLOAD_V1_SIZE
+        ) != header.checksum
+    )
+    {
+        return false;
+    }
+
+    if(
+        !Floppy144PersistenceDecodeProfile(
+            &decoded,
+            payload,
+            FLOPPY144_PROFILE_PAYLOAD_V1_SIZE
+        )
+    )
+    {
+        return false;
+    }
+
+    *profile =
+    decoded;
+
+    return true;
+}
+
+bool Floppy144PersistenceDecodeProfile
+(
+    Floppy144DiscoveryProfile *profile,
+ const uint8_t *payload,
+ uint32_t payload_size
+){
+    Floppy144DiscoveryProfile decoded;
+
+    uint32_t offset =
+    0U;
+
+    uint32_t index;
+
+    bool name_terminated =
+    false;
+
+    if(
+        profile == NULL ||
+        payload == NULL ||
+        payload_size !=
+        FLOPPY144_PROFILE_PAYLOAD_V1_SIZE
+    )
+    {
+        return false;
+    }
+
+    Floppy144DiscoveryProfileReset(
+        &decoded
+    );
+
+    memcpy(
+        decoded.operator_name,
+        &payload[offset],
+        FLOPPY144_PROFILE_NAME_CAPACITY
+    );
+
+    offset +=
+    FLOPPY144_PROFILE_NAME_CAPACITY;
+
+    for(
+        index = 0U;
+    index <
+    FLOPPY144_PROFILE_NAME_CAPACITY;
+    ++index
+    )
+    {
+        if(decoded.operator_name[index] == '\0')
+        {
+            name_terminated =
+            true;
+
+            break;
+        }
+    }
+
+    if(!name_terminated)
+    {
+        return false;
+    }
+
+    decoded.body_style =
+    payload[offset++];
+
+    /*
+     * Three reserved scalar bytes.
+     */
+
+    offset +=
+    3U;
+
+    decoded.recovery_sessions_begun =
+    Floppy144PersistenceReadU32(
+        &payload[offset]
+    );
+
+    offset +=
+    4U;
+
+    for(
+        index = 0U;
+    index <
+    (uint32_t)(
+        sizeof(
+            decoded.collections_ever_restored
+        ) /
+        sizeof(
+            decoded.collections_ever_restored[0]
+        )
+    );
+    ++index
+    )
+    {
+        decoded.collections_ever_restored[index] =
+        Floppy144PersistenceReadU32(
+            &payload[offset]
+        );
+
+        offset +=
+        4U;
+    }
+
+    for(
+        index = 0U;
+    index <
+    (uint32_t)(
+        sizeof(
+            decoded.evidence_ever_established
+        ) /
+        sizeof(
+            decoded.evidence_ever_established[0]
+        )
+    );
+    ++index
+    )
+    {
+        decoded.evidence_ever_established[index] =
+        Floppy144PersistenceReadU32(
+            &payload[offset]
+        );
+
+        offset +=
+        4U;
+    }
+
+    if(
+        decoded.body_style >=
+        (uint8_t)FLOPPY144_OPERATOR_BODY_STYLE_COUNT
+    )
+    {
+        return false;
+    }
+
+    decoded.dirty =
+    0U;
+
+    *profile =
+    decoded;
+
+    return true;
+}
+
+bool Floppy144PersistenceEncodeSettings
+(
+    const Floppy144Settings *settings,
+ uint8_t *payload,
+ uint32_t payload_size
+){
+    if(
+        settings == NULL ||
+        payload == NULL ||
+        payload_size !=
+        FLOPPY144_SETTINGS_PAYLOAD_V1_SIZE
+    )
+    {
+        return false;
+    }
+
+    memset(
+        payload,
+        0,
+        payload_size
+    );
+
+    payload[0] =
+    settings->crt_mode;
+
+    payload[1] =
+    settings->text_speed;
+
+    payload[2] =
+    settings->music_volume;
+
+    payload[3] =
+    settings->sfx_volume;
+
+    payload[4] =
+    settings->autosave_mode;
+
+    return true;
+}
+
+bool Floppy144PersistenceDecodeSettings
+(
+    Floppy144Settings *settings,
+ const uint8_t *payload,
+ uint32_t payload_size
+){
+    Floppy144Settings decoded;
+
+    if(
+        settings == NULL ||
+        payload == NULL ||
+        payload_size !=
+        FLOPPY144_SETTINGS_PAYLOAD_V1_SIZE
+    )
+    {
+        return false;
+    }
+
+    Floppy144SettingsReset(
+        &decoded
+    );
+
+    decoded.crt_mode =
+    payload[0];
+
+    decoded.text_speed =
+    payload[1];
+
+    decoded.music_volume =
+    payload[2];
+
+    decoded.sfx_volume =
+    payload[3];
+
+    decoded.autosave_mode =
+    payload[4];
+
+    if(
+        decoded.crt_mode >=
+        (uint8_t)FLOPPY144_CRT_COUNT ||
+        decoded.text_speed >=
+        (uint8_t)FLOPPY144_TEXT_SPEED_COUNT ||
+        decoded.music_volume >
+        FLOPPY144_SETTINGS_VOLUME_MAX ||
+        decoded.sfx_volume >
+        FLOPPY144_SETTINGS_VOLUME_MAX ||
+        decoded.autosave_mode >=
+        (uint8_t)FLOPPY144_AUTOSAVE_MODE_COUNT
+    )
+    {
+        return false;
+    }
+
+    decoded.dirty =
+    0U;
+
+    *settings =
+    decoded;
+
+    return true;
+}
+
+bool Floppy144PersistenceSaveSettings
+(
+    const char *path,
+ Floppy144Settings *settings
+){
+    uint8_t file_data[
+        FLOPPY144_SETTINGS_FILE_V1_SIZE
+    ];
+
+    uint8_t *payload =
+    &file_data[FLOPPY144_SAVE_HEADER_SIZE];
+
+    Floppy144SaveHeader header;
+
+    FILE *file =
+    NULL;
+
+    size_t written;
+
+    if(
+        path == NULL ||
+        settings == NULL
+    )
+    {
+        return false;
+    }
+
+    if(
+        !Floppy144PersistenceEncodeSettings(
+            settings,
+            payload,
+            FLOPPY144_SETTINGS_PAYLOAD_V1_SIZE
+        )
+    )
+    {
+        return false;
+    }
+
+    header.magic =
+    FLOPPY144_SETTINGS_MAGIC;
+
+    header.version =
+    FLOPPY144_SETTINGS_VERSION;
+
+    header.payload_size =
+    FLOPPY144_SETTINGS_PAYLOAD_V1_SIZE;
+
+    header.checksum =
+    Floppy144PersistenceChecksum(
+        payload,
+        FLOPPY144_SETTINGS_PAYLOAD_V1_SIZE
+    );
+
+    Floppy144PersistenceEncodeHeader(
+        file_data,
+        &header
+    );
+
+    if(
+        fopen_s(
+            &file,
+            path,
+            "wb"
+        ) != 0 ||
+        file == NULL
+    )
+    {
+        return false;
+    }
+
+    written =
+    fwrite(
+        file_data,
+        1U,
+        sizeof(file_data),
+           file
+    );
+
+    if(
+        fclose(file) != 0 ||
+        written != sizeof(file_data)
+    )
+    {
+        return false;
+    }
+
+    settings->dirty =
+    0U;
+
+    return true;
+}
+
+bool Floppy144PersistenceLoadSettings
+(
+    const char *path,
+ Floppy144Settings *settings
+){
+    uint8_t file_data[
+        FLOPPY144_SETTINGS_FILE_V1_SIZE
+    ];
+
+    const uint8_t *payload =
+    &file_data[FLOPPY144_SAVE_HEADER_SIZE];
+
+    Floppy144SaveHeader header;
+
+    Floppy144Settings decoded;
+
+    FILE *file =
+    NULL;
+
+    size_t read;
+
+    int trailing_byte;
+
+    if(
+        path == NULL ||
+        settings == NULL
+    )
+    {
+        return false;
+    }
+
+    if(
+        fopen_s(
+            &file,
+            path,
+            "rb"
+        ) != 0 ||
+        file == NULL
+    )
+    {
+        return false;
+    }
+
+    read =
+    fread(
+        file_data,
+        1U,
+        sizeof(file_data),
+          file
+    );
+
+    trailing_byte =
+    fgetc(file);
+
+    if(fclose(file) != 0)
+    {
+        return false;
+    }
+
+    if(
+        read != sizeof(file_data) ||
+        trailing_byte != EOF
+    )
+    {
+        return false;
+    }
+
+    Floppy144PersistenceDecodeHeader(
+        &header,
+        file_data
+    );
+
+    if(
+        !Floppy144PersistenceSettingsHeaderValid(
+            &header
+        )
+    )
+    {
+        return false;
+    }
+
+    if(
+        Floppy144PersistenceChecksum(
+            payload,
+            FLOPPY144_SETTINGS_PAYLOAD_V1_SIZE
+        ) != header.checksum
+    )
+    {
+        return false;
+    }
+
+    if(
+        !Floppy144PersistenceDecodeSettings(
+            &decoded,
+            payload,
+            FLOPPY144_SETTINGS_PAYLOAD_V1_SIZE
+        )
+    )
+    {
+        return false;
+    }
+
+    *settings =
     decoded;
 
     return true;

@@ -52,9 +52,16 @@ static Floppy144Screen global_screen;
 static Floppy144Player global_player;
 static Floppy144TerminalState global_terminal;
 static Floppy144CatalogueState global_catalogue;
+static Floppy144DiscoveryProfile global_profile;
+static Floppy144Settings global_settings;
 static Floppy144WorldState global_world;
 static Floppy144RunState global_run_state;
+
 static const char floppy144_manual_save_path[] = "floppy144_manual.sav";
+static const char floppy144_autosave_path[] = "floppy144_auto.sav";
+static const char floppy144_profile_path[] = "floppy144_profile.dat";
+static const char floppy144_settings_path[] = "floppy144_settings.dat";
+
 static bool global_recorded_session_available;
 
 /*
@@ -79,6 +86,8 @@ static DWORD global_splash_started_ticks;
 #define FLOPPY144_SPLASH_TIMER_ID          144U
 #define FLOPPY144_SPLASH_FRAME_MS           16U
 #define FLOPPY144_SPLASH_ANIMATION_MS     3700U
+
+#define FLOPPY144_AUTOSAVE_TIMER_ID        145U
 
 /*
  * Bind Floppy144's statically linked software renderer
@@ -192,6 +201,27 @@ static bool Floppy144RecordedSessionAvailable(
     );
 }
 
+static void Floppy144UpdateDiscoveryProfile(
+    void
+)
+{
+    if(global_session_active)
+    {
+        Floppy144DiscoveryProfileMergeRunState(
+            &global_profile,
+            &global_run_state
+        );
+    }
+
+    if(global_profile.dirty != 0U)
+    {
+        Floppy144PersistenceSaveProfile(
+            floppy144_profile_path,
+            &global_profile
+        );
+    }
+}
+
 /*
  * Return to the GDR main menu.
  *
@@ -300,6 +330,8 @@ static void Floppy144MainMenuActivate(
     {
         case FLOPPY144_MAIN_MENU_INITIATE_SESSION:
         {
+            Floppy144UpdateDiscoveryProfile();
+
             Floppy144WorldReset(
                 &global_world
             );
@@ -317,6 +349,15 @@ static void Floppy144MainMenuActivate(
                 Floppy144RunStateBegin(
                     &global_run_state,
                     recovery_seed
+                );
+
+                Floppy144DiscoveryProfileBeginRecovery(
+                    &global_profile
+                );
+
+                Floppy144PersistenceSaveProfile(
+                    floppy144_profile_path,
+                    &global_profile
                 );
             }
 
@@ -373,6 +414,8 @@ static void Floppy144MainMenuActivate(
 
         case FLOPPY144_MAIN_MENU_RECORD_SESSION:
         {
+            Floppy144UpdateDiscoveryProfile();
+
             if(
                 global_session_active &&
                 Floppy144PersistenceSaveRunState(
@@ -435,6 +478,8 @@ static void Floppy144MainMenuActivate(
 
                 global_session_active =
                 true;
+
+                Floppy144UpdateDiscoveryProfile();
 
                 global_resume_screen =
                 FLOPPY144_SCREEN_TERMINAL;
@@ -621,6 +666,13 @@ static LRESULT CALLBACK Floppy144WindowProc(
                 global_runtime->running = false;
             }
 
+            Floppy144UpdateDiscoveryProfile();
+
+            KillTimer(
+                window,
+                FLOPPY144_AUTOSAVE_TIMER_ID
+            );
+
             PostQuitMessage(0);
             return 0;
         }
@@ -631,6 +683,11 @@ static LRESULT CALLBACK Floppy144WindowProc(
             {
                 global_runtime->running = false;
             }
+
+            KillTimer(
+                window,
+                FLOPPY144_AUTOSAVE_TIMER_ID
+            );
 
             PostQuitMessage(0);
             return 0;
@@ -872,6 +929,24 @@ static LRESULT CALLBACK Floppy144WindowProc(
                     KillTimer(
                         window,
                         FLOPPY144_SPLASH_TIMER_ID
+                    );
+                }
+
+                return 0;
+            }
+
+            if(w_param == FLOPPY144_AUTOSAVE_TIMER_ID)
+            {
+                if(
+                    global_session_active &&
+                    global_run_state.dirty != 0U
+                )
+                {
+                    Floppy144UpdateDiscoveryProfile();
+
+                    Floppy144PersistenceSaveRunState(
+                        floppy144_autosave_path,
+                        &global_run_state
                     );
                 }
 
@@ -1430,6 +1505,35 @@ int CALLBACK WinMain(
         &global_run_state
     );
 
+    if(
+        !Floppy144PersistenceLoadProfile(
+            floppy144_profile_path,
+            &global_profile
+        )
+    )
+    {
+        Floppy144DiscoveryProfileReset(
+            &global_profile
+        );
+    }
+
+    if(
+        !Floppy144PersistenceLoadSettings(
+            floppy144_settings_path,
+            &global_settings
+        )
+    )
+    {
+        Floppy144SettingsReset(
+            &global_settings
+        );
+
+        Floppy144PersistenceSaveSettings(
+            floppy144_settings_path,
+            &global_settings
+        );
+    }
+
     Floppy144TerminalReset(
         &global_terminal,
         &global_world
@@ -1491,6 +1595,23 @@ int CALLBACK WinMain(
         FLOPPY144_SPLASH_FRAME_MS,
         NULL
     );
+
+    {
+        uint32_t autosave_interval =
+        Floppy144SettingsAutosaveIntervalMs(
+            &global_settings
+        );
+
+        if(autosave_interval != 0U)
+        {
+            SetTimer(
+                runtime.window,
+                FLOPPY144_AUTOSAVE_TIMER_ID,
+                (UINT)autosave_interval,
+                     NULL
+            );
+        }
+    }
 
     UpdateWindow(
         runtime.window

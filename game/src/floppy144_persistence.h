@@ -1,6 +1,8 @@
 #pragma once
 
 #include "floppy144_run_state.h"
+#include "floppy144_profile.h"
+#include "floppy144_settings.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -19,11 +21,32 @@
 #define FLOPPY144_SAVE_PAYLOAD_V1_SIZE 64U
 #define FLOPPY144_SAVE_HEADER_SIZE     16U
 #define FLOPPY144_SAVE_FILE_V1_SIZE    \
-(FLOPPY144_SAVE_HEADER_SIZE + FLOPPY144_SAVE_PAYLOAD_V1_SIZE)
+    (FLOPPY144_SAVE_HEADER_SIZE + FLOPPY144_SAVE_PAYLOAD_V1_SIZE)
+
+#define FLOPPY144_PROFILE_MAGIC       0x34343150U
+#define FLOPPY144_PROFILE_VERSION     1U
+
+#define FLOPPY144_PROFILE_PAYLOAD_V1_SIZE 64U
+#define FLOPPY144_PROFILE_FILE_V1_SIZE    \
+    (FLOPPY144_SAVE_HEADER_SIZE + FLOPPY144_PROFILE_PAYLOAD_V1_SIZE)
+
+#define FLOPPY144_SETTINGS_MAGIC       0x34343153U
+#define FLOPPY144_SETTINGS_VERSION     1U
+
+#define FLOPPY144_SETTINGS_PAYLOAD_V1_SIZE 16U
+#define FLOPPY144_SETTINGS_FILE_V1_SIZE    \
+    (FLOPPY144_SAVE_HEADER_SIZE + FLOPPY144_SETTINGS_PAYLOAD_V1_SIZE)
 
 bool Floppy144PersistenceEncodeRunState
 (
     const Floppy144RunState *state,
+ uint8_t *payload,
+ uint32_t payload_size
+);
+
+bool Floppy144PersistenceEncodeProfile
+(
+    const Floppy144DiscoveryProfile *profile,
  uint8_t *payload,
  uint32_t payload_size
 );
@@ -33,6 +56,25 @@ bool Floppy144PersistenceDecodeRunState
     Floppy144RunState *state,
  const uint8_t *payload,
  uint32_t payload_size
+);
+
+bool Floppy144PersistenceDecodeProfile
+(
+    Floppy144DiscoveryProfile *profile,
+ const uint8_t *payload,
+ uint32_t payload_size
+);
+
+bool Floppy144PersistenceSaveProfile
+(
+    const char *path,
+ Floppy144DiscoveryProfile *profile
+);
+
+bool Floppy144PersistenceLoadProfile
+(
+    const char *path,
+ Floppy144DiscoveryProfile *profile
 );
 
 typedef struct Floppy144SaveHeader
@@ -66,4 +108,30 @@ bool Floppy144PersistenceLoadRunState
 (
     const char *path,
  Floppy144RunState *state
+);
+
+bool Floppy144PersistenceEncodeSettings
+(
+    const Floppy144Settings *settings,
+ uint8_t *payload,
+ uint32_t payload_size
+);
+
+bool Floppy144PersistenceDecodeSettings
+(
+    Floppy144Settings *settings,
+ const uint8_t *payload,
+ uint32_t payload_size
+);
+
+bool Floppy144PersistenceSaveSettings
+(
+    const char *path,
+ Floppy144Settings *settings
+);
+
+bool Floppy144PersistenceLoadSettings
+(
+    const char *path,
+ Floppy144Settings *settings
 );
