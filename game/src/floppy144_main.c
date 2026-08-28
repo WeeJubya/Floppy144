@@ -56,11 +56,14 @@ static Floppy144DiscoveryProfile global_profile;
 static Floppy144Settings global_settings;
 static Floppy144WorldState global_world;
 static Floppy144RunState global_run_state;
+static Floppy144RunState global_recorded_run_state;
 
 static const char floppy144_manual_save_path[] = "floppy144_manual.sav";
 static const char floppy144_autosave_path[] = "floppy144_auto.sav";
 static const char floppy144_profile_path[] = "floppy144_profile.dat";
 static const char floppy144_settings_path[] = "floppy144_settings.dat";
+
+
 
 static bool global_recorded_session_available;
 
@@ -81,6 +84,24 @@ static Floppy144MainMenuOption
 static Floppy144Screen
     global_resume_screen;
 
+typedef enum Floppy144PersistenceWarning
+{
+    FLOPPY144_PERSISTENCE_WARNING_NONE =
+    0U,
+
+    FLOPPY144_PERSISTENCE_WARNING_SAVE =
+    1U << 0,
+
+    FLOPPY144_PERSISTENCE_WARNING_PROFILE =
+    1U << 1,
+
+    FLOPPY144_PERSISTENCE_WARNING_SETTINGS =
+    1U << 2
+}
+Floppy144PersistenceWarning;
+
+static uint8_t global_persistence_warnings;
+
 static DWORD global_splash_started_ticks;
 
 #define FLOPPY144_SPLASH_TIMER_ID          144U
@@ -88,6 +109,10 @@ static DWORD global_splash_started_ticks;
 #define FLOPPY144_SPLASH_ANIMATION_MS     3700U
 
 #define FLOPPY144_AUTOSAVE_TIMER_ID        145U
+
+static const char *Floppy144PersistenceWarningText(
+    void
+);
 
 /*
  * Bind Floppy144's statically linked software renderer
@@ -140,7 +165,9 @@ static void Floppy144Redraw(
                 global_main_menu_option,
                 global_session_active,
                 global_recorded_session_available,
-                &global_run_state
+                &global_run_state,
+                &global_recorded_run_state,
+                Floppy144PersistenceWarningText()
             );
 
             break;
@@ -188,17 +215,92 @@ static void Floppy144Redraw(
     );
 }
 
+static bool Floppy144PersistenceFileExists(
+    const char *path
+)
+{
+    DWORD attributes;
+
+    if(path == NULL)
+    {
+        return false;
+    }
+
+    attributes =
+    GetFileAttributesA(path);
+
+    return
+    attributes != INVALID_FILE_ATTRIBUTES &&
+    !(attributes & FILE_ATTRIBUTE_DIRECTORY);
+}
+
+static const char *Floppy144PersistenceWarningText(
+    void
+)
+{
+    switch(global_persistence_warnings)
+    {
+        case FLOPPY144_PERSISTENCE_WARNING_SAVE:
+        {
+            return
+            "RECORDED SESSION COULD NOT BE LOADED";
+        }
+
+        case FLOPPY144_PERSISTENCE_WARNING_PROFILE:
+        {
+            return
+            "DISCOVERY PROFILE INVALID - NEW PROFILE IN USE";
+        }
+
+        case FLOPPY144_PERSISTENCE_WARNING_SETTINGS:
+        {
+            return
+            "SETTINGS INVALID - DEFAULTS APPLIED";
+        }
+
+        case FLOPPY144_PERSISTENCE_WARNING_NONE:
+        {
+            return NULL;
+        }
+
+        default:
+        {
+            return
+            "PERSISTENCE WARNING - MULTIPLE FILES INVALID";
+        }
+    }
+}
+
 static bool Floppy144RecordedSessionAvailable(
     void
 )
 {
-    Floppy144RunState test_state;
-
-    return
-    Floppy144PersistenceLoadRunState(
-        floppy144_manual_save_path,
-        &test_state
+    bool file_exists =
+    Floppy144PersistenceFileExists(
+        floppy144_manual_save_path
     );
+
+    Floppy144RunStateReset(
+        &global_recorded_run_state
+    );
+
+    if(
+        Floppy144PersistenceLoadRunState(
+            floppy144_manual_save_path,
+            &global_recorded_run_state
+        )
+    )
+    {
+        return true;
+    }
+
+    if(file_exists)
+    {
+        global_persistence_warnings |=
+        FLOPPY144_PERSISTENCE_WARNING_SAVE;
+    }
+
+    return false;
 }
 
 static void Floppy144UpdateDiscoveryProfile(
@@ -424,8 +526,9 @@ static void Floppy144MainMenuActivate(
                 )
             )
             {
-                global_recorded_session_available =
-                true;
+                global_recorded_session_available = true;
+
+                global_recorded_run_state = global_run_state;
             }
 
             Floppy144Redraw(
@@ -500,7 +603,10 @@ static void Floppy144MainMenuActivate(
              */
 
             global_recorded_session_available =
-            false;
+                false;
+
+            global_persistence_warnings |=
+                FLOPPY144_PERSISTENCE_WARNING_SAVE;
 
             Floppy144Redraw(
                 window
@@ -1484,6 +1590,9 @@ int CALLBACK WinMain(
     global_splash_started_ticks =
         0U;
 
+    global_persistence_warnings =
+        FLOPPY144_PERSISTENCE_WARNING_NONE;
+
     global_recorded_session_available =
         Floppy144RecordedSessionAvailable();
 
@@ -1505,33 +1614,59 @@ int CALLBACK WinMain(
         &global_run_state
     );
 
-    if(
-        !Floppy144PersistenceLoadProfile(
-            floppy144_profile_path,
-            &global_profile
-        )
-    )
     {
-        Floppy144DiscoveryProfileReset(
-            &global_profile
+        bool profile_file_exists =
+        Floppy144PersistenceFileExists(
+            floppy144_profile_path
         );
+
+        if(
+            !Floppy144PersistenceLoadProfile(
+                floppy144_profile_path,
+                &global_profile
+            )
+        )
+        {
+            Floppy144DiscoveryProfileReset(
+                &global_profile
+            );
+
+            if(profile_file_exists)
+            {
+                global_persistence_warnings |=
+                FLOPPY144_PERSISTENCE_WARNING_PROFILE;
+            }
+        }
     }
 
-    if(
-        !Floppy144PersistenceLoadSettings(
-            floppy144_settings_path,
-            &global_settings
-        )
-    )
     {
-        Floppy144SettingsReset(
-            &global_settings
+        bool settings_file_exists =
+        Floppy144PersistenceFileExists(
+            floppy144_settings_path
         );
 
-        Floppy144PersistenceSaveSettings(
-            floppy144_settings_path,
-            &global_settings
-        );
+        if(
+            !Floppy144PersistenceLoadSettings(
+                floppy144_settings_path,
+                &global_settings
+            )
+        )
+        {
+            Floppy144SettingsReset(
+                &global_settings
+            );
+
+            if(settings_file_exists)
+            {
+                global_persistence_warnings |=
+                FLOPPY144_PERSISTENCE_WARNING_SETTINGS;
+            }
+
+            Floppy144PersistenceSaveSettings(
+                floppy144_settings_path,
+                &global_settings
+            );
+        }
     }
 
     Floppy144TerminalReset(

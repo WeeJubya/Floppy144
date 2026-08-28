@@ -45,18 +45,19 @@ bool Floppy144MainMenuOptionEnabled(
  */
 
 void Floppy144SplashDraw(
-    F144Runtime *engine,
+    F144Runtime *runtime,
     uint32_t elapsed_milliseconds
 );
 
 /*
  * GDR session-control menu renderer.
  */
-
 void Floppy144MainMenuDraw(
-    F144Runtime *engine,
+    F144Runtime *runtime,
     Floppy144MainMenuOption selected_option,
     bool active_session,
     bool recorded_session_available,
-    const Floppy144RunState *run_state
+    const Floppy144RunState *run_state,
+    const Floppy144RunState *recorded_run_state,
+    const char *persistence_warning
 );

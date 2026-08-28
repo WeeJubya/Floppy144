@@ -701,12 +701,48 @@ bool Floppy144MainMenuOptionEnabled(
  * Draw the GDR session-control menu.
  */
 
+static const char *Floppy144RecoveryActName(
+    uint8_t act
+)
+{
+    switch((Floppy144RunAct)act)
+    {
+        case FLOPPY144_RUN_ACT_I:
+        {
+            return "I";
+        }
+
+        case FLOPPY144_RUN_ACT_II:
+        {
+            return "II";
+        }
+
+        case FLOPPY144_RUN_ACT_III:
+        {
+            return "III";
+        }
+
+        case FLOPPY144_RUN_ACT_COMPLETE:
+        {
+            return "COMPLETE";
+        }
+
+        case FLOPPY144_RUN_ACT_PROLOGUE:
+        default:
+        {
+            return "PROLOGUE";
+        }
+    }
+}
+
 void Floppy144MainMenuDraw(
     F144Runtime *engine,
     Floppy144MainMenuOption selected_option,
     bool active_session,
     bool recorded_session_available,
-    const Floppy144RunState *run_state
+    const Floppy144RunState *run_state,
+    const Floppy144RunState *recorded_run_state,
+    const char *persistence_warning
 )
 {
     const uint32_t background =
@@ -733,26 +769,31 @@ void Floppy144MainMenuDraw(
     const uint32_t green =
         FLOPPY144_RGB(100, 156, 111);
 
-        uint32_t reconstruction_percent =
+        const Floppy144RunState *display_state =
         active_session
+        ? run_state
+        : (
+            recorded_session_available
+            ? recorded_run_state
+            : NULL
+        );
+
+        uint32_t reconstruction_percent =
+        display_state != NULL
         ? Floppy144RunStateReconstructionPercent(
-            run_state
+            display_state
         )
         : 0U;
 
-    uint32_t progress_width =
+        uint32_t progress_width =
         (
             522U *
             reconstruction_percent
         ) /
         100U;
 
-    const char *session_status =
-        active_session
-            ? "SESSION STATUS: ACTIVE"
-            : "SESSION STATUS: NO ACTIVE SESSION";
-
-    char reconstruction_text[48];
+        char session_status[80];
+        char reconstruction_text[48];
 
     uint32_t option_index;
 
@@ -771,6 +812,39 @@ void Floppy144MainMenuDraw(
     {
         selected_option =
             FLOPPY144_MAIN_MENU_INITIATE_SESSION;
+    }
+
+    if(active_session)
+    {
+        snprintf(
+            session_status,
+            sizeof(session_status),
+                 "SESSION STATUS: ACTIVE"
+        );
+    }
+    else if(
+        recorded_session_available &&
+        recorded_run_state != NULL
+    )
+    {
+        snprintf(
+            session_status,
+            sizeof(session_status),
+                 "RECORDED SESSION: ACT %s / SEED %u",
+                 Floppy144RecoveryActName(
+                     recorded_run_state->act
+                 ),
+                 (unsigned)
+                 recorded_run_state->recovery_seed
+        );
+    }
+    else
+    {
+        snprintf(
+            session_status,
+            sizeof(session_status),
+                 "SESSION STATUS: NO ACTIVE SESSION"
+        );
     }
 
     snprintf(
@@ -922,11 +996,27 @@ void Floppy144MainMenuDraw(
         &surface,
         56U,
         264U,
-        session_status,
+        (
+            !active_session &&
+            persistence_warning != NULL
+        )
+        ? persistence_warning
+        : session_status,
         1U,
-        active_session
+        (
+            !active_session &&
+            persistence_warning != NULL
+        )
+        ? amber
+        : (
+            active_session
             ? green
-            : muted
+            : (
+                recorded_session_available
+                ? amber
+                : muted
+            )
+        )
     );
 
     Floppy144DrawText(
