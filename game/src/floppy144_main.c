@@ -13,13 +13,15 @@
 
 #include "floppy144_catalogue.h"
 #include "floppy144_document.h"
-#include "floppy144_office.h"
 #include "floppy144_object_registry.h"
 #include "floppy144_recovery.h"
 #include "floppy144_terminal.h"
 #include "floppy144_world.h"
 #include "floppy144_run_state.h"
 #include "floppy144_persistence.h"
+#include "floppy144_site_2d.h"
+#include "floppy144_site_object.h"
+#include "floppy144_site_view.h"
 
 #include <stdbool.h>
 
@@ -49,7 +51,6 @@ typedef enum Floppy144Screen
 static F144Runtime *global_runtime;
 
 static Floppy144Screen global_screen;
-static Floppy144Player global_player;
 static Floppy144TerminalState global_terminal;
 static Floppy144CatalogueState global_catalogue;
 static Floppy144DiscoveryProfile global_profile;
@@ -175,10 +176,8 @@ static void Floppy144Redraw(
 
         case FLOPPY144_SCREEN_OFFICE:
         {
-            Floppy144OfficeDraw(
+            Floppy144Site2DDraw(
                 global_runtime,
-                &global_player,
-                &global_world,
                 &global_run_state,
                 global_office_notice
             );
@@ -463,10 +462,6 @@ static void Floppy144MainMenuActivate(
                 );
             }
 
-            Floppy144OfficeReset(
-                &global_player
-            );
-
             Floppy144TerminalReset(
                 &global_terminal,
                 &global_world
@@ -553,16 +548,6 @@ static void Floppy144MainMenuActivate(
                     &global_run_state
                 );
 
-                /*
-                 * The current technical-slice player uses transient 640x360
-                 * coordinates. Persistent 100x100 Site coordinates will replace
-                 * this reset when the final Site renderer is installed.
-                 */
-
-                Floppy144OfficeReset(
-                    &global_player
-                );
-
                 Floppy144TerminalReset(
                     &global_terminal,
                     &global_world
@@ -645,13 +630,28 @@ static void Floppy144MovePlayer(
     int32_t movement_y
 )
 {
-    global_office_notice = 0;
+    int32_t world_movement_x;
+    int32_t world_movement_y;
 
-    Floppy144OfficeMove(
-        &global_player,
-        &global_world,
+    global_office_notice =
+    NULL;
+
+    /*
+     * Input is expressed relative to what the player sees.
+     * Convert it back into the canonical unrotated Site before collision.
+     */
+
+    Floppy144SiteViewMovementToWorld(
         movement_x,
-        movement_y
+        movement_y,
+        &world_movement_x,
+        &world_movement_y
+    );
+
+    Floppy144RunStateMovePlayerSite(
+        &global_run_state,
+        world_movement_x,
+        world_movement_y
     );
 
     Floppy144Redraw(
@@ -668,9 +668,8 @@ static void Floppy144InteractOffice(
 )
 {
     Floppy144ObjectId object =
-        Floppy144OfficeInteractionTarget(
-            &global_world,
-            &global_player
+        Floppy144SiteInteractionTarget(
+            &global_run_state
         );
 
     const Floppy144ObjectDefinition *definition =
@@ -908,10 +907,6 @@ static LRESULT CALLBACK Floppy144WindowProc(
                     {
                         global_terminal.site_entry_requested =
                             false;
-
-                        Floppy144OfficeReset(
-                            &global_player
-                        );
 
                         global_office_notice =
                             NULL;
@@ -1165,7 +1160,7 @@ static LRESULT CALLBACK Floppy144WindowProc(
                     break;
                 }
 
-                /* Office: movement uses eight-pixel steps; E interacts; Escape returns to recovery. */
+                /* Site: movement uses 0.5-unit fixed-point steps; E interacts; Escape opens recovery control. */
                 case FLOPPY144_SCREEN_OFFICE:
                 {
                     switch(w_param)
@@ -1601,10 +1596,6 @@ int CALLBACK WinMain(
 
     global_resume_screen =
         FLOPPY144_SCREEN_TERMINAL;
-
-    Floppy144OfficeReset(
-        &global_player
-    );
 
     Floppy144WorldReset(
         &global_world

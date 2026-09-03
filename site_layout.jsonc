@@ -1,0 +1,1698 @@
+/* Valid Types for Room Geometry:
+    FLOOR_A
+    FLOOR_B
+    FLOOR_C
+    FLOOR_D
+
+    WINDOW
+    DOOR
+
+    STANDARD_DESK
+    CHAIR
+    NONSECURE_CABINET
+    SECURE_CABINET_HALF
+    SECURE_CABINET_FULL
+    WALL_MOUNTED_ITEM
+    BOOKCASE
+    TERMINAL_DESK
+    PARTITION_WALL
+    FRIDGE
+    WORKTOP
+    SINK
+    COFFEE_MAKER
+    SOFA
+    SERVER
+    SHELVING_FULL
+    TROLLEY
+    TABLE
+*/
+
+{
+    "schema_version": 1,
+
+    "site": {
+        "width": 100,
+        "height": 100,
+
+        "spawn": {
+            "x": 50.5,
+            "y": 4.0,
+            "room": "RECEPTION"
+        }
+    },
+
+    "rooms": [
+
+        {   "id": "RECEPTION",
+
+            "regions": [{"x": 33,   "y": 0, "width": 34,    "height": 34}],
+
+            "geometry": [
+                {"type": "FLOOR_A", "x": 34,    "y": 1, "width": 32,    "height": 32},
+
+                {
+                    "id": "RECEPTION_SITE_DIRECTORY",
+                    "type": "WALL_MOUNTED_ITEM",
+
+                    "variant": "SITE_DIRECTORY",
+                    "object": "SITE_DIRECTORY_RECEPTION",
+
+                    "x": 40,
+                    "y": 22,
+
+                    "width": 6,
+                    "height": 1
+                },
+
+                {
+                    "id": "RECEPTION_DESK",
+                    "type": "STANDARD_DESK",
+                    "variant": "STANDARD_DESK",
+                    "object": "RECEPTION_DESK",
+
+                    "x": 41,
+                    "y": 4,
+
+                    "width": 4,
+                    "height": 8
+                },
+
+                {
+                    "id": "RECEPTION_TERMINAL_DESK",
+                    "type": "TERMINAL_DESK",
+                    "variant": "GDR_TERMINAL",
+                    "object": "RECEPTION_TERMINAL",
+
+                    "x": 34,
+                    "y": 26,
+
+                    "width": 4,
+                    "height": 5
+                },
+
+                {
+                    "id": "RECEPTION_VISITOR_BOOK_TABLE",
+                    "type": "TABLE",
+                    "variant": "RECEPTION_TABLE",
+                    "object": "RECEPTION_VISITOR_BOOK_TABLE",
+
+                    "x": 41,
+                    "y": 12,
+
+                    "width": 4,
+                    "height": 4
+                },
+
+                {
+                    "id": "RECEPTION_SECURE_CABINET",
+                    "type": "SECURE_CABINET_HALF",
+                    "variant": "SECURE_CABINET",
+                    "object": "RECEPTION_SECURE_CABINET",
+
+                    "x": 34,
+                    "y": 2,
+
+                    "width": 2,
+                    "height": 6
+                },
+
+                {
+                    "id": "RECEPTION_BOOKSHELF_01",
+                    "type": "BOOKCASE",
+                    "variant": "BOOKCASE",
+                    "object": "RECEPTION_BOOKSHELF_01",
+
+                    "x": 34,
+                    "y": 9,
+
+                    "width": 2,
+                    "height": 6
+                },
+
+                {
+                    "id": "RECEPTION_BOOKSHELF_02",
+                    "type": "BOOKCASE",
+                    "variant": "BOOKCASE",
+                    "object": "RECEPTION_BOOKSHELF_02",
+
+                    "x": 34,
+                    "y": 16,
+
+                    "width": 2,
+                    "height": 6
+                },
+
+                {"type": "PARTITION_WALL",  "x": 34,    "y": 23,    "width": 17,    "height": 1},
+                {"type": "PARTITION_WALL",  "x": 56,    "y": 23,    "width": 10,    "height": 1},
+
+                {"type": "CHAIR", "x": 39, "y": 7,  "width": 2, "height": 2},
+                {"type": "CHAIR", "x": 56, "y": 4,  "width": 2, "height": 2},
+                {"type": "CHAIR", "x": 56, "y": 7,  "width": 2, "height": 2},
+                {"type": "CHAIR", "x": 56, "y": 10, "width": 2, "height": 2},
+                {"type": "CHAIR", "x": 56, "y": 13, "width": 2, "height": 2},
+                {"type": "CHAIR", "x": 56, "y": 16, "width": 2, "height": 2},
+                {"type": "CHAIR", "x": 56, "y": 19, "width": 2, "height": 2},
+                {"type": "CHAIR", "x": 60, "y": 4,  "width": 2, "height": 2},
+                {"type": "CHAIR", "x": 60, "y": 7,  "width": 2, "height": 2},
+                {"type": "CHAIR", "x": 60, "y": 10, "width": 2, "height": 2},
+                {"type": "CHAIR", "x": 60, "y": 13, "width": 2, "height": 2},
+                {"type": "CHAIR", "x": 60, "y": 16, "width": 2, "height": 2},
+                {"type": "CHAIR", "x": 60, "y": 19, "width": 2, "height": 2},
+                {"type": "CHAIR", "x": 64, "y": 4,  "width": 2, "height": 2},
+                {"type": "CHAIR", "x": 64, "y": 7,  "width": 2, "height": 2},
+                {"type": "CHAIR", "x": 64, "y": 10, "width": 2, "height": 2},
+                {"type": "CHAIR", "x": 64, "y": 13, "width": 2, "height": 2},
+                {"type": "CHAIR", "x": 64, "y": 16, "width": 2, "height": 2},
+                {"type": "CHAIR", "x": 64, "y": 19, "width": 2, "height": 2}
+            ]
+        },
+
+        {   "id": "CORRIDOR",
+
+            "regions": [
+                {"x": 46,   "y": 33,    "width": 54,    "height": 11},
+                {"x": 46,   "y": 43,    "width": 11,    "height": 42}
+            ],
+
+            "geometry": [
+                {"type": "FLOOR_A", "x": 47,    "y": 34,    "width": 52,    "height": 9},
+                {"type": "FLOOR_A", "x": 47,    "y": 43,    "width": 9,     "height": 41},
+
+                {
+                    "id": "CORRIDOR_SITE_DIRECTORY",
+                    "type": "WALL_MOUNTED_ITEM",
+
+                    "variant": "SITE_DIRECTORY",
+                    "object": "SITE_DIRECTORY_CORRIDOR",
+
+                    "x": 55,
+                    "y": 61,
+
+                    "width": 1,
+                    "height": 6
+                }
+            ]
+        },
+
+        {   "id": "MAIN_OFFICE",
+
+            "regions": [{"x": 66,   "y": 0, "width": 34,    "height": 34}],
+
+            "geometry": [
+                {"type": "FLOOR_B", "x": 67,    "y": 1, "width": 32,    "height": 32},
+
+                {
+                    "id": "MAIN_OFFICE_SUPPRESSION_PANEL",
+                    "type": "WALL_MOUNTED_ITEM",
+                    "variant": "SUPPRESSION_PANEL",
+                    "object": "SUPPRESSION_CONTROL_PANEL",
+
+                    "x": 90,
+                    "y": 32,
+
+                    "width": 6,
+                    "height": 1
+                },
+
+                {
+                    "id": "MAIN_OFFICE_DESK_01",
+                    "type": "STANDARD_DESK",
+                    "variant": "STANDARD_DESK",
+                    "object": "MAIN_OFFICE_DESK_01",
+
+                    "x": 80,
+                    "y": 8,
+
+                    "width": 4,
+                    "height": 6
+                },
+
+                {
+                    "id": "MAIN_OFFICE_DESK_02",
+                    "type": "STANDARD_DESK",
+                    "variant": "STANDARD_DESK",
+                    "object": "MAIN_OFFICE_DESK_02",
+
+                    "x": 85,
+                    "y": 8,
+
+                    "width": 4,
+                    "height": 6
+                },
+
+                {
+                    "id": "MAIN_OFFICE_DESK_03",
+                    "type": "STANDARD_DESK",
+                    "variant": "STANDARD_DESK",
+                    "object": "MAIN_OFFICE_DESK_03",
+
+                    "x": 80,
+                    "y": 15,
+
+                    "width": 4,
+                    "height": 6
+                },
+
+                {
+                    "id": "MAIN_OFFICE_DESK_04",
+                    "type": "STANDARD_DESK",
+                    "variant": "STANDARD_DESK",
+                    "object": "MAIN_OFFICE_DESK_04",
+
+                    "x": 85,
+                    "y": 15,
+
+                    "width": 4,
+                    "height": 6
+                },
+
+                {
+                    "id": "MAIN_OFFICE_DESK_05",
+                    "type": "STANDARD_DESK",
+                    "variant": "STANDARD_DESK",
+                    "object": "MAIN_OFFICE_DESK_05",
+
+                    "x": 80,
+                    "y": 22,
+
+                    "width": 4,
+                    "height": 6
+                },
+
+                {
+                    "id": "MAIN_OFFICE_DESK_06",
+                    "type": "STANDARD_DESK",
+                    "variant": "STANDARD_DESK",
+                    "object": "MAIN_OFFICE_DESK_06",
+
+                    "x": 85,
+                    "y": 22,
+
+                    "width": 4,
+                    "height": 6
+                },
+
+                {
+                    "id": "MAIN_OFFICE_TERMINAL_DESK",
+                    "type": "TERMINAL_DESK",
+                    "variant": "GDR_TERMINAL",
+                    "object": "MAIN_OFFICE_TERMINAL",
+
+                    "x": 94,
+                    "y": 1,
+
+                    "width": 5,
+                    "height": 4
+                },
+
+                {
+                    "id": "MAIN_OFFICE_SECURE_CABINET",
+                    "type": "SECURE_CABINET_HALF",
+                    "variant": "SECURE_CABINET",
+                    "object": "MAIN_OFFICE_SECURE_CABINET",
+
+                    "x": 67,
+                    "y": 1,
+
+                    "width": 6,
+                    "height": 2
+                },
+
+                {
+                    "id": "MAIN_OFFICE_BOOKSHELF_01",
+                    "type": "BOOKCASE",
+                    "variant": "BOOKCASE",
+                    "object": "MAIN_OFFICE_BOOKSHELF_01",
+
+                    "x": 74,
+                    "y": 1,
+
+                    "width": 6,
+                    "height": 2
+                },
+
+                {
+                    "id": "MAIN_OFFICE_BOOKSHELF_02",
+                    "type": "BOOKCASE",
+                    "variant": "BOOKCASE",
+                    "object": "MAIN_OFFICE_BOOKSHELF_02",
+
+                    "x": 97,
+                    "y": 20,
+
+                    "width": 2,
+                    "height": 6
+                },
+
+                {
+                    "id": "MAIN_OFFICE_BOOKSHELF_03",
+                    "type": "BOOKCASE",
+                    "variant": "BOOKCASE",
+                    "object": "MAIN_OFFICE_BOOKSHELF_03",
+
+                    "x": 97,
+                    "y": 27,
+
+                    "width": 2,
+                    "height": 6
+                },
+
+                {"type": "CHAIR",   "x": 78,    "y": 10,    "width": 2, "height": 2},
+                {"type": "CHAIR",   "x": 88,    "y": 10,    "width": 2, "height": 2},
+                {"type": "CHAIR",   "x": 78,    "y": 17,    "width": 2, "height": 2},
+                {"type": "CHAIR",   "x": 88,    "y": 17,    "width": 2, "height": 2},
+                {"type": "CHAIR",   "x": 78,    "y": 24,    "width": 2, "height": 2},
+                {"type": "CHAIR",   "x": 88,    "y": 24,    "width": 2, "height": 2}
+            ]
+        },
+
+        {   "id": "FACILITIES",
+
+            "regions": [{"x": 46,   "y": 84,    "width": 54,    "height": 16}],
+
+            "geometry": [
+                {"type": "FLOOR_B", "x": 47,    "y": 85,    "width": 52,    "height": 14},
+
+                {
+                    "id": "FACILITIES_DESK_01",
+                    "type": "STANDARD_DESK",
+                    "variant": "STANDARD_DESK",
+                    "object": "FACILITIES_DESK",
+
+                    "x": 95,
+                    "y": 85,
+
+                    "width": 4,
+                    "height": 6
+                },
+
+                {
+                    "id": "FACILITIES_TERMINAL_DESK",
+                    "type": "TERMINAL_DESK",
+                    "variant": "GDR_TERMINAL",
+                    "object": "FACILITIES_TERMINAL",
+
+                    "x": 77,
+                    "y": 85,
+
+                    "width": 5,
+                    "height": 4
+                },
+
+                {
+                    "id": "FACILITIES_SECURE_CABINET",
+                    "type": "SECURE_CABINET_HALF",
+                    "variant": "SECURE_CABINET",
+                    "object": "FACILITIES_SECURE_CABINET",
+
+                    "x": 84,
+                    "y": 85,
+
+                    "width": 6,
+                    "height": 2
+                },
+
+                {
+                    "id": "FACILITIES_SHELVING_01",
+                    "type": "SHELVING_FULL",
+                    "variant": "SHELVING_FULL",
+                    "object": "FACILITIES_SHELVING_01",
+
+                    "x": 55,
+                    "y": 85,
+
+                    "width": 8,
+                    "height": 2
+                },
+
+                {
+                    "id": "FACILITIES_SHELVING_02",
+                    "type": "SHELVING_FULL",
+                    "variant": "SHELVING_FULL",
+                    "object": "FACILITIES_SHELVING_02",
+
+                    "x": 64,
+                    "y": 85,
+
+                    "width": 8,
+                    "height": 2
+                },
+
+                {
+                    "id": "FACILITIES_SHELVING_03",
+                    "type": "SHELVING_FULL",
+                    "variant": "SHELVING_FULL",
+                    "object": "FACILITIES_SHELVING_03",
+
+                    "x": 47,
+                    "y": 97,
+
+                    "width": 8,
+                    "height": 2
+                },
+
+                {
+                    "id": "FACILITIES_SHELVING_04",
+                    "type": "SHELVING_FULL",
+                    "variant": "SHELVING_FULL",
+                    "object": "FACILITIES_SHELVING_04",
+
+                    "x": 56,
+                    "y": 97,
+
+                    "width": 8,
+                    "height": 2
+                },
+
+                {
+                    "id": "FACILITIES_SHELVING_05",
+                    "type": "SHELVING_FULL",
+                    "variant": "SHELVING_FULL",
+                    "object": "FACILITIES_SHELVING_05",
+
+                    "x": 65,
+                    "y": 97,
+
+                    "width": 8,
+                    "height": 2
+                },
+
+                {
+                    "id": "FACILITIES_SHELVING_06",
+                    "type": "SHELVING_FULL",
+                    "variant": "SHELVING_FULL",
+                    "object": "FACILITIES_SHELVING_06",
+
+                    "x": 74,
+                    "y": 97,
+
+                    "width": 8,
+                    "height": 2
+                },
+
+                {
+                    "id": "FACILITIES_SHELVING_07",
+                    "type": "SHELVING_FULL",
+                    "variant": "SHELVING_FULL",
+                    "object": "FACILITIES_SHELVING_07",
+
+                    "x": 83,
+                    "y": 97,
+
+                    "width": 8,
+                    "height": 2
+                },
+
+                {
+                    "id": "FACILITIES_SHELVING_08",
+                    "type": "SHELVING_FULL",
+                    "variant": "SHELVING_FULL",
+                    "object": "FACILITIES_SHELVING_08",
+
+                    "x": 92,
+                    "y": 97,
+
+                    "width": 8,
+                    "height": 2
+                },
+
+                {"type": "CHAIR",   "x": 93,    "y": 87,    "width": 2, "height": 2}
+            ]
+        },
+
+        {   "id": "RECORDS_OFFICE",
+
+            "regions": [
+                {"x": 0,    "y": 0,     "width": 34,    "height": 34},
+                {"x": 0,    "y": 33,    "width": 47,    "height": 13}
+            ],
+
+            "geometry": [
+                {"type": "FLOOR_C", "x": 1, "y": 1,     "width": 32,    "height": 32},
+                {"type": "FLOOR_C", "x": 1, "y": 33,    "width": 45,    "height": 10},
+
+                {
+                    "id": "RECORDS_OFFICE_DESK_01",
+                    "type": "STANDARD_DESK",
+                    "variant": "STANDARD_DESK",
+                    "object": "RECORDS_OFFICE_DESK_01",
+
+                    "x": 1,
+                    "y": 1,
+
+                    "width": 6,
+                    "height": 4
+                },
+
+                {
+                    "id": "RECORDS_OFFICE_DESK_02",
+                    "type": "STANDARD_DESK",
+                    "variant": "STANDARD_DESK",
+                    "object": "RECORDS_OFFICE_DESK_02",
+
+                    "x": 27,
+                    "y": 1,
+
+                    "width": 6,
+                    "height": 4
+                },
+
+                {
+                    "id": "RECORDS_OFFICE_DESK_03",
+                    "type": "STANDARD_DESK",
+                    "variant": "STANDARD_DESK",
+                    "object": "RECORDS_OFFICE_DESK_03",
+
+                    "x": 29,
+                    "y": 15,
+
+                    "width": 4,
+                    "height": 6
+                },
+
+                {
+                    "id": "RECORDS_OFFICE_DESK_04",
+                    "type": "STANDARD_DESK",
+                    "variant": "STANDARD_DESK",
+                    "object": "RECORDS_OFFICE_DESK_04",
+
+                    "x": 1,
+                    "y": 38,
+
+                    "width": 4,
+                    "height": 6
+                },
+
+                {
+                    "id": "RECORDS_OFFICE_TERMINAL_DESK",
+                    "type": "TERMINAL_DESK",
+                    "variant": "GDR_TERMINAL",
+                    "object": "RECORDS_OFFICE_TERMINAL",
+
+                    "x": 29,
+                    "y": 26,
+
+                    "width": 4,
+                    "height": 5
+                },
+
+                {
+                    "id": "RECORDS_OFFICE_SECURE_CABINET_01",
+                    "type": "SECURE_CABINET_FULL",
+                    "variant": "SECURE_CABINET",
+                    "object": "RECORDS_OFFICE_SECURE_CABINET_01",
+
+                    "x": 12,
+                    "y": 2,
+
+                    "width": 2,
+                    "height": 6
+                },
+
+                {
+                    "id": "RECORDS_OFFICE_SECURE_CABINET_02",
+                    "type": "SECURE_CABINET_FULL",
+                    "variant": "SECURE_CABINET",
+                    "object": "RECORDS_OFFICE_SECURE_CABINET_02",
+
+                    "x": 21,
+                    "y": 2,
+
+                    "width": 2,
+                    "height": 6
+                },
+
+                {
+                    "id": "RECORDS_OFFICE_SECURE_CABINET_03",
+                    "type": "SECURE_CABINET_FULL",
+                    "variant": "SECURE_CABINET",
+                    "object": "RECORDS_OFFICE_SECURE_CABINET_03",
+
+                    "x": 12,
+                    "y": 9,
+
+                    "width": 2,
+                    "height": 6
+                },
+
+                {
+                    "id": "RECORDS_OFFICE_SECURE_CABINET_04",
+                    "type": "SECURE_CABINET_FULL",
+                    "variant": "SECURE_CABINET",
+                    "object": "RECORDS_OFFICE_SECURE_CABINET_04",
+
+                    "x": 21,
+                    "y": 9,
+
+                    "width": 2,
+                    "height": 6
+                },
+
+                {
+                    "id": "RECORDS_OFFICE_SECURE_CABINET_05",
+                    "type": "SECURE_CABINET_FULL",
+                    "variant": "SECURE_CABINET",
+                    "object": "RECORDS_OFFICE_SECURE_CABINET_05",
+
+                    "x": 12,
+                    "y": 16,
+
+                    "width": 2,
+                    "height": 6
+                },
+
+                {
+                    "id": "RECORDS_OFFICE_SECURE_CABINET_06",
+                    "type": "SECURE_CABINET_FULL",
+                    "variant": "SECURE_CABINET",
+                    "object": "RECORDS_OFFICE_SECURE_CABINET_06",
+
+                    "x": 21,
+                    "y": 16,
+
+                    "width": 2,
+                    "height": 6
+                },
+
+                {
+                    "id": "RECORDS_OFFICE_SECURE_CABINET_07",
+                    "type": "SECURE_CABINET_FULL",
+                    "variant": "SECURE_CABINET",
+                    "object": "RECORDS_OFFICE_SECURE_CABINET_07",
+
+                    "x": 12,
+                    "y": 23,
+
+                    "width": 2,
+                    "height": 6
+                },
+
+                {
+                    "id": "RECORDS_OFFICE_SECURE_CABINET_08",
+                    "type": "SECURE_CABINET_FULL",
+                    "variant": "SECURE_CABINET",
+                    "object": "RECORDS_OFFICE_SECURE_CABINET_08",
+
+                    "x": 21,
+                    "y": 23,
+
+                    "width": 2,
+                    "height": 6
+                },
+
+                {
+                    "id": "RECORDS_OFFICE_SECURE_CABINET_09",
+                    "type": "SECURE_CABINET_FULL",
+                    "variant": "SECURE_CABINET",
+                    "object": "RECORDS_OFFICE_SECURE_CABINET_09",
+
+                    "x": 12,
+                    "y": 30,
+
+                    "width": 2,
+                    "height": 6
+                },
+
+                {
+                    "id": "RECORDS_OFFICE_SECURE_CABINET_10",
+                    "type": "SECURE_CABINET_FULL",
+                    "variant": "SECURE_CABINET",
+                    "object": "RECORDS_OFFICE_SECURE_CABINET_10",
+
+                    "x": 21,
+                    "y": 30,
+
+                    "width": 2,
+                    "height": 6
+                },
+
+                {
+                    "id": "RECORDS_OFFICE_SECURE_CABINET_11",
+                    "type": "SECURE_CABINET_FULL",
+                    "variant": "SECURE_CABINET",
+                    "object": "RECORDS_OFFICE_SECURE_CABINET_11",
+
+                    "x": 33,
+                    "y": 34,
+
+                    "width": 6,
+                    "height": 2
+                },
+
+                {
+                    "id": "RECORDS_OFFICE_SECURE_CABINET_12",
+                    "type": "SECURE_CABINET_FULL",
+                    "variant": "SECURE_CABINET",
+                    "object": "RECORDS_OFFICE_SECURE_CABINET_12",
+
+                    "x": 40,
+                    "y": 34,
+
+                    "width": 6,
+                    "height": 2
+                },
+
+                {
+                    "id": "RECORDS_OFFICE_SECURE_CABINET_13",
+                    "type": "SECURE_CABINET_FULL",
+                    "variant": "SECURE_CABINET",
+                    "object": "RECORDS_OFFICE_SECURE_CABINET_13",
+
+                    "x": 12,
+                    "y": 42,
+
+                    "width": 6,
+                    "height": 2
+                },
+
+                {
+                    "id": "RECORDS_OFFICE_SECURE_CABINET_14",
+                    "type": "SECURE_CABINET_FULL",
+                    "variant": "SECURE_CABINET",
+                    "object": "RECORDS_OFFICE_SECURE_CABINET_14",
+
+                    "x": 19,
+                    "y": 42,
+
+                    "width": 6,
+                    "height": 2
+                },
+
+                {
+                    "id": "RECORDS_OFFICE_SECURE_CABINET_15",
+                    "type": "SECURE_CABINET_FULL",
+                    "variant": "SECURE_CABINET",
+                    "object": "RECORDS_OFFICE_SECURE_CABINET_15",
+
+                    "x": 26,
+                    "y": 42,
+
+                    "width": 6,
+                    "height": 2
+                },
+
+                {
+                    "id": "RECORDS_OFFICE_SECURE_CABINET_16",
+                    "type": "SECURE_CABINET_FULL",
+                    "variant": "SECURE_CABINET",
+                    "object": "RECORDS_OFFICE_SECURE_CABINET_16",
+
+                    "x": 33,
+                    "y": 42,
+
+                    "width": 6,
+                    "height": 2
+                },
+
+                {
+                    "id": "RECORDS_OFFICE_SECURE_CABINET_17",
+                    "type": "SECURE_CABINET_FULL",
+                    "variant": "SECURE_CABINET",
+                    "object": "RECORDS_OFFICE_SECURE_CABINET_17",
+
+                    "x": 40,
+                    "y": 42,
+
+                    "width": 6,
+                    "height": 2
+                },
+
+                {"type": "CHAIR",   "x": 3,     "y": 5,     "width": 2, "height": 2},
+                {"type": "CHAIR",   "x": 29,    "y": 5,     "width": 2, "height": 2},
+                {"type": "CHAIR",   "x": 5,     "y": 40,    "width": 2, "height": 2},
+                {"type": "CHAIR",   "x": 27,    "y": 17,    "width": 2, "height": 2},
+
+                {
+                    "id": "RECORDS_OFFICE_TROLLEY",
+                    "type": "TROLLEY",
+                    "variant": "TROLLEY",
+                    "object": "RECORDS_OFFICE_TROLLEY",
+
+                    "x": 16,
+                    "y": 10,
+
+                    "width": 2,
+                    "height": 4
+                }
+            ]
+        },
+
+        {   "id": "IT_SUPPORT",
+
+            "regions": [{"x": 78,   "y": 43,    "width": 22,"height": 14}],
+
+            "geometry": [
+                {"type": "FLOOR_C", "x": 79,    "y": 44,    "width": 20,    "height": 12},
+
+                {
+                    "id": "IT_SUPPORT_DESK",
+                    "type": "STANDARD_DESK",
+                    "variant": "STANDARD_DESK",
+                    "object": "IT_SUPPORT_DESK",
+
+                    "x": 95,
+                    "y": 44,
+
+                    "width": 4,
+                    "height": 6
+                },
+
+                {
+                    "id": "IT_SUPPORT_WORKBENCH",
+                    "type": "TABLE",
+                    "variant": "WORKBENCH",
+                    "object": "IT_SUPPORT_WORKBENCH",
+
+                    "x": 95,
+                    "y": 50,
+
+                    "width": 4,
+                    "height": 6
+                },
+
+                {
+                    "id": "IT_SUPPORT_TERMINAL_DESK",
+                    "type": "TERMINAL_DESK",
+                    "variant": "GDR_TERMINAL",
+                    "object": "IT_SUPPORT_TERMINAL",
+
+                    "x": 82,
+                    "y": 44,
+
+                    "width": 5,
+                    "height": 4
+                },
+
+                {
+                    "id": "IT_SUPPORT_SECURE_CABINET",
+                    "type": "SECURE_CABINET_HALF",
+                    "variant": "SECURE_CABINET",
+                    "object": "IT_SUPPORT_SECURE_CABINET",
+
+                    "x": 79,
+                    "y": 48,
+
+                    "width": 2,
+                    "height": 6
+                },
+
+                {
+                    "id": "IT_SUPPORT_BOOKCASE",
+                    "type": "BOOKCASE",
+                    "variant": "BOOKCASE",
+                    "object": "IT_SUPPORT_BOOKCASE",
+
+                    "x": 81,
+                    "y": 54,
+
+                    "width": 6,
+                    "height": 2
+                },
+
+                {
+                    "id": "IT_SUPPORT_PATCH_PANEL",
+                    "type": "WALL_MOUNTED_ITEM",
+                    "variant": "PATCH_PANEL",
+                    "object": "IT_SUPPORT_PATCH_PANEL",
+
+                    "x": 79,
+                    "y": 55,
+
+                    "width": 8,
+                    "height": 1
+                },
+
+                {
+                    "id": "IT_SUPPORT_SHELVES",
+                    "type": "WALL_MOUNTED_ITEM",
+                    "variant": "SHELVING",
+                    "object": "IT_SUPPORT_SHELVES",
+
+                    "x": 97,
+                    "y": 44,
+
+                    "width": 2,
+                    "height": 12
+                },
+
+                {"type": "CHAIR",   "x": 93,    "y": 46,    "width": 2, "height": 2}
+            ]
+        },
+
+        {   "id": "STAFF_ROOM",
+
+            "regions": [{"x": 0,   "y": 75, "width": 47,    "height": 25}],
+
+            "geometry": [
+                {"type": "FLOOR_C", "x": 1,    "y": 76, "width": 45,    "height": 23},
+
+                {
+                    "id": "STAFF_ROOM_DINING_TABLE",
+                    "type": "TABLE",
+                    "variant": "DINING_TABLE",
+                    "object": "STAFF_ROOM_DINING_TABLE",
+
+                    "x": 34,
+                    "y": 87,
+
+                    "width": 6,
+                    "height": 6
+                },
+
+                {
+                    "id": "STAFF_ROOM_COFFEE_TABLE_01",
+                    "type": "TABLE",
+                    "variant": "COFFEE_TABLE",
+                    "object": "STAFF_ROOM_COFFEE_TABLE_01",
+
+                    "x": 20,
+                    "y": 76,
+
+                    "width": 2,
+                    "height": 4
+                },
+
+                {
+                    "id": "STAFF_ROOM_COFFEE_TABLE_02",
+                    "type": "TABLE",
+                    "variant": "COFFEE_TABLE",
+                    "object": "STAFF_ROOM_COFFEE_TABLE_02",
+
+                    "x": 20,
+                    "y": 96,
+
+                    "width": 2,
+                    "height": 4
+                },
+
+                {
+                    "id": "STAFF_ROOM_COFFEE_TABLE_03",
+                    "type": "TABLE",
+                    "variant": "COFFEE_TABLE",
+                    "object": "STAFF_ROOM_COFFEE_TABLE_03",
+
+                    "x": 13,
+                    "y": 86,
+
+                    "width": 6,
+                    "height": 4
+                },
+
+                {
+                    "id": "STAFF_ROOM_COFFEE_TABLE_04",
+                    "type": "TABLE",
+                    "variant": "COFFEE_TABLE",
+                    "object": "STAFF_ROOM_COFFEE_TABLE_04",
+
+                    "x": 23,
+                    "y": 86,
+
+                    "width": 6,
+                    "height": 4
+                },
+
+                {
+                    "id": "STAFF_ROOM_BOOKCASE_01",
+                    "type": "BOOKCASE",
+                    "variant": "BOOKCASE",
+                    "object": "STAFF_ROOM_BOOKCASE_01",
+
+                    "x": 32,
+                    "y": 76,
+
+                    "width": 6,
+                    "height": 2
+                },
+
+                {
+                    "id": "STAFF_ROOM_BOOKCASE_02",
+                    "type": "BOOKCASE",
+                    "variant": "BOOKCASE",
+                    "object": "STAFF_ROOM_BOOKCASE_02",
+
+                    "x": 39,
+                    "y": 76,
+
+                    "width": 6,
+                    "height": 2
+                },
+
+                {
+                    "id": "STAFF_ROOM_BOOKCASE_03",
+                    "type": "BOOKCASE",
+                    "variant": "BOOKCASE",
+                    "object": "STAFF_ROOM_BOOKCASE_03",
+
+                    "x": 32,
+                    "y": 97,
+
+                    "width": 6,
+                    "height": 2
+                },
+
+                {
+                    "id": "STAFF_ROOM_BOOKCASE_04",
+                    "type": "BOOKCASE",
+                    "variant": "BOOKCASE",
+                    "object": "STAFF_ROOM_BOOKCASE_04",
+
+                    "x": 39,
+                    "y": 97,
+
+                    "width": 6,
+                    "height": 2
+                },
+
+                {
+                    "id": "STAFF_ROOM_NOTICEBOARD",
+                    "type": "WALL_MOUNTED_ITEM",
+                    "variant": "NOTICEBOARD",
+                    "object": "STAFF_ROOM_NOTICEBOARD",
+
+                    "x": 45,
+                    "y": 86,
+
+                    "width": 1,
+                    "height": 10
+                },
+
+                {"type": "CHAIR",   "x": 10,    "y": 76,    "width": 2, "height": 2},
+                {"type": "CHAIR",   "x": 36,    "y": 85,    "width": 2, "height": 2},
+                {"type": "CHAIR",   "x": 32,    "y": 89,    "width": 2, "height": 2},
+                {"type": "CHAIR",   "x": 40,    "y": 89,    "width": 2, "height": 2},
+                {"type": "CHAIR",   "x": 36,    "y": 93,    "width": 2, "height": 2},
+
+                {"type": "SOFA",    "x": 13,    "y": 76,    "width": 6, "height": 4},
+                {"type": "SOFA",    "x": 23,    "y": 76,    "width": 6, "height": 4},
+                {"type": "SOFA",    "x": 13,    "y": 96,    "width": 6, "height": 4},
+                {"type": "SOFA",    "x": 23,    "y": 96,    "width": 6, "height": 4},
+
+                {
+                    "id": "STAFF_ROOM_FRIDGE",
+                    "type": "FRIDGE",
+                    "variant": "FRIDGE",
+                    "object": "STAFF_ROOM_FRIDGE",
+
+                    "x": 1,
+                    "y": 76,
+
+                    "width": 6,
+                    "height": 4
+                },
+
+                {
+                    "id": "STAFF_ROOM_WORKTOP",
+                    "type": "WORKTOP",
+                    "variant": "WORKTOP",
+                    "object": "STAFF_ROOM_WORKTOP",
+
+                    "x": 1,
+                    "y": 81,
+
+                    "width": 5,
+                    "height": 18
+                },
+
+                {
+                    "id": "STAFF_ROOM_SINK",
+                    "type": "SINK",
+                    "variant": "SINK",
+                    "object": "STAFF_ROOM_SINK",
+
+                    "x": 2,
+                    "y": 82,
+
+                    "width": 3,
+                    "height": 4
+                },
+
+                {
+                    "id": "STAFF_ROOM_COFFEE_MAKER",
+                    "type": "COFFEE_MAKER",
+                    "variant": "COFFEE_MAKER",
+                    "object": "STAFF_ROOM_COFFEE_MAKER",
+
+                    "x": 2,
+                    "y": 88,
+
+                    "width": 2,
+                    "height": 4
+                },
+            ]
+        },
+
+        {   "id": "SECURITY",
+
+            "regions": [{"x": 56,   "y": 43,    "width": 23,    "height": 14}],
+
+            "geometry": [
+                {"type": "FLOOR_D", "x": 57,    "y": 44,    "width": 21,    "height": 12},
+
+                {
+                    "id": "SECURITY_DESK_01",
+                    "type": "STANDARD_DESK",
+                    "variant": "STANDARD_DESK",
+                    "object": "SECURITY_DESK_01",
+
+                    "x": 57,
+                    "y": 44,
+
+                    "width": 4,
+                    "height": 6
+                },
+
+                {
+                    "id": "SECURITY_DESK_02",
+                    "type": "STANDARD_DESK",
+                    "variant": "STANDARD_DESK",
+                    "object": "SECURITY_DESK_02",
+
+                    "x": 57,
+                    "y": 50,
+
+                    "width": 4,
+                    "height": 6
+                },
+
+                {
+                    "id": "SECURITY_TERMINAL_DESK",
+                    "type": "TERMINAL_DESK",
+                    "variant": "GDR_TERMINAL",
+                    "object": "SECURITY_TERMINAL",
+
+                    "x": 66,
+                    "y": 52,
+
+                    "width": 5,
+                    "height": 4
+                },
+
+                {
+                    "id": "SECURITY_SECURE_CABINET",
+                    "type": "SECURE_CABINET_HALF",
+                    "variant": "SECURE_CABINET",
+                    "object": "SECURITY_SECURE_CABINET",
+
+                    "x": 76,
+                    "y": 50,
+
+                    "width": 2,
+                    "height": 6
+                },
+
+                {
+                    "id": "SECURITY_BOOKCASE",
+                    "type": "BOOKCASE",
+                    "variant": "BOOKCASE",
+                    "object": "SECURITY_BOOKCASE",
+
+                    "x": 76,
+                    "y": 44,
+
+                    "width": 2,
+                    "height": 6
+                },
+
+                {
+                    "id": "SECURITY_KEY_CABINET",
+                    "type": "WALL_MOUNTED_ITEM",
+                    "variant": "KEY_CABINET",
+                    "object": "SECURITY_KEY_CABINET",
+
+                    "x": 72,
+                    "y": 55,
+
+                    "width": 3,
+                    "height": 1
+                },
+
+                {
+                    "id": "SECURITY_FIRST_AID_KIT",
+                    "type": "WALL_MOUNTED_ITEM",
+                    "variant": "FIRST_AID_KIT",
+                    "object": "SECURITY_FIRST_AID_KIT",
+
+                    "x": 75,
+                    "y": 44,
+
+                    "width": 3,
+                    "height": 1
+                },
+
+                {
+                    "id": "SECURITY_MONITOR_BANK",
+                    "type": "WALL_MOUNTED_ITEM",
+                    "variant": "MONITOR_BANK",
+                    "object": "SECURITY_MONITOR_BANK",
+
+                    "x": 57,
+                    "y": 44,
+
+                    "width": 2,
+                    "height": 12
+                },
+
+                {"type": "CHAIR",   "x": 61,    "y": 46,    "width": 2, "height": 2},
+                {"type": "CHAIR",   "x": 61,    "y": 52,    "width": 2, "height": 2}
+            ]
+        },
+
+        {   "id": "SERVER_ROOM",
+
+            "regions": [{"x": 56,   "y": 56,    "width": 44,   "height": 29}],
+
+            "geometry": [
+                {"type": "FLOOR_D", "x": 57,    "y": 57,    "width": 42,    "height": 27},
+
+                {
+                    "id": "SERVER_ROOM_DESK",
+                    "type": "STANDARD_DESK",
+                    "variant": "STANDARD_DESK",
+                    "object": "SERVER_ROOM_DESK",
+
+                    "x": 57,
+                    "y": 59,
+
+                    "width": 4,
+                    "height": 6
+                },
+
+                {
+                    "id": "SERVER_ROOM_TERMINAL_DESK",
+                    "type": "TERMINAL_DESK",
+                    "variant": "GDR_TERMINAL",
+                    "object": "SERVER_ROOM_TERMINAL",
+
+                    "x": 72,
+                    "y": 57,
+
+                    "width": 5,
+                    "height": 4
+                },
+
+                {
+                    "id": "SERVER_ROOM_SECURE_CABINET",
+                    "type": "SECURE_CABINET_HALF",
+                    "variant": "SECURE_CABINET",
+                    "object": "SERVER_ROOM_SECURE_CABINET",
+
+                    "x": 97,
+                    "y": 57,
+
+                    "width": 2,
+                    "height": 6
+                },
+
+                {
+                    "id": "SERVER_ROOM_BOOKCASE_01",
+                    "type": "BOOKCASE",
+                    "variant": "BOOKCASE",
+                    "object": "SERVER_ROOM_BOOKCASE_01",
+
+                    "x": 84,
+                    "y": 65,
+
+                    "width": 2,
+                    "height": 6
+                },
+
+                {
+                    "id": "SERVER_ROOM_BOOKCASE_02",
+                    "type": "BOOKCASE",
+                    "variant": "BOOKCASE",
+                    "object": "SERVER_ROOM_BOOKCASE_02",
+
+                    "x": 91,
+                    "y": 65,
+
+                    "width": 2,
+                    "height": 6
+                },
+
+                {
+                    "id": "SERVER_ROOM_SHELVES",
+                    "type": "WALL_MOUNTED_ITEM",
+                    "variant": "SHELVING",
+                    "object": "SERVER_ROOM_SHELVES",
+
+                    "x": 57,
+                    "y": 57,
+
+                    "width": 2,
+                    "height": 10
+                },
+
+                {"type": "CHAIR",   "x": 61,    "y": 61,    "width": 2, "height": 2},
+
+                {"type": "PARTITION_WALL",  "x": 57,    "y": 67,    "width": 11,    "height": 1},
+                {"type": "PARTITION_WALL",  "x": 73,    "y": 67,    "width": 26,    "height": 1},
+
+                /* COLUMN ONE */
+                {"type": "SERVER",  "x": 57,    "y": 68,    "width": 4, "height": 4},
+                {"type": "SERVER",  "x": 57,    "y": 72,    "width": 4, "height": 4},
+                {"type": "SERVER",  "x": 57,    "y": 76,    "width": 4, "height": 4},
+                {"type": "SERVER",  "x": 57,    "y": 80,    "width": 4, "height": 4},
+                /* COLUMN TWO */
+                {"type": "SERVER",  "x": 67,    "y": 72,    "width": 4, "height": 4},
+                {"type": "SERVER",  "x": 67,    "y": 76,    "width": 4, "height": 4},
+                {"type": "SERVER",  "x": 67,    "y": 80,    "width": 4, "height": 4},
+                /* COLUMN THREE */
+                {"type": "SERVER",  "x": 71,    "y": 72,    "width": 4, "height": 4},
+                {"type": "SERVER",  "x": 71,    "y": 76,    "width": 4, "height": 4},
+                {"type": "SERVER",  "x": 71,    "y": 80,    "width": 4, "height": 4},
+                /* COLUMN FOUR */
+                {"type": "SERVER",  "x": 81,    "y": 72,    "width": 4, "height": 4},
+                {"type": "SERVER",  "x": 81,    "y": 76,    "width": 4, "height": 4},
+                {"type": "SERVER",  "x": 81,    "y": 80,    "width": 4, "height": 4},
+                /* COLUMN FIVE */
+                {"type": "SERVER",  "x": 85,    "y": 72,    "width": 4, "height": 4},
+                {"type": "SERVER",  "x": 85,    "y": 76,    "width": 4, "height": 4},
+                {"type": "SERVER",  "x": 85,    "y": 80,    "width": 4, "height": 4},
+                /* COLUMN SIX */
+                {"type": "SERVER",  "x": 95,    "y": 68,    "width": 4, "height": 4},
+                {"type": "SERVER",  "x": 95,    "y": 72,    "width": 4, "height": 4},
+                {"type": "SERVER",  "x": 95,    "y": 76,    "width": 4, "height": 4},
+                {"type": "SERVER",  "x": 95,    "y": 80,    "width": 4, "height": 4}
+            ]
+        },
+
+         {   "id": "SECRETARY_OFFICE",
+
+            "regions": [{"x": 30,    "y": 44,    "width": 17,    "height": 32}],
+
+            "geometry": [
+                {"type": "FLOOR_D", "x": 31, "y": 45,    "width": 15,    "height": 30},
+
+                {
+                    "id": "SECRETARY_OFFICE_DESK",
+                    "type": "STANDARD_DESK",
+                    "variant": "STANDARD_DESK",
+                    "object": "SECRETARY_OFFICE_DESK",
+
+                    "centre_x": 40,
+                    "centre_y": 51,
+
+                    "width": 6,
+                    "height": 4,
+
+                    "rotation": 45
+                },
+
+                {
+                    "id": "SECRETARY_OFFICE_TERMINAL_DESK",
+                    "type": "TERMINAL_DESK",
+                    "variant": "GDR_TERMINAL",
+                    "object": "SECRETARY_OFFICE_TERMINAL_DESK",
+
+                    "x": 31,
+                    "y": 71,
+
+                    "width": 5,
+                    "height": 4
+                },
+
+                {
+                    "id": "SECRETARY_OFFICE_SECURE_CABINET",
+                    "type": "SECURE_CABINET_HALF",
+                    "variant": "SECURE_CABINET",
+                    "object": "SECRETARY_OFFICE_SECURE_CABINET",
+
+                    "x": 31,
+                    "y": 45,
+
+                    "width": 6,
+                    "height": 2
+                },
+
+                {
+                    "id": "SECRETARY_OFFICE_OFFICE_BOOKCASE_01",
+                    "type": "BOOKCASE",
+                    "variant": "BOOKCASE",
+                    "object": "SECRETARY_OFFICE_OFFICE_BOOKCASE_01",
+
+                    "x": 44,
+                    "y": 67 ,
+
+                    "width": 2,
+                    "height": 6
+                },
+
+                {
+                    "id": "SECRETARY_OFFICE_OFFICE_BOOKCASE_02",
+                    "type": "BOOKCASE",
+                    "variant": "BOOKCASE",
+                    "object": "SECRETARY_OFFICE_OFFICE_BOOKCASE_02",
+
+                    "x": 38,
+                    "y": 73,
+
+                    "width": 6,
+                    "height": 2
+                },
+
+                {"type": "CHAIR",   "centre_x": 42, "centre_y": 49, "width": 2, "height": 2,    "rotation": 45},
+                {"type": "CHAIR",   "x": 31,    "y": 55,    "width": 2, "height": 2},
+                {"type": "CHAIR",   "x": 31,    "y": 58,    "width": 2, "height": 2},
+                {"type": "CHAIR",   "x": 31,    "y": 61,    "width": 2, "height": 2},
+                {"type": "CHAIR",   "x": 31,    "y": 64,    "width": 2, "height": 2}
+            ]
+        },
+
+        {   "id": "DIRECTOR_OFFICE",
+
+            "regions": [{"x": 0,    "y": 44,    "width": 31,    "height": 32}],
+
+            "geometry": [
+                {"type": "FLOOR_D", "x": 1, "y": 45,    "width": 29,    "height": 30},
+
+                {
+                    "id": "DIRECTOR_OFFICE_DESK",
+                    "type": "STANDARD_DESK",
+                    "variant": "STANDARD_DESK",
+                    "object": "DIRECTOR_OFFICE_DESK",
+
+                    "centre_x": 9,
+                    "centre_y": 52,
+
+                    "width": 8,
+                    "height": 4,
+
+                    "rotation": -45
+                },
+
+                {
+                    "id": "DIRECTOR_OFFICE_BOARDROOM_TABLE",
+                    "type": "TABLE",
+                    "variant": "BOARDROOM_TABLE",
+                    "object": "DIRECTOR_OFFICE_BOARDROOM_TABLE",
+
+                    "x": 11,
+                    "y": 64,
+
+                    "width": 10,
+                    "height": 6
+                },
+
+                {
+                    "id": "DIRECTOR_OFFICE_TERMINAL_DESK",
+                    "type": "TERMINAL_DESK",
+                    "variant": "GDR_TERMINAL",
+                    "object": "DIRECTOR_OFFICE_TERMINAL_DESK",
+
+                    "x": 25,
+                    "y": 71,
+
+                    "width": 5,
+                    "height": 4
+                },
+
+                {
+                    "id": "DIRECTOR_OFFICE_SECURE_CABINET",
+                    "type": "SECURE_CABINET_HALF",
+                    "variant": "SECURE_CABINET",
+                    "object": "DIRECTOR_OFFICE_SECURE_CABINET",
+
+                    "x": 24,
+                    "y": 45,
+
+                    "width": 6,
+                    "height": 2
+                },
+
+                {
+                    "id": "DIRECTOR_OFFICE_BOOKCASE_01",
+                    "type": "BOOKCASE",
+                    "variant": "BOOKCASE",
+                    "object": "DIRECTOR_OFFICE_BOOKCASE_01",
+
+                    "x": 1,
+                    "y": 53,
+
+                    "width": 2,
+                    "height": 6
+                },
+
+                {
+                    "id": "DIRECTOR_OFFICE_BOOKCASE_02",
+                    "type": "BOOKCASE",
+                    "variant": "BOOKCASE",
+                    "object": "DIRECTOR_OFFICE_BOOKCASE_02",
+
+                    "x": 1,
+                    "y": 60,
+
+                    "width": 2,
+                    "height": 6
+                },
+
+                {
+                    "id": "DIRECTOR_OFFICE_BOOKCASE_03",
+                    "type": "BOOKCASE",
+                    "variant": "BOOKCASE",
+                    "object": "DIRECTOR_OFFICE_BOOKCASE_03",
+
+                    "x": 1,
+                    "y": 67,
+
+                    "width": 2,
+                    "height": 6
+                },
+
+                {
+                    "id": "DIRECTOR_OFFICE_BOOKCASE_04",
+                    "type": "BOOKCASE",
+                    "variant": "BOOKCASE",
+                    "object": "DIRECTOR_OFFICE_BOOKCASE_04",
+
+                    "x": 3,
+                    "y": 73,
+
+                    "width": 6,
+                    "height": 2
+                },
+
+                {
+                    "id": "DIRECTOR_OFFICE_BOOKCASE_05",
+                    "type": "BOOKCASE",
+                    "variant": "BOOKCASE",
+                    "object": "DIRECTOR_OFFICE_BOOKCASE_05",
+
+                    "x": 10,
+                    "y": 73,
+
+                    "width": 6,
+                    "height": 2
+                },
+
+                {
+                    "id": "DIRECTOR_OFFICE_BOOKCASE_06",
+                    "type": "BOOKCASE",
+                    "variant": "BOOKCASE",
+                    "object": "DIRECTOR_OFFICE_BOOKCASE_06",
+
+                    "x": 17,
+                    "y": 73,
+
+                    "width": 6,
+                    "height": 2
+                },
+
+                {"type": "CHAIR",   "centre_x": 9,  "centre_y": 49, "width": 2, "height": 2,    "rotation": -45},
+                {"type": "CHAIR",   "centre_x": 10, "centre_y": 58, "width": 2, "height": 2,    "rotation": -45},
+                {"type": "CHAIR",   "centre_x": 13, "centre_y": 55, "width": 2, "height": 2,    "rotation": -45},
+                {"type": "CHAIR",   "centre_x": 15, "centre_y": 52, "width": 2, "height": 2,    "rotation": -45},
+                {"type": "CHAIR",   "x": 9,         "y": 65,        "width": 2, "height": 2},
+                {"type": "CHAIR",   "x": 12,        "y": 62,        "width": 2, "height": 2},
+                {"type": "CHAIR",   "x": 15,        "y": 62,        "width": 2, "height": 2},
+                {"type": "CHAIR",   "x": 18,        "y": 62,        "width": 2, "height": 2},
+                {"type": "CHAIR",   "x": 12,        "y": 68,        "width": 2, "height": 2},
+                {"type": "CHAIR",   "x": 15,        "y": 68,        "width": 2, "height": 2},
+                {"type": "CHAIR",   "x": 18,        "y": 68,        "width": 2, "height": 2},
+                {"type": "CHAIR",   "x": 21,        "y": 65,        "width": 2, "height": 2},
+                {"type": "SOFA",    "x": 27,        "y": 57,        "width": 3, "height": 6}
+            ]
+        },
+    ],
+
+    "shared_geometry": [
+
+    /* EXTERNAL DOUBLE DOORS */
+
+    {"id": "ENTRY_01",      "type": "DOOR", "from": "OUTSIDE",              "to": "RECEPTION",          "x": 45,    "y": 0,     "width": 5, "height": 1},
+    {"id": "ENTRY_02",      "type": "DOOR", "from": "OUTSIDE",              "to": "RECEPTION",          "x": 50,    "y": 0,     "width": 5, "height": 1},
+
+    /* EXTERNAL EMERGENCY EXIT */
+
+    {"id": "EMER_01",       "type": "DOOR", "from": "OUTSIDE",              "to": "CORRIDOR",           "x": 99,    "y": 34,    "width": 1, "height": 5},
+    {"id": "EMER_02",       "type": "DOOR", "from": "OUTSIDE",              "to": "CORRIDOR",           "x": 99,    "y": 39,    "width": 1, "height": 4},
+
+    /* INTERNAL DOORS */
+
+    {"id": "COR_REC",       "type": "DOOR", "from": "CORRIDOR",             "to": "RECEPTION",          "x": 54,    "y": 33,    "width": 5, "height": 1},
+    {"id": "COR_RECO",      "type": "DOOR", "from": "CORRIDOR",             "to": "RECORDS_OFFICE",     "x": 46,    "y": 37,    "width": 1, "height": 5},
+    {"id": "COR_OFF",       "type": "DOOR", "from": "CORRIDOR",             "to": "MAIN_OFFICE",        "x": 81,    "y": 33,    "width": 5, "height": 1},
+    {"id": "COR_SEC",       "type": "DOOR", "from": "CORRIDOR",             "to": "SECURITY",           "x": 66,    "y": 43,    "width": 5, "height": 1},
+    {"id": "COR_IT",        "type": "DOOR", "from": "CORRIDOR",             "to": "IT_SUPPORT",         "x": 87,    "y": 43,    "width": 5, "height": 1},
+    {"id": "COR_SECR",      "type": "DOOR", "from": "CORRIDOR",             "to": "SECRETARY_OFFICE",   "x": 46,    "y": 58,    "width": 1, "height": 5},
+    {"id": "COR_STAFF",     "type": "DOOR", "from": "CORRIDOR",             "to": "STAFF_ROOM",         "x": 46,    "y": 77,    "width": 1, "height": 5},
+    {"id": "COR_FAC",       "type": "DOOR", "from": "CORRIDOR",             "to": "FACILITIES",         "x": 49,    "y": 84,    "width": 5, "height": 1},
+    {"id": "REC_OFF",       "type": "DOOR", "from": "RECEPTION",            "to": "MAIN_OFFICE",        "x": 66,    "y": 26,    "width": 1, "height": 5},
+    {"id": "IT_SERV_01",    "type": "DOOR", "from": "IT_SUPPORT",           "to": "SERVER_ROOM",        "x": 87,    "y": 56,    "width": 5, "height": 1},
+    {"id": "SERV_01_02",    "type": "DOOR", "from": "SERVER_ROOM",          "to": "SERVER_ROOM",        "x": 68,    "y": 67,    "width": 5, "height": 1},
+    {"id": "SECR_DIR",      "type": "DOOR", "from": "SECRETARY_OFFICE",     "to": "DIRECTOR_OFFICE",    "x": 30,    "y": 49,    "width": 1, "height": 5},
+
+    /* INTERNAL WINDOWS */
+
+    {"type": "WINDOW", "x": 62, "y": 43,    "width": 3, "height": 1},
+    {"type": "WINDOW", "x": 72, "y": 43,    "width": 3, "height": 1},
+
+    /* EXTERNAL WINDOWS */
+
+    /* - NORTH WALL */
+
+    {"type": "WINDOW", "x": 1,  "y": 0,	    "width": 9,    "height": 1},
+    {"type": "WINDOW", "x": 12, "y": 0, 	"width": 10,   "height": 1},
+    {"type": "WINDOW", "x": 24, "y": 0,	    "width": 9,    "height": 1},
+    {"type": "WINDOW", "x": 35, "y": 0, 	"width": 9,    "height": 1},
+    {"type": "WINDOW", "x": 56, "y": 0, 	"width": 9,    "height": 1},
+    {"type": "WINDOW", "x": 66, "y": 0, 	"width": 9,    "height": 1},
+    {"type": "WINDOW", "x": 79, "y": 0, 	"width": 9,    "height": 1},
+    {"type": "WINDOW", "x": 90, "y": 0, 	"width": 9,	   "height": 1},
+
+    /* - EAST WALL*/
+
+    {"type": "WINDOW", "x": 99, "y": 1,     "width": 1,    "height": 9},
+    {"type": "WINDOW", "x": 99, "y": 12,    "width": 1,    "height": 9},
+    {"type": "WINDOW", "x": 99, "y": 23,    "width": 1,    "height": 9},
+    {"type": "WINDOW", "x": 99, "y": 45,    "width": 1,    "height": 10},
+    {"type": "WINDOW", "x": 99, "y": 57,    "width": 1,    "height": 9},
+    {"type": "WINDOW", "x": 99, "y": 68,	"width": 1,    "height": 6},
+    {"type": "WINDOW", "x": 99, "y": 75,	"width": 1,    "height": 9},
+    {"type": "WINDOW", "x": 99, "y": 87,	"width": 1,    "height": 10},
+
+    /* - SOUTH WALL */
+
+    {"type": "WINDOW", "x": 92, "y": 99,	"width": 6,    "height": 1},
+    {"type": "WINDOW", "x": 81, "y": 99,	"width": 9,    "height": 1},
+    {"type": "WINDOW", "x": 70, "y": 99,	"width": 9,    "height": 1},
+    {"type": "WINDOW", "x": 59, "y": 99,	"width": 9,    "height": 1},
+    {"type": "WINDOW", "x": 48, "y": 99,	"width": 9,    "height": 1},
+    {"type": "WINDOW", "x": 35, "y": 99,	"width": 9,    "height": 1},
+    {"type": "WINDOW", "x": 24, "y": 99,	"width": 9,    "height": 1},
+    {"type": "WINDOW", "x": 13, "y": 99,	"width": 9,    "height": 1},
+    {"type": "WINDOW", "x": 2,  "y": 99,	"width": 9,    "height": 1},
+
+    /* - WEST WALL */
+
+    {"type": "WINDOW", "x": 0, "y": 89,	    "width": 1,		"height": 10},
+    {"type": "WINDOW", "x": 0, "y": 76,	    "width": 1,		"height": 10},
+    {"type": "WINDOW", "x": 0, "y": 65,	    "width": 1,		"height": 9},
+    {"type": "WINDOW", "x": 0, "y": 56,	    "width": 1,		"height": 9},
+    {"type": "WINDOW", "x": 0, "y": 46,	    "width": 1,		"height": 9},
+    {"type": "WINDOW", "x": 0, "y": 34,	    "width": 1,		"height": 9},
+    {"type": "WINDOW", "x": 0, "y": 23, 	"width": 1,		"height": 9},
+    {"type": "WINDOW", "x": 0, "y": 12, 	"width": 1,		"height": 9},
+    {"type": "WINDOW", "x": 0, "y": 1,      "width": 1,		"height": 9}
+
+    ]
+}

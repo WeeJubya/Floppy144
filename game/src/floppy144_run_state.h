@@ -272,3 +272,10 @@ bool Floppy144RunStateSetProjection
     Floppy144RunState *state,
  Floppy144Projection projection
 );
+
+bool Floppy144RunStateMovePlayerSite
+(
+    Floppy144RunState *state,
+ int32_t delta_x16,
+ int32_t delta_y16
+);

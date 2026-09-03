@@ -1,133 +1,160 @@
 # Floppy//144 commented source tour
 
-This folder contains the same game-source code with explanatory comments added. The comments are deliberately aimed at understanding the architecture rather than narrating every assignment. C comments are removed by the compiler, so they do not add to the executable size.
+This folder contains the game source with architecture-oriented comments. C comments do not add to the release executable size.
 
 ## Start here
 
 Open the files in this order:
 
-1. `floppy144_collection.h` - stable IDs for archive collections.
-2. `floppy144_world.h` - persistent facts about the current reconstruction.
-3. `floppy144_main.c` - screen state machine, Win32 input and top-level routing.
-4. `floppy144_terminal.c` - collection selection and restoration.
-5. `floppy144_catalogue.c` - generated records, authored documents and evidence detection.
-6. `floppy144_office.c` - collision, interactions and physical reconstruction.
-7. `floppy144_draw.c` - the tiny rectangle and bitmap-text renderer.
-8. `floppy144_recovery.c` - the opening recovery interface.
+1. `floppy144_collection.h` - stable archive collection IDs.
+2. `floppy144_run_state.h` - authoritative state for one recovery session.
+3. `floppy144_world.h` - hydrated runtime view used by legacy/current world-facing systems.
+4. `floppy144_main.c` - screen state machine, Win32 input and top-level routing.
+5. `floppy144_site.h` / `floppy144_site.c` - generated Site geometry, collision and movement.
+6. `floppy144_site_rooms.h` / `floppy144_site_rooms.c` - floor-owned room membership and camera/view regions.
+7. `floppy144_site_2d.c` - Site Exploration shell, scrolling viewport and procedural 2D furniture rendering.
+8. `floppy144_site_object.c` - Site-space bridge to registered object interactions/visibility.
+9. `floppy144_terminal.c` - collection selection and restoration.
+10. `floppy144_catalogue.c` - generated records, authored documents and evidence detection.
+11. `floppy144_draw.c` - small rectangle and bitmap-text renderer.
+12. `floppy144_recovery.c` - opening recovery interface.
+
+## Site source of truth
+
+The human-authored physical Site lives in `site_layout.jsonc` at the project root.
+
+Development pipeline:
+
+```text
+site_layout.jsonc
+        |
+        v
+tools/site_compiler.c
+        |
+        v
+game/src/floppy144_site_generated.def
+        |
+        +--> floppy144_site.c
+        +--> floppy144_site_rooms.c
+        +--> Site rendering / collision / room topology
+```
+
+`floppy144_site_generated.def` is generated build data. Do not hand-edit it. Change `site_layout.jsonc` and regenerate instead.
+
+Room rules:
+
+- `FLOOR_A` / `FLOOR_B` / `FLOOR_C` / `FLOOR_D` own walkable room membership.
+- authored room `regions` define camera/view extents and may overlap on shared boundaries.
+- doors are physical shared geometry with explicit bidirectional room topology.
+- windows, walls and other shared boundary structures do not own a room floor.
 
 ## What owns what?
 
-`floppy144_main.c` owns the active screen and coordinates the modules. It is the only place where a catalogue evidence result is translated into a specific world-state flag.
+`floppy144_main.c` owns the active screen and coordinates modules.
 
-`Floppy144WorldState` owns facts that should remain true when the player leaves a screen, such as `hr02_restored` or `fa03_suppression_service_read`.
+`Floppy144RunState` is authoritative for one recovery session. It owns the player's canonical Site position, reconstructed-room bits, object visibility/access state, restored collections, triggers, interactions, evidence, notebook state, capabilities and projection state.
 
-`Floppy144TerminalState` owns temporary terminal UI state, such as which collection is selected and whether the detail panel is open.
+`Floppy144WorldState` is a runtime world-facing view hydrated from `Floppy144RunState` where existing systems still need it. New persistent gameplay state should normally be added to RunState rather than creating another parallel owner.
 
-`Floppy144CatalogueState` owns temporary catalogue UI state, such as the selected record, scroll position and whether a document is open.
+`Floppy144TerminalState` owns temporary terminal UI state, such as selection and detail-panel state.
 
-`Floppy144Player` owns only the player's logical-canvas position.
+`Floppy144CatalogueState` owns temporary catalogue UI state, such as selected record, scroll position and document-open state.
 
-## Screen flow
+The player has no separate prototype Office-player object. Canonical position lives in `Floppy144RunState.player_site_x` / `player_site_y` using Site fixed-point coordinates.
+
+## Site Exploration flow
 
 ```text
 RECOVERY
   Enter once: recovery begins
-  Enter again: OFFICE
+  Enter again: SITE EXPLORATION
 
-OFFICE
-  E near terminal: TERMINAL
-  E near evidence object: show inspection notice
+SITE EXPLORATION
+  WASD / arrows: movement through generated Site geometry
+  E near eligible object: interaction
+  valid reconstructed doorway: move into adjoining room
+  blocked/unreconstructed doorway: remain in current room
   Escape: RECOVERY
 
 TERMINAL
   Enter on collection: open details
   Enter on unrestored collection: restore it
   Enter on restored optional collection: CATALOGUE
-  Escape: close details, then return to OFFICE
+  Escape: close details, then return to SITE EXPLORATION
 
 CATALOGUE
-  Enter: open selected document and possibly record evidence
+  Enter: open selected document and possibly establish evidence
   Escape: close document, then return to TERMINAL
 ```
 
-## Example: reading FA-03 record 063
+## Site drawing model
+
+The logical canvas is 640x360. Site Exploration keeps the fixed Stage-1 shell and draws the scrolling world only inside its inset viewport.
+
+Rendering order is broadly:
 
 ```text
-Win32 sends VK_RETURN
-        |
-        v
-floppy144_main.c calls Floppy144CatalogueOpenDocument
-        |
-        v
-Floppy144CatalogueSelectedProvidesEvidence checks:
-    collection == FA-03
-    selected_index == 62  (visible record 063)
-        |
-        v
-global_world.fa03_suppression_service_read = true
-        |
-        +--> terminal list displays EVIDENCE
-        +--> terminal details display STATUS: EVIDENCE FOUND
-        +--> future office code can unlock suppression-panel inspection
+room floor
+room perimeter
+shared doors
+windows / structural geometry
+furniture / fixtures
+player
+fixed Site Exploration UI
 ```
 
-## Example: HR-02 desk evidence
+The camera uses a fixed Site zoom, follows the player and clamps to the current room view extent with a small gutter so room edges remain visible.
 
-```text
-Restore HR-02
-        |
-        v
-Office labels and desk props appear
-        |
-        v
-Read HR-02 visible record 038
-        |
-        v
-hr02_desk_reallocation_read becomes true
-        |
-        v
-Standing near Desk 01 or Desk 04 shows an inspection prompt
-        |
-        v
-E displays the reconstructed meaning of that desk detail
-```
-
-## Drawing model
-
-Every screen creates a `Floppy144Surface` that points at F144's software backbuffer.
-
-- clear surface
-- filled rectangle
-- rectangle outline
-- 5x7 bitmap text
-
-The logical canvas is 640x360. F144 presents it in a 1280x720 Win32 window, preserving crisp two-times scaling.
+Furniture geometry comes from the generated Site data. `floppy144_site_2d.c` adds procedural visual detail so the JSONC floorplan remains physical/layout data rather than sprite artwork.
 
 ## Collision model
 
-The office keeps a table of solid furniture rectangles. A proposed player position is valid only when it remains within the room and does not overlap any obstacle.
+Collision is handled in `floppy144_site.c`.
 
-Movement tests horizontal and vertical axes separately. This lets the player slide along furniture instead of stopping completely when one axis is blocked.
+The player's visible 2D character is deliberately larger than the movement footprint. The movement footprint is a compact ground-space box so the player can pass through authored doorways while retaining the intended character proportions on screen.
 
-Interaction zones are separate from collision. Desk interaction expands the relevant obstacle by eight pixels, creating a small halo without enlarging the solid desk itself.
+A valid player footprint must remain over walkable floor/door geometry and must not intersect blocking furniture or structure. Horizontal and vertical movement are resolved independently so the player can slide along obstacles.
+
+Room classification is derived from floor ownership. Door thresholds use generated door topology to resolve the transition between adjoining rooms.
+
+## Object interaction and reconstruction visibility
+
+`floppy144_site_object.c` bridges canonical Site coordinates to the existing registered-object interaction system.
+
+Ordinary Site furniture is scenery and appears with its reconstructed room. Geometry that has migrated to a registered gameplay object can additionally obey object visibility/reveal/collection state.
+
+Optional `object` hooks authored in `site_layout.jsonc` are future-facing metadata. They do not require every named chair, cabinet or fixture to become a gameplay object immediately.
+
+## Example: reconstruction opening the Site
+
+```text
+restore collection
+        |
+        v
+RunState collection bit changes
+        |
+        +--> required room reconstruction bits are set
+        |
+        +--> WorldState is hydrated as needed
+        |
+        +--> Site renderer can display the reconstructed room
+        |
+        +--> movement may cross doors into that room
+```
 
 ## Catalogue generation
 
-The catalogue does not store 100 complete titles per collection. It combines:
-
-- collection-specific subject vocabulary
-- shared document-form vocabulary
-- deterministic index arithmetic
-
-The same collection and record index always generate the same ID and title. Authored evidence records override this procedural output with stable IDs and titles.
+The catalogue does not store 100 complete titles per collection. It combines collection-specific vocabulary, shared document-form vocabulary and deterministic index arithmetic. The same collection and record index always generate the same ID/title, while authored evidence records override procedural output where required.
 
 ## Safest places to extend next
 
-- Add collection IDs in `floppy144_collection.h`.
-- Add persistent restoration and evidence fields in `floppy144_world.h`.
-- Add terminal labels and restoration handling in `floppy144_terminal.c`.
-- Add catalogue vocabulary, authored record positions and renderers in `floppy144_catalogue.c`.
-- Add physical objects and proximity functions in `floppy144_office.c`.
-- Route new evidence flags in the catalogue Enter block in `floppy144_main.c`.
+- Add stable collection IDs/metadata through the collection registry files.
+- Add persistent session facts to `Floppy144RunState`.
+- Add authored physical Site geometry to `site_layout.jsonc`, then regenerate the Site data.
+- Add Site collision/movement behaviour in `floppy144_site.c`.
+- Add room/topology queries in `floppy144_site_rooms.c`.
+- Add Site-space interaction bridging in `floppy144_site_object.c`.
+- Add procedural 2D presentation in `floppy144_site_2d.c`.
+- Add terminal/catalogue behaviour in their existing modules rather than duplicating state in the Site layer.
 
 Keep permanent build configuration in Premake rather than editing generated `.vcxproj` files.
