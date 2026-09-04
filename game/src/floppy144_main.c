@@ -64,9 +64,8 @@ static const char floppy144_autosave_path[] = "floppy144_auto.sav";
 static const char floppy144_profile_path[] = "floppy144_profile.dat";
 static const char floppy144_settings_path[] = "floppy144_settings.dat";
 
-
-
 static bool global_recorded_session_available;
+static bool global_recorded_session_is_autosave;
 
 /*
  * Short-lived interface state
@@ -97,7 +96,10 @@ typedef enum Floppy144PersistenceWarning
     1U << 1,
 
     FLOPPY144_PERSISTENCE_WARNING_SETTINGS =
-    1U << 2
+    1U << 2,
+
+    FLOPPY144_PERSISTENCE_WARNING_AUTOSAVE =
+    1U << 3
 }
 Floppy144PersistenceWarning;
 
@@ -257,6 +259,12 @@ static const char *Floppy144PersistenceWarningText(
             "SETTINGS INVALID - DEFAULTS APPLIED";
         }
 
+        case FLOPPY144_PERSISTENCE_WARNING_AUTOSAVE:
+        {
+            return
+            "AUTOSAVE COULD NOT BE RECORDED";
+        }
+
         case FLOPPY144_PERSISTENCE_WARNING_NONE:
         {
             return NULL;
@@ -265,7 +273,7 @@ static const char *Floppy144PersistenceWarningText(
         default:
         {
             return
-            "PERSISTENCE WARNING - MULTIPLE FILES INVALID";
+            "PERSISTENCE WARNING - MULTIPLE OPERATIONS FAILED";
         }
     }
 }
@@ -274,15 +282,30 @@ static bool Floppy144RecordedSessionAvailable(
     void
 )
 {
-    bool file_exists =
+    bool manual_exists;
+    bool autosave_exists;
+
+    manual_exists =
     Floppy144PersistenceFileExists(
         floppy144_manual_save_path
+    );
+
+    autosave_exists =
+    Floppy144PersistenceFileExists(
+        floppy144_autosave_path
     );
 
     Floppy144RunStateReset(
         &global_recorded_run_state
     );
 
+    global_recorded_session_is_autosave =
+    false;
+
+    /*
+     * An explicit player-recorded session always takes precedence over
+     * the automatic safety copy.
+     */
     if(
         Floppy144PersistenceLoadRunState(
             floppy144_manual_save_path,
@@ -293,7 +316,33 @@ static bool Floppy144RecordedSessionAvailable(
         return true;
     }
 
-    if(file_exists)
+    if(manual_exists)
+    {
+        global_persistence_warnings |=
+        FLOPPY144_PERSISTENCE_WARNING_SAVE;
+    }
+
+    /*
+     * If no usable manual checkpoint exists, fall back to the autosave.
+     */
+    Floppy144RunStateReset(
+        &global_recorded_run_state
+    );
+
+    if(
+        Floppy144PersistenceLoadRunState(
+            floppy144_autosave_path,
+            &global_recorded_run_state
+        )
+    )
+    {
+        global_recorded_session_is_autosave =
+        true;
+
+        return true;
+    }
+
+    if(autosave_exists)
     {
         global_persistence_warnings |=
         FLOPPY144_PERSISTENCE_WARNING_SAVE;
@@ -521,9 +570,14 @@ static void Floppy144MainMenuActivate(
                 )
             )
             {
-                global_recorded_session_available = true;
+                global_recorded_session_available =
+                true;
 
-                global_recorded_run_state = global_run_state;
+                global_recorded_session_is_autosave =
+                false;
+
+                global_recorded_run_state =
+                global_run_state;
             }
 
             Floppy144Redraw(
@@ -538,7 +592,9 @@ static void Floppy144MainMenuActivate(
             if(
                 global_recorded_session_available &&
                 Floppy144PersistenceLoadRunState(
-                    floppy144_manual_save_path,
+                    global_recorded_session_is_autosave
+                    ? floppy144_autosave_path
+                    : floppy144_manual_save_path,
                     &global_run_state
                 )
             )
@@ -588,6 +644,9 @@ static void Floppy144MainMenuActivate(
              */
 
             global_recorded_session_available =
+                false;
+
+            global_recorded_session_is_autosave =
                 false;
 
             global_persistence_warnings |=
@@ -1045,10 +1104,25 @@ static LRESULT CALLBACK Floppy144WindowProc(
                 {
                     Floppy144UpdateDiscoveryProfile();
 
-                    Floppy144PersistenceSaveRunState(
-                        floppy144_autosave_path,
-                        &global_run_state
-                    );
+                    if(
+                        Floppy144PersistenceSaveRunState(
+                            floppy144_autosave_path,
+                            &global_run_state
+                        )
+                    )
+                    {
+                        global_persistence_warnings &=
+                        (uint8_t)~FLOPPY144_PERSISTENCE_WARNING_AUTOSAVE;
+                    }
+                    else
+                    {
+                        global_persistence_warnings |=
+                        FLOPPY144_PERSISTENCE_WARNING_AUTOSAVE;
+
+                        Floppy144Redraw(
+                            window
+                        );
+                    }
                 }
 
                 return 0;

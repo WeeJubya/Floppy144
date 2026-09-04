@@ -1,8 +1,22 @@
 #include "floppy144_persistence.h"
+#include "floppy144_site.h"
+
+#include <windows.h>
 
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
+
+static uint32_t Floppy144PersistenceReadU32
+(
+    const uint8_t *source
+){
+    return
+    (uint32_t)source[0] |
+    ((uint32_t)source[1] << 8U) |
+    ((uint32_t)source[2] << 16U) |
+    ((uint32_t)source[3] << 24U);
+}
 
 static void Floppy144PersistenceWriteU32
 (
@@ -22,15 +36,182 @@ static void Floppy144PersistenceWriteU32
     (uint8_t)((value >> 24U) & 0xffU);
 }
 
-static uint32_t Floppy144PersistenceReadU32
+static bool Floppy144PersistenceReplaceFile
 (
-    const uint8_t *source
-){
-    return
-    (uint32_t)source[0] |
-    ((uint32_t)source[1] << 8U) |
-    ((uint32_t)source[2] << 16U) |
-    ((uint32_t)source[3] << 24U);
+    const char *path,
+ const uint8_t *data,
+ uint32_t data_size
+)
+{
+    char temporary_path[MAX_PATH];
+
+    size_t path_length;
+
+    FILE *file =
+    NULL;
+
+    size_t written;
+
+    if(
+        path == NULL ||
+        data == NULL ||
+        data_size == 0U
+    )
+    {
+        return false;
+    }
+
+    path_length =
+    strlen(path);
+
+    /*
+     * Four characters for ".tmp" plus the terminating NUL.
+     */
+    if(
+        path_length + 5U >
+        sizeof(temporary_path)
+    )
+    {
+        return false;
+    }
+
+    memcpy(
+        temporary_path,
+        path,
+        path_length
+    );
+
+    memcpy(
+        &temporary_path[path_length],
+        ".tmp",
+        5U
+    );
+
+    /*
+     * Write alongside the destination so the final rename remains on the
+     * same filesystem. A stale temporary file from an interrupted previous
+     * attempt is safe to overwrite.
+     */
+    if(
+        fopen_s(
+            &file,
+            temporary_path,
+            "wb"
+        ) != 0 ||
+        file == NULL
+    )
+    {
+        return false;
+    }
+
+    written =
+    fwrite(
+        data,
+        1U,
+        (size_t)data_size,
+           file
+    );
+
+    if(
+        fclose(file) != 0 ||
+        written != (size_t)data_size
+    )
+    {
+        DeleteFileA(
+            temporary_path
+        );
+
+        return false;
+    }
+
+    /*
+     * The old valid destination remains intact until the new temporary file
+     * has been written and closed successfully.
+     */
+    if(
+        !MoveFileExA(
+            temporary_path,
+            path,
+            MOVEFILE_REPLACE_EXISTING |
+            MOVEFILE_WRITE_THROUGH
+        )
+    )
+    {
+        DeleteFileA(
+            temporary_path
+        );
+
+        return false;
+    }
+
+    return true;
+}
+
+static bool Floppy144PersistenceWordArrayValid
+(
+    const uint32_t *words,
+    uint32_t word_count,
+    uint32_t bit_count
+)
+{
+    uint32_t used_word_count;
+    uint32_t used_bits;
+    uint32_t valid_mask;
+    uint32_t index;
+
+    if(
+        words == NULL ||
+        word_count == 0U ||
+        bit_count == 0U
+    )
+    {
+        return false;
+    }
+
+    used_word_count =
+    (bit_count + FLOPPY144_RUN_WORD_BITS - 1U) /
+    FLOPPY144_RUN_WORD_BITS;
+
+    if(used_word_count > word_count)
+    {
+        return false;
+    }
+
+    used_bits =
+    bit_count %
+    FLOPPY144_RUN_WORD_BITS;
+
+    if(used_bits != 0U)
+    {
+        valid_mask =
+        (1U << used_bits) - 1U;
+
+        if(
+            (words[used_word_count - 1U] & ~valid_mask) != 0U
+        )
+        {
+            return false;
+        }
+    }
+
+    /*
+     * Arrays may deliberately reserve more storage than the current registry
+     * requires. Those unused words must remain clear.
+     */
+
+    for(
+        index = used_word_count;
+    index < word_count;
+    ++index
+    )
+    {
+        if(words[index] != 0U)
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 static void Floppy144PersistenceEncodeHeader
@@ -124,8 +305,8 @@ static bool Floppy144PersistenceSettingsHeaderValid
 bool Floppy144PersistenceEncodeRunState
 (
     const Floppy144RunState *state,
- uint8_t *payload,
- uint32_t payload_size
+    uint8_t *payload,
+    uint32_t payload_size
 ){
     uint32_t offset =
     0U;
@@ -308,6 +489,112 @@ bool Floppy144PersistenceDecodeRunState
         return false;
     }
 
+    /*
+     * A loaded player position must represent a legal standing position in the
+     * current generated Site. This rejects corrupt coordinates as well as values
+     * outside the canonical Site.
+     */
+    if(
+        Floppy144SitePositionBlocked(
+            decoded.player_site_x,
+            decoded.player_site_y
+        )
+    )
+    {
+        return false;
+    }
+
+    /*
+     * Reject set bits that refer to IDs beyond the currently defined registries.
+     * Valid saves therefore cannot manufacture nonexistent rooms, objects,
+     * collections or other persisted entities.
+     */
+    if(
+        !Floppy144PersistenceWordArrayValid(
+            decoded.rooms,
+            (uint32_t)(
+                sizeof(decoded.rooms) /
+                sizeof(decoded.rooms[0])
+            ),
+            (uint32_t)FLOPPY144_ROOM_COUNT
+        ) ||
+        !Floppy144PersistenceWordArrayValid(
+            decoded.objects_visible,
+            (uint32_t)(
+                sizeof(decoded.objects_visible) /
+                sizeof(decoded.objects_visible[0])
+            ),
+            (uint32_t)FLOPPY144_OBJECT_COUNT
+        ) ||
+        !Floppy144PersistenceWordArrayValid(
+            decoded.objects_unlocked,
+            (uint32_t)(
+                sizeof(decoded.objects_unlocked) /
+                sizeof(decoded.objects_unlocked[0])
+            ),
+            (uint32_t)FLOPPY144_OBJECT_COUNT
+        ) ||
+        !Floppy144PersistenceWordArrayValid(
+            decoded.objects_open,
+            (uint32_t)(
+                sizeof(decoded.objects_open) /
+                sizeof(decoded.objects_open[0])
+            ),
+            (uint32_t)FLOPPY144_OBJECT_COUNT
+        ) ||
+        !Floppy144PersistenceWordArrayValid(
+            decoded.collections,
+            (uint32_t)(
+                sizeof(decoded.collections) /
+                sizeof(decoded.collections[0])
+            ),
+            (uint32_t)FLOPPY144_COLLECTION_COUNT
+        ) ||
+        !Floppy144PersistenceWordArrayValid(
+            decoded.triggers,
+            (uint32_t)(
+                sizeof(decoded.triggers) /
+                sizeof(decoded.triggers[0])
+            ),
+            (uint32_t)FLOPPY144_TRIGGER_COUNT
+        ) ||
+        !Floppy144PersistenceWordArrayValid(
+            decoded.interactions,
+            (uint32_t)(
+                sizeof(decoded.interactions) /
+                sizeof(decoded.interactions[0])
+            ),
+            (uint32_t)FLOPPY144_INTERACTION_COUNT
+        ) ||
+        !Floppy144PersistenceWordArrayValid(
+            decoded.evidence,
+            (uint32_t)(
+                sizeof(decoded.evidence) /
+                sizeof(decoded.evidence[0])
+            ),
+            (uint32_t)FLOPPY144_EVIDENCE_COUNT
+        ) ||
+        !Floppy144PersistenceWordArrayValid(
+            decoded.notebook,
+            (uint32_t)(
+                sizeof(decoded.notebook) /
+                sizeof(decoded.notebook[0])
+            ),
+            (uint32_t)FLOPPY144_NOTEBOOK_COUNT
+        ) ||
+        !Floppy144PersistenceWordArrayValid(
+            decoded.capabilities,
+            (uint32_t)(
+                sizeof(decoded.capabilities) /
+                sizeof(decoded.capabilities[0])
+            ),
+            (uint32_t)FLOPPY144_CAPABILITY_COUNT
+        )
+    )
+    {
+        return false;
+    }
+
     if(
         decoded.act >=
         (uint8_t)FLOPPY144_RUN_ACT_COMPLETE + 1U ||
@@ -405,10 +692,6 @@ bool Floppy144PersistenceSaveRunState
 
     Floppy144SaveHeader header;
 
-    FILE *file;
-
-    size_t written;
-
     if(
         path == NULL ||
         state == NULL
@@ -448,32 +731,12 @@ bool Floppy144PersistenceSaveRunState
         &header
     );
 
-    file =
-    NULL;
-
     if(
-        fopen_s(
-            &file,
+        !Floppy144PersistenceReplaceFile(
             path,
-            "wb"
-        ) != 0 ||
-        file == NULL
-    )
-    {
-        return false;
-    }
-
-    written =
-    fwrite(
-        file_data,
-        1U,
-        sizeof(file_data),
-           file
-    );
-
-    if(
-        fclose(file) != 0 ||
-        written != sizeof(file_data)
+            file_data,
+            (uint32_t)sizeof(file_data)
+        )
     )
     {
         return false;
@@ -601,7 +864,8 @@ bool Floppy144PersistenceEncodeProfile
     const Floppy144DiscoveryProfile *profile,
  uint8_t *payload,
  uint32_t payload_size
-){
+)
+{
     uint32_t offset =
     0U;
 
@@ -638,7 +902,6 @@ bool Floppy144PersistenceEncodeProfile
     /*
      * Three reserved scalar bytes.
      */
-
     offset +=
     3U;
 
@@ -700,7 +963,6 @@ bool Floppy144PersistenceEncodeProfile
      * The remaining V1 bytes stay zero and are reserved for future
      * cumulative discovery fields.
      */
-
     return
     offset <=
     FLOPPY144_PROFILE_PAYLOAD_V1_SIZE;
@@ -719,11 +981,6 @@ bool Floppy144PersistenceSaveProfile
     &file_data[FLOPPY144_SAVE_HEADER_SIZE];
 
     Floppy144SaveHeader header;
-
-    FILE *file =
-    NULL;
-
-    size_t written;
 
     if(
         path == NULL ||
@@ -765,28 +1022,11 @@ bool Floppy144PersistenceSaveProfile
     );
 
     if(
-        fopen_s(
-            &file,
+        !Floppy144PersistenceReplaceFile(
             path,
-            "wb"
-        ) != 0 ||
-        file == NULL
-    )
-    {
-        return false;
-    }
-
-    written =
-    fwrite(
-        file_data,
-        1U,
-        sizeof(file_data),
-           file
-    );
-
-    if(
-        fclose(file) != 0 ||
-        written != sizeof(file_data)
+            file_data,
+            (uint32_t)sizeof(file_data)
+        )
     )
     {
         return false;
@@ -911,7 +1151,8 @@ bool Floppy144PersistenceDecodeProfile
     Floppy144DiscoveryProfile *profile,
  const uint8_t *payload,
  uint32_t payload_size
-){
+)
+{
     Floppy144DiscoveryProfile decoded;
 
     uint32_t offset =
@@ -945,6 +1186,10 @@ bool Floppy144PersistenceDecodeProfile
     offset +=
     FLOPPY144_PROFILE_NAME_CAPACITY;
 
+    /*
+     * Stored operator names must contain a terminator inside the fixed
+     * profile field.
+     */
     for(
         index = 0U;
     index <
@@ -970,8 +1215,16 @@ bool Floppy144PersistenceDecodeProfile
     payload[offset++];
 
     /*
-     * Three reserved scalar bytes.
+     * Reserved V1 bytes must remain zero.
      */
+    if(
+        payload[offset] != 0U ||
+        payload[offset + 1U] != 0U ||
+        payload[offset + 2U] != 0U
+    )
+    {
+        return false;
+    }
 
     offset +=
     3U;
@@ -1028,6 +1281,49 @@ bool Floppy144PersistenceDecodeProfile
 
         offset +=
         4U;
+    }
+
+    /*
+     * Discovery storage deliberately has spare capacity. Bits referring to
+     * collection or evidence IDs which do not currently exist must remain
+     * clear.
+     */
+    if(
+        !Floppy144PersistenceWordArrayValid(
+            decoded.collections_ever_restored,
+            (uint32_t)(
+                sizeof(decoded.collections_ever_restored) /
+                sizeof(decoded.collections_ever_restored[0])
+            ),
+            (uint32_t)FLOPPY144_COLLECTION_COUNT
+        ) ||
+        !Floppy144PersistenceWordArrayValid(
+            decoded.evidence_ever_established,
+            (uint32_t)(
+                sizeof(decoded.evidence_ever_established) /
+                sizeof(decoded.evidence_ever_established[0])
+            ),
+            (uint32_t)FLOPPY144_EVIDENCE_COUNT
+        )
+    )
+    {
+        return false;
+    }
+
+    /*
+     * The remainder of the V1 payload is reserved and must remain zero.
+     */
+    for(
+        ;
+    offset <
+    FLOPPY144_PROFILE_PAYLOAD_V1_SIZE;
+    ++offset
+    )
+    {
+        if(payload[offset] != 0U)
+        {
+            return false;
+        }
     }
 
     if(
@@ -1163,11 +1459,6 @@ bool Floppy144PersistenceSaveSettings
 
     Floppy144SaveHeader header;
 
-    FILE *file =
-    NULL;
-
-    size_t written;
-
     if(
         path == NULL ||
         settings == NULL
@@ -1208,28 +1499,11 @@ bool Floppy144PersistenceSaveSettings
     );
 
     if(
-        fopen_s(
-            &file,
+        !Floppy144PersistenceReplaceFile(
             path,
-            "wb"
-        ) != 0 ||
-        file == NULL
-    )
-    {
-        return false;
-    }
-
-    written =
-    fwrite(
-        file_data,
-        1U,
-        sizeof(file_data),
-           file
-    );
-
-    if(
-        fclose(file) != 0 ||
-        written != sizeof(file_data)
+            file_data,
+            (uint32_t)sizeof(file_data)
+        )
     )
     {
         return false;
