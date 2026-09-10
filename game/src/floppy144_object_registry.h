@@ -69,6 +69,13 @@ typedef struct Floppy144ObjectInteractionDefinition
 
     const char *notice;
 
+    /*
+     * Optional canonical physical item ID (for example "P-012"). When set,
+     * the office dispatcher resolves and runs the JSON-defined interaction.
+     */
+    const char *pszPhysicalSourceId;
+
+    /* Compatibility path for presentation-only legacy effects. */
     const Floppy144Effect *effects;
     uint32_t effect_count;
 } Floppy144ObjectInteractionDefinition;

@@ -61,6 +61,9 @@ typedef struct Floppy144DocumentDefinition
      */
     const Floppy144Effect *effects;
     uint32_t effect_count;
+
+    /* Complete recovered body text compiled from the canonical JSON. */
+    const char *pszBody;
 }
 Floppy144DocumentDefinition;
 

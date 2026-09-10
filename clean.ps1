@@ -1,24 +1,17 @@
-if(Test-Path "vendor/imgsurf")
-{
-    Push-Location "vendor/imgsurf"
-    &./clean.ps1
-    Pop-Location
-}
+$ErrorActionPreference = "Stop"
+Set-StrictMode -Version Latest
 
-$toDelete =
-    "./build/",
-    "./bin/",
-    "./obj/",
-    "./log/"
+$toDelete = @(
+    ".\build",
+    ".\bin",
+    ".\obj",
+    ".\log"
+)
 
-Write-Host "cleaning the build..."
-
-foreach($folder in $toDelete)
-{
-    if(Test-Path $folder)
-    {
+Write-Host "Cleaning generated build output..."
+foreach($folder in $toDelete) {
+    if(Test-Path $folder) {
         Remove-Item $folder -Recurse -Force
     }
 }
-
-Write-Host "all clean!" -ForegroundColor Green
+Write-Host "Clean complete." -ForegroundColor Green

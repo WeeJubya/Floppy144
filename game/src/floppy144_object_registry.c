@@ -25,7 +25,10 @@ static const Floppy144ObjectInteractionDefinition
     "PRESS E TO ACCESS GDR TERMINAL",
     FLOPPY144_COLLECTION_HR01,
     "PRESS E TO REVIEW RESTORED COLLECTIONS",
-    NULL
+    NULL,
+    NULL,
+    NULL,
+    0U
 };
 
 static const Floppy144ObjectInteractionDefinition
@@ -37,7 +40,10 @@ static const Floppy144ObjectInteractionDefinition
     "PRESS E TO INSPECT RECONSTRUCTED DESK",
     FLOPPY144_COLLECTION_COUNT,
     NULL,
-    "DESK 01: MUG IS NOT AN ARCHIVE ITEM. FORM AR-7 NOT REQUIRED."
+    "DESK 01: MUG IS NOT AN ARCHIVE ITEM. FORM AR-7 NOT REQUIRED.",
+    NULL,
+    NULL,
+    0U
 };
 
 static const Floppy144ObjectInteractionDefinition
@@ -49,7 +55,10 @@ static const Floppy144ObjectInteractionDefinition
     "PRESS E TO INSPECT RECONSTRUCTED DESK",
     FLOPPY144_COLLECTION_COUNT,
     NULL,
-    "DESK 02: IT SUPPORT MOVED HERE PENDING TERMINAL CABLE REPLACEMENT."
+    "DESK 02: IT SUPPORT MOVED HERE PENDING TERMINAL CABLE REPLACEMENT.",
+    NULL,
+    NULL,
+    0U
 };
 /*
  * Desk 04 personnel-form investigation
@@ -70,6 +79,7 @@ static const Floppy144ObjectInteractionDefinition
     NULL,
     "PERSONNEL FORMS CONFIRM DESK 02 WAS REALLOCATED TO IT SUPPORT.",
     NULL,
+    NULL,
     0U
 };
 /*
@@ -79,19 +89,6 @@ static const Floppy144ObjectInteractionDefinition
  * confirms the collection evidence through the generic interaction effects.
  */
 
-static const Floppy144Effect
-floppy144_suppression_panel_effects[] =
-{
-    {
-        FLOPPY144_EFFECT_COMPLETE_INTERACTION,
-        (uint32_t)FLOPPY144_INTERACTION_I001
-    },
-
-    {
-        FLOPPY144_EFFECT_ESTABLISH_EVIDENCE,
-        (uint32_t)FLOPPY144_EVIDENCE_E001
-    }
-};
 
 static const Floppy144ObjectInteractionDefinition
     floppy144_suppression_panel_interaction =
@@ -103,8 +100,9 @@ static const Floppy144ObjectInteractionDefinition
     FLOPPY144_COLLECTION_COUNT,
     NULL,
     "SUPPRESSION PANEL: MANUAL DISCHARGE INPUT REMAINS CONNECTED.",
-    floppy144_suppression_panel_effects,
-    2U
+    "P-012",
+    NULL,
+    0U
 };
 
 /*
@@ -113,24 +111,6 @@ static const Floppy144ObjectInteractionDefinition
  * Physical inspection establishes E-002 and restores the handover folder
  * as the next physical evidence item.
  */
-static const Floppy144Effect
-floppy144_final_isolation_register_effects[] =
-{
-    {
-        FLOPPY144_EFFECT_COMPLETE_INTERACTION,
-        (uint32_t)FLOPPY144_INTERACTION_I002
-    },
-
-    {
-        FLOPPY144_EFFECT_ESTABLISH_EVIDENCE,
-        (uint32_t)FLOPPY144_EVIDENCE_E002
-    },
-
-    {
-        FLOPPY144_EFFECT_REVEAL_OBJECT,
-        (uint32_t)FLOPPY144_OBJECT_P014_SITE_CLOSURE_HANDOVER_FOLDER
-    }
-};
 
 static const Floppy144ObjectInteractionDefinition
 floppy144_final_isolation_register_interaction =
@@ -142,8 +122,9 @@ floppy144_final_isolation_register_interaction =
     FLOPPY144_COLLECTION_COUNT,
     NULL,
     "FINAL ISOLATION REGISTER: HALON SYSTEM RETAINED UNTIL FINAL HANDOVER.",
-    floppy144_final_isolation_register_effects,
-    3U
+    "P-033",
+    NULL,
+    0U
 };
 
 /*
@@ -152,19 +133,6 @@ floppy144_final_isolation_register_interaction =
  * This establishes E-003. DR-04 availability is deliberately handled by the
  * later evidence-prerequisite progression layer rather than being faked here.
  */
-static const Floppy144Effect
-floppy144_site_closure_handover_effects[] =
-{
-    {
-        FLOPPY144_EFFECT_COMPLETE_INTERACTION,
-        (uint32_t)FLOPPY144_INTERACTION_I003
-    },
-
-    {
-        FLOPPY144_EFFECT_ESTABLISH_EVIDENCE,
-        (uint32_t)FLOPPY144_EVIDENCE_E003
-    }
-};
 
 static const Floppy144ObjectInteractionDefinition
 floppy144_site_closure_handover_interaction =
@@ -176,8 +144,9 @@ floppy144_site_closure_handover_interaction =
     FLOPPY144_COLLECTION_COUNT,
     NULL,
     "HANDOVER FOLDER: ARCHIVE RECONCILIATION AND TERMINAL NETWORK REMEDIATION REMAIN OUTSTANDING.",
-    floppy144_site_closure_handover_effects,
-    2U
+    "P-014",
+    NULL,
+    0U
 };
 
 /*

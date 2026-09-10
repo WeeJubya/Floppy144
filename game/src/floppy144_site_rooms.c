@@ -133,7 +133,6 @@ static bool Floppy144SiteElementIsFloor(
 )
 {
     return
-        type >= (uint8_t)FLOPPY144_SITE_FLOOR_A &&
         type <= (uint8_t)FLOPPY144_SITE_FLOOR_D;
 }
 

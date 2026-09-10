@@ -6,6 +6,7 @@
  */
 
 #include "floppy144_effect.h"
+#include <stddef.h>
 
 /*
  * Apply one effect

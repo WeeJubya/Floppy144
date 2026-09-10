@@ -1,0 +1,59 @@
+FLOPPY//144 - STAGE 2 FINAL REGRESSION
+Date: 2026-09-10
+
+RESULT: PASS
+
+Gates completed in the assembly environment:
+
+1. Canonical JSON compilation
+   PASS
+   35 collections
+   157 readable documents
+   50 triggers
+   40 interactions
+   23 evidence definitions
+   161 physical items
+
+2. Generated-data reproducibility
+   PASS
+   floppy144_game_data.generated.inc reproduced byte-for-byte
+   floppy144_documents.generated.inc reproduced byte-for-byte
+   floppy144_site_generated.def reproduced from canonical Site JSON
+
+3. Strict C99 integration compile
+   PASS
+   Refactored/generated Stage 2 runtime modules compiled with:
+   -std=c99 -Wall -Wextra -Werror
+
+4. Stage 2 headless regression
+   PASS
+   Includes:
+   - generic trigger/effect execution
+   - derived connection unlocks and physical reveals
+   - FM-23 SET_PROJECTION -> isometric state
+   - reverse-order E-004 evidence synthesis
+   - all 40 physical-source interaction mappings
+   - Staff Room Hallowe'en ambient selection
+   - JSON drawing recipe interpretation
+   - Act II core completion inferred from generated branch dependencies
+
+5. Generated Site validation
+   PASS
+   Schema:            1
+   Site:              100 x 100
+   Rooms:             11 / 11
+   Room regions:      13
+   Room geometry:     202
+   Floor rectangles:  13
+   Shared geometry:   52
+   Doors:             16
+   Rotated items:     7
+   Object hooks:      104
+   Warnings:          0
+   Errors:            0
+
+Windows/MSVC note:
+The Win32 GUI executable and final 1,474,560-byte executable size gate must be
+run locally from a Visual Studio Developer PowerShell/Command Prompt. run.ps1
+performs the data build, Site validation and headless regression before invoking
+Premake/MSBuild and the release-size gate.

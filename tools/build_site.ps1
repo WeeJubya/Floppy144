@@ -8,10 +8,13 @@ Set-StrictMode -Version Latest
 
 $root = Split-Path -Parent $PSScriptRoot
 $compilerSource = Join-Path $PSScriptRoot "site_compiler.c"
-$compilerExe = Join-Path $PSScriptRoot "site_compiler.exe"
-$compilerObj = Join-Path $PSScriptRoot "site_compiler.obj"
+$toolObjDir = Join-Path $root "obj\tools"
+$compilerExe = Join-Path $toolObjDir "site_compiler.exe"
+$compilerObj = Join-Path $toolObjDir "site_compiler.obj"
 $inputPath = Join-Path $root $InputFile
 $outputPath = Join-Path $root $OutputFile
+
+New-Item -ItemType Directory -Force $toolObjDir | Out-Null
 
 Push-Location $root
 try {
@@ -25,6 +28,7 @@ try {
         /nologo `
         /TC `
         /std:c11 `
+        /utf-8 `
         /W4 `
         /WX `
         /O2 `

@@ -841,6 +841,174 @@ static void Floppy144CatalogueDrawFm13ServiceNote(
     );
 }
 
+/*
+ * Draw JSON-authored document prose inside the recovered-record panel.
+ *
+ * The font is tiny, so a lightweight word wrapper is enough here. Explicit
+ * newlines from the JSON are honoured and long paragraphs are wrapped to the
+ * panel width. Bodies in the Stage 2 data set fit within the available page.
+ */
+static void Floppy144CatalogueDrawBodyText(
+    Floppy144Surface *pSurface,
+    const char *pszBody,
+    uint32_t uColour
+)
+{
+    const uint32_t uLeft = 52U;
+    const uint32_t uTop = 102U;
+    const uint32_t uMaxWidth = 536U;
+    const uint32_t uLineHeight = 14U;
+    const uint32_t uMaxLines = 13U;
+    const char *pszCursor = pszBody;
+    char szLine[128];
+    uint32_t uLine = 0U;
+    uint32_t uLength = 0U;
+
+    if(pSurface == NULL || pszBody == NULL)
+    {
+        return;
+    }
+
+    while(*pszCursor != '\0' && uLine < uMaxLines)
+    {
+        const char *pszWordStart;
+        uint32_t uWordLength;
+        char szCandidate[128];
+        uint32_t uCandidateLength;
+
+        if(*pszCursor == '\n')
+        {
+            if(uLength > 0U)
+            {
+                szLine[uLength] = '\0';
+                Floppy144DrawText(
+                    pSurface,
+                    uLeft,
+                    uTop + uLine * uLineHeight,
+                    szLine,
+                    1U,
+                    uColour
+                );
+                ++uLine;
+                uLength = 0U;
+            }
+            else
+            {
+                ++uLine;
+            }
+
+            ++pszCursor;
+            continue;
+        }
+
+        while(*pszCursor == ' ' || *pszCursor == '\t')
+        {
+            ++pszCursor;
+        }
+
+        if(*pszCursor == '\0')
+        {
+            break;
+        }
+
+        pszWordStart = pszCursor;
+        uWordLength = 0U;
+        while(
+            pszCursor[uWordLength] != '\0' &&
+            pszCursor[uWordLength] != ' ' &&
+            pszCursor[uWordLength] != '\t' &&
+            pszCursor[uWordLength] != '\n'
+        )
+        {
+            ++uWordLength;
+        }
+
+        if(uWordLength >= sizeof(szLine))
+        {
+            uWordLength = (uint32_t)sizeof(szLine) - 1U;
+        }
+
+        uCandidateLength = uLength;
+        if(uCandidateLength > 0U && uCandidateLength + 1U < sizeof(szCandidate))
+        {
+            szCandidate[uCandidateLength++] = ' ';
+        }
+
+        if(uCandidateLength + uWordLength >= sizeof(szCandidate))
+        {
+            uWordLength =
+                (uint32_t)sizeof(szCandidate) - uCandidateLength - 1U;
+        }
+
+        if(uLength > 0U)
+        {
+            uint32_t uCopy;
+            for(uCopy = 0U; uCopy < uLength; ++uCopy)
+            {
+                szCandidate[uCopy] = szLine[uCopy];
+            }
+        }
+
+        {
+            uint32_t uCopy;
+            for(uCopy = 0U; uCopy < uWordLength; ++uCopy)
+            {
+                szCandidate[uCandidateLength + uCopy] = pszWordStart[uCopy];
+            }
+        }
+        uCandidateLength += uWordLength;
+        szCandidate[uCandidateLength] = '\0';
+
+        if(
+            uLength > 0U &&
+            Floppy144DrawTextWidth(szCandidate, 1U) > uMaxWidth
+        )
+        {
+            szLine[uLength] = '\0';
+            Floppy144DrawText(
+                pSurface,
+                uLeft,
+                uTop + uLine * uLineHeight,
+                szLine,
+                1U,
+                uColour
+            );
+            ++uLine;
+            uLength = 0U;
+
+            if(uLine >= uMaxLines)
+            {
+                break;
+            }
+
+            continue;
+        }
+
+        {
+            uint32_t uCopy;
+            for(uCopy = 0U; uCopy <= uCandidateLength; ++uCopy)
+            {
+                szLine[uCopy] = szCandidate[uCopy];
+            }
+        }
+        uLength = uCandidateLength;
+        pszCursor += uWordLength;
+    }
+
+    if(uLength > 0U && uLine < uMaxLines)
+    {
+        szLine[uLength] = '\0';
+        Floppy144DrawText(
+            pSurface,
+            uLeft,
+            uTop + uLine * uLineHeight,
+            szLine,
+            1U,
+            uColour
+        );
+    }
+}
+
 static void Floppy144CatalogueDrawDocument(
     Floppy144Surface *surface,
     const Floppy144CatalogueState *catalogue
@@ -859,6 +1027,7 @@ static void Floppy144CatalogueDrawDocument(
 
     if(
         authored_document != NULL &&
+        authored_document->pszBody == NULL &&
         authored_document->view ==
             FLOPPY144_DOCUMENT_VIEW_FM13_SUPPRESSION_SERVICE
     )
@@ -897,10 +1066,9 @@ static void Floppy144CatalogueDrawDocument(
     char record_id[24];
     char title[48];
 
-    bool authored =
+    bool bAuthored =
         authored_document != NULL &&
-        authored_document->view ==
-            FLOPPY144_DOCUMENT_VIEW_HR01_DESK_REALLOCATION;
+        authored_document->pszBody != NULL;
 
     Floppy144CatalogueBuildRecord(
         catalogue->collection,
@@ -997,123 +1165,40 @@ static void Floppy144CatalogueDrawDocument(
         border
     );
 
-    /* Choose between recovered content and the standard missing-content notice. */
-    switch(authored)
+    /* Draw complete authored JSON text when present. */
+    if(bAuthored)
     {
-        case true:
-        {
-            Floppy144DrawText(
-                surface,
-                52,
-                102,
-                "FROM: SENIOR ARCHIVIST",
-                1,
-                muted
-            );
+        Floppy144CatalogueDrawBodyText(
+            surface,
+            authored_document->pszBody,
+            text
+        );
+    }
+    else
+    {
+        Floppy144CatalogueTextCentred(
+            surface,
+            138,
+            "RECORD CONTENT NOT PRESENT ON DISK 144",
+            1,
+            amber
+        );
 
-            Floppy144DrawText(
-                surface,
-                52,
-                118,
-                "TO: RECORDS OFFICER",
-                1,
-                muted
-            );
+        Floppy144CatalogueTextCentred(
+            surface,
+            166,
+            "INDEX ENTRY RECONSTRUCTED FROM DISK 144 CROSS REFERENCES.",
+            1,
+            text
+        );
 
-            Floppy144DrawText(
-                surface,
-                52,
-                134,
-                "SUBJECT: TEMPORARY DESK REALLOCATION",
-                1,
-                text
-            );
-
-            Floppy144DrawFillRect(
-                surface,
-                52,
-                152,
-                536,
-                1,
-                border
-            );
-
-            Floppy144DrawText(
-                surface,
-                52,
-                168,
-                "IT SUPPORT IS TO REMAIN AT DESK 04 UNTIL",
-                1,
-                text
-            );
-
-            Floppy144DrawText(
-                surface,
-                52,
-                184,
-                "THE TERMINAL CABLE HAS BEEN REPLACED.",
-                1,
-                text
-            );
-
-            Floppy144DrawText(
-                surface,
-                52,
-                210,
-                "THE MUG AT DESK 01 IS NOT AN ARCHIVE ITEM",
-                1,
-                text
-            );
-
-            Floppy144DrawText(
-                surface,
-                52,
-                226,
-                "AND SHOULD NOT BE ENTERED ON FORM AR-7.",
-                1,
-                text
-            );
-
-            Floppy144DrawText(
-                surface,
-                52,
-                258,
-                "SIGNED: SENIOR ARCHIVIST",
-                1,
-                muted
-            );
-
-            break;
-        }
-
-        case false:
-        {
-            Floppy144CatalogueTextCentred(
-                surface,
-                138,
-                "RECORD CONTENT NOT PRESENT ON DISK 144",
-                1,
-                amber
-            );
-
-            Floppy144CatalogueTextCentred(
-                surface,
-                166,
-                "INDEX ENTRY RECONSTRUCTED FROM DISK 144 CROSS REFERENCES.",
-                1,
-                text
-            );
-
-            Floppy144CatalogueTextCentred(
-                surface,
-                184,
-                "THE DOCUMENT MAY EXIST IN AN UNAVAILABLE COLLECTION.",
-                1,
-                muted
-            );
-
-            break;
-        }
+        Floppy144CatalogueTextCentred(
+            surface,
+            184,
+            "THE DOCUMENT MAY EXIST IN AN UNAVAILABLE COLLECTION.",
+            1,
+            muted
+        );
     }
 
     Floppy144DrawFillRect(

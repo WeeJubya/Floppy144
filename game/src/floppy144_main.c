@@ -13,6 +13,7 @@
 
 #include "floppy144_catalogue.h"
 #include "floppy144_document.h"
+#include "floppy144_interaction_engine.h"
 #include "floppy144_object_registry.h"
 #include "floppy144_recovery.h"
 #include "floppy144_terminal.h"
@@ -20,6 +21,7 @@
 #include "floppy144_run_state.h"
 #include "floppy144_persistence.h"
 #include "floppy144_site_2d.h"
+#include "floppy144_site_isometric.h"
 #include "floppy144_site_object.h"
 #include "floppy144_site_view.h"
 
@@ -178,11 +180,26 @@ static void Floppy144Redraw(
 
         case FLOPPY144_SCREEN_OFFICE:
         {
-            Floppy144Site2DDraw(
-                global_runtime,
-                &global_run_state,
-                global_office_notice
-            );
+            /*
+             * Projection is persistent run state. FM-23 changes it through the
+             * same JSON SET_PROJECTION effect interpreter used by every trigger.
+             */
+            if(Floppy144RunStateIsIsometric(&global_run_state))
+            {
+                Floppy144SiteIsometricDraw(
+                    global_runtime,
+                    &global_run_state,
+                    global_office_notice
+                );
+            }
+            else
+            {
+                Floppy144Site2DDraw(
+                    global_runtime,
+                    &global_run_state,
+                    global_office_notice
+                );
+            }
 
             break;
         }
@@ -752,8 +769,29 @@ static void Floppy144InteractOffice(
      * registered content rather than the central interaction dispatcher.
      */
 
-    if(interaction->effect_count > 0U)
+    if(interaction->pszPhysicalSourceId != NULL)
     {
+        /*
+         * Resolve the physical item to its canonical JSON interaction. No
+         * object-specific progression function or T/I switch is needed here.
+         */
+        Floppy144InteractionId eInteraction =
+            Floppy144InteractionForPhysicalSource(
+                interaction->pszPhysicalSourceId
+            );
+
+        if(eInteraction != FLOPPY144_INTERACTION_COUNT)
+        {
+            (void)Floppy144InteractionTryRun(
+                &global_world,
+                &global_run_state,
+                eInteraction
+            );
+        }
+    }
+    else if(interaction->effect_count > 0U)
+    {
+        /* Compatibility path for non-canonical presentation effects. */
         Floppy144ApplyEffects(
             &global_world,
             &global_run_state,
@@ -1021,9 +1059,9 @@ static LRESULT CALLBACK Floppy144WindowProc(
                         false;
 
                         if(
-                            Floppy144RunStateTriggerFired(
+                            Floppy144RunStateRoomReconstructed(
                                 &global_run_state,
-                                FLOPPY144_TRIGGER_T001
+                                FLOPPY144_ROOM_RECEPTION
                             )
                         )
                         {

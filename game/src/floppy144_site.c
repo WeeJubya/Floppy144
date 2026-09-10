@@ -120,8 +120,7 @@ static bool Floppy144SiteElementIsWalkableGround(
 )
 {
     return
-        (type >= (uint8_t)FLOPPY144_SITE_FLOOR_A &&
-         type <= (uint8_t)FLOPPY144_SITE_FLOOR_D) ||
+        (type <= (uint8_t)FLOPPY144_SITE_FLOOR_D) ||
         type == (uint8_t)FLOPPY144_SITE_DOOR;
 }
 

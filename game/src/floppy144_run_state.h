@@ -102,6 +102,22 @@ typedef struct Floppy144RunState
 }
 Floppy144RunState;
 
+Floppy144RunAct Floppy144RunStateAct
+(
+    const Floppy144RunState *pState
+);
+
+bool Floppy144RunStateSetAct
+(
+    Floppy144RunState *pState,
+    Floppy144RunAct eAct
+);
+
+bool Floppy144RunStateIsIsometric
+(
+    const Floppy144RunState *pState
+);
+
 bool Floppy144RunStateSetBranch
 (
     Floppy144RunState *state,

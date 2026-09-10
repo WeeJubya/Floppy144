@@ -18,6 +18,36 @@
 #include <stdlib.h>
 #include <string.h>
 
+/*
+ * Return only the file-name component for generated comments. Using an
+ * absolute build-machine path would make otherwise identical generated Site
+ * definitions differ between workspaces.
+ */
+static const char *Floppy144SiteCompilerFileName(const char *pszPath)
+{
+    const char *pszSlash;
+    const char *pszBackslash;
+
+    if(pszPath == NULL)
+    {
+        return "site_layout.generated.jsonc";
+    }
+
+    pszSlash = strrchr(pszPath, '/');
+    pszBackslash = strrchr(pszPath, '\\');
+
+    if(pszSlash == NULL)
+    {
+        pszSlash = pszBackslash;
+    }
+    else if(pszBackslash != NULL && pszBackslash > pszSlash)
+    {
+        pszSlash = pszBackslash;
+    }
+
+    return pszSlash != NULL ? pszSlash + 1 : pszPath;
+}
+
 #define F144_SITE_SIZE 100
 #define F144_FIXED_ONE 16
 #define F144_SCHEMA_VERSION 1
@@ -2189,7 +2219,7 @@ static bool WriteGeneratedFile(const SiteData *site, const char *input_path, con
         " *\n"
         " * The JSONC file is the single authored Site source of truth.\n"
         " */\n\n",
-        input_path,
+        Floppy144SiteCompilerFileName(input_path),
         site->schema_version
     );
 

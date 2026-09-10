@@ -3,6 +3,7 @@
 #include "floppy144_object_registry.h"
 #include "floppy144_site.h"
 #include "floppy144_site_rooms.h"
+#include "floppy144_game_data.h"
 
 #include <string.h>
 
@@ -277,63 +278,14 @@ bool Floppy144RunStateBitClear
 
 bool Floppy144RunStateCollectionAvailable
 (
-    const Floppy144RunState *state,
- Floppy144CollectionId collection
+    const Floppy144RunState *pState,
+    Floppy144CollectionId eCollection
 )
 {
-    Floppy144TriggerId availability_trigger;
-
-    if(
-        state == NULL ||
-        !Floppy144RunStateCollectionValid(
-            collection
-        )
-    )
-    {
-        return false;
-    }
-
-    /*
-     * Once restored, a collection remains available regardless of the route
-     * which originally exposed it.
-     */
-    if(
-        Floppy144RunStateCollectionRestored(
-            state,
-            collection
-        )
-    )
-    {
-        return true;
-    }
-
-    /*
-     * DR-01 is the recovery bootstrap collection and is available from the
-     * start of a new recovery.
-     */
-    if(
-        collection ==
-        FLOPPY144_COLLECTION_DR01
-    )
-    {
-        return true;
-    }
-
-    availability_trigger = Floppy144CollectionAvailabilityTrigger(collection);
-
-    if(
-        availability_trigger !=
-        FLOPPY144_TRIGGER_COUNT
-    )
-    {
-        return
-        Floppy144RunStateTriggerFired(
-            state,
-            availability_trigger
-        );
-    }
-
-    return false;
+    const Floppy144CollectionDefinition *pDefinition;
+    if(pState == NULL || !Floppy144RunStateCollectionValid(eCollection)) return false;
+    pDefinition = Floppy144CollectionGet(eCollection);
+    return pDefinition != NULL && Floppy144GameDataCollectionEnabled(pState, pDefinition->code);
 }
 
 bool Floppy144RunStateCollectionRestored
@@ -732,91 +684,12 @@ void Floppy144RunStateSetPlayerSitePosition
  */
 static bool Floppy144RunStateRoomTransitionAllowed
 (
-    const Floppy144RunState *state,
- Floppy144RoomId from_room,
- Floppy144RoomId to_room
+    const Floppy144RunState *pState,
+    Floppy144RoomId eFromRoom,
+    Floppy144RoomId eToRoom
 )
 {
-    if(state == NULL)
-    {
-        return false;
-    }
-
-    /*
-     * Ordinary movement within one room never requires an access trigger.
-     */
-    if(from_room == to_room)
-    {
-        return true;
-    }
-
-    if(
-        from_room == FLOPPY144_ROOM_COUNT ||
-        to_room == FLOPPY144_ROOM_COUNT
-    )
-    {
-        return false;
-    }
-
-    /*
-     * Reception <-> Main Office
-     *
-     * T-002 reconstructs the Main Office.
-     * T-003 actually opens access to it.
-     */
-    if(
-        (
-            from_room == FLOPPY144_ROOM_RECEPTION &&
-            to_room == FLOPPY144_ROOM_MAIN_OFFICE
-        ) ||
-        (
-            from_room == FLOPPY144_ROOM_MAIN_OFFICE &&
-            to_room == FLOPPY144_ROOM_RECEPTION
-        )
-    )
-    {
-        return Floppy144RunStateTriggerFired(
-            state,
-            FLOPPY144_TRIGGER_T003
-        );
-    }
-
-    /*
-     * Corridor access remains locked even though T-001 has already
-     * reconstructed the Corridor.
-     *
-     * T-005 - Internal Circulation Access Plan - opens both early
-     * Corridor routes:
-     *
-     * Reception <-> Corridor
-     * Main Office <-> Corridor
-     */
-    if(
-        (
-            from_room == FLOPPY144_ROOM_RECEPTION &&
-            to_room == FLOPPY144_ROOM_CORRIDOR
-        ) ||
-        (
-            from_room == FLOPPY144_ROOM_CORRIDOR &&
-            to_room == FLOPPY144_ROOM_RECEPTION
-        ) ||
-        (
-            from_room == FLOPPY144_ROOM_MAIN_OFFICE &&
-            to_room == FLOPPY144_ROOM_CORRIDOR
-        ) ||
-        (
-            from_room == FLOPPY144_ROOM_CORRIDOR &&
-            to_room == FLOPPY144_ROOM_MAIN_OFFICE
-        )
-    )
-    {
-        return Floppy144RunStateTriggerFired(
-            state,
-            FLOPPY144_TRIGGER_T005
-        );
-    }
-
-    return true;
+    return Floppy144GameDataRoomTransitionAllowed(pState, eFromRoom, eToRoom);
 }
 
 bool Floppy144RunStateMovePlayerSite
@@ -963,6 +836,33 @@ bool Floppy144RunStateSetProjection
     state->dirty = 1;
 
     return true;
+}
+
+Floppy144RunAct Floppy144RunStateAct
+(
+    const Floppy144RunState *pState
+)
+{
+    if(pState == NULL || pState->act > (uint8_t)FLOPPY144_RUN_ACT_COMPLETE) return FLOPPY144_RUN_ACT_PROLOGUE;
+    return (Floppy144RunAct)pState->act;
+}
+
+bool Floppy144RunStateSetAct
+(
+    Floppy144RunState *pState,
+    Floppy144RunAct eAct
+)
+{
+    if(pState == NULL || (uint32_t)eAct > (uint32_t)FLOPPY144_RUN_ACT_COMPLETE || (uint8_t)eAct <= pState->act) return false;
+    pState->act=(uint8_t)eAct; pState->dirty=1U; return true;
+}
+
+bool Floppy144RunStateIsIsometric
+(
+    const Floppy144RunState *pState
+)
+{
+    return Floppy144RunStateProjection(pState) == FLOPPY144_PROJECTION_ISOMETRIC;
 }
 
 bool Floppy144RunStateSetBranch

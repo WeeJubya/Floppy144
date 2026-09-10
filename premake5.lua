@@ -36,7 +36,8 @@ targetdir("bin/%{cfg.buildcfg}")
 objdir("obj/Floppy144/%{cfg.buildcfg}/%{cfg.platform}")
 
 buildoptions({
-    "/wd4068"
+    "/wd4068",
+    "/utf-8"
 })
 
 filter("configurations:debug")
@@ -103,6 +104,10 @@ links({
     "F144 Runtime",
     "user32",
     "gdi32"
+})
+
+buildoptions({
+    "/utf-8"
 })
 
 filter("configurations:debug")
