@@ -24,13 +24,34 @@
 typedef enum Floppy144EffectType
 {
     FLOPPY144_EFFECT_NONE = 0,
+
     FLOPPY144_EFFECT_ESTABLISH_EVIDENCE,
-    FLOPPY144_EFFECT_REVEAL_OBJECT
+    FLOPPY144_EFFECT_REVEAL_OBJECT,
+
+    FLOPPY144_EFFECT_RECONSTRUCT_ROOM,
+    FLOPPY144_EFFECT_UNLOCK_OBJECT,
+    FLOPPY144_EFFECT_OPEN_OBJECT,
+    FLOPPY144_EFFECT_RESTORE_COLLECTION,
+    FLOPPY144_EFFECT_GRANT_CAPABILITY,
+    FLOPPY144_EFFECT_SET_PROJECTION,
+    FLOPPY144_EFFECT_SET_BRANCH,
+    FLOPPY144_EFFECT_COMPLETE_INTERACTION,
 }
 Floppy144EffectType;
+
 /*
- * ESTABLISH_EVIDENCE interprets target_id as Floppy144EvidenceId.
- * REVEAL_OBJECT interprets target_id as Floppy144ObjectId.
+ * target_id interpretation:
+ *
+ * ESTABLISH_EVIDENCE  -> Floppy144EvidenceId
+ * REVEAL_OBJECT       -> Floppy144ObjectId
+ * RECONSTRUCT_ROOM    -> Floppy144RoomId
+ * UNLOCK_OBJECT       -> Floppy144ObjectId
+ * OPEN_OBJECT         -> Floppy144ObjectId
+ * RESTORE_COLLECTION  -> Floppy144CollectionId
+ * GRANT_CAPABILITY    -> Floppy144CapabilityId
+ * SET_PROJECTION      -> Floppy144Projection
+ * SET_BRANCH          -> Floppy144RunBranch
+ * COMPLETE_INTERACTION -> Floppy144InteractionId
  */
 
 typedef struct Floppy144Effect

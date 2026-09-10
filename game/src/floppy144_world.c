@@ -46,21 +46,15 @@ void Floppy144WorldReset(
     for(
         collection_index = 0U;
         collection_index <
-            (uint32_t)FLOPPY144_COLLECTION_COUNT;
+        (uint32_t)FLOPPY144_COLLECTION_COUNT;
         ++collection_index
     )
     {
-        Floppy144CollectionId collection =
-            (Floppy144CollectionId)collection_index;
-
-        const Floppy144CollectionDefinition *definition =
-            Floppy144CollectionGet(collection);
-
         world->collections[collection_index].restored =
-            definition->auto_restored;
+        false;
 
         world->collections[collection_index].evidence_found =
-            false;
+        false;
     }
 
     for(

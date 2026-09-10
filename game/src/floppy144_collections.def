@@ -1,19 +1,16 @@
 /*
- * Master collection list
+ * Floppy//144 master collection ledger
  *
  * This file intentionally has no include guard. It is an X-macro definition
  * file and is included several times with FLOPPY144_COLLECTION defined
  * differently.
  *
- * Adding a standard collection begins here.
- *
  * Arguments:
  *   symbol
  *   player-facing code
  *   official title
- *   game act
- *   collection class
- *   restored automatically
+ *   archive domain
+ *   reconstruction contribution percentage
  *   terminal description
  *   evidence-found description
  *   catalogue record count
@@ -27,14 +24,53 @@
  *   generated record-number offset
  */
 
+
+/*
+ * Registered collections whose catalogue content has not yet been populated.
+ *
+ * A zero record count deliberately prevents the catalogue UI from opening a
+ * generated record browser while preserving the final collection identity,
+ * domain and reconstruction contribution.
+ */
+
+#define FLOPPY144_COLLECTION_STUB(                                 \
+    symbol,                                                        \
+    code_text,                                                     \
+    title_text,                                                    \
+    domain_value,                                                  \
+    reconstruction_percent_value                                  \
+)                                                                  \
+    FLOPPY144_COLLECTION(                                          \
+        symbol,                                                    \
+        code_text,                                                 \
+        title_text,                                                \
+        domain_value,                                              \
+        reconstruction_percent_value,                              \
+        "REGISTERED COLLECTION. RECORD POPULATION PENDING.",       \
+        NULL,                                                      \
+        0U,                                                        \
+        NULL,                                                      \
+        NULL,                                                      \
+        NULL,                                                      \
+        0U,                                                        \
+        false,                                                     \
+        0U,                                                        \
+        0U,                                                        \
+        0U                                                         \
+    )
+
+
+/*
+ * DEPARTMENT OF RECORDS
+ */
+
 FLOPPY144_COLLECTION(
     DR01,
     "DR-01",
     "DISK RECOVERY INDEX",
-    FLOPPY144_ACT_PROLOGUE,
-    FLOPPY144_COLLECTION_CLASS_MANDATORY,
-    false,
-    "CONTAINS DISK MANIFEST, OPERATING GUIDANCE AND RECOVERY NOTES.",
+    FLOPPY144_COLLECTION_DOMAIN_DR,
+    4U,
+    "CONTAINS DISK MANIFEST, RECOVERY INDEX AND RECOVERY NOTES.",
     NULL,
     15U,
     "DISK RECOVERY INDEX",
@@ -47,19 +83,98 @@ FLOPPY144_COLLECTION(
     1U
 )
 
+FLOPPY144_COLLECTION_STUB(
+    DR02,
+    "DR-02",
+    "TERMINAL OPERATIONS GUIDE",
+    FLOPPY144_COLLECTION_DOMAIN_DR,
+    1U
+)
+
+FLOPPY144_COLLECTION_STUB(
+    DR03,
+    "DR-03",
+    "SITE RECONSTRUCTION GUIDE",
+    FLOPPY144_COLLECTION_DOMAIN_DR,
+    1U
+)
+
+FLOPPY144_COLLECTION_STUB(
+    DR04,
+    "DR-04",
+    "SITE CLOSURE & BUILDING HANDOVER",
+    FLOPPY144_COLLECTION_DOMAIN_DR,
+    7U
+)
+
+FLOPPY144_COLLECTION_STUB(
+    DR07,
+    "DR-07",
+    "ARCHIVE HOLDINGS & RECONCILIATION",
+    FLOPPY144_COLLECTION_DOMAIN_DR,
+    6U
+)
+
+FLOPPY144_COLLECTION_STUB(
+    DR23,
+    "DR-23",
+    "HISTORICAL FILING EXCEPTIONS & RECOVERY ACTIONS",
+    FLOPPY144_COLLECTION_DOMAIN_DR,
+    3U
+)
+
+FLOPPY144_COLLECTION_STUB(
+    DR29,
+    "DR-29",
+    "ARCHIVE TRANSFER & CUSTODY",
+    FLOPPY144_COLLECTION_DOMAIN_DR,
+    6U
+)
+
+FLOPPY144_COLLECTION_STUB(
+    DR31,
+    "DR-31",
+    "ARCHIVE TRANSFER AUTHORISATION & EXCEPTIONS",
+    FLOPPY144_COLLECTION_DOMAIN_DR,
+    6U
+)
+
+FLOPPY144_COLLECTION_STUB(
+    DR47,
+    "DR-47",
+    "FINAL CLOSURE EXCEPTIONS & INCIDENT REVIEW",
+    FLOPPY144_COLLECTION_DOMAIN_DR,
+    9U
+)
+
+FLOPPY144_COLLECTION_STUB(
+    DR53,
+    "DR-53",
+    "EXECUTIVE CLOSURE CORRESPONDENCE",
+    FLOPPY144_COLLECTION_DOMAIN_DR,
+    5U
+)
+
+
+/*
+ * HUMAN RESOURCES
+ *
+ * HR-01 temporarily retains the technical-slice generated personnel catalogue.
+ * Final record population will replace this data later.
+ */
+
 FLOPPY144_COLLECTION(
-    HR02,
-    "HR-02",
-    "PERSONNEL LIFECYCLE RECORDS",
-    FLOPPY144_ACT_ONE,
-    FLOPPY144_COLLECTION_CLASS_ADMINISTRATIVE,
-    false,
-    "CONTAINS STAFF ALLOCATION AND DESK ASSIGNMENT RECORDS.",
-    "EVIDENCE FOUND: DESK REALLOCATION MEMORANDUM.",
-    50U,
-    "PERSONNEL LIFECYCLE RECORDS",
-    "HR-02-RS",
-    floppy144_hr02_record_subjects,
+    HR01,
+    "HR-01",
+    "SITE ESTABLISHMENT",
+    FLOPPY144_COLLECTION_DOMAIN_HR,
+    6U,
+    "CONTAINS SITE STAFFING AND MAIN OFFICE ESTABLISHMENT RECORDS.",
+    "EVIDENCE FOUND: STAFFING AND DESK-ALLOCATION MATERIAL.",
+    18U,
+    "SITE ESTABLISHMENT",
+    "HR-01-RS",
+    floppy144_hr01_record_subjects,
     10U,
     false,
     1400U,
@@ -67,22 +182,249 @@ FLOPPY144_COLLECTION(
     19U
 )
 
+FLOPPY144_COLLECTION_STUB(
+    HR05,
+    "HR-05",
+    "STAFF WELFARE & SHARED FACILITIES",
+    FLOPPY144_COLLECTION_DOMAIN_HR,
+    4U
+)
+
+FLOPPY144_COLLECTION_STUB(
+    HR09,
+    "HR-09",
+    "ATTENDANCE, LEAVE & DUTY STATUS",
+    FLOPPY144_COLLECTION_DOMAIN_HR,
+    5U
+)
+
+FLOPPY144_COLLECTION_STUB(
+    HR14,
+    "HR-14",
+    "LEARNING, DEVELOPMENT & COMPETENCY",
+    FLOPPY144_COLLECTION_DOMAIN_HR,
+    1U
+)
+
+FLOPPY144_COLLECTION_STUB(
+    HR27,
+    "HR-27",
+    "PAYROLL, ALLOWANCES & CLOSURE PAYMENTS",
+    FLOPPY144_COLLECTION_DOMAIN_HR,
+    1U
+)
+
+FLOPPY144_COLLECTION_STUB(
+    HR36,
+    "HR-36",
+    "PERSONNEL FILES & POSTINGS",
+    FLOPPY144_COLLECTION_DOMAIN_HR,
+    2U
+)
+
+
+/*
+ * FACILITIES MANAGEMENT
+ */
+
 FLOPPY144_COLLECTION(
-    FA03,
-    "FA-03",
-    "SITE SAFETY AND SUPPRESSION SYSTEMS",
-    FLOPPY144_ACT_ONE,
-    FLOPPY144_COLLECTION_CLASS_OPERATIONAL,
+    FM04,
+    "FM-04",
+    "SITE INFRASTRUCTURE & MAINTENANCE",
+    FLOPPY144_COLLECTION_DOMAIN_FM,
+    8U,
+    "CONTAINS SITE ACCESS, CIRCULATION AND FACILITIES MAINTENANCE RECORDS.",
+    "EVIDENCE FOUND: FACILITIES ACCESS AND INTERNAL CIRCULATION MATERIAL.",
+    25U,
+    "SITE INFRASTRUCTURE & MAINTENANCE",
+    "FM-04-RS",
+    floppy144_fm04_record_subjects,
+    10U,
     false,
+    0U,
+    1U,
+    1U
+)
+
+FLOPPY144_COLLECTION(
+    FM07,
+    "FM-07",
+    "ASSET MANAGEMENT & DECOMMISSIONING",
+    FLOPPY144_COLLECTION_DOMAIN_FM,
+    6U,
+    "CONTAINS ASSET DECOMMISSIONING, RETAINED-SERVICE AND SITE-HANDOVER RECORDS.",
+    "EVIDENCE FOUND: RETAINED SERVICES AND OUTSTANDING HANDOVER WORK VERIFIED.",
+    20U,
+    "ASSET MANAGEMENT & DECOMMISSIONING",
+    "FM-07-RS",
+    floppy144_fm07_record_subjects,
+    10U,
+    false,
+    0U,
+    1U,
+    1U
+)
+
+/*
+ * FM-13 temporarily retains the technical-slice suppression catalogue.
+ */
+
+FLOPPY144_COLLECTION(
+    FM13,
+    "FM-13",
+    "SITE SAFETY & SUPPRESSION SYSTEMS",
+    FLOPPY144_COLLECTION_DOMAIN_FM,
+    6U,
     "CONTAINS FIRE SAFETY AND SUPPRESSION MAINTENANCE RECORDS.",
     "EVIDENCE FOUND: MANUAL DISCHARGE CONTROL VERIFIED.",
-    50U,
-    "SITE SAFETY AND SUPPRESSION SYSTEMS",
-    "FA-03-RS",
-    floppy144_fa03_record_subjects,
+    22U,
+    "SITE SAFETY & SUPPRESSION SYSTEMS",
+    "FM-13-RS",
+    floppy144_fm13_record_subjects,
     10U,
     false,
     2400U,
     53U,
     11U
 )
+
+FLOPPY144_COLLECTION_STUB(
+    FM18,
+    "FM-18",
+    "ENVIRONMENTAL MONITORING & PLANT LOGS",
+    FLOPPY144_COLLECTION_DOMAIN_FM,
+    6U
+)
+
+FLOPPY144_COLLECTION_STUB(
+    FM23,
+    "FM-23",
+    "SITE MAPS & ROOM ORGANISATION",
+    FLOPPY144_COLLECTION_DOMAIN_FM,
+    5U
+)
+
+FLOPPY144_COLLECTION_STUB(
+    FM32,
+    "FM-32",
+    "UTILITIES, PLANT & ENVIRONMENTAL SERVICES",
+    FLOPPY144_COLLECTION_DOMAIN_FM,
+    2U
+)
+
+
+/*
+ * OPERATIONAL SECURITY
+ */
+
+FLOPPY144_COLLECTION_STUB(
+    OS07,
+    "OS-07",
+    "VISITOR & ACCESS MANAGEMENT",
+    FLOPPY144_COLLECTION_DOMAIN_OS,
+    7U
+)
+
+FLOPPY144_COLLECTION_STUB(
+    OS18,
+    "OS-18",
+    "ACCESS CONTROL & RESTRICTED AREAS",
+    FLOPPY144_COLLECTION_DOMAIN_OS,
+    2U
+)
+
+FLOPPY144_COLLECTION_STUB(
+    OS26,
+    "OS-26",
+    "INCIDENT REPORTING & EVACUATION",
+    FLOPPY144_COLLECTION_DOMAIN_OS,
+    8U
+)
+
+FLOPPY144_COLLECTION_STUB(
+    OS34,
+    "OS-34",
+    "SECURE STORAGE & KEY CONTROL",
+    FLOPPY144_COLLECTION_DOMAIN_OS,
+    6U
+)
+
+FLOPPY144_COLLECTION_STUB(
+    OS41,
+    "OS-41",
+    "TELEPHONE & DUTY COMMUNICATIONS LOGS",
+    FLOPPY144_COLLECTION_DOMAIN_OS,
+    1U
+)
+
+FLOPPY144_COLLECTION_STUB(
+    OS48,
+    "OS-48",
+    "CCTV INDEX & RETENTION",
+    FLOPPY144_COLLECTION_DOMAIN_OS,
+    5U
+)
+
+
+/*
+ * TECHNOLOGY SERVICES
+ */
+
+FLOPPY144_COLLECTION_STUB(
+    TS02,
+    "TS-02",
+    "TERMINAL NETWORK SUPPORT",
+    FLOPPY144_COLLECTION_DOMAIN_TS,
+    6U
+)
+
+FLOPPY144_COLLECTION_STUB(
+    TS06,
+    "TS-06",
+    "NETWORK INFRASTRUCTURE & CABLING",
+    FLOPPY144_COLLECTION_DOMAIN_TS,
+    6U
+)
+
+FLOPPY144_COLLECTION_STUB(
+    TS08,
+    "TS-08",
+    "SUPPORT HISTORY & FAULT TRENDS",
+    FLOPPY144_COLLECTION_DOMAIN_TS,
+    3U
+)
+
+FLOPPY144_COLLECTION_STUB(
+    TS10,
+    "TS-10",
+    "DIGITAL HOLDINGS & VERIFICATION",
+    FLOPPY144_COLLECTION_DOMAIN_TS,
+    6U
+)
+
+FLOPPY144_COLLECTION_STUB(
+    TS14,
+    "TS-14",
+    "BACKUP OPERATIONS & SERVER AVAILABILITY",
+    FLOPPY144_COLLECTION_DOMAIN_TS,
+    7U
+)
+
+FLOPPY144_COLLECTION_STUB(
+    TS18,
+    "TS-18",
+    "SERVER OPERATIONS & RECOVERY LOGS",
+    FLOPPY144_COLLECTION_DOMAIN_TS,
+    7U
+)
+
+FLOPPY144_COLLECTION_STUB(
+    TS27,
+    "TS-27",
+    "TELEPHONY & INTERNAL COMMUNICATIONS",
+    FLOPPY144_COLLECTION_DOMAIN_TS,
+    1U
+)
+
+
+#undef FLOPPY144_COLLECTION_STUB

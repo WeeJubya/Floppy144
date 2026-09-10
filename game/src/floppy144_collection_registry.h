@@ -1,6 +1,7 @@
 #pragma once
 
 #include "floppy144_collection.h"
+#include "floppy144_trigger.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -43,10 +44,9 @@ typedef struct Floppy144CollectionDefinition
     const char *code;
     const char *title;
 
-    Floppy144Act act;
-    Floppy144CollectionClass collection_class;
+    Floppy144CollectionDomain domain;
 
-    bool auto_restored;
+    uint32_t reconstruction_percent;
 
     const char *description;
     const char *evidence_description;
@@ -72,13 +72,20 @@ const Floppy144CollectionDefinition *Floppy144CollectionGet(
 );
 
 /*
+ * Return the persistent trigger which exposes a collection to the recovery.
+ *
+ * FLOPPY144_TRIGGER_COUNT means the collection is still using the current
+ * technical-slice compatibility rule rather than a registered trigger.
+ */
+Floppy144TriggerId Floppy144CollectionAvailabilityTrigger
+(
+    Floppy144CollectionId collection
+);
+
+/*
  * Convert enum values into player-facing terminal labels.
  */
 
-const char *Floppy144CollectionClassText(
-    Floppy144CollectionClass collection_class
-);
-
-const char *Floppy144CollectionActText(
-    Floppy144Act act
+const char *Floppy144CollectionDomainText(
+    Floppy144CollectionDomain domain
 );

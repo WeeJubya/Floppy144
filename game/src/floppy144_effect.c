@@ -18,9 +18,9 @@ void Floppy144ApplyEffect(
 )
 {
     if(
-        world == 0 ||
-        run_state == 0 ||
-        effect == 0
+        world == NULL ||
+        run_state == NULL ||
+        effect == NULL
     )
     {
         return;
@@ -43,23 +43,122 @@ void Floppy144ApplyEffect(
             Floppy144ObjectId object =
             (Floppy144ObjectId)effect->target_id;
 
+            /*
+             * RunState is authoritative. WorldState mirrors visibility for
+             * the currently hydrated runtime.
+             */
+            Floppy144RunStateRevealObject(
+                run_state,
+                object
+            );
+
+            Floppy144WorldRevealObject(
+                world,
+                object
+            );
+
+            break;
+        }
+
+        case FLOPPY144_EFFECT_RECONSTRUCT_ROOM:
+        {
+            Floppy144RunStateReconstructRoom(
+                run_state,
+                (Floppy144RoomId)effect->target_id
+            );
+
+            break;
+        }
+
+        case FLOPPY144_EFFECT_UNLOCK_OBJECT:
+        {
+            Floppy144RunStateSetObjectAccessState(
+                run_state,
+                (Floppy144ObjectId)effect->target_id,
+                                                  FLOPPY144_OBJECT_ACCESS_UNLOCKED
+            );
+
+            break;
+        }
+
+        case FLOPPY144_EFFECT_OPEN_OBJECT:
+        {
+            Floppy144RunStateSetObjectAccessState(
+                run_state,
+                (Floppy144ObjectId)effect->target_id,
+                                                  FLOPPY144_OBJECT_ACCESS_OPEN
+            );
+
+            break;
+        }
+
+        case FLOPPY144_EFFECT_RESTORE_COLLECTION:
+        {
+            Floppy144CollectionId collection =
+            (Floppy144CollectionId)effect->target_id;
+
+            /*
+             * RunState remains authoritative while WorldState mirrors the
+             * restored collection for the currently active runtime.
+             */
             if(
-                Floppy144WorldRevealObject(
-                    world,
-                    object
+                Floppy144RunStateRestoreCollection(
+                    run_state,
+                    collection
                 )
             )
             {
-                Floppy144RunStateRevealObject(
-                    run_state,
-                    object
+                Floppy144WorldRestoreCollection(
+                    world,
+                    collection
                 );
             }
 
             break;
         }
 
+        case FLOPPY144_EFFECT_GRANT_CAPABILITY:
+        {
+            Floppy144RunStateGrantCapability(
+                run_state,
+                (Floppy144CapabilityId)effect->target_id
+            );
+
+            break;
+        }
+
+        case FLOPPY144_EFFECT_SET_PROJECTION:
+        {
+            Floppy144RunStateSetProjection(
+                run_state,
+                (Floppy144Projection)effect->target_id
+            );
+
+            break;
+        }
+
+        case FLOPPY144_EFFECT_SET_BRANCH:
+        {
+            Floppy144RunStateSetBranch(
+                run_state,
+                (Floppy144RunBranch)effect->target_id
+            );
+
+            break;
+        }
+
+        case FLOPPY144_EFFECT_COMPLETE_INTERACTION:
+        {
+            Floppy144RunStateCompleteInteraction(
+                run_state,
+                (Floppy144InteractionId)effect->target_id
+            );
+
+            break;
+        }
+
         case FLOPPY144_EFFECT_NONE:
+
         default:
         {
             break;

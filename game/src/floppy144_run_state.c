@@ -110,37 +110,6 @@ bool Floppy144RunStateRoomReconstructed
         return true;
     }
 
-    /*
-     * Compatibility for saves created before room reconstruction was wired
-     * into Site movement/rendering. DR-01 has always been the minimum Site
-     * reconstruction, so an older save with DR-01 restored must still expose
-     * Reception and Corridor even if its room bitset predates 2E.7C.
-     */
-    if(
-        Floppy144RunStateCollectionRestored(
-            state,
-            FLOPPY144_COLLECTION_DR01
-        ) &&
-        (
-            room == FLOPPY144_ROOM_RECEPTION ||
-            room == FLOPPY144_ROOM_CORRIDOR
-        )
-    )
-    {
-        return true;
-    }
-
-    if(
-        room == FLOPPY144_ROOM_MAIN_OFFICE &&
-        Floppy144RunStateCollectionRestored(
-            state,
-            FLOPPY144_COLLECTION_HR02
-        )
-    )
-    {
-        return true;
-    }
-
     return false;
 }
 
@@ -306,6 +275,67 @@ bool Floppy144RunStateBitClear
     return true;
 }
 
+bool Floppy144RunStateCollectionAvailable
+(
+    const Floppy144RunState *state,
+ Floppy144CollectionId collection
+)
+{
+    Floppy144TriggerId availability_trigger;
+
+    if(
+        state == NULL ||
+        !Floppy144RunStateCollectionValid(
+            collection
+        )
+    )
+    {
+        return false;
+    }
+
+    /*
+     * Once restored, a collection remains available regardless of the route
+     * which originally exposed it.
+     */
+    if(
+        Floppy144RunStateCollectionRestored(
+            state,
+            collection
+        )
+    )
+    {
+        return true;
+    }
+
+    /*
+     * DR-01 is the recovery bootstrap collection and is available from the
+     * start of a new recovery.
+     */
+    if(
+        collection ==
+        FLOPPY144_COLLECTION_DR01
+    )
+    {
+        return true;
+    }
+
+    availability_trigger = Floppy144CollectionAvailabilityTrigger(collection);
+
+    if(
+        availability_trigger !=
+        FLOPPY144_TRIGGER_COUNT
+    )
+    {
+        return
+        Floppy144RunStateTriggerFired(
+            state,
+            availability_trigger
+        );
+    }
+
+    return false;
+}
+
 bool Floppy144RunStateCollectionRestored
 (
     const Floppy144RunState *state,
@@ -326,14 +356,73 @@ bool Floppy144RunStateCollectionRestored
     );
 }
 
+bool Floppy144RunStateCanRestoreCollection
+(
+    const Floppy144RunState *state,
+ Floppy144CollectionId collection
+){
+    const Floppy144CollectionDefinition *definition;
+    uint32_t current_percent;
+
+    if(
+        state == NULL ||
+        !Floppy144RunStateCollectionValid(collection)
+    )
+    {
+        return false;
+    }
+
+    if(
+        Floppy144RunStateCollectionRestored(
+            state,
+            collection
+        )
+    )
+    {
+        return false;
+    }
+
+    definition =
+    Floppy144CollectionGet(
+        collection
+    );
+
+    if(definition == NULL)
+    {
+        return false;
+    }
+
+    current_percent =
+    Floppy144RunStateReconstructionPercent(
+        state
+    );
+
+    /*
+     * More than 100 percent is an invalid run state.
+     *
+     * Use subtraction rather than addition for the capacity test so the
+     * comparison cannot overflow if reconstruction values are edited later.
+     */
+    if(current_percent > 100U)
+    {
+        return false;
+    }
+
+    return
+    definition->reconstruction_percent <=
+    (100U - current_percent);
+}
+
 bool Floppy144RunStateRestoreCollection
 (
     Floppy144RunState *state,
  Floppy144CollectionId collection
 ){
     if(
-        state == NULL ||
-        !Floppy144RunStateCollectionValid(collection)
+        !Floppy144RunStateCanRestoreCollection(
+            state,
+            collection
+        )
     )
     {
         return false;
@@ -347,35 +436,6 @@ bool Floppy144RunStateRestoreCollection
     )
     {
         return false;
-    }
-
-    /*
-     * Current Site reconstruction bridge.
-     *
-     * DR-01 establishes the minimum Site: Reception and Corridor.
-     * HR-02 is the existing technical-slice predecessor of the later
-     * Site-establishment content and currently opens the Main Office. Keeping
-     * that compatibility here preserves the playable Stage-1 loop while the
-     * final collection registry is expanded.
-     */
-    if(collection == FLOPPY144_COLLECTION_DR01)
-    {
-        Floppy144RunStateReconstructRoom(
-            state,
-            FLOPPY144_ROOM_RECEPTION
-        );
-
-        Floppy144RunStateReconstructRoom(
-            state,
-            FLOPPY144_ROOM_CORRIDOR
-        );
-    }
-    else if(collection == FLOPPY144_COLLECTION_HR02)
-    {
-        Floppy144RunStateReconstructRoom(
-            state,
-            FLOPPY144_ROOM_MAIN_OFFICE
-        );
     }
 
     state->dirty = 1;
@@ -651,17 +711,137 @@ void Floppy144RunStateSetPlayerSitePosition
     state->dirty = 1;
 }
 
+/*
+ * Determine whether progression state permits movement between two
+ * reconstructed rooms.
+ *
+ * Physical door geometry remains authoritative in the Site model.
+ * This function supplies only the recovery/progression access layer.
+ *
+ * Current early-Site rules:
+ *
+ * T-003:
+ *   Reception <-> Main Office
+ *
+ * T-005:
+ *   Reception  <-> Corridor
+ *   Main Office <-> Corridor
+ *
+ * Other room-access rules are added here as their authored trigger routes
+ * are migrated.
+ */
+static bool Floppy144RunStateRoomTransitionAllowed
+(
+    const Floppy144RunState *state,
+ Floppy144RoomId from_room,
+ Floppy144RoomId to_room
+)
+{
+    if(state == NULL)
+    {
+        return false;
+    }
+
+    /*
+     * Ordinary movement within one room never requires an access trigger.
+     */
+    if(from_room == to_room)
+    {
+        return true;
+    }
+
+    if(
+        from_room == FLOPPY144_ROOM_COUNT ||
+        to_room == FLOPPY144_ROOM_COUNT
+    )
+    {
+        return false;
+    }
+
+    /*
+     * Reception <-> Main Office
+     *
+     * T-002 reconstructs the Main Office.
+     * T-003 actually opens access to it.
+     */
+    if(
+        (
+            from_room == FLOPPY144_ROOM_RECEPTION &&
+            to_room == FLOPPY144_ROOM_MAIN_OFFICE
+        ) ||
+        (
+            from_room == FLOPPY144_ROOM_MAIN_OFFICE &&
+            to_room == FLOPPY144_ROOM_RECEPTION
+        )
+    )
+    {
+        return Floppy144RunStateTriggerFired(
+            state,
+            FLOPPY144_TRIGGER_T003
+        );
+    }
+
+    /*
+     * Corridor access remains locked even though T-001 has already
+     * reconstructed the Corridor.
+     *
+     * T-005 - Internal Circulation Access Plan - opens both early
+     * Corridor routes:
+     *
+     * Reception <-> Corridor
+     * Main Office <-> Corridor
+     */
+    if(
+        (
+            from_room == FLOPPY144_ROOM_RECEPTION &&
+            to_room == FLOPPY144_ROOM_CORRIDOR
+        ) ||
+        (
+            from_room == FLOPPY144_ROOM_CORRIDOR &&
+            to_room == FLOPPY144_ROOM_RECEPTION
+        ) ||
+        (
+            from_room == FLOPPY144_ROOM_MAIN_OFFICE &&
+            to_room == FLOPPY144_ROOM_CORRIDOR
+        ) ||
+        (
+            from_room == FLOPPY144_ROOM_CORRIDOR &&
+            to_room == FLOPPY144_ROOM_MAIN_OFFICE
+        )
+    )
+    {
+        return Floppy144RunStateTriggerFired(
+            state,
+            FLOPPY144_TRIGGER_T005
+        );
+    }
+
+    return true;
+}
+
 bool Floppy144RunStateMovePlayerSite
 (
     Floppy144RunState *state,
- int32_t delta_x16,
- int32_t delta_y16
+    int32_t delta_x16,
+    int32_t delta_y16
 )
 {
     int32_t x;
     int32_t y;
+    Floppy144RoomId current_room;
 
     if(state == NULL)
+    {
+        return false;
+    }
+
+    current_room =
+        Floppy144SiteRoomAtPosition(
+            state->player_site_x,
+            state->player_site_y
+        );
+
+    if(current_room == FLOPPY144_ROOM_COUNT)
     {
         return false;
     }
@@ -701,6 +881,23 @@ bool Floppy144RunStateMovePlayerSite
             destination_room == FLOPPY144_ROOM_COUNT ||
             !Floppy144RunStateRoomReconstructed(
                 state,
+                destination_room
+            )
+        )
+        {
+            return false;
+        }
+
+        /*
+         * A room may be reconstructed without yet being accessible.
+         *
+         * Door geometry decides whether a physical crossing exists.
+         * Trigger state decides whether recovery has unlocked that crossing.
+         */
+        if(
+            !Floppy144RunStateRoomTransitionAllowed(
+                state,
+                current_room,
                 destination_room
             )
         )
@@ -764,6 +961,46 @@ bool Floppy144RunStateSetProjection
     (uint8_t)projection;
 
     state->dirty = 1;
+
+    return true;
+}
+
+bool Floppy144RunStateSetBranch
+(
+    Floppy144RunState *state,
+ Floppy144RunBranch branch
+)
+{
+    if(
+        state == NULL ||
+        (
+            branch !=
+            FLOPPY144_RUN_BRANCH_RECORDS_FIRST &&
+            branch !=
+            FLOPPY144_RUN_BRANCH_TECHNOLOGY_FIRST
+        )
+    )
+    {
+        return false;
+    }
+
+    /*
+     * Branch selection is a commitment. Once one route has been selected,
+     * another trigger cannot silently replace it.
+     */
+    if(
+        state->branch !=
+        (uint8_t)FLOPPY144_RUN_BRANCH_NONE
+    )
+    {
+        return false;
+    }
+
+    state->branch =
+    (uint8_t)branch;
+
+    state->dirty =
+    1U;
 
     return true;
 }
@@ -947,9 +1184,9 @@ bool Floppy144RunStateSetObjectAccessState
 void Floppy144RunStateBegin
 (
     Floppy144RunState *state,
- uint32_t recovery_seed
-){
-    uint32_t collection_index;
+    uint32_t recovery_seed
+)
+{
     uint32_t object_index;
 
     Floppy144RunStateReset(
@@ -963,33 +1200,6 @@ void Floppy144RunStateBegin
 
     state->recovery_seed =
     recovery_seed;
-
-    for(
-        collection_index = 0U;
-    collection_index <
-    (uint32_t)FLOPPY144_COLLECTION_COUNT;
-    ++collection_index
-    )
-    {
-        Floppy144CollectionId collection =
-        (Floppy144CollectionId)collection_index;
-
-        const Floppy144CollectionDefinition *definition =
-        Floppy144CollectionGet(
-            collection
-        );
-
-        if(
-            definition != NULL &&
-            definition->auto_restored
-        )
-        {
-            Floppy144RunStateBitSet(
-                state->collections,
-                collection_index
-            );
-        }
-    }
 
     Floppy144SiteSpawnPosition(
         &state->player_site_x,
@@ -1073,10 +1283,7 @@ uint32_t Floppy144RunStateReconstructionPercent
         }
 
         percentage +=
-        definition->collection_class ==
-        FLOPPY144_COLLECTION_CLASS_MANDATORY
-        ? 4U
-        : 8U;
+        definition->reconstruction_percent;
     }
 
     return percentage;

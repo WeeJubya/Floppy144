@@ -102,6 +102,12 @@ typedef struct Floppy144RunState
 }
 Floppy144RunState;
 
+bool Floppy144RunStateSetBranch
+(
+    Floppy144RunState *state,
+    Floppy144RunBranch branch
+);
+
 bool Floppy144RunStateArchiveServicesInitialised
 (
     const Floppy144RunState *state
@@ -172,10 +178,21 @@ bool Floppy144RunStateBitClear
     uint32_t bit
 );
 
+bool Floppy144RunStateCollectionAvailable
+(
+    const Floppy144RunState *state,
+ Floppy144CollectionId collection
+);
+
 bool Floppy144RunStateCollectionRestored
 (
     const Floppy144RunState *state,
  Floppy144CollectionId collection
+);
+
+bool Floppy144RunStateCanRestoreCollection(
+    const Floppy144RunState *state,
+    Floppy144CollectionId collection
 );
 
 bool Floppy144RunStateRestoreCollection

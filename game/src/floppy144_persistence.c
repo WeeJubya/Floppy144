@@ -39,8 +39,8 @@ static void Floppy144PersistenceWriteU32
 static bool Floppy144PersistenceReplaceFile
 (
     const char *path,
- const uint8_t *data,
- uint32_t data_size
+    const uint8_t *data,
+    uint32_t data_size
 )
 {
     char temporary_path[MAX_PATH];

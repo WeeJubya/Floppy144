@@ -24,28 +24,29 @@
 /*
  * Terminal-local state
  *
- * selected_act tracks the visible archive page. selected_collection tracks
- * the highlighted row within that act. detail_open controls the collection
- * overlay. restoration_notice is a temporary success message.
+ * selected_domain tracks the visible archive domain. selected_collection
+ * tracks the highlighted row within that domain. detail_open controls the
+ * collection overlay. restoration_notice is a temporary success message.
  */
 
 typedef struct Floppy144TerminalState
 {
-    Floppy144Act selected_act;
+    Floppy144CollectionDomain selected_domain;
     Floppy144CollectionId selected_collection;
 
     bool detail_open;
     bool restoration_notice;
     bool suppress_next_character;
     bool exit_requested;
-    bool site_entry_requested;
     bool open_record_requested;
     bool record_pager_active;
+    bool help_pager_active;
 
     Floppy144CollectionId requested_collection;
 
     Floppy144CollectionId record_pager_collection;
     uint32_t record_pager_page;
+    uint32_t help_pager_page;
     uint32_t requested_record_index;
 
     char input[FLOPPY144_TERMINAL_INPUT_CAPACITY];
@@ -75,7 +76,7 @@ void Floppy144TerminalMoveSelection(
     int32_t direction
 );
 
-void Floppy144TerminalMoveAct(
+void Floppy144TerminalMoveDomain(
     Floppy144TerminalState *terminal,
     int32_t direction
 );
@@ -102,15 +103,23 @@ void Floppy144TerminalCloseRecordPager(
     Floppy144TerminalState *terminal
 );
 
+bool Floppy144TerminalHelpPagerActive(
+    const Floppy144TerminalState *terminal
+);
+
+void Floppy144TerminalMoveHelpPager(
+    Floppy144TerminalState *terminal,
+    int32_t direction
+);
+
+void Floppy144TerminalCloseHelpPager(
+    Floppy144TerminalState *terminal
+);
+
 void Floppy144TerminalSubmitInput(
     Floppy144TerminalState *terminal,
     Floppy144WorldState *world,
     Floppy144RunState *run_state
-);
-
-void Floppy144TerminalOpenSelection(
-    Floppy144TerminalState *terminal,
-    Floppy144WorldState *world
 );
 
 void Floppy144TerminalCloseDetail(

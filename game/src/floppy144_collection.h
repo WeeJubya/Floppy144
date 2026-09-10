@@ -4,41 +4,24 @@
 #include <stdint.h>
 
 /*
- * Narrative stage in which a collection becomes available.
+ * Archive collection domain.
  *
- * The technical slice currently uses the Prologue and Act One. The remaining
- * values are included now so future collections can be registered without
- * changing this type.
+ * Domains describe which part of the recovered organisation owns a
+ * collection. They are catalogue/navigation metadata only and do not control
+ * recovery progression.
  */
 
-typedef enum Floppy144Act
+typedef enum Floppy144CollectionDomain
 {
-    FLOPPY144_ACT_PROLOGUE,
-    FLOPPY144_ACT_ONE,
-    FLOPPY144_ACT_TWO,
-    FLOPPY144_ACT_THREE,
+    FLOPPY144_COLLECTION_DOMAIN_DR = 0,
+    FLOPPY144_COLLECTION_DOMAIN_HR,
+    FLOPPY144_COLLECTION_DOMAIN_FM,
+    FLOPPY144_COLLECTION_DOMAIN_OS,
+    FLOPPY144_COLLECTION_DOMAIN_TS,
 
-    FLOPPY144_ACT_COUNT
-} Floppy144Act;
-
-/*
- * Departmental classification shown in the archive terminal.
- */
-
-typedef enum Floppy144CollectionClass
-{
-    FLOPPY144_COLLECTION_CLASS_MANDATORY,
-    FLOPPY144_COLLECTION_CLASS_OPERATIONAL,
-    FLOPPY144_COLLECTION_CLASS_ADMINISTRATIVE,
-    FLOPPY144_COLLECTION_CLASS_REPORTING
-} Floppy144CollectionClass;
-
-/*
- * Generate one enum value for every entry in floppy144_collections.def.
- *
- * The definition order is also the terminal display order. DR-01, HR-02 and
- * FA-03 therefore retain their existing numeric IDs of zero, one and two.
- */
+    FLOPPY144_COLLECTION_DOMAIN_COUNT
+}
+Floppy144CollectionDomain;
 
 typedef enum Floppy144CollectionId
 {
@@ -46,9 +29,8 @@ typedef enum Floppy144CollectionId
     symbol,                                                        \
     code,                                                          \
     title,                                                         \
-    act,                                                           \
-    collection_class,                                              \
-    auto_restored,                                                 \
+    domain,                                                        \
+    reconstruction_percent,                                        \
     description,                                                   \
     evidence_description,                                          \
     catalogue_record_count,                                        \

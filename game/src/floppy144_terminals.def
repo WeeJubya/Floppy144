@@ -1,0 +1,70 @@
+/*
+ * Floppy//144 - GDR Site terminal definitions
+ *
+ * This file identifies the rooms containing operational GDR terminals.
+ *
+ * Physical position and dimensions do NOT belong here.
+ * site_layout.jsonc remains the single authoritative source of Site geometry.
+ *
+ * Format:
+ *
+ * FLOPPY144_TERMINAL(
+ *     symbol,
+ *     room,
+ *     display_name
+ * )
+ */
+
+FLOPPY144_TERMINAL(
+    RECEPTION,
+    FLOPPY144_ROOM_RECEPTION,
+    "RECEPTION TERMINAL"
+)
+
+FLOPPY144_TERMINAL(
+    MAIN_OFFICE,
+    FLOPPY144_ROOM_MAIN_OFFICE,
+    "MAIN OFFICE TERMINAL"
+)
+
+FLOPPY144_TERMINAL(
+    FACILITIES,
+    FLOPPY144_ROOM_FACILITIES,
+    "FACILITIES TERMINAL"
+)
+
+FLOPPY144_TERMINAL(
+    RECORDS_OFFICE,
+    FLOPPY144_ROOM_RECORDS_OFFICE,
+    "RECORDS OFFICE TERMINAL"
+)
+
+FLOPPY144_TERMINAL(
+    IT_SUPPORT,
+    FLOPPY144_ROOM_IT_SUPPORT,
+    "IT SUPPORT TERMINAL"
+)
+
+FLOPPY144_TERMINAL(
+    SECRETARY_OFFICE,
+    FLOPPY144_ROOM_SECRETARY_OFFICE,
+    "SECRETARY OFFICE TERMINAL"
+)
+
+FLOPPY144_TERMINAL(
+    DIRECTOR_OFFICE,
+    FLOPPY144_ROOM_DIRECTOR_OFFICE,
+    "DIRECTOR OFFICE TERMINAL"
+)
+
+FLOPPY144_TERMINAL(
+    SECURITY,
+    FLOPPY144_ROOM_SECURITY,
+    "SECURITY TERMINAL"
+)
+
+FLOPPY144_TERMINAL(
+    SERVER_ROOM,
+    FLOPPY144_ROOM_SERVER_ROOM,
+    "SERVER ROOM TERMINAL"
+)

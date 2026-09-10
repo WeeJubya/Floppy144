@@ -22,8 +22,8 @@ static const Floppy144ObjectInteractionDefinition
     FLOPPY144_OBJECT_ACTION_OPEN_TERMINAL,
     100U,
     FLOPPY144_COLLECTION_COUNT,
-    "PRESS E TO ACCESS ARCHIVE TERMINAL",
-    FLOPPY144_COLLECTION_HR02,
+    "PRESS E TO ACCESS GDR TERMINAL",
+    FLOPPY144_COLLECTION_HR01,
     "PRESS E TO REVIEW RESTORED COLLECTIONS",
     NULL
 };
@@ -54,7 +54,7 @@ static const Floppy144ObjectInteractionDefinition
 /*
  * Desk 04 personnel-form investigation
  *
- * Reading the HR-02 memorandum reveals these forms. Inspecting them confirms
+ * Reading the HR-01 memorandum reveals these forms. Inspecting them confirms
  * the collection evidence through the same generic effect system used by
  * authored documents.
  */
@@ -73,15 +73,20 @@ static const Floppy144ObjectInteractionDefinition
     0U
 };
 /*
- * FA-03 suppression-panel investigation
+ * FM-13 suppression-panel investigation
  *
  * The recovered service note reveals this fixture. Physical inspection then
  * confirms the collection evidence through the generic interaction effects.
  */
 
 static const Floppy144Effect
-    floppy144_suppression_panel_effects[] =
+floppy144_suppression_panel_effects[] =
 {
+    {
+        FLOPPY144_EFFECT_COMPLETE_INTERACTION,
+        (uint32_t)FLOPPY144_INTERACTION_I001
+    },
+
     {
         FLOPPY144_EFFECT_ESTABLISH_EVIDENCE,
         (uint32_t)FLOPPY144_EVIDENCE_E001
@@ -99,8 +104,82 @@ static const Floppy144ObjectInteractionDefinition
     NULL,
     "SUPPRESSION PANEL: MANUAL DISCHARGE INPUT REMAINS CONNECTED.",
     floppy144_suppression_panel_effects,
-    1U
+    2U
 };
+
+/*
+ * FM-07 Final Isolation Register
+ *
+ * Physical inspection establishes E-002 and restores the handover folder
+ * as the next physical evidence item.
+ */
+static const Floppy144Effect
+floppy144_final_isolation_register_effects[] =
+{
+    {
+        FLOPPY144_EFFECT_COMPLETE_INTERACTION,
+        (uint32_t)FLOPPY144_INTERACTION_I002
+    },
+
+    {
+        FLOPPY144_EFFECT_ESTABLISH_EVIDENCE,
+        (uint32_t)FLOPPY144_EVIDENCE_E002
+    },
+
+    {
+        FLOPPY144_EFFECT_REVEAL_OBJECT,
+        (uint32_t)FLOPPY144_OBJECT_P014_SITE_CLOSURE_HANDOVER_FOLDER
+    }
+};
+
+static const Floppy144ObjectInteractionDefinition
+floppy144_final_isolation_register_interaction =
+{
+    FLOPPY144_OBJECT_ACTION_SHOW_NOTICE,
+    100U,
+    FLOPPY144_COLLECTION_COUNT,
+    "PRESS E TO INSPECT FINAL ISOLATION REGISTER",
+    FLOPPY144_COLLECTION_COUNT,
+    NULL,
+    "FINAL ISOLATION REGISTER: HALON SYSTEM RETAINED UNTIL FINAL HANDOVER.",
+    floppy144_final_isolation_register_effects,
+    3U
+};
+
+/*
+ * FM-07 Site Closure Handover Folder
+ *
+ * This establishes E-003. DR-04 availability is deliberately handled by the
+ * later evidence-prerequisite progression layer rather than being faked here.
+ */
+static const Floppy144Effect
+floppy144_site_closure_handover_effects[] =
+{
+    {
+        FLOPPY144_EFFECT_COMPLETE_INTERACTION,
+        (uint32_t)FLOPPY144_INTERACTION_I003
+    },
+
+    {
+        FLOPPY144_EFFECT_ESTABLISH_EVIDENCE,
+        (uint32_t)FLOPPY144_EVIDENCE_E003
+    }
+};
+
+static const Floppy144ObjectInteractionDefinition
+floppy144_site_closure_handover_interaction =
+{
+    FLOPPY144_OBJECT_ACTION_SHOW_NOTICE,
+    100U,
+    FLOPPY144_COLLECTION_COUNT,
+    "PRESS E TO INSPECT SITE CLOSURE HANDOVER FOLDER",
+    FLOPPY144_COLLECTION_COUNT,
+    NULL,
+    "HANDOVER FOLDER: ARCHIVE RECONCILIATION AND TERMINAL NETWORK REMEDIATION REMAIN OUTSTANDING.",
+    floppy144_site_closure_handover_effects,
+    2U
+};
+
 /*
  * Object-attached labels
  */
@@ -123,7 +202,7 @@ static const Floppy144ObjectLabelDefinition
     10,
     FLOPPY144_OBJECT_COLOUR_EDGE,
     "DESK 01",
-    FLOPPY144_COLLECTION_HR02,
+    FLOPPY144_COLLECTION_HR01,
     "SENIOR ARCHIVIST"
 };
 
@@ -134,7 +213,7 @@ static const Floppy144ObjectLabelDefinition
     10,
     FLOPPY144_OBJECT_COLOUR_EDGE,
     "DESK 02",
-    FLOPPY144_COLLECTION_HR02,
+    FLOPPY144_COLLECTION_HR01,
     "RECORDS OFFICER"
 };
 
@@ -145,7 +224,7 @@ static const Floppy144ObjectLabelDefinition
     10,
     FLOPPY144_OBJECT_COLOUR_EDGE,
     "DESK 03",
-    FLOPPY144_COLLECTION_HR02,
+    FLOPPY144_COLLECTION_HR01,
     "ADMINISTRATOR"
 };
 
@@ -156,7 +235,7 @@ static const Floppy144ObjectLabelDefinition
     10,
     FLOPPY144_OBJECT_COLOUR_EDGE,
     "DESK 04",
-    FLOPPY144_COLLECTION_HR02,
+    FLOPPY144_COLLECTION_HR01,
     "IT SUPPORT"
 };
 

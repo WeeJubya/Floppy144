@@ -26,13 +26,18 @@
 
 /*
  * Visible player proportions and ground collision footprint are deliberately
- * separate. The standing character remains 3.5 units wide and 8 units high,
- * while movement uses a compact 2 x 2 unit footprint so doorways have
- * comfortable clearance.
+ * separate.
+ *
+ * The standing character is 4 units wide. Ground collision uses a 4 x 2 unit
+ * footprint positioned immediately above the player's persistent foot point.
+ * This keeps the lower edge from extending beyond the visible character while
+ * giving the left and right sides appropriate clearance.
  */
-#define FLOPPY144_SITE_PLAYER_VISUAL_WIDTH_X16   56
-#define FLOPPY144_SITE_PLAYER_HEIGHT_UNITS        8
-#define FLOPPY144_SITE_PLAYER_COLLISION_X16       32
+#define FLOPPY144_SITE_PLAYER_VISUAL_WIDTH_X16       56
+#define FLOPPY144_SITE_PLAYER_HEIGHT_UNITS            8
+
+#define FLOPPY144_SITE_PLAYER_COLLISION_WIDTH_X16    56
+#define FLOPPY144_SITE_PLAYER_COLLISION_DEPTH_X16    32
 
 #define FLOPPY144_SITE_MOVE_STEP_X16              8
 

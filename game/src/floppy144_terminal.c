@@ -1,4 +1,4 @@
-/*
+    /*
  * Floppy//144 - archive terminal implementation
  *
  * Renders the collection list and detail overlay, handles terminal-local
@@ -191,7 +191,7 @@ static void Floppy144TerminalDrawDetail(
         );
 
     char code[32];
-    char collection_class[32];
+    char collection_domain[32];
 
     snprintf(
         code,
@@ -201,12 +201,12 @@ static void Floppy144TerminalDrawDetail(
     );
 
     snprintf(
-        collection_class,
-        sizeof(collection_class),
-        "CLASS: %s",
-        Floppy144CollectionClassText(
-            definition->collection_class
-        )
+        collection_domain,
+        sizeof(collection_domain),
+             "DOMAIN: %s",
+             Floppy144CollectionDomainText(
+                 definition->domain
+             )
     );
 
     const char *title =
@@ -307,7 +307,7 @@ static void Floppy144TerminalDrawDetail(
         surface,
         84,
         178,
-        collection_class,
+        collection_domain,
         1,
         muted
     );
@@ -703,6 +703,163 @@ static bool Floppy144TerminalFindCollection(
     return false;
 }
 
+#define FLOPPY144_TERMINAL_HELP_PAGE_COUNT 3U
+
+/*
+ * Built-in GDR operating guidance.
+ *
+ * This is Terminal software documentation, not recovered archive material.
+ * It therefore consumes no reconstruction capacity and requires no restored
+ * collection.
+ */
+
+static const char *const floppy144_terminal_help_page_1[] =
+{
+    "TERMINAL OPERATION",
+    "",
+    "ENTER COMMANDS AT THE A:\\GDR> PROMPT.",
+    "BACKSPACE EDITS THE CURRENT ENTRY.",
+    "ENTER SUBMITS THE COMMAND.",
+    "ESC OPENS GDR SESSION CONTROL.",
+    "EXIT CLOSES THE TERMINAL SESSION.",
+    NULL
+};
+
+static const char *const floppy144_terminal_help_page_2[] =
+{
+    "RESTORING COLLECTIONS",
+    "",
+    "LIST DISPLAYS COLLECTION STATUS.",
+    "RESTORE <CODE> RECOVERS ONE COLLECTION.",
+    "EXAMPLE: RESTORE DR-01",
+    "RESTORATION USES RECONSTRUCTION CAPACITY.",
+    "MAXIMUM AVAILABLE PER RECOVERY: 100%.",
+    NULL
+};
+
+static const char *const floppy144_terminal_help_page_3[] =
+{
+    "RECORD ACCESS",
+    "",
+    "LIST <CODE> OPENS A RESTORED RECORD INDEX.",
+    "SPACE AND BACKSPACE MOVE BETWEEN PAGES.",
+    "ENTER RETURNS TO THE COMMAND PROMPT.",
+    "OPEN <RECORD-ID> RETRIEVES ONE RECORD.",
+    "ONLY RESTORED COLLECTIONS MAY BE SEARCHED.",
+    NULL
+};
+
+static void Floppy144TerminalPrintHelpPage(
+    Floppy144TerminalState *terminal
+)
+{
+    const char *const *lines;
+    char line[FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
+    uint32_t line_index;
+
+    if(
+        terminal == NULL ||
+        !terminal->help_pager_active
+    )
+    {
+        return;
+    }
+
+    switch(terminal->help_pager_page)
+    {
+        case 1U:
+        {
+            lines =
+            floppy144_terminal_help_page_1;
+
+            break;
+        }
+
+        case 2U:
+        {
+            lines =
+            floppy144_terminal_help_page_2;
+
+            break;
+        }
+
+        case 3U:
+        default:
+        {
+            lines =
+            floppy144_terminal_help_page_3;
+
+            break;
+        }
+    }
+
+    terminal->output_count =
+    0U;
+
+    Floppy144TerminalPushLine(
+        terminal,
+        "GDR ARCHIVE RECOVERY SYSTEM"
+    );
+
+    Floppy144TerminalPushLine(
+        terminal,
+        "OPERATOR HELP"
+    );
+
+    snprintf(
+        line,
+        sizeof(line),
+             "PAGE %u OF %u",
+             (unsigned)terminal->help_pager_page,
+             (unsigned)FLOPPY144_TERMINAL_HELP_PAGE_COUNT
+    );
+
+    Floppy144TerminalPushLine(
+        terminal,
+        line
+    );
+
+    Floppy144TerminalPushLine(
+        terminal,
+        ""
+    );
+
+    for(
+        line_index = 0U;
+    lines[line_index] != NULL;
+    ++line_index
+    )
+    {
+        Floppy144TerminalPushLine(
+            terminal,
+            lines[line_index]
+        );
+    }
+}
+
+static void Floppy144TerminalOpenHelpPager(
+    Floppy144TerminalState *terminal
+)
+{
+    if(terminal == NULL)
+    {
+        return;
+    }
+
+    terminal->record_pager_active =
+    false;
+
+    terminal->help_pager_active =
+    true;
+
+    terminal->help_pager_page =
+    1U;
+
+    Floppy144TerminalPrintHelpPage(
+        terminal
+    );
+}
+
 static void Floppy144TerminalPrintHelp(
     Floppy144TerminalState *terminal,
     bool services_initialised,
@@ -915,7 +1072,7 @@ static void Floppy144TerminalPrintHelp(
 
         Floppy144TerminalPushLine(
             terminal,
-            "EXAMPLE: RESTORE HR-02"
+            "EXAMPLE: RESTORE HR-01"
         );
 
         return;
@@ -1012,7 +1169,7 @@ static void Floppy144TerminalPrintHelp(
 
         Floppy144TerminalPushLine(
             terminal,
-            "EXAMPLE: OPEN HR-02-RS-0038"
+            "EXAMPLE: OPEN HR-01-RS-0038"
         );
 
         Floppy144TerminalPushLine(
@@ -1045,7 +1202,8 @@ static void Floppy144TerminalPrintHelp(
 
 static void Floppy144TerminalPrintCollections(
     Floppy144TerminalState *terminal,
-    const Floppy144WorldState *world
+    const Floppy144WorldState *world,
+    const Floppy144RunState *run_state
 )
 {
     uint32_t collection_index;
@@ -1083,21 +1241,19 @@ static void Floppy144TerminalPrintCollections(
                 collection
             );
 
-        /*
-         * Before DR-01 reconstructs the site, the removable-media recovery
-         * environment exposes only its mandatory recovery index.
-         */
-
-        if(
-            collection != FLOPPY144_COLLECTION_DR01 &&
-            !Floppy144WorldCollectionRestored(
-                world,
-                FLOPPY144_COLLECTION_DR01
+            /*
+             * Collection visibility is derived from persistent progression state.
+             * The terminal does not contain collection-specific story rules.
+             */
+            if(
+                !Floppy144RunStateCollectionAvailable(
+                    run_state,
+                    collection
+                )
             )
-        )
-        {
-            continue;
-        }
+            {
+                continue;
+            }
 
         const char *status =
             Floppy144WorldCollectionEvidenceFound(
@@ -1131,13 +1287,13 @@ static void Floppy144TerminalPrintCollections(
  * Restore one collection identified by its registered code.
  */
 
-#define FLOPPY144_TERMINAL_RECORDS_PER_PAGE 7U
+#define FLOPPY144_TERMINAL_RECORDS_PER_PAGE 10U
 
 /*
  * Parse LIST arguments into a collection code and optional page number.
  *
- * LIST HR-02 defaults to page one.
- * LIST HR-02 3 requests page three.
+ * LIST HR-01 defaults to page one.
+ * LIST HR-01 3 requests page three.
  */
 
 static bool Floppy144TerminalParseListRequest(
@@ -1624,6 +1780,80 @@ void Floppy144TerminalCloseRecordPager(
     terminal->record_pager_active =
         false;
 }
+
+bool Floppy144TerminalHelpPagerActive(
+    const Floppy144TerminalState *terminal
+)
+{
+    return
+    terminal != NULL &&
+    terminal->help_pager_active;
+}
+
+void Floppy144TerminalMoveHelpPager(
+    Floppy144TerminalState *terminal,
+    int32_t direction
+)
+{
+    int32_t next_page;
+
+    if(
+        terminal == NULL ||
+        !terminal->help_pager_active ||
+        direction == 0
+    )
+    {
+        return;
+    }
+
+    next_page =
+    (int32_t)terminal->help_pager_page +
+    direction;
+
+    if(next_page < 1)
+    {
+        next_page =
+        1;
+    }
+
+    if(
+        next_page >
+        (int32_t)FLOPPY144_TERMINAL_HELP_PAGE_COUNT
+    )
+    {
+        next_page =
+        (int32_t)FLOPPY144_TERMINAL_HELP_PAGE_COUNT;
+    }
+
+    if(
+        (uint32_t)next_page ==
+        terminal->help_pager_page
+    )
+    {
+        return;
+    }
+
+    terminal->help_pager_page =
+    (uint32_t)next_page;
+
+    Floppy144TerminalPrintHelpPage(
+        terminal
+    );
+}
+
+void Floppy144TerminalCloseHelpPager(
+    Floppy144TerminalState *terminal
+)
+{
+    if(terminal == NULL)
+    {
+        return;
+    }
+
+    terminal->help_pager_active =
+    false;
+}
+
 static void Floppy144TerminalRestoreCollection(
     Floppy144TerminalState *terminal,
     Floppy144WorldState *world,
@@ -1665,21 +1895,20 @@ static void Floppy144TerminalRestoreCollection(
             collection
         );
 
-    if(
-        collection != FLOPPY144_COLLECTION_DR01 &&
-        !Floppy144WorldCollectionRestored(
-            world,
-            FLOPPY144_COLLECTION_DR01
+        if(
+            !Floppy144RunStateCollectionAvailable(
+                run_state,
+                collection
+            )
         )
-    )
-    {
-        Floppy144TerminalPushLine(
-            terminal,
-            "COLLECTION UNAVAILABLE IN INITIAL RECOVERY ENVIRONMENT."
-        );
+        {
+            Floppy144TerminalPushLine(
+                terminal,
+                "COLLECTION NOT YET AVAILABLE FOR RECOVERY."
+            );
 
-        return;
-    }
+            return;
+        }
 
     if(
         Floppy144WorldCollectionRestored(
@@ -1693,6 +1922,49 @@ static void Floppy144TerminalRestoreCollection(
             sizeof(line),
             "COLLECTION %s ALREADY RESTORED.",
             definition->code
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            line
+        );
+
+        return;
+    }
+
+    if(
+        !Floppy144RunStateCanRestoreCollection(
+            run_state,
+            collection
+        )
+    )
+    {
+        uint32_t current_percent =
+        Floppy144RunStateReconstructionPercent(
+            run_state
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            ""
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "RESTORE REFUSED."
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "INSUFFICIENT RECONSTRUCTION CAPACITY."
+        );
+
+        snprintf(
+            line,
+            sizeof(line),
+                 "CURRENT: %u%%  REQUIRED: %u%%  MAXIMUM: 100%%",
+                 (unsigned)current_percent,
+                 (unsigned)definition->reconstruction_percent
         );
 
         Floppy144TerminalPushLine(
@@ -1721,8 +1993,8 @@ static void Floppy144TerminalRestoreCollection(
     );
 
     if(
-        !Floppy144WorldRestoreCollection(
-            world,
+        !Floppy144RunStateRestoreCollection(
+            run_state,
             collection
         )
     )
@@ -1735,16 +2007,14 @@ static void Floppy144TerminalRestoreCollection(
         return;
     }
 
-    Floppy144RunStateRestoreCollection(
-        run_state,
+    /*
+     * RunState is authoritative. WorldState mirrors a restoration only after the
+     * authoritative state has accepted it.
+     */
+    Floppy144WorldRestoreCollection(
+        world,
         collection
     );
-
-    if(collection == FLOPPY144_COLLECTION_DR01)
-    {
-        terminal->site_entry_requested =
-            true;
-    }
 
     Floppy144TerminalPushLine(
         terminal,
@@ -2021,11 +2291,23 @@ void Floppy144TerminalSubmitInput(
     }
     else if(help_arguments != NULL)
     {
-        Floppy144TerminalPrintHelp(
-            terminal,
-            services_initialised,
-            help_arguments
-        );
+        if(
+            services_initialised &&
+            help_arguments[0] == '\0'
+        )
+        {
+            Floppy144TerminalOpenHelpPager(
+                terminal
+            );
+        }
+        else
+        {
+            Floppy144TerminalPrintHelp(
+                terminal,
+                services_initialised,
+                help_arguments
+            );
+        }
     }
     else if(
         !services_initialised &&
@@ -2068,6 +2350,11 @@ void Floppy144TerminalSubmitInput(
             Floppy144TerminalPushLine(
                 terminal,
                 "NEW COMMANDS: RESTORE, LIST, OPEN"
+            );
+
+            Floppy144TerminalPushLine(
+                terminal,
+                "TYPE HELP FOR OPERATING GUIDANCE."
             );
         }
         else
@@ -2125,7 +2412,8 @@ void Floppy144TerminalSubmitInput(
         {
             Floppy144TerminalPrintCollections(
                 terminal,
-                world
+                world,
+                run_state
             );
         }
     }
@@ -2168,33 +2456,34 @@ void Floppy144TerminalSubmitInput(
     terminal->input[0] =
         '\0';
 }
+
 /*
  * Terminal state management
  *
- * The terminal displays one narrative act at a time. Selection remains within
- * that act, while act navigation skips pages containing no registered
- * collections.
+ * The terminal displays one archive domain at a time. Selection remains
+ * within that domain, while domain navigation skips domains containing no
+ * registered collections.
  */
 
-static bool Floppy144TerminalActHasCollections(
-    Floppy144Act act
+static bool Floppy144TerminalDomainHasCollections(
+    Floppy144CollectionDomain domain
 )
 {
     uint32_t collection_index;
 
     for(
         collection_index = 0U;
-        collection_index <
-            (uint32_t)FLOPPY144_COLLECTION_COUNT;
-        ++collection_index
+    collection_index <
+    (uint32_t)FLOPPY144_COLLECTION_COUNT;
+    ++collection_index
     )
     {
         const Floppy144CollectionDefinition *definition =
-            Floppy144CollectionGet(
-                (Floppy144CollectionId)collection_index
-            );
+        Floppy144CollectionGet(
+            (Floppy144CollectionId)collection_index
+        );
 
-        if(definition->act == act)
+        if(definition->domain == domain)
         {
             return true;
         }
@@ -2203,28 +2492,28 @@ static bool Floppy144TerminalActHasCollections(
     return false;
 }
 
-static Floppy144CollectionId Floppy144TerminalFirstCollectionInAct(
-    Floppy144Act act
+static Floppy144CollectionId Floppy144TerminalFirstCollectionInDomain(
+    Floppy144CollectionDomain domain
 )
 {
     uint32_t collection_index;
 
     for(
         collection_index = 0U;
-        collection_index <
-            (uint32_t)FLOPPY144_COLLECTION_COUNT;
-        ++collection_index
+    collection_index <
+    (uint32_t)FLOPPY144_COLLECTION_COUNT;
+    ++collection_index
     )
     {
         Floppy144CollectionId collection =
-            (Floppy144CollectionId)collection_index;
+        (Floppy144CollectionId)collection_index;
 
         const Floppy144CollectionDefinition *definition =
-            Floppy144CollectionGet(
-                collection
-            );
+        Floppy144CollectionGet(
+            collection
+        );
 
-        if(definition->act == act)
+        if(definition->domain == domain)
         {
             return collection;
         }
@@ -2240,13 +2529,13 @@ void Floppy144TerminalReset(
 {
     uint32_t line_index;
 
-    terminal->selected_act =
-        FLOPPY144_ACT_PROLOGUE;
+    terminal->selected_domain =
+        FLOPPY144_COLLECTION_DOMAIN_DR;
 
     terminal->selected_collection =
-        Floppy144TerminalFirstCollectionInAct(
-            terminal->selected_act
-        );
+        Floppy144TerminalFirstCollectionInDomain(
+        terminal->selected_domain
+    );
 
     terminal->detail_open =
         false;
@@ -2260,19 +2549,25 @@ void Floppy144TerminalReset(
     terminal->exit_requested =
         false;
 
-    terminal->site_entry_requested =
-        false;
-
     terminal->open_record_requested =
         false;
 
     terminal->record_pager_active =
         false;
 
+    terminal->help_pager_active =
+        false;
+
+    terminal->help_pager_active =
+        false;
+
     terminal->record_pager_collection =
         FLOPPY144_COLLECTION_DR01;
 
     terminal->record_pager_page =
+        1U;
+
+    terminal->help_pager_page =
         1U;
 
     terminal->requested_collection =
@@ -2403,8 +2698,8 @@ void Floppy144TerminalMoveSelection(
             );
 
         if(
-            definition->act ==
-            terminal->selected_act
+            definition->domain ==
+            terminal->selected_domain
         )
         {
             terminal->selected_collection =
@@ -2416,15 +2711,15 @@ void Floppy144TerminalMoveSelection(
 }
 
 /*
- * Move to the next populated act page.
+ * Move to the next populated archive domain.
  */
 
-void Floppy144TerminalMoveAct(
+void Floppy144TerminalMoveDomain(
     Floppy144TerminalState *terminal,
     int32_t direction
 )
 {
-    int32_t next_act;
+    int32_t next_domain;
     int32_t step;
     uint32_t attempts;
 
@@ -2437,94 +2732,56 @@ void Floppy144TerminalMoveAct(
     }
 
     step =
-        direction < 0
-            ? -1
-            : 1;
+    direction < 0
+    ? -1
+    : 1;
 
-    next_act =
-        (int32_t)terminal->selected_act;
+    next_domain =
+    (int32_t)terminal->selected_domain;
 
     for(
         attempts = 0U;
-        attempts <
-            (uint32_t)FLOPPY144_ACT_COUNT;
-        ++attempts
+    attempts <
+    (uint32_t)FLOPPY144_COLLECTION_DOMAIN_COUNT;
+    ++attempts
     )
     {
-        next_act +=
-            step;
+        next_domain +=
+        step;
 
-        if(next_act < 0)
+        if(next_domain < 0)
         {
-            next_act =
-                (int32_t)FLOPPY144_ACT_COUNT - 1;
+            next_domain =
+            (int32_t)FLOPPY144_COLLECTION_DOMAIN_COUNT - 1;
         }
 
         if(
-            next_act >=
-            (int32_t)FLOPPY144_ACT_COUNT
+            next_domain >=
+            (int32_t)FLOPPY144_COLLECTION_DOMAIN_COUNT
         )
         {
-            next_act =
-                0;
+            next_domain =
+            0;
         }
 
         if(
-            Floppy144TerminalActHasCollections(
-                (Floppy144Act)next_act
+            Floppy144TerminalDomainHasCollections(
+                (Floppy144CollectionDomain)next_domain
             )
         )
         {
-            terminal->selected_act =
-                (Floppy144Act)next_act;
+            terminal->selected_domain =
+            (Floppy144CollectionDomain)next_domain;
 
             terminal->selected_collection =
-                Floppy144TerminalFirstCollectionInAct(
-                    terminal->selected_act
-                );
+            Floppy144TerminalFirstCollectionInDomain(
+                terminal->selected_domain
+            );
 
             terminal->restoration_notice =
-                false;
+            false;
 
             return;
-        }
-    }
-}
-/*
- * Open details or restore a collection
- *
- * First Enter opens the detail overlay. A later Enter asks the world-state
- * system to restore whichever registered collection is selected.
- */
-
-void Floppy144TerminalOpenSelection(
-    Floppy144TerminalState *terminal,
-    Floppy144WorldState *world
-)
-{
-    if(!terminal->detail_open)
-    {
-        terminal->detail_open = true;
-        terminal->restoration_notice = false;
-        return;
-    }
-
-    if(
-        Floppy144WorldRestoreCollection(
-            world,
-            terminal->selected_collection
-        )
-    )
-    {
-        terminal->restoration_notice = true;
-
-        if(
-            terminal->selected_collection ==
-                FLOPPY144_COLLECTION_DR01
-        )
-        {
-            terminal->site_entry_requested =
-                true;
         }
     }
 }
@@ -2562,41 +2819,6 @@ bool Floppy144TerminalDetailOpen(
  * Builds collection status labels from world state, draws the base list and
  * footer, then overlays details when detail_open is true.
  */
-
-/*
- * Derive the compact status displayed beside a collection.
- *
- * Runtime state comes from the indexed world-state API, so this helper does
- * not need collection-specific branches.
- */
-
-static const char *Floppy144TerminalCollectionStatusText(
-    const Floppy144WorldState *world,
-    Floppy144CollectionId collection
-)
-{
-    if(
-        Floppy144WorldCollectionEvidenceFound(
-            world,
-            collection
-        )
-    )
-    {
-        return "EVIDENCE";
-    }
-
-    if(
-        Floppy144WorldCollectionRestored(
-            world,
-            collection
-        )
-    )
-    {
-        return "RESTORED";
-    }
-
-    return "AVAILABLE";
-}
 
 /*
  * Determine whether a restored collection exposes catalogue records.
@@ -2702,7 +2924,10 @@ void Floppy144TerminalDraw(
         )
     );
 
-    if(terminal->record_pager_active)
+    if(
+        terminal->record_pager_active ||
+        terminal->help_pager_active
+    )
     {
         snprintf(
             prompt,

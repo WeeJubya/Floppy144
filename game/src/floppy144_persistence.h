@@ -18,7 +18,35 @@
 #define FLOPPY144_SAVE_MAGIC       0x34343146U
 #define FLOPPY144_SAVE_VERSION     1U
 
-#define FLOPPY144_SAVE_PAYLOAD_V1_SIZE 64U
+/*
+ * Run-state payload size.
+ *
+ * Keep this derived from the actual persisted arrays rather than a manually
+ * maintained byte count. Registry growth can change bitset storage width.
+ *
+ * Fixed scalar prefix:
+ *   recovery_seed                 4
+ *   act/branch/projection/init    4
+ *   player_site_x                 4
+ *   player_site_y                 4
+ *                                --
+ *                                16 bytes
+ */
+#define FLOPPY144_SAVE_PAYLOAD_V1_SIZE                            \
+(                                                                 \
+    16U +                                                         \
+    sizeof(((Floppy144RunState *)0)->rooms) +                     \
+    sizeof(((Floppy144RunState *)0)->objects_visible) +           \
+    sizeof(((Floppy144RunState *)0)->objects_unlocked) +          \
+    sizeof(((Floppy144RunState *)0)->objects_open) +              \
+    sizeof(((Floppy144RunState *)0)->collections) +               \
+    sizeof(((Floppy144RunState *)0)->triggers) +                  \
+    sizeof(((Floppy144RunState *)0)->interactions) +              \
+    sizeof(((Floppy144RunState *)0)->evidence) +                  \
+    sizeof(((Floppy144RunState *)0)->notebook) +                  \
+    sizeof(((Floppy144RunState *)0)->capabilities)                \
+)
+
 #define FLOPPY144_SAVE_HEADER_SIZE     16U
 #define FLOPPY144_SAVE_FILE_V1_SIZE    \
     (FLOPPY144_SAVE_HEADER_SIZE + FLOPPY144_SAVE_PAYLOAD_V1_SIZE)

@@ -889,6 +889,59 @@ static LRESULT CALLBACK Floppy144WindowProc(
             }
 
             /*
+             * Built-in operating guidance owns terminal character input while open.
+             */
+            if(
+                Floppy144TerminalHelpPagerActive(
+                    &global_terminal
+                )
+            )
+            {
+                switch(w_param)
+                {
+                    case ' ':
+                    {
+                        Floppy144TerminalMoveHelpPager(
+                            &global_terminal,
+                            1
+                        );
+
+                        break;
+                    }
+
+                    case '\b':
+                    {
+                        Floppy144TerminalMoveHelpPager(
+                            &global_terminal,
+                            -1
+                        );
+
+                        break;
+                    }
+
+                    case '\r':
+                    {
+                        Floppy144TerminalCloseHelpPager(
+                            &global_terminal
+                        );
+
+                        break;
+                    }
+
+                    default:
+                    {
+                        break;
+                    }
+                }
+
+                Floppy144Redraw(
+                    window
+                );
+
+                return 0;
+            }
+
+            /*
              * The record pager temporarily owns terminal character input.
              * Escape remains handled by WM_KEYDOWN and opens session control.
              */
@@ -962,37 +1015,23 @@ static LRESULT CALLBACK Floppy144WindowProc(
                         &global_run_state
                     );
 
-                    if(global_terminal.site_entry_requested)
-                    {
-                        global_terminal.site_entry_requested =
-                            false;
-
-                        global_office_notice =
-                            NULL;
-
-                        global_resume_screen =
-                            FLOPPY144_SCREEN_OFFICE;
-
-                        global_screen =
-                            FLOPPY144_SCREEN_OFFICE;
-                    }
-                    else if(global_terminal.exit_requested)
+                    if(global_terminal.exit_requested)
                     {
                         global_terminal.exit_requested =
-                            false;
+                        false;
 
                         if(
-                            Floppy144WorldCollectionRestored(
-                                &global_world,
-                                FLOPPY144_COLLECTION_DR01
+                            Floppy144RunStateTriggerFired(
+                                &global_run_state,
+                                FLOPPY144_TRIGGER_T001
                             )
                         )
                         {
                             global_resume_screen =
-                                FLOPPY144_SCREEN_OFFICE;
+                            FLOPPY144_SCREEN_OFFICE;
 
                             global_screen =
-                                FLOPPY144_SCREEN_OFFICE;
+                            FLOPPY144_SCREEN_OFFICE;
                         }
                         else
                         {

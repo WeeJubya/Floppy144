@@ -9,6 +9,7 @@
 #pragma once
 
 #include "floppy144_effect.h"
+#include "floppy144_trigger.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -19,16 +20,16 @@
  * Rendering remains in the catalogue module for now, but the registry decides
  * which treatment belongs to each document.
  */
-
 typedef enum Floppy144DocumentView
 {
-    FLOPPY144_DOCUMENT_VIEW_HR02_DESK_REALLOCATION = 0,
-    FLOPPY144_DOCUMENT_VIEW_FA03_SUPPRESSION_SERVICE,
+    FLOPPY144_DOCUMENT_VIEW_HR01_DESK_REALLOCATION = 0,
+    FLOPPY144_DOCUMENT_VIEW_FM13_SUPPRESSION_SERVICE,
 
-    FLOPPY144_DOCUMENT_VIEW_DR01_HELP_TERMINAL_ACCESS,
-    FLOPPY144_DOCUMENT_VIEW_DR01_HELP_RESTORATION,
-    FLOPPY144_DOCUMENT_VIEW_DR01_HELP_RECORDS
-} Floppy144DocumentView;
+    FLOPPY144_DOCUMENT_VIEW_DR01_DISK_RECOVERY_INDEX,
+
+    FLOPPY144_DOCUMENT_VIEW_GENERIC
+}
+Floppy144DocumentView;
 
 /*
  * Immutable authored-document metadata
@@ -47,9 +48,21 @@ typedef struct Floppy144DocumentDefinition
 
     Floppy144DocumentView view;
 
+    /*
+     * FLOPPY144_TRIGGER_COUNT means this authored document has no registered
+     * persistent trigger.
+     */
+    Floppy144TriggerId trigger;
+
+    /*
+     * Direct effects remain as a compatibility path for the current technical
+     * slice. Final trigger documents should route their progression through
+     * the trigger registry instead.
+     */
     const Floppy144Effect *effects;
     uint32_t effect_count;
-} Floppy144DocumentDefinition;
+}
+Floppy144DocumentDefinition;
 
 /*
  * Locate an authored document matching a collection and catalogue index.

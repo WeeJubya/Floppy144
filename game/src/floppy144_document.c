@@ -3,6 +3,7 @@
  */
 
 #include "floppy144_document.h"
+#include "floppy144_trigger_engine.h"
 
 #include <stddef.h>
 
@@ -10,30 +11,11 @@
     ((uint32_t)(sizeof(values) / sizeof((values)[0])))
 
 /*
- * Effects declared by the primary-evidence documents in the technical slice.
- */
-
-static const Floppy144Effect floppy144_hr02_038_effects[] =
-{
-    {
-        FLOPPY144_EFFECT_REVEAL_OBJECT,
-        (uint32_t)FLOPPY144_OBJECT_DESK_FOUR_PERSONNEL_FORMS
-    }
-};
-
-static const Floppy144Effect floppy144_fa03_047_effects[] =
-{
-    {
-        FLOPPY144_EFFECT_REVEAL_OBJECT,
-        (uint32_t)FLOPPY144_OBJECT_SUPPRESSION_CONTROL_PANEL
-    }
-};
-
-/*
  * Master authored-document table
  *
- * HR-02 record 038 retains its procedurally generated catalogue ID and title.
- * FA-03 record 047 uses a stable recovered-record identity.
+ * Final readable-document identities are installed collection by collection.
+ * Unspecified record IDs continue to use catalogue generation until archive
+ * population is completed.
  */
 
 static const Floppy144DocumentDefinition
@@ -41,51 +23,145 @@ static const Floppy144DocumentDefinition
 {
     {
         FLOPPY144_COLLECTION_DR01,
-        1U,
+        0U,
         NULL,
         NULL,
-        FLOPPY144_DOCUMENT_VIEW_DR01_HELP_TERMINAL_ACCESS,
+        FLOPPY144_DOCUMENT_VIEW_DR01_DISK_RECOVERY_INDEX,
+        FLOPPY144_TRIGGER_T001,
         NULL,
         0U
     },
 
     {
-        FLOPPY144_COLLECTION_DR01,
+        FLOPPY144_COLLECTION_HR01,
+        0U,
+        NULL,
+        "SITE ESTABLISHMENT REGISTER",
+        FLOPPY144_DOCUMENT_VIEW_GENERIC,
+        FLOPPY144_TRIGGER_T002,
+        NULL,
+        0U
+    },
+
+    {
+        FLOPPY144_COLLECTION_HR01,
+        1U,
+        "HR-01-RS-0107",
+        "MAIN OFFICE STAFFING ALLOCATION",
+        FLOPPY144_DOCUMENT_VIEW_GENERIC,
+        FLOPPY144_TRIGGER_T003,
+        NULL,
+        0U
+    },
+
+    {
+        FLOPPY144_COLLECTION_HR01,
         2U,
         NULL,
-        NULL,
-        FLOPPY144_DOCUMENT_VIEW_DR01_HELP_RESTORATION,
+        "ORGANISATIONAL CHART",
+        FLOPPY144_DOCUMENT_VIEW_GENERIC,
+        FLOPPY144_TRIGGER_COUNT,
         NULL,
         0U
     },
 
     {
-        FLOPPY144_COLLECTION_DR01,
+        FLOPPY144_COLLECTION_HR01,
         3U,
         NULL,
-        NULL,
-        FLOPPY144_DOCUMENT_VIEW_DR01_HELP_RECORDS,
+        "TEMPORARY DESK REALLOCATION NOTICE",
+        FLOPPY144_DOCUMENT_VIEW_HR01_DESK_REALLOCATION,
+        FLOPPY144_TRIGGER_COUNT,
         NULL,
         0U
     },
+
     {
-        FLOPPY144_COLLECTION_HR02,
-        37U,
+        FLOPPY144_COLLECTION_HR01,
+        4U,
         NULL,
+        "VACANCY & HOT-DESK PROVISION",
+        FLOPPY144_DOCUMENT_VIEW_GENERIC,
+        FLOPPY144_TRIGGER_COUNT,
         NULL,
-        FLOPPY144_DOCUMENT_VIEW_HR02_DESK_REALLOCATION,
-        floppy144_hr02_038_effects,
-        FLOPPY144_ARRAY_COUNT(floppy144_hr02_038_effects)
+        0U
     },
 
     {
-        FLOPPY144_COLLECTION_FA03,
-        46U,
-        "FA-03-RS-0047",
+        FLOPPY144_COLLECTION_HR01,
+        5U,
+        NULL,
+        "STAFF CONTACT DIRECTORY",
+        FLOPPY144_DOCUMENT_VIEW_GENERIC,
+        FLOPPY144_TRIGGER_COUNT,
+        NULL,
+        0U
+    },
+
+    {
+        FLOPPY144_COLLECTION_FM13,
+        0U,
+        NULL,
         "SUPPRESSION CONTROL PANEL SERVICE NOTE",
-        FLOPPY144_DOCUMENT_VIEW_FA03_SUPPRESSION_SERVICE,
-        floppy144_fa03_047_effects,
-        FLOPPY144_ARRAY_COUNT(floppy144_fa03_047_effects)
+        FLOPPY144_DOCUMENT_VIEW_FM13_SUPPRESSION_SERVICE,
+        FLOPPY144_TRIGGER_T006,
+        NULL,
+        0U
+    },
+
+    {
+        FLOPPY144_COLLECTION_FM13,
+        1U,
+        NULL,
+        "MANUAL DISCHARGE CIRCUIT TEST RECORD",
+        FLOPPY144_DOCUMENT_VIEW_GENERIC,
+        FLOPPY144_TRIGGER_T007,
+        NULL,
+        0U
+    },
+
+    {
+        FLOPPY144_COLLECTION_FM07,
+        0U,
+        NULL,
+        "FINAL DECOMMISSIONING SCHEDULE",
+        FLOPPY144_DOCUMENT_VIEW_GENERIC,
+        FLOPPY144_TRIGGER_T008,
+        NULL,
+        0U
+    },
+
+    {
+        FLOPPY144_COLLECTION_FM07,
+        1U,
+        NULL,
+        "RETAINED SERVICES SCHEDULE",
+        FLOPPY144_DOCUMENT_VIEW_GENERIC,
+        FLOPPY144_TRIGGER_T009,
+        NULL,
+        0U
+    },
+
+    {
+        FLOPPY144_COLLECTION_FM04,
+        0U,
+        NULL,
+        "FACILITIES ACCESS AUTHORISATION",
+        FLOPPY144_DOCUMENT_VIEW_GENERIC,
+        FLOPPY144_TRIGGER_T004,
+        NULL,
+        0U
+    },
+
+    {
+        FLOPPY144_COLLECTION_FM04,
+        1U,
+        NULL,
+        "INTERNAL CIRCULATION ACCESS PLAN",
+        FLOPPY144_DOCUMENT_VIEW_GENERIC,
+        FLOPPY144_TRIGGER_T005,
+        NULL,
+        0U
     }
 };
 
@@ -144,6 +220,23 @@ bool Floppy144DocumentApplyEffects(
     if(document == NULL)
     {
         return false;
+    }
+
+    /*
+     * Authored trigger documents route through the persistent fire-once trigger
+     * engine. Existing technical-slice direct effects remain supported separately
+     * until their final authored replacements are registered.
+     */
+    if(
+        document->trigger !=
+        FLOPPY144_TRIGGER_COUNT
+    )
+    {
+        Floppy144TriggerTryFire(
+            world,
+            run_state,
+            document->trigger
+        );
     }
 
     if(document->effect_count > 0U)

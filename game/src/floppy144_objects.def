@@ -44,7 +44,7 @@ FLOPPY144_OBJECT(
     34,
     34,
     28,
-    FLOPPY144_COLLECTION_FA03,
+    FLOPPY144_COLLECTION_FM13,
     FLOPPY144_OBJECT_FLAG_NONE,
     false,
     NULL,
@@ -54,7 +54,7 @@ FLOPPY144_OBJECT(
 
 FLOPPY144_OBJECT(
     ARCHIVE_TERMINAL,
-    "ARCHIVE TERMINAL",
+    "GDR TERMINAL",
     FLOPPY144_SCENE_OFFICE,
     FLOPPY144_OBJECT_NONE,
     274,
@@ -188,7 +188,7 @@ FLOPPY144_OBJECT(
     0,
     0,
     0,
-    FLOPPY144_COLLECTION_HR02,
+    FLOPPY144_COLLECTION_HR01,
     FLOPPY144_OBJECT_FLAG_NONE,
     true,
     NULL,
@@ -212,11 +212,94 @@ FLOPPY144_OBJECT(
     -30,
     165,
     79,
-    FLOPPY144_COLLECTION_HR02,
+    FLOPPY144_COLLECTION_HR01,
     FLOPPY144_OBJECT_FLAG_NONE,
     false,
     NULL,
     &floppy144_personnel_forms_interaction,
+    floppy144_desk_four_personnel_forms_primitives
+)
+
+/*
+ * HR-01 staffing-allocation recovery items.
+ *
+ * These are persistent logical objects. Their final Site-space presentation
+ * is deferred to the physical-item rendering pass.
+ *
+ * P-008 represents the recovered desk-number labelling scheme as one fact,
+ * even though its presentation will eventually repeat across all six
+ * canonical Main Office desks.
+ */
+
+FLOPPY144_OBJECT(
+    P008_DESK_NUMBER_LABELS,
+    "MAIN OFFICE DESK-NUMBER LABELS",
+    FLOPPY144_SCENE_OFFICE,
+    FLOPPY144_OBJECT_DESK_ONE,
+    0,
+    0,
+    FLOPPY144_OBJECT_LAYER_CONTENT,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    FLOPPY144_COLLECTION_HR01,
+    FLOPPY144_OBJECT_FLAG_NONE,
+    false,
+    NULL,
+    NULL,
+    floppy144_desk_four_personnel_forms_primitives
+)
+
+FLOPPY144_OBJECT(
+    P009_TEMP_DESK_ALLOCATION_SLIP,
+    "TEMPORARY DESK ALLOCATION SLIP",
+    FLOPPY144_SCENE_OFFICE,
+    FLOPPY144_OBJECT_DESK_FOUR,
+    0,
+    0,
+    FLOPPY144_OBJECT_LAYER_CONTENT,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    FLOPPY144_COLLECTION_HR01,
+    FLOPPY144_OBJECT_FLAG_NONE,
+    false,
+    NULL,
+    NULL,
+    floppy144_desk_four_personnel_forms_primitives
+)
+
+FLOPPY144_OBJECT(
+    P010_HOT_DESKING_NOTE,
+    "HR HOT-DESKING NOTE",
+    FLOPPY144_SCENE_OFFICE,
+    FLOPPY144_OBJECT_DESK_FOUR,
+    0,
+    0,
+    FLOPPY144_OBJECT_LAYER_CONTENT,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    FLOPPY144_COLLECTION_HR01,
+    FLOPPY144_OBJECT_FLAG_NONE,
+    false,
+    NULL,
+    NULL,
     floppy144_desk_four_personnel_forms_primitives
 )
 
@@ -314,4 +397,179 @@ FLOPPY144_OBJECT(
     NULL,
     NULL,
     floppy144_east_cabinet_primitives
+)
+
+/*
+ * FM-13 / FM-07 physical reconstruction material.
+ *
+ * These objects use the existing compact paper-object primitive for now.
+ * Site-space location and interaction are authoritative in site_object.c.
+ */
+
+FLOPPY144_OBJECT(
+    P013_PANEL_SERVICE_LABEL,
+    "PANEL SERVICE LABEL",
+    FLOPPY144_SCENE_OFFICE,
+    FLOPPY144_OBJECT_SUPPRESSION_CONTROL_PANEL,
+    0,
+    0,
+    FLOPPY144_OBJECT_LAYER_CONTENT,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    FLOPPY144_COLLECTION_FM13,
+    FLOPPY144_OBJECT_FLAG_NONE,
+    false,
+    NULL,
+    NULL,
+    floppy144_desk_four_personnel_forms_primitives
+)
+
+FLOPPY144_OBJECT(
+    P014_SITE_CLOSURE_HANDOVER_FOLDER,
+    "SITE CLOSURE HANDOVER FOLDER",
+    FLOPPY144_SCENE_OFFICE,
+    FLOPPY144_OBJECT_NONE,
+    0,
+    0,
+    FLOPPY144_OBJECT_LAYER_CONTENT,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    FLOPPY144_COLLECTION_FM07,
+    FLOPPY144_OBJECT_FLAG_NONE,
+    false,
+    NULL,
+    &floppy144_site_closure_handover_interaction,
+    floppy144_desk_four_personnel_forms_primitives
+)
+
+FLOPPY144_OBJECT(
+    P032_SUPPRESSION_ZONE_DIAGRAM,
+    "SUPPRESSION-ZONE DIAGRAM",
+    FLOPPY144_SCENE_OFFICE,
+    FLOPPY144_OBJECT_NONE,
+    0,
+    0,
+    FLOPPY144_OBJECT_LAYER_CONTENT,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    FLOPPY144_COLLECTION_FM13,
+    FLOPPY144_OBJECT_FLAG_NONE,
+    false,
+    NULL,
+    NULL,
+    floppy144_desk_four_personnel_forms_primitives
+)
+
+FLOPPY144_OBJECT(
+    P033_FINAL_ISOLATION_REGISTER,
+    "FINAL ISOLATION REGISTER",
+    FLOPPY144_SCENE_OFFICE,
+    FLOPPY144_OBJECT_NONE,
+    0,
+    0,
+    FLOPPY144_OBJECT_LAYER_CONTENT,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    FLOPPY144_COLLECTION_FM07,
+    FLOPPY144_OBJECT_FLAG_NONE,
+    false,
+    NULL,
+    &floppy144_final_isolation_register_interaction,
+    floppy144_desk_four_personnel_forms_primitives
+)
+
+FLOPPY144_OBJECT(
+    P034_DECOMMISSIONING_TAG_SET,
+    "DECOMMISSIONING TAG SET",
+    FLOPPY144_SCENE_OFFICE,
+    FLOPPY144_OBJECT_NONE,
+    0,
+    0,
+    FLOPPY144_OBJECT_LAYER_CONTENT,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    FLOPPY144_COLLECTION_FM07,
+    FLOPPY144_OBJECT_FLAG_NONE,
+    false,
+    NULL,
+    NULL,
+    floppy144_desk_four_personnel_forms_primitives
+)
+
+FLOPPY144_OBJECT(
+    P035_ASSET_TRANSFER_LABELS,
+    "ASSET-TRANSFER LABELS",
+    FLOPPY144_SCENE_OFFICE,
+    FLOPPY144_OBJECT_NONE,
+    0,
+    0,
+    FLOPPY144_OBJECT_LAYER_CONTENT,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    FLOPPY144_COLLECTION_FM07,
+    FLOPPY144_OBJECT_FLAG_NONE,
+    false,
+    NULL,
+    NULL,
+    floppy144_desk_four_personnel_forms_primitives
+)
+
+FLOPPY144_OBJECT(
+    P036_CONTRACTOR_CLIPBOARD,
+    "CONTRACTOR CLIPBOARD",
+    FLOPPY144_SCENE_OFFICE,
+    FLOPPY144_OBJECT_NONE,
+    0,
+    0,
+    FLOPPY144_OBJECT_LAYER_CONTENT,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    FLOPPY144_COLLECTION_FM07,
+    FLOPPY144_OBJECT_FLAG_NONE,
+    false,
+    NULL,
+    NULL,
+    floppy144_desk_four_personnel_forms_primitives
 )

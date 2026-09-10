@@ -51,8 +51,8 @@ static const char *floppy144_record_forms[10] =
  * Build a deterministic record ID and title
  *
  * The same collection and index always produce the same output. Different
- * multipliers give HR-02 and FA-03 distinct record-number sequences.
- * FA-03 record 047 is overridden with its stable authored identity.
+ * multipliers give HR-01 and FM-13 distinct record-number sequences.
+ * FM-13 record 047 is overridden with its stable authored identity.
  */
 
 void Floppy144CatalogueBuildRecord(
@@ -603,13 +603,13 @@ static void Floppy144CatalogueDrawList(
 }
 
 /*
- * Draw the recovered FA-03 authored document
+ * Draw the recovered FM-13 authored document
  *
  * This record is laid out directly because its complete contents exist on
  * Disk 144. Reading it reveals the reconstructed suppression control panel.
  */
 
-static void Floppy144CatalogueDrawFa03ServiceNote(
+static void Floppy144CatalogueDrawFm13ServiceNote(
     Floppy144Surface *surface
 )
 {
@@ -655,7 +655,7 @@ static void Floppy144CatalogueDrawFa03ServiceNote(
         surface,
         538,
         5,
-        "FA-03",
+        "FM-13",
         1,
         green
     );
@@ -700,7 +700,7 @@ static void Floppy144CatalogueDrawFa03ServiceNote(
         surface,
         52,
         50,
-        "FA-03-RS-0047",
+        "FM-13-RS-0047",
         1,
         amber
     );
@@ -840,275 +840,7 @@ static void Floppy144CatalogueDrawFa03ServiceNote(
         muted
     );
 }
-/*
- * Draw the selected document
- *
- * FA-03 record 047 has a dedicated renderer. Other entries use this shared
- * viewer, which either shows the HR-02 authored memorandum or explains that
- * only the index entry was recovered.
- */
 
-static const char *const floppy144_dr01_help_terminal_lines[] =
-{
-    "COMMANDS ARE ENTERED AT THE TERMINAL PROMPT.",
-    "TYPE HELP TO DISPLAY AVAILABLE COMMANDS.",
-    "TYPE EXIT TO CLOSE THE TERMINAL SESSION.",
-    "USE BACKSPACE TO CORRECT THE CURRENT ENTRY.",
-    "PRESS ENTER TO SUBMIT A COMMAND.",
-    "ESC OPENS GDR SESSION CONTROL.",
-    NULL
-};
-
-static const char *const floppy144_dr01_help_restoration_lines[] =
-{
-    "ARCHIVE SERVICES MAY INITIALLY BE OFFLINE.",
-    "TYPE INITIATE TO INITIALISE RECOVERY SERVICES.",
-    "TYPE LIST TO DISPLAY COLLECTIONS ON DISK 144.",
-    "TYPE RESTORE CODE TO RESTORE A COLLECTION.",
-    "EXAMPLE: RESTORE HR-02",
-    "RESTORED COLLECTIONS REMAIN AVAILABLE.",
-    "SOME COLLECTIONS MAY REVEAL PARTS OF THE SITE.",
-    NULL
-};
-
-static const char *const floppy144_dr01_help_record_lines[] =
-{
-    "TYPE LIST CODE TO OPEN THE RECORD INDEX.",
-    "PRESS SPACE TO DISPLAY THE NEXT PAGE.",
-    "PRESS BACKSPACE TO DISPLAY THE PREVIOUS PAGE.",
-    "PRESS ENTER TO RETURN TO THE TERMINAL PROMPT.",
-    "TYPE OPEN RECORD-ID TO RETRIEVE A RECORD.",
-    "EXAMPLE: OPEN HR-02-RS-1419",
-    "ONLY RESTORED COLLECTIONS MAY BE SEARCHED.",
-    "BACKSPACE RETURNS TO THE PREVIOUS VIEW.",
-    NULL
-};
-
-/*
- * Draw one DR-01 operating-guidance page.
- */
-
-static void Floppy144CatalogueDrawDr01HelpDocument(
-    Floppy144Surface *surface,
-    const Floppy144CatalogueState *catalogue,
-    Floppy144DocumentView view
-)
-{
-    const uint32_t background =
-        FLOPPY144_RGB(12, 17, 21);
-
-    const uint32_t panel =
-        FLOPPY144_RGB(24, 33, 39);
-
-    const uint32_t document =
-        FLOPPY144_RGB(31, 40, 44);
-
-    const uint32_t border =
-        FLOPPY144_RGB(86, 103, 107);
-
-    const uint32_t text =
-        FLOPPY144_RGB(202, 211, 205);
-
-    const uint32_t muted =
-        FLOPPY144_RGB(118, 133, 132);
-
-    const uint32_t green =
-        FLOPPY144_RGB(100, 156, 111);
-
-    const uint32_t amber =
-        FLOPPY144_RGB(194, 153, 76);
-
-    const Floppy144CollectionDefinition *collection_definition =
-        Floppy144CollectionGet(
-            catalogue->collection
-        );
-
-    const char *const *lines =
-        NULL;
-
-    char record_id[24];
-    char title[48];
-
-    uint32_t line_index;
-
-    switch(view)
-    {
-        case FLOPPY144_DOCUMENT_VIEW_DR01_HELP_TERMINAL_ACCESS:
-        {
-            lines =
-                floppy144_dr01_help_terminal_lines;
-
-            break;
-        }
-
-        case FLOPPY144_DOCUMENT_VIEW_DR01_HELP_RESTORATION:
-        {
-            lines =
-                floppy144_dr01_help_restoration_lines;
-
-            break;
-        }
-
-        case FLOPPY144_DOCUMENT_VIEW_DR01_HELP_RECORDS:
-        {
-            lines =
-                floppy144_dr01_help_record_lines;
-
-            break;
-        }
-
-        default:
-        {
-            return;
-        }
-    }
-
-    Floppy144CatalogueBuildRecord(
-        catalogue->collection,
-        catalogue->selected_index,
-        record_id,
-        sizeof(record_id),
-        title,
-        sizeof(title)
-    );
-
-    Floppy144DrawClear(
-        surface,
-        background
-    );
-
-    Floppy144DrawText(
-        surface,
-        10,
-        5,
-        "GDR ARCHIVE DOCUMENT VIEWER",
-        1,
-        muted
-    );
-
-    Floppy144DrawText(
-        surface,
-        538,
-        5,
-        collection_definition->code,
-        1,
-        green
-    );
-
-    Floppy144DrawFillRect(
-        surface,
-        20,
-        20,
-        600,
-        284,
-        panel
-    );
-
-    Floppy144DrawRect(
-        surface,
-        20,
-        20,
-        600,
-        284,
-        border
-    );
-
-    Floppy144DrawFillRect(
-        surface,
-        36,
-        36,
-        568,
-        252,
-        document
-    );
-
-    Floppy144DrawRect(
-        surface,
-        36,
-        36,
-        568,
-        252,
-        border
-    );
-
-    Floppy144DrawText(
-        surface,
-        52,
-        50,
-        record_id,
-        1,
-        amber
-    );
-
-    Floppy144DrawText(
-        surface,
-        52,
-        68,
-        title,
-        1,
-        text
-    );
-
-    Floppy144DrawFillRect(
-        surface,
-        52,
-        86,
-        536,
-        1,
-        border
-    );
-
-    Floppy144DrawText(
-        surface,
-        52,
-        102,
-        "GDR OPERATING GUIDANCE",
-        1,
-        muted
-    );
-
-    for(
-        line_index = 0U;
-        lines[line_index] != NULL;
-        ++line_index
-    )
-    {
-        Floppy144DrawText(
-            surface,
-            52,
-            124 + line_index * 18U,
-            lines[line_index],
-            1,
-            text
-        );
-    }
-
-    Floppy144DrawFillRect(
-        surface,
-        20,
-        312,
-        600,
-        28,
-        background
-    );
-
-    Floppy144DrawRect(
-        surface,
-        20,
-        312,
-        600,
-        28,
-        border
-    );
-
-    Floppy144CatalogueTextCentred(
-        surface,
-        322,
-        "BACKSPACE BACK",
-        1,
-        amber
-    );
-}
 static void Floppy144CatalogueDrawDocument(
     Floppy144Surface *surface,
     const Floppy144CatalogueState *catalogue
@@ -1128,32 +860,11 @@ static void Floppy144CatalogueDrawDocument(
     if(
         authored_document != NULL &&
         authored_document->view ==
-            FLOPPY144_DOCUMENT_VIEW_FA03_SUPPRESSION_SERVICE
+            FLOPPY144_DOCUMENT_VIEW_FM13_SUPPRESSION_SERVICE
     )
     {
-        Floppy144CatalogueDrawFa03ServiceNote(
+        Floppy144CatalogueDrawFm13ServiceNote(
             surface
-        );
-
-        return;
-    }
-
-    if(
-        authored_document != NULL &&
-        (
-            authored_document->view ==
-                FLOPPY144_DOCUMENT_VIEW_DR01_HELP_TERMINAL_ACCESS ||
-            authored_document->view ==
-                FLOPPY144_DOCUMENT_VIEW_DR01_HELP_RESTORATION ||
-            authored_document->view ==
-                FLOPPY144_DOCUMENT_VIEW_DR01_HELP_RECORDS
-        )
-    )
-    {
-        Floppy144CatalogueDrawDr01HelpDocument(
-            surface,
-            catalogue,
-            authored_document->view
         );
 
         return;
@@ -1189,7 +900,7 @@ static void Floppy144CatalogueDrawDocument(
     bool authored =
         authored_document != NULL &&
         authored_document->view ==
-            FLOPPY144_DOCUMENT_VIEW_HR02_DESK_REALLOCATION;
+            FLOPPY144_DOCUMENT_VIEW_HR01_DESK_REALLOCATION;
 
     Floppy144CatalogueBuildRecord(
         catalogue->collection,

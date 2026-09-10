@@ -177,13 +177,33 @@ bool Floppy144SitePositionBlocked(
     int32_t centre_y16
 )
 {
-    const int32_t half_player =
-        FLOPPY144_SITE_PLAYER_COLLISION_X16 / 2;
+    const int32_t half_player_width =
+    FLOPPY144_SITE_PLAYER_COLLISION_WIDTH_X16 / 2;
 
-    const int32_t player_x0 = centre_x16 - half_player;
-    const int32_t player_x1 = centre_x16 + half_player;
-    const int32_t player_y0 = centre_y16 - half_player;
-    const int32_t player_y1 = centre_y16 + half_player;
+    /*
+     * Current 2D view rotates canonical Site space clockwise:
+     *
+     *   Site Y = screen horizontal
+     *   Site X = screen vertical
+     *
+     * The persistent player position is the sprite's foot point. Keep the
+     * collision footprint above that point rather than allowing it to project
+     * below the character.
+     */
+    const int32_t player_x0 =
+    centre_x16 -
+    FLOPPY144_SITE_PLAYER_COLLISION_DEPTH_X16;
+
+    const int32_t player_x1 =
+    centre_x16;
+
+    const int32_t player_y0 =
+    centre_y16 -
+    half_player_width;
+
+    const int32_t player_y1 =
+    centre_y16 +
+    half_player_width;
 
     uint32_t index;
     int32_t cell_x0;

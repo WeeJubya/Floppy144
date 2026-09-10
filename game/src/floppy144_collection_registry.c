@@ -12,9 +12,6 @@
 static const char *const floppy144_dr01_record_titles[] =
 {
     "DISK RECOVERY INDEX",
-    "PLAYER HELP 1 - TERMINAL ACCESS",
-    "PLAYER HELP 2 - RESTORING COLLECTIONS",
-    "PLAYER HELP 3 - LISTING AND OPENING RECORDS",
     "DISK 144 MEDIA MANIFEST",
     "ARCHIVE SERVICE STARTUP NOTE",
     "COLLECTION CODE DIRECTORY",
@@ -27,7 +24,8 @@ static const char *const floppy144_dr01_record_titles[] =
     "SOURCE MEDIA HANDLING NOTE",
     "END OF RECOVERY INDEX"
 };
-static const char *const floppy144_hr02_record_subjects[] =
+
+static const char *const floppy144_hr01_record_subjects[] =
 {
     "APPOINTMENT",
     "TRANSFER",
@@ -41,7 +39,42 @@ static const char *const floppy144_hr02_record_subjects[] =
     "EXIT"
 };
 
-static const char *const floppy144_fa03_record_subjects[] =
+/*
+ * FM-04 procedural catalogue subjects.
+ *
+ * Final authored record identities will replace these during archive
+ * population. The first two readable documents are already authored
+ * separately in floppy144_document.c.
+ */
+static const char *const floppy144_fm04_record_subjects[] =
+{
+    "SITE ACCESS",
+    "MAINTENANCE",
+    "FACILITIES",
+    "CIRCULATION",
+    "DOOR CONTROL",
+    "UTILITIES",
+    "ROOM IDENTIFICATION",
+    "INSPECTION",
+    "WORK ORDER",
+    "HANDOVER"
+};
+
+static const char *const floppy144_fm07_record_subjects[] =
+{
+    "ASSET DISPOSAL",
+    "RETAINED SERVICE",
+    "UTILITY SHUTDOWN",
+    "FURNITURE TRANSFER",
+    "CONTRACTOR COORDINATION",
+    "FINAL ISOLATION",
+    "DECOMMISSIONING",
+    "ASSET TRANSFER",
+    "SITE HANDOVER",
+    "CLOSURE WORK"
+};
+
+static const char *const floppy144_fm13_record_subjects[] =
 {
     "SUPPRESSION PANEL",
     "HALON CYLINDER",
@@ -53,6 +86,57 @@ static const char *const floppy144_fa03_record_subjects[] =
     "DETECTOR LOOP",
     "MAINTENANCE ACCESS",
     "PRESSURE SENSOR"
+};
+
+/*
+ * Collection availability progression
+ *
+ * The full recovery uses persistent trigger state to determine when a
+ * collection becomes available for restoration.
+ *
+ * The current technical-slice collections retain the compatibility sentinel
+ * until their authoritative trigger routes are installed during Stage 2G.
+ */
+
+typedef struct Floppy144CollectionAvailabilityRoute
+{
+    Floppy144CollectionId collection;
+    Floppy144TriggerId trigger;
+}
+Floppy144CollectionAvailabilityRoute;
+
+static const Floppy144CollectionAvailabilityRoute
+floppy144_collection_availability_routes[] =
+{
+    {
+        FLOPPY144_COLLECTION_DR02,
+        FLOPPY144_TRIGGER_T001
+    },
+
+    {
+        FLOPPY144_COLLECTION_DR03,
+        FLOPPY144_TRIGGER_T001
+    },
+
+    {
+        FLOPPY144_COLLECTION_HR01,
+        FLOPPY144_TRIGGER_T001
+    },
+
+    {
+        FLOPPY144_COLLECTION_FM04,
+        FLOPPY144_TRIGGER_T003
+    },
+
+    {
+        FLOPPY144_COLLECTION_FM07,
+        FLOPPY144_TRIGGER_T005
+    },
+
+    {
+        FLOPPY144_COLLECTION_FM13,
+        FLOPPY144_TRIGGER_T005
+    }
 };
 
 /*
@@ -70,9 +154,8 @@ const Floppy144CollectionDefinition
     symbol,                                                        \
     code_text,                                                     \
     title_text,                                                    \
-    act_value,                                                     \
-    class_value,                                                   \
-    auto_restored_value,                                           \
+    domain_value,                                                  \
+    reconstruction_percent_value,                                  \
     description_text,                                              \
     evidence_description_text,                                     \
     catalogue_record_count,                                        \
@@ -89,9 +172,8 @@ const Floppy144CollectionDefinition
         FLOPPY144_COLLECTION_##symbol,                             \
         code_text,                                                 \
         title_text,                                                \
-        act_value,                                                 \
-        class_value,                                               \
-        auto_restored_value,                                       \
+        domain_value,                                              \
+        reconstruction_percent_value,                              \
         description_text,                                          \
         evidence_description_text,                                 \
         {                                                          \
@@ -129,60 +211,79 @@ const Floppy144CollectionDefinition *Floppy144CollectionGet(
         &floppy144_collection_definitions[index];
 }
 
-const char *Floppy144CollectionClassText(
-    Floppy144CollectionClass collection_class
+Floppy144TriggerId Floppy144CollectionAvailabilityTrigger
+(
+    Floppy144CollectionId collection
 )
 {
-    switch(collection_class)
+    uint32_t route_index;
+
+    if(
+        (uint32_t)collection >=
+        (uint32_t)FLOPPY144_COLLECTION_COUNT
+    )
     {
-        case FLOPPY144_COLLECTION_CLASS_MANDATORY:
-        {
-            return "MANDATORY";
-        }
+        return FLOPPY144_TRIGGER_COUNT;
+    }
 
-        case FLOPPY144_COLLECTION_CLASS_OPERATIONAL:
-        {
-            return "OPERATIONAL";
-        }
+    for(
+        route_index = 0U;
+    route_index <
+    (uint32_t)(
+        sizeof(floppy144_collection_availability_routes) /
+        sizeof(floppy144_collection_availability_routes[0])
+    );
+    ++route_index
+    )
+    {
+        const Floppy144CollectionAvailabilityRoute *route =
+        &floppy144_collection_availability_routes[
+            route_index
+        ];
 
-        case FLOPPY144_COLLECTION_CLASS_ADMINISTRATIVE:
+        if(route->collection == collection)
         {
-            return "ADMINISTRATIVE";
-        }
-
-        case FLOPPY144_COLLECTION_CLASS_REPORTING:
-        {
-            return "REPORTING";
+            return route->trigger;
         }
     }
 
-    return "UNKNOWN";
+    return FLOPPY144_TRIGGER_COUNT;
 }
 
-const char *Floppy144CollectionActText(
-    Floppy144Act act
+const char *Floppy144CollectionDomainText(
+    Floppy144CollectionDomain domain
 )
 {
-    switch(act)
+    switch(domain)
     {
-        case FLOPPY144_ACT_PROLOGUE:
+        case FLOPPY144_COLLECTION_DOMAIN_DR:
         {
-            return "PROLOGUE";
+            return "DR";
         }
 
-        case FLOPPY144_ACT_ONE:
+        case FLOPPY144_COLLECTION_DOMAIN_HR:
         {
-            return "ACT I";
+            return "HR";
         }
 
-        case FLOPPY144_ACT_TWO:
+        case FLOPPY144_COLLECTION_DOMAIN_FM:
         {
-            return "ACT II";
+            return "FM";
         }
 
-        case FLOPPY144_ACT_THREE:
+        case FLOPPY144_COLLECTION_DOMAIN_OS:
         {
-            return "ACT III";
+            return "OS";
+        }
+
+        case FLOPPY144_COLLECTION_DOMAIN_TS:
+        {
+            return "TS";
+        }
+
+        default:
+        {
+            break;
         }
     }
 
