@@ -65,6 +65,58 @@ const Floppy144DocumentDefinition *Floppy144DocumentGet(
 }
 
 /*
+ * Find the next actionable trigger document for one restored collection.
+ *
+ * The document table is generated from canonical JSON, so source order is the
+ * authored progression order. Trigger eligibility remains owned by the generic
+ * trigger engine; this function only joins those two existing registries.
+ */
+const Floppy144DocumentDefinition *Floppy144DocumentFirstPendingTrigger(
+    const Floppy144RunState *pRunState,
+    Floppy144CollectionId eCollection
+)
+{
+    uint32_t uDocumentIndex;
+
+    if(
+        pRunState == NULL ||
+        (uint32_t)eCollection >=
+            (uint32_t)FLOPPY144_COLLECTION_COUNT ||
+        !Floppy144RunStateCollectionRestored(
+            pRunState,
+            eCollection
+        )
+    )
+    {
+        return NULL;
+    }
+
+    for(
+        uDocumentIndex = 0U;
+        uDocumentIndex < FLOPPY144_DOCUMENT_COUNT;
+        ++uDocumentIndex
+    )
+    {
+        const Floppy144DocumentDefinition *pDocument =
+            &floppy144_documents[uDocumentIndex];
+
+        if(
+            pDocument->collection == eCollection &&
+            pDocument->trigger != FLOPPY144_TRIGGER_COUNT &&
+            Floppy144TriggerCanFire(
+                pRunState,
+                pDocument->trigger
+            )
+        )
+        {
+            return pDocument;
+        }
+    }
+
+    return NULL;
+}
+
+/*
  * Apply every effect registered against one authored document.
  */
 

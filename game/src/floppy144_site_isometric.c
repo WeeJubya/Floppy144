@@ -276,31 +276,105 @@ static const char *Floppy144IsometricInteractionPrompt(
 
     if(pRunState == NULL)
     {
-        return "WASD OR ARROWS TO MOVE";
+        return "ARROWS TO MOVE   N NOTEBOOK";
     }
 
-    eObject = Floppy144SiteInteractionTarget(pRunState);
-    pDefinition = Floppy144ObjectGet(eObject);
-    pInteraction = pDefinition != NULL ? pDefinition->interaction : NULL;
+    eObject =
+        Floppy144SiteInteractionTarget(
+            pRunState
+        );
 
-    if(pInteraction == NULL || pInteraction->prompt == NULL)
+    pDefinition =
+        Floppy144ObjectGet(
+            eObject
+        );
+
+    pInteraction =
+        pDefinition != NULL
+            ? pDefinition->interaction
+            : NULL;
+
+    if(pInteraction == NULL)
     {
-        return "WASD OR ARROWS TO MOVE";
+        return "ARROWS TO MOVE   N NOTEBOOK";
+    }
+
+    /*
+     * Keep the same generic control language as the 2D projection. Prompt
+     * text stored against individual objects is presentation data only and
+     * must not reintroduce obsolete key bindings.
+     */
+    if(
+        pInteraction->action ==
+        FLOPPY144_OBJECT_ACTION_OPEN_TERMINAL
+    )
+    {
+        return "PRESS A TO ACCESS   N NOTEBOOK";
+    }
+
+    return "PRESS I TO INSPECT   N NOTEBOOK";
+}
+
+/*
+ * Isometric view may show several reconstructed rooms at once, but boundary
+ * geometry is still gated by its explicit endpoints. Internal doors/windows
+ * appear only after both rooms exist in the reconstruction. Exterior
+ * boundaries require only their interior room.
+ */
+static bool Floppy144IsometricEndpointReconstructed(
+    const Floppy144RunState *pRunState,
+    uint8_t uRoom
+)
+{
+    if(uRoom == FLOPPY144_SITE_ROOM_OUTSIDE)
+    {
+        return true;
     }
 
     if(
-        pInteraction->alternate_prompt != NULL &&
-        pInteraction->alternate_prompt_collection != FLOPPY144_COLLECTION_COUNT &&
-        Floppy144RunStateCollectionRestored(
-            pRunState,
-            pInteraction->alternate_prompt_collection
-        )
+        pRunState == NULL ||
+        uRoom >= (uint8_t)FLOPPY144_ROOM_COUNT
     )
     {
-        return pInteraction->alternate_prompt;
+        return false;
     }
 
-    return pInteraction->prompt;
+    return
+        Floppy144RunStateRoomReconstructed(
+            pRunState,
+            (Floppy144RoomId)uRoom
+        );
+}
+
+static bool Floppy144IsometricRectVisible(
+    const Floppy144RunState *pRunState,
+    const Floppy144SiteRect *pRect
+)
+{
+    if(pRunState == NULL || pRect == NULL)
+    {
+        return false;
+    }
+
+    if(pRect->from_room == pRect->to_room)
+    {
+        return
+            pRect->room < (uint8_t)FLOPPY144_ROOM_COUNT &&
+            Floppy144RunStateRoomReconstructed(
+                pRunState,
+                (Floppy144RoomId)pRect->room
+            );
+    }
+
+    return
+        Floppy144IsometricEndpointReconstructed(
+            pRunState,
+            pRect->from_room
+        ) &&
+        Floppy144IsometricEndpointReconstructed(
+            pRunState,
+            pRect->to_room
+        );
 }
 
 void Floppy144SiteIsometricDraw(
@@ -369,7 +443,7 @@ void Floppy144SiteIsometricDraw(
         if(
             eElement < FLOPPY144_SITE_FLOOR_A ||
             eElement > FLOPPY144_SITE_FLOOR_D ||
-            pRect->room == FLOPPY144_SITE_ROOM_SHARED ||
+            pRect->room >= (uint8_t)FLOPPY144_ROOM_COUNT ||
             !Floppy144RunStateRoomReconstructed(
                 pRunState,
                 (Floppy144RoomId)pRect->room
@@ -402,13 +476,9 @@ void Floppy144SiteIsometricDraw(
         }
 
         bRoomVisible =
-            pRect->room == FLOPPY144_SITE_ROOM_SHARED ||
-            (
-                pRect->room < (uint8_t)FLOPPY144_ROOM_COUNT &&
-                Floppy144RunStateRoomReconstructed(
-                    pRunState,
-                    (Floppy144RoomId)pRect->room
-                )
+            Floppy144IsometricRectVisible(
+                pRunState,
+                pRect
             );
 
         if(

@@ -14,6 +14,7 @@
 #include "floppy144_catalogue.h"
 #include "floppy144_document.h"
 #include "floppy144_interaction_engine.h"
+#include "floppy144_notebook_view.h"
 #include "floppy144_object_registry.h"
 #include "floppy144_recovery.h"
 #include "floppy144_terminal.h"
@@ -23,6 +24,7 @@
 #include "floppy144_site_2d.h"
 #include "floppy144_site_isometric.h"
 #include "floppy144_site_object.h"
+#include "floppy144_site_rooms.h"
 #include "floppy144_site_view.h"
 
 #include <stdbool.h>
@@ -39,6 +41,7 @@ typedef enum Floppy144Screen
     FLOPPY144_SCREEN_SPLASH,
     FLOPPY144_SCREEN_MAIN_MENU,
     FLOPPY144_SCREEN_OFFICE,
+    FLOPPY144_SCREEN_NOTEBOOK,
     FLOPPY144_SCREEN_TERMINAL,
     FLOPPY144_SCREEN_CATALOGUE
 } Floppy144Screen;
@@ -55,6 +58,7 @@ static F144Runtime *global_runtime;
 static Floppy144Screen global_screen;
 static Floppy144TerminalState global_terminal;
 static Floppy144CatalogueState global_catalogue;
+static Floppy144NotebookViewState global_notebook;
 static Floppy144DiscoveryProfile global_profile;
 static Floppy144Settings global_settings;
 static Floppy144WorldState global_world;
@@ -204,6 +208,17 @@ static void Floppy144Redraw(
             break;
         }
 
+        case FLOPPY144_SCREEN_NOTEBOOK:
+        {
+            Floppy144NotebookViewDraw(
+                global_runtime,
+                &global_notebook,
+                &global_run_state
+            );
+
+            break;
+        }
+
         case FLOPPY144_SCREEN_TERMINAL:
         {
             Floppy144TerminalDraw(
@@ -312,6 +327,14 @@ static bool Floppy144RecordedSessionAvailable(
         floppy144_autosave_path
     );
 
+    /*
+     * Refresh only the recorded-session warning. Other persistence warnings
+     * describe independent profile/settings/autosave operations and must not
+     * be disturbed by this availability check.
+     */
+    global_persistence_warnings &=
+        (uint8_t)~FLOPPY144_PERSISTENCE_WARNING_SAVE;
+
     Floppy144RunStateReset(
         &global_recorded_run_state
     );
@@ -321,7 +344,8 @@ static bool Floppy144RecordedSessionAvailable(
 
     /*
      * An explicit player-recorded session always takes precedence over
-     * the automatic safety copy.
+     * the automatic safety copy. A corrupt manual save is not itself a
+     * player-facing failure if the automatic safety copy can be loaded.
      */
     if(
         Floppy144PersistenceLoadRunState(
@@ -331,12 +355,6 @@ static bool Floppy144RecordedSessionAvailable(
     )
     {
         return true;
-    }
-
-    if(manual_exists)
-    {
-        global_persistence_warnings |=
-        FLOPPY144_PERSISTENCE_WARNING_SAVE;
     }
 
     /*
@@ -359,7 +377,11 @@ static bool Floppy144RecordedSessionAvailable(
         return true;
     }
 
-    if(autosave_exists)
+    /*
+     * Only report a load warning when a recorded-session file really exists
+     * and neither the manual checkpoint nor autosave can be recovered.
+     */
+    if(manual_exists || autosave_exists)
     {
         global_persistence_warnings |=
         FLOPPY144_PERSISTENCE_WARNING_SAVE;
@@ -538,6 +560,10 @@ static void Floppy144MainMenuActivate(
                 FLOPPY144_COLLECTION_DR01
             );
 
+            Floppy144NotebookViewReset(
+                &global_notebook
+            );
+
             global_office_notice =
                 NULL;
 
@@ -595,6 +621,9 @@ static void Floppy144MainMenuActivate(
 
                 global_recorded_run_state =
                 global_run_state;
+
+                global_persistence_warnings &=
+                    (uint8_t)~FLOPPY144_PERSISTENCE_WARNING_SAVE;
             }
 
             Floppy144Redraw(
@@ -631,6 +660,10 @@ static void Floppy144MainMenuActivate(
                     FLOPPY144_COLLECTION_DR01
                 );
 
+                Floppy144NotebookViewReset(
+                    &global_notebook
+                );
+
                 global_office_notice =
                 NULL;
 
@@ -639,6 +672,9 @@ static void Floppy144MainMenuActivate(
 
                 global_session_active =
                 true;
+
+                global_persistence_warnings &=
+                    (uint8_t)~FLOPPY144_PERSISTENCE_WARNING_SAVE;
 
                 Floppy144UpdateDiscoveryProfile();
 
@@ -739,8 +775,25 @@ static void Floppy144MovePlayer(
  * Execute the action declared by the best eligible nearby object.
  */
 
+typedef enum Floppy144OfficeInteractionMode
+{
+    FLOPPY144_OFFICE_INTERACTION_ACCESS,
+    FLOPPY144_OFFICE_INTERACTION_INSPECT
+}
+Floppy144OfficeInteractionMode;
+
+/*
+ * Execute the action declared by the best eligible nearby object.
+ *
+ * Access and inspection deliberately use different keys. Access is reserved
+ * for terminals and later openable containers/doors; inspection is used for
+ * physical evidence and ordinary objects. Checking the presentation action
+ * before applying effects prevents the wrong key from accidentally firing a
+ * physical interaction.
+ */
 static void Floppy144InteractOffice(
-    HWND window
+    HWND window,
+    Floppy144OfficeInteractionMode eMode
 )
 {
     Floppy144ObjectId object =
@@ -758,7 +811,27 @@ static void Floppy144InteractOffice(
             ? definition->interaction
             : NULL;
 
+    bool bAccessAction;
+
     if(interaction == NULL)
+    {
+        return;
+    }
+
+    bAccessAction =
+        interaction->action ==
+        FLOPPY144_OBJECT_ACTION_OPEN_TERMINAL;
+
+    if(
+        (
+            eMode == FLOPPY144_OFFICE_INTERACTION_ACCESS &&
+            !bAccessAction
+        ) ||
+        (
+            eMode == FLOPPY144_OFFICE_INTERACTION_INSPECT &&
+            bAccessAction
+        )
+    )
     {
         return;
     }
@@ -804,15 +877,22 @@ static void Floppy144InteractOffice(
     {
         case FLOPPY144_OBJECT_ACTION_OPEN_TERMINAL:
         {
+            Floppy144RoomId eTerminalRoom =
+                Floppy144SiteRoomAtPosition(
+                    global_run_state.player_site_x,
+                    global_run_state.player_site_y
+                );
+
             global_office_notice =
                 0;
 
             global_screen =
                 FLOPPY144_SCREEN_TERMINAL;
 
-            Floppy144TerminalReset(
+            Floppy144TerminalResetAtRoom(
                 &global_terminal,
-                &global_world
+                &global_world,
+                eTerminalRoom
             );
 
             Floppy144Redraw(
@@ -837,6 +917,15 @@ static void Floppy144InteractOffice(
         case FLOPPY144_OBJECT_ACTION_NONE:
         default:
         {
+            /*
+             * Some generated physical interactions exist only to establish
+             * persistent evidence/state. Their lack of a presentation action
+             * is therefore valid after the generic interaction has run.
+             */
+            Floppy144Redraw(
+                window
+            );
+
             return;
         }
     }
@@ -938,6 +1027,7 @@ static LRESULT CALLBACK Floppy144WindowProc(
                 switch(w_param)
                 {
                     case ' ':
+                    case '\r':
                     {
                         Floppy144TerminalMoveHelpPager(
                             &global_terminal,
@@ -957,7 +1047,8 @@ static LRESULT CALLBACK Floppy144WindowProc(
                         break;
                     }
 
-                    case '\r':
+                    case 'q':
+                    case 'Q':
                     {
                         Floppy144TerminalCloseHelpPager(
                             &global_terminal
@@ -993,6 +1084,7 @@ static LRESULT CALLBACK Floppy144WindowProc(
                 switch(w_param)
                 {
                     case ' ':
+                    case '\r':
                     {
                         Floppy144TerminalMoveRecordPager(
                             &global_terminal,
@@ -1012,7 +1104,8 @@ static LRESULT CALLBACK Floppy144WindowProc(
                         break;
                     }
 
-                    case '\r':
+                    case 'q':
+                    case 'Q':
                     {
                         Floppy144TerminalCloseRecordPager(
                             &global_terminal
@@ -1095,6 +1188,16 @@ static LRESULT CALLBACK Floppy144WindowProc(
                                 &global_run_state,
                                 global_terminal.requested_collection,
                                 global_terminal.requested_record_index
+                            );
+
+                            /*
+                             * Refresh the objective from resulting persistent
+                             * state. It becomes visible when the player returns
+                             * from the document to the terminal.
+                             */
+                            Floppy144TerminalPrintNextAction(
+                                &global_terminal,
+                                &global_run_state
                             );
 
                             global_catalogue_direct_document =
@@ -1311,13 +1414,19 @@ static LRESULT CALLBACK Floppy144WindowProc(
                     break;
                 }
 
-                /* Site: movement uses 0.5-unit fixed-point steps; E interacts; Escape opens recovery control. */
+                /*
+                 * Site: arrow keys move in 0.5-unit fixed-point steps.
+                 *
+                 * A is reserved for access actions such as terminals. I is
+                 * reserved for inspecting physical objects and evidence. The
+                 * previous WASD aliases are intentionally removed so A has one
+                 * unambiguous meaning while the player is in the Site.
+                 */
                 case FLOPPY144_SCREEN_OFFICE:
                 {
                     switch(w_param)
                     {
                         case VK_LEFT:
-                        case 'A':
                         {
                             Floppy144MovePlayer(
                                 window,
@@ -1329,7 +1438,6 @@ static LRESULT CALLBACK Floppy144WindowProc(
                         }
 
                         case VK_RIGHT:
-                        case 'D':
                         {
                             Floppy144MovePlayer(
                                 window,
@@ -1341,7 +1449,6 @@ static LRESULT CALLBACK Floppy144WindowProc(
                         }
 
                         case VK_UP:
-                        case 'W':
                         {
                             Floppy144MovePlayer(
                                 window,
@@ -1353,7 +1460,6 @@ static LRESULT CALLBACK Floppy144WindowProc(
                         }
 
                         case VK_DOWN:
-                        case 'S':
                         {
                             Floppy144MovePlayer(
                                 window,
@@ -1364,19 +1470,110 @@ static LRESULT CALLBACK Floppy144WindowProc(
                             return 0;
                         }
 
-                        /* Resolve and execute the registry-declared nearby interaction. */
-                        case 'E':
+                        case 'A':
                         {
                             Floppy144InteractOffice(
-                                window
+                                window,
+                                FLOPPY144_OFFICE_INTERACTION_ACCESS
                             );
 
                             return 0;
                         }
+
+                        case 'I':
+                        {
+                            Floppy144InteractOffice(
+                                window,
+                                FLOPPY144_OFFICE_INTERACTION_INSPECT
+                            );
+
+                            return 0;
+                        }
+
+                        case 'N':
+                        {
+                            global_screen =
+                                FLOPPY144_SCREEN_NOTEBOOK;
+
+                            Floppy144Redraw(window);
+                            return 0;
+                        }
+
                         case VK_ESCAPE:
                         {
                             global_screen =
                                 FLOPPY144_SCREEN_MAIN_MENU;
+
+                            Floppy144Redraw(window);
+                            return 0;
+                        }
+                    }
+
+                    break;
+                }
+
+                /*
+                 * Notebook: browse recovered persistent knowledge. Up/Down
+                 * moves one entry, Page Up/Page Down jumps five entries, and
+                 * N or Backspace returns to Site exploration.
+                 */
+                case FLOPPY144_SCREEN_NOTEBOOK:
+                {
+                    switch(w_param)
+                    {
+                        case VK_UP:
+                        {
+                            Floppy144NotebookViewMove(
+                                &global_notebook,
+                                &global_run_state,
+                                -1
+                            );
+
+                            Floppy144Redraw(window);
+                            return 0;
+                        }
+
+                        case VK_DOWN:
+                        {
+                            Floppy144NotebookViewMove(
+                                &global_notebook,
+                                &global_run_state,
+                                1
+                            );
+
+                            Floppy144Redraw(window);
+                            return 0;
+                        }
+
+                        case VK_PRIOR:
+                        {
+                            Floppy144NotebookViewMove(
+                                &global_notebook,
+                                &global_run_state,
+                                -5
+                            );
+
+                            Floppy144Redraw(window);
+                            return 0;
+                        }
+
+                        case VK_NEXT:
+                        {
+                            Floppy144NotebookViewMove(
+                                &global_notebook,
+                                &global_run_state,
+                                5
+                            );
+
+                            Floppy144Redraw(window);
+                            return 0;
+                        }
+
+                        case 'N':
+                        case VK_BACK:
+                        {
+                            global_screen =
+                                FLOPPY144_SCREEN_OFFICE;
 
                             Floppy144Redraw(window);
                             return 0;
@@ -1456,20 +1653,39 @@ static LRESULT CALLBACK Floppy144WindowProc(
 
                         case VK_RETURN:
                         {
-                            Floppy144CatalogueOpenDocument(
-                                &global_catalogue
-                            );
-
                             /*
-                             * Authored records declare their own effects.
-                             * Index-only records have no registered effects.
+                             * Enter opens a record only from catalogue-list view.
+                             *
+                             * Once a document is already open, further Enter
+                             * presses must not re-apply its effects or append the
+                             * same data-derived next-action guidance again.
                              */
-                            Floppy144DocumentApplyEffects(
-                                &global_world,
-                                &global_run_state,
-                                global_catalogue.collection,
-                                global_catalogue.selected_index
-                            );
+                            if(
+                                !Floppy144CatalogueDocumentOpen(
+                                    &global_catalogue
+                                )
+                            )
+                            {
+                                Floppy144CatalogueOpenDocument(
+                                    &global_catalogue
+                                );
+
+                                /*
+                                 * Authored records declare their own effects.
+                                 * Index-only records have no registered effects.
+                                 */
+                                Floppy144DocumentApplyEffects(
+                                    &global_world,
+                                    &global_run_state,
+                                    global_catalogue.collection,
+                                    global_catalogue.selected_index
+                                );
+
+                                Floppy144TerminalPrintNextAction(
+                                    &global_terminal,
+                                    &global_run_state
+                                );
+                            }
 
                             Floppy144Redraw(window);
                             return 0;
@@ -1819,6 +2035,10 @@ int CALLBACK WinMain(
     Floppy144CatalogueReset(
         &global_catalogue,
         FLOPPY144_COLLECTION_DR01
+    );
+
+    Floppy144NotebookViewReset(
+        &global_notebook
     );
 
     /*

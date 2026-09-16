@@ -1,10 +1,13 @@
 .gitignore
 LICENSE
 Phases 1-2e.docx
+PACKAGE_MANIFEST.txt
 README.md
 README_ORIGINAL.md
 REGRESSION_RESULTS.txt
 STAGE2_REFACTOR_NOTES.md
+STAGE3A_NOTES.md
+STAGE3A_REGRESSION_RESULTS.txt
 clean.ps1
 cleanbuild.ps1
 data/DATA_SCHEMA_README.md
@@ -108,3 +111,5 @@ tools/game_data_emit_runtime.inc
 tools/site_compiler.c
 tools/stage2_headless_tests.c
 tools/test_stage2.ps1
+tools/stage3a_prologue_tests.c
+tools/test_stage3a.ps1

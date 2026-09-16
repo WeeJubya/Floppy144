@@ -21,3 +21,8 @@ Counts: {
 }
 
 The JSON intentionally contains both parent fields and a redundant `relationships` edge list. The compiler validates stable IDs before emitting C definitions. Runtime JSON parsing is not required in the release executable.
+
+Stage 3A uses `RECORD_NOTEBOOK_FACT` with a canonical source ID as its target.
+The fact is derived from the persistent owner trigger or interaction, allowing a
+future notebook view to resolve the matching authored `notebook_entry` without
+duplicating progression state.

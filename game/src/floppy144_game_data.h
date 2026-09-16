@@ -35,6 +35,7 @@ typedef enum Floppy144DataRecordKind {
     FLOPPY144_DATA_RELATIONSHIP,
     FLOPPY144_DATA_AMBIENT,
     FLOPPY144_DATA_AMBIENT_RANGE,
+    FLOPPY144_DATA_NOTEBOOK,
     FLOPPY144_DATA_RECORD_KIND_COUNT
 } Floppy144DataRecordKind;
 
@@ -69,3 +70,10 @@ bool Floppy144GameDataInteractionCanRun(const Floppy144RunState *pState,Floppy14
 bool Floppy144GameDataInteractionTryRun(Floppy144WorldState *pWorld,Floppy144RunState *pState,Floppy144InteractionId eInteraction);
 void Floppy144GameDataResolveEvidence(Floppy144RunState *pState);
 const Floppy144DataRecord *Floppy144GameDataAmbientForDate(const char *pszTargetId,uint32_t uMonth,uint32_t uDay);
+
+/* Data-driven Notebook view over persistent recovered knowledge. */
+uint32_t Floppy144GameDataNotebookEntryCount(const Floppy144RunState *pState);
+const Floppy144DataRecord *Floppy144GameDataNotebookEntryAt(
+    const Floppy144RunState *pState,
+    uint32_t uVisibleIndex
+);

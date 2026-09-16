@@ -53,6 +53,24 @@ bool Floppy144GameDataConnectionUnlocked(const Floppy144RunState*pState,const ch
 bool Floppy144GameDataCollectionEnabled(const Floppy144RunState*pState,const char*pszId){Floppy144CollectionId e=Floppy144GameDataCollectionId(pszId);if(!pState||e==FLOPPY144_COLLECTION_COUNT)return false;if(e==FLOPPY144_COLLECTION_DR01)return true;if(Floppy144RunStateCollectionRestored(pState,e))return true;return Floppy144PersistentEffectPresent(pState,"ENABLE_COLLECTION",pszId);}
 bool Floppy144GameDataPhysicalItemRevealed(const Floppy144RunState*pState,const char*pszId){return Floppy144PersistentEffectPresent(pState,"REVEAL_PHYSICAL_ITEM",pszId);}
 bool Floppy144GameDataFactRecorded(const Floppy144RunState*pState,const char*pszId){return Floppy144PersistentEffectPresent(pState,"RECORD_NOTEBOOK_FACT",pszId);}
+/*
+ * Notebook visibility is derived from already-persisted gameplay state.
+ * Generated Notebook records carry prose only; they do not add save fields.
+ */
+static bool Floppy144GameDataNotebookRecordVisible(
+    const Floppy144RunState *pState,
+    const Floppy144DataRecord *pRecord
+)
+{
+    if(!pState||!pRecord||pRecord->eKind!=FLOPPY144_DATA_NOTEBOOK||!pRecord->pszId||!pRecord->pszA||!pRecord->pszB)return false;
+    if(Floppy144StringEqual(pRecord->pszB,"FACT"))return Floppy144GameDataFactRecorded(pState,pRecord->pszId);
+    if(Floppy144StringEqual(pRecord->pszB,"EVIDENCE")){Floppy144EvidenceId e=Floppy144GameDataEvidenceId(pRecord->pszId);return e!=FLOPPY144_EVIDENCE_COUNT&&Floppy144RunStateEvidenceEstablished(pState,e);}
+    if(Floppy144StringEqual(pRecord->pszB,"INTERACTION")){Floppy144InteractionId e=Floppy144GameDataInteractionId(pRecord->pszId);return e!=FLOPPY144_INTERACTION_COUNT&&Floppy144RunStateInteractionCompleted(pState,e);}
+    return false;
+}
+uint32_t Floppy144GameDataNotebookEntryCount(const Floppy144RunState*pState){uint32_t u,n=0;if(!pState)return 0U;for(u=0;u<F144_COUNT(g_asGameData);++u)if(Floppy144GameDataNotebookRecordVisible(pState,&g_asGameData[u]))++n;return n;}
+const Floppy144DataRecord *Floppy144GameDataNotebookEntryAt(const Floppy144RunState*pState,uint32_t uVisibleIndex){uint32_t u,n=0;if(!pState)return NULL;for(u=0;u<F144_COUNT(g_asGameData);++u){const Floppy144DataRecord*p=&g_asGameData[u];if(!Floppy144GameDataNotebookRecordVisible(pState,p))continue;if(n==uVisibleIndex)return p;++n;}return NULL;}
+
 bool Floppy144GameDataWorkstreamAvailable(const Floppy144RunState*pState,const char*pszWorkstream){if(!pState||!pszWorkstream)return false;if(Floppy144StringEqual(pszWorkstream,"TECHNOLOGY")&&pState->branch==(uint8_t)FLOPPY144_RUN_BRANCH_TECHNOLOGY_FIRST)return true;if(Floppy144StringEqual(pszWorkstream,"RECORDS")&&pState->branch==(uint8_t)FLOPPY144_RUN_BRANCH_RECORDS_FIRST)return true;return Floppy144PersistentEffectPresent(pState,"RELEASE_ALTERNATE_WORKSTREAM",NULL);}
 
 bool Floppy144GameDataRoomAccessible(const Floppy144RunState*pState,const char*pszRoomId){Floppy144RoomId eRoom=Floppy144GameDataRoomId(pszRoomId);uint32_t u;if(!pState||eRoom==FLOPPY144_ROOM_COUNT||!Floppy144RunStateRoomReconstructed(pState,eRoom))return false;for(u=0;u<F144_COUNT(g_asGameData);++u){const Floppy144DataRecord*p=&g_asGameData[u];const char*pszOther=NULL;if(p->eKind!=FLOPPY144_DATA_CONNECTION)continue;if(Floppy144StringEqual(p->pszA,pszRoomId))pszOther=p->pszB;else if(Floppy144StringEqual(p->pszB,pszRoomId))pszOther=p->pszA;else continue;if(!Floppy144GameDataConnectionUnlocked(pState,p->pszId))continue;if(Floppy144StringEqual(pszOther,"OUTSIDE"))return true;{Floppy144RoomId eOther=Floppy144GameDataRoomId(pszOther);if(eOther!=FLOPPY144_ROOM_COUNT&&Floppy144RunStateRoomReconstructed(pState,eOther))return true;}}return false;}

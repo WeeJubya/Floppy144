@@ -22,30 +22,45 @@ static const Floppy144SiteRect floppy144_site_rects[] =
     #define SITE_ROOM_DEF(room, first_region, region_count)
 
     #define SITE_GEOMETRY(room, type, x, y, width, height) \
-        { (uint8_t)(type), (uint8_t)(room), (uint8_t)(x), (uint8_t)(y), \
-          (uint8_t)(width), (uint8_t)(height) },
+        { (uint8_t)(type), (uint8_t)(room), (uint8_t)(room), (uint8_t)(room), \
+          (uint8_t)(x), (uint8_t)(y), (uint8_t)(width), (uint8_t)(height), 0U },
 
     #define SITE_ROTATED_GEOMETRY(room, type, x, y, width, height, centre_x16, centre_y16, width16, height16, rotation) \
-        { (uint8_t)(type), (uint8_t)(room), (uint8_t)(x), (uint8_t)(y), \
-          (uint8_t)(width), (uint8_t)(height) },
+        { (uint8_t)(type), (uint8_t)(room), (uint8_t)(room), (uint8_t)(room), \
+          (uint8_t)(x), (uint8_t)(y), (uint8_t)(width), (uint8_t)(height), (uint16_t)(rotation) },
 
+    #define SITE_BOUNDARY(room, type, from_room, to_room, x, y, width, height) \
+        { (uint8_t)(type), (uint8_t)(room), (uint8_t)(from_room), (uint8_t)(to_room), \
+          (uint8_t)(x), (uint8_t)(y), (uint8_t)(width), (uint8_t)(height), 0U },
+
+    #define SITE_ROTATED_BOUNDARY(room, type, from_room, to_room, x, y, width, height, centre_x16, centre_y16, width16, height16, rotation) \
+        { (uint8_t)(type), (uint8_t)(room), (uint8_t)(from_room), (uint8_t)(to_room), \
+          (uint8_t)(x), (uint8_t)(y), (uint8_t)(width), (uint8_t)(height), (uint16_t)(rotation) },
+
+    /* Legacy macros keep stale generated files buildable during migration. */
     #define SITE_DOOR(from_room, to_room, x, y, width, height) \
-        { (uint8_t)FLOPPY144_SITE_DOOR, (uint8_t)FLOPPY144_SITE_ROOM_SHARED, \
-          (uint8_t)(x), (uint8_t)(y), (uint8_t)(width), (uint8_t)(height) },
+        { (uint8_t)FLOPPY144_SITE_DOOR, \
+          (uint8_t)(((from_room) == FLOPPY144_SITE_ROOM_OUTSIDE) ? (to_room) : (from_room)), \
+          (uint8_t)(from_room), (uint8_t)(to_room), \
+          (uint8_t)(x), (uint8_t)(y), (uint8_t)(width), (uint8_t)(height), 0U },
 
     #define SITE_SHARED(type, x, y, width, height) \
         { (uint8_t)(type), (uint8_t)FLOPPY144_SITE_ROOM_SHARED, \
-          (uint8_t)(x), (uint8_t)(y), (uint8_t)(width), (uint8_t)(height) },
+          (uint8_t)FLOPPY144_SITE_ROOM_SHARED, (uint8_t)FLOPPY144_SITE_ROOM_SHARED, \
+          (uint8_t)(x), (uint8_t)(y), (uint8_t)(width), (uint8_t)(height), 0U },
 
     #define SITE_ROTATED_SHARED(type, x, y, width, height, centre_x16, centre_y16, width16, height16, rotation) \
         { (uint8_t)(type), (uint8_t)FLOPPY144_SITE_ROOM_SHARED, \
-          (uint8_t)(x), (uint8_t)(y), (uint8_t)(width), (uint8_t)(height) },
+          (uint8_t)FLOPPY144_SITE_ROOM_SHARED, (uint8_t)FLOPPY144_SITE_ROOM_SHARED, \
+          (uint8_t)(x), (uint8_t)(y), (uint8_t)(width), (uint8_t)(height), (uint16_t)(rotation) },
 
     #include "floppy144_site_generated.def"
 
     #undef SITE_ROTATED_SHARED
     #undef SITE_SHARED
     #undef SITE_DOOR
+    #undef SITE_ROTATED_BOUNDARY
+    #undef SITE_BOUNDARY
     #undef SITE_ROTATED_GEOMETRY
     #undef SITE_GEOMETRY
     #undef SITE_ROOM_DEF
@@ -64,6 +79,8 @@ static const Floppy144SiteRect floppy144_site_rects[] =
 #define SITE_ROOM_DEF(room, first_region, region_count)
 #define SITE_GEOMETRY(room, type, x, y, width, height)
 #define SITE_ROTATED_GEOMETRY(room, type, x, y, width, height, centre_x16, centre_y16, width16, height16, rotation)
+#define SITE_BOUNDARY(room, type, from_room, to_room, x, y, width, height)
+#define SITE_ROTATED_BOUNDARY(room, type, from_room, to_room, x, y, width, height, centre_x16, centre_y16, width16, height16, rotation)
 #define SITE_DOOR(from_room, to_room, x, y, width, height)
 #define SITE_SHARED(type, x, y, width, height)
 #define SITE_ROTATED_SHARED(type, x, y, width, height, centre_x16, centre_y16, width16, height16, rotation)
@@ -71,6 +88,8 @@ static const Floppy144SiteRect floppy144_site_rects[] =
 #undef SITE_ROTATED_SHARED
 #undef SITE_SHARED
 #undef SITE_DOOR
+#undef SITE_ROTATED_BOUNDARY
+#undef SITE_BOUNDARY
 #undef SITE_ROTATED_GEOMETRY
 #undef SITE_GEOMETRY
 #undef SITE_ROOM_DEF

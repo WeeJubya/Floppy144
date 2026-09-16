@@ -36,7 +36,6 @@
 #define FLOPPY144_SITE_2D_PIXELS_PER_UNIT 20
 #define FLOPPY144_SITE_2D_CAMERA_GUTTER_X16 FLOPPY144_SITE_FIXED_ONE
 #define FLOPPY144_SITE_2D_CAMERA_TOP_GUTTER_X16 (6 * FLOPPY144_SITE_FIXED_ONE)
-#define FLOPPY144_SITE_2D_ROOM_BORDER_PIXELS 5
 
 #define FLOPPY144_SITE_2D_PLAYER_VISUAL_HEIGHT_X16 (6 * FLOPPY144_SITE_FIXED_ONE)
 
@@ -136,16 +135,6 @@ static bool Floppy144Site2DIsFloor(
         element <= FLOPPY144_SITE_FLOOR_D;
 }
 
-static bool Floppy144Site2DIsBoundaryElement(
-    Floppy144SiteElement element
-)
-{
-    return
-        element == FLOPPY144_SITE_DOOR ||
-        element == FLOPPY144_SITE_WINDOW ||
-        element == FLOPPY144_SITE_PARTITION_WALL;
-}
-
 static int32_t Floppy144Site2DClamp(
     int32_t value,
     int32_t minimum,
@@ -166,106 +155,72 @@ static int32_t Floppy144Site2DClamp(
 }
 
 /*
- * Room visibility without a second door database.
+ * Room visibility from explicit boundary ownership.
  *
- * Exact physical door/window/partition rectangles live only in site_layout.
- * Boundary elements receive a one-unit visibility halo so a threshold lying
- * on one half-open room edge remains visible from the room on either side.
+ * Ordinary geometry is visible only in its owning room. Boundary geometry is
+ * visible only from one of its endpoints, and an internal boundary does not
+ * appear until both endpoint rooms have been reconstructed. OUTSIDE is not a
+ * reconstructed room and therefore never blocks an exterior door/window.
  */
+static bool Floppy144Site2DEndpointReconstructed(
+    const Floppy144RunState *run_state,
+    uint8_t room
+)
+{
+    if(room == FLOPPY144_SITE_ROOM_OUTSIDE)
+    {
+        return true;
+    }
+
+    if(
+        run_state == NULL ||
+        room >= (uint8_t)FLOPPY144_ROOM_COUNT
+    )
+    {
+        return false;
+    }
+
+    return
+        Floppy144RunStateRoomReconstructed(
+            run_state,
+            (Floppy144RoomId)room
+        );
+}
+
 static bool Floppy144Site2DRectVisibleInRoom(
+    const Floppy144RunState *run_state,
     Floppy144RoomId room,
     const Floppy144SiteRect *rect
 )
 {
-    Floppy144SiteElement element;
-
-    uint8_t expanded_x;
-    uint8_t expanded_y;
-    uint8_t expanded_width;
-    uint8_t expanded_height;
-
-    uint16_t expanded_x1;
-    uint16_t expanded_y1;
-
     if(rect == NULL)
     {
         return false;
     }
 
-    /*
-     * Room-owned geometry carries its generated owner directly. Only shared
-     * structure needs spatial visibility inference from overlapping view
-     * regions. This keeps neighbouring furniture from leaking across walls.
-     */
-    if(rect->room != FLOPPY144_SITE_ROOM_SHARED)
+    /* Ordinary room-owned geometry, including same-room boundaries. */
+    if(rect->from_room == rect->to_room)
     {
         return rect->room == (uint8_t)room;
     }
 
+    /* A boundary belongs only to the rooms named by its topology. */
     if(
-        Floppy144SiteRoomIntersectsRect(
-            room,
-            rect->x,
-            rect->y,
-            rect->width,
-            rect->height
-        )
+        rect->from_room != (uint8_t)room &&
+        rect->to_room != (uint8_t)room
     )
-    {
-        return true;
-    }
-
-    element =
-        (Floppy144SiteElement)rect->type;
-
-    if(!Floppy144Site2DIsBoundaryElement(element))
     {
         return false;
     }
 
-    expanded_x =
-        rect->x > 0U
-            ? (uint8_t)(rect->x - 1U)
-            : 0U;
-
-    expanded_y =
-        rect->y > 0U
-            ? (uint8_t)(rect->y - 1U)
-            : 0U;
-
-    expanded_x1 =
-        (uint16_t)rect->x +
-        (uint16_t)rect->width +
-        1U;
-
-    expanded_y1 =
-        (uint16_t)rect->y +
-        (uint16_t)rect->height +
-        1U;
-
-    if(expanded_x1 > FLOPPY144_SITE_SIZE_UNITS)
-    {
-        expanded_x1 = FLOPPY144_SITE_SIZE_UNITS;
-    }
-
-    if(expanded_y1 > FLOPPY144_SITE_SIZE_UNITS)
-    {
-        expanded_y1 = FLOPPY144_SITE_SIZE_UNITS;
-    }
-
-    expanded_width =
-        (uint8_t)(expanded_x1 - expanded_x);
-
-    expanded_height =
-        (uint8_t)(expanded_y1 - expanded_y);
-
     return
-        Floppy144SiteRoomIntersectsRect(
-            room,
-            expanded_x,
-            expanded_y,
-            expanded_width,
-            expanded_height
+        Floppy144Site2DEndpointReconstructed(
+            run_state,
+            rect->from_room
+        ) &&
+        Floppy144Site2DEndpointReconstructed(
+            run_state,
+            rect->to_room
         );
 }
 
@@ -319,6 +274,15 @@ static bool Floppy144Site2DBuildCamera(
 
     world_rect.room =
         (uint8_t)room;
+
+    world_rect.from_room =
+        (uint8_t)room;
+
+    world_rect.to_room =
+        (uint8_t)room;
+
+    world_rect.rotation =
+        0U;
 
     world_rect.x = world_bounds.x;
     world_rect.y = world_bounds.y;
@@ -697,77 +661,82 @@ static bool Floppy144Site2DRoomOwnsCell(
         );
 }
 
-static void Floppy144Site2DDrawWorldEdge(
+/*
+ * Draw one whole Site-unit wall cell.
+ *
+ * Doors and windows in the authored Site are one Site unit deep. Room walls
+ * now use the same physical depth and the same world-to-view projection path,
+ * so walls, doors and windows occupy exactly the same plane on every side of
+ * a room. This also avoids pixel-level centring differences after rotation.
+ */
+static void Floppy144Site2DDrawWallCell(
     Floppy144Surface *surface,
     const Floppy144SiteCamera2D *camera,
-    int32_t world_x0,
-    int32_t world_y0,
-    int32_t world_x1,
-    int32_t world_y1,
+    int32_t world_x,
+    int32_t world_y,
     uint32_t colour
 )
 {
-    const int32_t thickness =
-        FLOPPY144_SITE_2D_ROOM_BORDER_PIXELS;
-    int32_t screen_x0;
-    int32_t screen_y0;
-    int32_t screen_x1;
-    int32_t screen_y1;
-    int32_t minimum;
-    int32_t length;
+    Floppy144SiteRect wall_rect;
+    Floppy144SiteScreenRect screen_rect;
 
-    Floppy144Site2DProjectPoint(
-        camera,
-        world_x0 * FLOPPY144_SITE_FIXED_ONE,
-        world_y0 * FLOPPY144_SITE_FIXED_ONE,
-        &screen_x0,
-        &screen_y0
-    );
-
-    Floppy144Site2DProjectPoint(
-        camera,
-        world_x1 * FLOPPY144_SITE_FIXED_ONE,
-        world_y1 * FLOPPY144_SITE_FIXED_ONE,
-        &screen_x1,
-        &screen_y1
-    );
-
-    if(screen_x0 == screen_x1)
+    if(
+        surface == NULL ||
+        camera == NULL ||
+        world_x < 0 ||
+        world_y < 0 ||
+        world_x >= FLOPPY144_SITE_SIZE_UNITS ||
+        world_y >= FLOPPY144_SITE_SIZE_UNITS
+    )
     {
-        minimum = screen_y0 < screen_y1 ? screen_y0 : screen_y1;
-        length = screen_y0 < screen_y1 ? screen_y1 - screen_y0 : screen_y0 - screen_y1;
-
-        Floppy144Site2DFill(
-            surface,
-            screen_x0 - thickness / 2,
-            minimum,
-            thickness,
-            length + 1,
-            colour
-        );
+        return;
     }
-    else if(screen_y0 == screen_y1)
+
+    wall_rect.type = (uint8_t)FLOPPY144_SITE_PARTITION_WALL;
+    wall_rect.room = FLOPPY144_SITE_ROOM_SHARED;
+    wall_rect.from_room = FLOPPY144_SITE_ROOM_SHARED;
+    wall_rect.to_room = FLOPPY144_SITE_ROOM_SHARED;
+    wall_rect.rotation = 0U;
+    wall_rect.x = (uint8_t)world_x;
+    wall_rect.y = (uint8_t)world_y;
+    wall_rect.width = 1U;
+    wall_rect.height = 1U;
+
+    if(
+        !Floppy144Site2DProjectRect(
+            camera,
+            &wall_rect,
+            &screen_rect
+        )
+    )
     {
-        minimum = screen_x0 < screen_x1 ? screen_x0 : screen_x1;
-        length = screen_x0 < screen_x1 ? screen_x1 - screen_x0 : screen_x0 - screen_x1;
-
-        Floppy144Site2DFill(
-            surface,
-            minimum,
-            screen_y0 - thickness / 2,
-            length + 1,
-            thickness,
-            colour
-        );
+        return;
     }
+
+    Floppy144Site2DFill(
+        surface,
+        screen_rect.x,
+        screen_rect.y,
+        screen_rect.width,
+        screen_rect.height,
+        colour
+    );
 }
 
 /*
  * Draw the exposed perimeter of the active room's FLOOR_* union.
  *
- * Each edge is tested against adjacent floor ownership, so multi-rectangle
- * rooms such as the corridor do not acquire false internal seams. Doors are
- * drawn after this border and therefore punch clean visual openings through it.
+ * The authored floors are inset by one Site unit from their containing room
+ * shell. Each exposed floor edge therefore receives a one-unit wall cell on
+ * the OUTSIDE of the floor rather than a thin line centred on the floor edge.
+ *
+ * That is the same world-space shell occupied by one-unit-deep doors and
+ * windows. Boundary geometry is drawn later, so an available door/window
+ * cleanly replaces the wall cell beneath it while an unavailable boundary
+ * remains a continuous wall.
+ *
+ * Convex corners receive their own one-unit corner cell. This closes the four
+ * small gaps that can otherwise appear where perpendicular wall runs meet.
  */
 static void Floppy144Site2DDrawRoomBorder(
     Floppy144Surface *surface,
@@ -791,6 +760,11 @@ static void Floppy144Site2DDrawRoomBorder(
         int32_t x1;
         int32_t y1;
 
+        bool top_left_corner;
+        bool top_right_corner;
+        bool bottom_left_corner;
+        bool bottom_right_corner;
+
         if(
             rect == NULL ||
             rect->room != (uint8_t)room ||
@@ -805,62 +779,135 @@ static void Floppy144Site2DDrawRoomBorder(
         x1 = (int32_t)rect->x + (int32_t)rect->width;
         y1 = (int32_t)rect->y + (int32_t)rect->height;
 
+        /*
+         * Horizontal wall runs.
+         *
+         * Top walls occupy y0 - 1; bottom walls occupy y1. This mirrors the
+         * authored boundary rectangles instead of centring a stroke on y0/y1.
+         */
         for(x = x0; x < x1; ++x)
         {
             if(!Floppy144Site2DRoomOwnsCell(room, x, y0 - 1))
             {
-                Floppy144Site2DDrawWorldEdge(
+                Floppy144Site2DDrawWallCell(
                     surface,
                     camera,
                     x,
-                    y0,
-                    x + 1,
-                    y0,
+                    y0 - 1,
                     border_colour
                 );
             }
 
             if(!Floppy144Site2DRoomOwnsCell(room, x, y1))
             {
-                Floppy144Site2DDrawWorldEdge(
+                Floppy144Site2DDrawWallCell(
                     surface,
                     camera,
                     x,
-                    y1,
-                    x + 1,
                     y1,
                     border_colour
                 );
             }
         }
 
+        /*
+         * Vertical wall runs.
+         *
+         * Left walls occupy x0 - 1; right walls occupy x1. These cells are
+         * exactly one Site unit deep, matching vertical door/window rectangles.
+         */
         for(y = y0; y < y1; ++y)
         {
             if(!Floppy144Site2DRoomOwnsCell(room, x0 - 1, y))
             {
-                Floppy144Site2DDrawWorldEdge(
+                Floppy144Site2DDrawWallCell(
                     surface,
                     camera,
-                    x0,
+                    x0 - 1,
                     y,
-                    x0,
-                    y + 1,
                     border_colour
                 );
             }
 
             if(!Floppy144Site2DRoomOwnsCell(room, x1, y))
             {
-                Floppy144Site2DDrawWorldEdge(
+                Floppy144Site2DDrawWallCell(
                     surface,
                     camera,
                     x1,
                     y,
-                    x1,
-                    y + 1,
                     border_colour
                 );
             }
+        }
+
+        /*
+         * Fill convex corner shell cells only when both adjoining exterior
+         * directions are exposed. Multi-rectangle rooms therefore keep their
+         * internal joins open while true outer corners remain solid.
+         */
+        top_left_corner =
+            !Floppy144Site2DRoomOwnsCell(room, x0 - 1, y0) &&
+            !Floppy144Site2DRoomOwnsCell(room, x0, y0 - 1) &&
+            !Floppy144Site2DRoomOwnsCell(room, x0 - 1, y0 - 1);
+
+        top_right_corner =
+            !Floppy144Site2DRoomOwnsCell(room, x1, y0) &&
+            !Floppy144Site2DRoomOwnsCell(room, x1 - 1, y0 - 1) &&
+            !Floppy144Site2DRoomOwnsCell(room, x1, y0 - 1);
+
+        bottom_left_corner =
+            !Floppy144Site2DRoomOwnsCell(room, x0 - 1, y1 - 1) &&
+            !Floppy144Site2DRoomOwnsCell(room, x0, y1) &&
+            !Floppy144Site2DRoomOwnsCell(room, x0 - 1, y1);
+
+        bottom_right_corner =
+            !Floppy144Site2DRoomOwnsCell(room, x1, y1 - 1) &&
+            !Floppy144Site2DRoomOwnsCell(room, x1 - 1, y1) &&
+            !Floppy144Site2DRoomOwnsCell(room, x1, y1);
+
+        if(top_left_corner)
+        {
+            Floppy144Site2DDrawWallCell(
+                surface,
+                camera,
+                x0 - 1,
+                y0 - 1,
+                border_colour
+            );
+        }
+
+        if(top_right_corner)
+        {
+            Floppy144Site2DDrawWallCell(
+                surface,
+                camera,
+                x1,
+                y0 - 1,
+                border_colour
+            );
+        }
+
+        if(bottom_left_corner)
+        {
+            Floppy144Site2DDrawWallCell(
+                surface,
+                camera,
+                x0 - 1,
+                y1,
+                border_colour
+            );
+        }
+
+        if(bottom_right_corner)
+        {
+            Floppy144Site2DDrawWallCell(
+                surface,
+                camera,
+                x1,
+                y1,
+                border_colour
+            );
         }
     }
 }
@@ -984,6 +1031,7 @@ static void Floppy144Site2DDrawFurnitureDetails(
     Floppy144Surface *surface,
     Floppy144SiteElement element,
     const Floppy144SiteScreenRect *screen_rect,
+    uint16_t rotation,
     uint32_t edge_colour
 )
 {
@@ -1007,6 +1055,7 @@ static void Floppy144Site2DDrawFurnitureDetails(
     int32_t inset_w;
     int32_t inset_h;
     int32_t index;
+    bool half_turn;
 
     if(screen_rect == NULL)
     {
@@ -1018,33 +1067,91 @@ static void Floppy144Site2DDrawFurnitureDetails(
     inset_w = screen_rect->width * 3 / 4;
     inset_h = screen_rect->height * 3 / 4;
 
+    half_turn =
+        (rotation % 360U) == 180U;
+
     switch(element)
     {
         case FLOPPY144_SITE_STANDARD_DESK:
         {
+            int32_t equipment_w =
+                screen_rect->width / 4;
+            int32_t equipment_h =
+                screen_rect->height / 3;
+            int32_t equipment_x;
+            int32_t equipment_y;
+            int32_t paper_w =
+                screen_rect->width / 5;
+            int32_t paper_x;
+            int32_t paper_y;
+
+            /*
+             * The desk footprint does not change for a 180-degree turn, but
+             * its directional details do. Mirroring the equipment block and
+             * paper makes paired desks visibly face opposite directions while
+             * leaving collision and authored placement untouched.
+             */
+            if(half_turn)
+            {
+                equipment_x =
+                    screen_rect->x +
+                    screen_rect->width -
+                    screen_rect->width / 8 -
+                    equipment_w;
+
+                equipment_y =
+                    screen_rect->y +
+                    screen_rect->height -
+                    screen_rect->height / 8 -
+                    equipment_h;
+
+                paper_x =
+                    screen_rect->x +
+                    screen_rect->width / 8;
+
+                paper_y =
+                    screen_rect->y +
+                    screen_rect->height -
+                    screen_rect->height / 5 -
+                    3;
+            }
+            else
+            {
+                equipment_x = inset_x;
+                equipment_y = inset_y;
+
+                paper_x =
+                    screen_rect->x +
+                    screen_rect->width * 5 / 8;
+
+                paper_y =
+                    screen_rect->y +
+                    screen_rect->height / 5;
+            }
+
             Floppy144Site2DFill(
                 surface,
-                inset_x,
-                inset_y,
-                screen_rect->width / 4,
-                screen_rect->height / 3,
+                equipment_x,
+                equipment_y,
+                equipment_w,
+                equipment_h,
                 detail_colour
             );
 
             Floppy144Site2DOutline(
                 surface,
-                inset_x,
-                inset_y,
-                screen_rect->width / 4,
-                screen_rect->height / 3,
+                equipment_x,
+                equipment_y,
+                equipment_w,
+                equipment_h,
                 edge_colour
             );
 
             Floppy144Site2DFill(
                 surface,
-                screen_rect->x + screen_rect->width * 5 / 8,
-                screen_rect->y + screen_rect->height / 5,
-                screen_rect->width / 5,
+                paper_x,
+                paper_y,
+                paper_w,
                 3,
                 paper_colour
             );
@@ -1056,11 +1163,53 @@ static void Floppy144Site2DDrawFurnitureDetails(
         {
             int32_t monitor_w = screen_rect->width / 2;
             int32_t monitor_h = screen_rect->height / 2;
+            int32_t monitor_x;
+            int32_t monitor_y;
+            int32_t keyboard_y;
+
+            /*
+             * A terminal desk has an obvious facing direction because the
+             * monitor and keyboard sit on opposite halves of the worktop.
+             * Preserve that direction when the authored furniture is turned
+             * through 180 degrees, just as we do for standard desks/chairs.
+             */
+            if(half_turn)
+            {
+                monitor_x =
+                    screen_rect->x +
+                    screen_rect->width -
+                    screen_rect->width / 8 -
+                    monitor_w;
+
+                monitor_y =
+                    screen_rect->y +
+                    screen_rect->height -
+                    screen_rect->height / 8 -
+                    monitor_h;
+
+                keyboard_y =
+                    screen_rect->y +
+                    screen_rect->height / 4;
+            }
+            else
+            {
+                monitor_x =
+                    screen_rect->x +
+                    screen_rect->width / 8;
+
+                monitor_y =
+                    screen_rect->y +
+                    screen_rect->height / 8;
+
+                keyboard_y =
+                    screen_rect->y +
+                    screen_rect->height * 3 / 4;
+            }
 
             Floppy144Site2DFill(
                 surface,
-                screen_rect->x + screen_rect->width / 8,
-                screen_rect->y + screen_rect->height / 8,
+                monitor_x,
+                monitor_y,
                 monitor_w,
                 monitor_h,
                 detail_colour
@@ -1068,8 +1217,8 @@ static void Floppy144Site2DDrawFurnitureDetails(
 
             Floppy144Site2DFill(
                 surface,
-                screen_rect->x + screen_rect->width / 8 + 4,
-                screen_rect->y + screen_rect->height / 8 + 4,
+                monitor_x + 4,
+                monitor_y + 4,
                 monitor_w - 8,
                 monitor_h - 8,
                 screen_colour
@@ -1078,7 +1227,7 @@ static void Floppy144Site2DDrawFurnitureDetails(
             Floppy144Site2DFill(
                 surface,
                 screen_rect->x + screen_rect->width / 4,
-                screen_rect->y + screen_rect->height * 3 / 4,
+                keyboard_y,
                 screen_rect->width / 2,
                 3,
                 edge_colour
@@ -1089,6 +1238,8 @@ static void Floppy144Site2DDrawFurnitureDetails(
 
         case FLOPPY144_SITE_CHAIR:
         {
+            int32_t back_y;
+
             Floppy144Site2DOutline(
                 surface,
                 inset_x,
@@ -1098,10 +1249,20 @@ static void Floppy144Site2DDrawFurnitureDetails(
                 detail_colour
             );
 
+            /*
+             * The light strip represents the chair back. Moving it to the
+             * opposite edge makes a 180-degree chair rotation immediately
+             * readable without changing the 2 x 2 collision footprint.
+             */
+            back_y =
+                half_turn
+                    ? screen_rect->y + screen_rect->height - 7
+                    : screen_rect->y + 4;
+
             Floppy144Site2DFill(
                 surface,
                 screen_rect->x + 4,
-                screen_rect->y + 4,
+                back_y,
                 screen_rect->width - 8,
                 3,
                 light_colour
@@ -1557,6 +1718,7 @@ static void Floppy144Site2DDrawSiteRect(
         surface,
         element,
         &screen_rect,
+        rect->rotation,
         edge_colour
     );
 }
@@ -1740,8 +1902,19 @@ static const char *Floppy144Site2DInteractionPrompt(
     const Floppy144ObjectDefinition *definition;
     const Floppy144ObjectInteractionDefinition *interaction;
 
+    /*
+     * Movement guidance is deliberately quiet until the player is close
+     * enough to interact with something. Object-specific prompt prose is not
+     * exposed here; the control vocabulary is always the same:
+     *
+     *   A = Access
+     *   I = Inspect
+     *
+     * This prevents stale data such as "PRESS E" from leaking into the UI and
+     * keeps every desk, terminal and physical item consistent.
+     */
     const char *prompt =
-        "WASD OR ARROWS TO MOVE";
+        "ARROWS TO MOVE   N NOTEBOOK";
 
     if(run_state == NULL)
     {
@@ -1763,32 +1936,20 @@ static const char *Floppy144Site2DInteractionPrompt(
             ? definition->interaction
             : NULL;
 
-    if(
-        interaction == NULL ||
-        interaction->prompt == NULL
-    )
+    if(interaction == NULL)
     {
         return prompt;
     }
 
-    prompt =
-        interaction->prompt;
-
     if(
-        interaction->alternate_prompt != NULL &&
-        interaction->alternate_prompt_collection !=
-            FLOPPY144_COLLECTION_COUNT &&
-        Floppy144RunStateCollectionRestored(
-            run_state,
-            interaction->alternate_prompt_collection
-        )
+        interaction->action ==
+        FLOPPY144_OBJECT_ACTION_OPEN_TERMINAL
     )
     {
-        prompt =
-            interaction->alternate_prompt;
+        return "PRESS A TO ACCESS   N NOTEBOOK";
     }
 
-    return prompt;
+    return "PRESS I TO INSPECT   N NOTEBOOK";
 }
 
 static const char *Floppy144Site2DRoomLabel(
@@ -1991,6 +2152,7 @@ void Floppy144Site2DDraw(
             if(
                 rect == NULL ||
                 !Floppy144Site2DRectVisibleInRoom(
+                    run_state,
                     active_room,
                     rect
                 )
@@ -2028,6 +2190,7 @@ void Floppy144Site2DDraw(
                 rect == NULL ||
                 rect->type != (uint8_t)FLOPPY144_SITE_DOOR ||
                 !Floppy144Site2DRectVisibleInRoom(
+                    run_state,
                     active_room,
                     rect
                 )
@@ -2043,7 +2206,42 @@ void Floppy144Site2DDraw(
             );
         }
 
-        /* Structure, furniture and fixtures above the floor. */
+        /*
+         * Chairs are deliberately drawn before desks and other furniture.
+         * This gives desk/chair groupings a consistent visual hierarchy when
+         * their projected rectangles touch or slightly overlap, without
+         * changing any collision geometry. The rule applies Site-wide.
+         */
+        for(index = 0U; index < rect_count; ++index)
+        {
+            const Floppy144SiteRect *rect =
+                Floppy144SiteRectAt(index);
+
+            if(
+                rect == NULL ||
+                rect->type != (uint8_t)FLOPPY144_SITE_CHAIR ||
+                !Floppy144Site2DRectVisibleInRoom(
+                    run_state,
+                    active_room,
+                    rect
+                ) ||
+                !Floppy144SiteObjectGeometryVisible(
+                    run_state,
+                    rect
+                )
+            )
+            {
+                continue;
+            }
+
+            Floppy144Site2DDrawSiteRect(
+                &surface,
+                &camera,
+                rect
+            );
+        }
+
+        /* Structure, non-chair furniture and fixtures above the chairs. */
         for(index = 0U; index < rect_count; ++index)
         {
             const Floppy144SiteRect *rect =
@@ -2054,6 +2252,7 @@ void Floppy144Site2DDraw(
             if(
                 rect == NULL ||
                 !Floppy144Site2DRectVisibleInRoom(
+                    run_state,
                     active_room,
                     rect
                 ) ||
@@ -2071,7 +2270,8 @@ void Floppy144Site2DDraw(
 
             if(
                 Floppy144Site2DIsFloor(element) ||
-                element == FLOPPY144_SITE_DOOR
+                element == FLOPPY144_SITE_DOOR ||
+                element == FLOPPY144_SITE_CHAIR
             )
             {
                 continue;

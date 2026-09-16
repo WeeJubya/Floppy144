@@ -70,7 +70,11 @@ bool Floppy144SiteRoomBounds(
     Floppy144SiteRegion *bounds
 );
 
-/* View-region intersection query used for shared boundary visibility. */
+/*
+ * View-region intersection query retained for camera/layout diagnostics.
+ * Boundary visibility no longer relies on spatial intersection; generated
+ * from/to topology is authoritative.
+ */
 bool Floppy144SiteRoomIntersectsRect(
     Floppy144RoomId room,
     uint8_t rect_x,

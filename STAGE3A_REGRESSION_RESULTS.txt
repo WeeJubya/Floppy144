@@ -1,0 +1,53 @@
+FLOPPY//144 - STAGE 3A PROLOGUE REGRESSION
+Date: 2026-09-10
+
+ASSEMBLY RESULT: PASS
+
+Gates completed in the assembly environment:
+
+1. Canonical JSON compilation
+   PASS
+   35 collections
+   157 readable documents
+   50 triggers
+   40 interactions
+   23 evidence definitions
+   161 physical items
+
+2. Generated-data reproducibility
+   PASS
+   10 game-data outputs reproduced byte-for-byte
+   generated Site definition reproduced byte-for-byte
+
+3. Existing Stage 2 headless regression
+   PASS
+
+4. Stage 3A portable Prologue regression
+   PASS
+   - new recovery starts in Prologue
+   - INITIATE updates RunState and WorldState
+   - DR-01 restores through terminal input
+   - Disk Recovery Index resolves through direct OPEN
+   - Disk Recovery Index resolves through catalogue navigation
+   - T-001 reconstructs Reception and Corridor
+   - T-001 enables DR-02, DR-03 and HR-01
+   - T-001 records the DR-01 notebook fact
+   - terminal hands the player to Site exploration
+   - next collection remains visible after the Site hand-off
+
+5. Generated Site validation
+   PASS
+   Rooms:             11 / 11
+   Room regions:      13
+   Room geometry:     202
+   Shared geometry:   52
+   Doors:             16
+   Warnings:          0
+   Errors:            0
+
+WINDOWS ACCEPTANCE REQUIRED
+
+The supplied tools/test_stage3a.ps1 additionally performs the real binary
+save/reinstate round trip. The Win32 GUI build, manual Prologue walkthrough and
+1,474,560-byte release-size gate must be run locally from a Visual Studio
+Developer PowerShell or Developer Command Prompt with Premake 5 on PATH.

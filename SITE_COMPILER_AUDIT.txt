@@ -1,0 +1,20 @@
+
+=== FLOPPY//144 SITE COMPILER ===
+Input:             /mnt/data/site_layout.generated.jsonc
+Schema:            1
+Site:              100 x 100
+Rooms:             11 / 11
+Room regions:      13
+Room geometry:     254
+Floor rectangles:  13
+Boundary geometry: 52
+Shared runtime:    0
+Legacy shared in:  52
+Doors:             16
+Rotated items:     7
+Object hooks:      104
+Warnings:          0
+Errors:            0
+Generated:         /mnt/data/floppy144_site_generated_stage3a12_final.def
+RESULT:            PASS
+==================================

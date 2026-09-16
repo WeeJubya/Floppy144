@@ -30,6 +30,14 @@ param
         throw "Stage 2 regression failed with exit code $LASTEXITCODE."
     }
 
+    Write-Host ""
+    Write-Host "=== FLOPPY//144 STAGE 3A PROLOGUE REGRESSION ==="
+    & .\tools\test_stage3a.ps1
+
+    if($LASTEXITCODE -ne 0) {
+        throw "Stage 3A Prologue regression failed with exit code $LASTEXITCODE."
+    }
+
     if(-not (Get-Command premake5 -ErrorAction SilentlyContinue)) {
         throw "premake5 was not found on PATH."
     }

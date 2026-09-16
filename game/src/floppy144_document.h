@@ -77,6 +77,16 @@ const Floppy144DocumentDefinition *Floppy144DocumentGet(
 );
 
 /*
+ * Locate the first trigger document in a restored collection whose trigger is
+ * currently eligible and has not already fired. This is a generic progression
+ * query: callers do not need to know any story-specific document or trigger ID.
+ */
+const Floppy144DocumentDefinition *Floppy144DocumentFirstPendingTrigger(
+    const Floppy144RunState *pRunState,
+    Floppy144CollectionId eCollection
+);
+
+/*
  * Apply every effect registered against an authored document.
  *
  * Returns true when the selected record exists in the registry.

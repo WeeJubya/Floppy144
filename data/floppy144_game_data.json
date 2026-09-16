@@ -30,7 +30,7 @@
     "evidence": 23,
     "physical_items": 161,
     "rooms": 11,
-    "furniture": 151,
+    "furniture": 145,
     "fixtures": 91,
     "drawing_definitions": 24,
     "colours": 44,
@@ -163,126 +163,96 @@
             "x": 56,
             "y": 4,
             "width": 2,
-            "height": 2
+            "height": 2,
+            "rotation": 180
           },
           {
             "type": "CHAIR",
             "x": 56,
             "y": 7,
             "width": 2,
-            "height": 2
+            "height": 2,
+            "rotation": 180
           },
           {
             "type": "CHAIR",
             "x": 56,
             "y": 10,
             "width": 2,
-            "height": 2
+            "height": 2,
+            "rotation": 180
           },
           {
             "type": "CHAIR",
             "x": 56,
             "y": 13,
             "width": 2,
-            "height": 2
+            "height": 2,
+            "rotation": 180
           },
           {
             "type": "CHAIR",
             "x": 56,
             "y": 16,
             "width": 2,
-            "height": 2
+            "height": 2,
+            "rotation": 180
           },
           {
             "type": "CHAIR",
             "x": 56,
             "y": 19,
             "width": 2,
-            "height": 2
+            "height": 2,
+            "rotation": 180
           },
           {
             "type": "CHAIR",
             "x": 60,
             "y": 4,
             "width": 2,
-            "height": 2
+            "height": 2,
+            "rotation": 180
           },
           {
             "type": "CHAIR",
             "x": 60,
             "y": 7,
             "width": 2,
-            "height": 2
+            "height": 2,
+            "rotation": 180
           },
           {
             "type": "CHAIR",
             "x": 60,
             "y": 10,
             "width": 2,
-            "height": 2
+            "height": 2,
+            "rotation": 180
           },
           {
             "type": "CHAIR",
             "x": 60,
             "y": 13,
             "width": 2,
-            "height": 2
+            "height": 2,
+            "rotation": 180
           },
           {
             "type": "CHAIR",
             "x": 60,
             "y": 16,
             "width": 2,
-            "height": 2
+            "height": 2,
+            "rotation": 180
           },
           {
             "type": "CHAIR",
             "x": 60,
             "y": 19,
             "width": 2,
-            "height": 2
-          },
-          {
-            "type": "CHAIR",
-            "x": 64,
-            "y": 4,
-            "width": 2,
-            "height": 2
-          },
-          {
-            "type": "CHAIR",
-            "x": 64,
-            "y": 7,
-            "width": 2,
-            "height": 2
-          },
-          {
-            "type": "CHAIR",
-            "x": 64,
-            "y": 10,
-            "width": 2,
-            "height": 2
-          },
-          {
-            "type": "CHAIR",
-            "x": 64,
-            "y": 13,
-            "width": 2,
-            "height": 2
-          },
-          {
-            "type": "CHAIR",
-            "x": 64,
-            "y": 16,
-            "width": 2,
-            "height": 2
-          },
-          {
-            "type": "CHAIR",
-            "x": 64,
-            "y": 19,
-            "width": 2,
-            "height": 2
+            "height": 2,
+            "rotation": 180
           }
         ]
       },
@@ -365,7 +335,8 @@
             "x": 80,
             "y": 8,
             "width": 4,
-            "height": 6
+            "height": 6,
+            "rotation": 180
           },
           {
             "id": "MAIN_OFFICE_DESK_02",
@@ -385,7 +356,8 @@
             "x": 80,
             "y": 15,
             "width": 4,
-            "height": 6
+            "height": 6,
+            "rotation": 180
           },
           {
             "id": "MAIN_OFFICE_DESK_04",
@@ -405,7 +377,8 @@
             "x": 80,
             "y": 22,
             "width": 4,
-            "height": 6
+            "height": 6,
+            "rotation": 180
           },
           {
             "id": "MAIN_OFFICE_DESK_06",
@@ -425,7 +398,8 @@
             "x": 94,
             "y": 1,
             "width": 5,
-            "height": 4
+            "height": 4,
+            "rotation": 180
           },
           {
             "id": "MAIN_OFFICE_SECURE_CABINET",
@@ -476,10 +450,11 @@
           },
           {
             "type": "CHAIR",
-            "x": 88,
+            "x": 89,
             "y": 10,
             "width": 2,
-            "height": 2
+            "height": 2,
+            "rotation": 180
           },
           {
             "type": "CHAIR",
@@ -490,10 +465,11 @@
           },
           {
             "type": "CHAIR",
-            "x": 88,
+            "x": 89,
             "y": 17,
             "width": 2,
-            "height": 2
+            "height": 2,
+            "rotation": 180
           },
           {
             "type": "CHAIR",
@@ -504,10 +480,11 @@
           },
           {
             "type": "CHAIR",
-            "x": 88,
+            "x": 89,
             "y": 24,
             "width": 2,
-            "height": 2
+            "height": 2,
+            "rotation": 180
           }
         ]
       },
@@ -3695,13 +3672,7 @@
         "RECEPTION_CHAIR_10",
         "RECEPTION_CHAIR_11",
         "RECEPTION_CHAIR_12",
-        "RECEPTION_CHAIR_13",
-        "RECEPTION_CHAIR_14",
-        "RECEPTION_CHAIR_15",
-        "RECEPTION_CHAIR_16",
-        "RECEPTION_CHAIR_17",
-        "RECEPTION_CHAIR_18",
-        "RECEPTION_CHAIR_19"
+        "RECEPTION_CHAIR_13"
       ],
       "fixture_ids": [
         "RECEPTION_SITE_DIRECTORY",
@@ -4419,7 +4390,8 @@
         "x": 56,
         "y": 4,
         "width": 2,
-        "height": 2
+        "height": 2,
+        "rotation": 180
       },
       "drawing_definition_id": "DRAW_CHAIR"
     },
@@ -4433,7 +4405,8 @@
         "x": 56,
         "y": 7,
         "width": 2,
-        "height": 2
+        "height": 2,
+        "rotation": 180
       },
       "drawing_definition_id": "DRAW_CHAIR"
     },
@@ -4447,7 +4420,8 @@
         "x": 56,
         "y": 10,
         "width": 2,
-        "height": 2
+        "height": 2,
+        "rotation": 180
       },
       "drawing_definition_id": "DRAW_CHAIR"
     },
@@ -4461,7 +4435,8 @@
         "x": 56,
         "y": 13,
         "width": 2,
-        "height": 2
+        "height": 2,
+        "rotation": 180
       },
       "drawing_definition_id": "DRAW_CHAIR"
     },
@@ -4475,7 +4450,8 @@
         "x": 56,
         "y": 16,
         "width": 2,
-        "height": 2
+        "height": 2,
+        "rotation": 180
       },
       "drawing_definition_id": "DRAW_CHAIR"
     },
@@ -4489,7 +4465,8 @@
         "x": 56,
         "y": 19,
         "width": 2,
-        "height": 2
+        "height": 2,
+        "rotation": 180
       },
       "drawing_definition_id": "DRAW_CHAIR"
     },
@@ -4503,7 +4480,8 @@
         "x": 60,
         "y": 4,
         "width": 2,
-        "height": 2
+        "height": 2,
+        "rotation": 180
       },
       "drawing_definition_id": "DRAW_CHAIR"
     },
@@ -4517,7 +4495,8 @@
         "x": 60,
         "y": 7,
         "width": 2,
-        "height": 2
+        "height": 2,
+        "rotation": 180
       },
       "drawing_definition_id": "DRAW_CHAIR"
     },
@@ -4531,7 +4510,8 @@
         "x": 60,
         "y": 10,
         "width": 2,
-        "height": 2
+        "height": 2,
+        "rotation": 180
       },
       "drawing_definition_id": "DRAW_CHAIR"
     },
@@ -4545,7 +4525,8 @@
         "x": 60,
         "y": 13,
         "width": 2,
-        "height": 2
+        "height": 2,
+        "rotation": 180
       },
       "drawing_definition_id": "DRAW_CHAIR"
     },
@@ -4559,7 +4540,8 @@
         "x": 60,
         "y": 16,
         "width": 2,
-        "height": 2
+        "height": 2,
+        "rotation": 180
       },
       "drawing_definition_id": "DRAW_CHAIR"
     },
@@ -4573,91 +4555,8 @@
         "x": 60,
         "y": 19,
         "width": 2,
-        "height": 2
-      },
-      "drawing_definition_id": "DRAW_CHAIR"
-    },
-    {
-      "id": "RECEPTION_CHAIR_14",
-      "room_id": "RECEPTION",
-      "element_type": "CHAIR",
-      "variant": "CHAIR",
-      "object_id": null,
-      "geometry": {
-        "x": 64,
-        "y": 4,
-        "width": 2,
-        "height": 2
-      },
-      "drawing_definition_id": "DRAW_CHAIR"
-    },
-    {
-      "id": "RECEPTION_CHAIR_15",
-      "room_id": "RECEPTION",
-      "element_type": "CHAIR",
-      "variant": "CHAIR",
-      "object_id": null,
-      "geometry": {
-        "x": 64,
-        "y": 7,
-        "width": 2,
-        "height": 2
-      },
-      "drawing_definition_id": "DRAW_CHAIR"
-    },
-    {
-      "id": "RECEPTION_CHAIR_16",
-      "room_id": "RECEPTION",
-      "element_type": "CHAIR",
-      "variant": "CHAIR",
-      "object_id": null,
-      "geometry": {
-        "x": 64,
-        "y": 10,
-        "width": 2,
-        "height": 2
-      },
-      "drawing_definition_id": "DRAW_CHAIR"
-    },
-    {
-      "id": "RECEPTION_CHAIR_17",
-      "room_id": "RECEPTION",
-      "element_type": "CHAIR",
-      "variant": "CHAIR",
-      "object_id": null,
-      "geometry": {
-        "x": 64,
-        "y": 13,
-        "width": 2,
-        "height": 2
-      },
-      "drawing_definition_id": "DRAW_CHAIR"
-    },
-    {
-      "id": "RECEPTION_CHAIR_18",
-      "room_id": "RECEPTION",
-      "element_type": "CHAIR",
-      "variant": "CHAIR",
-      "object_id": null,
-      "geometry": {
-        "x": 64,
-        "y": 16,
-        "width": 2,
-        "height": 2
-      },
-      "drawing_definition_id": "DRAW_CHAIR"
-    },
-    {
-      "id": "RECEPTION_CHAIR_19",
-      "room_id": "RECEPTION",
-      "element_type": "CHAIR",
-      "variant": "CHAIR",
-      "object_id": null,
-      "geometry": {
-        "x": 64,
-        "y": 19,
-        "width": 2,
-        "height": 2
+        "height": 2,
+        "rotation": 180
       },
       "drawing_definition_id": "DRAW_CHAIR"
     },
@@ -4671,7 +4570,8 @@
         "x": 80,
         "y": 8,
         "width": 4,
-        "height": 6
+        "height": 6,
+        "rotation": 180
       },
       "drawing_definition_id": "DRAW_STANDARD_DESK"
     },
@@ -4699,7 +4599,8 @@
         "x": 80,
         "y": 15,
         "width": 4,
-        "height": 6
+        "height": 6,
+        "rotation": 180
       },
       "drawing_definition_id": "DRAW_STANDARD_DESK"
     },
@@ -4727,7 +4628,8 @@
         "x": 80,
         "y": 22,
         "width": 4,
-        "height": 6
+        "height": 6,
+        "rotation": 180
       },
       "drawing_definition_id": "DRAW_STANDARD_DESK"
     },
@@ -4755,7 +4657,8 @@
         "x": 94,
         "y": 1,
         "width": 5,
-        "height": 4
+        "height": 4,
+        "rotation": 180
       },
       "drawing_definition_id": "DRAW_TERMINAL_DESK"
     },
@@ -4836,10 +4739,11 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "x": 88,
+        "x": 89,
         "y": 10,
         "width": 2,
-        "height": 2
+        "height": 2,
+        "rotation": 180
       },
       "drawing_definition_id": "DRAW_CHAIR"
     },
@@ -4864,10 +4768,11 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "x": 88,
+        "x": 89,
         "y": 17,
         "width": 2,
-        "height": 2
+        "height": 2,
+        "rotation": 180
       },
       "drawing_definition_id": "DRAW_CHAIR"
     },
@@ -4892,10 +4797,11 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "x": 88,
+        "x": 89,
         "y": 24,
         "width": 2,
-        "height": 2
+        "height": 2,
+        "rotation": 180
       },
       "drawing_definition_id": "DRAW_CHAIR"
     },
@@ -10117,10 +10023,10 @@
         "trigger_documents_budget": 1
       },
       "document_ids": [
-        "DR-01-RD-0001",
-        "DR-01-RD-0002",
-        "DR-01-RD-0003",
-        "DR-01-RD-0004"
+        "DR-01-RS-0001",
+        "DR-01-RS-0002",
+        "DR-01-RS-0003",
+        "DR-01-RS-0004"
       ],
       "trigger_ids": [
         "T-001"
@@ -10142,10 +10048,10 @@
         "trigger_documents_budget": 0
       },
       "document_ids": [
-        "DR-02-RD-0001",
-        "DR-02-RD-0002",
-        "DR-02-RD-0003",
-        "DR-02-RD-0004"
+        "DR-02-RS-0001",
+        "DR-02-RS-0002",
+        "DR-02-RS-0003",
+        "DR-02-RS-0004"
       ],
       "trigger_ids": [],
       "physical_item_ids": [],
@@ -10165,10 +10071,10 @@
         "trigger_documents_budget": 0
       },
       "document_ids": [
-        "DR-03-RD-0001",
-        "DR-03-RD-0002",
-        "DR-03-RD-0003",
-        "DR-03-RD-0004"
+        "DR-03-RS-0001",
+        "DR-03-RS-0002",
+        "DR-03-RS-0003",
+        "DR-03-RS-0004"
       ],
       "trigger_ids": [],
       "physical_item_ids": [],
@@ -10188,12 +10094,12 @@
         "trigger_documents_budget": 2
       },
       "document_ids": [
-        "DR-04-RD-0001",
-        "DR-04-RD-0002",
-        "DR-04-RD-0003",
-        "DR-04-RD-0004",
-        "DR-04-RD-0005",
-        "DR-04-RD-0006"
+        "DR-04-RS-0001",
+        "DR-04-RS-0002",
+        "DR-04-RS-0003",
+        "DR-04-RS-0004",
+        "DR-04-RS-0005",
+        "DR-04-RS-0006"
       ],
       "trigger_ids": [
         "T-010",
@@ -10222,12 +10128,12 @@
         "trigger_documents_budget": 2
       },
       "document_ids": [
-        "DR-07-RD-0001",
-        "DR-07-RD-0002",
-        "DR-07-RD-0003",
-        "DR-07-RD-0004",
-        "DR-07-RD-0005",
-        "DR-07-RD-0006"
+        "DR-07-RS-0001",
+        "DR-07-RS-0002",
+        "DR-07-RS-0003",
+        "DR-07-RS-0004",
+        "DR-07-RS-0005",
+        "DR-07-RS-0006"
       ],
       "trigger_ids": [
         "T-013",
@@ -10259,10 +10165,10 @@
         "trigger_documents_budget": 0
       },
       "document_ids": [
-        "DR-23-RD-0001",
-        "DR-23-RD-0002",
-        "DR-23-RD-0003",
-        "DR-23-RD-0004"
+        "DR-23-RS-0001",
+        "DR-23-RS-0002",
+        "DR-23-RS-0003",
+        "DR-23-RS-0004"
       ],
       "trigger_ids": [],
       "physical_item_ids": [],
@@ -10282,12 +10188,12 @@
         "trigger_documents_budget": 2
       },
       "document_ids": [
-        "DR-29-RD-0001",
-        "DR-29-RD-0002",
-        "DR-29-RD-0003",
-        "DR-29-RD-0004",
-        "DR-29-RD-0005",
-        "DR-29-RD-0006"
+        "DR-29-RS-0001",
+        "DR-29-RS-0002",
+        "DR-29-RS-0003",
+        "DR-29-RS-0004",
+        "DR-29-RS-0005",
+        "DR-29-RS-0006"
       ],
       "trigger_ids": [
         "T-015",
@@ -10319,12 +10225,12 @@
         "trigger_documents_budget": 2
       },
       "document_ids": [
-        "DR-31-RD-0001",
-        "DR-31-RD-0002",
-        "DR-31-RD-0003",
-        "DR-31-RD-0004",
-        "DR-31-RD-0005",
-        "DR-31-RD-0006"
+        "DR-31-RS-0001",
+        "DR-31-RS-0002",
+        "DR-31-RS-0003",
+        "DR-31-RS-0004",
+        "DR-31-RS-0005",
+        "DR-31-RS-0006"
       ],
       "trigger_ids": [
         "T-017",
@@ -10355,12 +10261,12 @@
         "trigger_documents_budget": 3
       },
       "document_ids": [
-        "DR-47-RD-0001",
-        "DR-47-RD-0002",
-        "DR-47-RD-0003",
-        "DR-47-RD-0004",
-        "DR-47-RD-0005",
-        "DR-47-RD-0006"
+        "DR-47-RS-0001",
+        "DR-47-RS-0002",
+        "DR-47-RS-0003",
+        "DR-47-RS-0004",
+        "DR-47-RS-0005",
+        "DR-47-RS-0006"
       ],
       "trigger_ids": [
         "T-026",
@@ -10391,12 +10297,12 @@
         "trigger_documents_budget": 1
       },
       "document_ids": [
-        "DR-53-RD-0001",
-        "DR-53-RD-0002",
-        "DR-53-RD-0003",
-        "DR-53-RD-0004",
-        "DR-53-RD-0005",
-        "DR-53-RD-0006"
+        "DR-53-RS-0001",
+        "DR-53-RS-0002",
+        "DR-53-RS-0003",
+        "DR-53-RS-0004",
+        "DR-53-RS-0005",
+        "DR-53-RS-0006"
       ],
       "trigger_ids": [
         "T-029"
@@ -10426,12 +10332,12 @@
         "trigger_documents_budget": 2
       },
       "document_ids": [
-        "HR-01-RD-0001",
+        "HR-01-RS-0001",
         "HR-01-RS-0107",
-        "HR-01-RD-0003",
-        "HR-01-RD-0004",
-        "HR-01-RD-0005",
-        "HR-01-RD-0006"
+        "HR-01-RS-0003",
+        "HR-01-RS-0004",
+        "HR-01-RS-0005",
+        "HR-01-RS-0006"
       ],
       "trigger_ids": [
         "T-002",
@@ -10463,11 +10369,11 @@
         "trigger_documents_budget": 1
       },
       "document_ids": [
-        "HR-05-RD-0001",
-        "HR-05-RD-0002",
-        "HR-05-RD-0003",
-        "HR-05-RD-0004",
-        "HR-05-RD-0005"
+        "HR-05-RS-0001",
+        "HR-05-RS-0002",
+        "HR-05-RS-0003",
+        "HR-05-RS-0004",
+        "HR-05-RS-0005"
       ],
       "trigger_ids": [
         "T-012"
@@ -10502,12 +10408,12 @@
         "trigger_documents_budget": 2
       },
       "document_ids": [
-        "HR-09-RD-0001",
-        "HR-09-RD-0002",
-        "HR-09-RD-0003",
-        "HR-09-RD-0004",
-        "HR-09-RD-0005",
-        "HR-09-RD-0006"
+        "HR-09-RS-0001",
+        "HR-09-RS-0002",
+        "HR-09-RS-0003",
+        "HR-09-RS-0004",
+        "HR-09-RS-0005",
+        "HR-09-RS-0006"
       ],
       "trigger_ids": [
         "T-043",
@@ -10577,12 +10483,12 @@
         "trigger_documents_budget": 2
       },
       "document_ids": [
-        "FM-04-RD-0001",
-        "FM-04-RD-0002",
-        "FM-04-RD-0003",
-        "FM-04-RD-0004",
-        "FM-04-RD-0005",
-        "FM-04-RD-0006"
+        "FM-04-RS-0001",
+        "FM-04-RS-0002",
+        "FM-04-RS-0003",
+        "FM-04-RS-0004",
+        "FM-04-RS-0005",
+        "FM-04-RS-0006"
       ],
       "trigger_ids": [
         "T-004",
@@ -10617,12 +10523,12 @@
         "trigger_documents_budget": 2
       },
       "document_ids": [
-        "FM-07-RD-0001",
-        "FM-07-RD-0002",
-        "FM-07-RD-0003",
-        "FM-07-RD-0004",
-        "FM-07-RD-0005",
-        "FM-07-RD-0006"
+        "FM-07-RS-0001",
+        "FM-07-RS-0002",
+        "FM-07-RS-0003",
+        "FM-07-RS-0004",
+        "FM-07-RS-0005",
+        "FM-07-RS-0006"
       ],
       "trigger_ids": [
         "T-008",
@@ -10655,11 +10561,11 @@
       },
       "document_ids": [
         "FM-13-RS-0047",
-        "FM-13-RD-0002",
-        "FM-13-RD-0003",
-        "FM-13-RD-0004",
-        "FM-13-RD-0005",
-        "FM-13-RD-0006"
+        "FM-13-RS-0002",
+        "FM-13-RS-0003",
+        "FM-13-RS-0004",
+        "FM-13-RS-0005",
+        "FM-13-RS-0006"
       ],
       "trigger_ids": [
         "T-006",
@@ -10688,12 +10594,12 @@
         "trigger_documents_budget": 2
       },
       "document_ids": [
-        "FM-18-RD-0001",
-        "FM-18-RD-0002",
-        "FM-18-RD-0003",
-        "FM-18-RD-0004",
-        "FM-18-RD-0005",
-        "FM-18-RD-0006"
+        "FM-18-RS-0001",
+        "FM-18-RS-0002",
+        "FM-18-RS-0003",
+        "FM-18-RS-0004",
+        "FM-18-RS-0005",
+        "FM-18-RS-0006"
       ],
       "trigger_ids": [
         "T-041",
@@ -10721,7 +10627,7 @@
       "reconstruction_quota_percent": 5,
       "content_budget": null,
       "document_ids": [
-        "FM-23-RD-0001"
+        "FM-23-RS-0001"
       ],
       "trigger_ids": [
         "T-025"
@@ -10756,12 +10662,12 @@
         "trigger_documents_budget": 2
       },
       "document_ids": [
-        "OS-07-RD-0001",
-        "OS-07-RD-0002",
-        "OS-07-RD-0003",
-        "OS-07-RD-0004",
-        "OS-07-RD-0005",
-        "OS-07-RD-0006"
+        "OS-07-RS-0001",
+        "OS-07-RS-0002",
+        "OS-07-RS-0003",
+        "OS-07-RS-0004",
+        "OS-07-RS-0005",
+        "OS-07-RS-0006"
       ],
       "trigger_ids": [
         "T-030",
@@ -10790,8 +10696,8 @@
       "reconstruction_quota_percent": 2,
       "content_budget": null,
       "document_ids": [
-        "OS-18-RD-0001",
-        "OS-18-RD-0002"
+        "OS-18-RS-0001",
+        "OS-18-RS-0002"
       ],
       "trigger_ids": [
         "T-032",
@@ -10819,13 +10725,13 @@
         "trigger_documents_budget": 3
       },
       "document_ids": [
-        "OS-26-RD-0001",
-        "OS-26-RD-0002",
-        "OS-26-RD-0003",
-        "OS-26-RD-0004",
-        "OS-26-RD-0005",
-        "OS-26-RD-0006",
-        "OS-26-RD-0007"
+        "OS-26-RS-0001",
+        "OS-26-RS-0002",
+        "OS-26-RS-0003",
+        "OS-26-RS-0004",
+        "OS-26-RS-0005",
+        "OS-26-RS-0006",
+        "OS-26-RS-0007"
       ],
       "trigger_ids": [
         "T-034",
@@ -10860,11 +10766,11 @@
         "trigger_documents_budget": 2
       },
       "document_ids": [
-        "OS-34-RD-0001",
-        "OS-34-RD-0002",
-        "OS-34-RD-0003",
-        "OS-34-RD-0004",
-        "OS-34-RD-0005"
+        "OS-34-RS-0001",
+        "OS-34-RS-0002",
+        "OS-34-RS-0003",
+        "OS-34-RS-0004",
+        "OS-34-RS-0005"
       ],
       "trigger_ids": [
         "T-037",
@@ -10887,7 +10793,7 @@
       "reconstruction_quota_percent": 1,
       "content_budget": null,
       "document_ids": [
-        "OS-41-RD-0001"
+        "OS-41-RS-0001"
       ],
       "trigger_ids": [
         "T-039"
@@ -10913,12 +10819,12 @@
         "trigger_documents_budget": 1
       },
       "document_ids": [
-        "OS-48-RD-0001",
-        "OS-48-RD-0002",
-        "OS-48-RD-0003",
-        "OS-48-RD-0004",
-        "OS-48-RD-0005",
-        "OS-48-RD-0006"
+        "OS-48-RS-0001",
+        "OS-48-RS-0002",
+        "OS-48-RS-0003",
+        "OS-48-RS-0004",
+        "OS-48-RS-0005",
+        "OS-48-RS-0006"
       ],
       "trigger_ids": [
         "T-040"
@@ -10950,12 +10856,12 @@
         "trigger_documents_budget": 2
       },
       "document_ids": [
-        "TS-02-RD-0001",
-        "TS-02-RD-0002",
-        "TS-02-RD-0003",
-        "TS-02-RD-0004",
-        "TS-02-RD-0005",
-        "TS-02-RD-0006"
+        "TS-02-RS-0001",
+        "TS-02-RS-0002",
+        "TS-02-RS-0003",
+        "TS-02-RS-0004",
+        "TS-02-RS-0005",
+        "TS-02-RS-0006"
       ],
       "trigger_ids": [
         "T-019",
@@ -10985,12 +10891,12 @@
         "trigger_documents_budget": 2
       },
       "document_ids": [
-        "TS-06-RD-0001",
-        "TS-06-RD-0002",
-        "TS-06-RD-0003",
-        "TS-06-RD-0004",
-        "TS-06-RD-0005",
-        "TS-06-RD-0006"
+        "TS-06-RS-0001",
+        "TS-06-RS-0002",
+        "TS-06-RS-0003",
+        "TS-06-RS-0004",
+        "TS-06-RS-0005",
+        "TS-06-RS-0006"
       ],
       "trigger_ids": [
         "T-021",
@@ -11021,10 +10927,10 @@
         "trigger_documents_budget": 0
       },
       "document_ids": [
-        "TS-08-RD-0001",
-        "TS-08-RD-0002",
-        "TS-08-RD-0003",
-        "TS-08-RD-0004"
+        "TS-08-RS-0001",
+        "TS-08-RS-0002",
+        "TS-08-RS-0003",
+        "TS-08-RS-0004"
       ],
       "trigger_ids": [],
       "physical_item_ids": [
@@ -11049,12 +10955,12 @@
         "trigger_documents_budget": 2
       },
       "document_ids": [
-        "TS-10-RD-0001",
-        "TS-10-RD-0002",
-        "TS-10-RD-0003",
-        "TS-10-RD-0004",
-        "TS-10-RD-0005",
-        "TS-10-RD-0006"
+        "TS-10-RS-0001",
+        "TS-10-RS-0002",
+        "TS-10-RS-0003",
+        "TS-10-RS-0004",
+        "TS-10-RS-0005",
+        "TS-10-RS-0006"
       ],
       "trigger_ids": [
         "T-023",
@@ -11088,12 +10994,12 @@
         "trigger_documents_budget": 3
       },
       "document_ids": [
-        "TS-14-RD-0001",
-        "TS-14-RD-0002",
-        "TS-14-RD-0003",
-        "TS-14-RD-0004",
-        "TS-14-RD-0005",
-        "TS-14-RD-0006"
+        "TS-14-RS-0001",
+        "TS-14-RS-0002",
+        "TS-14-RS-0003",
+        "TS-14-RS-0004",
+        "TS-14-RS-0005",
+        "TS-14-RS-0006"
       ],
       "trigger_ids": [
         "T-045",
@@ -11126,14 +11032,14 @@
         "trigger_documents_budget": 3
       },
       "document_ids": [
-        "TS-18-RD-0001",
-        "TS-18-RD-0002",
-        "TS-18-RD-0003",
-        "TS-18-RD-0004",
-        "TS-18-RD-0005",
-        "TS-18-RD-0006",
-        "TS-18-RD-0007",
-        "TS-18-RD-0008"
+        "TS-18-RS-0001",
+        "TS-18-RS-0002",
+        "TS-18-RS-0003",
+        "TS-18-RS-0004",
+        "TS-18-RS-0005",
+        "TS-18-RS-0006",
+        "TS-18-RS-0007",
+        "TS-18-RS-0008"
       ],
       "trigger_ids": [
         "T-048",
@@ -11176,7 +11082,7 @@
   ],
   "documents": [
     {
-      "id": "DR-01-RD-0001",
+      "id": "DR-01-RS-0001",
       "collection_id": "DR-01",
       "record_index": 0,
       "title": "Disk Recovery Index",
@@ -11188,7 +11094,7 @@
       "parent_collection_id": "DR-01"
     },
     {
-      "id": "DR-01-RD-0002",
+      "id": "DR-01-RS-0002",
       "collection_id": "DR-01",
       "record_index": 1,
       "title": "Terminal Access & Command Reference",
@@ -11200,7 +11106,7 @@
       "parent_collection_id": "DR-01"
     },
     {
-      "id": "DR-01-RD-0003",
+      "id": "DR-01-RS-0003",
       "collection_id": "DR-01",
       "record_index": 2,
       "title": "Collection Restoration",
@@ -11212,7 +11118,7 @@
       "parent_collection_id": "DR-01"
     },
     {
-      "id": "DR-01-RD-0004",
+      "id": "DR-01-RS-0004",
       "collection_id": "DR-01",
       "record_index": 3,
       "title": "Listing & Opening Records",
@@ -11224,7 +11130,7 @@
       "parent_collection_id": "DR-01"
     },
     {
-      "id": "DR-02-RD-0001",
+      "id": "DR-02-RS-0001",
       "collection_id": "DR-02",
       "record_index": 0,
       "title": "Terminal Access & Command Reference",
@@ -11236,7 +11142,7 @@
       "parent_collection_id": "DR-02"
     },
     {
-      "id": "DR-02-RD-0002",
+      "id": "DR-02-RS-0002",
       "collection_id": "DR-02",
       "record_index": 1,
       "title": "Archive Command Syntax",
@@ -11248,7 +11154,7 @@
       "parent_collection_id": "DR-02"
     },
     {
-      "id": "DR-02-RD-0003",
+      "id": "DR-02-RS-0003",
       "collection_id": "DR-02",
       "record_index": 2,
       "title": "Error & Recovery Messages",
@@ -11260,7 +11166,7 @@
       "parent_collection_id": "DR-02"
     },
     {
-      "id": "DR-02-RD-0004",
+      "id": "DR-02-RS-0004",
       "collection_id": "DR-02",
       "record_index": 3,
       "title": "Terminal Session Safeguards",
@@ -11272,7 +11178,7 @@
       "parent_collection_id": "DR-02"
     },
     {
-      "id": "DR-03-RD-0001",
+      "id": "DR-03-RS-0001",
       "collection_id": "DR-03",
       "record_index": 0,
       "title": "Reconstruction & Collection Recovery Procedures",
@@ -11284,7 +11190,7 @@
       "parent_collection_id": "DR-03"
     },
     {
-      "id": "DR-03-RD-0002",
+      "id": "DR-03-RS-0002",
       "collection_id": "DR-03",
       "record_index": 1,
       "title": "Reconstruction Quota Notes",
@@ -11296,7 +11202,7 @@
       "parent_collection_id": "DR-03"
     },
     {
-      "id": "DR-03-RD-0003",
+      "id": "DR-03-RS-0003",
       "collection_id": "DR-03",
       "record_index": 2,
       "title": "Physical Item Reconstruction Rules",
@@ -11308,7 +11214,7 @@
       "parent_collection_id": "DR-03"
     },
     {
-      "id": "DR-03-RD-0004",
+      "id": "DR-03-RS-0004",
       "collection_id": "DR-03",
       "record_index": 3,
       "title": "Evidence & Notebook Behaviour",
@@ -11320,31 +11226,31 @@
       "parent_collection_id": "DR-03"
     },
     {
-      "id": "DR-04-RD-0001",
+      "id": "DR-04-RS-0001",
       "collection_id": "DR-04",
       "record_index": 0,
       "title": "Physical Archive Reconciliation Workstream",
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-010",
-      "body": "PHYSICAL ARCHIVE RECONCILIATION WORKSTREAM\n\nThis recovered DR-04 record authorises or records the following state change in the reconstruction: SET_ACT ACT_II; SET_BRANCH RECORDS_FIRST; RECONSTRUCT_ROOM RECORDS_OFFICE; UNLOCK_CONNECTION COR_RECO.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "PHYSICAL ARCHIVE RECONCILIATION WORKSTREAM\n\nThis recovered DR-04 record authorises or records the following state change in the reconstruction: SET_BRANCH RECORDS_FIRST; RECONSTRUCT_ROOM RECORDS_OFFICE; UNLOCK_CONNECTION COR_RECO.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-04"
     },
     {
-      "id": "DR-04-RD-0002",
+      "id": "DR-04-RS-0002",
       "collection_id": "DR-04",
       "record_index": 1,
       "title": "Terminal Network Remediation Workstream",
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-011",
-      "body": "TERMINAL NETWORK REMEDIATION WORKSTREAM\n\nThis recovered DR-04 record authorises or records the following state change in the reconstruction: SET_ACT ACT_II; SET_BRANCH TECHNOLOGY_FIRST; RECONSTRUCT_ROOM IT_SUPPORT; UNLOCK_CONNECTION COR_IT.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "TERMINAL NETWORK REMEDIATION WORKSTREAM\n\nThis recovered DR-04 record authorises or records the following state change in the reconstruction: SET_BRANCH TECHNOLOGY_FIRST; RECONSTRUCT_ROOM IT_SUPPORT; UNLOCK_CONNECTION COR_IT.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-04"
     },
     {
-      "id": "DR-04-RD-0003",
+      "id": "DR-04-RS-0003",
       "collection_id": "DR-04",
       "record_index": 2,
       "title": "Handover Readiness Checklist",
@@ -11356,7 +11262,7 @@
       "parent_collection_id": "DR-04"
     },
     {
-      "id": "DR-04-RD-0004",
+      "id": "DR-04-RS-0004",
       "collection_id": "DR-04",
       "record_index": 3,
       "title": "Outstanding Workstream Summary",
@@ -11368,7 +11274,7 @@
       "parent_collection_id": "DR-04"
     },
     {
-      "id": "DR-04-RD-0005",
+      "id": "DR-04-RS-0005",
       "collection_id": "DR-04",
       "record_index": 4,
       "title": "Final Friday Milestone Plan",
@@ -11380,7 +11286,7 @@
       "parent_collection_id": "DR-04"
     },
     {
-      "id": "DR-04-RD-0006",
+      "id": "DR-04-RS-0006",
       "collection_id": "DR-04",
       "record_index": 5,
       "title": "Building Handover Dependencies",
@@ -11392,7 +11298,7 @@
       "parent_collection_id": "DR-04"
     },
     {
-      "id": "DR-07-RD-0001",
+      "id": "DR-07-RS-0001",
       "collection_id": "DR-07",
       "record_index": 0,
       "title": "Archive Reconciliation Exception Report",
@@ -11404,7 +11310,7 @@
       "parent_collection_id": "DR-07"
     },
     {
-      "id": "DR-07-RD-0002",
+      "id": "DR-07-RS-0002",
       "collection_id": "DR-07",
       "record_index": 1,
       "title": "Unlocated Holdings Schedule",
@@ -11416,7 +11322,7 @@
       "parent_collection_id": "DR-07"
     },
     {
-      "id": "DR-07-RD-0003",
+      "id": "DR-07-RS-0003",
       "collection_id": "DR-07",
       "record_index": 2,
       "title": "Trolley Holding Reconciliation",
@@ -11428,7 +11334,7 @@
       "parent_collection_id": "DR-07"
     },
     {
-      "id": "DR-07-RD-0004",
+      "id": "DR-07-RS-0004",
       "collection_id": "DR-07",
       "record_index": 3,
       "title": "Cabinet Location Audit",
@@ -11440,7 +11346,7 @@
       "parent_collection_id": "DR-07"
     },
     {
-      "id": "DR-07-RD-0005",
+      "id": "DR-07-RS-0005",
       "collection_id": "DR-07",
       "record_index": 4,
       "title": "Refiling Exception Notes",
@@ -11452,7 +11358,7 @@
       "parent_collection_id": "DR-07"
     },
     {
-      "id": "DR-07-RD-0006",
+      "id": "DR-07-RS-0006",
       "collection_id": "DR-07",
       "record_index": 5,
       "title": "Archive Reconciliation Sign-off",
@@ -11464,7 +11370,7 @@
       "parent_collection_id": "DR-07"
     },
     {
-      "id": "DR-23-RD-0001",
+      "id": "DR-23-RS-0001",
       "collection_id": "DR-23",
       "record_index": 0,
       "title": "1962 Initial Filing Discrepancy",
@@ -11476,7 +11382,7 @@
       "parent_collection_id": "DR-23"
     },
     {
-      "id": "DR-23-RD-0002",
+      "id": "DR-23-RS-0002",
       "collection_id": "DR-23",
       "record_index": 1,
       "title": "1962 Site Lockdown Direction",
@@ -11488,7 +11394,7 @@
       "parent_collection_id": "DR-23"
     },
     {
-      "id": "DR-23-RD-0003",
+      "id": "DR-23-RS-0003",
       "collection_id": "DR-23",
       "record_index": 2,
       "title": "1962 Misfile Recovery Record",
@@ -11500,7 +11406,7 @@
       "parent_collection_id": "DR-23"
     },
     {
-      "id": "DR-23-RD-0004",
+      "id": "DR-23-RS-0004",
       "collection_id": "DR-23",
       "record_index": 3,
       "title": "1962 Procedural Review",
@@ -11512,7 +11418,7 @@
       "parent_collection_id": "DR-23"
     },
     {
-      "id": "DR-29-RD-0001",
+      "id": "DR-29-RS-0001",
       "collection_id": "DR-29",
       "record_index": 0,
       "title": "Final Transfer Batch Custody Register",
@@ -11524,7 +11430,7 @@
       "parent_collection_id": "DR-29"
     },
     {
-      "id": "DR-29-RD-0002",
+      "id": "DR-29-RS-0002",
       "collection_id": "DR-29",
       "record_index": 1,
       "title": "Transfer Box Manifest",
@@ -11536,7 +11442,7 @@
       "parent_collection_id": "DR-29"
     },
     {
-      "id": "DR-29-RD-0003",
+      "id": "DR-29-RS-0003",
       "collection_id": "DR-29",
       "record_index": 2,
       "title": "Archive Transfer Staging Plan",
@@ -11548,7 +11454,7 @@
       "parent_collection_id": "DR-29"
     },
     {
-      "id": "DR-29-RD-0004",
+      "id": "DR-29-RS-0004",
       "collection_id": "DR-29",
       "record_index": 3,
       "title": "Custody Seal Register",
@@ -11560,7 +11466,7 @@
       "parent_collection_id": "DR-29"
     },
     {
-      "id": "DR-29-RD-0005",
+      "id": "DR-29-RS-0005",
       "collection_id": "DR-29",
       "record_index": 4,
       "title": "Transfer Batch Exception Note",
@@ -11572,7 +11478,7 @@
       "parent_collection_id": "DR-29"
     },
     {
-      "id": "DR-29-RD-0006",
+      "id": "DR-29-RS-0006",
       "collection_id": "DR-29",
       "record_index": 5,
       "title": "Digital Verification Dependency",
@@ -11584,7 +11490,7 @@
       "parent_collection_id": "DR-29"
     },
     {
-      "id": "DR-31-RD-0001",
+      "id": "DR-31-RS-0001",
       "collection_id": "DR-31",
       "record_index": 0,
       "title": "Final Transfer Exception Register",
@@ -11596,7 +11502,7 @@
       "parent_collection_id": "DR-31"
     },
     {
-      "id": "DR-31-RD-0002",
+      "id": "DR-31-RS-0002",
       "collection_id": "DR-31",
       "record_index": 1,
       "title": "Senior Archivist Verification Assignment",
@@ -11608,7 +11514,7 @@
       "parent_collection_id": "DR-31"
     },
     {
-      "id": "DR-31-RD-0003",
+      "id": "DR-31-RS-0003",
       "collection_id": "DR-31",
       "record_index": 2,
       "title": "Custody Exception Sign-off",
@@ -11620,7 +11526,7 @@
       "parent_collection_id": "DR-31"
     },
     {
-      "id": "DR-31-RD-0004",
+      "id": "DR-31-RS-0004",
       "collection_id": "DR-31",
       "record_index": 3,
       "title": "Unverified Holdings List",
@@ -11632,7 +11538,7 @@
       "parent_collection_id": "DR-31"
     },
     {
-      "id": "DR-31-RD-0005",
+      "id": "DR-31-RS-0005",
       "collection_id": "DR-31",
       "record_index": 4,
       "title": "Handover Authority Note",
@@ -11644,7 +11550,7 @@
       "parent_collection_id": "DR-31"
     },
     {
-      "id": "DR-31-RD-0006",
+      "id": "DR-31-RS-0006",
       "collection_id": "DR-31",
       "record_index": 5,
       "title": "Transfer Release Checklist",
@@ -11656,19 +11562,19 @@
       "parent_collection_id": "DR-31"
     },
     {
-      "id": "DR-47-RD-0001",
+      "id": "DR-47-RS-0001",
       "collection_id": "DR-47",
       "record_index": 0,
       "title": "Final Closure Exception Summary",
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-026",
-      "body": "FINAL CLOSURE EXCEPTION SUMMARY\n\nThis recovered DR-47 record authorises or records the following state change in the reconstruction: SET_ACT ACT_III; REVEAL_PHYSICAL_ITEM P-021; REVEAL_PHYSICAL_ITEM P-022; REVEAL_PHYSICAL_ITEM P-023; REVEAL_PHYSICAL_ITEM P-024.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "FINAL CLOSURE EXCEPTION SUMMARY\n\nThis recovered DR-47 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-021; REVEAL_PHYSICAL_ITEM P-022; REVEAL_PHYSICAL_ITEM P-023; REVEAL_PHYSICAL_ITEM P-024.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-47"
     },
     {
-      "id": "DR-47-RD-0002",
+      "id": "DR-47-RS-0002",
       "collection_id": "DR-47",
       "record_index": 1,
       "title": "Operational Security Review Requirement",
@@ -11680,7 +11586,7 @@
       "parent_collection_id": "DR-47"
     },
     {
-      "id": "DR-47-RD-0003",
+      "id": "DR-47-RS-0003",
       "collection_id": "DR-47",
       "record_index": 2,
       "title": "Remaining Workstream Release Authority",
@@ -11692,7 +11598,7 @@
       "parent_collection_id": "DR-47"
     },
     {
-      "id": "DR-47-RD-0004",
+      "id": "DR-47-RS-0004",
       "collection_id": "DR-47",
       "record_index": 3,
       "title": "Incident Review Referral",
@@ -11704,7 +11610,7 @@
       "parent_collection_id": "DR-47"
     },
     {
-      "id": "DR-47-RD-0005",
+      "id": "DR-47-RS-0005",
       "collection_id": "DR-47",
       "record_index": 4,
       "title": "Closure Suspension Notice",
@@ -11716,7 +11622,7 @@
       "parent_collection_id": "DR-47"
     },
     {
-      "id": "DR-47-RD-0006",
+      "id": "DR-47-RS-0006",
       "collection_id": "DR-47",
       "record_index": 5,
       "title": "Revised Handover Conditions",
@@ -11728,7 +11634,7 @@
       "parent_collection_id": "DR-47"
     },
     {
-      "id": "DR-53-RD-0001",
+      "id": "DR-53-RS-0001",
       "collection_id": "DR-53",
       "record_index": 0,
       "title": "Site Closure Direction",
@@ -11740,7 +11646,7 @@
       "parent_collection_id": "DR-53"
     },
     {
-      "id": "DR-53-RD-0002",
+      "id": "DR-53-RS-0002",
       "collection_id": "DR-53",
       "record_index": 1,
       "title": "Executive Closure Briefing",
@@ -11752,7 +11658,7 @@
       "parent_collection_id": "DR-53"
     },
     {
-      "id": "DR-53-RD-0003",
+      "id": "DR-53-RS-0003",
       "collection_id": "DR-53",
       "record_index": 2,
       "title": "Centralisation Programme Summary",
@@ -11764,7 +11670,7 @@
       "parent_collection_id": "DR-53"
     },
     {
-      "id": "DR-53-RD-0004",
+      "id": "DR-53-RS-0004",
       "collection_id": "DR-53",
       "record_index": 3,
       "title": "Director Annotation Record",
@@ -11776,7 +11682,7 @@
       "parent_collection_id": "DR-53"
     },
     {
-      "id": "DR-53-RD-0005",
+      "id": "DR-53-RS-0005",
       "collection_id": "DR-53",
       "record_index": 4,
       "title": "Handover Authority Chain",
@@ -11788,7 +11694,7 @@
       "parent_collection_id": "DR-53"
     },
     {
-      "id": "DR-53-RD-0006",
+      "id": "DR-53-RS-0006",
       "collection_id": "DR-53",
       "record_index": 5,
       "title": "Final-Day Executive Diary Extract",
@@ -11800,14 +11706,14 @@
       "parent_collection_id": "DR-53"
     },
     {
-      "id": "HR-01-RD-0001",
+      "id": "HR-01-RS-0001",
       "collection_id": "HR-01",
       "record_index": 0,
       "title": "Site Establishment Register",
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-002",
-      "body": "SITE ESTABLISHMENT REGISTER\n\nThis recovered HR-01 record authorises or records the following state change in the reconstruction: SET_ACT ACT_I; RECONSTRUCT_ROOM MAIN_OFFICE.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "SITE ESTABLISHMENT REGISTER\n\nThis recovered HR-01 record authorises or records the following state change in the reconstruction: RECONSTRUCT_ROOM MAIN_OFFICE.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "HR-01"
     },
@@ -11824,7 +11730,7 @@
       "parent_collection_id": "HR-01"
     },
     {
-      "id": "HR-01-RD-0003",
+      "id": "HR-01-RS-0003",
       "collection_id": "HR-01",
       "record_index": 2,
       "title": "Organisational Chart",
@@ -11836,7 +11742,7 @@
       "parent_collection_id": "HR-01"
     },
     {
-      "id": "HR-01-RD-0004",
+      "id": "HR-01-RS-0004",
       "collection_id": "HR-01",
       "record_index": 3,
       "title": "Temporary Desk Reallocation Notice",
@@ -11848,7 +11754,7 @@
       "parent_collection_id": "HR-01"
     },
     {
-      "id": "HR-01-RD-0005",
+      "id": "HR-01-RS-0005",
       "collection_id": "HR-01",
       "record_index": 4,
       "title": "Vacancy & Hot-Desk Provision",
@@ -11860,7 +11766,7 @@
       "parent_collection_id": "HR-01"
     },
     {
-      "id": "HR-01-RD-0006",
+      "id": "HR-01-RS-0006",
       "collection_id": "HR-01",
       "record_index": 5,
       "title": "Staff Contact Directory",
@@ -11872,7 +11778,7 @@
       "parent_collection_id": "HR-01"
     },
     {
-      "id": "HR-05-RD-0001",
+      "id": "HR-05-RS-0001",
       "collection_id": "HR-05",
       "record_index": 0,
       "title": "Staff Welfare & Amenities Allocation",
@@ -11884,7 +11790,7 @@
       "parent_collection_id": "HR-05"
     },
     {
-      "id": "HR-05-RD-0002",
+      "id": "HR-05-RS-0002",
       "collection_id": "HR-05",
       "record_index": 1,
       "title": "Shared Facilities Inventory",
@@ -11896,7 +11802,7 @@
       "parent_collection_id": "HR-05"
     },
     {
-      "id": "HR-05-RD-0003",
+      "id": "HR-05-RS-0003",
       "collection_id": "HR-05",
       "record_index": 2,
       "title": "Staff Room Cleaning Rota",
@@ -11908,7 +11814,7 @@
       "parent_collection_id": "HR-05"
     },
     {
-      "id": "HR-05-RD-0004",
+      "id": "HR-05-RS-0004",
       "collection_id": "HR-05",
       "record_index": 3,
       "title": "Tea & Coffee Contribution Note",
@@ -11920,7 +11826,7 @@
       "parent_collection_id": "HR-05"
     },
     {
-      "id": "HR-05-RD-0005",
+      "id": "HR-05-RS-0005",
       "collection_id": "HR-05",
       "record_index": 4,
       "title": "Social Committee Circular",
@@ -11932,7 +11838,7 @@
       "parent_collection_id": "HR-05"
     },
     {
-      "id": "HR-09-RD-0001",
+      "id": "HR-09-RS-0001",
       "collection_id": "HR-09",
       "record_index": 0,
       "title": "Final Friday Attendance Return",
@@ -11944,7 +11850,7 @@
       "parent_collection_id": "HR-09"
     },
     {
-      "id": "HR-09-RD-0002",
+      "id": "HR-09-RS-0002",
       "collection_id": "HR-09",
       "record_index": 1,
       "title": "Duty & Leave Status Schedule",
@@ -11956,7 +11862,7 @@
       "parent_collection_id": "HR-09"
     },
     {
-      "id": "HR-09-RD-0003",
+      "id": "HR-09-RS-0003",
       "collection_id": "HR-09",
       "record_index": 2,
       "title": "Final-Week Leave Summary",
@@ -11968,7 +11874,7 @@
       "parent_collection_id": "HR-09"
     },
     {
-      "id": "HR-09-RD-0004",
+      "id": "HR-09-RS-0004",
       "collection_id": "HR-09",
       "record_index": 3,
       "title": "Overtime Authorisation",
@@ -11980,7 +11886,7 @@
       "parent_collection_id": "HR-09"
     },
     {
-      "id": "HR-09-RD-0005",
+      "id": "HR-09-RS-0005",
       "collection_id": "HR-09",
       "record_index": 4,
       "title": "Temporary Duty Allocation",
@@ -11992,7 +11898,7 @@
       "parent_collection_id": "HR-09"
     },
     {
-      "id": "HR-09-RD-0006",
+      "id": "HR-09-RS-0006",
       "collection_id": "HR-09",
       "record_index": 5,
       "title": "Attendance Amendment Register",
@@ -12004,7 +11910,7 @@
       "parent_collection_id": "HR-09"
     },
     {
-      "id": "FM-04-RD-0001",
+      "id": "FM-04-RS-0001",
       "collection_id": "FM-04",
       "record_index": 0,
       "title": "Facilities Access Authorisation",
@@ -12016,7 +11922,7 @@
       "parent_collection_id": "FM-04"
     },
     {
-      "id": "FM-04-RD-0002",
+      "id": "FM-04-RS-0002",
       "collection_id": "FM-04",
       "record_index": 1,
       "title": "Internal Circulation Access Plan",
@@ -12028,7 +11934,7 @@
       "parent_collection_id": "FM-04"
     },
     {
-      "id": "FM-04-RD-0003",
+      "id": "FM-04-RS-0003",
       "collection_id": "FM-04",
       "record_index": 2,
       "title": "Site Directory Maintenance Note",
@@ -12040,7 +11946,7 @@
       "parent_collection_id": "FM-04"
     },
     {
-      "id": "FM-04-RD-0004",
+      "id": "FM-04-RS-0004",
       "collection_id": "FM-04",
       "record_index": 3,
       "title": "Room Identification Schedule",
@@ -12052,7 +11958,7 @@
       "parent_collection_id": "FM-04"
     },
     {
-      "id": "FM-04-RD-0005",
+      "id": "FM-04-RS-0005",
       "collection_id": "FM-04",
       "record_index": 4,
       "title": "Maintenance Responsibility Matrix",
@@ -12064,7 +11970,7 @@
       "parent_collection_id": "FM-04"
     },
     {
-      "id": "FM-04-RD-0006",
+      "id": "FM-04-RS-0006",
       "collection_id": "FM-04",
       "record_index": 5,
       "title": "Final Week Work Order Summary",
@@ -12076,7 +11982,7 @@
       "parent_collection_id": "FM-04"
     },
     {
-      "id": "FM-07-RD-0001",
+      "id": "FM-07-RS-0001",
       "collection_id": "FM-07",
       "record_index": 0,
       "title": "Final Decommissioning Schedule",
@@ -12088,7 +11994,7 @@
       "parent_collection_id": "FM-07"
     },
     {
-      "id": "FM-07-RD-0002",
+      "id": "FM-07-RS-0002",
       "collection_id": "FM-07",
       "record_index": 1,
       "title": "Retained Services Schedule",
@@ -12100,7 +12006,7 @@
       "parent_collection_id": "FM-07"
     },
     {
-      "id": "FM-07-RD-0003",
+      "id": "FM-07-RS-0003",
       "collection_id": "FM-07",
       "record_index": 2,
       "title": "Asset Transfer Register",
@@ -12112,7 +12018,7 @@
       "parent_collection_id": "FM-07"
     },
     {
-      "id": "FM-07-RD-0004",
+      "id": "FM-07-RS-0004",
       "collection_id": "FM-07",
       "record_index": 3,
       "title": "Utility Isolation Plan",
@@ -12124,7 +12030,7 @@
       "parent_collection_id": "FM-07"
     },
     {
-      "id": "FM-07-RD-0005",
+      "id": "FM-07-RS-0005",
       "collection_id": "FM-07",
       "record_index": 4,
       "title": "Contractor Coordination Note",
@@ -12136,7 +12042,7 @@
       "parent_collection_id": "FM-07"
     },
     {
-      "id": "FM-07-RD-0006",
+      "id": "FM-07-RS-0006",
       "collection_id": "FM-07",
       "record_index": 5,
       "title": "Final Asset Sweep",
@@ -12160,7 +12066,7 @@
       "parent_collection_id": "FM-13"
     },
     {
-      "id": "FM-13-RD-0002",
+      "id": "FM-13-RS-0002",
       "collection_id": "FM-13",
       "record_index": 1,
       "title": "Manual Discharge Circuit Test Record",
@@ -12172,7 +12078,7 @@
       "parent_collection_id": "FM-13"
     },
     {
-      "id": "FM-13-RD-0003",
+      "id": "FM-13-RS-0003",
       "collection_id": "FM-13",
       "record_index": 2,
       "title": "Suppression Zone Diagram Register",
@@ -12184,7 +12090,7 @@
       "parent_collection_id": "FM-13"
     },
     {
-      "id": "FM-13-RD-0004",
+      "id": "FM-13-RS-0004",
       "collection_id": "FM-13",
       "record_index": 3,
       "title": "Halon Cylinder Service Record",
@@ -12196,7 +12102,7 @@
       "parent_collection_id": "FM-13"
     },
     {
-      "id": "FM-13-RD-0005",
+      "id": "FM-13-RS-0005",
       "collection_id": "FM-13",
       "record_index": 4,
       "title": "Alarm Loop Maintenance Note",
@@ -12208,7 +12114,7 @@
       "parent_collection_id": "FM-13"
     },
     {
-      "id": "FM-13-RD-0006",
+      "id": "FM-13-RS-0006",
       "collection_id": "FM-13",
       "record_index": 5,
       "title": "Server Room Safety Inspection",
@@ -12220,7 +12126,7 @@
       "parent_collection_id": "FM-13"
     },
     {
-      "id": "FM-18-RD-0001",
+      "id": "FM-18-RS-0001",
       "collection_id": "FM-18",
       "record_index": 0,
       "title": "Environmental Event Log",
@@ -12232,7 +12138,7 @@
       "parent_collection_id": "FM-18"
     },
     {
-      "id": "FM-18-RD-0002",
+      "id": "FM-18-RS-0002",
       "collection_id": "FM-18",
       "record_index": 1,
       "title": "Fire Suppression Event Record",
@@ -12244,7 +12150,7 @@
       "parent_collection_id": "FM-18"
     },
     {
-      "id": "FM-18-RD-0003",
+      "id": "FM-18-RS-0003",
       "collection_id": "FM-18",
       "record_index": 2,
       "title": "Ventilation Isolation Sequence",
@@ -12256,7 +12162,7 @@
       "parent_collection_id": "FM-18"
     },
     {
-      "id": "FM-18-RD-0004",
+      "id": "FM-18-RS-0004",
       "collection_id": "FM-18",
       "record_index": 3,
       "title": "Environmental Sensor Summary",
@@ -12268,7 +12174,7 @@
       "parent_collection_id": "FM-18"
     },
     {
-      "id": "FM-18-RD-0005",
+      "id": "FM-18-RS-0005",
       "collection_id": "FM-18",
       "record_index": 4,
       "title": "Plant Response Timeline",
@@ -12280,7 +12186,7 @@
       "parent_collection_id": "FM-18"
     },
     {
-      "id": "FM-18-RD-0006",
+      "id": "FM-18-RS-0006",
       "collection_id": "FM-18",
       "record_index": 5,
       "title": "Post-Incident Environmental Check",
@@ -12292,7 +12198,7 @@
       "parent_collection_id": "FM-18"
     },
     {
-      "id": "FM-23-RD-0001",
+      "id": "FM-23-RS-0001",
       "collection_id": "FM-23",
       "record_index": 0,
       "title": "Request for Preparation of Isometric Accommodation Plans",
@@ -12304,7 +12210,7 @@
       "parent_collection_id": "FM-23"
     },
     {
-      "id": "OS-07-RD-0001",
+      "id": "OS-07-RS-0001",
       "collection_id": "OS-07",
       "record_index": 0,
       "title": "Final Week Visitor Access Register",
@@ -12316,7 +12222,7 @@
       "parent_collection_id": "OS-07"
     },
     {
-      "id": "OS-07-RD-0002",
+      "id": "OS-07-RS-0002",
       "collection_id": "OS-07",
       "record_index": 1,
       "title": "Contractor Access Authorisations",
@@ -12328,7 +12234,7 @@
       "parent_collection_id": "OS-07"
     },
     {
-      "id": "OS-07-RD-0003",
+      "id": "OS-07-RS-0003",
       "collection_id": "OS-07",
       "record_index": 2,
       "title": "Temporary Pass Reconciliation",
@@ -12340,7 +12246,7 @@
       "parent_collection_id": "OS-07"
     },
     {
-      "id": "OS-07-RD-0004",
+      "id": "OS-07-RS-0004",
       "collection_id": "OS-07",
       "record_index": 3,
       "title": "Reception Visitor Summary",
@@ -12352,7 +12258,7 @@
       "parent_collection_id": "OS-07"
     },
     {
-      "id": "OS-07-RD-0005",
+      "id": "OS-07-RS-0005",
       "collection_id": "OS-07",
       "record_index": 4,
       "title": "Restricted Visitor Escort Note",
@@ -12364,7 +12270,7 @@
       "parent_collection_id": "OS-07"
     },
     {
-      "id": "OS-07-RD-0006",
+      "id": "OS-07-RS-0006",
       "collection_id": "OS-07",
       "record_index": 5,
       "title": "Visitor Badge Return Register",
@@ -12376,7 +12282,7 @@
       "parent_collection_id": "OS-07"
     },
     {
-      "id": "OS-18-RD-0001",
+      "id": "OS-18-RS-0001",
       "collection_id": "OS-18",
       "record_index": 0,
       "title": "Temporary Restricted Area Authorisation",
@@ -12388,7 +12294,7 @@
       "parent_collection_id": "OS-18"
     },
     {
-      "id": "OS-18-RD-0002",
+      "id": "OS-18-RS-0002",
       "collection_id": "OS-18",
       "record_index": 1,
       "title": "Restricted Area Access Matrix",
@@ -12400,7 +12306,7 @@
       "parent_collection_id": "OS-18"
     },
     {
-      "id": "OS-26-RD-0001",
+      "id": "OS-26-RS-0001",
       "collection_id": "OS-26",
       "record_index": 0,
       "title": "Initial Halon Incident Report",
@@ -12412,7 +12318,7 @@
       "parent_collection_id": "OS-26"
     },
     {
-      "id": "OS-26-RD-0002",
+      "id": "OS-26-RS-0002",
       "collection_id": "OS-26",
       "record_index": 1,
       "title": "Evacuation Accountability Return",
@@ -12424,7 +12330,7 @@
       "parent_collection_id": "OS-26"
     },
     {
-      "id": "OS-26-RD-0003",
+      "id": "OS-26-RS-0003",
       "collection_id": "OS-26",
       "record_index": 2,
       "title": "Restricted Area Evacuation Note",
@@ -12436,7 +12342,7 @@
       "parent_collection_id": "OS-26"
     },
     {
-      "id": "OS-26-RD-0004",
+      "id": "OS-26-RS-0004",
       "collection_id": "OS-26",
       "record_index": 3,
       "title": "Incident Timeline Worksheet",
@@ -12448,7 +12354,7 @@
       "parent_collection_id": "OS-26"
     },
     {
-      "id": "OS-26-RD-0005",
+      "id": "OS-26-RS-0005",
       "collection_id": "OS-26",
       "record_index": 4,
       "title": "Post-Evacuation Site Check",
@@ -12460,7 +12366,7 @@
       "parent_collection_id": "OS-26"
     },
     {
-      "id": "OS-26-RD-0006",
+      "id": "OS-26-RS-0006",
       "collection_id": "OS-26",
       "record_index": 5,
       "title": "Emergency Services Contact Note",
@@ -12472,7 +12378,7 @@
       "parent_collection_id": "OS-26"
     },
     {
-      "id": "OS-26-RD-0007",
+      "id": "OS-26-RS-0007",
       "collection_id": "OS-26",
       "record_index": 6,
       "title": "No-Injury Confirmation",
@@ -12484,7 +12390,7 @@
       "parent_collection_id": "OS-26"
     },
     {
-      "id": "OS-34-RD-0001",
+      "id": "OS-34-RS-0001",
       "collection_id": "OS-34",
       "record_index": 0,
       "title": "Security Memo: Master Cabinet Register Control",
@@ -12496,7 +12402,7 @@
       "parent_collection_id": "OS-34"
     },
     {
-      "id": "OS-34-RD-0002",
+      "id": "OS-34-RS-0002",
       "collection_id": "OS-34",
       "record_index": 1,
       "title": "Secure Storage Access Procedure",
@@ -12508,7 +12414,7 @@
       "parent_collection_id": "OS-34"
     },
     {
-      "id": "OS-34-RD-0003",
+      "id": "OS-34-RS-0003",
       "collection_id": "OS-34",
       "record_index": 2,
       "title": "Key Safe Custody Note",
@@ -12520,7 +12426,7 @@
       "parent_collection_id": "OS-34"
     },
     {
-      "id": "OS-34-RD-0004",
+      "id": "OS-34-RS-0004",
       "collection_id": "OS-34",
       "record_index": 3,
       "title": "Master Cabinet Register Recovery Note",
@@ -12532,7 +12438,7 @@
       "parent_collection_id": "OS-34"
     },
     {
-      "id": "OS-34-RD-0005",
+      "id": "OS-34-RS-0005",
       "collection_id": "OS-34",
       "record_index": 4,
       "title": "Secure Cabinet Code Handling",
@@ -12544,7 +12450,7 @@
       "parent_collection_id": "OS-34"
     },
     {
-      "id": "OS-41-RD-0001",
+      "id": "OS-41-RS-0001",
       "collection_id": "OS-41",
       "record_index": 0,
       "title": "Final-Day Duty Communications Log",
@@ -12556,7 +12462,7 @@
       "parent_collection_id": "OS-41"
     },
     {
-      "id": "OS-48-RD-0001",
+      "id": "OS-48-RS-0001",
       "collection_id": "OS-48",
       "record_index": 0,
       "title": "CCTV Coverage & Retention Index",
@@ -12568,7 +12474,7 @@
       "parent_collection_id": "OS-48"
     },
     {
-      "id": "OS-48-RD-0002",
+      "id": "OS-48-RS-0002",
       "collection_id": "OS-48",
       "record_index": 1,
       "title": "IT Support Entrance Event Summary",
@@ -12580,7 +12486,7 @@
       "parent_collection_id": "OS-48"
     },
     {
-      "id": "OS-48-RD-0003",
+      "id": "OS-48-RS-0003",
       "collection_id": "OS-48",
       "record_index": 2,
       "title": "Camera Coverage Diagram",
@@ -12592,7 +12498,7 @@
       "parent_collection_id": "OS-48"
     },
     {
-      "id": "OS-48-RD-0004",
+      "id": "OS-48-RS-0004",
       "collection_id": "OS-48",
       "record_index": 3,
       "title": "Retention Schedule",
@@ -12604,7 +12510,7 @@
       "parent_collection_id": "OS-48"
     },
     {
-      "id": "OS-48-RD-0005",
+      "id": "OS-48-RS-0005",
       "collection_id": "OS-48",
       "record_index": 4,
       "title": "Monitor Bank Channel Register",
@@ -12616,7 +12522,7 @@
       "parent_collection_id": "OS-48"
     },
     {
-      "id": "OS-48-RD-0006",
+      "id": "OS-48-RS-0006",
       "collection_id": "OS-48",
       "record_index": 5,
       "title": "Final-Day CCTV Review Note",
@@ -12628,7 +12534,7 @@
       "parent_collection_id": "OS-48"
     },
     {
-      "id": "TS-02-RD-0001",
+      "id": "TS-02-RS-0001",
       "collection_id": "TS-02",
       "record_index": 0,
       "title": "Office Terminal Connectivity Fault Report",
@@ -12640,7 +12546,7 @@
       "parent_collection_id": "TS-02"
     },
     {
-      "id": "TS-02-RD-0002",
+      "id": "TS-02-RS-0002",
       "collection_id": "TS-02",
       "record_index": 1,
       "title": "Local Terminal Diagnostic Result",
@@ -12652,7 +12558,7 @@
       "parent_collection_id": "TS-02"
     },
     {
-      "id": "TS-02-RD-0003",
+      "id": "TS-02-RS-0003",
       "collection_id": "TS-02",
       "record_index": 2,
       "title": "Temporary Workstation Note",
@@ -12664,7 +12570,7 @@
       "parent_collection_id": "TS-02"
     },
     {
-      "id": "TS-02-RD-0004",
+      "id": "TS-02-RS-0004",
       "collection_id": "TS-02",
       "record_index": 3,
       "title": "Network Lead Test",
@@ -12676,7 +12582,7 @@
       "parent_collection_id": "TS-02"
     },
     {
-      "id": "TS-02-RD-0005",
+      "id": "TS-02-RS-0005",
       "collection_id": "TS-02",
       "record_index": 4,
       "title": "Terminal Hardware Check",
@@ -12688,7 +12594,7 @@
       "parent_collection_id": "TS-02"
     },
     {
-      "id": "TS-02-RD-0006",
+      "id": "TS-02-RS-0006",
       "collection_id": "TS-02",
       "record_index": 5,
       "title": "Escalation to Infrastructure",
@@ -12700,7 +12606,7 @@
       "parent_collection_id": "TS-02"
     },
     {
-      "id": "TS-06-RD-0001",
+      "id": "TS-06-RS-0001",
       "collection_id": "TS-06",
       "record_index": 0,
       "title": "Terminal Network Cable Route Investigation",
@@ -12712,7 +12618,7 @@
       "parent_collection_id": "TS-06"
     },
     {
-      "id": "TS-06-RD-0002",
+      "id": "TS-06-RS-0002",
       "collection_id": "TS-06",
       "record_index": 1,
       "title": "Distribution Panel Test Record",
@@ -12724,7 +12630,7 @@
       "parent_collection_id": "TS-06"
     },
     {
-      "id": "TS-06-RD-0003",
+      "id": "TS-06-RS-0003",
       "collection_id": "TS-06",
       "record_index": 2,
       "title": "Patch Panel Port Schedule",
@@ -12736,7 +12642,7 @@
       "parent_collection_id": "TS-06"
     },
     {
-      "id": "TS-06-RD-0004",
+      "id": "TS-06-RS-0004",
       "collection_id": "TS-06",
       "record_index": 3,
       "title": "Server Route Identification",
@@ -12748,7 +12654,7 @@
       "parent_collection_id": "TS-06"
     },
     {
-      "id": "TS-06-RD-0005",
+      "id": "TS-06-RS-0005",
       "collection_id": "TS-06",
       "record_index": 4,
       "title": "Cable Continuity Test",
@@ -12760,7 +12666,7 @@
       "parent_collection_id": "TS-06"
     },
     {
-      "id": "TS-06-RD-0006",
+      "id": "TS-06-RS-0006",
       "collection_id": "TS-06",
       "record_index": 5,
       "title": "Network Remediation Work Order",
@@ -12772,7 +12678,7 @@
       "parent_collection_id": "TS-06"
     },
     {
-      "id": "TS-08-RD-0001",
+      "id": "TS-08-RS-0001",
       "collection_id": "TS-08",
       "record_index": 0,
       "title": "Historical Terminal Fault 1",
@@ -12784,7 +12690,7 @@
       "parent_collection_id": "TS-08"
     },
     {
-      "id": "TS-08-RD-0002",
+      "id": "TS-08-RS-0002",
       "collection_id": "TS-08",
       "record_index": 1,
       "title": "Historical Terminal Fault 2",
@@ -12796,7 +12702,7 @@
       "parent_collection_id": "TS-08"
     },
     {
-      "id": "TS-08-RD-0003",
+      "id": "TS-08-RS-0003",
       "collection_id": "TS-08",
       "record_index": 2,
       "title": "Legacy Patch Workaround",
@@ -12808,7 +12714,7 @@
       "parent_collection_id": "TS-08"
     },
     {
-      "id": "TS-08-RD-0004",
+      "id": "TS-08-RS-0004",
       "collection_id": "TS-08",
       "record_index": 3,
       "title": "Support Trend Summary",
@@ -12820,7 +12726,7 @@
       "parent_collection_id": "TS-08"
     },
     {
-      "id": "TS-10-RD-0001",
+      "id": "TS-10-RS-0001",
       "collection_id": "TS-10",
       "record_index": 0,
       "title": "Final Digital Holdings Verification Report",
@@ -12832,7 +12738,7 @@
       "parent_collection_id": "TS-10"
     },
     {
-      "id": "TS-10-RD-0002",
+      "id": "TS-10-RS-0002",
       "collection_id": "TS-10",
       "record_index": 1,
       "title": "Verification Media Preparation Record",
@@ -12844,7 +12750,7 @@
       "parent_collection_id": "TS-10"
     },
     {
-      "id": "TS-10-RD-0003",
+      "id": "TS-10-RS-0003",
       "collection_id": "TS-10",
       "record_index": 2,
       "title": "Checksum Preparation Sheet",
@@ -12856,7 +12762,7 @@
       "parent_collection_id": "TS-10"
     },
     {
-      "id": "TS-10-RD-0004",
+      "id": "TS-10-RS-0004",
       "collection_id": "TS-10",
       "record_index": 3,
       "title": "Archive Transfer Media List",
@@ -12868,7 +12774,7 @@
       "parent_collection_id": "TS-10"
     },
     {
-      "id": "TS-10-RD-0005",
+      "id": "TS-10-RS-0005",
       "collection_id": "TS-10",
       "record_index": 4,
       "title": "Verification Blocker Note",
@@ -12880,7 +12786,7 @@
       "parent_collection_id": "TS-10"
     },
     {
-      "id": "TS-10-RD-0006",
+      "id": "TS-10-RS-0006",
       "collection_id": "TS-10",
       "record_index": 5,
       "title": "Digital Holdings Handover Checklist",
@@ -12892,7 +12798,7 @@
       "parent_collection_id": "TS-10"
     },
     {
-      "id": "TS-14-RD-0001",
+      "id": "TS-14-RS-0001",
       "collection_id": "TS-14",
       "record_index": 0,
       "title": "Server Availability & Backup Operations Summary",
@@ -12904,7 +12810,7 @@
       "parent_collection_id": "TS-14"
     },
     {
-      "id": "TS-14-RD-0002",
+      "id": "TS-14-RS-0002",
       "collection_id": "TS-14",
       "record_index": 1,
       "title": "Final Backup Window Schedule",
@@ -12916,7 +12822,7 @@
       "parent_collection_id": "TS-14"
     },
     {
-      "id": "TS-14-RD-0003",
+      "id": "TS-14-RS-0003",
       "collection_id": "TS-14",
       "record_index": 2,
       "title": "Archive Verification Dependency Note",
@@ -12928,7 +12834,7 @@
       "parent_collection_id": "TS-14"
     },
     {
-      "id": "TS-14-RD-0004",
+      "id": "TS-14-RS-0004",
       "collection_id": "TS-14",
       "record_index": 3,
       "title": "Backup Rotation Log",
@@ -12940,7 +12846,7 @@
       "parent_collection_id": "TS-14"
     },
     {
-      "id": "TS-14-RD-0005",
+      "id": "TS-14-RS-0005",
       "collection_id": "TS-14",
       "record_index": 4,
       "title": "Server Availability Checklist",
@@ -12952,7 +12858,7 @@
       "parent_collection_id": "TS-14"
     },
     {
-      "id": "TS-14-RD-0006",
+      "id": "TS-14-RS-0006",
       "collection_id": "TS-14",
       "record_index": 5,
       "title": "UPS & Rack Status Summary",
@@ -12964,7 +12870,7 @@
       "parent_collection_id": "TS-14"
     },
     {
-      "id": "TS-18-RD-0001",
+      "id": "TS-18-RS-0001",
       "collection_id": "TS-18",
       "record_index": 0,
       "title": "Server Room Cable Riser Maintenance Log",
@@ -12976,7 +12882,7 @@
       "parent_collection_id": "TS-18"
     },
     {
-      "id": "TS-18-RD-0002",
+      "id": "TS-18-RS-0002",
       "collection_id": "TS-18",
       "record_index": 1,
       "title": "Suppression Event Diagnostic",
@@ -12988,7 +12894,7 @@
       "parent_collection_id": "TS-18"
     },
     {
-      "id": "TS-18-RD-0003",
+      "id": "TS-18-RS-0003",
       "collection_id": "TS-18",
       "record_index": 2,
       "title": "Post-Discharge System Recovery Summary",
@@ -13000,7 +12906,7 @@
       "parent_collection_id": "TS-18"
     },
     {
-      "id": "TS-18-RD-0004",
+      "id": "TS-18-RS-0004",
       "collection_id": "TS-18",
       "record_index": 3,
       "title": "Cable Remediation Work Sheet",
@@ -13012,7 +12918,7 @@
       "parent_collection_id": "TS-18"
     },
     {
-      "id": "TS-18-RD-0005",
+      "id": "TS-18-RS-0005",
       "collection_id": "TS-18",
       "record_index": 4,
       "title": "Manual Release Input Trace",
@@ -13024,7 +12930,7 @@
       "parent_collection_id": "TS-18"
     },
     {
-      "id": "TS-18-RD-0006",
+      "id": "TS-18-RS-0006",
       "collection_id": "TS-18",
       "record_index": 5,
       "title": "Server Room Recovery Checklist",
@@ -13036,7 +12942,7 @@
       "parent_collection_id": "TS-18"
     },
     {
-      "id": "TS-18-RD-0007",
+      "id": "TS-18-RS-0007",
       "collection_id": "TS-18",
       "record_index": 6,
       "title": "Halon Control Wiring Note",
@@ -13048,7 +12954,7 @@
       "parent_collection_id": "TS-18"
     },
     {
-      "id": "TS-18-RD-0008",
+      "id": "TS-18-RS-0008",
       "collection_id": "TS-18",
       "record_index": 7,
       "title": "Final Technical Reconstruction",
@@ -13695,9 +13601,13 @@
         {
           "op": "ENABLE_COLLECTION",
           "target": "HR-01"
+        },
+        {
+          "op": "RECORD_NOTEBOOK_FACT",
+          "target": "DR-01"
         }
       ],
-      "effect_summary": "RECONSTRUCT_ROOM RECEPTION; RECONSTRUCT_ROOM CORRIDOR; ENABLE_COLLECTION DR-02; ENABLE_COLLECTION DR-03; ENABLE_COLLECTION HR-01",
+      "effect_summary": "RECONSTRUCT_ROOM RECEPTION; RECONSTRUCT_ROOM CORRIDOR; ENABLE_COLLECTION DR-02; ENABLE_COLLECTION DR-03; ENABLE_COLLECTION HR-01; RECORD_NOTEBOOK_FACT DR-01",
       "persistent": true,
       "idempotent": true,
       "source_order": 1
@@ -16150,7 +16060,7 @@
         ]
       },
       "title": "NEW YEAR: PLEASE DATE ALL FORMS WITH THE NEW YEAR. YES, EVEN THE ONES YOU STARTED LAST YEAR.",
-      "text": "Someone has added: “This notice expires the moment everybody stops writing the old year.”",
+      "text": "Someone has added: \u201cThis notice expires the moment everybody stops writing the old year.\u201d",
       "effects": [],
       "persistent": false,
       "priority": 99
@@ -16170,7 +16080,7 @@
         ]
       },
       "title": "VALENTINE'S TEA BREAK: BISCUITS AT 15:00. ANONYMOUS CARDS MUST STILL CARRY A FILE REFERENCE.",
-      "text": "A red paper heart has been stapled directly through the word “anonymous”.",
+      "text": "A red paper heart has been stapled directly through the word \u201canonymous\u201d.",
       "effects": [],
       "persistent": false,
       "priority": 98
@@ -16189,7 +16099,7 @@
           ]
         ]
       },
-      "title": "EASTER EGG AMNESTY: CHOCOLATE MAY BE STORED IN THE STAFF ROOM. DO NOT LABEL IT “EVIDENCE”.",
+      "title": "EASTER EGG AMNESTY: CHOCOLATE MAY BE STORED IN THE STAFF ROOM. DO NOT LABEL IT \u201cEVIDENCE\u201d.",
       "text": "A pencilled note asks whether Creme Eggs require a custody form.",
       "effects": [],
       "persistent": false,
@@ -16250,7 +16160,7 @@
         ]
       },
       "title": "BONFIRE NIGHT REMINDER: THE CAR PARK IS NOT A FIREWORK VIEWING AREA. THE SERVER ROOM IS DEFINITELY NOT A FIREWORK VIEWING AREA.",
-      "text": "“Who asked?” has been underlined twice.",
+      "text": "\u201cWho asked?\u201d has been underlined twice.",
       "effects": [],
       "persistent": false,
       "priority": 94
@@ -16269,7 +16179,7 @@
           ]
         ]
       },
-      "title": "CHRISTMAS LUNCH: SIGN UP BY FRIDAY. VEGETARIAN, STANDARD, AND “I FORGOT TO TICK A BOX” OPTIONS AVAILABLE.",
+      "title": "CHRISTMAS LUNCH: SIGN UP BY FRIDAY. VEGETARIAN, STANDARD, AND \u201cI FORGOT TO TICK A BOX\u201d OPTIONS AVAILABLE.",
       "text": "The final option already has the most signatures.",
       "effects": [],
       "persistent": false,
@@ -16316,7 +16226,7 @@
       "target_id": "P-074",
       "room_id": "STAFF_ROOM",
       "title": "Half-finished crossword",
-      "text": "14 across: “Administrative delay, eleven letters.” Somebody has written BUREAUCRACY, counted again, and left the clue unfinished.",
+      "text": "14 across: \u201cAdministrative delay, eleven letters.\u201d Somebody has written BUREAUCRACY, counted again, and left the clue unfinished.",
       "effects": [],
       "persistent": false
     },
@@ -16326,7 +16236,7 @@
       "target_id": "P-137",
       "room_id": "STAFF_ROOM",
       "title": "Completed crossword",
-      "text": "Every answer is filled in. The final clue has been answered “PENDING”, which does not fit but has been awarded a tick anyway.",
+      "text": "Every answer is filled in. The final clue has been answered \u201cPENDING\u201d, which does not fit but has been awarded a tick anyway.",
       "effects": [],
       "persistent": false
     },
@@ -16336,7 +16246,7 @@
       "target_id": "P-077",
       "room_id": "STAFF_ROOM",
       "title": "Labelled milk bottle",
-      "text": "Label: “M. HARGREAVES. MONDAY. THIS MEANS YOU, TREVOR.” The milk has outlived the dispute.",
+      "text": "Label: \u201cM. HARGREAVES. MONDAY. THIS MEANS YOU, TREVOR.\u201d The milk has outlived the dispute.",
       "effects": [],
       "persistent": false
     },
@@ -16346,7 +16256,7 @@
       "target_id": "P-139",
       "room_id": "STAFF_ROOM",
       "title": "Ancient first-aid manual",
-      "text": "The manual strongly recommends techniques that the modern world has since reconsidered. A later reader has added: “Perhaps ring Security first.”",
+      "text": "The manual strongly recommends techniques that the modern world has since reconsidered. A later reader has added: \u201cPerhaps ring Security first.\u201d",
       "effects": [],
       "persistent": false
     },
@@ -16356,7 +16266,7 @@
       "target_id": "P-079",
       "room_id": "STAFF_ROOM",
       "title": "Forgotten umbrella",
-      "text": "A perfectly serviceable umbrella, labelled only “NOT SIMON’S”. Nobody named Simon appears in the nearby staffing material.",
+      "text": "A perfectly serviceable umbrella, labelled only \u201cNOT SIMON\u2019S\u201d. Nobody named Simon appears in the nearby staffing material.",
       "effects": [],
       "persistent": false
     },
@@ -16366,7 +16276,7 @@
       "target_id": "P-078",
       "room_id": "STAFF_ROOM",
       "title": "Birthday card",
-      "text": "The card has been signed by almost everyone. One signature simply reads: “Many happy returns, subject to retention policy.”",
+      "text": "The card has been signed by almost everyone. One signature simply reads: \u201cMany happy returns, subject to retention policy.\u201d",
       "effects": [],
       "persistent": false
     }
@@ -16374,22 +16284,22 @@
   "relationships": [
     {
       "parent_id": "DR-01",
-      "child_id": "DR-01-RD-0001",
+      "child_id": "DR-01-RS-0001",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-01",
-      "child_id": "DR-01-RD-0002",
+      "child_id": "DR-01-RS-0002",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-01",
-      "child_id": "DR-01-RD-0003",
+      "child_id": "DR-01-RS-0003",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-01",
-      "child_id": "DR-01-RD-0004",
+      "child_id": "DR-01-RS-0004",
       "relation": "contains_document"
     },
     {
@@ -16399,72 +16309,72 @@
     },
     {
       "parent_id": "DR-02",
-      "child_id": "DR-02-RD-0001",
+      "child_id": "DR-02-RS-0001",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-02",
-      "child_id": "DR-02-RD-0002",
+      "child_id": "DR-02-RS-0002",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-02",
-      "child_id": "DR-02-RD-0003",
+      "child_id": "DR-02-RS-0003",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-02",
-      "child_id": "DR-02-RD-0004",
+      "child_id": "DR-02-RS-0004",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-03",
-      "child_id": "DR-03-RD-0001",
+      "child_id": "DR-03-RS-0001",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-03",
-      "child_id": "DR-03-RD-0002",
+      "child_id": "DR-03-RS-0002",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-03",
-      "child_id": "DR-03-RD-0003",
+      "child_id": "DR-03-RS-0003",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-03",
-      "child_id": "DR-03-RD-0004",
+      "child_id": "DR-03-RS-0004",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-04",
-      "child_id": "DR-04-RD-0001",
+      "child_id": "DR-04-RS-0001",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-04",
-      "child_id": "DR-04-RD-0002",
+      "child_id": "DR-04-RS-0002",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-04",
-      "child_id": "DR-04-RD-0003",
+      "child_id": "DR-04-RS-0003",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-04",
-      "child_id": "DR-04-RD-0004",
+      "child_id": "DR-04-RS-0004",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-04",
-      "child_id": "DR-04-RD-0005",
+      "child_id": "DR-04-RS-0005",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-04",
-      "child_id": "DR-04-RD-0006",
+      "child_id": "DR-04-RS-0006",
       "relation": "contains_document"
     },
     {
@@ -16499,32 +16409,32 @@
     },
     {
       "parent_id": "DR-07",
-      "child_id": "DR-07-RD-0001",
+      "child_id": "DR-07-RS-0001",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-07",
-      "child_id": "DR-07-RD-0002",
+      "child_id": "DR-07-RS-0002",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-07",
-      "child_id": "DR-07-RD-0003",
+      "child_id": "DR-07-RS-0003",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-07",
-      "child_id": "DR-07-RD-0004",
+      "child_id": "DR-07-RS-0004",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-07",
-      "child_id": "DR-07-RD-0005",
+      "child_id": "DR-07-RS-0005",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-07",
-      "child_id": "DR-07-RD-0006",
+      "child_id": "DR-07-RS-0006",
       "relation": "contains_document"
     },
     {
@@ -16574,52 +16484,52 @@
     },
     {
       "parent_id": "DR-23",
-      "child_id": "DR-23-RD-0001",
+      "child_id": "DR-23-RS-0001",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-23",
-      "child_id": "DR-23-RD-0002",
+      "child_id": "DR-23-RS-0002",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-23",
-      "child_id": "DR-23-RD-0003",
+      "child_id": "DR-23-RS-0003",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-23",
-      "child_id": "DR-23-RD-0004",
+      "child_id": "DR-23-RS-0004",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-29",
-      "child_id": "DR-29-RD-0001",
+      "child_id": "DR-29-RS-0001",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-29",
-      "child_id": "DR-29-RD-0002",
+      "child_id": "DR-29-RS-0002",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-29",
-      "child_id": "DR-29-RD-0003",
+      "child_id": "DR-29-RS-0003",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-29",
-      "child_id": "DR-29-RD-0004",
+      "child_id": "DR-29-RS-0004",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-29",
-      "child_id": "DR-29-RD-0005",
+      "child_id": "DR-29-RS-0005",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-29",
-      "child_id": "DR-29-RD-0006",
+      "child_id": "DR-29-RS-0006",
       "relation": "contains_document"
     },
     {
@@ -16669,32 +16579,32 @@
     },
     {
       "parent_id": "DR-31",
-      "child_id": "DR-31-RD-0001",
+      "child_id": "DR-31-RS-0001",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-31",
-      "child_id": "DR-31-RD-0002",
+      "child_id": "DR-31-RS-0002",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-31",
-      "child_id": "DR-31-RD-0003",
+      "child_id": "DR-31-RS-0003",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-31",
-      "child_id": "DR-31-RD-0004",
+      "child_id": "DR-31-RS-0004",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-31",
-      "child_id": "DR-31-RD-0005",
+      "child_id": "DR-31-RS-0005",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-31",
-      "child_id": "DR-31-RD-0006",
+      "child_id": "DR-31-RS-0006",
       "relation": "contains_document"
     },
     {
@@ -16739,32 +16649,32 @@
     },
     {
       "parent_id": "DR-47",
-      "child_id": "DR-47-RD-0001",
+      "child_id": "DR-47-RS-0001",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-47",
-      "child_id": "DR-47-RD-0002",
+      "child_id": "DR-47-RS-0002",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-47",
-      "child_id": "DR-47-RD-0003",
+      "child_id": "DR-47-RS-0003",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-47",
-      "child_id": "DR-47-RD-0004",
+      "child_id": "DR-47-RS-0004",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-47",
-      "child_id": "DR-47-RD-0005",
+      "child_id": "DR-47-RS-0005",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-47",
-      "child_id": "DR-47-RD-0006",
+      "child_id": "DR-47-RS-0006",
       "relation": "contains_document"
     },
     {
@@ -16809,32 +16719,32 @@
     },
     {
       "parent_id": "DR-53",
-      "child_id": "DR-53-RD-0001",
+      "child_id": "DR-53-RS-0001",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-53",
-      "child_id": "DR-53-RD-0002",
+      "child_id": "DR-53-RS-0002",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-53",
-      "child_id": "DR-53-RD-0003",
+      "child_id": "DR-53-RS-0003",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-53",
-      "child_id": "DR-53-RD-0004",
+      "child_id": "DR-53-RS-0004",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-53",
-      "child_id": "DR-53-RD-0005",
+      "child_id": "DR-53-RS-0005",
       "relation": "contains_document"
     },
     {
       "parent_id": "DR-53",
-      "child_id": "DR-53-RD-0006",
+      "child_id": "DR-53-RS-0006",
       "relation": "contains_document"
     },
     {
@@ -16874,7 +16784,7 @@
     },
     {
       "parent_id": "HR-01",
-      "child_id": "HR-01-RD-0001",
+      "child_id": "HR-01-RS-0001",
       "relation": "contains_document"
     },
     {
@@ -16884,22 +16794,22 @@
     },
     {
       "parent_id": "HR-01",
-      "child_id": "HR-01-RD-0003",
+      "child_id": "HR-01-RS-0003",
       "relation": "contains_document"
     },
     {
       "parent_id": "HR-01",
-      "child_id": "HR-01-RD-0004",
+      "child_id": "HR-01-RS-0004",
       "relation": "contains_document"
     },
     {
       "parent_id": "HR-01",
-      "child_id": "HR-01-RD-0005",
+      "child_id": "HR-01-RS-0005",
       "relation": "contains_document"
     },
     {
       "parent_id": "HR-01",
-      "child_id": "HR-01-RD-0006",
+      "child_id": "HR-01-RS-0006",
       "relation": "contains_document"
     },
     {
@@ -16954,27 +16864,27 @@
     },
     {
       "parent_id": "HR-05",
-      "child_id": "HR-05-RD-0001",
+      "child_id": "HR-05-RS-0001",
       "relation": "contains_document"
     },
     {
       "parent_id": "HR-05",
-      "child_id": "HR-05-RD-0002",
+      "child_id": "HR-05-RS-0002",
       "relation": "contains_document"
     },
     {
       "parent_id": "HR-05",
-      "child_id": "HR-05-RD-0003",
+      "child_id": "HR-05-RS-0003",
       "relation": "contains_document"
     },
     {
       "parent_id": "HR-05",
-      "child_id": "HR-05-RD-0004",
+      "child_id": "HR-05-RS-0004",
       "relation": "contains_document"
     },
     {
       "parent_id": "HR-05",
-      "child_id": "HR-05-RD-0005",
+      "child_id": "HR-05-RS-0005",
       "relation": "contains_document"
     },
     {
@@ -17044,32 +16954,32 @@
     },
     {
       "parent_id": "HR-09",
-      "child_id": "HR-09-RD-0001",
+      "child_id": "HR-09-RS-0001",
       "relation": "contains_document"
     },
     {
       "parent_id": "HR-09",
-      "child_id": "HR-09-RD-0002",
+      "child_id": "HR-09-RS-0002",
       "relation": "contains_document"
     },
     {
       "parent_id": "HR-09",
-      "child_id": "HR-09-RD-0003",
+      "child_id": "HR-09-RS-0003",
       "relation": "contains_document"
     },
     {
       "parent_id": "HR-09",
-      "child_id": "HR-09-RD-0004",
+      "child_id": "HR-09-RS-0004",
       "relation": "contains_document"
     },
     {
       "parent_id": "HR-09",
-      "child_id": "HR-09-RD-0005",
+      "child_id": "HR-09-RS-0005",
       "relation": "contains_document"
     },
     {
       "parent_id": "HR-09",
-      "child_id": "HR-09-RD-0006",
+      "child_id": "HR-09-RS-0006",
       "relation": "contains_document"
     },
     {
@@ -17114,32 +17024,32 @@
     },
     {
       "parent_id": "FM-04",
-      "child_id": "FM-04-RD-0001",
+      "child_id": "FM-04-RS-0001",
       "relation": "contains_document"
     },
     {
       "parent_id": "FM-04",
-      "child_id": "FM-04-RD-0002",
+      "child_id": "FM-04-RS-0002",
       "relation": "contains_document"
     },
     {
       "parent_id": "FM-04",
-      "child_id": "FM-04-RD-0003",
+      "child_id": "FM-04-RS-0003",
       "relation": "contains_document"
     },
     {
       "parent_id": "FM-04",
-      "child_id": "FM-04-RD-0004",
+      "child_id": "FM-04-RS-0004",
       "relation": "contains_document"
     },
     {
       "parent_id": "FM-04",
-      "child_id": "FM-04-RD-0005",
+      "child_id": "FM-04-RS-0005",
       "relation": "contains_document"
     },
     {
       "parent_id": "FM-04",
-      "child_id": "FM-04-RD-0006",
+      "child_id": "FM-04-RS-0006",
       "relation": "contains_document"
     },
     {
@@ -17209,32 +17119,32 @@
     },
     {
       "parent_id": "FM-07",
-      "child_id": "FM-07-RD-0001",
+      "child_id": "FM-07-RS-0001",
       "relation": "contains_document"
     },
     {
       "parent_id": "FM-07",
-      "child_id": "FM-07-RD-0002",
+      "child_id": "FM-07-RS-0002",
       "relation": "contains_document"
     },
     {
       "parent_id": "FM-07",
-      "child_id": "FM-07-RD-0003",
+      "child_id": "FM-07-RS-0003",
       "relation": "contains_document"
     },
     {
       "parent_id": "FM-07",
-      "child_id": "FM-07-RD-0004",
+      "child_id": "FM-07-RS-0004",
       "relation": "contains_document"
     },
     {
       "parent_id": "FM-07",
-      "child_id": "FM-07-RD-0005",
+      "child_id": "FM-07-RS-0005",
       "relation": "contains_document"
     },
     {
       "parent_id": "FM-07",
-      "child_id": "FM-07-RD-0006",
+      "child_id": "FM-07-RS-0006",
       "relation": "contains_document"
     },
     {
@@ -17289,27 +17199,27 @@
     },
     {
       "parent_id": "FM-13",
-      "child_id": "FM-13-RD-0002",
+      "child_id": "FM-13-RS-0002",
       "relation": "contains_document"
     },
     {
       "parent_id": "FM-13",
-      "child_id": "FM-13-RD-0003",
+      "child_id": "FM-13-RS-0003",
       "relation": "contains_document"
     },
     {
       "parent_id": "FM-13",
-      "child_id": "FM-13-RD-0004",
+      "child_id": "FM-13-RS-0004",
       "relation": "contains_document"
     },
     {
       "parent_id": "FM-13",
-      "child_id": "FM-13-RD-0005",
+      "child_id": "FM-13-RS-0005",
       "relation": "contains_document"
     },
     {
       "parent_id": "FM-13",
-      "child_id": "FM-13-RD-0006",
+      "child_id": "FM-13-RS-0006",
       "relation": "contains_document"
     },
     {
@@ -17344,32 +17254,32 @@
     },
     {
       "parent_id": "FM-18",
-      "child_id": "FM-18-RD-0001",
+      "child_id": "FM-18-RS-0001",
       "relation": "contains_document"
     },
     {
       "parent_id": "FM-18",
-      "child_id": "FM-18-RD-0002",
+      "child_id": "FM-18-RS-0002",
       "relation": "contains_document"
     },
     {
       "parent_id": "FM-18",
-      "child_id": "FM-18-RD-0003",
+      "child_id": "FM-18-RS-0003",
       "relation": "contains_document"
     },
     {
       "parent_id": "FM-18",
-      "child_id": "FM-18-RD-0004",
+      "child_id": "FM-18-RS-0004",
       "relation": "contains_document"
     },
     {
       "parent_id": "FM-18",
-      "child_id": "FM-18-RD-0005",
+      "child_id": "FM-18-RS-0005",
       "relation": "contains_document"
     },
     {
       "parent_id": "FM-18",
-      "child_id": "FM-18-RD-0006",
+      "child_id": "FM-18-RS-0006",
       "relation": "contains_document"
     },
     {
@@ -17424,7 +17334,7 @@
     },
     {
       "parent_id": "FM-23",
-      "child_id": "FM-23-RD-0001",
+      "child_id": "FM-23-RS-0001",
       "relation": "contains_document"
     },
     {
@@ -17434,32 +17344,32 @@
     },
     {
       "parent_id": "OS-07",
-      "child_id": "OS-07-RD-0001",
+      "child_id": "OS-07-RS-0001",
       "relation": "contains_document"
     },
     {
       "parent_id": "OS-07",
-      "child_id": "OS-07-RD-0002",
+      "child_id": "OS-07-RS-0002",
       "relation": "contains_document"
     },
     {
       "parent_id": "OS-07",
-      "child_id": "OS-07-RD-0003",
+      "child_id": "OS-07-RS-0003",
       "relation": "contains_document"
     },
     {
       "parent_id": "OS-07",
-      "child_id": "OS-07-RD-0004",
+      "child_id": "OS-07-RS-0004",
       "relation": "contains_document"
     },
     {
       "parent_id": "OS-07",
-      "child_id": "OS-07-RD-0005",
+      "child_id": "OS-07-RS-0005",
       "relation": "contains_document"
     },
     {
       "parent_id": "OS-07",
-      "child_id": "OS-07-RD-0006",
+      "child_id": "OS-07-RS-0006",
       "relation": "contains_document"
     },
     {
@@ -17519,12 +17429,12 @@
     },
     {
       "parent_id": "OS-18",
-      "child_id": "OS-18-RD-0001",
+      "child_id": "OS-18-RS-0001",
       "relation": "contains_document"
     },
     {
       "parent_id": "OS-18",
-      "child_id": "OS-18-RD-0002",
+      "child_id": "OS-18-RS-0002",
       "relation": "contains_document"
     },
     {
@@ -17554,37 +17464,37 @@
     },
     {
       "parent_id": "OS-26",
-      "child_id": "OS-26-RD-0001",
+      "child_id": "OS-26-RS-0001",
       "relation": "contains_document"
     },
     {
       "parent_id": "OS-26",
-      "child_id": "OS-26-RD-0002",
+      "child_id": "OS-26-RS-0002",
       "relation": "contains_document"
     },
     {
       "parent_id": "OS-26",
-      "child_id": "OS-26-RD-0003",
+      "child_id": "OS-26-RS-0003",
       "relation": "contains_document"
     },
     {
       "parent_id": "OS-26",
-      "child_id": "OS-26-RD-0004",
+      "child_id": "OS-26-RS-0004",
       "relation": "contains_document"
     },
     {
       "parent_id": "OS-26",
-      "child_id": "OS-26-RD-0005",
+      "child_id": "OS-26-RS-0005",
       "relation": "contains_document"
     },
     {
       "parent_id": "OS-26",
-      "child_id": "OS-26-RD-0006",
+      "child_id": "OS-26-RS-0006",
       "relation": "contains_document"
     },
     {
       "parent_id": "OS-26",
-      "child_id": "OS-26-RD-0007",
+      "child_id": "OS-26-RS-0007",
       "relation": "contains_document"
     },
     {
@@ -17649,27 +17559,27 @@
     },
     {
       "parent_id": "OS-34",
-      "child_id": "OS-34-RD-0001",
+      "child_id": "OS-34-RS-0001",
       "relation": "contains_document"
     },
     {
       "parent_id": "OS-34",
-      "child_id": "OS-34-RD-0002",
+      "child_id": "OS-34-RS-0002",
       "relation": "contains_document"
     },
     {
       "parent_id": "OS-34",
-      "child_id": "OS-34-RD-0003",
+      "child_id": "OS-34-RS-0003",
       "relation": "contains_document"
     },
     {
       "parent_id": "OS-34",
-      "child_id": "OS-34-RD-0004",
+      "child_id": "OS-34-RS-0004",
       "relation": "contains_document"
     },
     {
       "parent_id": "OS-34",
-      "child_id": "OS-34-RD-0005",
+      "child_id": "OS-34-RS-0005",
       "relation": "contains_document"
     },
     {
@@ -17704,7 +17614,7 @@
     },
     {
       "parent_id": "OS-41",
-      "child_id": "OS-41-RD-0001",
+      "child_id": "OS-41-RS-0001",
       "relation": "contains_document"
     },
     {
@@ -17724,32 +17634,32 @@
     },
     {
       "parent_id": "OS-48",
-      "child_id": "OS-48-RD-0001",
+      "child_id": "OS-48-RS-0001",
       "relation": "contains_document"
     },
     {
       "parent_id": "OS-48",
-      "child_id": "OS-48-RD-0002",
+      "child_id": "OS-48-RS-0002",
       "relation": "contains_document"
     },
     {
       "parent_id": "OS-48",
-      "child_id": "OS-48-RD-0003",
+      "child_id": "OS-48-RS-0003",
       "relation": "contains_document"
     },
     {
       "parent_id": "OS-48",
-      "child_id": "OS-48-RD-0004",
+      "child_id": "OS-48-RS-0004",
       "relation": "contains_document"
     },
     {
       "parent_id": "OS-48",
-      "child_id": "OS-48-RD-0005",
+      "child_id": "OS-48-RS-0005",
       "relation": "contains_document"
     },
     {
       "parent_id": "OS-48",
-      "child_id": "OS-48-RD-0006",
+      "child_id": "OS-48-RS-0006",
       "relation": "contains_document"
     },
     {
@@ -17799,32 +17709,32 @@
     },
     {
       "parent_id": "TS-02",
-      "child_id": "TS-02-RD-0001",
+      "child_id": "TS-02-RS-0001",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-02",
-      "child_id": "TS-02-RD-0002",
+      "child_id": "TS-02-RS-0002",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-02",
-      "child_id": "TS-02-RD-0003",
+      "child_id": "TS-02-RS-0003",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-02",
-      "child_id": "TS-02-RD-0004",
+      "child_id": "TS-02-RS-0004",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-02",
-      "child_id": "TS-02-RD-0005",
+      "child_id": "TS-02-RS-0005",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-02",
-      "child_id": "TS-02-RD-0006",
+      "child_id": "TS-02-RS-0006",
       "relation": "contains_document"
     },
     {
@@ -17864,32 +17774,32 @@
     },
     {
       "parent_id": "TS-06",
-      "child_id": "TS-06-RD-0001",
+      "child_id": "TS-06-RS-0001",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-06",
-      "child_id": "TS-06-RD-0002",
+      "child_id": "TS-06-RS-0002",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-06",
-      "child_id": "TS-06-RD-0003",
+      "child_id": "TS-06-RS-0003",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-06",
-      "child_id": "TS-06-RD-0004",
+      "child_id": "TS-06-RS-0004",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-06",
-      "child_id": "TS-06-RD-0005",
+      "child_id": "TS-06-RS-0005",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-06",
-      "child_id": "TS-06-RD-0006",
+      "child_id": "TS-06-RS-0006",
       "relation": "contains_document"
     },
     {
@@ -17934,22 +17844,22 @@
     },
     {
       "parent_id": "TS-08",
-      "child_id": "TS-08-RD-0001",
+      "child_id": "TS-08-RS-0001",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-08",
-      "child_id": "TS-08-RD-0002",
+      "child_id": "TS-08-RS-0002",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-08",
-      "child_id": "TS-08-RD-0003",
+      "child_id": "TS-08-RS-0003",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-08",
-      "child_id": "TS-08-RD-0004",
+      "child_id": "TS-08-RS-0004",
       "relation": "contains_document"
     },
     {
@@ -17974,32 +17884,32 @@
     },
     {
       "parent_id": "TS-10",
-      "child_id": "TS-10-RD-0001",
+      "child_id": "TS-10-RS-0001",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-10",
-      "child_id": "TS-10-RD-0002",
+      "child_id": "TS-10-RS-0002",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-10",
-      "child_id": "TS-10-RD-0003",
+      "child_id": "TS-10-RS-0003",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-10",
-      "child_id": "TS-10-RD-0004",
+      "child_id": "TS-10-RS-0004",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-10",
-      "child_id": "TS-10-RD-0005",
+      "child_id": "TS-10-RS-0005",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-10",
-      "child_id": "TS-10-RD-0006",
+      "child_id": "TS-10-RS-0006",
       "relation": "contains_document"
     },
     {
@@ -18059,32 +17969,32 @@
     },
     {
       "parent_id": "TS-14",
-      "child_id": "TS-14-RD-0001",
+      "child_id": "TS-14-RS-0001",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-14",
-      "child_id": "TS-14-RD-0002",
+      "child_id": "TS-14-RS-0002",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-14",
-      "child_id": "TS-14-RD-0003",
+      "child_id": "TS-14-RS-0003",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-14",
-      "child_id": "TS-14-RD-0004",
+      "child_id": "TS-14-RS-0004",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-14",
-      "child_id": "TS-14-RD-0005",
+      "child_id": "TS-14-RS-0005",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-14",
-      "child_id": "TS-14-RD-0006",
+      "child_id": "TS-14-RS-0006",
       "relation": "contains_document"
     },
     {
@@ -18139,42 +18049,42 @@
     },
     {
       "parent_id": "TS-18",
-      "child_id": "TS-18-RD-0001",
+      "child_id": "TS-18-RS-0001",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-18",
-      "child_id": "TS-18-RD-0002",
+      "child_id": "TS-18-RS-0002",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-18",
-      "child_id": "TS-18-RD-0003",
+      "child_id": "TS-18-RS-0003",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-18",
-      "child_id": "TS-18-RD-0004",
+      "child_id": "TS-18-RS-0004",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-18",
-      "child_id": "TS-18-RD-0005",
+      "child_id": "TS-18-RS-0005",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-18",
-      "child_id": "TS-18-RD-0006",
+      "child_id": "TS-18-RS-0006",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-18",
-      "child_id": "TS-18-RD-0007",
+      "child_id": "TS-18-RS-0007",
       "relation": "contains_document"
     },
     {
       "parent_id": "TS-18",
-      "child_id": "TS-18-RD-0008",
+      "child_id": "TS-18-RS-0008",
       "relation": "contains_document"
     },
     {
@@ -18258,72 +18168,72 @@
       "relation": "supports_evidence"
     },
     {
-      "parent_id": "DR-01-RD-0001",
+      "parent_id": "DR-01-RS-0001",
       "child_id": "T-001",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "DR-04-RD-0001",
+      "parent_id": "DR-04-RS-0001",
       "child_id": "T-010",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "DR-04-RD-0002",
+      "parent_id": "DR-04-RS-0002",
       "child_id": "T-011",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "DR-07-RD-0001",
+      "parent_id": "DR-07-RS-0001",
       "child_id": "T-013",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "DR-07-RD-0002",
+      "parent_id": "DR-07-RS-0002",
       "child_id": "T-014",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "DR-29-RD-0001",
+      "parent_id": "DR-29-RS-0001",
       "child_id": "T-015",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "DR-29-RD-0002",
+      "parent_id": "DR-29-RS-0002",
       "child_id": "T-016",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "DR-31-RD-0001",
+      "parent_id": "DR-31-RS-0001",
       "child_id": "T-017",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "DR-31-RD-0002",
+      "parent_id": "DR-31-RS-0002",
       "child_id": "T-018",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "DR-47-RD-0001",
+      "parent_id": "DR-47-RS-0001",
       "child_id": "T-026",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "DR-47-RD-0002",
+      "parent_id": "DR-47-RS-0002",
       "child_id": "T-027",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "DR-47-RD-0003",
+      "parent_id": "DR-47-RS-0003",
       "child_id": "T-028",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "DR-53-RD-0001",
+      "parent_id": "DR-53-RS-0001",
       "child_id": "T-029",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "HR-01-RD-0001",
+      "parent_id": "HR-01-RS-0001",
       "child_id": "T-002",
       "relation": "fires_trigger"
     },
@@ -18333,37 +18243,37 @@
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "HR-05-RD-0001",
+      "parent_id": "HR-05-RS-0001",
       "child_id": "T-012",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "HR-09-RD-0001",
+      "parent_id": "HR-09-RS-0001",
       "child_id": "T-043",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "HR-09-RD-0002",
+      "parent_id": "HR-09-RS-0002",
       "child_id": "T-044",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "FM-04-RD-0001",
+      "parent_id": "FM-04-RS-0001",
       "child_id": "T-004",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "FM-04-RD-0002",
+      "parent_id": "FM-04-RS-0002",
       "child_id": "T-005",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "FM-07-RD-0001",
+      "parent_id": "FM-07-RS-0001",
       "child_id": "T-008",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "FM-07-RD-0002",
+      "parent_id": "FM-07-RS-0002",
       "child_id": "T-009",
       "relation": "fires_trigger"
     },
@@ -18373,137 +18283,137 @@
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "FM-13-RD-0002",
+      "parent_id": "FM-13-RS-0002",
       "child_id": "T-007",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "FM-18-RD-0001",
+      "parent_id": "FM-18-RS-0001",
       "child_id": "T-041",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "FM-18-RD-0002",
+      "parent_id": "FM-18-RS-0002",
       "child_id": "T-042",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "FM-23-RD-0001",
+      "parent_id": "FM-23-RS-0001",
       "child_id": "T-025",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "OS-07-RD-0001",
+      "parent_id": "OS-07-RS-0001",
       "child_id": "T-030",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "OS-07-RD-0002",
+      "parent_id": "OS-07-RS-0002",
       "child_id": "T-031",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "OS-18-RD-0001",
+      "parent_id": "OS-18-RS-0001",
       "child_id": "T-033",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "OS-18-RD-0002",
+      "parent_id": "OS-18-RS-0002",
       "child_id": "T-032",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "OS-26-RD-0001",
+      "parent_id": "OS-26-RS-0001",
       "child_id": "T-034",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "OS-26-RD-0002",
+      "parent_id": "OS-26-RS-0002",
       "child_id": "T-035",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "OS-26-RD-0003",
+      "parent_id": "OS-26-RS-0003",
       "child_id": "T-036",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "OS-34-RD-0001",
+      "parent_id": "OS-34-RS-0001",
       "child_id": "T-037",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "OS-34-RD-0002",
+      "parent_id": "OS-34-RS-0002",
       "child_id": "T-038",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "OS-41-RD-0001",
+      "parent_id": "OS-41-RS-0001",
       "child_id": "T-039",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "OS-48-RD-0001",
+      "parent_id": "OS-48-RS-0001",
       "child_id": "T-040",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "TS-02-RD-0001",
+      "parent_id": "TS-02-RS-0001",
       "child_id": "T-019",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "TS-02-RD-0002",
+      "parent_id": "TS-02-RS-0002",
       "child_id": "T-020",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "TS-06-RD-0001",
+      "parent_id": "TS-06-RS-0001",
       "child_id": "T-021",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "TS-06-RD-0002",
+      "parent_id": "TS-06-RS-0002",
       "child_id": "T-022",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "TS-10-RD-0001",
+      "parent_id": "TS-10-RS-0001",
       "child_id": "T-023",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "TS-10-RD-0002",
+      "parent_id": "TS-10-RS-0002",
       "child_id": "T-024",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "TS-14-RD-0001",
+      "parent_id": "TS-14-RS-0001",
       "child_id": "T-045",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "TS-14-RD-0002",
+      "parent_id": "TS-14-RS-0002",
       "child_id": "T-046",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "TS-14-RD-0003",
+      "parent_id": "TS-14-RS-0003",
       "child_id": "T-047",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "TS-18-RD-0001",
+      "parent_id": "TS-18-RS-0001",
       "child_id": "T-048",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "TS-18-RD-0002",
+      "parent_id": "TS-18-RS-0002",
       "child_id": "T-049",
       "relation": "fires_trigger"
     },
     {
-      "parent_id": "TS-18-RD-0003",
+      "parent_id": "TS-18-RS-0003",
       "child_id": "T-050",
       "relation": "fires_trigger"
     },
@@ -20420,36 +20330,6 @@
     {
       "parent_id": "RECEPTION",
       "child_id": "RECEPTION_CHAIR_13",
-      "relation": "contains_furniture"
-    },
-    {
-      "parent_id": "RECEPTION",
-      "child_id": "RECEPTION_CHAIR_14",
-      "relation": "contains_furniture"
-    },
-    {
-      "parent_id": "RECEPTION",
-      "child_id": "RECEPTION_CHAIR_15",
-      "relation": "contains_furniture"
-    },
-    {
-      "parent_id": "RECEPTION",
-      "child_id": "RECEPTION_CHAIR_16",
-      "relation": "contains_furniture"
-    },
-    {
-      "parent_id": "RECEPTION",
-      "child_id": "RECEPTION_CHAIR_17",
-      "relation": "contains_furniture"
-    },
-    {
-      "parent_id": "RECEPTION",
-      "child_id": "RECEPTION_CHAIR_18",
-      "relation": "contains_furniture"
-    },
-    {
-      "parent_id": "RECEPTION",
-      "child_id": "RECEPTION_CHAIR_19",
       "relation": "contains_furniture"
     },
     {

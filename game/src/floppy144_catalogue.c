@@ -401,19 +401,19 @@ static void Floppy144CatalogueDrawList(
 
     Floppy144DrawFillRect(
         surface,
-        20,
-        20,
-        600,
-        284,
+        10,
+        18,
+        610,
+        280,
         panel
     );
 
     Floppy144DrawRect(
         surface,
-        20,
-        20,
-        600,
-        284,
+        10,
+        18,
+        610,
+        280,
         border
     );
 
@@ -549,26 +549,26 @@ static void Floppy144CatalogueDrawList(
 
     Floppy144DrawFillRect(
         surface,
-        20,
-        312,
-        600,
+        10,
+        306,
+        610,
         28,
         background
     );
 
     Floppy144DrawRect(
         surface,
-        20,
-        312,
-        600,
+        10,
+        306,
+        610,
         28,
         border
     );
 
     Floppy144DrawText(
         surface,
-        32,
-        322,
+        22,
+        316,
         "UP DOWN SELECT",
         1,
         text
@@ -576,8 +576,8 @@ static void Floppy144CatalogueDrawList(
 
     Floppy144DrawText(
         surface,
-        198,
-        322,
+        188,
+        316,
         "PGUP PGDN PAGE",
         1,
         muted
@@ -585,8 +585,8 @@ static void Floppy144CatalogueDrawList(
 
     Floppy144DrawText(
         surface,
-        384,
-        322,
+        374,
+        316,
         "ENTER VIEW CONTENTS",
         1,
         amber
@@ -594,8 +594,8 @@ static void Floppy144CatalogueDrawList(
 
     Floppy144DrawText(
         surface,
-        512,
-        322,
+        502,
+        316,
         "BACKSPACE RETURN",
         1,
         muted
@@ -662,19 +662,19 @@ static void Floppy144CatalogueDrawFm13ServiceNote(
 
     Floppy144DrawFillRect(
         surface,
-        20,
-        20,
-        600,
-        284,
+        10,
+        18,
+        610,
+        280,
         panel
     );
 
     Floppy144DrawRect(
         surface,
-        20,
-        20,
-        600,
-        284,
+        10,
+        18,
+        610,
+        280,
         border
     );
 
@@ -806,26 +806,26 @@ static void Floppy144CatalogueDrawFm13ServiceNote(
 
     Floppy144DrawFillRect(
         surface,
-        20,
-        316,
-        600,
+        10,
+        306,
+        610,
         28,
         background
     );
 
     Floppy144DrawRect(
         surface,
-        20,
-        316,
-        600,
+        10,
+        306,
+        610,
         28,
         border
     );
 
     Floppy144DrawText(
         surface,
-        32,
-        326,
+        22,
+        316,
         "RECOVERED AUTHORED RECORD",
         1,
         green
@@ -834,7 +834,7 @@ static void Floppy144CatalogueDrawFm13ServiceNote(
     Floppy144DrawText(
         surface,
         526,
-        326,
+        316,
         "BACKSPACE BACK",
         1,
         muted
@@ -1104,19 +1104,19 @@ static void Floppy144CatalogueDrawDocument(
 
     Floppy144DrawFillRect(
         surface,
-        20,
-        20,
-        600,
-        284,
+        10,
+        18,
+        610,
+        280,
         panel
     );
 
     Floppy144DrawRect(
         surface,
-        20,
-        20,
-        600,
-        284,
+        10,
+        18,
+        610,
+        280,
         border
     );
 
@@ -1203,25 +1203,25 @@ static void Floppy144CatalogueDrawDocument(
 
     Floppy144DrawFillRect(
         surface,
-        20,
-        312,
-        600,
+        10,
+        306,
+        610,
         28,
         background
     );
 
     Floppy144DrawRect(
         surface,
-        20,
-        312,
-        600,
+        10,
+        306,
+        610,
         28,
         border
     );
 
     Floppy144CatalogueTextCentred(
         surface,
-        322,
+        316,
         "BACKSPACE BACK",
         1,
         amber

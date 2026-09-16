@@ -28,25 +28,29 @@
  * Visible player proportions and ground collision footprint are deliberately
  * separate.
  *
- * The standing character is 4 units wide. Ground collision uses a 4 x 2 unit
- * footprint positioned immediately above the player's persistent foot point.
- * This keeps the lower edge from extending beyond the visible character while
- * giving the left and right sides appropriate clearance.
+ * The standing character is 3.5 units wide, but the movement footprint is
+ * intentionally narrower than the sprite. A 2 x 2 unit ground footprint lets
+ * the player pass through authored office clearances without the shoulders of
+ * the visual sprite behaving like solid geometry. The shadow uses the same
+ * collision width so the on-screen footprint matches movement clearance.
  */
 #define FLOPPY144_SITE_PLAYER_VISUAL_WIDTH_X16       56
 #define FLOPPY144_SITE_PLAYER_HEIGHT_UNITS            8
 
-#define FLOPPY144_SITE_PLAYER_COLLISION_WIDTH_X16    56
+#define FLOPPY144_SITE_PLAYER_COLLISION_WIDTH_X16    32
 #define FLOPPY144_SITE_PLAYER_COLLISION_DEPTH_X16    32
 
 #define FLOPPY144_SITE_MOVE_STEP_X16              8
 
 /*
- * Room ownership marker used by generated Site rectangles that are shared
- * structure rather than room-owned geometry. Door topology uses the same
- * 0xff value for OUTSIDE in generated data.
+ * Boundary endpoints may reference OUTSIDE. Runtime rectangles themselves are
+ * always owned by a real Site room; anonymous shared geometry is no longer
+ * emitted by the Site compiler.
+ *
+ * FLOPPY144_SITE_ROOM_SHARED remains only as a legacy compatibility sentinel
+ * for stale generated definitions and must not appear in newly generated data.
  */
-#define FLOPPY144_SITE_ROOM_SHARED              0xffU
+#define FLOPPY144_SITE_ROOM_SHARED              0xfeU
 #define FLOPPY144_SITE_ROOM_OUTSIDE             0xffU
 
 /*
@@ -89,21 +93,28 @@ Floppy144SiteElement;
 /*
  * Compact generated-plan rectangle.
  *
- * room is a Floppy144RoomId value for room-owned geometry, or
- * FLOPPY144_SITE_ROOM_SHARED for shared structure/doors/windows.
- * Coordinates and dimensions are expressed in whole Site units. Rotated JSONC
- * placements currently expose their conservative generated bounds here while
- * the source rotation remains preserved in the generated definition.
+ * room is the owning room. Ordinary room geometry has from_room == to_room ==
+ * room. Boundary geometry such as a door or window retains its explicit
+ * endpoints so renderers can decide whether that boundary belongs in the
+ * current reconstruction without spatial guesswork or visibility halos.
+ *
+ * Coordinates and dimensions are expressed in whole Site units. rotation is
+ * the authored clockwise rotation in degrees, normalised to 0..359. Rotated
+ * placements still expose conservative generated bounds for collision, while
+ * renderers may use rotation to orient directional furniture detail.
  */
 
 typedef struct Floppy144SiteRect
 {
     uint8_t type;
     uint8_t room;
+    uint8_t from_room;
+    uint8_t to_room;
     uint8_t x;
     uint8_t y;
     uint8_t width;
     uint8_t height;
+    uint16_t rotation;
 }
 Floppy144SiteRect;
 

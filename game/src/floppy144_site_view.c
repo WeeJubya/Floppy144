@@ -58,6 +58,15 @@ void Floppy144SiteViewRect(
     view_rect->room =
     source.room;
 
+    view_rect->from_room =
+    source.from_room;
+
+    view_rect->to_room =
+    source.to_room;
+
+    view_rect->rotation =
+    source.rotation;
+
     view_rect->x =
     (uint8_t)(
         FLOPPY144_SITE_SIZE_UNITS -

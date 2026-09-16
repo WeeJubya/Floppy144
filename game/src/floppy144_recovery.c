@@ -870,7 +870,7 @@ void Floppy144MainMenuDraw(
 
     Floppy144DrawText(
         &surface,
-        10U,
+        15U,
         5U,
         "GDR SESSION CONTROL SYSTEM",
         1U,
@@ -879,7 +879,7 @@ void Floppy144MainMenuDraw(
 
     Floppy144DrawText(
         &surface,
-        556U,
+        575U,
         5U,
         "APS-12",
         1U,
@@ -888,18 +888,18 @@ void Floppy144MainMenuDraw(
 
     Floppy144DrawFillRect(
         &surface,
-        24U,
+        15U,
         28U,
-        592U,
+        605U,
         306U,
         panel
     );
 
     Floppy144DrawRect(
         &surface,
-        24U,
+        15U,
         28U,
-        592U,
+        605U,
         306U,
         border
     );

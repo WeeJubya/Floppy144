@@ -1,6 +1,8 @@
-# Floppy//144 - Stage 2 Data-Driven Refactor
+# Floppy//144 - Stage 3A Prologue Vertical Slice
 
-This is the self-contained Stage 2 refactor of Floppy//144.
+This is the self-contained Stage 3A build of Floppy//144. It preserves the
+completed Stage 2 data-driven refactor and makes the complete Prologue route a
+tested player-facing vertical slice.
 
 The central design rule is deliberately simple:
 
@@ -40,7 +42,24 @@ Stage 2 includes:
 - Stage 2 headless regression tests;
 - the 1,474,560-byte release size gate.
 
-Stages 3, 4 and 5 are intentionally **not** implemented here.
+## Stage 3A scope
+
+Stage 3A adds:
+
+- a data-derived next-action prompt in the archive terminal;
+- the complete `INITIATE -> RESTORE -> OPEN -> EXIT` Prologue hand-off;
+- equivalent progression when the Disk Recovery Index is opened through the
+  graphical catalogue instead of the direct terminal command;
+- a persistent DR-01 notebook fact emitted by T-001 through the existing
+  generic `RECORD_NOTEBOOK_FACT` effect;
+- Stage 3A end-to-end regression through the public terminal and document APIs;
+- Windows save/reinstate verification for completed Prologue state.
+
+Stage 3A does not add a bespoke DR-01 or T-001 C function. The Prologue remains
+defined by canonical JSON and interpreted by reusable runtime systems.
+
+The remaining Stage 3 gameplay integration, Stage 4 presentation/audio work
+and Stage 5 finalisation are intentionally outside this package.
 
 ## Folder location
 
@@ -84,9 +103,10 @@ The build performs these gates in order:
 3. synchronise generated stable-ID definition files;
 4. compile and validate generated Site geometry;
 5. compile and run the Stage 2 headless regression suite;
-6. generate the VS2022 solution with Premake;
-7. build Floppy144 with MSBuild;
-8. enforce the 1.44 MB / 1,474,560-byte release executable limit.
+6. compile and run the Stage 3A Prologue regression suite;
+7. generate the VS2022 solution with Premake;
+8. build Floppy144 with MSBuild;
+9. enforce the 1.44 MB / 1,474,560-byte release executable limit.
 
 A failure in an earlier gate stops the build.
 
@@ -101,6 +121,33 @@ To run only the Stage 2 headless regression:
 ```powershell
 .\tools\test_stage2.ps1
 ```
+
+To run only the Stage 3A Prologue regression:
+
+```powershell
+.\tools\test_stage3a.ps1
+```
+
+## Stage 3A manual acceptance route
+
+After a successful release build:
+
+1. Start `bin\release\Floppy144.exe` and initiate a new recovery.
+2. Enter `INITIATE` at the terminal.
+3. Confirm the prompt says `NEXT RECOVERY ACTION: RESTORE DR-01`.
+4. Enter `RESTORE DR-01`.
+5. Confirm reconstruction reaches 4 percent and the prompt names
+   `DR-01-RS-0001`.
+6. Enter `OPEN DR-01-RS-0001` and read the Disk Recovery Index.
+7. Press Backspace to return to the terminal.
+8. Confirm the prompt says `NEXT RECOVERY ACTION: EXIT TO SITE`.
+9. Enter `EXIT` and confirm Reception and Corridor are reconstructed.
+10. Press Escape, record the session, close the game, relaunch it and reinstate
+    the recorded session.
+11. Enter `EXIT` again and confirm the reconstructed Site state is retained.
+
+The graphical alternative is also valid: after restoring DR-01, use
+`LIST DR-01`, open the first record and follow the same return/exit route.
 
 ## Isometric state
 

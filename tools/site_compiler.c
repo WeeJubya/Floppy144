@@ -418,6 +418,18 @@ static bool IsFloorType(const char *name)
         strcmp(name, "FLOOR_D") == 0;
 }
 
+/*
+ * Boundary geometry belongs to a room but also names the two spaces it
+ * separates. Doors and windows currently use this contract. Anonymous
+ * shared runtime geometry is no longer emitted.
+ */
+static bool IsBoundaryType(const char *name)
+{
+    return
+        strcmp(name, "DOOR") == 0 ||
+        strcmp(name, "WINDOW") == 0;
+}
+
 static void LexerAdvanceCharacter(Lexer *lexer)
 {
     if(lexer->position >= lexer->length)
@@ -1613,18 +1625,28 @@ static bool NormalizePlacement(SiteData *site, Placement *placement, const char 
         }
 
         rotation = placement->has_rotation ? RoundToInt(placement->rotation) : 0;
+        rotation %= 360;
+        if(rotation < 0) rotation += 360;
 
-        if(rotation % 360 != 0)
+        /*
+         * Top-left x/y geometry may safely carry a half-turn because a
+         * 180-degree rotation preserves the same axis-aligned footprint.
+         *
+         * Quarter-turns and diagonal rotations can change the generated
+         * bounds, so those continue to require centre_x/centre_y authoring.
+         */
+        if(rotation != 0 && rotation != 180)
         {
             SiteMessage(
                 site,
                 true,
-                "%s uses rotation with x/y form; rotated geometry must use centre_x/centre_y",
-                context
+                "%s uses %d-degree rotation with x/y form; only 0 or 180 degrees are supported without centre_x/centre_y",
+                context,
+                rotation
             );
         }
 
-        placement->rotation_normalized = 0;
+        placement->rotation_normalized = rotation;
         placement->bounds_x = RoundToInt(placement->x);
         placement->bounds_y = RoundToInt(placement->y);
         placement->bounds_width = RoundToInt(placement->width);
@@ -1821,6 +1843,70 @@ static void ValidateRegions(SiteData *site)
     }
 }
 
+static bool ValidateBoundaryEndpoints(
+    SiteData *site,
+    Placement *placement,
+    const char *context,
+    bool require_owner
+)
+{
+    int from_room;
+    int to_room;
+
+    if(!placement->has_from || !placement->has_to)
+    {
+        SiteMessage(site, true, "%s boundary requires from and to", context);
+        return false;
+    }
+
+    from_room = RoomIndex(placement->from);
+    to_room = RoomIndex(placement->to);
+
+    if(from_room == F144_ROOM_INVALID)
+    {
+        SiteMessage(site, true, "%s has unknown boundary endpoint '%s'", context, placement->from);
+    }
+
+    if(to_room == F144_ROOM_INVALID)
+    {
+        SiteMessage(site, true, "%s has unknown boundary endpoint '%s'", context, placement->to);
+    }
+
+    if(
+        from_room == F144_ROOM_INVALID ||
+        to_room == F144_ROOM_INVALID
+    )
+    {
+        return false;
+    }
+
+    if(from_room == F144_ROOM_OUTSIDE && to_room == F144_ROOM_OUTSIDE)
+    {
+        SiteMessage(site, true, "%s cannot connect OUTSIDE to OUTSIDE", context);
+        return false;
+    }
+
+    if(require_owner)
+    {
+        if(
+            placement->room != from_room &&
+            placement->room != to_room
+        )
+        {
+            SiteMessage(
+                site,
+                true,
+                "%s belongs to %s but neither endpoint names that room",
+                context,
+                g_rooms[placement->room].json_name
+            );
+            return false;
+        }
+    }
+
+    return true;
+}
+
 static void ValidatePlacementList(SiteData *site, Placement *placements, int count, bool shared)
 {
     int index;
@@ -1836,7 +1922,7 @@ static void ValidatePlacementList(SiteData *site, Placement *placements, int cou
         }
         else if(shared)
         {
-            snprintf(context, sizeof(context), "shared geometry #%d", index + 1);
+            snprintf(context, sizeof(context), "legacy shared geometry #%d", index + 1);
         }
         else if(placement->room >= 0 && placement->room < F144_MAX_ROOMS)
         {
@@ -1869,84 +1955,96 @@ static void ValidatePlacementList(SiteData *site, Placement *placements, int cou
             );
         }
 
-        if(!shared)
+        if(shared)
         {
-            if(placement->room < 0 || placement->room >= F144_MAX_ROOMS)
-            {
-                SiteMessage(site, true, "%s has no valid owning room", context);
-            }
-            else if(!PlacementCoveredByRoomRegions(site, placement))
-            {
-                if(placement->rotation_normalized != 0)
-                {
-                    SiteMessage(
-                        site,
-                        false,
-                        "%s conservative rotated bounds cross outside %s region",
-                        context,
-                        g_rooms[placement->room].json_name
-                    );
-                }
-                else
-                {
-                    SiteMessage(
-                        site,
-                        true,
-                        "%s lies outside the declared %s region",
-                        context,
-                        g_rooms[placement->room].json_name
-                    );
-                }
-            }
-
-            if(placement->is_door)
+            /*
+             * shared_geometry is accepted only as a compatibility input for
+             * the existing game-data emitter. It must contain boundary
+             * geometry and is re-homed into an owning room before output.
+             */
+            if(!IsBoundaryType(placement->type))
             {
                 SiteMessage(
                     site,
                     true,
-                    "%s is a DOOR inside room geometry; doors belong in shared_geometry with from/to",
+                    "%s uses legacy shared_geometry but is not a DOOR or WINDOW",
                     context
                 );
             }
-        }
-        else if(placement->is_door)
-        {
-            int from_room;
-            int to_room;
 
-            if(!placement->has_id)
+            if(placement->is_door)
+            {
+                if(!placement->has_id)
+                {
+                    SiteMessage(site, true, "%s DOOR requires an id", context);
+                }
+
+                if(placement->has_from && placement->has_to)
+                {
+                    (void)ValidateBoundaryEndpoints(
+                        site,
+                        placement,
+                        context,
+                        false
+                    );
+                }
+            }
+
+            continue;
+        }
+
+        if(placement->room < 0 || placement->room >= F144_MAX_ROOMS)
+        {
+            SiteMessage(site, true, "%s has no valid owning room", context);
+            continue;
+        }
+
+        if(!PlacementCoveredByRoomRegions(site, placement))
+        {
+            if(placement->rotation_normalized != 0)
+            {
+                SiteMessage(
+                    site,
+                    false,
+                    "%s conservative rotated bounds cross outside %s region",
+                    context,
+                    g_rooms[placement->room].json_name
+                );
+            }
+            else
+            {
+                SiteMessage(
+                    site,
+                    true,
+                    "%s lies outside the declared %s region",
+                    context,
+                    g_rooms[placement->room].json_name
+                );
+            }
+        }
+
+        if(IsBoundaryType(placement->type))
+        {
+            if(placement->is_door && !placement->has_id)
             {
                 SiteMessage(site, true, "%s DOOR requires an id", context);
             }
 
-            if(!placement->has_from || !placement->has_to)
-            {
-                SiteMessage(site, true, "%s DOOR requires from and to", context);
-            }
-            else
-            {
-                from_room = RoomIndex(placement->from);
-                to_room = RoomIndex(placement->to);
-
-                if(from_room == F144_ROOM_INVALID)
-                {
-                    SiteMessage(site, true, "%s has unknown door endpoint '%s'", context, placement->from);
-                }
-
-                if(to_room == F144_ROOM_INVALID)
-                {
-                    SiteMessage(site, true, "%s has unknown door endpoint '%s'", context, placement->to);
-                }
-
-                if(from_room == F144_ROOM_OUTSIDE && to_room == F144_ROOM_OUTSIDE)
-                {
-                    SiteMessage(site, true, "%s cannot connect OUTSIDE to OUTSIDE", context);
-                }
-            }
+            (void)ValidateBoundaryEndpoints(
+                site,
+                placement,
+                context,
+                true
+            );
         }
         else if(placement->has_from || placement->has_to)
         {
-            SiteMessage(site, false, "%s has from/to fields but is not a DOOR; they will be ignored", context);
+            SiteMessage(
+                site,
+                true,
+                "%s has from/to fields but is not boundary geometry",
+                context
+            );
         }
     }
 }
@@ -2075,6 +2173,233 @@ static void ValidateFloorOwnership(SiteData *site)
     }
 }
 
+/* Return FLOOR_* ownership for one cell after room placements are normalized. */
+static int FloorRoomAtCell(const SiteData *site, int x, int y)
+{
+    int index;
+
+    if(x < 0 || y < 0 || x >= site->site_width || y >= site->site_height)
+    {
+        return F144_ROOM_OUTSIDE;
+    }
+
+    for(index = 0; index < site->placement_count; ++index)
+    {
+        const Placement *placement = &site->placements[index];
+
+        if(
+            IsFloorType(placement->type) &&
+            placement->room >= 0 &&
+            placement->room < F144_MAX_ROOMS &&
+            PlacementContainsCell(placement, x, y)
+        )
+        {
+            return placement->room;
+        }
+    }
+
+    return F144_ROOM_INVALID;
+}
+
+static int BoundarySideRoom(
+    const SiteData *site,
+    const Placement *placement,
+    bool first_side
+)
+{
+    int room = F144_ROOM_INVALID;
+    int position;
+
+    if(placement->bounds_width >= placement->bounds_height)
+    {
+        int y = first_side
+            ? placement->bounds_y - 1
+            : placement->bounds_y + placement->bounds_height;
+
+        for(
+            position = placement->bounds_x;
+            position < placement->bounds_x + placement->bounds_width;
+            ++position
+        )
+        {
+            int candidate = FloorRoomAtCell(site, position, y);
+
+            if(candidate == F144_ROOM_INVALID)
+            {
+                continue;
+            }
+
+            if(room == F144_ROOM_INVALID || room == F144_ROOM_OUTSIDE)
+            {
+                room = candidate;
+            }
+            else if(
+                candidate != F144_ROOM_OUTSIDE &&
+                candidate != room
+            )
+            {
+                return F144_ROOM_INVALID;
+            }
+        }
+    }
+    else
+    {
+        int x = first_side
+            ? placement->bounds_x - 1
+            : placement->bounds_x + placement->bounds_width;
+
+        for(
+            position = placement->bounds_y;
+            position < placement->bounds_y + placement->bounds_height;
+            ++position
+        )
+        {
+            int candidate = FloorRoomAtCell(site, x, position);
+
+            if(candidate == F144_ROOM_INVALID)
+            {
+                continue;
+            }
+
+            if(room == F144_ROOM_INVALID || room == F144_ROOM_OUTSIDE)
+            {
+                room = candidate;
+            }
+            else if(
+                candidate != F144_ROOM_OUTSIDE &&
+                candidate != room
+            )
+            {
+                return F144_ROOM_INVALID;
+            }
+        }
+    }
+
+    if(room == F144_ROOM_INVALID)
+    {
+        return F144_ROOM_OUTSIDE;
+    }
+
+    return room;
+}
+
+static void RoomNameForIndex(int room, char *text, size_t capacity)
+{
+    if(room == F144_ROOM_OUTSIDE)
+    {
+        CopyString(text, capacity, "OUTSIDE");
+    }
+    else if(room >= 0 && room < F144_MAX_ROOMS)
+    {
+        CopyString(text, capacity, g_rooms[room].json_name);
+    }
+    else
+    {
+        text[0] = '\0';
+    }
+}
+
+/*
+ * Convert legacy top-level shared_geometry into explicit room-owned boundary
+ * geometry. This makes the current generated JSON backwards-compatible while
+ * ensuring no anonymous shared rectangle reaches the runtime definition.
+ */
+static void ResolveLegacySharedGeometry(SiteData *site)
+{
+    int index;
+
+    for(index = 0; index < site->shared_count; ++index)
+    {
+        Placement *placement = &site->shared[index];
+        int from_room;
+        int to_room;
+        int owner;
+        char context[256];
+
+        if(placement->has_id)
+        {
+            snprintf(context, sizeof(context), "placement '%s'", placement->id);
+        }
+        else
+        {
+            snprintf(context, sizeof(context), "legacy shared geometry #%d", index + 1);
+        }
+
+        if(!IsBoundaryType(placement->type))
+        {
+            continue;
+        }
+
+        if(placement->has_from && placement->has_to)
+        {
+            from_room = RoomIndex(placement->from);
+            to_room = RoomIndex(placement->to);
+        }
+        else
+        {
+            from_room = BoundarySideRoom(site, placement, true);
+            to_room = BoundarySideRoom(site, placement, false);
+
+            if(
+                from_room == F144_ROOM_INVALID ||
+                to_room == F144_ROOM_INVALID ||
+                (from_room == F144_ROOM_OUTSIDE && to_room == F144_ROOM_OUTSIDE)
+            )
+            {
+                SiteMessage(
+                    site,
+                    true,
+                    "%s endpoints could not be inferred from adjacent FLOOR_* geometry",
+                    context
+                );
+                continue;
+            }
+
+            RoomNameForIndex(
+                from_room,
+                placement->from,
+                sizeof(placement->from)
+            );
+            RoomNameForIndex(
+                to_room,
+                placement->to,
+                sizeof(placement->to)
+            );
+            placement->has_from = true;
+            placement->has_to = true;
+        }
+
+        if(
+            from_room == F144_ROOM_INVALID ||
+            to_room == F144_ROOM_INVALID
+        )
+        {
+            SiteMessage(site, true, "%s has invalid boundary endpoints", context);
+            continue;
+        }
+
+        owner = from_room != F144_ROOM_OUTSIDE
+            ? from_room
+            : to_room;
+
+        if(owner < 0 || owner >= F144_MAX_ROOMS)
+        {
+            SiteMessage(site, true, "%s has no room endpoint to own it", context);
+            continue;
+        }
+
+        placement->room = owner;
+        placement->shared = false;
+
+        (void)ValidateBoundaryEndpoints(
+            site,
+            placement,
+            context,
+            true
+        );
+    }
+}
+
 static bool ValidateSite(SiteData *site)
 {
     int room;
@@ -2116,8 +2441,9 @@ static bool ValidateSite(SiteData *site)
     ValidateRegions(site);
     ValidatePlacementList(site, site->placements, site->placement_count, false);
     ValidatePlacementList(site, site->shared, site->shared_count, true);
-    ValidateUniqueIdsAndObjects(site);
     ValidateFloorOwnership(site);
+    ResolveLegacySharedGeometry(site);
+    ValidateUniqueIdsAndObjects(site);
 
     if(!site->has_spawn_x || !site->has_spawn_y || !site->has_spawn_room)
     {
@@ -2274,7 +2600,12 @@ static bool WriteGeneratedFile(const SiteData *site, const char *input_path, con
         running_region += room_region_count;
     }
 
-    fputs("\n/* Room-owned geometry. FLOOR_* entries are authoritative room ownership. */\n", output);
+    fputs(
+        "\n/* Room-owned geometry. FLOOR_* entries are authoritative room ownership. */\n"
+        "/* Boundary geometry carries explicit from/to topology and is emitted */\n"
+        "/* under one owning room; no anonymous shared runtime geometry remains. */\n",
+        output
+    );
 
     for(room = 0; room < F144_MAX_ROOMS; ++room)
     {
@@ -2295,7 +2626,48 @@ static bool WriteGeneratedFile(const SiteData *site, const char *input_path, con
 
             WritePlacementComment(output, placement);
 
-            if(placement->rotation_normalized == 0)
+            if(IsBoundaryType(placement->type))
+            {
+                int from_room = RoomIndex(placement->from);
+                int to_room = RoomIndex(placement->to);
+
+                if(placement->rotation_normalized == 0)
+                {
+                    fprintf(
+                        output,
+                        "SITE_BOUNDARY(%s, %s, %s, %s, %dU, %dU, %dU, %dU)\n",
+                        RoomCSymbol(room),
+                        type_symbol,
+                        RoomCSymbol(from_room),
+                        RoomCSymbol(to_room),
+                        placement->bounds_x,
+                        placement->bounds_y,
+                        placement->bounds_width,
+                        placement->bounds_height
+                    );
+                }
+                else
+                {
+                    fprintf(
+                        output,
+                        "SITE_ROTATED_BOUNDARY(%s, %s, %s, %s, %dU, %dU, %dU, %dU, %d, %d, %d, %d, %d)\n",
+                        RoomCSymbol(room),
+                        type_symbol,
+                        RoomCSymbol(from_room),
+                        RoomCSymbol(to_room),
+                        placement->bounds_x,
+                        placement->bounds_y,
+                        placement->bounds_width,
+                        placement->bounds_height,
+                        placement->centre_x16,
+                        placement->centre_y16,
+                        placement->width16,
+                        placement->height16,
+                        placement->rotation_normalized
+                    );
+                }
+            }
+            else if(placement->rotation_normalized == 0)
             {
                 fprintf(
                     output,
@@ -2327,63 +2699,62 @@ static bool WriteGeneratedFile(const SiteData *site, const char *input_path, con
                 );
             }
         }
-    }
 
-    fputs("\n/* Shared geometry and door topology. */\n", output);
-
-    for(index = 0; index < site->shared_count; ++index)
-    {
-        const Placement *placement = &site->shared[index];
-        const char *type_symbol = TypeCSymbol(placement->type);
-
-        if(type_symbol == NULL) type_symbol = "FLOPPY144_SITE_ELEMENT_COUNT";
-
-        WritePlacementComment(output, placement);
-
-        if(placement->is_door)
+        /* Legacy generated shared_geometry is normalized into this room. */
+        for(index = 0; index < site->shared_count; ++index)
         {
-            int from_room = RoomIndex(placement->from);
-            int to_room = RoomIndex(placement->to);
+            const Placement *placement = &site->shared[index];
+            const char *type_symbol;
+            int from_room;
+            int to_room;
 
-            fprintf(
-                output,
-                "SITE_DOOR(%s, %s, %dU, %dU, %dU, %dU)\n",
-                RoomCSymbol(from_room),
-                RoomCSymbol(to_room),
-                placement->bounds_x,
-                placement->bounds_y,
-                placement->bounds_width,
-                placement->bounds_height
-            );
-        }
-        else if(placement->rotation_normalized == 0)
-        {
-            fprintf(
-                output,
-                "SITE_SHARED(%s, %dU, %dU, %dU, %dU)\n",
-                type_symbol,
-                placement->bounds_x,
-                placement->bounds_y,
-                placement->bounds_width,
-                placement->bounds_height
-            );
-        }
-        else
-        {
-            fprintf(
-                output,
-                "SITE_ROTATED_SHARED(%s, %dU, %dU, %dU, %dU, %d, %d, %d, %d, %d)\n",
-                type_symbol,
-                placement->bounds_x,
-                placement->bounds_y,
-                placement->bounds_width,
-                placement->bounds_height,
-                placement->centre_x16,
-                placement->centre_y16,
-                placement->width16,
-                placement->height16,
-                placement->rotation_normalized
-            );
+            if(placement->room != room)
+            {
+                continue;
+            }
+
+            type_symbol = TypeCSymbol(placement->type);
+            if(type_symbol == NULL) type_symbol = "FLOPPY144_SITE_ELEMENT_COUNT";
+            from_room = RoomIndex(placement->from);
+            to_room = RoomIndex(placement->to);
+
+            WritePlacementComment(output, placement);
+
+            if(placement->rotation_normalized == 0)
+            {
+                fprintf(
+                    output,
+                    "SITE_BOUNDARY(%s, %s, %s, %s, %dU, %dU, %dU, %dU)\n",
+                    RoomCSymbol(room),
+                    type_symbol,
+                    RoomCSymbol(from_room),
+                    RoomCSymbol(to_room),
+                    placement->bounds_x,
+                    placement->bounds_y,
+                    placement->bounds_width,
+                    placement->bounds_height
+                );
+            }
+            else
+            {
+                fprintf(
+                    output,
+                    "SITE_ROTATED_BOUNDARY(%s, %s, %s, %s, %dU, %dU, %dU, %dU, %d, %d, %d, %d, %d)\n",
+                    RoomCSymbol(room),
+                    type_symbol,
+                    RoomCSymbol(from_room),
+                    RoomCSymbol(to_room),
+                    placement->bounds_x,
+                    placement->bounds_y,
+                    placement->bounds_width,
+                    placement->bounds_height,
+                    placement->centre_x16,
+                    placement->centre_y16,
+                    placement->width16,
+                    placement->height16,
+                    placement->rotation_normalized
+                );
+            }
         }
     }
 
@@ -2447,6 +2818,7 @@ static void PrintAudit(const SiteData *site, const char *input_path, const char 
 {
     int rooms = 0;
     int doors = 0;
+    int boundaries = 0;
     int rotated = 0;
     int object_refs = 0;
     int floors = 0;
@@ -2461,12 +2833,15 @@ static void PrintAudit(const SiteData *site, const char *input_path, const char 
     for(index = 0; index < site->placement_count; ++index)
     {
         if(IsFloorType(site->placements[index].type)) ++floors;
+        if(IsBoundaryType(site->placements[index].type)) ++boundaries;
+        if(site->placements[index].is_door) ++doors;
         if(site->placements[index].rotation_normalized != 0) ++rotated;
         if(site->placements[index].has_object) ++object_refs;
     }
 
     for(index = 0; index < site->shared_count; ++index)
     {
+        if(IsBoundaryType(site->shared[index].type)) ++boundaries;
         if(site->shared[index].is_door) ++doors;
         if(site->shared[index].rotation_normalized != 0) ++rotated;
         if(site->shared[index].has_object) ++object_refs;
@@ -2478,9 +2853,11 @@ static void PrintAudit(const SiteData *site, const char *input_path, const char 
     printf("Site:              %d x %d\n", site->site_width, site->site_height);
     printf("Rooms:             %d / %d\n", rooms, F144_MAX_ROOMS);
     printf("Room regions:      %d\n", site->region_count);
-    printf("Room geometry:     %d\n", site->placement_count);
+    printf("Room geometry:     %d\n", site->placement_count + site->shared_count);
     printf("Floor rectangles:  %d\n", floors);
-    printf("Shared geometry:   %d\n", site->shared_count);
+    printf("Boundary geometry: %d\n", boundaries);
+    printf("Shared runtime:    0\n");
+    printf("Legacy shared in:  %d\n", site->shared_count);
     printf("Doors:             %d\n", doors);
     printf("Rotated items:     %d\n", rotated);
     printf("Object hooks:      %d\n", object_refs);

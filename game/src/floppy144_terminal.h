@@ -42,7 +42,20 @@ typedef struct Floppy144TerminalState
     bool record_pager_active;
     bool help_pager_active;
 
+    /*
+     * Stage 3A terminal capability state.
+     *
+     * open_command_available prevents OPEN being advertised before the
+     * initial recovery collection has been restored. The default-record
+     * collection is deliberately terminal-session-local: restoring a
+     * collection makes RS-#### shorthand resolve against that collection,
+     * but leaving the terminal clears that convenience context.
+     */
+    bool open_command_available;
+    bool default_record_collection_valid;
+
     Floppy144CollectionId requested_collection;
+    Floppy144CollectionId default_record_collection;
 
     Floppy144CollectionId record_pager_collection;
     uint32_t record_pager_page;
@@ -69,6 +82,16 @@ typedef struct Floppy144TerminalState
 void Floppy144TerminalReset(
     Floppy144TerminalState *terminal,
     const Floppy144WorldState *world
+);
+
+/*
+ * Reset a terminal entered from the physical Site and identify its room in
+ * the first transcript line. The fixed screen header is unchanged.
+ */
+void Floppy144TerminalResetAtRoom(
+    Floppy144TerminalState *terminal,
+    const Floppy144WorldState *world,
+    Floppy144RoomId room
 );
 
 void Floppy144TerminalMoveSelection(
@@ -120,6 +143,16 @@ void Floppy144TerminalSubmitInput(
     Floppy144TerminalState *terminal,
     Floppy144WorldState *world,
     Floppy144RunState *run_state
+);
+
+/*
+ * Append the next data-derived recovery action to the terminal transcript.
+ * The same helper is used after terminal commands and after a document closes,
+ * keeping the Prologue hand-off consistent without hard-coded story branches.
+ */
+void Floppy144TerminalPrintNextAction(
+    Floppy144TerminalState *pTerminal,
+    const Floppy144RunState *pRunState
 );
 
 void Floppy144TerminalCloseDetail(

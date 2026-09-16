@@ -7,11 +7,13 @@
 
 #include "floppy144_terminal.h"
 #include "floppy144_catalogue.h"
+#include "floppy144_document.h"
 
 #include "floppy144_draw.h"
 #include "floppy144_collection_registry.h"
 
 #include <stdio.h>
+#include <string.h>
 
 /*
  * Small terminal drawing helpers
@@ -242,8 +244,8 @@ static void Floppy144TerminalDrawDetail(
     /* Paint the modal panel over the already-drawn terminal list. */
     Floppy144DrawFillRect(
         surface,
-        64,
-        72,
+        54,
+        62,
         512,
         216,
         background
@@ -260,8 +262,8 @@ static void Floppy144TerminalDrawDetail(
 
     Floppy144DrawFillRect(
         surface,
-        72,
-        80,
+        62,
+        70,
         496,
         32,
         panel
@@ -269,8 +271,8 @@ static void Floppy144TerminalDrawDetail(
 
     Floppy144DrawText(
         surface,
-        84,
-        91,
+        74,
+        81,
         code,
         1,
         text
@@ -278,8 +280,8 @@ static void Floppy144TerminalDrawDetail(
 
     Floppy144DrawText(
         surface,
-        84,
-        122,
+        74,
+        112,
         title,
         1,
         text
@@ -287,8 +289,8 @@ static void Floppy144TerminalDrawDetail(
 
     Floppy144DrawFillRect(
         surface,
-        80,
-        142,
+        70,
+        132,
         480,
         1,
         border
@@ -296,8 +298,8 @@ static void Floppy144TerminalDrawDetail(
 
     Floppy144DrawText(
         surface,
-        84,
-        158,
+        74,
+        148,
         status,
         1,
         status_colour
@@ -305,8 +307,8 @@ static void Floppy144TerminalDrawDetail(
 
     Floppy144DrawText(
         surface,
-        84,
-        178,
+        74,
+        168,
         collection_domain,
         1,
         muted
@@ -314,8 +316,8 @@ static void Floppy144TerminalDrawDetail(
 
     Floppy144DrawText(
         surface,
-        84,
-        208,
+        74,
+        198,
         description_one,
         1,
         text
@@ -323,8 +325,8 @@ static void Floppy144TerminalDrawDetail(
 
     Floppy144DrawText(
         surface,
-        84,
-        228,
+        74,
+        218,
         description_two,
         1,
         terminal->restoration_notice
@@ -334,8 +336,8 @@ static void Floppy144TerminalDrawDetail(
 
     Floppy144DrawFillRect(
         surface,
-        80,
-        252,
+        70,
+        242,
         480,
         1,
         border
@@ -398,6 +400,209 @@ static void Floppy144TerminalPushLine(
     );
 
     ++terminal->output_count;
+}
+
+static void Floppy144TerminalPushWrappedLine(
+    Floppy144TerminalState *terminal,
+    const char *text
+);
+
+/*
+ * Print the next useful recovery action from current persistent state.
+ *
+ * Priority is deliberate:
+ *   1. initialise archive services;
+ *   2. open an eligible trigger document from a restored collection;
+ *   3. leave the terminal once a Site room exists;
+ *   4. restore the next available collection.
+ *
+ * No collection, document or trigger ID is embedded here. The canonical JSON
+ * and generated registries decide which action satisfies each step.
+ */
+void Floppy144TerminalPrintNextAction(
+    Floppy144TerminalState *pTerminal,
+    const Floppy144RunState *pRunState
+)
+{
+    uint32_t uCollectionIndex;
+    uint32_t uRoomIndex;
+    const char *pszAvailableCollectionCode = NULL;
+    char szLine[FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
+
+    if(pTerminal == NULL || pRunState == NULL)
+    {
+        return;
+    }
+
+    if(!Floppy144RunStateArchiveServicesInitialised(pRunState))
+    {
+        Floppy144TerminalPushLine(
+            pTerminal,
+            "NEXT RECOVERY ACTION: INITIATE"
+        );
+
+        return;
+    }
+
+    for(
+        uCollectionIndex = 0U;
+        uCollectionIndex < (uint32_t)FLOPPY144_COLLECTION_COUNT;
+        ++uCollectionIndex
+    )
+    {
+        Floppy144CollectionId eCollection =
+            (Floppy144CollectionId)uCollectionIndex;
+
+        const Floppy144DocumentDefinition *pDocument =
+            Floppy144DocumentFirstPendingTrigger(
+                pRunState,
+                eCollection
+            );
+
+        if(pDocument != NULL && pDocument->record_id_override != NULL)
+        {
+            const char *pszRecordId =
+                pDocument->record_id_override;
+
+            /*
+             * Immediately after a collection is restored, allow the player
+             * to use the collection-local RS-#### form. The full identifier
+             * remains valid at all times.
+             */
+            if(pTerminal->default_record_collection_valid)
+            {
+                const Floppy144CollectionDefinition *pDefaultDefinition =
+                    Floppy144CollectionGet(
+                        pTerminal->default_record_collection
+                    );
+
+                size_t uCodeLength =
+                    strlen(pDefaultDefinition->code);
+
+                if(
+                    strncmp(
+                        pszRecordId,
+                        pDefaultDefinition->code,
+                        uCodeLength
+                    ) == 0 &&
+                    pszRecordId[uCodeLength] == '-'
+                )
+                {
+                    pszRecordId +=
+                        uCodeLength + 1U;
+                }
+            }
+
+            snprintf(
+                szLine,
+                sizeof(szLine),
+                "NEXT RECOVERY ACTION: OPEN %s",
+                pszRecordId
+            );
+
+            Floppy144TerminalPushWrappedLine(
+                pTerminal,
+                szLine
+            );
+
+            return;
+        }
+    }
+
+    /*
+     * Remember the next restorable collection before considering the Site
+     * hand-off. Once rooms exist, both actions are useful: the player may
+     * explore immediately or continue archive restoration on a later visit.
+     */
+    for(
+        uCollectionIndex = 0U;
+        uCollectionIndex < (uint32_t)FLOPPY144_COLLECTION_COUNT;
+        ++uCollectionIndex
+    )
+    {
+        Floppy144CollectionId eCollection =
+            (Floppy144CollectionId)uCollectionIndex;
+
+        const Floppy144CollectionDefinition *pDefinition =
+            Floppy144CollectionGet(eCollection);
+
+        if(
+            pDefinition != NULL &&
+            Floppy144RunStateCollectionAvailable(
+                pRunState,
+                eCollection
+            ) &&
+            !Floppy144RunStateCollectionRestored(
+                pRunState,
+                eCollection
+            )
+        )
+        {
+            pszAvailableCollectionCode = pDefinition->code;
+            break;
+        }
+    }
+
+    for(
+        uRoomIndex = 0U;
+        uRoomIndex < (uint32_t)FLOPPY144_ROOM_COUNT;
+        ++uRoomIndex
+    )
+    {
+        if(
+            Floppy144RunStateRoomReconstructed(
+                pRunState,
+                (Floppy144RoomId)uRoomIndex
+            )
+        )
+        {
+            if(pszAvailableCollectionCode != NULL)
+            {
+                snprintf(
+                    szLine,
+                    sizeof(szLine),
+                    "NEXT: EXIT TO SITE / RESTORE %s",
+                    pszAvailableCollectionCode
+                );
+
+                Floppy144TerminalPushLine(
+                    pTerminal,
+                    szLine
+                );
+            }
+            else
+            {
+                Floppy144TerminalPushLine(
+                    pTerminal,
+                    "NEXT RECOVERY ACTION: EXIT TO SITE"
+                );
+            }
+
+            return;
+        }
+    }
+
+    if(pszAvailableCollectionCode != NULL)
+    {
+        snprintf(
+            szLine,
+            sizeof(szLine),
+            "NEXT RECOVERY ACTION: RESTORE %s",
+            pszAvailableCollectionCode
+        );
+
+        Floppy144TerminalPushLine(
+            pTerminal,
+            szLine
+        );
+
+        return;
+    }
+
+    Floppy144TerminalPushLine(
+        pTerminal,
+        "NO RECOVERY ACTION IS CURRENTLY AVAILABLE."
+    );
 }
 
 /*
@@ -703,6 +908,50 @@ static bool Floppy144TerminalFindCollection(
     return false;
 }
 
+/*
+ * Record retrieval becomes available once at least one restored collection
+ * exposes catalogue records. In the Prologue this is DR-01, but deriving the
+ * capability from registered data keeps the terminal reusable.
+ */
+static bool Floppy144TerminalRecordAccessAvailable(
+    const Floppy144WorldState *world
+)
+{
+    uint32_t collection_index;
+
+    if(world == NULL)
+    {
+        return false;
+    }
+
+    for(
+        collection_index = 0U;
+        collection_index < (uint32_t)FLOPPY144_COLLECTION_COUNT;
+        ++collection_index
+    )
+    {
+        Floppy144CollectionId collection =
+            (Floppy144CollectionId)collection_index;
+
+        const Floppy144CollectionDefinition *definition =
+            Floppy144CollectionGet(collection);
+
+        if(
+            definition != NULL &&
+            definition->catalogue.record_count > 0U &&
+            Floppy144WorldCollectionRestored(
+                world,
+                collection
+            )
+        )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 #define FLOPPY144_TERMINAL_HELP_PAGE_COUNT 3U
 
 /*
@@ -737,15 +986,27 @@ static const char *const floppy144_terminal_help_page_2[] =
     NULL
 };
 
+static const char *const floppy144_terminal_help_page_3_locked[] =
+{
+    "RECORD ACCESS",
+    "",
+    "RECORD RETRIEVAL IS NOT YET AVAILABLE.",
+    "RESTORE A COLLECTION TO ENABLE OPEN.",
+    "SPACE OR ENTER: NEXT PAGE.",
+    "BACKSPACE: PREVIOUS PAGE.",
+    "Q: RETURN TO COMMAND PROMPT.",
+    NULL
+};
+
 static const char *const floppy144_terminal_help_page_3[] =
 {
     "RECORD ACCESS",
     "",
     "LIST <CODE> OPENS A RESTORED RECORD INDEX.",
-    "SPACE AND BACKSPACE MOVE BETWEEN PAGES.",
-    "ENTER RETURNS TO THE COMMAND PROMPT.",
     "OPEN <RECORD-ID> RETRIEVES ONE RECORD.",
-    "ONLY RESTORED COLLECTIONS MAY BE SEARCHED.",
+    "AFTER RESTORE, RS-#### USES THAT COLLECTION.",
+    "SPACE OR ENTER: NEXT PAGE.",
+    "BACKSPACE: PREVIOUS PAGE.  Q: RETURN.",
     NULL
 };
 
@@ -787,7 +1048,9 @@ static void Floppy144TerminalPrintHelpPage(
         default:
         {
             lines =
-            floppy144_terminal_help_page_3;
+                terminal->open_command_available
+                    ? floppy144_terminal_help_page_3
+                    : floppy144_terminal_help_page_3_locked;
 
             break;
         }
@@ -903,10 +1166,13 @@ static void Floppy144TerminalPrintHelp(
                 "  LIST [CODE]"
             );
 
-            Floppy144TerminalPushLine(
-                terminal,
-                "  OPEN <RECORD>"
-            );
+            if(terminal->open_command_available)
+            {
+                Floppy144TerminalPushLine(
+                    terminal,
+                    "  OPEN <RECORD>"
+                );
+            }
         }
         else
         {
@@ -971,12 +1237,27 @@ static void Floppy144TerminalPrintHelp(
             "DISPLAY GUIDANCE FOR AN AVAILABLE COMMAND."
         );
 
-        Floppy144TerminalPushLine(
-            terminal,
-            services_initialised
-                ? "TOPICS: RESTORE, LIST, OPEN, EXIT."
-                : "TOPICS: INITIATE, EXIT."
-        );
+        if(!services_initialised)
+        {
+            Floppy144TerminalPushLine(
+                terminal,
+                "TOPICS: INITIATE, EXIT."
+            );
+        }
+        else if(terminal->open_command_available)
+        {
+            Floppy144TerminalPushLine(
+                terminal,
+                "TOPICS: RESTORE, LIST, OPEN, EXIT."
+            );
+        }
+        else
+        {
+            Floppy144TerminalPushLine(
+                terminal,
+                "TOPICS: RESTORE, LIST, EXIT."
+            );
+        }
 
         return;
     }
@@ -1118,7 +1399,7 @@ static void Floppy144TerminalPrintHelp(
 
         Floppy144TerminalPushLine(
             terminal,
-            "SPACE: NEXT PAGE."
+            "SPACE OR ENTER: NEXT PAGE."
         );
 
         Floppy144TerminalPushLine(
@@ -1128,7 +1409,7 @@ static void Floppy144TerminalPrintHelp(
 
         Floppy144TerminalPushLine(
             terminal,
-            "ENTER: RETURN TO COMMAND PROMPT."
+            "Q: RETURN TO COMMAND PROMPT."
         );
 
         Floppy144TerminalPushLine(
@@ -1141,6 +1422,7 @@ static void Floppy144TerminalPrintHelp(
 
     if(
         services_initialised &&
+        terminal->open_command_available &&
         Floppy144TerminalCommandMatches(
             topic,
             "OPEN"
@@ -1164,12 +1446,17 @@ static void Floppy144TerminalPrintHelp(
 
         Floppy144TerminalPushLine(
             terminal,
-            "RETRIEVE ONE RECORD BY FULL ID."
+            "RETRIEVE ONE RECORD BY ID."
         );
 
         Floppy144TerminalPushLine(
             terminal,
-            "EXAMPLE: OPEN HR-01-RS-0038"
+            "FULL IDS ARE ALWAYS ACCEPTED."
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "AFTER RESTORE: OPEN RS-0001 USES THAT COLLECTION."
         );
 
         Floppy144TerminalPushLine(
@@ -1807,13 +2094,13 @@ void Floppy144TerminalMoveHelpPager(
     }
 
     next_page =
-    (int32_t)terminal->help_pager_page +
-    direction;
+        (int32_t)terminal->help_pager_page +
+        direction;
 
     if(next_page < 1)
     {
         next_page =
-        1;
+            (int32_t)FLOPPY144_TERMINAL_HELP_PAGE_COUNT;
     }
 
     if(
@@ -1822,19 +2109,11 @@ void Floppy144TerminalMoveHelpPager(
     )
     {
         next_page =
-        (int32_t)FLOPPY144_TERMINAL_HELP_PAGE_COUNT;
-    }
-
-    if(
-        (uint32_t)next_page ==
-        terminal->help_pager_page
-    )
-    {
-        return;
+            1;
     }
 
     terminal->help_pager_page =
-    (uint32_t)next_page;
+        (uint32_t)next_page;
 
     Floppy144TerminalPrintHelpPage(
         terminal
@@ -2016,10 +2295,39 @@ static void Floppy144TerminalRestoreCollection(
         collection
     );
 
+    /*
+     * Record shorthand is session-local. The most recently restored
+     * collection becomes the implicit prefix for OPEN RS-####.
+     */
+    terminal->default_record_collection =
+        collection;
+
+    terminal->default_record_collection_valid =
+        true;
+
     Floppy144TerminalPushLine(
         terminal,
         "COLLECTION RESTORED."
     );
+
+    /*
+     * OPEN is intentionally withheld until a restored collection actually
+     * exposes catalogue records. DR-01 is the first such collection in the
+     * Prologue, but the rule itself remains data-driven.
+     */
+    if(
+        !terminal->open_command_available &&
+        definition->catalogue.record_count > 0U
+    )
+    {
+        terminal->open_command_available =
+            true;
+
+        Floppy144TerminalPushLine(
+            terminal,
+            "NEW COMMAND: OPEN <RECORD>"
+        );
+    }
 
     snprintf(
         line,
@@ -2033,6 +2341,11 @@ static void Floppy144TerminalRestoreCollection(
     Floppy144TerminalPushLine(
         terminal,
         line
+    );
+
+    Floppy144TerminalPrintNextAction(
+        terminal,
+        run_state
     );
 }
 
@@ -2131,14 +2444,56 @@ static void Floppy144TerminalRequestOpenRecord(
     uint32_t record_index;
 
     const Floppy144CollectionDefinition *definition;
+    const char *resolved_record_id =
+        record_id;
 
+    char expanded_record_id[32];
     char canonical_record_id[24];
     char title[48];
     char line[FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
 
+    /*
+     * A collection restored during this terminal session becomes the default
+     * namespace for short record IDs such as RS-0001. Full record IDs remain
+     * valid and bypass this expansion.
+     */
+    if(
+        record_id != NULL &&
+        record_id[0] == 'R' &&
+        record_id[1] == 'S' &&
+        record_id[2] == '-'
+    )
+    {
+        if(!terminal->default_record_collection_valid)
+        {
+            Floppy144TerminalPushLine(
+                terminal,
+                "NO DEFAULT COLLECTION. USE THE FULL RECORD ID."
+            );
+
+            return;
+        }
+
+        definition =
+            Floppy144CollectionGet(
+                terminal->default_record_collection
+            );
+
+        snprintf(
+            expanded_record_id,
+            sizeof(expanded_record_id),
+            "%s-%s",
+            definition->code,
+            record_id
+        );
+
+        resolved_record_id =
+            expanded_record_id;
+    }
+
     if(
         !Floppy144TerminalFindRecord(
-            record_id,
+            resolved_record_id,
             &collection,
             &record_index
         )
@@ -2349,12 +2704,17 @@ void Floppy144TerminalSubmitInput(
 
             Floppy144TerminalPushLine(
                 terminal,
-                "NEW COMMANDS: RESTORE, LIST, OPEN"
+                "NEW COMMANDS: RESTORE, LIST"
             );
 
             Floppy144TerminalPushLine(
                 terminal,
                 "TYPE HELP FOR OPERATING GUIDANCE."
+            );
+
+            Floppy144TerminalPrintNextAction(
+                terminal,
+                run_state
             );
         }
         else
@@ -2424,6 +2784,13 @@ void Floppy144TerminalSubmitInput(
             Floppy144TerminalPushLine(
                 terminal,
                 "COMMAND UNAVAILABLE. RUN INITIATE."
+            );
+        }
+        else if(!terminal->open_command_available)
+        {
+            Floppy144TerminalPushLine(
+                terminal,
+                "COMMAND UNAVAILABLE. RESTORE A COLLECTION FIRST."
             );
         }
         else if(open_arguments[0] == '\0')
@@ -2558,8 +2925,16 @@ void Floppy144TerminalReset(
     terminal->help_pager_active =
         false;
 
-    terminal->help_pager_active =
+    terminal->open_command_available =
+        Floppy144TerminalRecordAccessAvailable(
+            world
+        );
+
+    terminal->default_record_collection_valid =
         false;
+
+    terminal->default_record_collection =
+        FLOPPY144_COLLECTION_DR01;
 
     terminal->record_pager_collection =
         FLOPPY144_COLLECTION_DR01;
@@ -2633,6 +3008,95 @@ void Floppy144TerminalReset(
     Floppy144TerminalPushLine(
         terminal,
         "TYPE HELP FOR OPERATING GUIDANCE."
+    );
+
+    if(
+        !Floppy144WorldArchiveServicesInitialised(
+            world
+        )
+    )
+    {
+        Floppy144TerminalPushLine(
+            terminal,
+            "TYPE INITIATE TO START THE RESTORATION PROCESS."
+        );
+    }
+}
+
+
+/*
+ * Reset the terminal as a physical Site terminal.
+ *
+ * The normal reset remains intentionally location-neutral for the first
+ * recovery screen and reinstated sessions. A terminal reached from the Site
+ * replaces only the first transcript line with its room-qualified identity;
+ * the fixed top screen header remains "GDR ARCHIVE RECOVERY TERMINAL".
+ */
+static const char *Floppy144TerminalRoomName(
+    Floppy144RoomId room
+)
+{
+    switch(room)
+    {
+        case FLOPPY144_ROOM_RECEPTION:        return "RECEPTION";
+        case FLOPPY144_ROOM_CORRIDOR:         return "CORRIDOR";
+        case FLOPPY144_ROOM_MAIN_OFFICE:      return "MAIN OFFICE";
+        case FLOPPY144_ROOM_FACILITIES:       return "FACILITIES";
+        case FLOPPY144_ROOM_RECORDS_OFFICE:   return "RECORDS OFFICE";
+        case FLOPPY144_ROOM_IT_SUPPORT:       return "IT SUPPORT";
+        case FLOPPY144_ROOM_STAFF_ROOM:       return "STAFF ROOM";
+        case FLOPPY144_ROOM_SECRETARY_OFFICE: return "SECRETARY OFFICE";
+        case FLOPPY144_ROOM_DIRECTOR_OFFICE:  return "DIRECTOR OFFICE";
+        case FLOPPY144_ROOM_SECURITY:         return "SECURITY";
+        case FLOPPY144_ROOM_SERVER_ROOM:      return "SERVER ROOM";
+        default:                              return NULL;
+    }
+}
+
+void Floppy144TerminalResetAtRoom(
+    Floppy144TerminalState *terminal,
+    const Floppy144WorldState *world,
+    Floppy144RoomId room
+)
+{
+    const char *room_name;
+    char environment_line[FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
+
+    Floppy144TerminalReset(
+        terminal,
+        world
+    );
+
+    if(
+        terminal == NULL ||
+        terminal->output_count == 0U
+    )
+    {
+        return;
+    }
+
+    room_name =
+        Floppy144TerminalRoomName(
+            room
+        );
+
+    if(room_name == NULL)
+    {
+        return;
+    }
+
+    snprintf(
+        environment_line,
+        sizeof(environment_line),
+        "GDR ARCHIVE RECOVERY ENVIRONMENT - %s TERMINAL",
+        room_name
+    );
+
+    snprintf(
+        terminal->output[0],
+        FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY,
+        "%s",
+        environment_line
     );
 }
 
@@ -2932,7 +3396,7 @@ void Floppy144TerminalDraw(
         snprintf(
             prompt,
             sizeof(prompt),
-            "SPACE NEXT  BACKSPACE PREVIOUS  ENTER RETURN"
+            "SPACE/ENTER NEXT  BACKSPACE PREVIOUS  Q RETURN"
         );
     }
     else
@@ -2961,7 +3425,7 @@ void Floppy144TerminalDraw(
 
     Floppy144DrawText(
         &surface,
-        538,
+        568,
         5,
         site_status,
         1,
@@ -2970,18 +3434,18 @@ void Floppy144TerminalDraw(
 
     Floppy144DrawFillRect(
         &surface,
-        20,
-        28,
-        600,
+        10,
+        18,
+        610,
         280,
         panel
     );
 
     Floppy144DrawRect(
         &surface,
-        20,
-        28,
-        600,
+        10,
+        18,
+        610,
         280,
         border
     );
@@ -2996,9 +3460,9 @@ void Floppy144TerminalDraw(
 
     Floppy144DrawFillRect(
         &surface,
-        40,
+        30,
         68,
-        560,
+        570,
         1,
         border
     );
@@ -3012,7 +3476,7 @@ void Floppy144TerminalDraw(
     {
         Floppy144DrawText(
             &surface,
-            44,
+            34,
             output_y,
             terminal->output[line_index],
             1,
@@ -3025,8 +3489,8 @@ void Floppy144TerminalDraw(
 
     Floppy144DrawFillRect(
         &surface,
-        40,
-        270,
+        30,
+        260,
         560,
         1,
         border
@@ -3034,8 +3498,8 @@ void Floppy144TerminalDraw(
 
     Floppy144DrawText(
         &surface,
-        44,
-        284,
+        34,
+        274,
         prompt,
         1,
         bright
@@ -3043,12 +3507,12 @@ void Floppy144TerminalDraw(
 
     Floppy144DrawFillRect(
         &surface,
-        44 +
+        34 +
             Floppy144DrawTextWidth(
                 prompt,
                 1
             ),
-        284,
+        274,
         5,
         8,
         bright
@@ -3056,26 +3520,26 @@ void Floppy144TerminalDraw(
 
     Floppy144DrawFillRect(
         &surface,
-        20,
-        316,
-        600,
+        10,
+        306,
+        610,
         28,
         background
     );
 
     Floppy144DrawRect(
         &surface,
-        20,
-        316,
-        600,
+        10,
+        306,
+        610,
         28,
         border
     );
 
     Floppy144DrawText(
         &surface,
-        32,
-        326,
+        22,
+        316,
         "TYPE COMMAND   BACKSPACE EDIT   ENTER SUBMIT",
         1,
         text
@@ -3084,7 +3548,7 @@ void Floppy144TerminalDraw(
     Floppy144DrawText(
         &surface,
         490,
-        326,
+        316,
         "TYPE EXIT TO CLOSE",
         1,
         muted

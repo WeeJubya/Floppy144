@@ -12,13 +12,14 @@
 #define FLOPPY144_ARRAY_COUNT(values) \
     ((uint8_t)(sizeof(values) / sizeof((values)[0])))
 
-typedef struct Floppy144SiteDoorTopology
+typedef struct Floppy144SiteBoundaryTopology
 {
     Floppy144SiteRegion rect;
+    uint8_t type;
     uint8_t room_a;
     uint8_t room_b;
 }
-Floppy144SiteDoorTopology;
+Floppy144SiteBoundaryTopology;
 
 /* Generated camera/view regions. */
 static const Floppy144SiteRegion floppy144_site_room_regions[] =
@@ -29,6 +30,8 @@ static const Floppy144SiteRegion floppy144_site_room_regions[] =
     #define SITE_ROOM_DEF(room, first_region, region_count)
     #define SITE_GEOMETRY(room, type, x, y, width, height)
     #define SITE_ROTATED_GEOMETRY(room, type, x, y, width, height, centre_x16, centre_y16, width16, height16, rotation)
+    #define SITE_BOUNDARY(room, type, from_room, to_room, x, y, width, height)
+    #define SITE_ROTATED_BOUNDARY(room, type, from_room, to_room, x, y, width, height, centre_x16, centre_y16, width16, height16, rotation)
     #define SITE_DOOR(from_room, to_room, x, y, width, height)
     #define SITE_SHARED(type, x, y, width, height)
     #define SITE_ROTATED_SHARED(type, x, y, width, height, centre_x16, centre_y16, width16, height16, rotation)
@@ -38,6 +41,8 @@ static const Floppy144SiteRegion floppy144_site_room_regions[] =
     #undef SITE_ROTATED_SHARED
     #undef SITE_SHARED
     #undef SITE_DOOR
+    #undef SITE_ROTATED_BOUNDARY
+    #undef SITE_BOUNDARY
     #undef SITE_ROTATED_GEOMETRY
     #undef SITE_GEOMETRY
     #undef SITE_ROOM_DEF
@@ -59,6 +64,8 @@ floppy144_site_rooms[FLOPPY144_ROOM_COUNT] =
         { (uint8_t)(first_region), (uint8_t)(region_count) },
     #define SITE_GEOMETRY(room, type, x, y, width, height)
     #define SITE_ROTATED_GEOMETRY(room, type, x, y, width, height, centre_x16, centre_y16, width16, height16, rotation)
+    #define SITE_BOUNDARY(room, type, from_room, to_room, x, y, width, height)
+    #define SITE_ROTATED_BOUNDARY(room, type, from_room, to_room, x, y, width, height, centre_x16, centre_y16, width16, height16, rotation)
     #define SITE_DOOR(from_room, to_room, x, y, width, height)
     #define SITE_SHARED(type, x, y, width, height)
     #define SITE_ROTATED_SHARED(type, x, y, width, height, centre_x16, centre_y16, width16, height16, rotation)
@@ -68,6 +75,8 @@ floppy144_site_rooms[FLOPPY144_ROOM_COUNT] =
     #undef SITE_ROTATED_SHARED
     #undef SITE_SHARED
     #undef SITE_DOOR
+    #undef SITE_ROTATED_BOUNDARY
+    #undef SITE_BOUNDARY
     #undef SITE_ROTATED_GEOMETRY
     #undef SITE_GEOMETRY
     #undef SITE_ROOM_DEF
@@ -75,17 +84,25 @@ floppy144_site_rooms[FLOPPY144_ROOM_COUNT] =
     #undef SITE_META
 };
 
-/* Generated physical doors and their bidirectional topology. */
-static const Floppy144SiteDoorTopology floppy144_site_doors[] =
+/* Generated boundary geometry and its endpoint topology. */
+static const Floppy144SiteBoundaryTopology floppy144_site_boundaries[] =
 {
     #define SITE_META(site_width, site_height, spawn_x16, spawn_y16, spawn_room)
     #define SITE_ROOM_REGION(room, x, y, width, height)
     #define SITE_ROOM_DEF(room, first_region, region_count)
     #define SITE_GEOMETRY(room, type, x, y, width, height)
     #define SITE_ROTATED_GEOMETRY(room, type, x, y, width, height, centre_x16, centre_y16, width16, height16, rotation)
+    #define SITE_BOUNDARY(room, type, from_room, to_room, x, y, width, height) \
+        { { (uint8_t)(x), (uint8_t)(y), (uint8_t)(width), (uint8_t)(height) }, \
+          (uint8_t)(type), (uint8_t)(from_room), (uint8_t)(to_room) },
+    #define SITE_ROTATED_BOUNDARY(room, type, from_room, to_room, x, y, width, height, centre_x16, centre_y16, width16, height16, rotation) \
+        { { (uint8_t)(x), (uint8_t)(y), (uint8_t)(width), (uint8_t)(height) }, \
+          (uint8_t)(type), (uint8_t)(from_room), (uint8_t)(to_room) },
+
+    /* Legacy door macro retained only for stale generated definitions. */
     #define SITE_DOOR(from_room, to_room, x, y, width, height) \
         { { (uint8_t)(x), (uint8_t)(y), (uint8_t)(width), (uint8_t)(height) }, \
-          (uint8_t)(from_room), (uint8_t)(to_room) },
+          (uint8_t)FLOPPY144_SITE_DOOR, (uint8_t)(from_room), (uint8_t)(to_room) },
     #define SITE_SHARED(type, x, y, width, height)
     #define SITE_ROTATED_SHARED(type, x, y, width, height, centre_x16, centre_y16, width16, height16, rotation)
 
@@ -94,6 +111,8 @@ static const Floppy144SiteDoorTopology floppy144_site_doors[] =
     #undef SITE_ROTATED_SHARED
     #undef SITE_SHARED
     #undef SITE_DOOR
+    #undef SITE_ROTATED_BOUNDARY
+    #undef SITE_BOUNDARY
     #undef SITE_ROTATED_GEOMETRY
     #undef SITE_GEOMETRY
     #undef SITE_ROOM_DEF
@@ -101,8 +120,8 @@ static const Floppy144SiteDoorTopology floppy144_site_doors[] =
     #undef SITE_META
 };
 
-#define FLOPPY144_SITE_DOOR_COUNT \
-    ((uint32_t)(sizeof(floppy144_site_doors) / sizeof(floppy144_site_doors[0])))
+#define FLOPPY144_SITE_BOUNDARY_COUNT \
+    ((uint32_t)(sizeof(floppy144_site_boundaries) / sizeof(floppy144_site_boundaries[0])))
 
 static bool Floppy144SiteRectContainsCell(
     const Floppy144SiteRect *rect,
@@ -154,7 +173,7 @@ static Floppy144RoomId Floppy144SiteFloorRoomAtCellSigned(
 }
 
 static bool Floppy144SiteDoorContainsPosition(
-    const Floppy144SiteDoorTopology *door,
+    const Floppy144SiteBoundaryTopology *door,
     int32_t x16,
     int32_t y16
 )
@@ -182,7 +201,7 @@ static bool Floppy144SiteDoorContainsPosition(
 }
 
 static Floppy144RoomId Floppy144SiteResolveDoorRoom(
-    const Floppy144SiteDoorTopology *door,
+    const Floppy144SiteBoundaryTopology *door,
     int32_t x16,
     int32_t y16
 )
@@ -415,12 +434,15 @@ Floppy144RoomId Floppy144SiteRoomAtPosition(
         return room;
     }
 
-    for(door_index = 0U; door_index < FLOPPY144_SITE_DOOR_COUNT; ++door_index)
+    for(door_index = 0U; door_index < FLOPPY144_SITE_BOUNDARY_COUNT; ++door_index)
     {
-        const Floppy144SiteDoorTopology *door =
-            &floppy144_site_doors[door_index];
+        const Floppy144SiteBoundaryTopology *door =
+            &floppy144_site_boundaries[door_index];
 
-        if(Floppy144SiteDoorContainsPosition(door, x16, y16))
+        if(
+            door->type == (uint8_t)FLOPPY144_SITE_DOOR &&
+            Floppy144SiteDoorContainsPosition(door, x16, y16)
+        )
         {
             return Floppy144SiteResolveDoorRoom(door, x16, y16);
         }
