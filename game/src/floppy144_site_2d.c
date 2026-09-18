@@ -13,6 +13,7 @@
 #include "floppy144_site_2d.h"
 
 #include "floppy144_draw.h"
+#include "floppy144_cabinet.h"
 #include "floppy144_site.h"
 #include "floppy144_site_object.h"
 #include "floppy144_site_rooms.h"
@@ -2424,6 +2425,7 @@ static const char *Floppy144Site2DInteractionPrompt(
 )
 {
     uint32_t uActions;
+    Floppy144CabinetState sCabinetProbe;
 
     if(run_state == NULL)
     {
@@ -2434,6 +2436,13 @@ static const char *Floppy144Site2DInteractionPrompt(
         Floppy144SiteAvailableActions(
             run_state
         );
+
+    /* STAGE 3B.5 SECURE CABINET ACCESS PROMPT */
+    Floppy144CabinetReset(&sCabinetProbe);
+    if(Floppy144CabinetOpenNearby(&sCabinetProbe, run_state))
+    {
+        uActions |= FLOPPY144_SITE_ACTION_ACCESS;
+    }
 
     if(
         (uActions & FLOPPY144_SITE_ACTION_ACCESS) != 0U &&

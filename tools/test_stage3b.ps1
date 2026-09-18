@@ -307,3 +307,83 @@ Invoke-Stage3BRegression `
     -BuildFolder "stage3b_door_access_tests" `
     -ExecutableName "stage3b_door_access_tests.exe" `
     -Sources $DoorAccessSources
+
+function Test-Stage3B5CoordinatorWiring {
+    Write-Host ""
+    Write-Host "=== STAGE 3B.5 CABINET COORDINATOR WIRING AUDIT ==="
+
+    $MainPath = Join-Path $SourceDir "floppy144_main.c"
+    $RunStateHeaderPath = Join-Path $SourceDir "floppy144_run_state.h"
+    $PersistenceHeaderPath = Join-Path $SourceDir "floppy144_persistence.h"
+    $Site2DPath = Join-Path $SourceDir "floppy144_site_2d.c"
+    $SiteIsoPath = Join-Path $SourceDir "floppy144_site_isometric.c"
+
+    foreach($Path in @($MainPath, $RunStateHeaderPath, $PersistenceHeaderPath, $Site2DPath, $SiteIsoPath)) {
+        if(-not (Test-Path $Path)) {
+            throw "Stage 3B.5 wiring source is missing: $Path"
+        }
+    }
+
+    $MainSource = Get-Content -Raw -Path $MainPath
+    $RunStateHeader = Get-Content -Raw -Path $RunStateHeaderPath
+    $PersistenceHeader = Get-Content -Raw -Path $PersistenceHeaderPath
+    $Site2DSource = Get-Content -Raw -Path $Site2DPath
+    $SiteIsoSource = Get-Content -Raw -Path $SiteIsoPath
+
+    foreach($Required in @(
+        'floppy144_cabinet.h',
+        'FLOPPY144_SCREEN_CABINET',
+        'Floppy144CabinetOpenNearby',
+        'Floppy144CabinetDraw',
+        'Floppy144CabinetSubmitCode',
+        'Floppy144CabinetInspectSelected',
+        'Floppy144CabinetBackspace'
+    )) {
+        if($MainSource -notmatch [regex]::Escape($Required)) {
+            throw "Stage 3B.5 main coordinator is missing: $Required"
+        }
+    }
+
+    if($RunStateHeader -notmatch 'secure_cabinets_unlocked') {
+        throw "Stage 3B.5 per-cabinet unlock state is not present in RunState."
+    }
+
+    if($PersistenceHeader -notmatch 'secure_cabinets_unlocked') {
+        throw "Stage 3B.5 per-cabinet unlock state is not included in persistence payload sizing."
+    }
+
+    foreach($Renderer in @($Site2DSource, $SiteIsoSource)) {
+        if($Renderer -notmatch 'Floppy144CabinetOpenNearby') {
+            throw "Stage 3B.5 Site prompt does not advertise A=Access near secure cabinets."
+        }
+    }
+
+    Write-Host "STAGE 3B.5 CABINET COORDINATOR WIRING AUDIT: PASS"
+}
+
+Test-Stage3B5CoordinatorWiring
+
+$CabinetSources = @(
+    (Join-Path $ScriptDir "stage3b_cabinet_tests.c"),
+    (Join-Path $SourceDir "floppy144_cabinet.c"),
+    (Join-Path $SourceDir "floppy144_game_data.c"),
+    (Join-Path $SourceDir "floppy144_trigger_engine.c"),
+    (Join-Path $SourceDir "floppy144_interaction_engine.c"),
+    (Join-Path $SourceDir "floppy144_run_state.c"),
+    (Join-Path $SourceDir "floppy144_world.c"),
+    (Join-Path $SourceDir "floppy144_draw.c"),
+    (Join-Path $SourceDir "floppy144_site.c"),
+    (Join-Path $SourceDir "floppy144_site_rooms.c"),
+    (Join-Path $SourceDir "floppy144_site_object.c"),
+    (Join-Path $SourceDir "floppy144_object_registry.c"),
+    (Join-Path $SourceDir "floppy144_collection_registry.c"),
+    (Join-Path $SourceDir "floppy144_persistence.c"),
+    (Join-Path $SourceDir "floppy144_profile.c"),
+    (Join-Path $SourceDir "floppy144_settings.c")
+)
+
+Invoke-Stage3BRegression `
+    -Label "STAGE 3B.5 SECURE CABINET / INTERIOR REGRESSION" `
+    -BuildFolder "stage3b_cabinet_tests" `
+    -ExecutableName "stage3b_cabinet_tests.exe" `
+    -Sources $CabinetSources

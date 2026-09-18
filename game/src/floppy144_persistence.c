@@ -358,6 +358,14 @@ bool Floppy144PersistenceEncodeRunState
 
     offset += 4U;
 
+    /* STAGE 3B.5 SECURE CABINET PERSISTENCE */
+    Floppy144PersistenceWriteU32(
+        &payload[offset],
+        state->secure_cabinets_unlocked
+    );
+
+    offset += 4U;
+
     #define FLOPPY144_WRITE_WORD_ARRAY(array_name)                     \
     for(                                                           \
         index = 0U;                                                \
@@ -447,6 +455,13 @@ bool Floppy144PersistenceDecodeRunState
 
     decoded.player_site_y =
     (int32_t)Floppy144PersistenceReadU32(
+        &payload[offset]
+    );
+
+    offset += 4U;
+
+    decoded.secure_cabinets_unlocked =
+    Floppy144PersistenceReadU32(
         &payload[offset]
     );
 

@@ -9,6 +9,7 @@
 #include "floppy144_site_isometric.h"
 
 #include "floppy144_draw.h"
+#include "floppy144_cabinet.h"
 #include "floppy144_site.h"
 #include "floppy144_site_object.h"
 #include "floppy144_site_rooms.h"
@@ -270,6 +271,7 @@ static const char *Floppy144IsometricInteractionPrompt(
 )
 {
     uint32_t uActions;
+    Floppy144CabinetState sCabinetProbe;
 
     if(pRunState == NULL)
     {
@@ -280,6 +282,13 @@ static const char *Floppy144IsometricInteractionPrompt(
         Floppy144SiteAvailableActions(
             pRunState
         );
+
+    /* STAGE 3B.5 SECURE CABINET ACCESS PROMPT */
+    Floppy144CabinetReset(&sCabinetProbe);
+    if(Floppy144CabinetOpenNearby(&sCabinetProbe, pRunState))
+    {
+        uActions |= FLOPPY144_SITE_ACTION_ACCESS;
+    }
 
     if(
         (uActions & FLOPPY144_SITE_ACTION_ACCESS) != 0U &&

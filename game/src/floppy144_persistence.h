@@ -35,6 +35,7 @@
 #define FLOPPY144_SAVE_PAYLOAD_V1_SIZE                            \
 (                                                                 \
     16U +                                                         \
+    sizeof(((Floppy144RunState *)0)->secure_cabinets_unlocked) +   \
     sizeof(((Floppy144RunState *)0)->rooms) +                     \
     sizeof(((Floppy144RunState *)0)->objects_visible) +           \
     sizeof(((Floppy144RunState *)0)->objects_unlocked) +          \

@@ -25,6 +25,9 @@
 
 #define FLOPPY144_RUN_WORD_BITS             32
 
+/* STAGE 3B.5 SECURE CABINET STATE */
+#define FLOPPY144_SECURE_CABINET_MAX          32U
+
 #define FLOPPY144_RUN_WORD_COUNT(capacity) \
 (((capacity) + FLOPPY144_RUN_WORD_BITS - 1) / FLOPPY144_RUN_WORD_BITS)
 
@@ -59,6 +62,9 @@ typedef struct Floppy144RunState
 
     int32_t player_site_x;
     int32_t player_site_y;
+
+    /* Persistent per-cabinet unlocks for the current recovery. */
+    uint32_t secure_cabinets_unlocked;
 
     uint32_t rooms[
         FLOPPY144_RUN_WORD_COUNT(FLOPPY144_ROOM_COUNT)
@@ -174,6 +180,17 @@ bool Floppy144RunStateSetObjectAccessState
     Floppy144RunState *state,
  Floppy144ObjectId object,
  Floppy144ObjectAccessState access_state
+);
+
+/* Stage 3B.5: generated secure-cabinet unlock state. */
+bool Floppy144RunStateSecureCabinetUnlocked(
+    const Floppy144RunState *state,
+    uint32_t uCabinetIndex
+);
+
+bool Floppy144RunStateUnlockSecureCabinet(
+    Floppy144RunState *state,
+    uint32_t uCabinetIndex
 );
 
 bool Floppy144RunStateBitGet

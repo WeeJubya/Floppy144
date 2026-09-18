@@ -191,6 +191,51 @@ bool Floppy144RunStateRevealObject
     return true;
 }
 
+/* STAGE 3B.5 SECURE CABINET STATE
+ *
+ * Cabinet ordinals are derived from canonical generated secure-cabinet
+ * furniture order. One 32-bit word is sufficient for the current Site.
+ */
+bool Floppy144RunStateSecureCabinetUnlocked(
+    const Floppy144RunState *state,
+    uint32_t uCabinetIndex
+)
+{
+    uint32_t uMask;
+
+    if(state == NULL || uCabinetIndex >= FLOPPY144_SECURE_CABINET_MAX)
+    {
+        return false;
+    }
+
+    uMask = 1U << uCabinetIndex;
+    return (state->secure_cabinets_unlocked & uMask) != 0U;
+}
+
+bool Floppy144RunStateUnlockSecureCabinet(
+    Floppy144RunState *state,
+    uint32_t uCabinetIndex
+)
+{
+    uint32_t uMask;
+
+    if(state == NULL || uCabinetIndex >= FLOPPY144_SECURE_CABINET_MAX)
+    {
+        return false;
+    }
+
+    uMask = 1U << uCabinetIndex;
+
+    if((state->secure_cabinets_unlocked & uMask) != 0U)
+    {
+        return false;
+    }
+
+    state->secure_cabinets_unlocked |= uMask;
+    state->dirty = 1U;
+    return true;
+}
+
 bool Floppy144RunStateBitGet
 (
     const uint32_t *words,

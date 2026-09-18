@@ -12,6 +12,7 @@
 #include "f144_win32_platform.h"
 
 #include "floppy144_catalogue.h"
+#include "floppy144_cabinet.h"
 #include "floppy144_document.h"
 #include "floppy144_interaction_engine.h"
 #include "floppy144_notebook_view.h"
@@ -42,6 +43,7 @@ typedef enum Floppy144Screen
     FLOPPY144_SCREEN_SPLASH,
     FLOPPY144_SCREEN_MAIN_MENU,
     FLOPPY144_SCREEN_OFFICE,
+    FLOPPY144_SCREEN_CABINET,
     FLOPPY144_SCREEN_NOTEBOOK,
     FLOPPY144_SCREEN_TERMINAL,
     FLOPPY144_SCREEN_CATALOGUE
@@ -59,6 +61,7 @@ static F144Runtime *global_runtime;
 static Floppy144Screen global_screen;
 static Floppy144TerminalState global_terminal;
 static Floppy144CatalogueState global_catalogue;
+static Floppy144CabinetState global_cabinet;
 static Floppy144NotebookViewState global_notebook;
 static Floppy144DiscoveryProfile global_profile;
 static Floppy144Settings global_settings;
@@ -208,6 +211,18 @@ static void Floppy144Redraw(
                     global_office_notice
                 );
             }
+
+            break;
+        }
+
+        /* STAGE 3B.5 CABINET DRAW */
+        case FLOPPY144_SCREEN_CABINET:
+        {
+            Floppy144CabinetDraw(
+                global_runtime,
+                &global_cabinet,
+                &global_run_state
+            );
 
             break;
         }
@@ -1118,6 +1133,21 @@ static LRESULT CALLBACK Floppy144WindowProc(
 
         case WM_CHAR:
         {
+            /* STAGE 3B.5 CABINET CHARACTER INPUT */
+            if(global_screen == FLOPPY144_SCREEN_CABINET)
+            {
+                if(w_param >= '0' && w_param <= '9')
+                {
+                    (void)Floppy144CabinetInputDigit(
+                        &global_cabinet,
+                        (char)w_param
+                    );
+                }
+
+                Floppy144Redraw(window);
+                return 0;
+            }
+
             if(
                 global_screen !=
                 FLOPPY144_SCREEN_TERMINAL
@@ -1597,6 +1627,27 @@ static LRESULT CALLBACK Floppy144WindowProc(
 
                         case 'A':
                         {
+                            /* STAGE 3B.5 CABINET ACCESS KEY */
+                            {
+                                if(
+                                    (
+                                        Floppy144SiteAvailableActions(&global_run_state) &
+                                        FLOPPY144_SITE_ACTION_ACCESS
+                                    ) == 0U &&
+                                    Floppy144CabinetOpenNearby(
+                                        &global_cabinet,
+                                        &global_run_state
+                                    )
+                                )
+                                {
+                                    global_office_notice = NULL;
+                                    global_resume_screen = FLOPPY144_SCREEN_CABINET;
+                                    global_screen = FLOPPY144_SCREEN_CABINET;
+                                    Floppy144Redraw(window);
+                                    return 0;
+                                }
+                            }
+
                             Floppy144InteractOffice(
                                 window,
                                 FLOPPY144_OFFICE_INTERACTION_ACCESS
@@ -1642,6 +1693,90 @@ static LRESULT CALLBACK Floppy144WindowProc(
                  * moves one entry, Page Up/Page Down jumps five entries, and
                  * N or Backspace returns to Site exploration.
                  */
+                /* STAGE 3B.5 CABINET KEY ROUTING
+                 *
+                 * Keypad and Interior share one reusable screen state.
+                 * Escape remains the universal Session Control route.
+                 */
+                case FLOPPY144_SCREEN_CABINET:
+                {
+                    switch(w_param)
+                    {
+                        case VK_UP:
+                        {
+                            Floppy144CabinetMoveSelection(
+                                &global_cabinet,
+                                &global_run_state,
+                                -1
+                            );
+                            Floppy144Redraw(window);
+                            return 0;
+                        }
+
+                        case VK_DOWN:
+                        {
+                            Floppy144CabinetMoveSelection(
+                                &global_cabinet,
+                                &global_run_state,
+                                1
+                            );
+                            Floppy144Redraw(window);
+                            return 0;
+                        }
+
+                        case VK_RETURN:
+                        {
+                            if(Floppy144CabinetInteriorOpen(&global_cabinet))
+                            {
+                                (void)Floppy144CabinetInspectSelected(
+                                    &global_cabinet,
+                                    &global_world,
+                                    &global_run_state
+                                );
+                            }
+                            else
+                            {
+                                (void)Floppy144CabinetSubmitCode(
+                                    &global_cabinet,
+                                    &global_world,
+                                    &global_run_state
+                                );
+                            }
+
+                            Floppy144Redraw(window);
+                            return 0;
+                        }
+
+                        case 'I':
+                        {
+                            if(Floppy144CabinetInteriorOpen(&global_cabinet))
+                            {
+                                (void)Floppy144CabinetInspectSelected(
+                                    &global_cabinet,
+                                    &global_world,
+                                    &global_run_state
+                                );
+                                Floppy144Redraw(window);
+                            }
+                            return 0;
+                        }
+
+                        case VK_BACK:
+                        {
+                            if(!Floppy144CabinetBackspace(&global_cabinet))
+                            {
+                                global_resume_screen = FLOPPY144_SCREEN_OFFICE;
+                                global_screen = FLOPPY144_SCREEN_OFFICE;
+                            }
+
+                            Floppy144Redraw(window);
+                            return 0;
+                        }
+                    }
+
+                    break;
+                }
+
                 case FLOPPY144_SCREEN_NOTEBOOK:
                 {
                     switch(w_param)
