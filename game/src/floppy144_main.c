@@ -15,7 +15,6 @@
 #include "floppy144_document.h"
 #include "floppy144_interaction_engine.h"
 #include "floppy144_notebook_view.h"
-#include "floppy144_object_registry.h"
 #include "floppy144_recovery.h"
 #include "floppy144_terminal.h"
 #include "floppy144_world.h"
@@ -28,6 +27,8 @@
 #include "floppy144_site_view.h"
 
 #include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
 
 /*
  * Top-level screen state
@@ -80,6 +81,9 @@ static bool global_recorded_session_is_autosave;
  * clears it. session state controls menu availability and suspended-screen recovery.
  */
 
+#define FLOPPY144_OFFICE_NOTICE_CAPACITY 160U
+
+static char global_office_notice_buffer[FLOPPY144_OFFICE_NOTICE_CAPACITY];
 static const char *global_office_notice;
 static bool global_session_active;
 static bool global_catalogue_direct_document;
@@ -749,8 +753,9 @@ static void Floppy144MovePlayer(
     NULL;
 
     /*
-     * Input is expressed relative to what the player sees.
-     * Convert it back into the canonical unrotated Site before collision.
+     * Input is expressed in the same axes as canonical Site space.
+     * The view facade is intentionally identity-mapped after the orientation
+     * migration, so collision receives the same direction the player presses.
      */
 
     Floppy144SiteViewMovementToWorld(
@@ -759,6 +764,29 @@ static void Floppy144MovePlayer(
         &world_movement_x,
         &world_movement_y
     );
+
+    /*
+     * OUTSIDE is a real connection endpoint, not another reconstructable room.
+     * Crossing an unlocked exterior door therefore suspends Site exploration
+     * and opens the existing recovery/session-control menu. The player is not
+     * moved beyond the threshold, so RETURN TO SITE places them just inside
+     * the same exit. Locked exterior doors continue through ordinary collision
+     * and remain impassable.
+     */
+    if(
+        Floppy144RunStateWouldExitSite(
+            &global_run_state,
+            world_movement_x,
+            world_movement_y
+        )
+    )
+    {
+        Floppy144OpenMainMenu(
+            window
+        );
+
+        return;
+    }
 
     Floppy144RunStateMovePlayerSite(
         &global_run_state,
@@ -783,151 +811,248 @@ typedef enum Floppy144OfficeInteractionMode
 Floppy144OfficeInteractionMode;
 
 /*
- * Execute the action declared by the best eligible nearby object.
+ * Convert a stable data identifier into compact player-facing Site text.
+ * This is used only when a reconstructed parent exists but all of its physical
+ * children are still hidden by progression.
+ */
+static void Floppy144OfficeParentLabel(
+    char *pszOutput,
+    size_t uOutputCapacity,
+    const char *pszId
+)
+{
+    size_t uRead = 0U;
+    size_t uWrite = 0U;
+
+    if(
+        pszOutput == NULL ||
+        uOutputCapacity == 0U
+    )
+    {
+        return;
+    }
+
+    pszOutput[0] = '\0';
+
+    if(pszId == NULL)
+    {
+        return;
+    }
+
+    while(
+        pszId[uRead] != '\0' &&
+        uWrite + 1U < uOutputCapacity
+    )
+    {
+        char cCharacter = pszId[uRead++];
+
+        if(cCharacter == '_')
+        {
+            cCharacter = ' ';
+        }
+
+        pszOutput[uWrite++] = cCharacter;
+    }
+
+    pszOutput[uWrite] = '\0';
+}
+
+static void Floppy144OfficeSetItemNotice(
+    const char *pszItemName,
+    const char *pszSuffix
+)
+{
+    if(pszItemName == NULL)
+    {
+        global_office_notice = NULL;
+        return;
+    }
+
+    snprintf(
+        global_office_notice_buffer,
+        sizeof(global_office_notice_buffer),
+        "%s%s",
+        pszItemName,
+        pszSuffix != NULL ? pszSuffix : ""
+    );
+
+    global_office_notice =
+        global_office_notice_buffer;
+}
+
+/*
+ * Execute a projection-neutral Site action.
  *
- * Access and inspection deliberately use different keys. Access is reserved
- * for terminals and later openable containers/doors; inspection is used for
- * physical evidence and ordinary objects. Checking the presentation action
- * before applying effects prevents the wrong key from accidentally firing a
- * physical interaction.
+ * Access is currently the GDR-terminal action. Doors/openable furniture remain
+ * for the later connection/access pass. Inspect resolves the nearest canonical
+ * physical item through generated furniture/fixture geometry and then routes
+ * any progression through the generic interaction engine.
  */
 static void Floppy144InteractOffice(
     HWND window,
     Floppy144OfficeInteractionMode eMode
 )
 {
-    Floppy144ObjectId object =
-        Floppy144SiteInteractionTarget(
-            &global_run_state
-        );
-
-    const Floppy144ObjectDefinition *definition =
-        Floppy144ObjectGet(
-            object
-        );
-
-    const Floppy144ObjectInteractionDefinition *interaction =
-        definition != NULL
-            ? definition->interaction
-            : NULL;
-
-    bool bAccessAction;
-
-    if(interaction == NULL)
+    if(eMode == FLOPPY144_OFFICE_INTERACTION_ACCESS)
     {
-        return;
-    }
+        Floppy144RoomId eTerminalRoom;
 
-    bAccessAction =
-        interaction->action ==
-        FLOPPY144_OBJECT_ACTION_OPEN_TERMINAL;
-
-    if(
-        (
-            eMode == FLOPPY144_OFFICE_INTERACTION_ACCESS &&
-            !bAccessAction
-        ) ||
-        (
-            eMode == FLOPPY144_OFFICE_INTERACTION_INSPECT &&
-            bAccessAction
+        if(
+            !Floppy144SiteAccessTerminalRoom(
+                &global_run_state,
+                &eTerminalRoom
+            )
         )
-    )
-    {
+        {
+            return;
+        }
+
+        global_office_notice = NULL;
+
+        global_screen =
+            FLOPPY144_SCREEN_TERMINAL;
+
+        Floppy144TerminalResetAtRoom(
+            &global_terminal,
+            &global_world,
+            eTerminalRoom
+        );
+
+        Floppy144Redraw(window);
         return;
     }
 
-    /*
-     * Objects may declare persistent world-state effects independently of
-     * their presentation action. This keeps evidence and reveal logic inside
-     * registered content rather than the central interaction dispatcher.
-     */
-
-    if(interaction->pszPhysicalSourceId != NULL)
+    if(eMode == FLOPPY144_OFFICE_INTERACTION_INSPECT)
     {
+        Floppy144SiteInspectionTarget sTarget;
+
+        if(
+            !Floppy144SiteResolveInspectionTarget(
+                &global_run_state,
+                &sTarget
+            )
+        )
+        {
+            return;
+        }
+
         /*
-         * Resolve the physical item to its canonical JSON interaction. No
-         * object-specific progression function or T/I switch is needed here.
+         * The furniture/fixture is reconstructed, but every physical child on
+         * it is still progression-hidden. Report only the parent so no future
+         * evidence or story wording leaks early.
          */
-        Floppy144InteractionId eInteraction =
-            Floppy144InteractionForPhysicalSource(
-                interaction->pszPhysicalSourceId
+        if(sTarget.pszPhysicalItemName == NULL)
+        {
+            char szParentLabel[96];
+
+            Floppy144OfficeParentLabel(
+                szParentLabel,
+                sizeof(szParentLabel),
+                sTarget.pszParentId
             );
 
-        if(eInteraction != FLOPPY144_INTERACTION_COUNT)
+            snprintf(
+                global_office_notice_buffer,
+                sizeof(global_office_notice_buffer),
+                "%s: NO RECOVERED ITEM VISIBLE.",
+                szParentLabel[0] != '\0'
+                    ? szParentLabel
+                    : "RECONSTRUCTED OBJECT"
+            );
+
+            global_office_notice =
+                global_office_notice_buffer;
+
+            Floppy144Redraw(window);
+            return;
+        }
+
+        /* Ordinary physical context needs no persistent interaction bit. */
+        if(
+            sTarget.eInteraction ==
+            FLOPPY144_INTERACTION_COUNT
+        )
         {
-            (void)Floppy144InteractionTryRun(
+            Floppy144OfficeSetItemNotice(
+                sTarget.pszPhysicalItemName,
+                "."
+            );
+
+            Floppy144Redraw(window);
+            return;
+        }
+
+        if(sTarget.bInteractionCompleted)
+        {
+            Floppy144OfficeSetItemNotice(
+                sTarget.pszPhysicalItemName,
+                ": INSPECTION ALREADY RECORDED."
+            );
+
+            Floppy144Redraw(window);
+            return;
+        }
+
+        if(!sTarget.bInteractionAvailable)
+        {
+            Floppy144OfficeSetItemNotice(
+                sTarget.pszPhysicalItemName,
+                ": NO ACTIONABLE FINDING YET."
+            );
+
+            Floppy144Redraw(window);
+            return;
+        }
+
+        if(
+            Floppy144InteractionTryRun(
                 &global_world,
                 &global_run_state,
-                eInteraction
-            );
-        }
-    }
-    else if(interaction->effect_count > 0U)
-    {
-        /* Compatibility path for non-canonical presentation effects. */
-        Floppy144ApplyEffects(
-            &global_world,
-            &global_run_state,
-            interaction->effects,
-            interaction->effect_count
-        );
-    }
-
-    switch(interaction->action)
-    {
-        case FLOPPY144_OBJECT_ACTION_OPEN_TERMINAL:
+                sTarget.eInteraction
+            )
+        )
         {
-            Floppy144RoomId eTerminalRoom =
-                Floppy144SiteRoomAtPosition(
-                    global_run_state.player_site_x,
-                    global_run_state.player_site_y
+            const Floppy144DataRecord *pInteraction =
+                Floppy144InteractionRecord(
+                    sTarget.eInteraction
                 );
 
-            global_office_notice =
-                0;
+            bool bEvidenceRecorded = false;
 
-            global_screen =
-                FLOPPY144_SCREEN_TERMINAL;
+            if(
+                pInteraction != NULL &&
+                pInteraction->pszE != NULL
+            )
+            {
+                Floppy144EvidenceId eEvidence =
+                    Floppy144GameDataEvidenceId(
+                        pInteraction->pszE
+                    );
 
-            Floppy144TerminalResetAtRoom(
-                &global_terminal,
-                &global_world,
-                eTerminalRoom
+                bEvidenceRecorded =
+                    eEvidence != FLOPPY144_EVIDENCE_COUNT &&
+                    Floppy144RunStateEvidenceEstablished(
+                        &global_run_state,
+                        eEvidence
+                    );
+            }
+
+            Floppy144OfficeSetItemNotice(
+                sTarget.pszPhysicalItemName,
+                bEvidenceRecorded
+                    ? ": EVIDENCE RECORDED."
+                    : ": INSPECTION RECORDED."
             );
-
-            Floppy144Redraw(
-                window
-            );
-
-            return;
         }
-
-        case FLOPPY144_OBJECT_ACTION_SHOW_NOTICE:
+        else
         {
-            global_office_notice =
-                interaction->notice;
-
-            Floppy144Redraw(
-                window
+            Floppy144OfficeSetItemNotice(
+                sTarget.pszPhysicalItemName,
+                ": INSPECTION COULD NOT BE RECORDED."
             );
-
-            return;
         }
 
-        case FLOPPY144_OBJECT_ACTION_NONE:
-        default:
-        {
-            /*
-             * Some generated physical interactions exist only to establish
-             * persistent evidence/state. Their lack of a presentation action
-             * is therefore valid after the generic interaction has run.
-             */
-            Floppy144Redraw(
-                window
-            );
-
-            return;
-        }
+        Floppy144Redraw(window);
     }
 }
 
@@ -1583,7 +1708,11 @@ static LRESULT CALLBACK Floppy144WindowProc(
                     break;
                 }
 
-                /* Terminal: printable input arrives through WM_CHAR. */
+                /*
+                 * Terminal: printable input arrives through WM_CHAR. Arrow
+                 * keys are reserved for session-local command history while
+                 * the help/record pagers are not active.
+                 */
                 case FLOPPY144_SCREEN_TERMINAL:
                 {
                     if(w_param == VK_ESCAPE)
@@ -1596,6 +1725,41 @@ static LRESULT CALLBACK Floppy144WindowProc(
                         );
 
                         return 0;
+                    }
+
+                    if(
+                        !Floppy144TerminalHelpPagerActive(
+                            &global_terminal
+                        ) &&
+                        !Floppy144TerminalRecordPagerActive(
+                            &global_terminal
+                        )
+                    )
+                    {
+                        switch(w_param)
+                        {
+                            case VK_UP:
+                            {
+                                Floppy144TerminalMoveHistory(
+                                    &global_terminal,
+                                    -1
+                                );
+
+                                Floppy144Redraw(window);
+                                return 0;
+                            }
+
+                            case VK_DOWN:
+                            {
+                                Floppy144TerminalMoveHistory(
+                                    &global_terminal,
+                                    1
+                                );
+
+                                Floppy144Redraw(window);
+                                return 0;
+                            }
+                        }
                     }
 
                     break;
@@ -1666,6 +1830,23 @@ static LRESULT CALLBACK Floppy144WindowProc(
                                 )
                             )
                             {
+                                /*
+                                 * Do not let the graphical catalogue bypass a
+                                 * trigger gate which would defer the same record
+                                 * through terminal OPEN.
+                                 */
+                                if(
+                                    !Floppy144DocumentAccessible(
+                                        &global_run_state,
+                                        global_catalogue.collection,
+                                        global_catalogue.selected_index
+                                    )
+                                )
+                                {
+                                    Floppy144Redraw(window);
+                                    return 0;
+                                }
+
                                 Floppy144CatalogueOpenDocument(
                                     &global_catalogue
                                 );

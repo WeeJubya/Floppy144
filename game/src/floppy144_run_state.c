@@ -3,6 +3,7 @@
 #include "floppy144_object_registry.h"
 #include "floppy144_site.h"
 #include "floppy144_site_rooms.h"
+#include "floppy144_site_object.h"
 #include "floppy144_game_data.h"
 
 #include <string.h>
@@ -692,6 +693,218 @@ static bool Floppy144RunStateRoomTransitionAllowed
     return Floppy144GameDataRoomTransitionAllowed(pState, eFromRoom, eToRoom);
 }
 
+/*
+ * Run-aware collision filter.
+ *
+ * Compiled Site geometry may contain a progression-controlled fixture before
+ * that fixture has been reconstructed into the current run. Rendering already
+ * suppresses such geometry through Floppy144SiteObjectGeometryVisible(); use
+ * the same decision for collision so an invisible item cannot block movement.
+ */
+static bool Floppy144RunStateCollisionGeometryVisible
+(
+    const Floppy144SiteRect *pRect,
+    void *pContext
+)
+{
+    const Floppy144RunState *pState =
+        (const Floppy144RunState *)pContext;
+
+    if(pState == NULL || pRect == NULL)
+    {
+        return false;
+    }
+
+    return Floppy144SiteRectRuntimeVisible(
+        pState,
+        pRect
+    );
+}
+
+/*
+ * Convert one generated connection endpoint to the compact room code carried
+ * by Site boundary rectangles.
+ */
+static uint8_t Floppy144RunStateConnectionEndpoint
+(
+    const char *pszRoomId
+)
+{
+    Floppy144RoomId eRoom;
+
+    if(pszRoomId == NULL)
+    {
+        return FLOPPY144_SITE_ROOM_SHARED;
+    }
+
+    if(strcmp(pszRoomId, "OUTSIDE") == 0)
+    {
+        return FLOPPY144_SITE_ROOM_OUTSIDE;
+    }
+
+    eRoom = Floppy144GameDataRoomId(pszRoomId);
+
+    if((uint32_t)eRoom >= (uint32_t)FLOPPY144_ROOM_COUNT)
+    {
+        return FLOPPY144_SITE_ROOM_SHARED;
+    }
+
+    return (uint8_t)eRoom;
+}
+
+/*
+ * Determine whether a generated exterior door is currently unlocked.
+ *
+ * Boundary rectangles intentionally remain compact and do not carry string
+ * connection IDs. Their endpoints identify the corresponding canonical
+ * connection record. Parallel exterior doors in the current Site share the
+ * same state, so endpoint matching is sufficient.
+ */
+static bool Floppy144RunStateExteriorDoorUnlocked
+(
+    const Floppy144RunState *pState,
+    const Floppy144SiteRect *pDoor
+)
+{
+    uint32_t uRecordIndex;
+
+    if(
+        pState == NULL ||
+        pDoor == NULL ||
+        pDoor->type != (uint8_t)FLOPPY144_SITE_DOOR ||
+        (
+            pDoor->from_room != FLOPPY144_SITE_ROOM_OUTSIDE &&
+            pDoor->to_room != FLOPPY144_SITE_ROOM_OUTSIDE
+        )
+    )
+    {
+        return false;
+    }
+
+    for(
+        uRecordIndex = 0U;
+        uRecordIndex < Floppy144GameDataRecordCount();
+        ++uRecordIndex
+    )
+    {
+        const Floppy144DataRecord *pConnection =
+            Floppy144GameDataRecordAt(uRecordIndex);
+
+        uint8_t uFrom;
+        uint8_t uTo;
+
+        if(
+            pConnection == NULL ||
+            pConnection->eKind != FLOPPY144_DATA_CONNECTION
+        )
+        {
+            continue;
+        }
+
+        uFrom =
+            Floppy144RunStateConnectionEndpoint(
+                pConnection->pszA
+            );
+
+        uTo =
+            Floppy144RunStateConnectionEndpoint(
+                pConnection->pszB
+            );
+
+        if(
+            !(
+                (
+                    uFrom == pDoor->from_room &&
+                    uTo == pDoor->to_room
+                ) ||
+                (
+                    uFrom == pDoor->to_room &&
+                    uTo == pDoor->from_room
+                )
+            )
+        )
+        {
+            continue;
+        }
+
+        if(
+            pConnection->pszId != NULL &&
+            Floppy144GameDataConnectionUnlocked(
+                pState,
+                pConnection->pszId
+            )
+        )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool Floppy144RunStateWouldExitSite
+(
+    const Floppy144RunState *state,
+    int32_t delta_x16,
+    int32_t delta_y16
+)
+{
+    const Floppy144SiteRect *pDoor;
+    Floppy144RoomId eCurrentRoom;
+    uint8_t uInteriorRoom;
+
+    if(state == NULL)
+    {
+        return false;
+    }
+
+    pDoor =
+        Floppy144SiteExteriorDoorForMove(
+            state->player_site_x,
+            state->player_site_y,
+            delta_x16,
+            delta_y16
+        );
+
+    if(pDoor == NULL)
+    {
+        return false;
+    }
+
+    eCurrentRoom =
+        Floppy144SiteRoomAtPosition(
+            state->player_site_x,
+            state->player_site_y
+        );
+
+    if(
+        (uint32_t)eCurrentRoom >= (uint32_t)FLOPPY144_ROOM_COUNT ||
+        !Floppy144RunStateRoomReconstructed(
+            state,
+            eCurrentRoom
+        )
+    )
+    {
+        return false;
+    }
+
+    uInteriorRoom =
+        pDoor->from_room == FLOPPY144_SITE_ROOM_OUTSIDE
+            ? pDoor->to_room
+            : pDoor->from_room;
+
+    if(uInteriorRoom != (uint8_t)eCurrentRoom)
+    {
+        return false;
+    }
+
+    return
+        Floppy144RunStateExteriorDoorUnlocked(
+            state,
+            pDoor
+        );
+}
+
 bool Floppy144RunStateMovePlayerSite
 (
     Floppy144RunState *state,
@@ -726,11 +939,13 @@ bool Floppy144RunStateMovePlayerSite
     state->player_site_y;
 
     if(
-        !Floppy144SiteMovePosition(
+        !Floppy144SiteMovePositionFiltered(
             &x,
             &y,
             delta_x16,
-            delta_y16
+            delta_y16,
+            Floppy144RunStateCollisionGeometryVisible,
+            state
         )
     )
     {

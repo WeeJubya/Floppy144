@@ -46,11 +46,371 @@ Floppy144CollectionId Floppy144GameDataCollectionId(const char *pszId){uint32_t 
 Floppy144RoomId Floppy144GameDataRoomId(const char *pszId){uint32_t u;for(u=0;u<(uint32_t)FLOPPY144_ROOM_COUNT;++u)if(Floppy144StringEqual(g_apszRoomIds[u],pszId))return(Floppy144RoomId)u;return FLOPPY144_ROOM_COUNT;}
 Floppy144CapabilityId Floppy144GameDataCapabilityId(const char *pszId){uint32_t u;for(u=0;u<(uint32_t)FLOPPY144_CAPABILITY_COUNT;++u)if(Floppy144StringEqual(g_apszCapabilityIds[u],pszId))return(Floppy144CapabilityId)u;return FLOPPY144_CAPABILITY_COUNT;}
 
-static Floppy144ObjectId Floppy144LegacyObjectFromPhysicalId(const char *pszPhysicalId){char szPrefix[16];uint32_t r=0,w=0,u;if(!pszPhysicalId)return FLOPPY144_OBJECT_NONE;while(pszPhysicalId[r]&&w+1U<sizeof(szPrefix)){char c=pszPhysicalId[r++];if(c!='-')szPrefix[w++]=c;}szPrefix[w]='\0';for(u=0;u<F144_COUNT(g_asLegacyObjects);++u){size_t n=strlen(szPrefix);if(strncmp(g_asLegacyObjects[u].pszSymbol,szPrefix,n)==0&&(g_asLegacyObjects[u].pszSymbol[n]=='\0'||g_asLegacyObjects[u].pszSymbol[n]=='_'))return g_asLegacyObjects[u].eObject;}return FLOPPY144_OBJECT_NONE;}
+/*
+ * Bridge canonical physical-item IDs onto the small legacy object registry
+ * while Stage 3 migration is still in progress.
+ *
+ * Prefer the object's declared canonical physical source. This correctly maps
+ * items such as P-012 onto SUPPRESSION_CONTROL_PANEL even though the old
+ * internal object symbol does not contain the physical ID. The historical
+ * symbol-prefix fallback remains for older migrated objects.
+ */
+static Floppy144ObjectId Floppy144LegacyObjectFromPhysicalId(
+    const char *pszPhysicalId
+)
+{
+    char szPrefix[16];
+    uint32_t uRead = 0U;
+    uint32_t uWrite = 0U;
+    uint32_t uIndex;
+
+    if(pszPhysicalId == NULL)
+    {
+        return FLOPPY144_OBJECT_NONE;
+    }
+
+    for(
+        uIndex = 0U;
+        uIndex < (uint32_t)FLOPPY144_OBJECT_COUNT;
+        ++uIndex
+    )
+    {
+        const Floppy144ObjectDefinition *pDefinition =
+            Floppy144ObjectGet(
+                (Floppy144ObjectId)uIndex
+            );
+
+        if(
+            pDefinition != NULL &&
+            pDefinition->interaction != NULL &&
+            Floppy144StringEqual(
+                pDefinition->interaction->pszPhysicalSourceId,
+                pszPhysicalId
+            )
+        )
+        {
+            return (Floppy144ObjectId)uIndex;
+        }
+    }
+
+    while(
+        pszPhysicalId[uRead] != '\0' &&
+        uWrite + 1U < sizeof(szPrefix)
+    )
+    {
+        char c = pszPhysicalId[uRead++];
+
+        if(c != '-')
+        {
+            szPrefix[uWrite++] = c;
+        }
+    }
+
+    szPrefix[uWrite] = '\0';
+
+    for(
+        uIndex = 0U;
+        uIndex < F144_COUNT(g_asLegacyObjects);
+        ++uIndex
+    )
+    {
+        size_t uPrefixLength =
+            strlen(szPrefix);
+
+        if(
+            strncmp(
+                g_asLegacyObjects[uIndex].pszSymbol,
+                szPrefix,
+                uPrefixLength
+            ) == 0 &&
+            (
+                g_asLegacyObjects[uIndex].pszSymbol[uPrefixLength] == '\0' ||
+                g_asLegacyObjects[uIndex].pszSymbol[uPrefixLength] == '_'
+            )
+        )
+        {
+            return g_asLegacyObjects[uIndex].eObject;
+        }
+    }
+
+    return FLOPPY144_OBJECT_NONE;
+}
 
 static bool Floppy144PersistentEffectPresent(const Floppy144RunState *pState,const char *pszOperation,const char *pszTarget){uint32_t uIndex;if(!pState||!pszOperation)return false;for(uIndex=0;uIndex<F144_COUNT(g_asGameData);++uIndex){const Floppy144DataRecord*p=&g_asGameData[uIndex];bool bOwner=false;if(p->eKind!=FLOPPY144_DATA_TRIGGER_EFFECT&&p->eKind!=FLOPPY144_DATA_INTERACTION_EFFECT)continue;if(!Floppy144StringEqual(p->pszA,pszOperation))continue;if(pszTarget&&!Floppy144StringEqual(p->pszB,pszTarget))continue;if(p->eKind==FLOPPY144_DATA_TRIGGER_EFFECT){Floppy144TriggerId e=Floppy144GameDataTriggerId(p->pszId);bOwner=e!=FLOPPY144_TRIGGER_COUNT&&Floppy144RunStateTriggerFired(pState,e);}else{Floppy144InteractionId e=Floppy144GameDataInteractionId(p->pszId);bOwner=e!=FLOPPY144_INTERACTION_COUNT&&Floppy144RunStateInteractionCompleted(pState,e);}if(bOwner)return true;}return false;}
-bool Floppy144GameDataConnectionUnlocked(const Floppy144RunState*pState,const char*pszId){const Floppy144DataRecord*p=Floppy144GameDataFind(FLOPPY144_DATA_CONNECTION,pszId);if(!p)return false;if(Floppy144StringEqual(p->pszC,"UNLOCKED"))return true;return Floppy144PersistentEffectPresent(pState,"UNLOCK_CONNECTION",pszId);}
-bool Floppy144GameDataCollectionEnabled(const Floppy144RunState*pState,const char*pszId){Floppy144CollectionId e=Floppy144GameDataCollectionId(pszId);if(!pState||e==FLOPPY144_COLLECTION_COUNT)return false;if(e==FLOPPY144_COLLECTION_DR01)return true;if(Floppy144RunStateCollectionRestored(pState,e))return true;return Floppy144PersistentEffectPresent(pState,"ENABLE_COLLECTION",pszId);}
+
+/*
+ * Resolve one stable progression ID used by a connection unlock condition.
+ *
+ * Current canonical connection data names either a trigger (T-xxx) or an
+ * interaction (I-xxx). Keep the resolver generic by asking the generated
+ * registries rather than switching on specific story IDs.
+ */
+static bool Floppy144ConnectionConditionAtomSatisfied(
+    const Floppy144RunState *pState,
+    const char *pszId
+)
+{
+    Floppy144TriggerId eTrigger;
+    Floppy144InteractionId eInteraction;
+
+    if(pState == NULL || pszId == NULL || pszId[0] == '\0')
+    {
+        return false;
+    }
+
+    eTrigger = Floppy144GameDataTriggerId(pszId);
+
+    if(eTrigger != FLOPPY144_TRIGGER_COUNT)
+    {
+        return Floppy144RunStateTriggerFired(pState, eTrigger);
+    }
+
+    eInteraction = Floppy144GameDataInteractionId(pszId);
+
+    if(eInteraction != FLOPPY144_INTERACTION_COUNT)
+    {
+        return Floppy144RunStateInteractionCompleted(
+            pState,
+            eInteraction
+        );
+    }
+
+    return false;
+}
+
+/*
+ * Evaluate the compact OR form used by canonical connection data, e.g.
+ *
+ *     T-010_OR_T-028
+ *
+ * A connection may contain more than one CONNECTION_CONDITION record. Those
+ * records are treated as AND requirements, while atoms inside one record are
+ * OR alternatives. This mirrors the authored structure without introducing a
+ * second story-specific door table in C.
+ */
+static bool Floppy144ConnectionConditionSatisfied(
+    const Floppy144RunState *pState,
+    const char *pszCondition
+)
+{
+    static const char szOrToken[] = "_OR_";
+    const char *pszStart;
+
+    if(pState == NULL || pszCondition == NULL || pszCondition[0] == '\0')
+    {
+        return false;
+    }
+
+    pszStart = pszCondition;
+
+    for(;;)
+    {
+        const char *pszSeparator = strstr(pszStart, szOrToken);
+        size_t uLength = pszSeparator != NULL
+            ? (size_t)(pszSeparator - pszStart)
+            : strlen(pszStart);
+        char szAtom[32];
+
+        if(uLength == 0U || uLength >= sizeof(szAtom))
+        {
+            return false;
+        }
+
+        memcpy(szAtom, pszStart, uLength);
+        szAtom[uLength] = '\0';
+
+        if(Floppy144ConnectionConditionAtomSatisfied(pState, szAtom))
+        {
+            return true;
+        }
+
+        if(pszSeparator == NULL)
+        {
+            break;
+        }
+
+        pszStart = pszSeparator + (sizeof(szOrToken) - 1U);
+    }
+
+    return false;
+}
+
+bool Floppy144GameDataConnectionUnlocked(
+    const Floppy144RunState *pState,
+    const char *pszId
+)
+{
+    const Floppy144DataRecord *pConnection;
+    uint32_t uIndex;
+    bool bHasCondition = false;
+
+    if(pState == NULL || pszId == NULL)
+    {
+        return false;
+    }
+
+    pConnection =
+        Floppy144GameDataFind(
+            FLOPPY144_DATA_CONNECTION,
+            pszId
+        );
+
+    if(pConnection == NULL)
+    {
+        return false;
+    }
+
+    if(Floppy144StringEqual(pConnection->pszC, "UNLOCKED"))
+    {
+        return true;
+    }
+
+    /*
+     * Preserve explicit UNLOCK_CONNECTION effects. Some authored interactions
+     * deliberately use the effect even when the connection also names the
+     * completing interaction as an unlock condition.
+     */
+    if(
+        Floppy144PersistentEffectPresent(
+            pState,
+            "UNLOCK_CONNECTION",
+            pszId
+        )
+    )
+    {
+        return true;
+    }
+
+    /*
+     * Honour the canonical connection.unlock_conditions array emitted as
+     * CONNECTION_CONDITION records. Every record must be satisfied; a record
+     * may itself contain OR alternatives such as T-010_OR_T-028.
+     */
+    for(uIndex = 0U; uIndex < F144_COUNT(g_asGameData); ++uIndex)
+    {
+        const Floppy144DataRecord *pRecord = &g_asGameData[uIndex];
+
+        if(
+            pRecord->eKind != FLOPPY144_DATA_CONNECTION_CONDITION ||
+            !Floppy144StringEqual(pRecord->pszId, pszId)
+        )
+        {
+            continue;
+        }
+
+        bHasCondition = true;
+
+        if(
+            !Floppy144ConnectionConditionSatisfied(
+                pState,
+                pRecord->pszA
+            )
+        )
+        {
+            return false;
+        }
+    }
+
+    return bHasCondition;
+}
+/*
+ * A collection may enter the available pool in two generic ways:
+ *
+ * 1. an earlier persistent effect explicitly ENABLE_COLLECTIONs it; or
+ * 2. one of that collection's trigger records has become actionable.
+ *
+ * The second rule bridges narrative progression and the terminal catalogue.
+ * Room-reconstruction collections therefore appear when their authored
+ * conditions become true, without hard-coding collection IDs or player-facing
+ * Act labels in the engine.
+ */
+static bool Floppy144CollectionHasReadyTrigger(
+    const Floppy144RunState *pState,
+    const char *pszCollectionId
+)
+{
+    uint32_t uIndex;
+
+    if(pState == NULL || pszCollectionId == NULL)
+    {
+        return false;
+    }
+
+    for(uIndex = 0U; uIndex < F144_COUNT(g_asGameData); ++uIndex)
+    {
+        const Floppy144DataRecord *pRecord = &g_asGameData[uIndex];
+        Floppy144TriggerId eTrigger;
+
+        if(
+            pRecord->eKind != FLOPPY144_DATA_TRIGGER ||
+            !Floppy144StringEqual(pRecord->pszA, pszCollectionId)
+        )
+        {
+            continue;
+        }
+
+        eTrigger = Floppy144GameDataTriggerId(pRecord->pszId);
+
+        if(
+            eTrigger != FLOPPY144_TRIGGER_COUNT &&
+            Floppy144GameDataTriggerCanFire(pState, eTrigger)
+        )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool Floppy144GameDataCollectionEnabled(
+    const Floppy144RunState *pState,
+    const char *pszId
+)
+{
+    Floppy144CollectionId eCollection =
+        Floppy144GameDataCollectionId(pszId);
+
+    if(
+        pState == NULL ||
+        eCollection == FLOPPY144_COLLECTION_COUNT
+    )
+    {
+        return false;
+    }
+
+    if(eCollection == FLOPPY144_COLLECTION_DR01)
+    {
+        return true;
+    }
+
+    if(
+        Floppy144RunStateCollectionRestored(
+            pState,
+            eCollection
+        )
+    )
+    {
+        return true;
+    }
+
+    if(
+        Floppy144PersistentEffectPresent(
+            pState,
+            "ENABLE_COLLECTION",
+            pszId
+        )
+    )
+    {
+        return true;
+    }
+
+    return
+        Floppy144CollectionHasReadyTrigger(
+            pState,
+            pszId
+        );
+}
 bool Floppy144GameDataPhysicalItemRevealed(const Floppy144RunState*pState,const char*pszId){return Floppy144PersistentEffectPresent(pState,"REVEAL_PHYSICAL_ITEM",pszId);}
 bool Floppy144GameDataFactRecorded(const Floppy144RunState*pState,const char*pszId){return Floppy144PersistentEffectPresent(pState,"RECORD_NOTEBOOK_FACT",pszId);}
 /*
@@ -71,7 +431,66 @@ static bool Floppy144GameDataNotebookRecordVisible(
 uint32_t Floppy144GameDataNotebookEntryCount(const Floppy144RunState*pState){uint32_t u,n=0;if(!pState)return 0U;for(u=0;u<F144_COUNT(g_asGameData);++u)if(Floppy144GameDataNotebookRecordVisible(pState,&g_asGameData[u]))++n;return n;}
 const Floppy144DataRecord *Floppy144GameDataNotebookEntryAt(const Floppy144RunState*pState,uint32_t uVisibleIndex){uint32_t u,n=0;if(!pState)return NULL;for(u=0;u<F144_COUNT(g_asGameData);++u){const Floppy144DataRecord*p=&g_asGameData[u];if(!Floppy144GameDataNotebookRecordVisible(pState,p))continue;if(n==uVisibleIndex)return p;++n;}return NULL;}
 
-bool Floppy144GameDataWorkstreamAvailable(const Floppy144RunState*pState,const char*pszWorkstream){if(!pState||!pszWorkstream)return false;if(Floppy144StringEqual(pszWorkstream,"TECHNOLOGY")&&pState->branch==(uint8_t)FLOPPY144_RUN_BRANCH_TECHNOLOGY_FIRST)return true;if(Floppy144StringEqual(pszWorkstream,"RECORDS")&&pState->branch==(uint8_t)FLOPPY144_RUN_BRANCH_RECORDS_FIRST)return true;return Floppy144PersistentEffectPresent(pState,"RELEASE_ALTERNATE_WORKSTREAM",NULL);}
+bool Floppy144GameDataWorkstreamAvailable(
+    const Floppy144RunState *pState,
+    const char *pszWorkstream
+)
+{
+    bool bKnownWorkstream;
+
+    if(pState == NULL || pszWorkstream == NULL)
+    {
+        return false;
+    }
+
+    bKnownWorkstream =
+        Floppy144StringEqual(pszWorkstream, "TECHNOLOGY") ||
+        Floppy144StringEqual(pszWorkstream, "RECORDS");
+
+    if(!bKnownWorkstream)
+    {
+        return false;
+    }
+
+    /*
+     * Before the Act II branch choice, both workstream documents are valid
+     * choices. Selecting either one commits RunState.branch, after which the
+     * unchosen workstream is deferred until the authored
+     * RELEASE_ALTERNATE_WORKSTREAM effect fires at the end of Act II.
+     */
+    if(
+        pState->branch ==
+        (uint8_t)FLOPPY144_RUN_BRANCH_NONE
+    )
+    {
+        return true;
+    }
+
+    if(
+        Floppy144StringEqual(pszWorkstream, "TECHNOLOGY") &&
+        pState->branch ==
+            (uint8_t)FLOPPY144_RUN_BRANCH_TECHNOLOGY_FIRST
+    )
+    {
+        return true;
+    }
+
+    if(
+        Floppy144StringEqual(pszWorkstream, "RECORDS") &&
+        pState->branch ==
+            (uint8_t)FLOPPY144_RUN_BRANCH_RECORDS_FIRST
+    )
+    {
+        return true;
+    }
+
+    return
+        Floppy144PersistentEffectPresent(
+            pState,
+            "RELEASE_ALTERNATE_WORKSTREAM",
+            NULL
+        );
+}
 
 bool Floppy144GameDataRoomAccessible(const Floppy144RunState*pState,const char*pszRoomId){Floppy144RoomId eRoom=Floppy144GameDataRoomId(pszRoomId);uint32_t u;if(!pState||eRoom==FLOPPY144_ROOM_COUNT||!Floppy144RunStateRoomReconstructed(pState,eRoom))return false;for(u=0;u<F144_COUNT(g_asGameData);++u){const Floppy144DataRecord*p=&g_asGameData[u];const char*pszOther=NULL;if(p->eKind!=FLOPPY144_DATA_CONNECTION)continue;if(Floppy144StringEqual(p->pszA,pszRoomId))pszOther=p->pszB;else if(Floppy144StringEqual(p->pszB,pszRoomId))pszOther=p->pszA;else continue;if(!Floppy144GameDataConnectionUnlocked(pState,p->pszId))continue;if(Floppy144StringEqual(pszOther,"OUTSIDE"))return true;{Floppy144RoomId eOther=Floppy144GameDataRoomId(pszOther);if(eOther!=FLOPPY144_ROOM_COUNT&&Floppy144RunStateRoomReconstructed(pState,eOther))return true;}}return false;}
 bool Floppy144GameDataRoomTransitionAllowed(const Floppy144RunState*pState,Floppy144RoomId eFrom,Floppy144RoomId eTo){uint32_t u;if(!pState)return false;if(eFrom==eTo)return true;if((uint32_t)eFrom>=(uint32_t)FLOPPY144_ROOM_COUNT||(uint32_t)eTo>=(uint32_t)FLOPPY144_ROOM_COUNT)return false;for(u=0;u<F144_COUNT(g_asGameData);++u){const Floppy144DataRecord*p=&g_asGameData[u];Floppy144RoomId a,b;if(p->eKind!=FLOPPY144_DATA_CONNECTION)continue;a=Floppy144GameDataRoomId(p->pszA);b=Floppy144GameDataRoomId(p->pszB);if(((a==eFrom&&b==eTo)||(a==eTo&&b==eFrom))&&Floppy144GameDataConnectionUnlocked(pState,p->pszId))return true;}return false;}
@@ -91,6 +510,79 @@ bool Floppy144GameDataExecuteEffect(Floppy144WorldState*pWorld,Floppy144RunState
 
 static const Floppy144DataRecord *Floppy144Nth(Floppy144DataRecordKind eKind,int32_t nOrdinal){uint32_t u;int32_t n=0;for(u=0;u<F144_COUNT(g_asGameData);++u)if(g_asGameData[u].eKind==eKind){if(n==nOrdinal)return&g_asGameData[u];++n;}return NULL;}
 bool Floppy144GameDataTriggerCanFire(const Floppy144RunState*pState,Floppy144TriggerId eTrigger){const Floppy144DataRecord*pTrigger;uint32_t u;if(!pState||(uint32_t)eTrigger>=(uint32_t)FLOPPY144_TRIGGER_COUNT||Floppy144RunStateTriggerFired(pState,eTrigger))return false;pTrigger=Floppy144Nth(FLOPPY144_DATA_TRIGGER,(int32_t)eTrigger);if(!pTrigger)return false;for(u=0;u<F144_COUNT(g_asGameData);++u){const Floppy144DataRecord*p=&g_asGameData[u];if(p->eKind==FLOPPY144_DATA_TRIGGER_CONDITION&&Floppy144StringEqual(p->pszId,pTrigger->pszId)&&!Floppy144GameDataConditionSatisfied(pState,p->pszA,p->pszB))return false;}return true;}
+
+bool Floppy144GameDataTriggerDocumentAccessible(
+    const Floppy144RunState *pState,
+    Floppy144TriggerId eTrigger
+)
+{
+    const Floppy144DataRecord *pTrigger;
+    uint32_t uIndex;
+
+    if(
+        pState == NULL ||
+        (uint32_t)eTrigger >=
+            (uint32_t)FLOPPY144_TRIGGER_COUNT
+    )
+    {
+        return false;
+    }
+
+    pTrigger =
+        Floppy144Nth(
+            FLOPPY144_DATA_TRIGGER,
+            (int32_t)eTrigger
+        );
+
+    if(pTrigger == NULL)
+    {
+        return false;
+    }
+
+    /*
+     * Recovery-sequence conditions normally control effects, not whether the
+     * recovered prose itself can be read. Workstream availability is the one
+     * deliberate exception: it represents an authored branch-access gate.
+     */
+    for(
+        uIndex = 0U;
+        uIndex < F144_COUNT(g_asGameData);
+        ++uIndex
+    )
+    {
+        const Floppy144DataRecord *pCondition =
+            &g_asGameData[uIndex];
+
+        if(
+            pCondition->eKind !=
+                FLOPPY144_DATA_TRIGGER_CONDITION ||
+            !Floppy144StringEqual(
+                pCondition->pszId,
+                pTrigger->pszId
+            ) ||
+            !Floppy144StringEqual(
+                pCondition->pszA,
+                "workstream_available"
+            )
+        )
+        {
+            continue;
+        }
+
+        if(
+            !Floppy144GameDataConditionSatisfied(
+                pState,
+                pCondition->pszA,
+                pCondition->pszB
+            )
+        )
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
 bool Floppy144GameDataTriggerTryFire(Floppy144WorldState*pWorld,Floppy144RunState*pState,Floppy144TriggerId eTrigger){const Floppy144DataRecord*pTrigger;uint32_t u;if(!Floppy144GameDataTriggerCanFire(pState,eTrigger))return false;pTrigger=Floppy144Nth(FLOPPY144_DATA_TRIGGER,(int32_t)eTrigger);if(!pTrigger||!Floppy144RunStateFireTrigger(pState,eTrigger))return false;for(u=0;u<F144_COUNT(g_asGameData);++u){const Floppy144DataRecord*p=&g_asGameData[u];if(p->eKind==FLOPPY144_DATA_TRIGGER_EFFECT&&Floppy144StringEqual(p->pszId,pTrigger->pszId))(void)Floppy144GameDataExecuteEffect(pWorld,pState,p->pszA,p->pszB);}return true;}
 
 static bool Floppy144EvidenceOwnsInteraction(const char*pszEvidenceId,const char*pszInteractionId){const Floppy144DataRecord*pEvidence=Floppy144GameDataFind(FLOPPY144_DATA_EVIDENCE,pszEvidenceId);uint32_t u;if(!pEvidence||!pEvidence->b0)return false;for(u=0;u<F144_COUNT(g_asGameData);++u){const Floppy144DataRecord*p=&g_asGameData[u];if(p->eKind==FLOPPY144_DATA_EVIDENCE_REQUIREMENT&&Floppy144StringEqual(p->pszId,pszEvidenceId)&&Floppy144StringEqual(p->pszA,pszInteractionId))return true;}return false;}

@@ -3,9 +3,11 @@
  */
 
 #include "floppy144_document.h"
+#include "floppy144_game_data.h"
 #include "floppy144_trigger_engine.h"
 
 #include <stddef.h>
+#include <string.h>
 
 #define FLOPPY144_ARRAY_COUNT(values)                              \
     ((uint32_t)(sizeof(values) / sizeof((values)[0])))
@@ -65,6 +67,56 @@ const Floppy144DocumentDefinition *Floppy144DocumentGet(
 }
 
 /*
+ * Resolve an authored record by its exact stable player-facing ID.
+ *
+ * The procedural catalogue is intentionally not consulted here. This is the
+ * fallback used when a collection has authored records but its wider generated
+ * record index has not yet been populated.
+ */
+bool Floppy144DocumentFindRecordId(
+    const char *pszRecordId,
+    Floppy144CollectionId *pCollection,
+    uint32_t *pRecordIndex
+)
+{
+    uint32_t uDocumentIndex;
+
+    if(
+        pszRecordId == NULL ||
+        pCollection == NULL ||
+        pRecordIndex == NULL
+    )
+    {
+        return false;
+    }
+
+    for(
+        uDocumentIndex = 0U;
+        uDocumentIndex < FLOPPY144_DOCUMENT_COUNT;
+        ++uDocumentIndex
+    )
+    {
+        const Floppy144DocumentDefinition *pDocument =
+            &floppy144_documents[uDocumentIndex];
+
+        if(
+            pDocument->record_id_override != NULL &&
+            strcmp(
+                pDocument->record_id_override,
+                pszRecordId
+            ) == 0
+        )
+        {
+            *pCollection = pDocument->collection;
+            *pRecordIndex = pDocument->record_index;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/*
  * Find the next actionable trigger document for one restored collection.
  *
  * The document table is generated from canonical JSON, so source order is the
@@ -114,6 +166,68 @@ const Floppy144DocumentDefinition *Floppy144DocumentFirstPendingTrigger(
     }
 
     return NULL;
+}
+
+
+/*
+ * Query whether one recovered document is currently readable.
+ *
+ * Trigger documents are special because the trigger can itself represent an
+ * authored gate. Once fired, the document remains readable permanently. Before
+ * firing, the generic trigger engine decides whether the document is currently
+ * available in this recovery path.
+ */
+bool Floppy144DocumentAccessible(
+    const Floppy144RunState *pRunState,
+    Floppy144CollectionId eCollection,
+    uint32_t uRecordIndex
+)
+{
+    const Floppy144DocumentDefinition *pDocument;
+
+    if(
+        pRunState == NULL ||
+        (uint32_t)eCollection >=
+            (uint32_t)FLOPPY144_COLLECTION_COUNT
+    )
+    {
+        return false;
+    }
+
+    pDocument =
+        Floppy144DocumentGet(
+            eCollection,
+            uRecordIndex
+        );
+
+    /*
+     * Index-only/generated catalogue entries have no authored trigger gate.
+     */
+    if(pDocument == NULL)
+    {
+        return true;
+    }
+
+    if(pDocument->trigger == FLOPPY144_TRIGGER_COUNT)
+    {
+        return true;
+    }
+
+    if(
+        Floppy144RunStateTriggerFired(
+            pRunState,
+            pDocument->trigger
+        )
+    )
+    {
+        return true;
+    }
+
+    return
+        Floppy144GameDataTriggerDocumentAccessible(
+            pRunState,
+            pDocument->trigger
+        );
 }
 
 /*

@@ -77,14 +77,34 @@ uint8_t f144CharToKey
 Dimensions f144GetWindowSize
 (
     F144Runtime *runtime
-){
-    Dimensions dim  = {0};
-    RECT       rect = {0};
+)
+{
+    Dimensions dim = {0};
+    RECT rect = {0};
 
-    GetWindowRect(runtime->window, &rect);
+    if(
+        runtime == NULL ||
+        runtime->window == NULL
+    )
+    {
+        return dim;
+    }
 
-    dim.width  = rect.right  - rect.left;
-    dim.height = rect.bottom - rect.top;
+    /*
+     * Rendering targets the Win32 client-area device context. GetWindowRect()
+     * includes the title bar and borders and therefore produces a fractional
+     * stretch even when the requested client size is an exact canvas multiple.
+     */
+    if(!GetClientRect(runtime->window, &rect))
+    {
+        return dim;
+    }
+
+    dim.width =
+        (uint32_t)(rect.right - rect.left);
+
+    dim.height =
+        (uint32_t)(rect.bottom - rect.top);
 
     return dim;
 }

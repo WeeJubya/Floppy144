@@ -65,6 +65,18 @@ bool Floppy144GameDataRoomTransitionAllowed(const Floppy144RunState *pState,Flop
 bool Floppy144GameDataConditionSatisfied(const Floppy144RunState *pState,const char *pszKind,const char *pszTarget);
 bool Floppy144GameDataExecuteEffect(Floppy144WorldState *pWorld,Floppy144RunState *pState,const char *pszOperation,const char *pszTarget);
 bool Floppy144GameDataTriggerCanFire(const Floppy144RunState *pState,Floppy144TriggerId eTrigger);
+
+/*
+ * Query whether an authored trigger document is currently readable.
+ *
+ * Most trigger documents remain readable whenever their collection has been
+ * restored, even if the trigger itself is not yet actionable. Only explicit
+ * workstream-availability conditions defer document access.
+ */
+bool Floppy144GameDataTriggerDocumentAccessible(
+    const Floppy144RunState *pState,
+    Floppy144TriggerId eTrigger
+);
 bool Floppy144GameDataTriggerTryFire(Floppy144WorldState *pWorld,Floppy144RunState *pState,Floppy144TriggerId eTrigger);
 bool Floppy144GameDataInteractionCanRun(const Floppy144RunState *pState,Floppy144InteractionId eInteraction);
 bool Floppy144GameDataInteractionTryRun(Floppy144WorldState *pWorld,Floppy144RunState *pState,Floppy144InteractionId eInteraction);

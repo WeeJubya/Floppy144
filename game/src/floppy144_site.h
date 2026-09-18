@@ -130,6 +130,25 @@ bool Floppy144SiteElementBlocksMovement(
     Floppy144SiteElement element
 );
 
+/*
+ * Optional collision filter.
+ *
+ * The Site model owns geometry and footprint maths, while RunState decides
+ * whether progression-controlled geometry currently exists. Returning false
+ * from the callback removes that blocking rectangle from the collision pass.
+ */
+typedef bool (*Floppy144SiteCollisionFilter)(
+    const Floppy144SiteRect *rect,
+    void *context
+);
+
+bool Floppy144SitePositionBlockedFiltered(
+    int32_t centre_x16,
+    int32_t centre_y16,
+    Floppy144SiteCollisionFilter filter,
+    void *context
+);
+
 bool Floppy144SitePositionBlocked(
     int32_t centre_x16,
     int32_t centre_y16
@@ -138,6 +157,29 @@ bool Floppy144SitePositionBlocked(
 void Floppy144SiteSpawnPosition(
     int32_t *x16,
     int32_t *y16
+);
+
+/*
+ * Return the exterior door crossed by one attempted movement step.
+ *
+ * This is a geometry-only query. It does not decide whether the door is
+ * unlocked; progression state remains the responsibility of RunState.
+ * NULL means the movement does not cross the Site boundary through a door.
+ */
+const Floppy144SiteRect *Floppy144SiteExteriorDoorForMove(
+    int32_t x16,
+    int32_t y16,
+    int32_t delta_x16,
+    int32_t delta_y16
+);
+
+bool Floppy144SiteMovePositionFiltered(
+    int32_t *x16,
+    int32_t *y16,
+    int32_t delta_x16,
+    int32_t delta_y16,
+    Floppy144SiteCollisionFilter filter,
+    void *context
 );
 
 bool Floppy144SiteMovePosition(

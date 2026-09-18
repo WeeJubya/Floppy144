@@ -38,6 +38,8 @@ param
         throw "Stage 3A Prologue regression failed with exit code $LASTEXITCODE."
     }
 
+    & .\tools\test_stage3b.ps1
+
     if(-not (Get-Command premake5 -ErrorAction SilentlyContinue)) {
         throw "premake5 was not found on PATH."
     }

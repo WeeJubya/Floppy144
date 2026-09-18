@@ -13,6 +13,7 @@
 
 #include <stddef.h>
 #include <stdio.h>
+#include <string.h>
 
 /*
  * Catalogue size
@@ -180,6 +181,74 @@ void Floppy144CatalogueBuildRecord(
         );
     }
 }
+
+/*
+ * Resolve one complete record ID through the catalogue registry.
+ *
+ * Centralising this lookup keeps terminal commands, graphical browsing and
+ * authored record overrides on one identity path. No story-specific record
+ * IDs are embedded here.
+ */
+bool Floppy144CatalogueFindRecord(
+    const char *record_id,
+    Floppy144CollectionId *collection,
+    uint32_t *record_index
+)
+{
+    uint32_t collection_index;
+    char generated_record_id[24];
+    char generated_title[48];
+
+    if(
+        record_id == NULL ||
+        collection == NULL ||
+        record_index == NULL
+    )
+    {
+        return false;
+    }
+
+    for(
+        collection_index = 0U;
+        collection_index < (uint32_t)FLOPPY144_COLLECTION_COUNT;
+        ++collection_index
+    )
+    {
+        Floppy144CollectionId candidate_collection =
+            (Floppy144CollectionId)collection_index;
+
+        const Floppy144CatalogueDefinition *definition =
+            &Floppy144CollectionGet(candidate_collection)->catalogue;
+
+        uint32_t candidate_index;
+
+        for(
+            candidate_index = 0U;
+            candidate_index < definition->record_count;
+            ++candidate_index
+        )
+        {
+            Floppy144CatalogueBuildRecord(
+                candidate_collection,
+                candidate_index,
+                generated_record_id,
+                sizeof(generated_record_id),
+                generated_title,
+                sizeof(generated_title)
+            );
+
+            if(strcmp(record_id, generated_record_id) == 0)
+            {
+                *collection = candidate_collection;
+                *record_index = candidate_index;
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 /*
  * Catalogue drawing helpers
  *

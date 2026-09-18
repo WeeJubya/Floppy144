@@ -306,6 +306,17 @@ bool Floppy144RunStateSetProjection
  Floppy144Projection projection
 );
 
+/*
+ * Query whether one movement step would leave the reconstructed Site through
+ * an unlocked exterior door. The query does not move the player.
+ */
+bool Floppy144RunStateWouldExitSite
+(
+    const Floppy144RunState *state,
+    int32_t delta_x16,
+    int32_t delta_y16
+);
+
 bool Floppy144RunStateMovePlayerSite
 (
     Floppy144RunState *state,

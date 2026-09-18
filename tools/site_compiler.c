@@ -1629,20 +1629,22 @@ static bool NormalizePlacement(SiteData *site, Placement *placement, const char 
         if(rotation < 0) rotation += 360;
 
         /*
-         * Top-left x/y geometry may safely carry a half-turn because a
-         * 180-degree rotation preserves the same axis-aligned footprint.
+         * Stage 3B.3 stores the final player-facing footprint directly in
+         * JSON. For x/y authoring, rotation is therefore orientation metadata
+         * only: x/y/width/height already describe the conservative runtime
+         * bounds and must not be rotated a second time by the compiler.
          *
-         * Quarter-turns and diagonal rotations can change the generated
-         * bounds, so those continue to require centre_x/centre_y authoring.
+         * centre_x/centre_y remains available for genuinely free-rotated
+         * placements such as the Director/Secretary desks, where the compiler
+         * is responsible for deriving conservative bounds.
          */
-        if(rotation != 0 && rotation != 180)
+        if(rotation % 45 != 0)
         {
             SiteMessage(
                 site,
                 true,
-                "%s uses %d-degree rotation with x/y form; only 0 or 180 degrees are supported without centre_x/centre_y",
-                context,
-                rotation
+                "%s rotation must be a multiple of 45 degrees",
+                context
             );
         }
 

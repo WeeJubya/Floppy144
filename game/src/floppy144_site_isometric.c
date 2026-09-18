@@ -9,7 +9,6 @@
 #include "floppy144_site_isometric.h"
 
 #include "floppy144_draw.h"
-#include "floppy144_object_registry.h"
 #include "floppy144_site.h"
 #include "floppy144_site_object.h"
 #include "floppy144_site_rooms.h"
@@ -270,49 +269,37 @@ static const char *Floppy144IsometricInteractionPrompt(
     const Floppy144RunState *pRunState
 )
 {
-    Floppy144ObjectId eObject;
-    const Floppy144ObjectDefinition *pDefinition;
-    const Floppy144ObjectInteractionDefinition *pInteraction;
+    uint32_t uActions;
 
     if(pRunState == NULL)
     {
         return "ARROWS TO MOVE   N NOTEBOOK";
     }
 
-    eObject =
-        Floppy144SiteInteractionTarget(
+    uActions =
+        Floppy144SiteAvailableActions(
             pRunState
         );
 
-    pDefinition =
-        Floppy144ObjectGet(
-            eObject
-        );
-
-    pInteraction =
-        pDefinition != NULL
-            ? pDefinition->interaction
-            : NULL;
-
-    if(pInteraction == NULL)
-    {
-        return "ARROWS TO MOVE   N NOTEBOOK";
-    }
-
-    /*
-     * Keep the same generic control language as the 2D projection. Prompt
-     * text stored against individual objects is presentation data only and
-     * must not reintroduce obsolete key bindings.
-     */
     if(
-        pInteraction->action ==
-        FLOPPY144_OBJECT_ACTION_OPEN_TERMINAL
+        (uActions & FLOPPY144_SITE_ACTION_ACCESS) != 0U &&
+        (uActions & FLOPPY144_SITE_ACTION_INSPECT) != 0U
     )
     {
-        return "PRESS A TO ACCESS   N NOTEBOOK";
+        return "A ACCESS   I INSPECT   N NOTEBOOK";
     }
 
-    return "PRESS I TO INSPECT   N NOTEBOOK";
+    if((uActions & FLOPPY144_SITE_ACTION_ACCESS) != 0U)
+    {
+        return "A ACCESS   N NOTEBOOK";
+    }
+
+    if((uActions & FLOPPY144_SITE_ACTION_INSPECT) != 0U)
+    {
+        return "I INSPECT   N NOTEBOOK";
+    }
+
+    return "ARROWS TO MOVE   N NOTEBOOK";
 }
 
 /*
@@ -321,59 +308,15 @@ static const char *Floppy144IsometricInteractionPrompt(
  * appear only after both rooms exist in the reconstruction. Exterior
  * boundaries require only their interior room.
  */
-static bool Floppy144IsometricEndpointReconstructed(
-    const Floppy144RunState *pRunState,
-    uint8_t uRoom
-)
-{
-    if(uRoom == FLOPPY144_SITE_ROOM_OUTSIDE)
-    {
-        return true;
-    }
-
-    if(
-        pRunState == NULL ||
-        uRoom >= (uint8_t)FLOPPY144_ROOM_COUNT
-    )
-    {
-        return false;
-    }
-
-    return
-        Floppy144RunStateRoomReconstructed(
-            pRunState,
-            (Floppy144RoomId)uRoom
-        );
-}
-
 static bool Floppy144IsometricRectVisible(
     const Floppy144RunState *pRunState,
     const Floppy144SiteRect *pRect
 )
 {
-    if(pRunState == NULL || pRect == NULL)
-    {
-        return false;
-    }
-
-    if(pRect->from_room == pRect->to_room)
-    {
-        return
-            pRect->room < (uint8_t)FLOPPY144_ROOM_COUNT &&
-            Floppy144RunStateRoomReconstructed(
-                pRunState,
-                (Floppy144RoomId)pRect->room
-            );
-    }
-
     return
-        Floppy144IsometricEndpointReconstructed(
+        Floppy144SiteRectRuntimeVisible(
             pRunState,
-            pRect->from_room
-        ) &&
-        Floppy144IsometricEndpointReconstructed(
-            pRunState,
-            pRect->to_room
+            pRect
         );
 }
 
@@ -390,6 +333,7 @@ void Floppy144SiteIsometricDraw(
     int32_t nPlayerX;
     int32_t nPlayerY;
     const char *pszRoomLabel;
+    const char *pszContextLabel = NULL;
     char szStatus[64];
 
     if(
@@ -411,9 +355,22 @@ void Floppy144SiteIsometricDraw(
     );
 
     pszRoomLabel =
-        pszNotice != NULL
-            ? pszNotice
-            : Floppy144IsometricRoomLabel(eActiveRoom);
+        Floppy144IsometricRoomLabel(eActiveRoom);
+
+    if(pszNotice != NULL)
+    {
+        pszRoomLabel = pszNotice;
+    }
+    else
+    {
+        pszContextLabel =
+            Floppy144SiteContextLabel(pRunState);
+
+        if(pszContextLabel != NULL)
+        {
+            pszRoomLabel = pszContextLabel;
+        }
+    }
 
     Floppy144DrawClear(&sSurface, FLOPPY144_RGB(12, 17, 21));
     Floppy144DrawText(
@@ -444,9 +401,9 @@ void Floppy144SiteIsometricDraw(
             eElement < FLOPPY144_SITE_FLOOR_A ||
             eElement > FLOPPY144_SITE_FLOOR_D ||
             pRect->room >= (uint8_t)FLOPPY144_ROOM_COUNT ||
-            !Floppy144RunStateRoomReconstructed(
+            !Floppy144SiteRectRuntimeVisible(
                 pRunState,
-                (Floppy144RoomId)pRect->room
+                pRect
             )
         )
         {
@@ -482,8 +439,7 @@ void Floppy144SiteIsometricDraw(
             );
 
         if(
-            !bRoomVisible ||
-            !Floppy144SiteObjectGeometryVisible(pRunState, pRect)
+            !bRoomVisible
         )
         {
             continue;

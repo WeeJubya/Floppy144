@@ -47,6 +47,17 @@ void Floppy144CatalogueBuildRecord(
     char *title,
     size_t title_size
 );
+
+/*
+ * Resolve one complete player-facing record ID back to its catalogue
+ * collection and zero-based record index. The same generated/overridden IDs
+ * used by LIST and the document viewer are authoritative here.
+ */
+bool Floppy144CatalogueFindRecord(
+    const char *record_id,
+    Floppy144CollectionId *collection,
+    uint32_t *record_index
+);
 void Floppy144CatalogueReset(
     Floppy144CatalogueState *catalogue,
     Floppy144CollectionId collection

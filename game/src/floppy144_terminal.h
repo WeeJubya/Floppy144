@@ -20,6 +20,7 @@
 #define FLOPPY144_TERMINAL_INPUT_CAPACITY 81U
 #define FLOPPY144_TERMINAL_OUTPUT_LINES 12U
 #define FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY 96U
+#define FLOPPY144_TERMINAL_HISTORY_ENTRIES 16U
 
 /*
  * Terminal-local state
@@ -43,7 +44,7 @@ typedef struct Floppy144TerminalState
     bool help_pager_active;
 
     /*
-     * Stage 3A terminal capability state.
+     * Terminal capability and contextual-record state.
      *
      * open_command_available prevents OPEN being advertised before the
      * initial recovery collection has been restored. The default-record
@@ -64,6 +65,19 @@ typedef struct Floppy144TerminalState
 
     char input[FLOPPY144_TERMINAL_INPUT_CAPACITY];
     uint32_t input_length;
+
+    /*
+     * Session-local command history. This state belongs to the terminal UI
+     * only and is never written to RunState or persistence. history_cursor is
+     * -1 while editing the live command line; history_draft preserves any
+     * unfinished text while the operator browses older commands.
+     */
+    char history
+        [FLOPPY144_TERMINAL_HISTORY_ENTRIES]
+        [FLOPPY144_TERMINAL_INPUT_CAPACITY];
+    uint32_t history_count;
+    int32_t history_cursor;
+    char history_draft[FLOPPY144_TERMINAL_INPUT_CAPACITY];
 
     char output
         [FLOPPY144_TERMINAL_OUTPUT_LINES]
@@ -111,6 +125,15 @@ void Floppy144TerminalInputCharacter(
 
 void Floppy144TerminalBackspace(
     Floppy144TerminalState *terminal
+);
+
+/*
+ * Recall commands from the current terminal session. Negative direction
+ * moves toward older commands; positive direction moves toward newer ones.
+ */
+void Floppy144TerminalMoveHistory(
+    Floppy144TerminalState *terminal,
+    int32_t direction
 );
 
 bool Floppy144TerminalRecordPagerActive(
@@ -172,4 +195,4 @@ void Floppy144TerminalDraw(
     F144Runtime *runtime,
     const Floppy144TerminalState *terminal,
     const Floppy144RunState *run_state
-);;
+);

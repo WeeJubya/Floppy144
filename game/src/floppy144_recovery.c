@@ -701,40 +701,6 @@ bool Floppy144MainMenuOptionEnabled(
  * Draw the GDR session-control menu.
  */
 
-static const char *Floppy144RecoveryActName(
-    uint8_t act
-)
-{
-    switch((Floppy144RunAct)act)
-    {
-        case FLOPPY144_RUN_ACT_I:
-        {
-            return "I";
-        }
-
-        case FLOPPY144_RUN_ACT_II:
-        {
-            return "II";
-        }
-
-        case FLOPPY144_RUN_ACT_III:
-        {
-            return "III";
-        }
-
-        case FLOPPY144_RUN_ACT_COMPLETE:
-        {
-            return "COMPLETE";
-        }
-
-        case FLOPPY144_RUN_ACT_PROLOGUE:
-        default:
-        {
-            return "PROLOGUE";
-        }
-    }
-}
-
 void Floppy144MainMenuDraw(
     F144Runtime *engine,
     Floppy144MainMenuOption selected_option,
@@ -830,12 +796,8 @@ void Floppy144MainMenuDraw(
         snprintf(
             session_status,
             sizeof(session_status),
-                 "RECORDED SESSION: ACT %s / SEED %u",
-                 Floppy144RecoveryActName(
-                     recorded_run_state->act
-                 ),
-                 (unsigned)
-                 recorded_run_state->recovery_seed
+            "RECORDED SESSION: SEED %u",
+            (unsigned)recorded_run_state->recovery_seed
         );
     }
     else
@@ -870,7 +832,7 @@ void Floppy144MainMenuDraw(
 
     Floppy144DrawText(
         &surface,
-        15U,
+        10U,
         5U,
         "GDR SESSION CONTROL SYSTEM",
         1U,
@@ -879,7 +841,7 @@ void Floppy144MainMenuDraw(
 
     Floppy144DrawText(
         &surface,
-        575U,
+        556U,
         5U,
         "APS-12",
         1U,
@@ -888,18 +850,18 @@ void Floppy144MainMenuDraw(
 
     Floppy144DrawFillRect(
         &surface,
-        15U,
+        24U,
         28U,
-        605U,
+        592U,
         306U,
         panel
     );
 
     Floppy144DrawRect(
         &surface,
-        15U,
+        24U,
         28U,
-        605U,
+        592U,
         306U,
         border
     );

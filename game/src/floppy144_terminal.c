@@ -698,6 +698,164 @@ static void Floppy144TerminalPushWrappedLine(
     }
 }
 /*
+ * Command-line editing and history helpers.
+ */
+
+static void Floppy144TerminalSetInput(
+    Floppy144TerminalState *terminal,
+    const char *text
+)
+{
+    if(terminal == NULL || text == NULL)
+    {
+        return;
+    }
+
+    snprintf(
+        terminal->input,
+        sizeof(terminal->input),
+        "%s",
+        text
+    );
+
+    terminal->input_length =
+        (uint32_t)strlen(terminal->input);
+}
+
+static void Floppy144TerminalLeaveHistoryNavigation(
+    Floppy144TerminalState *terminal
+)
+{
+    if(terminal == NULL)
+    {
+        return;
+    }
+
+    terminal->history_cursor = -1;
+    terminal->history_draft[0] = '\0';
+}
+
+/*
+ * Canonicalise a submitted command. Leading/trailing whitespace disappears
+ * and repeated interior spaces collapse to one. InputCharacter has already
+ * converted alphabetic input to uppercase.
+ */
+static bool Floppy144TerminalNormaliseCommand(
+    const char *input,
+    char *output,
+    size_t output_capacity
+)
+{
+    size_t output_length = 0U;
+    bool pending_space = false;
+
+    if(
+        input == NULL ||
+        output == NULL ||
+        output_capacity == 0U
+    )
+    {
+        return false;
+    }
+
+    output[0] = '\0';
+
+    while(*input != '\0')
+    {
+        if(*input == ' ' || *input == '\t')
+        {
+            if(output_length > 0U)
+            {
+                pending_space = true;
+            }
+
+            ++input;
+            continue;
+        }
+
+        if(pending_space)
+        {
+            if(output_length + 1U >= output_capacity)
+            {
+                break;
+            }
+
+            output[output_length++] = ' ';
+            pending_space = false;
+        }
+
+        if(output_length + 1U >= output_capacity)
+        {
+            break;
+        }
+
+        output[output_length++] = *input;
+        ++input;
+    }
+
+    output[output_length] = '\0';
+    return output_length > 0U;
+}
+
+/*
+ * Keep only a compact in-memory command history. The newest command is at
+ * history_count - 1. Blank commands never reach this helper and consecutive
+ * duplicates are deliberately ignored.
+ */
+static void Floppy144TerminalStoreHistory(
+    Floppy144TerminalState *terminal,
+    const char *command
+)
+{
+    if(
+        terminal == NULL ||
+        command == NULL ||
+        command[0] == '\0'
+    )
+    {
+        return;
+    }
+
+    if(
+        terminal->history_count > 0U &&
+        strcmp(
+            terminal->history[terminal->history_count - 1U],
+            command
+        ) == 0
+    )
+    {
+        Floppy144TerminalLeaveHistoryNavigation(terminal);
+        return;
+    }
+
+    if(
+        terminal->history_count >=
+        FLOPPY144_TERMINAL_HISTORY_ENTRIES
+    )
+    {
+        memmove(
+            terminal->history[0],
+            terminal->history[1],
+            (FLOPPY144_TERMINAL_HISTORY_ENTRIES - 1U) *
+                sizeof(terminal->history[0])
+        );
+
+        terminal->history_count =
+            FLOPPY144_TERMINAL_HISTORY_ENTRIES - 1U;
+    }
+
+    snprintf(
+        terminal->history[terminal->history_count],
+        FLOPPY144_TERMINAL_INPUT_CAPACITY,
+        "%s",
+        command
+    );
+
+    ++terminal->history_count;
+    Floppy144TerminalLeaveHistoryNavigation(terminal);
+}
+
+/*
  * Append one printable character to the command line.
  */
 
@@ -741,6 +899,10 @@ void Floppy144TerminalInputCharacter(
         return;
     }
 
+    Floppy144TerminalLeaveHistoryNavigation(
+        terminal
+    );
+
     terminal->input[terminal->input_length] =
         character;
 
@@ -766,10 +928,90 @@ void Floppy144TerminalBackspace(
         return;
     }
 
+    Floppy144TerminalLeaveHistoryNavigation(
+        terminal
+    );
+
     --terminal->input_length;
 
     terminal->input[terminal->input_length] =
         '\0';
+}
+
+/*
+ * Recall commands from the current terminal session.
+ *
+ * The first Up preserves the live draft. Down past the newest recalled entry
+ * restores that draft. Navigation clamps at the oldest command rather than
+ * wrapping, which avoids surprising edits on long command histories.
+ */
+void Floppy144TerminalMoveHistory(
+    Floppy144TerminalState *terminal,
+    int32_t direction
+)
+{
+    if(
+        terminal == NULL ||
+        terminal->history_count == 0U ||
+        direction == 0
+    )
+    {
+        return;
+    }
+
+    if(direction < 0)
+    {
+        if(terminal->history_cursor < 0)
+        {
+            snprintf(
+                terminal->history_draft,
+                sizeof(terminal->history_draft),
+                "%s",
+                terminal->input
+            );
+
+            terminal->history_cursor =
+                (int32_t)terminal->history_count - 1;
+        }
+        else if(terminal->history_cursor > 0)
+        {
+            --terminal->history_cursor;
+        }
+
+        Floppy144TerminalSetInput(
+            terminal,
+            terminal->history[terminal->history_cursor]
+        );
+
+        return;
+    }
+
+    if(terminal->history_cursor < 0)
+    {
+        return;
+    }
+
+    if(
+        terminal->history_cursor + 1 <
+        (int32_t)terminal->history_count
+    )
+    {
+        ++terminal->history_cursor;
+
+        Floppy144TerminalSetInput(
+            terminal,
+            terminal->history[terminal->history_cursor]
+        );
+
+        return;
+    }
+
+    terminal->history_cursor = -1;
+    Floppy144TerminalSetInput(
+        terminal,
+        terminal->history_draft
+    );
+    terminal->history_draft[0] = '\0';
 }
 
 /*
@@ -968,6 +1210,7 @@ static const char *const floppy144_terminal_help_page_1[] =
     "",
     "ENTER COMMANDS AT THE A:\\GDR> PROMPT.",
     "BACKSPACE EDITS THE CURRENT ENTRY.",
+    "UP/DOWN RECALL SESSION COMMANDS.",
     "ENTER SUBMITS THE COMMAND.",
     "ESC OPENS GDR SESSION CONTROL.",
     "EXIT CLOSES THE TERMINAL SESSION.",
@@ -2350,93 +2593,13 @@ static void Floppy144TerminalRestoreCollection(
 }
 
 /*
- * Locate a record by its complete player-facing ID.
- *
- * IDs are generated through the same catalogue function used by LIST and the
- * graphical catalogue, including authored-document overrides.
- */
-
-static bool Floppy144TerminalFindRecord(
-    const char *requested_record_id,
-    Floppy144CollectionId *collection,
-    uint32_t *record_index
-)
-{
-    uint32_t collection_index;
-
-    char generated_record_id[24];
-    char generated_title[48];
-
-    if(
-        requested_record_id == NULL ||
-        collection == NULL ||
-        record_index == NULL
-    )
-    {
-        return false;
-    }
-
-    for(
-        collection_index = 0U;
-        collection_index <
-            (uint32_t)FLOPPY144_COLLECTION_COUNT;
-        ++collection_index
-    )
-    {
-        Floppy144CollectionId candidate_collection =
-            (Floppy144CollectionId)collection_index;
-
-        const Floppy144CatalogueDefinition *catalogue_definition =
-            &Floppy144CollectionGet(
-                candidate_collection
-            )->catalogue;
-
-        uint32_t candidate_index;
-
-        for(
-            candidate_index = 0U;
-            candidate_index <
-                catalogue_definition->record_count;
-            ++candidate_index
-        )
-        {
-            Floppy144CatalogueBuildRecord(
-                candidate_collection,
-                candidate_index,
-                generated_record_id,
-                sizeof(generated_record_id),
-                generated_title,
-                sizeof(generated_title)
-            );
-
-            if(
-                Floppy144TerminalCommandMatches(
-                    requested_record_id,
-                    generated_record_id
-                )
-            )
-            {
-                *collection =
-                    candidate_collection;
-
-                *record_index =
-                    candidate_index;
-
-                return true;
-            }
-        }
-    }
-
-    return false;
-}
-
-/*
  * Validate an OPEN request and pass the resolved catalogue position to main.
  */
 
 static void Floppy144TerminalRequestOpenRecord(
     Floppy144TerminalState *terminal,
     const Floppy144WorldState *world,
+    const Floppy144RunState *run_state,
     const char *record_id
 )
 {
@@ -2491,8 +2654,19 @@ static void Floppy144TerminalRequestOpenRecord(
             expanded_record_id;
     }
 
+    /*
+     * Resolve through the procedural catalogue first. Later collections may
+     * still have a zero-row catalogue stub while already owning fully authored
+     * trigger documents. Those stable document IDs remain valid OPEN targets,
+     * so fall back to the authored-document registry before reporting failure.
+     */
     if(
-        !Floppy144TerminalFindRecord(
+        !Floppy144CatalogueFindRecord(
+            resolved_record_id,
+            &collection,
+            &record_index
+        ) &&
+        !Floppy144DocumentFindRecordId(
             resolved_record_id,
             &collection,
             &record_index
@@ -2529,6 +2703,28 @@ static void Floppy144TerminalRequestOpenRecord(
         Floppy144TerminalPushLine(
             terminal,
             line
+        );
+
+        return;
+    }
+
+    /*
+     * A restored collection may contain an authored branch-choice document
+     * whose trigger is temporarily deferred by persistent recovery state.
+     * Keep the record on disk, but do not allow it to bypass its generic
+     * trigger gate through a direct OPEN command.
+     */
+    if(
+        !Floppy144DocumentAccessible(
+            run_state,
+            collection,
+            record_index
+        )
+    )
+    {
+        Floppy144TerminalPushLine(
+            terminal,
+            "RECORD ACCESS DEFERRED BY RECOVERY SEQUENCE."
         );
 
         return;
@@ -2573,6 +2769,9 @@ void Floppy144TerminalSubmitInput(
     char submitted_line
         [FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
 
+    char normalised_input
+        [FLOPPY144_TERMINAL_INPUT_CAPACITY];
+
     bool services_initialised;
 
     const char *help_arguments;
@@ -2593,11 +2792,34 @@ void Floppy144TerminalSubmitInput(
     terminal->open_record_requested =
         false;
 
+    /*
+     * Whitespace-only submissions are true no-ops: they are not printed,
+     * stored in history or treated as invalid commands.
+     */
+    if(
+        !Floppy144TerminalNormaliseCommand(
+            terminal->input,
+            normalised_input,
+            sizeof(normalised_input)
+        )
+    )
+    {
+        terminal->input_length = 0U;
+        terminal->input[0] = '\0';
+        Floppy144TerminalLeaveHistoryNavigation(terminal);
+        return;
+    }
+
+    Floppy144TerminalStoreHistory(
+        terminal,
+        normalised_input
+    );
+
     snprintf(
         submitted_line,
         sizeof(submitted_line),
         "A:\\GDR> %s",
-        terminal->input
+        normalised_input
     );
 
     Floppy144TerminalPushWrappedLine(
@@ -2612,31 +2834,31 @@ void Floppy144TerminalSubmitInput(
 
     help_arguments =
         Floppy144TerminalCommandArguments(
-            terminal->input,
+            normalised_input,
             "HELP"
         );
 
     restore_arguments =
         Floppy144TerminalCommandArguments(
-            terminal->input,
+            normalised_input,
             "RESTORE"
         );
 
     list_arguments =
         Floppy144TerminalCommandArguments(
-            terminal->input,
+            normalised_input,
             "LIST"
         );
 
     open_arguments =
         Floppy144TerminalCommandArguments(
-            terminal->input,
+            normalised_input,
             "OPEN"
         );
 
     if(
         Floppy144TerminalCommandMatches(
-            terminal->input,
+            normalised_input,
             "EXIT"
         )
     )
@@ -2667,7 +2889,7 @@ void Floppy144TerminalSubmitInput(
     else if(
         !services_initialised &&
         Floppy144TerminalCommandMatches(
-            terminal->input,
+            normalised_input,
             "INITIATE"
         )
     )
@@ -2805,6 +3027,7 @@ void Floppy144TerminalSubmitInput(
             Floppy144TerminalRequestOpenRecord(
                 terminal,
                 world,
+                run_state,
                 open_arguments
             );
         }
@@ -2822,6 +3045,10 @@ void Floppy144TerminalSubmitInput(
 
     terminal->input[0] =
         '\0';
+
+    Floppy144TerminalLeaveHistoryNavigation(
+        terminal
+    );
 }
 
 /*
@@ -2895,6 +3122,7 @@ void Floppy144TerminalReset(
 )
 {
     uint32_t line_index;
+    uint32_t history_index;
 
     terminal->selected_domain =
         FLOPPY144_COLLECTION_DOMAIN_DR;
@@ -2956,6 +3184,19 @@ void Floppy144TerminalReset(
 
     terminal->input[0] =
         '\0';
+
+    terminal->history_count = 0U;
+    terminal->history_cursor = -1;
+    terminal->history_draft[0] = '\0';
+
+    for(
+        history_index = 0U;
+        history_index < FLOPPY144_TERMINAL_HISTORY_ENTRIES;
+        ++history_index
+    )
+    {
+        terminal->history[history_index][0] = '\0';
+    }
 
     terminal->output_count =
         0U;
@@ -3540,7 +3781,7 @@ void Floppy144TerminalDraw(
         &surface,
         22,
         316,
-        "TYPE COMMAND   BACKSPACE EDIT   ENTER SUBMIT",
+        "UP/DOWN HISTORY   BACKSPACE EDIT   ENTER SUBMIT",
         1,
         text
     );

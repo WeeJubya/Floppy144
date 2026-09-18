@@ -1,0 +1,792 @@
+/*
+ * Floppy//144 Stage 3B.1 terminal/archive regression.
+ *
+ * Exercises the reusable command shell rather than story-specific shortcuts:
+ * collection restoration, catalogue lookup, contextual OPEN, paged LIST and
+ * terminal-session command history.
+ */
+#include "floppy144_catalogue.h"
+#include "floppy144_collection_registry.h"
+#include "floppy144_document.h"
+#include "floppy144_game_data.h"
+#include "floppy144_run_state.h"
+#include "floppy144_terminal.h"
+#include "floppy144_world.h"
+
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
+
+static int g_nFailures = 0;
+
+#define F144_CHECK(bCondition, pszMessage)                         \
+    do                                                            \
+    {                                                             \
+        if(!(bCondition))                                         \
+        {                                                         \
+            fprintf(                                              \
+                stderr,                                           \
+                "FAIL: %s (line %d)\n",                          \
+                (pszMessage),                                     \
+                __LINE__                                          \
+            );                                                    \
+            ++g_nFailures;                                        \
+        }                                                         \
+    }                                                             \
+    while(0)
+
+static void Floppy144TestSubmitCommand(
+    Floppy144TerminalState *pTerminal,
+    Floppy144WorldState *pWorld,
+    Floppy144RunState *pRunState,
+    const char *pszCommand
+)
+{
+    const char *pszCharacter;
+
+    for(
+        pszCharacter = pszCommand;
+        pszCharacter != NULL && *pszCharacter != '\0';
+        ++pszCharacter
+    )
+    {
+        Floppy144TerminalInputCharacter(
+            pTerminal,
+            *pszCharacter
+        );
+    }
+
+    Floppy144TerminalSubmitInput(
+        pTerminal,
+        pWorld,
+        pRunState
+    );
+}
+
+static bool Floppy144TestTerminalContains(
+    const Floppy144TerminalState *pTerminal,
+    const char *pszText
+)
+{
+    uint32_t uLine;
+
+    if(pTerminal == NULL || pszText == NULL)
+    {
+        return false;
+    }
+
+    for(uLine = 0U; uLine < pTerminal->output_count; ++uLine)
+    {
+        if(strstr(pTerminal->output[uLine], pszText) != NULL)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/*
+ * Reach the first post-Prologue archive state exclusively through public
+ * terminal/document APIs. T-001 makes DR-02, DR-03 and HR-01 available.
+ */
+static void Floppy144TestReachOpeningCollections(
+    Floppy144WorldState *pWorld,
+    Floppy144RunState *pRunState,
+    Floppy144TerminalState *pTerminal
+)
+{
+    Floppy144WorldReset(pWorld);
+    Floppy144RunStateBegin(pRunState, 144U);
+    Floppy144TerminalReset(pTerminal, pWorld);
+
+    Floppy144TestSubmitCommand(
+        pTerminal,
+        pWorld,
+        pRunState,
+        "INITIATE"
+    );
+
+    Floppy144TestSubmitCommand(
+        pTerminal,
+        pWorld,
+        pRunState,
+        "RESTORE DR-01"
+    );
+
+    Floppy144TestSubmitCommand(
+        pTerminal,
+        pWorld,
+        pRunState,
+        "OPEN DR-01-RS-0001"
+    );
+
+    F144_CHECK(
+        pTerminal->open_record_requested,
+        "opening fixture requests DR-01 trigger document"
+    );
+
+    if(pTerminal->open_record_requested)
+    {
+        F144_CHECK(
+            Floppy144DocumentApplyEffects(
+                pWorld,
+                pRunState,
+                pTerminal->requested_collection,
+                pTerminal->requested_record_index
+            ),
+            "opening fixture applies DR-01 document effects"
+        );
+    }
+
+    pTerminal->open_record_requested = false;
+}
+
+/*
+ * Every catalogue ID must round-trip through the shared resolver. This covers
+ * generated index entries and authored ID overrides with one generic test.
+ */
+static void Floppy144TestCatalogueRecordResolution(void)
+{
+    uint32_t uCollection;
+    uint32_t uChecked = 0U;
+
+    for(
+        uCollection = 0U;
+        uCollection < (uint32_t)FLOPPY144_COLLECTION_COUNT;
+        ++uCollection
+    )
+    {
+        Floppy144CollectionId eCollection =
+            (Floppy144CollectionId)uCollection;
+
+        const Floppy144CollectionDefinition *pDefinition =
+            Floppy144CollectionGet(eCollection);
+
+        uint32_t uRecord;
+
+        for(
+            uRecord = 0U;
+            uRecord < pDefinition->catalogue.record_count;
+            ++uRecord
+        )
+        {
+            char szRecordId[24];
+            char szTitle[48];
+            Floppy144CollectionId eResolvedCollection =
+                FLOPPY144_COLLECTION_COUNT;
+            uint32_t uResolvedRecord = UINT32_MAX;
+
+            Floppy144CatalogueBuildRecord(
+                eCollection,
+                uRecord,
+                szRecordId,
+                sizeof(szRecordId),
+                szTitle,
+                sizeof(szTitle)
+            );
+
+            F144_CHECK(
+                Floppy144CatalogueFindRecord(
+                    szRecordId,
+                    &eResolvedCollection,
+                    &uResolvedRecord
+                ),
+                "catalogue record ID resolves"
+            );
+
+            F144_CHECK(
+                eResolvedCollection == eCollection &&
+                uResolvedRecord == uRecord,
+                "catalogue record ID round-trips to original location"
+            );
+
+            ++uChecked;
+        }
+    }
+
+    F144_CHECK(
+        uChecked > 0U,
+        "catalogue resolver exercised registered records"
+    );
+
+    {
+        Floppy144CollectionId eCollection;
+        uint32_t uRecord;
+
+        F144_CHECK(
+            !Floppy144CatalogueFindRecord(
+                "NOT-A-RECORD",
+                &eCollection,
+                &uRecord
+            ),
+            "unknown record ID is rejected"
+        );
+    }
+}
+
+/*
+ * Restore and browse several collections without embedding special-case
+ * terminal behaviour for any one of them.
+ */
+static void Floppy144TestMultipleCollectionCommands(void)
+{
+    Floppy144WorldState sWorld;
+    Floppy144RunState sRunState;
+    Floppy144TerminalState sTerminal;
+
+    Floppy144CollectionId eDr02;
+    Floppy144CollectionId eDr03;
+    Floppy144CollectionId eHr01;
+    Floppy144CollectionId eFm04;
+
+    Floppy144TestReachOpeningCollections(
+        &sWorld,
+        &sRunState,
+        &sTerminal
+    );
+
+    eDr02 = Floppy144GameDataCollectionId("DR-02");
+    eDr03 = Floppy144GameDataCollectionId("DR-03");
+    eHr01 = Floppy144GameDataCollectionId("HR-01");
+    eFm04 = Floppy144GameDataCollectionId("FM-04");
+
+    F144_CHECK(
+        eDr02 < FLOPPY144_COLLECTION_COUNT &&
+        eDr03 < FLOPPY144_COLLECTION_COUNT &&
+        eHr01 < FLOPPY144_COLLECTION_COUNT &&
+        eFm04 < FLOPPY144_COLLECTION_COUNT,
+        "3B.1 collection fixtures resolve"
+    );
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "RESTORE FM-04"
+    );
+    F144_CHECK(
+        !Floppy144RunStateCollectionRestored(&sRunState, eFm04),
+        "unavailable collection cannot be restored"
+    );
+    F144_CHECK(
+        Floppy144TestTerminalContains(
+            &sTerminal,
+            "NOT YET AVAILABLE"
+        ),
+        "unavailable collection reports progression gate"
+    );
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "RESTORE DR-02"
+    );
+    F144_CHECK(
+        Floppy144RunStateCollectionRestored(&sRunState, eDr02) &&
+        Floppy144WorldCollectionRestored(&sWorld, eDr02),
+        "RESTORE works for second generic collection"
+    );
+    F144_CHECK(
+        sTerminal.default_record_collection_valid &&
+        sTerminal.default_record_collection == eDr02,
+        "most recently restored collection becomes short-ID context"
+    );
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "OPEN RS-0001"
+    );
+    F144_CHECK(
+        sTerminal.open_record_requested &&
+        sTerminal.requested_collection == eDr02 &&
+        sTerminal.requested_record_index == 0U,
+        "short OPEN resolves against most recently restored collection"
+    );
+    sTerminal.open_record_requested = false;
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "OPEN HR-01-RS-0001"
+    );
+    F144_CHECK(
+        !sTerminal.open_record_requested,
+        "full OPEN cannot retrieve an unrestored collection"
+    );
+    F144_CHECK(
+        Floppy144TestTerminalContains(
+            &sTerminal,
+            "COLLECTION HR-01 HAS NOT BEEN RESTORED"
+        ),
+        "unrestored full OPEN explains collection state"
+    );
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "LIST HR-01"
+    );
+    F144_CHECK(
+        !Floppy144TerminalRecordPagerActive(&sTerminal),
+        "LIST does not open unrestored collection index"
+    );
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "RESTORE HR-01"
+    );
+    F144_CHECK(
+        Floppy144RunStateCollectionRestored(&sRunState, eHr01),
+        "RESTORE works across archive domains"
+    );
+    F144_CHECK(
+        sTerminal.default_record_collection == eHr01,
+        "HR-01 becomes current short-ID context"
+    );
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "LIST HR-01 2"
+    );
+    F144_CHECK(
+        Floppy144TerminalRecordPagerActive(&sTerminal) &&
+        sTerminal.record_pager_collection == eHr01 &&
+        sTerminal.record_pager_page == 2U,
+        "LIST <CODE> <PAGE> opens requested restored index page"
+    );
+
+    Floppy144TerminalMoveRecordPager(&sTerminal, 1);
+    F144_CHECK(
+        sTerminal.record_pager_page == 2U,
+        "record pager clamps at final page"
+    );
+
+    Floppy144TerminalMoveRecordPager(&sTerminal, -1);
+    F144_CHECK(
+        sTerminal.record_pager_page == 1U,
+        "record pager moves backward"
+    );
+    Floppy144TerminalCloseRecordPager(&sTerminal);
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "OPEN RS-0107"
+    );
+    F144_CHECK(
+        sTerminal.open_record_requested &&
+        sTerminal.requested_collection == eHr01 &&
+        sTerminal.requested_record_index == 1U,
+        "short OPEN resolves authored HR-01 override"
+    );
+    sTerminal.open_record_requested = false;
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "RESTORE DR-03"
+    );
+    F144_CHECK(
+        Floppy144RunStateCollectionRestored(&sRunState, eDr03),
+        "third enabled collection restores generically"
+    );
+    F144_CHECK(
+        sTerminal.default_record_collection == eDr03,
+        "latest restore replaces short-ID context"
+    );
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "OPEN RS-0001"
+    );
+    F144_CHECK(
+        sTerminal.open_record_requested &&
+        sTerminal.requested_collection == eDr03 &&
+        sTerminal.requested_record_index == 0U,
+        "short OPEN follows updated restore context"
+    );
+    sTerminal.open_record_requested = false;
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "RESTORE DR-03"
+    );
+    F144_CHECK(
+        Floppy144TestTerminalContains(
+            &sTerminal,
+            "COLLECTION DR-03 ALREADY RESTORED"
+        ),
+        "repeat RESTORE is idempotent at terminal layer"
+    );
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "RESTORE XX-99"
+    );
+    F144_CHECK(
+        Floppy144TestTerminalContains(
+            &sTerminal,
+            "COLLECTION XX-99 NOT FOUND"
+        ),
+        "unknown collection is rejected generically"
+    );
+}
+
+/*
+ * History is deliberately UI-only. It remembers meaningful submissions in
+ * the current terminal session, ignores blank/duplicate commands and supports
+ * conventional Up/Down recall with restoration of an unfinished draft.
+ */
+static void Floppy144TestCommandHistory(void)
+{
+    Floppy144WorldState sWorld;
+    Floppy144RunState sRunState;
+    Floppy144TerminalState sTerminal;
+    uint32_t uOutputBeforeBlank;
+
+    Floppy144WorldReset(&sWorld);
+    Floppy144RunStateBegin(&sRunState, 144U);
+    Floppy144TerminalReset(&sTerminal, &sWorld);
+
+    uOutputBeforeBlank = sTerminal.output_count;
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "     "
+    );
+    F144_CHECK(
+        sTerminal.history_count == 0U &&
+        sTerminal.output_count == uOutputBeforeBlank,
+        "blank command is ignored and not stored"
+    );
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "   help   "
+    );
+    F144_CHECK(
+        sTerminal.history_count == 1U &&
+        strcmp(sTerminal.history[0], "HELP") == 0,
+        "history stores normalised uppercase command"
+    );
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "HELP"
+    );
+    F144_CHECK(
+        sTerminal.history_count == 1U,
+        "consecutive duplicate command is not stored twice"
+    );
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "INITIATE"
+    );
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "LIST"
+    );
+
+    F144_CHECK(
+        sTerminal.history_count == 3U,
+        "distinct submitted commands populate history"
+    );
+
+    {
+        const char *pszDraft = "RESTORE D";
+        const char *pszCharacter;
+
+        for(pszCharacter = pszDraft; *pszCharacter != '\0'; ++pszCharacter)
+        {
+            Floppy144TerminalInputCharacter(
+                &sTerminal,
+                *pszCharacter
+            );
+        }
+    }
+
+    Floppy144TerminalMoveHistory(&sTerminal, -1);
+    F144_CHECK(
+        strcmp(sTerminal.input, "LIST") == 0,
+        "Up recalls newest command"
+    );
+
+    Floppy144TerminalMoveHistory(&sTerminal, -1);
+    F144_CHECK(
+        strcmp(sTerminal.input, "INITIATE") == 0,
+        "second Up recalls older command"
+    );
+
+    Floppy144TerminalMoveHistory(&sTerminal, -1);
+    Floppy144TerminalMoveHistory(&sTerminal, -1);
+    F144_CHECK(
+        strcmp(sTerminal.input, "HELP") == 0,
+        "history clamps at oldest command"
+    );
+
+    Floppy144TerminalMoveHistory(&sTerminal, 1);
+    F144_CHECK(
+        strcmp(sTerminal.input, "INITIATE") == 0,
+        "Down recalls newer command"
+    );
+
+    Floppy144TerminalMoveHistory(&sTerminal, 1);
+    F144_CHECK(
+        strcmp(sTerminal.input, "LIST") == 0,
+        "Down reaches newest stored command"
+    );
+
+    Floppy144TerminalMoveHistory(&sTerminal, 1);
+    F144_CHECK(
+        strcmp(sTerminal.input, "RESTORE D") == 0 &&
+        sTerminal.history_cursor == -1,
+        "Down past newest restores unfinished draft"
+    );
+
+    Floppy144TerminalMoveHistory(&sTerminal, -1);
+    Floppy144TerminalBackspace(&sTerminal);
+    F144_CHECK(
+        strcmp(sTerminal.input, "LIS") == 0 &&
+        sTerminal.history_cursor == -1,
+        "editing a recalled command detaches history navigation"
+    );
+
+    Floppy144TerminalReset(&sTerminal, &sWorld);
+    F144_CHECK(
+        sTerminal.history_count == 0U &&
+        sTerminal.history_cursor == -1,
+        "terminal reset starts a fresh non-persistent command history"
+    );
+}
+
+
+/*
+ * DR-04 is the player-facing Act II branch choice.
+ *
+ * Both records are initially readable. Opening one commits the branch, and a
+ * direct OPEN of the other must then be deferred until T-028 releases the
+ * alternate workstream.
+ */
+static void Floppy144TestBranchDocumentAccessGate(void)
+{
+    Floppy144WorldState sWorld;
+    Floppy144RunState sRunState;
+    Floppy144TerminalState sTerminal;
+
+    Floppy144CollectionId eDr04;
+    Floppy144EvidenceId eE003;
+    Floppy144TriggerId eT026;
+    Floppy144TriggerId eT028;
+
+    Floppy144WorldReset(
+        &sWorld
+    );
+
+    Floppy144RunStateBegin(
+        &sRunState,
+        144U
+    );
+
+    F144_CHECK(
+        Floppy144WorldInitialiseArchiveServices(
+            &sWorld
+        ) &&
+        Floppy144RunStateInitialiseArchiveServices(
+            &sRunState
+        ),
+        "branch fixture initialises archive services"
+    );
+
+    eDr04 =
+        Floppy144GameDataCollectionId(
+            "DR-04"
+        );
+
+    eE003 =
+        Floppy144GameDataEvidenceId(
+            "E-003"
+        );
+
+    eT026 =
+        Floppy144GameDataTriggerId(
+            "T-026"
+        );
+
+    eT028 =
+        Floppy144GameDataTriggerId(
+            "T-028"
+        );
+
+    F144_CHECK(
+        eDr04 < FLOPPY144_COLLECTION_COUNT &&
+        eE003 < FLOPPY144_EVIDENCE_COUNT &&
+        eT026 < FLOPPY144_TRIGGER_COUNT &&
+        eT028 < FLOPPY144_TRIGGER_COUNT,
+        "branch fixture IDs resolve"
+    );
+
+    /*
+     * This fixture starts at the already-recovered DR-04 branch point. Set the
+     * restored bit directly so the test is independent of reconstruction
+     * budget consumed by the earlier narrative route.
+     */
+    F144_CHECK(
+        Floppy144RunStateBitSet(
+            sRunState.collections,
+            (uint32_t)eDr04
+        ) &&
+        Floppy144WorldRestoreCollection(
+            &sWorld,
+            eDr04
+        ),
+        "DR-04 is restored for branch fixture"
+    );
+
+    /*
+     * Initialise the terminal after establishing the fixture's recovered
+     * collection state. TerminalReset derives OPEN availability from the
+     * collections currently restored in the World.
+     */
+    Floppy144TerminalReset(
+        &sTerminal,
+        &sWorld
+    );
+
+    F144_CHECK(
+        Floppy144RunStateEstablishEvidence(
+            &sRunState,
+            eE003
+        ),
+        "E-003 exposes both branch records initially"
+    );
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "OPEN DR-04-RS-0001"
+    );
+
+    F144_CHECK(
+        sTerminal.open_record_requested,
+        "Records-first branch record is initially readable"
+    );
+
+    if(sTerminal.open_record_requested)
+    {
+        F144_CHECK(
+            Floppy144DocumentApplyEffects(
+                &sWorld,
+                &sRunState,
+                sTerminal.requested_collection,
+                sTerminal.requested_record_index
+            ),
+            "Records-first branch document applies effects"
+        );
+    }
+
+    sTerminal.open_record_requested = false;
+
+    F144_CHECK(
+        sRunState.branch ==
+            (uint8_t)FLOPPY144_RUN_BRANCH_RECORDS_FIRST,
+        "opening first workstream commits Records branch"
+    );
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "OPEN DR-04-RS-0002"
+    );
+
+    F144_CHECK(
+        !sTerminal.open_record_requested &&
+        Floppy144TestTerminalContains(
+            &sTerminal,
+            "RECORD ACCESS DEFERRED BY RECOVERY SEQUENCE."
+        ),
+        "unchosen branch record is deferred during Act II"
+    );
+
+    F144_CHECK(
+        Floppy144RunStateFireTrigger(
+            &sRunState,
+            eT026
+        ),
+        "branch fixture marks Act II core complete"
+    );
+
+    F144_CHECK(
+        Floppy144GameDataTriggerTryFire(
+            &sWorld,
+            &sRunState,
+            eT028
+        ),
+        "T-028 releases the alternate workstream"
+    );
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "OPEN DR-04-RS-0002"
+    );
+
+    F144_CHECK(
+        sTerminal.open_record_requested,
+        "alternate branch record becomes readable after Act II"
+    );
+}
+
+int main(void)
+{
+    Floppy144TestCatalogueRecordResolution();
+    Floppy144TestMultipleCollectionCommands();
+    Floppy144TestCommandHistory();
+    Floppy144TestBranchDocumentAccessGate();
+
+    if(g_nFailures != 0)
+    {
+        fprintf(
+            stderr,
+            "\nSTAGE 3B.1 TERMINAL TESTS: FAIL (%d failure%s)\n",
+            g_nFailures,
+            g_nFailures == 1 ? "" : "s"
+        );
+
+        return 1;
+    }
+
+    puts("\nSTAGE 3B.1 TERMINAL TESTS: PASS");
+    return 0;
+}

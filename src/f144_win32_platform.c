@@ -147,14 +147,188 @@ void f144Win32CompositeImage
 void f144Win32BltBuffer
 (
     F144Runtime *runtime
-){
+)
+{
     Dimensions dim = {0};
-    dim = f144GetWindowSize(runtime);
 
-    StretchDIBits(runtime->context, 0, 0, dim.width, dim.height, 0, 0,
-                  (int)runtime->backbuffer.width, (int)runtime->backbuffer.height,
-                  runtime->backbuffer.data, &runtime->backbuffer.info, DIB_RGB_COLORS,
-                  SRCCOPY);
+    int32_t destination_width;
+    int32_t destination_height;
+    int32_t destination_x;
+    int32_t destination_y;
+
+    uint64_t width_limited_height;
+    uint64_t height_limited_width;
+
+    if(
+        runtime == NULL ||
+        runtime->context == NULL ||
+        runtime->backbuffer.data == NULL ||
+        runtime->backbuffer.width == 0U ||
+        runtime->backbuffer.height == 0U
+    )
+    {
+        return;
+    }
+
+    dim =
+        f144GetWindowSize(runtime);
+
+    if(dim.width == 0U || dim.height == 0U)
+    {
+        return;
+    }
+
+    /*
+     * Fit the logical framebuffer to the available client area while
+     * preserving its aspect ratio.
+     *
+     * The previous integer-only presenter had an unpleasant cliff: a client
+     * area one pixel smaller than a 2x fit dropped immediately to 1x, while a
+     * maximised window that could not reach 3x remained stuck at 2x.
+     *
+     * We now use the largest aspect-correct destination rectangle that fits
+     * the client. StretchDIBits still uses COLORONCOLOR, so scaling remains
+     * hard-edged/nearest-neighbour rather than blurred. At exact integer
+     * multiples (1280x720, 1920x1080, etc.) the result is still a perfect
+     * integer scale. Intermediate window sizes use the available space
+     * smoothly instead of jumping between whole-number magnifications.
+     *
+     * Integer arithmetic avoids floating-point rounding drift and keeps the
+     * destination rectangle stable from frame to frame.
+     */
+    width_limited_height =
+        (
+            (uint64_t)dim.width *
+            (uint64_t)runtime->backbuffer.height
+        ) /
+        (uint64_t)runtime->backbuffer.width;
+
+    if(width_limited_height <= (uint64_t)dim.height)
+    {
+        destination_width =
+            (int32_t)dim.width;
+
+        destination_height =
+            (int32_t)width_limited_height;
+    }
+    else
+    {
+        height_limited_width =
+            (
+                (uint64_t)dim.height *
+                (uint64_t)runtime->backbuffer.width
+            ) /
+            (uint64_t)runtime->backbuffer.height;
+
+        destination_height =
+            (int32_t)dim.height;
+
+        destination_width =
+            (int32_t)height_limited_width;
+    }
+
+    if(destination_width <= 0 || destination_height <= 0)
+    {
+        return;
+    }
+
+    destination_x =
+        ((int32_t)dim.width - destination_width) / 2;
+
+    destination_y =
+        ((int32_t)dim.height - destination_height) / 2;
+
+    /*
+     * COLORONCOLOR performs hard-edged pixel selection for StretchDIBits.
+     * This keeps the deliberately low-resolution framebuffer crisp without
+     * interpolation blur at fractional presentation sizes.
+     */
+    SetStretchBltMode(
+        runtime->context,
+        COLORONCOLOR
+    );
+
+    /*
+     * Present the game image FIRST.
+     *
+     * Do not clear the entire client area before StretchDIBits. A full-client
+     * PatBlt is a separate visible GDI operation, so Windows/Desktop Capture
+     * can occasionally expose that intermediate black surface for one refresh.
+     * That produced the single-frame black flashes seen while walking.
+     *
+     * The game image replaces every pixel in the destination rectangle in one
+     * GDI operation. Letterbox/pillarbox areas are cleared separately below.
+     */
+    StretchDIBits(
+        runtime->context,
+        destination_x,
+        destination_y,
+        destination_width,
+        destination_height,
+        0,
+        0,
+        (int)runtime->backbuffer.width,
+        (int)runtime->backbuffer.height,
+        runtime->backbuffer.data,
+        &runtime->backbuffer.info,
+        DIB_RGB_COLORS,
+        SRCCOPY
+    );
+
+    /*
+     * Clear only the unused presentation bands.
+     *
+     * These rectangles never overlap the live game image, so even if Windows
+     * presents between GDI calls there is no all-black intermediate frame.
+     * This also removes stale pixels correctly after arbitrary window resizes.
+     */
+    if(destination_y > 0)
+    {
+        PatBlt(
+            runtime->context,
+            0,
+            0,
+            (int)dim.width,
+            destination_y,
+            BLACKNESS
+        );
+    }
+
+    if(destination_y + destination_height < (int32_t)dim.height)
+    {
+        PatBlt(
+            runtime->context,
+            0,
+            destination_y + destination_height,
+            (int)dim.width,
+            (int)dim.height - (destination_y + destination_height),
+            BLACKNESS
+        );
+    }
+
+    if(destination_x > 0)
+    {
+        PatBlt(
+            runtime->context,
+            0,
+            destination_y,
+            destination_x,
+            destination_height,
+            BLACKNESS
+        );
+    }
+
+    if(destination_x + destination_width < (int32_t)dim.width)
+    {
+        PatBlt(
+            runtime->context,
+            destination_x + destination_width,
+            destination_y,
+            (int)dim.width - (destination_x + destination_width),
+            destination_height,
+            BLACKNESS
+        );
+    }
 }
 
 void f144Win32LoadText

@@ -77,6 +77,20 @@ const Floppy144DocumentDefinition *Floppy144DocumentGet(
 );
 
 /*
+ * Resolve one exact authored player-facing record ID.
+ *
+ * This is deliberately independent of the procedural catalogue record count.
+ * Some later collections are still catalogue stubs while already containing
+ * fully authored trigger documents. The terminal must still be able to OPEN
+ * those records when progression points the player at their stable IDs.
+ */
+bool Floppy144DocumentFindRecordId(
+    const char *pszRecordId,
+    Floppy144CollectionId *pCollection,
+    uint32_t *pRecordIndex
+);
+
+/*
  * Locate the first trigger document in a restored collection whose trigger is
  * currently eligible and has not already fired. This is a generic progression
  * query: callers do not need to know any story-specific document or trigger ID.
@@ -84,6 +98,21 @@ const Floppy144DocumentDefinition *Floppy144DocumentGet(
 const Floppy144DocumentDefinition *Floppy144DocumentFirstPendingTrigger(
     const Floppy144RunState *pRunState,
     Floppy144CollectionId eCollection
+);
+
+/*
+ * Query whether a recovered document is currently readable.
+ *
+ * Ordinary documents are always readable once their collection has been
+ * restored. Trigger documents remain readable after their trigger has fired,
+ * but a not-yet-fired trigger document is only readable while its trigger is
+ * currently eligible. This allows authored branch-choice documents to be
+ * deferred without hiding already-recovered material permanently.
+ */
+bool Floppy144DocumentAccessible(
+    const Floppy144RunState *pRunState,
+    Floppy144CollectionId eCollection,
+    uint32_t uRecordIndex
 );
 
 /*
