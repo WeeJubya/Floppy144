@@ -251,3 +251,59 @@ Invoke-Stage3BRegression `
     -ExecutableName "stage3b_reconstruction_tests.exe" `
     -Sources $ReconstructionSources
 
+
+function Test-Stage3B4CoordinatorWiring {
+    Write-Host ""
+    Write-Host "=== STAGE 3B.4 COORDINATOR WIRING AUDIT ==="
+
+    $MainPath = Join-Path $SourceDir "floppy144_main.c"
+    if(-not (Test-Path $MainPath)) {
+        throw "Main coordinator source is missing: $MainPath"
+    }
+
+    $MainSource = Get-Content -Raw -Path $MainPath
+    $MoveStart = $MainSource.IndexOf("static void Floppy144MovePlayer(")
+    $MoveEnd = $MainSource.IndexOf("typedef enum Floppy144OfficeInteractionMode", $MoveStart)
+
+    if($MoveStart -lt 0 -or $MoveEnd -le $MoveStart) {
+        throw "Could not isolate Floppy144MovePlayer for the Stage 3B.4 audit."
+    }
+
+    $MoveSource = $MainSource.Substring($MoveStart, $MoveEnd - $MoveStart)
+
+    if($MoveSource -notmatch 'Floppy144RunStateWouldExitSite') {
+        throw "Floppy144MovePlayer does not query unlocked exterior Site exits."
+    }
+
+    if($MoveSource -notmatch 'Floppy144OpenMainMenu') {
+        throw "Floppy144MovePlayer does not hand an exterior exit back to GDR session control."
+    }
+
+    if($MoveSource -notmatch 'Floppy144RunStateMovePlayerSite') {
+        throw "Floppy144MovePlayer no longer routes ordinary movement through RunState."
+    }
+
+    Write-Host "STAGE 3B.4 COORDINATOR WIRING AUDIT: PASS"
+}
+
+Test-Stage3B4CoordinatorWiring
+
+$DoorAccessSources = @(
+    (Join-Path $ScriptDir "stage3b_door_access_tests.c"),
+    (Join-Path $SourceDir "floppy144_game_data.c"),
+    (Join-Path $SourceDir "floppy144_trigger_engine.c"),
+    (Join-Path $SourceDir "floppy144_interaction_engine.c"),
+    (Join-Path $SourceDir "floppy144_run_state.c"),
+    (Join-Path $SourceDir "floppy144_world.c"),
+    (Join-Path $SourceDir "floppy144_site.c"),
+    (Join-Path $SourceDir "floppy144_site_rooms.c"),
+    (Join-Path $SourceDir "floppy144_site_object.c"),
+    (Join-Path $SourceDir "floppy144_object_registry.c"),
+    (Join-Path $SourceDir "floppy144_collection_registry.c")
+)
+
+Invoke-Stage3BRegression `
+    -Label "STAGE 3B.4 DOOR / ACCESS REGRESSION" `
+    -BuildFolder "stage3b_door_access_tests" `
+    -ExecutableName "stage3b_door_access_tests.exe" `
+    -Sources $DoorAccessSources
