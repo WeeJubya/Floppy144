@@ -663,6 +663,19 @@ static const char *const floppy144_main_menu_labels[] =
  * Report whether one session-control option is available.
  */
 
+void Floppy144RecoveryFormatCapacity(
+    const Floppy144RunState *pState,
+    char *pszBuffer,
+    uint32_t uBufferCapacity
+)
+{
+    Floppy144RunStateFormatCapacity(
+        pState,
+        pszBuffer,
+        uBufferCapacity
+    );
+}
+
 bool Floppy144MainMenuOptionEnabled(
     Floppy144MainMenuOption option,
     bool active_session,
@@ -759,7 +772,7 @@ void Floppy144MainMenuDraw(
         100U;
 
         char session_status[80];
-        char reconstruction_text[48];
+        char reconstruction_text[64];
 
     uint32_t option_index;
 
@@ -809,11 +822,10 @@ void Floppy144MainMenuDraw(
         );
     }
 
-    snprintf(
+    Floppy144RecoveryFormatCapacity(
+        display_state,
         reconstruction_text,
-        sizeof(reconstruction_text),
-        "SITE RECONSTRUCTION: %02u%%",
-        (unsigned)reconstruction_percent
+        (uint32_t)sizeof(reconstruction_text)
     );
 
     Floppy144DrawClear(

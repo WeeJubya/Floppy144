@@ -1184,11 +1184,10 @@ void Floppy144SiteIsometricDraw(
         FLOPPY144_RGB(100, 156, 111)
     );
 
-    snprintf(
+    Floppy144RunStateFormatCapacity(
+        pRunState,
         szStatus,
-        sizeof(szStatus),
-        "STATUS %02u%% // FM-23 PROJECTION ACTIVE",
-        (unsigned)Floppy144RunStateReconstructionPercent(pRunState)
+        (uint32_t)sizeof(szStatus)
     );
 
     Floppy144DrawText(

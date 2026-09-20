@@ -3156,7 +3156,7 @@ void Floppy144Site2DDraw(
     const char *room_label;
     const char *context_label = NULL;
     const char *prompt;
-    char status_text[16];
+    char status_text[64];
 
     uint32_t index;
     uint32_t rect_count;
@@ -3227,13 +3227,10 @@ void Floppy144Site2DDraw(
             run_state
         );
 
-    snprintf(
+    Floppy144RunStateFormatCapacity(
+        run_state,
         status_text,
-        sizeof(status_text),
-        "STATUS %02u%%",
-        (unsigned)Floppy144RunStateReconstructionPercent(
-            run_state
-        )
+        (uint32_t)sizeof(status_text)
     );
 
     /*
@@ -3256,7 +3253,7 @@ void Floppy144Site2DDraw(
 
     Floppy144DrawText(
         &surface,
-        526U,
+        630U - Floppy144DrawTextWidth(status_text, 1U),
         5U,
         status_text,
         1U,

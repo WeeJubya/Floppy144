@@ -162,6 +162,7 @@ bool Floppy144RunStateReconstructRoom
 uint32_t Floppy144RunStateRecoveredKb(const Floppy144RunState *pState);
 uint32_t Floppy144RunStateFreeKb(const Floppy144RunState *pState);
 uint32_t Floppy144RunStateRecoveredPercent(const Floppy144RunState *pState);
+void Floppy144RunStateFormatCapacity(const Floppy144RunState *pState,char *pszBuffer,uint32_t uBufferCapacity);
 uint32_t Floppy144RunStateRequiredTotalKb(void);
 uint32_t Floppy144RunStateRequiredRecoveredKb(const Floppy144RunState *pState);
 uint32_t Floppy144RunStateRequiredCoveragePercent(const Floppy144RunState *pState);

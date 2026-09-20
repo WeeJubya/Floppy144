@@ -6,6 +6,7 @@
 #include "floppy144_site_object.h"
 #include "floppy144_game_data.h"
 
+#include <stdio.h>
 #include <string.h>
 
 /**************/
@@ -378,6 +379,36 @@ uint32_t Floppy144RunStateFreeKb(const Floppy144RunState *pState)
 uint32_t Floppy144RunStateRecoveredPercent(const Floppy144RunState *pState)
 {
     return (Floppy144RunStateRecoveredKb(pState)*100U)/FLOPPY144_RECOVERY_CAPACITY_KB;
+}
+
+void Floppy144RunStateFormatCapacity(
+    const Floppy144RunState *pState,
+    char *pszBuffer,
+    uint32_t uBufferCapacity
+)
+{
+    if(pszBuffer == NULL || uBufferCapacity == 0U)
+        return;
+
+    if(pState == NULL)
+    {
+        (void)snprintf(
+            pszBuffer,
+            uBufferCapacity,
+            "RECOVERED 0 / %u KB  0%%",
+            (unsigned)FLOPPY144_RECOVERY_CAPACITY_KB
+        );
+        return;
+    }
+
+    (void)snprintf(
+        pszBuffer,
+        uBufferCapacity,
+        "RECOVERED %u / %u KB  %u%%",
+        (unsigned)Floppy144RunStateRecoveredKb(pState),
+        (unsigned)FLOPPY144_RECOVERY_CAPACITY_KB,
+        (unsigned)Floppy144RunStateRecoveredPercent(pState)
+    );
 }
 
 uint32_t Floppy144RunStateRequiredTotalKb(void)
