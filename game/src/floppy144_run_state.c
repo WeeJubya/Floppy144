@@ -640,7 +640,7 @@ bool Floppy144RunStateNotebookEntryRecorded
 bool Floppy144RunStateAppendNotebookEntry(Floppy144RunState *pState,uint32_t uNotebookOrdinal)
 {
     uint16_t u;
-    if(pState==NULL||uNotebookOrdinal>=(uint32_t)FLOPPY144_NOTEBOOK_COUNT||pState->notebook_order_count>=FLOPPY144_NOTEBOOK_ORDER_MAX)return false;
+    if(pState==NULL||uNotebookOrdinal>=FLOPPY144_NOTEBOOK_ORDER_MAX||pState->notebook_order_count>=FLOPPY144_NOTEBOOK_ORDER_MAX)return false;
     for(u=0U;u<pState->notebook_order_count;++u)if((uint32_t)pState->notebook_order[u]==uNotebookOrdinal)return false;
     pState->notebook_order[pState->notebook_order_count++]=(uint16_t)uNotebookOrdinal;
     pState->dirty=1U;
