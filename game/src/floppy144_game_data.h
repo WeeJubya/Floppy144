@@ -55,6 +55,10 @@ Floppy144EvidenceId Floppy144GameDataEvidenceId(const char *pszId);
 Floppy144CollectionId Floppy144GameDataCollectionId(const char *pszId);
 Floppy144RoomId Floppy144GameDataRoomId(const char *pszId);
 Floppy144CapabilityId Floppy144GameDataCapabilityId(const char *pszId);
+void Floppy144GameDataCaptureNewNotebookEntries(Floppy144RunState *pState);
+uint32_t Floppy144GameDataNotebookOrderedCount(const Floppy144RunState *pState);
+const Floppy144DataRecord *Floppy144GameDataNotebookOrderedEntryAt(const Floppy144RunState *pState,uint32_t uIndex);
+
 bool Floppy144GameDataConnectionUnlocked(const Floppy144RunState *pState,const char *pszConnectionId);
 bool Floppy144GameDataCollectionEnabled(const Floppy144RunState *pState,const char *pszCollectionId);
 bool Floppy144GameDataPhysicalItemRevealed(const Floppy144RunState *pState,const char *pszPhysicalItemId);
