@@ -23,6 +23,9 @@
  * state. Gameplay is migrated into it incrementally in later passes.
  */
 
+#define FLOPPY144_RECOVERY_CAPACITY_KB 1440U
+#define FLOPPY144_NOTEBOOK_ORDER_MAX FLOPPY144_NOTEBOOK_COUNT
+
 #define FLOPPY144_RUN_WORD_BITS             32
 
 /* STAGE 3B.5 SECURE CABINET STATE */
@@ -102,6 +105,10 @@ typedef struct Floppy144RunState
         FLOPPY144_RUN_WORD_COUNT(FLOPPY144_NOTEBOOK_COUNT)
     ];
 
+    /* Stage 3C: persistent chronological acquisition order for Notebook prose. */
+    uint16_t notebook_order[FLOPPY144_NOTEBOOK_ORDER_MAX];
+    uint16_t notebook_order_count;
+
     uint32_t capabilities[
         FLOPPY144_RUN_WORD_COUNT(FLOPPY144_CAPABILITY_COUNT)
     ];
@@ -152,6 +159,16 @@ bool Floppy144RunStateReconstructRoom
  Floppy144RoomId room
 );
 
+uint32_t Floppy144RunStateRecoveredKb(const Floppy144RunState *pState);
+uint32_t Floppy144RunStateFreeKb(const Floppy144RunState *pState);
+uint32_t Floppy144RunStateRecoveredPercent(const Floppy144RunState *pState);
+uint32_t Floppy144RunStateRequiredTotalKb(void);
+uint32_t Floppy144RunStateRequiredRecoveredKb(const Floppy144RunState *pState);
+uint32_t Floppy144RunStateRequiredCoveragePercent(const Floppy144RunState *pState);
+bool Floppy144RunStateAnyUnrestoredCollectionFits(const Floppy144RunState *pState);
+bool Floppy144RunStateRecoveryExhausted(const Floppy144RunState *pState);
+
+/* Legacy display-name compatibility: now derived from KB. */
 uint32_t Floppy144RunStateReconstructionPercent
 (
     const Floppy144RunState *state
@@ -280,6 +297,11 @@ bool Floppy144RunStateRecordNotebookEntry
 (
     Floppy144RunState *state,
  Floppy144NotebookId entry
+);
+
+bool Floppy144RunStateAppendNotebookEntry(
+    Floppy144RunState *pState,
+    uint32_t uNotebookOrdinal
 );
 
 bool Floppy144RunStateHasCapability
