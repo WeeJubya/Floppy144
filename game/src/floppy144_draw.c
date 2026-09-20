@@ -89,7 +89,20 @@ static uint64_t Floppy144Glyph(
         case '[': return FLOPPY144_GLYPH(14, 8, 8, 8, 8, 8, 14);
         case ']': return FLOPPY144_GLYPH(14, 2, 2, 2, 2, 2, 14);
         case '@': return FLOPPY144_GLYPH(14, 17, 21, 29, 5, 1, 30);
-        case '&': return FLOPPY144_GLYPH( 12, 18, 12, 21, 18, 18, 13);
+        case '&': return FLOPPY144_GLYPH(12, 18, 12, 21, 18, 18, 13);
+        case '!': return FLOPPY144_GLYPH(4, 4, 4, 4, 4, 0, 4);
+        case '"': return FLOPPY144_GLYPH(10, 10, 10, 0, 0, 0, 0);
+        case '#': return FLOPPY144_GLYPH(10, 31, 10, 10, 31, 10, 0);
+        case '\'': return FLOPPY144_GLYPH(4, 4, 2, 0, 0, 0, 0);
+        case '(': return FLOPPY144_GLYPH(2, 4, 8, 8, 8, 4, 2);
+        case ')': return FLOPPY144_GLYPH(8, 4, 2, 2, 2, 4, 8);
+        /* Notebook uses '*' as a compact bullet rather than an asterisk. */
+        case '*': return FLOPPY144_GLYPH(0, 0, 4, 14, 4, 0, 0);
+        case '+': return FLOPPY144_GLYPH(0, 4, 4, 31, 4, 4, 0);
+        case ';': return FLOPPY144_GLYPH(0, 4, 4, 0, 4, 4, 8);
+        case '=': return FLOPPY144_GLYPH(0, 0, 31, 0, 31, 0, 0);
+        case '?': return FLOPPY144_GLYPH(14, 17, 2, 4, 0, 4, 0);
+        case '|': return FLOPPY144_GLYPH(4, 4, 4, 4, 4, 4, 4);
         case ' ': return 0;
 
         default: return FLOPPY144_GLYPH(14, 17, 2, 4, 0, 4, 0);
@@ -513,6 +526,67 @@ void Floppy144DrawFillCircle(
     }
 }
 /*
+ * Decode the small set of UTF-8 punctuation used by authored archive prose.
+ *
+ * The renderer remains an ASCII 5x7 font, but smart quotes/dashes and a
+ * Unicode bullet are normalised to supported glyphs instead of becoming
+ * three separate question marks. Other bytes fall back through the normal
+ * unsupported-character glyph path.
+ */
+static uint32_t Floppy144DisplayCharacter(
+    const char *pszText,
+    char *pCharacter
+)
+{
+    const unsigned char *pBytes =
+        (const unsigned char *)pszText;
+
+    if(pszText == NULL || pCharacter == NULL || pBytes[0] == 0U)
+    {
+        return 0U;
+    }
+
+    if(
+        pBytes[0] == 0xE2U &&
+        pBytes[1] == 0x80U &&
+        pBytes[2] != 0U
+    )
+    {
+        switch(pBytes[2])
+        {
+            case 0x98U:
+            case 0x99U:
+                *pCharacter = '\'';
+                return 3U;
+
+            case 0x9CU:
+            case 0x9DU:
+                *pCharacter = '"';
+                return 3U;
+
+            case 0x93U:
+            case 0x94U:
+                *pCharacter = '-';
+                return 3U;
+
+            case 0xA2U:
+                *pCharacter = '*';
+                return 3U;
+
+            case 0xA6U:
+                *pCharacter = '.';
+                return 3U;
+
+            default:
+                break;
+        }
+    }
+
+    *pCharacter = (char)pBytes[0];
+    return 1U;
+}
+
+/*
  * Measure bitmap text
  *
  * Each glyph is five pixels wide with one pixel of spacing. The final
@@ -523,19 +597,39 @@ uint32_t Floppy144DrawTextWidth(
     uint32_t scale
 )
 {
-    uint32_t character_count = 0;
+    uint32_t uByteIndex = 0U;
+    uint32_t uCharacterCount = 0U;
 
-    while(text[character_count] != '\0')
+    if(text == NULL)
     {
-        ++character_count;
+        return 0U;
     }
 
-    if(character_count == 0)
+    while(text[uByteIndex] != '\0')
     {
-        return 0;
+        char chDisplay;
+        uint32_t uConsumed =
+            Floppy144DisplayCharacter(
+                &text[uByteIndex],
+                &chDisplay
+            );
+
+        if(uConsumed == 0U)
+        {
+            break;
+        }
+
+        uByteIndex += uConsumed;
+        ++uCharacterCount;
+        (void)chDisplay;
     }
 
-    return character_count * 6 * scale - scale;
+    if(uCharacterCount == 0U)
+    {
+        return 0U;
+    }
+
+    return uCharacterCount * 6U * scale - scale;
 }
 
 /*
@@ -554,14 +648,29 @@ void Floppy144DrawText(
     uint32_t colour
 )
 {
-    uint32_t character_index = 0;
+    uint32_t uByteIndex = 0U;
 
-    while(text[character_index] != '\0')
+    if(text == NULL)
     {
-        char character = text[character_index];
+        return;
+    }
+
+    while(text[uByteIndex] != '\0')
+    {
+        char character;
+        uint32_t uConsumed =
+            Floppy144DisplayCharacter(
+                &text[uByteIndex],
+                &character
+            );
         uint64_t glyph;
         uint32_t glyph_row;
         uint32_t glyph_column;
+
+        if(uConsumed == 0U)
+        {
+            break;
+        }
 
         /* The font table is uppercase-only, so normalise lowercase input. */
         if(character >= 'a' && character <= 'z')
@@ -600,6 +709,6 @@ void Floppy144DrawText(
         }
 
         x += 6 * scale;
-        ++character_index;
+        uByteIndex += uConsumed;
     }
 }
