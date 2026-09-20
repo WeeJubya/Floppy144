@@ -15,42 +15,29 @@
  * structure changes from silently changing the on-disk format.
  */
 
-#define FLOPPY144_SAVE_MAGIC       0x34343146U
-#define FLOPPY144_SAVE_VERSION     1U
+#define FLOPPY144_SAVE_MAGIC          0x34343146U
+#define FLOPPY144_SAVE_VERSION_V1     1U
+#define FLOPPY144_SAVE_VERSION        2U
 
 /*
- * Run-state payload size.
- *
- * Keep this derived from the actual persisted arrays rather than a manually
- * maintained byte count. Registry growth can change bitset storage width.
- *
- * Fixed scalar prefix:
- *   recovery_seed                 4
- *   act/branch/projection/init    4
- *   player_site_x                 4
- *   player_site_y                 4
- *                                --
- *                                16 bytes
+ * Stage 3B V1 is frozen at 72 payload bytes. Never derive this from the
+ * current RunState structure: doing so would make legacy saves drift whenever
+ * a registry or runtime-only field grows.
  */
-#define FLOPPY144_SAVE_PAYLOAD_V1_SIZE                            \
-(                                                                 \
-    16U +                                                         \
-    sizeof(((Floppy144RunState *)0)->secure_cabinets_unlocked) +   \
-    sizeof(((Floppy144RunState *)0)->rooms) +                     \
-    sizeof(((Floppy144RunState *)0)->objects_visible) +           \
-    sizeof(((Floppy144RunState *)0)->objects_unlocked) +          \
-    sizeof(((Floppy144RunState *)0)->objects_open) +              \
-    sizeof(((Floppy144RunState *)0)->collections) +               \
-    sizeof(((Floppy144RunState *)0)->triggers) +                  \
-    sizeof(((Floppy144RunState *)0)->interactions) +              \
-    sizeof(((Floppy144RunState *)0)->evidence) +                  \
-    sizeof(((Floppy144RunState *)0)->notebook) +                  \
-    sizeof(((Floppy144RunState *)0)->capabilities)                \
-)
+#define FLOPPY144_SAVE_PAYLOAD_V1_SIZE 72U
 
-#define FLOPPY144_SAVE_HEADER_SIZE     16U
-#define FLOPPY144_SAVE_FILE_V1_SIZE    \
+/*
+ * Stage 3C V2 appends a fixed chronological Notebook sequence. Trailing slots
+ * are serialized as zero so the byte representation remains deterministic.
+ */
+#define FLOPPY144_SAVE_PAYLOAD_V2_SIZE \
+    (FLOPPY144_SAVE_PAYLOAD_V1_SIZE + 2U + (2U * FLOPPY144_NOTEBOOK_ORDER_MAX))
+
+#define FLOPPY144_SAVE_HEADER_SIZE      16U
+#define FLOPPY144_SAVE_FILE_V1_SIZE \
     (FLOPPY144_SAVE_HEADER_SIZE + FLOPPY144_SAVE_PAYLOAD_V1_SIZE)
+#define FLOPPY144_SAVE_FILE_V2_SIZE \
+    (FLOPPY144_SAVE_HEADER_SIZE + FLOPPY144_SAVE_PAYLOAD_V2_SIZE)
 
 #define FLOPPY144_PROFILE_MAGIC       0x34343150U
 #define FLOPPY144_PROFILE_VERSION     1U

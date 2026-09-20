@@ -1,5 +1,6 @@
 #include "floppy144_persistence.h"
 #include "floppy144_site.h"
+#include "floppy144_game_data.h"
 
 #include <windows.h>
 
@@ -34,6 +35,17 @@ static void Floppy144PersistenceWriteU32
 
     destination[3] =
     (uint8_t)((value >> 24U) & 0xffU);
+}
+
+static uint16_t Floppy144PersistenceReadU16(const uint8_t *pSource)
+{
+    return (uint16_t)((uint16_t)pSource[0] | ((uint16_t)pSource[1] << 8U));
+}
+
+static void Floppy144PersistenceWriteU16(uint8_t *pDestination,uint16_t uValue)
+{
+    pDestination[0]=(uint8_t)(uValue & 0xffU);
+    pDestination[1]=(uint8_t)((uValue >> 8U) & 0xffU);
 }
 
 static bool Floppy144PersistenceReplaceFile
@@ -308,79 +320,27 @@ bool Floppy144PersistenceEncodeRunState
     uint8_t *payload,
     uint32_t payload_size
 ){
-    uint32_t offset =
-    0U;
-
+    uint32_t offset=0U;
     uint32_t index;
+    bool bV2=payload_size==FLOPPY144_SAVE_PAYLOAD_V2_SIZE;
 
     if(
-        state == NULL ||
-        payload == NULL ||
-        payload_size !=
-        FLOPPY144_SAVE_PAYLOAD_V1_SIZE
-    )
-    {
-        return false;
-    }
+        state==NULL || payload==NULL ||
+        (payload_size!=FLOPPY144_SAVE_PAYLOAD_V1_SIZE && !bV2)
+    ) return false;
 
-    Floppy144PersistenceWriteU32(
-        &payload[offset],
-        state->recovery_seed
-    );
+    Floppy144PersistenceWriteU32(&payload[offset],state->recovery_seed); offset+=4U;
+    payload[offset++]=state->act;
+    payload[offset++]=state->branch;
+    payload[offset++]=state->projection;
+    payload[offset++]=state->archive_services_initialised!=0U?1U:0U;
+    Floppy144PersistenceWriteU32(&payload[offset],(uint32_t)state->player_site_x); offset+=4U;
+    Floppy144PersistenceWriteU32(&payload[offset],(uint32_t)state->player_site_y); offset+=4U;
+    Floppy144PersistenceWriteU32(&payload[offset],state->secure_cabinets_unlocked); offset+=4U;
 
-    offset += 4U;
-
-    payload[offset++] =
-    state->act;
-
-    payload[offset++] =
-    state->branch;
-
-    payload[offset++] =
-    state->projection;
-
-    payload[offset++] =
-    state->archive_services_initialised != 0U
-    ? 1U
-    : 0U;
-
-    Floppy144PersistenceWriteU32(
-        &payload[offset],
-        (uint32_t)state->player_site_x
-    );
-
-    offset += 4U;
-
-    Floppy144PersistenceWriteU32(
-        &payload[offset],
-        (uint32_t)state->player_site_y
-    );
-
-    offset += 4U;
-
-    /* STAGE 3B.5 SECURE CABINET PERSISTENCE */
-    Floppy144PersistenceWriteU32(
-        &payload[offset],
-        state->secure_cabinets_unlocked
-    );
-
-    offset += 4U;
-
-    #define FLOPPY144_WRITE_WORD_ARRAY(array_name)                     \
-    for(                                                           \
-        index = 0U;                                                \
-        index <                                                    \
-        (uint32_t)(sizeof(state->array_name) /                 \
-        sizeof(state->array_name[0]));                         \
-        ++index                                                    \
-    )                                                              \
-    {                                                              \
-        Floppy144PersistenceWriteU32(                              \
-        &payload[offset],                                      \
-        state->array_name[index]                               \
-        );                                                         \
-        offset += 4U;                                              \
-    }
+    #define FLOPPY144_WRITE_WORD_ARRAY(array_name) \
+    for(index=0U;index<(uint32_t)(sizeof(state->array_name)/sizeof(state->array_name[0]));++index) \
+    { Floppy144PersistenceWriteU32(&payload[offset],state->array_name[index]); offset+=4U; }
 
     FLOPPY144_WRITE_WORD_ARRAY(rooms)
     FLOPPY144_WRITE_WORD_ARRAY(objects_visible)
@@ -392,96 +352,58 @@ bool Floppy144PersistenceEncodeRunState
     FLOPPY144_WRITE_WORD_ARRAY(evidence)
     FLOPPY144_WRITE_WORD_ARRAY(notebook)
     FLOPPY144_WRITE_WORD_ARRAY(capabilities)
-
     #undef FLOPPY144_WRITE_WORD_ARRAY
 
-    return
-    offset ==
-    FLOPPY144_SAVE_PAYLOAD_V1_SIZE;
+    if(offset!=FLOPPY144_SAVE_PAYLOAD_V1_SIZE) return false;
+    if(!bV2) return true;
+
+    if(state->notebook_order_count>FLOPPY144_NOTEBOOK_ORDER_MAX) return false;
+    for(index=0U;index<(uint32_t)state->notebook_order_count;++index)
+    {
+        uint32_t uOther;
+        if((uint32_t)state->notebook_order[index]>=Floppy144GameDataNotebookRecordCount()) return false;
+        for(uOther=0U;uOther<index;++uOther)
+            if(state->notebook_order[uOther]==state->notebook_order[index]) return false;
+    }
+
+    Floppy144PersistenceWriteU16(&payload[offset],state->notebook_order_count); offset+=2U;
+    for(index=0U;index<FLOPPY144_NOTEBOOK_ORDER_MAX;++index)
+    {
+        uint16_t uOrdinal=index<(uint32_t)state->notebook_order_count?state->notebook_order[index]:0U;
+        Floppy144PersistenceWriteU16(&payload[offset],uOrdinal); offset+=2U;
+    }
+    return offset==FLOPPY144_SAVE_PAYLOAD_V2_SIZE;
 }
 
 bool Floppy144PersistenceDecodeRunState
 (
     Floppy144RunState *state,
- const uint8_t *payload,
- uint32_t payload_size
+    const uint8_t *payload,
+    uint32_t payload_size
 ){
     Floppy144RunState decoded;
-
-    uint32_t offset =
-    0U;
-
+    uint32_t offset=0U;
     uint32_t index;
+    bool bV2=payload_size==FLOPPY144_SAVE_PAYLOAD_V2_SIZE;
 
     if(
-        state == NULL ||
-        payload == NULL ||
-        payload_size !=
-        FLOPPY144_SAVE_PAYLOAD_V1_SIZE
-    )
-    {
-        return false;
-    }
+        state==NULL || payload==NULL ||
+        (payload_size!=FLOPPY144_SAVE_PAYLOAD_V1_SIZE && !bV2)
+    ) return false;
 
-    Floppy144RunStateReset(
-        &decoded
-    );
+    Floppy144RunStateReset(&decoded);
+    decoded.recovery_seed=Floppy144PersistenceReadU32(&payload[offset]); offset+=4U;
+    decoded.act=payload[offset++];
+    decoded.branch=payload[offset++];
+    decoded.projection=payload[offset++];
+    decoded.archive_services_initialised=payload[offset++];
+    decoded.player_site_x=(int32_t)Floppy144PersistenceReadU32(&payload[offset]); offset+=4U;
+    decoded.player_site_y=(int32_t)Floppy144PersistenceReadU32(&payload[offset]); offset+=4U;
+    decoded.secure_cabinets_unlocked=Floppy144PersistenceReadU32(&payload[offset]); offset+=4U;
 
-    decoded.recovery_seed =
-    Floppy144PersistenceReadU32(
-        &payload[offset]
-    );
-
-    offset += 4U;
-
-    decoded.act =
-    payload[offset++];
-
-    decoded.branch =
-    payload[offset++];
-
-    decoded.projection =
-    payload[offset++];
-
-    decoded.archive_services_initialised =
-    payload[offset++];
-
-    decoded.player_site_x =
-    (int32_t)Floppy144PersistenceReadU32(
-        &payload[offset]
-    );
-
-    offset += 4U;
-
-    decoded.player_site_y =
-    (int32_t)Floppy144PersistenceReadU32(
-        &payload[offset]
-    );
-
-    offset += 4U;
-
-    decoded.secure_cabinets_unlocked =
-    Floppy144PersistenceReadU32(
-        &payload[offset]
-    );
-
-    offset += 4U;
-
-    #define FLOPPY144_READ_WORD_ARRAY(array_name)                      \
-    for(                                                           \
-        index = 0U;                                                \
-        index <                                                    \
-        (uint32_t)(sizeof(decoded.array_name) /                \
-        sizeof(decoded.array_name[0]));                        \
-        ++index                                                    \
-    )                                                              \
-    {                                                              \
-        decoded.array_name[index] =                                \
-        Floppy144PersistenceReadU32(                           \
-        &payload[offset]                                   \
-        );                                                     \
-        offset += 4U;                                              \
-    }
+    #define FLOPPY144_READ_WORD_ARRAY(array_name) \
+    for(index=0U;index<(uint32_t)(sizeof(decoded.array_name)/sizeof(decoded.array_name[0]));++index) \
+    { decoded.array_name[index]=Floppy144PersistenceReadU32(&payload[offset]); offset+=4U; }
 
     FLOPPY144_READ_WORD_ARRAY(rooms)
     FLOPPY144_READ_WORD_ARRAY(objects_visible)
@@ -493,147 +415,64 @@ bool Floppy144PersistenceDecodeRunState
     FLOPPY144_READ_WORD_ARRAY(evidence)
     FLOPPY144_READ_WORD_ARRAY(notebook)
     FLOPPY144_READ_WORD_ARRAY(capabilities)
-
     #undef FLOPPY144_READ_WORD_ARRAY
 
-    if(
-        offset !=
-        FLOPPY144_SAVE_PAYLOAD_V1_SIZE
-    )
+    if(offset!=FLOPPY144_SAVE_PAYLOAD_V1_SIZE) return false;
+
+    if(bV2)
     {
-        return false;
+        uint16_t uCount=Floppy144PersistenceReadU16(&payload[offset]); offset+=2U;
+        if((uint32_t)uCount>FLOPPY144_NOTEBOOK_ORDER_MAX) return false;
+        decoded.notebook_order_count=uCount;
+        for(index=0U;index<FLOPPY144_NOTEBOOK_ORDER_MAX;++index)
+        {
+            uint16_t uOrdinal=Floppy144PersistenceReadU16(&payload[offset]);
+            uint32_t uOther;
+            offset+=2U;
+            if(index>=(uint32_t)uCount)
+            {
+                if(uOrdinal!=0U) return false;
+                continue;
+            }
+            if((uint32_t)uOrdinal>=Floppy144GameDataNotebookRecordCount()) return false;
+            for(uOther=0U;uOther<index;++uOther)
+                if(decoded.notebook_order[uOther]==uOrdinal) return false;
+            decoded.notebook_order[index]=uOrdinal;
+        }
+        if(offset!=FLOPPY144_SAVE_PAYLOAD_V2_SIZE) return false;
     }
 
-    /*
-     * A loaded player position must represent a legal standing position in the
-     * current generated Site. This rejects corrupt coordinates as well as values
-     * outside the canonical Site.
-     */
-    if(
-        Floppy144SitePositionBlocked(
-            decoded.player_site_x,
-            decoded.player_site_y
-        )
-    )
-    {
-        return false;
-    }
-
-    /*
-     * Reject set bits that refer to IDs beyond the currently defined registries.
-     * Valid saves therefore cannot manufacture nonexistent rooms, objects,
-     * collections or other persisted entities.
-     */
-    if(
-        !Floppy144PersistenceWordArrayValid(
-            decoded.rooms,
-            (uint32_t)(
-                sizeof(decoded.rooms) /
-                sizeof(decoded.rooms[0])
-            ),
-            (uint32_t)FLOPPY144_ROOM_COUNT
-        ) ||
-        !Floppy144PersistenceWordArrayValid(
-            decoded.objects_visible,
-            (uint32_t)(
-                sizeof(decoded.objects_visible) /
-                sizeof(decoded.objects_visible[0])
-            ),
-            (uint32_t)FLOPPY144_OBJECT_COUNT
-        ) ||
-        !Floppy144PersistenceWordArrayValid(
-            decoded.objects_unlocked,
-            (uint32_t)(
-                sizeof(decoded.objects_unlocked) /
-                sizeof(decoded.objects_unlocked[0])
-            ),
-            (uint32_t)FLOPPY144_OBJECT_COUNT
-        ) ||
-        !Floppy144PersistenceWordArrayValid(
-            decoded.objects_open,
-            (uint32_t)(
-                sizeof(decoded.objects_open) /
-                sizeof(decoded.objects_open[0])
-            ),
-            (uint32_t)FLOPPY144_OBJECT_COUNT
-        ) ||
-        !Floppy144PersistenceWordArrayValid(
-            decoded.collections,
-            (uint32_t)(
-                sizeof(decoded.collections) /
-                sizeof(decoded.collections[0])
-            ),
-            (uint32_t)FLOPPY144_COLLECTION_COUNT
-        ) ||
-        !Floppy144PersistenceWordArrayValid(
-            decoded.triggers,
-            (uint32_t)(
-                sizeof(decoded.triggers) /
-                sizeof(decoded.triggers[0])
-            ),
-            (uint32_t)FLOPPY144_TRIGGER_COUNT
-        ) ||
-        !Floppy144PersistenceWordArrayValid(
-            decoded.interactions,
-            (uint32_t)(
-                sizeof(decoded.interactions) /
-                sizeof(decoded.interactions[0])
-            ),
-            (uint32_t)FLOPPY144_INTERACTION_COUNT
-        ) ||
-        !Floppy144PersistenceWordArrayValid(
-            decoded.evidence,
-            (uint32_t)(
-                sizeof(decoded.evidence) /
-                sizeof(decoded.evidence[0])
-            ),
-            (uint32_t)FLOPPY144_EVIDENCE_COUNT
-        ) ||
-        !Floppy144PersistenceWordArrayValid(
-            decoded.notebook,
-            (uint32_t)(
-                sizeof(decoded.notebook) /
-                sizeof(decoded.notebook[0])
-            ),
-            (uint32_t)FLOPPY144_NOTEBOOK_COUNT
-        ) ||
-        !Floppy144PersistenceWordArrayValid(
-            decoded.capabilities,
-            (uint32_t)(
-                sizeof(decoded.capabilities) /
-                sizeof(decoded.capabilities[0])
-            ),
-            (uint32_t)FLOPPY144_CAPABILITY_COUNT
-        )
-    )
-    {
-        return false;
-    }
+    if(Floppy144SitePositionBlocked(decoded.player_site_x,decoded.player_site_y)) return false;
 
     if(
-        decoded.act >=
-        (uint8_t)FLOPPY144_RUN_ACT_COMPLETE + 1U ||
-        decoded.branch >
-        (uint8_t)FLOPPY144_RUN_BRANCH_TECHNOLOGY_FIRST ||
-        decoded.projection >=
-        (uint8_t)FLOPPY144_PROJECTION_COUNT ||
-        decoded.archive_services_initialised > 1U
-    )
+        !Floppy144PersistenceWordArrayValid(decoded.rooms,(uint32_t)(sizeof(decoded.rooms)/sizeof(decoded.rooms[0])),(uint32_t)FLOPPY144_ROOM_COUNT) ||
+        !Floppy144PersistenceWordArrayValid(decoded.objects_visible,(uint32_t)(sizeof(decoded.objects_visible)/sizeof(decoded.objects_visible[0])),(uint32_t)FLOPPY144_OBJECT_COUNT) ||
+        !Floppy144PersistenceWordArrayValid(decoded.objects_unlocked,(uint32_t)(sizeof(decoded.objects_unlocked)/sizeof(decoded.objects_unlocked[0])),(uint32_t)FLOPPY144_OBJECT_COUNT) ||
+        !Floppy144PersistenceWordArrayValid(decoded.objects_open,(uint32_t)(sizeof(decoded.objects_open)/sizeof(decoded.objects_open[0])),(uint32_t)FLOPPY144_OBJECT_COUNT) ||
+        !Floppy144PersistenceWordArrayValid(decoded.collections,(uint32_t)(sizeof(decoded.collections)/sizeof(decoded.collections[0])),(uint32_t)FLOPPY144_COLLECTION_COUNT) ||
+        !Floppy144PersistenceWordArrayValid(decoded.triggers,(uint32_t)(sizeof(decoded.triggers)/sizeof(decoded.triggers[0])),(uint32_t)FLOPPY144_TRIGGER_COUNT) ||
+        !Floppy144PersistenceWordArrayValid(decoded.interactions,(uint32_t)(sizeof(decoded.interactions)/sizeof(decoded.interactions[0])),(uint32_t)FLOPPY144_INTERACTION_COUNT) ||
+        !Floppy144PersistenceWordArrayValid(decoded.evidence,(uint32_t)(sizeof(decoded.evidence)/sizeof(decoded.evidence[0])),(uint32_t)FLOPPY144_EVIDENCE_COUNT) ||
+        !Floppy144PersistenceWordArrayValid(decoded.notebook,(uint32_t)(sizeof(decoded.notebook)/sizeof(decoded.notebook[0])),(uint32_t)FLOPPY144_NOTEBOOK_COUNT) ||
+        !Floppy144PersistenceWordArrayValid(decoded.capabilities,(uint32_t)(sizeof(decoded.capabilities)/sizeof(decoded.capabilities[0])),(uint32_t)FLOPPY144_CAPABILITY_COUNT)
+    ) return false;
+
+    if(
+        decoded.act>=(uint8_t)FLOPPY144_RUN_ACT_COMPLETE+1U ||
+        decoded.branch>(uint8_t)FLOPPY144_RUN_BRANCH_TECHNOLOGY_FIRST ||
+        decoded.projection>=(uint8_t)FLOPPY144_PROJECTION_COUNT ||
+        decoded.archive_services_initialised>1U
+    ) return false;
+
+    if(!bV2)
     {
-        return false;
+        /* V1 had no chronology. Reconstruct one deterministically from the
+           persisted knowledge/progression state, then mark the migrated load clean. */
+        Floppy144GameDataCaptureNewNotebookEntries(&decoded);
     }
 
-    /*
-     * A freshly loaded state matches its saved representation and therefore
-     * begins clean.
-     */
-
-    decoded.dirty =
-    0U;
-
-    *state =
-    decoded;
-
+    decoded.dirty=0U;
+    *state=decoded;
     return true;
 }
 
@@ -677,310 +516,78 @@ uint32_t Floppy144PersistenceChecksum
 bool Floppy144PersistenceHeaderValid
 (
     const Floppy144SaveHeader *header,
- uint32_t expected_payload_size
+    uint32_t expected_payload_size
 ){
-    if(header == NULL)
-    {
-        return false;
-    }
-
-    return
-    header->magic ==
-    FLOPPY144_SAVE_MAGIC &&
-    header->version ==
-    FLOPPY144_SAVE_VERSION &&
-    header->payload_size ==
-    expected_payload_size;
+    if(header==NULL || header->magic!=FLOPPY144_SAVE_MAGIC) return false;
+    if(header->payload_size!=expected_payload_size) return false;
+    if(header->version==FLOPPY144_SAVE_VERSION_V1)
+        return expected_payload_size==FLOPPY144_SAVE_PAYLOAD_V1_SIZE;
+    if(header->version==FLOPPY144_SAVE_VERSION)
+        return expected_payload_size==FLOPPY144_SAVE_PAYLOAD_V2_SIZE;
+    return false;
 }
 
 bool Floppy144PersistenceSaveRunState
 (
     const char *path,
- Floppy144RunState *state
+    Floppy144RunState *state
 ){
-    uint8_t file_data[
-        FLOPPY144_SAVE_FILE_V1_SIZE
-    ];
-
-    uint8_t *payload =
-    &file_data[FLOPPY144_SAVE_HEADER_SIZE];
-
+    uint8_t file_data[FLOPPY144_SAVE_FILE_V2_SIZE];
+    uint8_t *payload=&file_data[FLOPPY144_SAVE_HEADER_SIZE];
     Floppy144SaveHeader header;
 
-    if(
-        path == NULL ||
-        state == NULL
-    )
-    {
-        return false;
-    }
+    if(path==NULL||state==NULL) return false;
+    if(!Floppy144PersistenceEncodeRunState(state,payload,FLOPPY144_SAVE_PAYLOAD_V2_SIZE)) return false;
 
-    if(
-        !Floppy144PersistenceEncodeRunState(
-            state,
-            payload,
-            FLOPPY144_SAVE_PAYLOAD_V1_SIZE
-        )
-    )
-    {
-        return false;
-    }
-
-    header.magic =
-    FLOPPY144_SAVE_MAGIC;
-
-    header.version =
-    FLOPPY144_SAVE_VERSION;
-
-    header.payload_size =
-    FLOPPY144_SAVE_PAYLOAD_V1_SIZE;
-
-    header.checksum =
-    Floppy144PersistenceChecksum(
-        payload,
-        FLOPPY144_SAVE_PAYLOAD_V1_SIZE
-    );
-
-    Floppy144PersistenceEncodeHeader(
-        file_data,
-        &header
-    );
-
-    if(
-        !Floppy144PersistenceReplaceFile(
-            path,
-            file_data,
-            (uint32_t)sizeof(file_data)
-        )
-    )
-    {
-        return false;
-    }
-
-    state->dirty =
-    0U;
-
+    header.magic=FLOPPY144_SAVE_MAGIC;
+    header.version=FLOPPY144_SAVE_VERSION;
+    header.payload_size=FLOPPY144_SAVE_PAYLOAD_V2_SIZE;
+    header.checksum=Floppy144PersistenceChecksum(payload,FLOPPY144_SAVE_PAYLOAD_V2_SIZE);
+    Floppy144PersistenceEncodeHeader(file_data,&header);
+    if(!Floppy144PersistenceReplaceFile(path,file_data,(uint32_t)sizeof(file_data))) return false;
+    state->dirty=0U;
     return true;
 }
 
 bool Floppy144PersistenceLoadRunState
 (
     const char *path,
- Floppy144RunState *state
+    Floppy144RunState *state
 ){
-    uint8_t file_data[
-        FLOPPY144_SAVE_FILE_V1_SIZE
-    ];
-
-    const uint8_t *payload =
-    &file_data[FLOPPY144_SAVE_HEADER_SIZE];
-
+    uint8_t file_data[FLOPPY144_SAVE_FILE_V2_SIZE];
+    const uint8_t *payload=&file_data[FLOPPY144_SAVE_HEADER_SIZE];
     Floppy144SaveHeader header;
-
     Floppy144RunState decoded;
-
-    FILE *file;
-
+    FILE *file=NULL;
     size_t read;
-
     int trailing_byte;
+    uint32_t expected_payload;
+    uint32_t expected_file_size;
 
-    if(
-        path == NULL ||
-        state == NULL
-    )
-    {
+    if(path==NULL||state==NULL) return false;
+    if(fopen_s(&file,path,"rb")!=0||file==NULL) return false;
+    read=fread(file_data,1U,sizeof(file_data),file);
+    trailing_byte=fgetc(file);
+    if(fclose(file)!=0) return false;
+    if(read<FLOPPY144_SAVE_HEADER_SIZE||trailing_byte!=EOF) return false;
+
+    Floppy144PersistenceDecodeHeader(&header,file_data);
+    if(header.magic!=FLOPPY144_SAVE_MAGIC) return false;
+
+    if(header.version==FLOPPY144_SAVE_VERSION_V1)
+        expected_payload=FLOPPY144_SAVE_PAYLOAD_V1_SIZE;
+    else if(header.version==FLOPPY144_SAVE_VERSION)
+        expected_payload=FLOPPY144_SAVE_PAYLOAD_V2_SIZE;
+    else
         return false;
-    }
 
-    file =
-    NULL;
+    expected_file_size=FLOPPY144_SAVE_HEADER_SIZE+expected_payload;
+    if(header.payload_size!=expected_payload||read!=(size_t)expected_file_size) return false;
+    if(Floppy144PersistenceChecksum(payload,expected_payload)!=header.checksum) return false;
+    if(!Floppy144PersistenceDecodeRunState(&decoded,payload,expected_payload)) return false;
 
-    if(
-        fopen_s(
-            &file,
-            path,
-            "rb"
-        ) != 0 ||
-        file == NULL
-    )
-    {
-        return false;
-    }
-
-    read =
-    fread(
-        file_data,
-        1U,
-        sizeof(file_data),
-          file
-    );
-
-    trailing_byte =
-    fgetc(file);
-
-    if(fclose(file) != 0)
-    {
-        return false;
-    }
-
-    if(
-        read != sizeof(file_data) ||
-        trailing_byte != EOF
-    )
-    {
-        return false;
-    }
-
-    Floppy144PersistenceDecodeHeader(
-        &header,
-        file_data
-    );
-
-    if(
-        !Floppy144PersistenceHeaderValid(
-            &header,
-            FLOPPY144_SAVE_PAYLOAD_V1_SIZE
-        )
-    )
-    {
-        return false;
-    }
-
-    if(
-        Floppy144PersistenceChecksum(
-            payload,
-            FLOPPY144_SAVE_PAYLOAD_V1_SIZE
-        ) != header.checksum
-    )
-    {
-        return false;
-    }
-
-    if(
-        !Floppy144PersistenceDecodeRunState(
-            &decoded,
-            payload,
-            FLOPPY144_SAVE_PAYLOAD_V1_SIZE
-        )
-    )
-    {
-        return false;
-    }
-
-    *state =
-    decoded;
-
+    *state=decoded;
     return true;
-}
-
-bool Floppy144PersistenceEncodeProfile
-(
-    const Floppy144DiscoveryProfile *profile,
- uint8_t *payload,
- uint32_t payload_size
-)
-{
-    uint32_t offset =
-    0U;
-
-    uint32_t index;
-
-    if(
-        profile == NULL ||
-        payload == NULL ||
-        payload_size !=
-        FLOPPY144_PROFILE_PAYLOAD_V1_SIZE
-    )
-    {
-        return false;
-    }
-
-    memset(
-        payload,
-        0,
-        payload_size
-    );
-
-    memcpy(
-        &payload[offset],
-        profile->operator_name,
-        FLOPPY144_PROFILE_NAME_CAPACITY
-    );
-
-    offset +=
-    FLOPPY144_PROFILE_NAME_CAPACITY;
-
-    payload[offset++] =
-    profile->body_style;
-
-    /*
-     * Three reserved scalar bytes.
-     */
-    offset +=
-    3U;
-
-    Floppy144PersistenceWriteU32(
-        &payload[offset],
-        profile->recovery_sessions_begun
-    );
-
-    offset +=
-    4U;
-
-    for(
-        index = 0U;
-    index <
-    (uint32_t)(
-        sizeof(
-            profile->collections_ever_restored
-        ) /
-        sizeof(
-            profile->collections_ever_restored[0]
-        )
-    );
-    ++index
-    )
-    {
-        Floppy144PersistenceWriteU32(
-            &payload[offset],
-            profile->collections_ever_restored[index]
-        );
-
-        offset +=
-        4U;
-    }
-
-    for(
-        index = 0U;
-    index <
-    (uint32_t)(
-        sizeof(
-            profile->evidence_ever_established
-        ) /
-        sizeof(
-            profile->evidence_ever_established[0]
-        )
-    );
-    ++index
-    )
-    {
-        Floppy144PersistenceWriteU32(
-            &payload[offset],
-            profile->evidence_ever_established[index]
-        );
-
-        offset +=
-        4U;
-    }
-
-    /*
-     * The remaining V1 bytes stay zero and are reserved for future
-     * cumulative discovery fields.
-     */
-    return
-    offset <=
-    FLOPPY144_PROFILE_PAYLOAD_V1_SIZE;
 }
 
 bool Floppy144PersistenceSaveProfile

@@ -435,6 +435,14 @@ static const Floppy144DataRecord *Floppy144GameDataNotebookRecordAtOrdinal(uint3
     return NULL;
 }
 
+uint32_t Floppy144GameDataNotebookRecordCount(void)
+{
+    uint32_t u,n=0U;
+    for(u=0U;u<F144_COUNT(g_asGameData);++u)
+        if(g_asGameData[u].eKind==FLOPPY144_DATA_NOTEBOOK)++n;
+    return n;
+}
+
 void Floppy144GameDataCaptureNewNotebookEntries(Floppy144RunState *pState)
 {
     uint32_t u,n=0U;
