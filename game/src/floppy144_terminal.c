@@ -1751,26 +1751,29 @@ static void Floppy144TerminalPseudoCollectionIdentity(
     uint32_t uNameCapacity
 )
 {
-    static const char *const apszAdjectives[] =
-    {
-        "GREY", "QUIET", "COLD", "SEALED",
-        "DORMANT", "FADED", "BLANK", "REMOTE"
-    };
-    static const char *const apszNouns[] =
-    {
-        "INDEX", "LEDGER", "PACKET", "BUNDLE",
-        "REGISTER", "FOLDER", "REEL", "ARCHIVE"
-    };
-    uint32_t uHash = Floppy144TerminalObfuscationHash(uSeed, uOrdinal);
+    uint32_t uHashA =
+        Floppy144TerminalObfuscationHash(uSeed, uOrdinal);
 
+    uint32_t uHashB =
+        Floppy144TerminalObfuscationHash(
+            uSeed ^ 0xA5C31F27U,
+            uOrdinal + 37U
+        );
+
+    /*
+     * N/A rows must look like damaged index data, not plausible collection
+     * names. Keep them deterministic per recovery while revealing no semantic
+     * hints such as "BLANK PACKET" or a fixed synthetic UX namespace.
+     */
     if(pszCode != NULL && uCodeCapacity > 0U)
     {
         (void)snprintf(
             pszCode,
             uCodeCapacity,
-            "UX-%02u%02X",
-            (unsigned)(uOrdinal + 1U),
-            (unsigned)(uHash & 0xFFU)
+            "%c%c-%04X",
+            (char)('A' + (uHashA % 26U)),
+            (char)('A' + ((uHashA >> 5U) % 26U)),
+            (unsigned)(uHashB & 0xFFFFU)
         );
     }
 
@@ -1779,9 +1782,10 @@ static void Floppy144TerminalPseudoCollectionIdentity(
         (void)snprintf(
             pszName,
             uNameCapacity,
-            "%s %s",
-            apszAdjectives[uHash & 7U],
-            apszNouns[(uHash >> 3U) & 7U]
+            "%04X %04X %04X",
+            (unsigned)(uHashA & 0xFFFFU),
+            (unsigned)((uHashA >> 16U) & 0xFFFFU),
+            (unsigned)(uHashB & 0xFFFFU)
         );
     }
 }
@@ -1835,10 +1839,17 @@ static void Floppy144TerminalPrintCollectionPage(
         uFinal = (uint32_t)FLOPPY144_COLLECTION_COUNT;
 
     pTerminal->output_count = 0U;
-    Floppy144TerminalPushLine(
-        pTerminal,
-        "COLLECTION ID | COLLECTION NAME                | STATUS    | SIZE"
+
+    (void)snprintf(
+        szLine,
+        sizeof(szLine),
+        "%-13s | %-27s | %-9s | %s",
+        "COLLECTION ID",
+        "COLLECTION NAME",
+        "STATUS",
+        "SIZE"
     );
+    Floppy144TerminalPushLine(pTerminal, szLine);
 
     (void)snprintf(
         szLine,
@@ -1882,7 +1893,7 @@ static void Floppy144TerminalPrintCollectionPage(
         (void)snprintf(
             szLine,
             sizeof(szLine),
-            "%-8s | %-30.30s | %-9s | %4u KB",
+            "%-13s | %-27.27s | %-9s | %4u KB",
             pszCode,
             pszName,
             pszStatus,
@@ -3783,14 +3794,23 @@ void Floppy144TerminalDraw(
             1U,
             text
         );
-        Floppy144DrawText(
-            &surface,
-            630U - Floppy144DrawTextWidth("Q RETURN", 1U) - 12U,
-            316U,
-            "Q RETURN",
-            1U,
-            muted
-        );
+        {
+            const char *pszReturnPrompt =
+                terminal->record_pager_active
+                    ? "EXIT: Q"
+                    : "Q RETURN";
+
+            Floppy144DrawText(
+                &surface,
+                630U -
+                    Floppy144DrawTextWidth(pszReturnPrompt, 1U) -
+                    12U,
+                316U,
+                pszReturnPrompt,
+                1U,
+                muted
+            );
+        }
     }
     else
     {
