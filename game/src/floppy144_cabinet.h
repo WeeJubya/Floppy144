@@ -58,8 +58,19 @@ const char *Floppy144CabinetId(
     const Floppy144CabinetState *pCabinet
 );
 
+uint8_t Floppy144CabinetCodeDigits(
+    const Floppy144CabinetState *pCabinet
+);
+
 uint8_t Floppy144CabinetRequiredDigits(
     const Floppy144CabinetState *pCabinet
+);
+
+void Floppy144CabinetExpectedCode(
+    const Floppy144CabinetState *pCabinet,
+    uint32_t uRecoverySeed,
+    char *pszCode,
+    uint32_t uCapacity
 );
 
 bool Floppy144CabinetCodeKnown(
@@ -90,13 +101,8 @@ void Floppy144CabinetClearInput(
 );
 
 /*
- * Submit the keypad entry.
- *
- * The canonical data currently records whether the player knows the code and
- * how secure access progresses, but it does not yet contain literal numeric
- * cabinet codes. Stage 3B.5 therefore validates knowledge state plus the
- * authored 4/6/8-digit phase contract. Numeric equality can be added later by
- * attaching literal values to the cabinet data without changing this screen.
+ * Submit one exact deterministic code. Knowledge state controls disclosure,
+ * not whether a correctly guessed physical code can operate the lock.
  */
 bool Floppy144CabinetSubmitCode(
     Floppy144CabinetState *pCabinet,
