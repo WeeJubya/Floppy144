@@ -403,12 +403,28 @@ static void Floppy144IsometricDrawWallFixture(
         if(bThinX)
         {
             nWidth16 = FLOPPY144_SITE_FIXED_ONE / 2;
-            nX16 +=
-                (
-                    (int32_t)pRect->width *
-                    FLOPPY144_SITE_FIXED_ONE -
-                    nWidth16
-                ) / 2;
+
+            if(
+                pRect->room != (uint8_t)FLOPPY144_ROOM_RECEPTION ||
+                !Floppy144IsometricVariantIs(
+                    pPlacement,
+                    "SITE_DIRECTORY"
+                )
+            )
+            {
+                nX16 +=
+                    (
+                        (int32_t)pRect->width *
+                        FLOPPY144_SITE_FIXED_ONE -
+                        nWidth16
+                    ) / 2;
+            }
+            /*
+             * The Reception directory sits immediately on the east face of
+             * the x=76 partition wall. Keeping the authored x edge here makes
+             * the 0.5U projection start flush at that face instead of floating
+             * a quarter-unit into the room.
+             */
         }
         else
         {
@@ -434,6 +450,15 @@ static void Floppy144IsometricDrawWallFixture(
     {
         nMountBase16 = 1 * FLOPPY144_SITE_FIXED_ONE;
         nMountTop16 = 9 * FLOPPY144_SITE_FIXED_ONE;
+    }
+    else if(
+        pRect->room == (uint8_t)FLOPPY144_ROOM_RECEPTION &&
+        Floppy144IsometricVariantIs(pPlacement, "SITE_DIRECTORY")
+    )
+    {
+        /* Eye-level directory, below the high window/viewpoint sightline. */
+        nMountBase16 = 3 * FLOPPY144_SITE_FIXED_ONE;
+        nMountTop16 = 7 * FLOPPY144_SITE_FIXED_ONE;
     }
 
     Floppy144IsometricDrawPrismX16(
