@@ -60,6 +60,9 @@ typedef struct Floppy144TerminalState
 
     Floppy144CollectionId record_pager_collection;
     uint32_t record_pager_page;
+
+    /* LIST with no code reuses the pager shell with COLLECTION_COUNT sentinel. */
+    const Floppy144RunState *collection_pager_state;
     uint32_t help_pager_page;
     uint32_t requested_record_index;
 
