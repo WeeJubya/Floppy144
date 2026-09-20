@@ -134,9 +134,9 @@ int main(int argc,char**argv)
     if(count(get(root,"collections"))!=35||count(get(root,"triggers"))!=50||count(get(root,"interactions"))!=40||count(get(root,"evidence"))!=23||count(get(root,"physical_items"))!=161)die("stable ledger counts do not match Floppy//144 contract");
     collections=get(root,"collections");
     for(i=0;i<count(collections);++i){JsonValue*c=at(collections,i);long kb=intv(c,"size_kb",0);if(kb<=0)die("every collection must define positive size_kb");total_kb+=(unsigned long)kb;if(boolv(c,"required_for_completion",false))required_kb+=(unsigned long)kb;}
-    if(total_kb!=2371UL)die("collection size total must remain 2371 KB");
-    if(required_kb!=1208UL)die("required collection total must remain 1208 KB");
-    if(required_kb>1440UL||total_kb<=1440UL)die("recovery capacity contract invalid");
+    /* Stage 3C balance contract: the authored required route must fit, while the complete archive must not. */
+    if(required_kb>1440UL)die("required collection total exceeds 1440 KB recovery capacity");
+    if(total_kb<=1440UL)die("complete archive must exceed 1440 KB recovery capacity");
     furniture=get(root,"furniture");
     for(i=0;i<count(furniture);++i){JsonValue*x=at(furniture,i);if(strv(x,"variant")&&strcmp(strv(x,"variant"),"SECURE_CABINET")==0){long d=intv(x,"code_digits",0);if(d!=6&&d!=8)die("secure cabinet code_digits must be 6 or 8");}}
     emit_collections(root,argv[2]);emit_documents(root,argv[2]);emit_simple_def(root,"triggers","FLOPPY144_TRIGGER","floppy144_triggers.generated.def",argv[2]);emit_simple_def(root,"interactions","FLOPPY144_INTERACTION","floppy144_interactions.generated.def",argv[2]);emit_simple_def(root,"evidence","FLOPPY144_EVIDENCE","floppy144_evidence.generated.def",argv[2]);emit_physical(root,argv[2]);emit_ambient(root,argv[2]);emit_runtime_ledger(root,argv[2]);emit_flat_runtime(root,argv[2]);
