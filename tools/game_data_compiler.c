@@ -93,20 +93,119 @@ static void emit_collections(JsonValue*root,const char*outdir)
     }
     fclose(f);
 }
+static long preserved_document_slot(
+    const char *pszRecordId,
+    long nRecordCount
+)
+{
+    if(
+        pszRecordId != NULL &&
+        strcmp(pszRecordId,"DR-01-RS-0001") == 0 &&
+        nRecordCount > 0
+    )
+    {
+        return 0L;
+    }
+
+    if(
+        pszRecordId != NULL &&
+        strcmp(pszRecordId,"FM-13-RS-0047") == 0 &&
+        nRecordCount > 3
+    )
+    {
+        return 3L;
+    }
+
+    if(
+        pszRecordId != NULL &&
+        strcmp(pszRecordId,"HR-01-RS-0107") == 0 &&
+        nRecordCount > 9
+    )
+    {
+        return 9L;
+    }
+
+    return -1L;
+}
+
+static void player_record_id(
+    char *pszBuffer,
+    size_t uCapacity,
+    const char *pszCollectionId,
+    const char *pszCanonicalId,
+    long nSlot
+)
+{
+    if(
+        pszCanonicalId != NULL &&
+        (
+            strcmp(pszCanonicalId,"DR-01-RS-0001") == 0 ||
+            strcmp(pszCanonicalId,"FM-13-RS-0047") == 0 ||
+            strcmp(pszCanonicalId,"HR-01-RS-0107") == 0
+        )
+    )
+    {
+        (void)snprintf(
+            pszBuffer,
+            uCapacity,
+            "%s",
+            pszCanonicalId
+        );
+        return;
+    }
+
+    {
+        unsigned long uHash =
+            stable_hash(pszCanonicalId);
+        unsigned long uNumber =
+            (unsigned long)(nSlot + 1L) * 10UL +
+            1UL +
+            (uHash % 8UL);
+
+        (void)snprintf(
+            pszBuffer,
+            uCapacity,
+            "%s-RS-%04lu",
+            pszCollectionId,
+            uNumber
+        );
+    }
+}
+
 static void emit_documents(JsonValue*root,const char*outdir)
 {
     JsonValue*collections=get(root,"collections"),*docs=get(root,"documents");size_t ci,di;FILE*f=openout(outdir,"floppy144_documents.generated.inc");
     fputs("/* Generated from floppy144_game_data.json. Do not edit. */\n",f);
     for(ci=0;ci<count(collections);++ci){
-        JsonValue*c=at(collections,ci);const char*cid=strv(c,"id");long records=collection_record_count(root,cid);unsigned char *used;
+        JsonValue*c=at(collections,ci);const char*cid=strv(c,"id");long records=collection_record_count(root,cid);unsigned char *used;size_t authored_total,authored_ordinal=0U;
         if(records<=0) continue;
         used=(unsigned char*)calloc((size_t)records,1U);if(!used)die("out of memory assigning document slots");
+        authored_total=authored_count_for(docs,cid);
+
+        /* Reserve the few established player-facing IDs in their numeric band. */
         for(di=0;di<count(docs);++di){
-            JsonValue*d=at(docs,di);const char*dcid=strv(d,"collection_id"),*rid=strv(d,"id"),*title=strv(d,"title"),*body=strv(d,"body"),*tid=strv(d,"trigger_id");long idx;unsigned long h;
+            JsonValue*d=at(docs,di);const char*dcid=strv(d,"collection_id"),*rid=strv(d,"id");long special;
             if(!dcid||strcmp(dcid,cid)!=0)continue;
-            h=stable_hash(cid)^(stable_hash(rid)*16777619UL);idx=(long)(h%(unsigned long)records);
-            while(used[idx])idx=(idx+1L)%records;used[idx]=1U;
-            fprintf(f,"    { FLOPPY144_COLLECTION_");sym(f,cid);fprintf(f,", %ldU, ",idx);cstr(f,rid);fprintf(f,", ");cstr(f,title);
+            special=preserved_document_slot(rid,records);
+            if(special>=0L){if(used[special])die("preserved authored document slots collide");used[special]=1U;}
+        }
+
+        for(di=0;di<count(docs);++di){
+            JsonValue*d=at(docs,di);const char*dcid=strv(d,"collection_id"),*rid=strv(d,"id"),*title=strv(d,"title"),*body=strv(d,"body"),*tid=strv(d,"trigger_id");long idx,special;char player_id[32];
+            if(!dcid||strcmp(dcid,cid)!=0)continue;
+            special=preserved_document_slot(rid,records);
+            if(special>=0L){idx=special;}
+            else{
+                long desired=(long)(((authored_ordinal+1U)*(size_t)records)/(authored_total+1U));long attempts=0L;
+                if(desired>=records)desired=records-1L;
+                idx=desired;
+                while(used[idx]&&attempts<records){idx=(idx+1L)%records;++attempts;}
+                if(attempts>=records)die("no free authored document slot");
+                used[idx]=1U;
+            }
+            ++authored_ordinal;
+            player_record_id(player_id,sizeof(player_id),cid,rid,idx);
+            fprintf(f,"    { FLOPPY144_COLLECTION_");sym(f,cid);fprintf(f,", %ldU, ",idx);cstr(f,player_id);fprintf(f,", ");cstr(f,title);
             if(title && strcmp(title,"Suppression Control Panel Service Note")==0) fputs(", FLOPPY144_DOCUMENT_VIEW_FM13_SUPPRESSION_SERVICE, ",f);
             else if(title && strcmp(title,"Temporary Desk Reallocation Notice")==0) fputs(", FLOPPY144_DOCUMENT_VIEW_HR01_DESK_REALLOCATION, ",f);
             else if(title && strcmp(title,"Disk Recovery Index")==0) fputs(", FLOPPY144_DOCUMENT_VIEW_DR01_DISK_RECOVERY_INDEX, ",f);
