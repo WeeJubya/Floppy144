@@ -590,6 +590,115 @@ bool Floppy144PersistenceLoadRunState
     return true;
 }
 
+bool Floppy144PersistenceEncodeProfile
+(
+    const Floppy144DiscoveryProfile *profile,
+ uint8_t *payload,
+ uint32_t payload_size
+)
+{
+    uint32_t offset =
+    0U;
+
+    uint32_t index;
+
+    if(
+        profile == NULL ||
+        payload == NULL ||
+        payload_size !=
+        FLOPPY144_PROFILE_PAYLOAD_V1_SIZE
+    )
+    {
+        return false;
+    }
+
+    memset(
+        payload,
+        0,
+        payload_size
+    );
+
+    memcpy(
+        &payload[offset],
+        profile->operator_name,
+        FLOPPY144_PROFILE_NAME_CAPACITY
+    );
+
+    offset +=
+    FLOPPY144_PROFILE_NAME_CAPACITY;
+
+    payload[offset++] =
+    profile->body_style;
+
+    /*
+     * Three reserved scalar bytes.
+     */
+    offset +=
+    3U;
+
+    Floppy144PersistenceWriteU32(
+        &payload[offset],
+        profile->recovery_sessions_begun
+    );
+
+    offset +=
+    4U;
+
+    for(
+        index = 0U;
+    index <
+    (uint32_t)(
+        sizeof(
+            profile->collections_ever_restored
+        ) /
+        sizeof(
+            profile->collections_ever_restored[0]
+        )
+    );
+    ++index
+    )
+    {
+        Floppy144PersistenceWriteU32(
+            &payload[offset],
+            profile->collections_ever_restored[index]
+        );
+
+        offset +=
+        4U;
+    }
+
+    for(
+        index = 0U;
+    index <
+    (uint32_t)(
+        sizeof(
+            profile->evidence_ever_established
+        ) /
+        sizeof(
+            profile->evidence_ever_established[0]
+        )
+    );
+    ++index
+    )
+    {
+        Floppy144PersistenceWriteU32(
+            &payload[offset],
+            profile->evidence_ever_established[index]
+        );
+
+        offset +=
+        4U;
+    }
+
+    /*
+     * The remaining V1 bytes stay zero and are reserved for future
+     * cumulative discovery fields.
+     */
+    return
+    offset <=
+    FLOPPY144_PROFILE_PAYLOAD_V1_SIZE;
+}
+
 bool Floppy144PersistenceSaveProfile
 (
     const char *path,
