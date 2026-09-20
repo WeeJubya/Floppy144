@@ -4447,7 +4447,8 @@
         "width": 6,
         "height": 2
       },
-      "drawing_definition_id": "DRAW_SECURE_CABINET_HALF"
+      "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
+      "code_digits": 6
     },
     {
       "id": "RECEPTION_BOOKSHELF_01",
@@ -4789,7 +4790,8 @@
         "width": 2,
         "height": 6
       },
-      "drawing_definition_id": "DRAW_SECURE_CABINET_HALF"
+      "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
+      "code_digits": 6
     },
     {
       "id": "MAIN_OFFICE_BOOKSHELF_01",
@@ -4965,7 +4967,8 @@
         "width": 2,
         "height": 6
       },
-      "drawing_definition_id": "DRAW_SECURE_CABINET_HALF"
+      "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
+      "code_digits": 6
     },
     {
       "id": "FACILITIES_SHELVING_01",
@@ -5181,7 +5184,8 @@
         "width": 6,
         "height": 2
       },
-      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL"
+      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL",
+      "code_digits": 6
     },
     {
       "id": "RECORDS_OFFICE_SECURE_CABINET_02",
@@ -5195,7 +5199,8 @@
         "width": 6,
         "height": 2
       },
-      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL"
+      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL",
+      "code_digits": 6
     },
     {
       "id": "RECORDS_OFFICE_SECURE_CABINET_03",
@@ -5209,7 +5214,8 @@
         "width": 6,
         "height": 2
       },
-      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL"
+      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL",
+      "code_digits": 6
     },
     {
       "id": "RECORDS_OFFICE_SECURE_CABINET_04",
@@ -5223,7 +5229,8 @@
         "width": 6,
         "height": 2
       },
-      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL"
+      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL",
+      "code_digits": 6
     },
     {
       "id": "RECORDS_OFFICE_SECURE_CABINET_05",
@@ -5237,7 +5244,8 @@
         "width": 6,
         "height": 2
       },
-      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL"
+      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL",
+      "code_digits": 6
     },
     {
       "id": "RECORDS_OFFICE_SECURE_CABINET_06",
@@ -5251,7 +5259,8 @@
         "width": 6,
         "height": 2
       },
-      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL"
+      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL",
+      "code_digits": 6
     },
     {
       "id": "RECORDS_OFFICE_SECURE_CABINET_07",
@@ -5265,7 +5274,8 @@
         "width": 6,
         "height": 2
       },
-      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL"
+      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL",
+      "code_digits": 6
     },
     {
       "id": "RECORDS_OFFICE_SECURE_CABINET_08",
@@ -5279,7 +5289,8 @@
         "width": 6,
         "height": 2
       },
-      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL"
+      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL",
+      "code_digits": 6
     },
     {
       "id": "RECORDS_OFFICE_SECURE_CABINET_09",
@@ -5293,7 +5304,8 @@
         "width": 6,
         "height": 2
       },
-      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL"
+      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL",
+      "code_digits": 6
     },
     {
       "id": "RECORDS_OFFICE_SECURE_CABINET_10",
@@ -5307,7 +5319,8 @@
         "width": 6,
         "height": 2
       },
-      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL"
+      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL",
+      "code_digits": 6
     },
     {
       "id": "RECORDS_OFFICE_SECURE_CABINET_11",
@@ -5321,7 +5334,8 @@
         "width": 2,
         "height": 6
       },
-      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL"
+      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL",
+      "code_digits": 6
     },
     {
       "id": "RECORDS_OFFICE_SECURE_CABINET_12",
@@ -5335,7 +5349,8 @@
         "width": 2,
         "height": 6
       },
-      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL"
+      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL",
+      "code_digits": 6
     },
     {
       "id": "RECORDS_OFFICE_SECURE_CABINET_13",
@@ -5349,7 +5364,8 @@
         "width": 2,
         "height": 6
       },
-      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL"
+      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL",
+      "code_digits": 6
     },
     {
       "id": "RECORDS_OFFICE_SECURE_CABINET_14",
@@ -5363,7 +5379,8 @@
         "width": 2,
         "height": 6
       },
-      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL"
+      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL",
+      "code_digits": 6
     },
     {
       "id": "RECORDS_OFFICE_SECURE_CABINET_15",
@@ -5377,7 +5394,8 @@
         "width": 2,
         "height": 6
       },
-      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL"
+      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL",
+      "code_digits": 6
     },
     {
       "id": "RECORDS_OFFICE_SECURE_CABINET_16",
@@ -5391,7 +5409,8 @@
         "width": 2,
         "height": 6
       },
-      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL"
+      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL",
+      "code_digits": 6
     },
     {
       "id": "RECORDS_OFFICE_SECURE_CABINET_17",
@@ -5405,7 +5424,8 @@
         "width": 2,
         "height": 6
       },
-      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL"
+      "drawing_definition_id": "DRAW_SECURE_CABINET_FULL",
+      "code_digits": 6
     },
     {
       "id": "RECORDS_OFFICE_CHAIR_01",
@@ -5491,7 +5511,7 @@
         "x": 50,
         "y": 95,
         "width": 6,
-        "height": 2,
+        "height": 4,
         "rotation": 90
       },
       "drawing_definition_id": "DRAW_STANDARD_DESK"
@@ -5506,7 +5526,7 @@
         "x": 44,
         "y": 95,
         "width": 6,
-        "height": 2
+        "height": 4
       },
       "drawing_definition_id": "DRAW_TABLE"
     },
@@ -5537,7 +5557,8 @@
         "width": 6,
         "height": 2
       },
-      "drawing_definition_id": "DRAW_SECURE_CABINET_HALF"
+      "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
+      "code_digits": 6
     },
     {
       "id": "IT_SUPPORT_BOOKCASE",
@@ -5883,7 +5904,8 @@
         "width": 6,
         "height": 2
       },
-      "drawing_definition_id": "DRAW_SECURE_CABINET_HALF"
+      "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
+      "code_digits": 8
     },
     {
       "id": "SECURITY_BOOKCASE",
@@ -5939,7 +5961,7 @@
         "x": 35,
         "y": 59,
         "width": 6,
-        "height": 2,
+        "height": 4,
         "rotation": 90
       },
       "drawing_definition_id": "DRAW_STANDARD_DESK"
@@ -5971,7 +5993,8 @@
         "width": 6,
         "height": 2
       },
-      "drawing_definition_id": "DRAW_SECURE_CABINET_HALF"
+      "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
+      "code_digits": 6
     },
     {
       "id": "SERVER_ROOM_BOOKCASE_01",
@@ -6058,7 +6081,8 @@
         "width": 2,
         "height": 6
       },
-      "drawing_definition_id": "DRAW_SECURE_CABINET_HALF"
+      "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
+      "code_digits": 6
     },
     {
       "id": "SECRETARY_OFFICE_OFFICE_BOOKCASE_01",
@@ -6219,7 +6243,8 @@
         "width": 2,
         "height": 6
       },
-      "drawing_definition_id": "DRAW_SECURE_CABINET_HALF"
+      "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
+      "code_digits": 6
     },
     {
       "id": "DIRECTOR_OFFICE_BOOKCASE_01",
@@ -10266,7 +10291,6 @@
       "id": "DR-01",
       "name": "Disk Recovery Index",
       "domain": "Department of Records",
-      "reconstruction_quota_percent": 4,
       "content_budget": {
         "act": "Prologue",
         "records": 8,
@@ -10285,13 +10309,14 @@
       "physical_item_ids": [],
       "evidence_ids": [],
       "notebook_entry": "Disk Recovery Index: recovered collection material is available to the current reconstruction.",
-      "source_order": 1
+      "source_order": 1,
+      "size_kb": 58,
+      "required_for_completion": true
     },
     {
       "id": "DR-02",
       "name": "Terminal Operations Guide",
       "domain": "Department of Records",
-      "reconstruction_quota_percent": 1,
       "content_budget": {
         "act": "Prologue",
         "records": 6,
@@ -10308,13 +10333,14 @@
       "physical_item_ids": [],
       "evidence_ids": [],
       "notebook_entry": "Terminal Operations Guide: recovered collection material is available to the current reconstruction.",
-      "source_order": 2
+      "source_order": 2,
+      "size_kb": 14,
+      "required_for_completion": false
     },
     {
       "id": "DR-03",
       "name": "Site Reconstruction Guide",
       "domain": "Department of Records",
-      "reconstruction_quota_percent": 1,
       "content_budget": {
         "act": "Prologue",
         "records": 6,
@@ -10331,13 +10357,14 @@
       "physical_item_ids": [],
       "evidence_ids": [],
       "notebook_entry": "Site Reconstruction Guide: recovered collection material is available to the current reconstruction.",
-      "source_order": 3
+      "source_order": 3,
+      "size_kb": 14,
+      "required_for_completion": false
     },
     {
       "id": "DR-04",
       "name": "Site Closure & Building Handover",
       "domain": "Department of Records",
-      "reconstruction_quota_percent": 7,
       "content_budget": {
         "act": "Act II",
         "records": 18,
@@ -10365,13 +10392,14 @@
         "E-003"
       ],
       "notebook_entry": "Site Closure & Building Handover: recovered collection material is available to the current reconstruction.",
-      "source_order": 4
+      "source_order": 4,
+      "size_kb": 101,
+      "required_for_completion": true
     },
     {
       "id": "DR-07",
       "name": "Archive Holdings & Reconciliation",
       "domain": "Department of Records",
-      "reconstruction_quota_percent": 6,
       "content_budget": {
         "act": "Act II",
         "records": 24,
@@ -10402,13 +10430,14 @@
         "E-004"
       ],
       "notebook_entry": "Archive Holdings & Reconciliation: recovered collection material is available to the current reconstruction.",
-      "source_order": 5
+      "source_order": 5,
+      "size_kb": 86,
+      "required_for_completion": false
     },
     {
       "id": "DR-23",
       "name": "Historical Filing Exceptions & Recovery Actions",
       "domain": "Department of Records",
-      "reconstruction_quota_percent": 3,
       "content_budget": {
         "act": "Act II",
         "records": 12,
@@ -10425,13 +10454,14 @@
       "physical_item_ids": [],
       "evidence_ids": [],
       "notebook_entry": "Historical Filing Exceptions & Recovery Actions: recovered collection material is available to the current reconstruction.",
-      "source_order": 6
+      "source_order": 6,
+      "size_kb": 43,
+      "required_for_completion": false
     },
     {
       "id": "DR-29",
       "name": "Archive Transfer & Custody",
       "domain": "Department of Records",
-      "reconstruction_quota_percent": 6,
       "content_budget": {
         "act": "Act II",
         "records": 20,
@@ -10462,13 +10492,14 @@
         "E-005"
       ],
       "notebook_entry": "Archive Transfer & Custody: recovered collection material is available to the current reconstruction.",
-      "source_order": 7
+      "source_order": 7,
+      "size_kb": 86,
+      "required_for_completion": false
     },
     {
       "id": "DR-31",
       "name": "Archive Transfer Authorisation & Exceptions",
       "domain": "Department of Records",
-      "reconstruction_quota_percent": 6,
       "content_budget": {
         "act": "Act II",
         "records": 18,
@@ -10498,13 +10529,14 @@
         "E-006"
       ],
       "notebook_entry": "Archive Transfer Authorisation & Exceptions: recovered collection material is available to the current reconstruction.",
-      "source_order": 8
+      "source_order": 8,
+      "size_kb": 86,
+      "required_for_completion": false
     },
     {
       "id": "DR-47",
       "name": "Final Closure Exceptions & Incident Review",
       "domain": "Department of Records",
-      "reconstruction_quota_percent": 9,
       "content_budget": {
         "act": "Act III",
         "records": 20,
@@ -10534,13 +10566,14 @@
         "E-010"
       ],
       "notebook_entry": "Final Closure Exceptions & Incident Review: recovered collection material is available to the current reconstruction.",
-      "source_order": 9
+      "source_order": 9,
+      "size_kb": 130,
+      "required_for_completion": true
     },
     {
       "id": "DR-53",
       "name": "Executive Closure Correspondence",
       "domain": "Department of Records",
-      "reconstruction_quota_percent": 5,
       "content_budget": {
         "act": "Act III",
         "records": 18,
@@ -10569,13 +10602,14 @@
         "E-011"
       ],
       "notebook_entry": "Executive Closure Correspondence: recovered collection material is available to the current reconstruction.",
-      "source_order": 10
+      "source_order": 10,
+      "size_kb": 72,
+      "required_for_completion": true
     },
     {
       "id": "HR-01",
       "name": "Site Establishment",
       "domain": "Human Resources",
-      "reconstruction_quota_percent": 6,
       "content_budget": {
         "act": "Act I",
         "records": 18,
@@ -10606,13 +10640,14 @@
       ],
       "evidence_ids": [],
       "notebook_entry": "Site Establishment: recovered collection material is available to the current reconstruction.",
-      "source_order": 11
+      "source_order": 11,
+      "size_kb": 86,
+      "required_for_completion": false
     },
     {
       "id": "HR-05",
       "name": "Staff Welfare & Shared Facilities",
       "domain": "Human Resources",
-      "reconstruction_quota_percent": 4,
       "content_budget": {
         "act": "Act II",
         "records": 16,
@@ -10645,13 +10680,14 @@
       ],
       "evidence_ids": [],
       "notebook_entry": "Staff Welfare & Shared Facilities: recovered collection material is available to the current reconstruction.",
-      "source_order": 12
+      "source_order": 12,
+      "size_kb": 58,
+      "required_for_completion": false
     },
     {
       "id": "HR-09",
       "name": "Attendance, Leave & Duty Status",
       "domain": "Human Resources",
-      "reconstruction_quota_percent": 5,
       "content_budget": {
         "act": "Act III",
         "records": 18,
@@ -10681,52 +10717,56 @@
         "E-014"
       ],
       "notebook_entry": "Attendance, Leave & Duty Status: recovered collection material is available to the current reconstruction.",
-      "source_order": 13
+      "source_order": 13,
+      "size_kb": 72,
+      "required_for_completion": false
     },
     {
       "id": "HR-14",
       "name": "Learning, Development & Competency",
       "domain": "Human Resources",
-      "reconstruction_quota_percent": 1,
       "content_budget": null,
       "document_ids": [],
       "trigger_ids": [],
       "physical_item_ids": [],
       "evidence_ids": [],
       "notebook_entry": "Learning, Development & Competency: recovered collection material is available to the current reconstruction.",
-      "source_order": 14
+      "source_order": 14,
+      "size_kb": 14,
+      "required_for_completion": false
     },
     {
       "id": "HR-27",
       "name": "Payroll, Allowances & Closure Payments",
       "domain": "Human Resources",
-      "reconstruction_quota_percent": 1,
       "content_budget": null,
       "document_ids": [],
       "trigger_ids": [],
       "physical_item_ids": [],
       "evidence_ids": [],
       "notebook_entry": "Payroll, Allowances & Closure Payments: recovered collection material is available to the current reconstruction.",
-      "source_order": 15
+      "source_order": 15,
+      "size_kb": 14,
+      "required_for_completion": false
     },
     {
       "id": "HR-36",
       "name": "Personnel Files & Postings",
       "domain": "Human Resources",
-      "reconstruction_quota_percent": 2,
       "content_budget": null,
       "document_ids": [],
       "trigger_ids": [],
       "physical_item_ids": [],
       "evidence_ids": [],
       "notebook_entry": "Personnel Files & Postings: recovered collection material is available to the current reconstruction.",
-      "source_order": 16
+      "source_order": 16,
+      "size_kb": 29,
+      "required_for_completion": false
     },
     {
       "id": "FM-04",
       "name": "Site Infrastructure & Maintenance",
       "domain": "Facilities Management",
-      "reconstruction_quota_percent": 8,
       "content_budget": {
         "act": "Act I",
         "records": 25,
@@ -10760,13 +10800,14 @@
       ],
       "evidence_ids": [],
       "notebook_entry": "Site Infrastructure & Maintenance: recovered collection material is available to the current reconstruction.",
-      "source_order": 17
+      "source_order": 17,
+      "size_kb": 115,
+      "required_for_completion": true
     },
     {
       "id": "FM-07",
       "name": "Asset Management & Decommissioning",
       "domain": "Facilities Management",
-      "reconstruction_quota_percent": 6,
       "content_budget": {
         "act": "Act I",
         "records": 20,
@@ -10797,13 +10838,14 @@
         "E-003"
       ],
       "notebook_entry": "Asset Management & Decommissioning: recovered collection material is available to the current reconstruction.",
-      "source_order": 18
+      "source_order": 18,
+      "size_kb": 86,
+      "required_for_completion": false
     },
     {
       "id": "FM-13",
       "name": "Site Safety & Suppression Systems",
       "domain": "Facilities Management",
-      "reconstruction_quota_percent": 6,
       "content_budget": {
         "act": "Act I",
         "records": 22,
@@ -10831,13 +10873,14 @@
         "E-001"
       ],
       "notebook_entry": "Site Safety & Suppression Systems: recovered collection material is available to the current reconstruction.",
-      "source_order": 19
+      "source_order": 19,
+      "size_kb": 86,
+      "required_for_completion": false
     },
     {
       "id": "FM-18",
       "name": "Environmental Monitoring & Plant Logs",
       "domain": "Facilities Management",
-      "reconstruction_quota_percent": 6,
       "content_budget": {
         "act": "Act III",
         "records": 18,
@@ -10869,13 +10912,14 @@
         "E-022"
       ],
       "notebook_entry": "Environmental Monitoring & Plant Logs: recovered collection material is available to the current reconstruction.",
-      "source_order": 20
+      "source_order": 20,
+      "size_kb": 86,
+      "required_for_completion": false
     },
     {
       "id": "FM-23",
       "name": "Site Maps & Room Organisation",
       "domain": "Facilities Management",
-      "reconstruction_quota_percent": 5,
       "content_budget": null,
       "document_ids": [
         "FM-23-RS-0001"
@@ -10886,26 +10930,28 @@
       "physical_item_ids": [],
       "evidence_ids": [],
       "notebook_entry": "Site Maps & Room Organisation: recovered collection material is available to the current reconstruction.",
-      "source_order": 21
+      "source_order": 21,
+      "size_kb": 72,
+      "required_for_completion": false
     },
     {
       "id": "FM-32",
       "name": "Utilities, Plant & Environmental Services",
       "domain": "Facilities Management",
-      "reconstruction_quota_percent": 2,
       "content_budget": null,
       "document_ids": [],
       "trigger_ids": [],
       "physical_item_ids": [],
       "evidence_ids": [],
       "notebook_entry": "Utilities, Plant & Environmental Services: recovered collection material is available to the current reconstruction.",
-      "source_order": 22
+      "source_order": 22,
+      "size_kb": 29,
+      "required_for_completion": false
     },
     {
       "id": "OS-07",
       "name": "Visitor & Access Management",
       "domain": "Operational Security",
-      "reconstruction_quota_percent": 7,
       "content_budget": {
         "act": "Act III",
         "records": 20,
@@ -10938,13 +10984,14 @@
         "E-013"
       ],
       "notebook_entry": "Visitor & Access Management: recovered collection material is available to the current reconstruction.",
-      "source_order": 23
+      "source_order": 23,
+      "size_kb": 101,
+      "required_for_completion": false
     },
     {
       "id": "OS-18",
       "name": "Access Control & Restricted Areas",
       "domain": "Operational Security",
-      "reconstruction_quota_percent": 2,
       "content_budget": null,
       "document_ids": [
         "OS-18-RS-0001",
@@ -10962,13 +11009,14 @@
         "E-012"
       ],
       "notebook_entry": "Access Control & Restricted Areas: recovered collection material is available to the current reconstruction.",
-      "source_order": 24
+      "source_order": 24,
+      "size_kb": 29,
+      "required_for_completion": false
     },
     {
       "id": "OS-26",
       "name": "Incident Reporting & Evacuation",
       "domain": "Operational Security",
-      "reconstruction_quota_percent": 8,
       "content_budget": {
         "act": "Act III",
         "records": 22,
@@ -11003,13 +11051,14 @@
         "E-016"
       ],
       "notebook_entry": "Incident Reporting & Evacuation: recovered collection material is available to the current reconstruction.",
-      "source_order": 25
+      "source_order": 25,
+      "size_kb": 115,
+      "required_for_completion": true
     },
     {
       "id": "OS-34",
       "name": "Secure Storage & Key Control",
       "domain": "Operational Security",
-      "reconstruction_quota_percent": 6,
       "content_budget": {
         "act": "Act III",
         "records": 16,
@@ -11035,13 +11084,14 @@
       ],
       "evidence_ids": [],
       "notebook_entry": "Secure Storage & Key Control: recovered collection material is available to the current reconstruction.",
-      "source_order": 26
+      "source_order": 26,
+      "size_kb": 86,
+      "required_for_completion": true
     },
     {
       "id": "OS-41",
       "name": "Telephone & Duty Communications Logs",
       "domain": "Operational Security",
-      "reconstruction_quota_percent": 1,
       "content_budget": null,
       "document_ids": [
         "OS-41-RS-0001"
@@ -11056,13 +11106,14 @@
         "E-017"
       ],
       "notebook_entry": "Telephone & Duty Communications Logs: recovered collection material is available to the current reconstruction.",
-      "source_order": 27
+      "source_order": 27,
+      "size_kb": 14,
+      "required_for_completion": false
     },
     {
       "id": "OS-48",
       "name": "CCTV Index & Retention",
       "domain": "Operational Security",
-      "reconstruction_quota_percent": 5,
       "content_budget": {
         "act": "Act III",
         "records": 18,
@@ -11093,13 +11144,14 @@
         "E-017"
       ],
       "notebook_entry": "CCTV Index & Retention: recovered collection material is available to the current reconstruction.",
-      "source_order": 28
+      "source_order": 28,
+      "size_kb": 72,
+      "required_for_completion": false
     },
     {
       "id": "TS-02",
       "name": "Terminal Network Support",
       "domain": "Technology Services",
-      "reconstruction_quota_percent": 6,
       "content_budget": {
         "act": "Act II",
         "records": 20,
@@ -11128,13 +11180,14 @@
         "E-007"
       ],
       "notebook_entry": "Terminal Network Support: recovered collection material is available to the current reconstruction.",
-      "source_order": 29
+      "source_order": 29,
+      "size_kb": 86,
+      "required_for_completion": true
     },
     {
       "id": "TS-06",
       "name": "Network Infrastructure & Cabling",
       "domain": "Technology Services",
-      "reconstruction_quota_percent": 6,
       "content_budget": {
         "act": "Act II",
         "records": 22,
@@ -11164,13 +11217,14 @@
         "E-008"
       ],
       "notebook_entry": "Network Infrastructure & Cabling: recovered collection material is available to the current reconstruction.",
-      "source_order": 30
+      "source_order": 30,
+      "size_kb": 86,
+      "required_for_completion": true
     },
     {
       "id": "TS-08",
       "name": "Support History & Fault Trends",
       "domain": "Technology Services",
-      "reconstruction_quota_percent": 3,
       "content_budget": {
         "act": "Act II",
         "records": 12,
@@ -11192,13 +11246,14 @@
       ],
       "evidence_ids": [],
       "notebook_entry": "Support History & Fault Trends: recovered collection material is available to the current reconstruction.",
-      "source_order": 31
+      "source_order": 31,
+      "size_kb": 43,
+      "required_for_completion": false
     },
     {
       "id": "TS-10",
       "name": "Digital Holdings & Verification",
       "domain": "Technology Services",
-      "reconstruction_quota_percent": 6,
       "content_budget": {
         "act": "Act II",
         "records": 20,
@@ -11231,13 +11286,14 @@
         "E-009"
       ],
       "notebook_entry": "Digital Holdings & Verification: recovered collection material is available to the current reconstruction.",
-      "source_order": 32
+      "source_order": 32,
+      "size_kb": 86,
+      "required_for_completion": true
     },
     {
       "id": "TS-14",
       "name": "Backup Operations & Server Availability",
       "domain": "Technology Services",
-      "reconstruction_quota_percent": 7,
       "content_budget": {
         "act": "Act III",
         "records": 20,
@@ -11269,13 +11325,14 @@
         "E-019"
       ],
       "notebook_entry": "Backup Operations & Server Availability: recovered collection material is available to the current reconstruction.",
-      "source_order": 33
+      "source_order": 33,
+      "size_kb": 101,
+      "required_for_completion": true
     },
     {
       "id": "TS-18",
       "name": "Server Operations & Recovery Logs",
       "domain": "Technology Services",
-      "reconstruction_quota_percent": 7,
       "content_budget": {
         "act": "Act III",
         "records": 24,
@@ -11315,20 +11372,23 @@
         "E-023"
       ],
       "notebook_entry": "Server Operations & Recovery Logs: recovered collection material is available to the current reconstruction.",
-      "source_order": 34
+      "source_order": 34,
+      "size_kb": 101,
+      "required_for_completion": true
     },
     {
       "id": "TS-27",
       "name": "Telephony & Internal Communications",
       "domain": "Technology Services",
-      "reconstruction_quota_percent": 1,
       "content_budget": null,
       "document_ids": [],
       "trigger_ids": [],
       "physical_item_ids": [],
       "evidence_ids": [],
       "notebook_entry": "Telephony & Internal Communications: recovered collection material is available to the current reconstruction.",
-      "source_order": 35
+      "source_order": 35,
+      "size_kb": 14,
+      "required_for_completion": true
     }
   ],
   "documents": [
@@ -11484,7 +11544,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-010",
-      "body": "PHYSICAL ARCHIVE RECONCILIATION WORKSTREAM\n\nThis recovered DR-04 record authorises or records the following state change in the reconstruction: SET_BRANCH RECORDS_FIRST; RECONSTRUCT_ROOM RECORDS_OFFICE; UNLOCK_CONNECTION COR_RECO.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Physical Archive Reconciliation Workstream\n\nThe archive now contains enough context to advance the recovery investigation. The recovered material establishes a new line of enquiry for the reconstruction. The RECORDS OFFICE area has been reconstructed from the surviving archive. A previously inaccessible internal route has been restored for investigation.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-04"
     },
@@ -11496,7 +11556,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-011",
-      "body": "TERMINAL NETWORK REMEDIATION WORKSTREAM\n\nThis recovered DR-04 record authorises or records the following state change in the reconstruction: SET_BRANCH TECHNOLOGY_FIRST; RECONSTRUCT_ROOM IT_SUPPORT; UNLOCK_CONNECTION COR_IT.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Terminal Network Remediation Workstream\n\nThe archive now contains enough context to advance the recovery investigation. The recovered material establishes a new line of enquiry for the reconstruction. The IT SUPPORT area has been reconstructed from the surviving archive. A previously inaccessible internal route has been restored for investigation.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-04"
     },
@@ -11556,7 +11616,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-013",
-      "body": "ARCHIVE RECONCILIATION EXCEPTION REPORT\n\nThis recovered DR-07 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-040; REVEAL_PHYSICAL_ITEM P-042; REVEAL_PHYSICAL_ITEM P-043.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Archive Reconciliation Exception Report\n\nRecord on Records Trolley is now represented in the recovered site and can be inspected. Misfile slip is now represented in the recovered site and can be inspected. Trolley refiling divider is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-07"
     },
@@ -11568,7 +11628,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-014",
-      "body": "UNLOCATED HOLDINGS SCHEDULE\n\nThis recovered DR-07 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-041; REVEAL_PHYSICAL_ITEM P-044; REVEAL_PHYSICAL_ITEM P-045.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Unlocated Holdings Schedule\n\nExternal withdrawal / location marker is now represented in the recovered site and can be inspected. Catalogue discrepancy card is now represented in the recovered site and can be inspected. Refiling note is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-07"
     },
@@ -11676,7 +11736,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-015",
-      "body": "FINAL TRANSFER BATCH CUSTODY REGISTER\n\nThis recovered DR-29 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-046; REVEAL_PHYSICAL_ITEM P-048; REVEAL_PHYSICAL_ITEM P-049.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Final Transfer Batch Custody Register\n\nLabelled archive transfer box is now represented in the recovered site and can be inspected. Transfer Box Manifest is now represented in the recovered site and can be inspected. Custody tag is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-29"
     },
@@ -11688,7 +11748,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-016",
-      "body": "TRANSFER BOX MANIFEST\n\nThis recovered DR-29 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-047; REVEAL_PHYSICAL_ITEM P-050; REVEAL_PHYSICAL_ITEM P-051.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Transfer Box Manifest\n\nTransfer withdrawal marker is now represented in the recovered site and can be inspected. Box seal strip is now represented in the recovered site and can be inspected. Transfer staging checklist is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-29"
     },
@@ -11748,7 +11808,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-017",
-      "body": "FINAL TRANSFER EXCEPTION REGISTER\n\nThis recovered DR-31 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-053; REVEAL_PHYSICAL_ITEM P-054; REVEAL_PHYSICAL_ITEM P-055; REVEAL_PHYSICAL_ITEM P-056.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Final Transfer Exception Register\n\nFinal Transfer Exception Register is now represented in the recovered site and can be inspected. Senior Archivist verification note is now represented in the recovered site and can be inspected. In-tray card is now represented in the recovered site and can be inspected. Paperclip tin is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-31"
     },
@@ -11760,7 +11820,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-018",
-      "body": "SENIOR ARCHIVIST VERIFICATION ASSIGNMENT\n\nThis recovered DR-31 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-052.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Senior Archivist Verification Assignment\n\nSigned Custody Sheet is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-31"
     },
@@ -11820,7 +11880,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-026",
-      "body": "FINAL CLOSURE EXCEPTION SUMMARY\n\nThis recovered DR-47 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-021; REVEAL_PHYSICAL_ITEM P-022; REVEAL_PHYSICAL_ITEM P-023; REVEAL_PHYSICAL_ITEM P-024.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Final Closure Exception Summary\n\nThe archive now contains enough context to advance the recovery investigation. Project Manager Exception Sheet is now represented in the recovered site and can be inspected. Closure suspension note is now represented in the recovered site and can be inspected. Security review referral is now represented in the recovered site and can be inspected. Remaining-workstream release sheet is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-47"
     },
@@ -11832,7 +11892,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-027",
-      "body": "OPERATIONAL SECURITY REVIEW REQUIREMENT\n\nThis recovered DR-47 record authorises or records the following state change in the reconstruction: RECONSTRUCT_ROOM SECURITY; RECONSTRUCT_ROOM SECRETARY_OFFICE; UNLOCK_CONNECTION COR_SEC; UNLOCK_CONNECTION COR_SECR.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Operational Security Review Requirement\n\nThe SECURITY area has been reconstructed from the surviving archive. The SECRETARY OFFICE area has been reconstructed from the surviving archive. A previously inaccessible internal route has been restored for investigation.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-47"
     },
@@ -11892,7 +11952,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-029",
-      "body": "SITE CLOSURE DIRECTION\n\nThis recovered DR-53 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-080; REVEAL_PHYSICAL_ITEM P-081; REVEAL_PHYSICAL_ITEM P-082; REVEAL_PHYSICAL_ITEM P-083; REVEAL_PHYSICAL_ITEM P-084.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Site Closure Direction\n\nSigned closure briefing is now represented in the recovered site and can be inspected. Director annotated copy is now represented in the recovered site and can be inspected. Meeting notes card is now represented in the recovered site and can be inspected. Briefing binder is now represented in the recovered site and can be inspected. Final-day diary card is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-53"
     },
@@ -11964,7 +12024,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-002",
-      "body": "SITE ESTABLISHMENT REGISTER\n\nThis recovered HR-01 record authorises or records the following state change in the reconstruction: RECONSTRUCT_ROOM MAIN_OFFICE.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Site Establishment Register\n\nThe archive now contains enough context to advance the recovery investigation. The MAIN OFFICE area has been reconstructed from the surviving archive.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "HR-01"
     },
@@ -11976,7 +12036,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-003",
-      "body": "MAIN OFFICE STAFFING ALLOCATION\n\nThis recovered HR-01 record authorises or records the following state change in the reconstruction: UNLOCK_CONNECTION REC_OFF; REVEAL_PHYSICAL_ITEM P-008; REVEAL_PHYSICAL_ITEM P-009; REVEAL_PHYSICAL_ITEM P-010.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Main Office Staffing Allocation\n\nA previously inaccessible internal route has been restored for investigation. Main Office desk-number labels is now represented in the recovered site and can be inspected. Temporary desk allocation slip is now represented in the recovered site and can be inspected. HR hot desking note is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "HR-01"
     },
@@ -12036,7 +12096,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-012",
-      "body": "STAFF WELFARE & AMENITIES ALLOCATION\n\nThis recovered HR-05 record authorises or records the following state change in the reconstruction: RECONSTRUCT_ROOM STAFF_ROOM; UNLOCK_CONNECTION COR_STAFF; REVEAL_PHYSICAL_ITEM P-071; REVEAL_PHYSICAL_ITEM P-072; REVEAL_PHYSICAL_ITEM P-073; REVEAL_PHYSICAL_ITEM P-074; REVEAL_PHYSICAL_ITEM P-075; REVEAL_PHYSICAL_ITEM P-076; REVEAL_PHYSICAL_ITEM P-077; REVEAL_PHYSICAL_ITEM P-078; REVEAL_PHYSICAL_ITEM P-079; REVEAL_PHYSICAL_ITEM P-137; REVEAL_PHYSICAL_ITEM P-138; REVEAL_PHYSICAL_ITEM P-139.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Staff Welfare & Amenities Allocation\n\nThe STAFF ROOM area has been reconstructed from the surviving archive. A previously inaccessible internal route has been restored for investigation. Mouldy cheese sandwich is now represented in the recovered site and can be inspected. Named mugs is now represented in the recovered site and can be inspected. Dog-eared paperback is now represented in the recovered site and can be inspected. Half-finished crossword is now represented in the recovered site and can be inspected. Noticeboard social poster is now represented in the recovered site and can be inspected. Coffee jar is now represented in the recovered site and can be inspected. Labelled milk bottle is now represented in the recovered site and can be inspected. Birthday card is now represented in the recovered site and can be inspected. Forgotten umbrella is now represented in the recovered site and can be inspected. Completed newspaper crossword is now represented in the recovered site and can be inspected. Seasonal staff-social notice is now represented in the recovered site and can be inspected. Ancient workplace first-aid manual is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "HR-05"
     },
@@ -12096,7 +12156,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-043",
-      "body": "FINAL FRIDAY ATTENDANCE RETURN\n\nThis recovered HR-09 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-025; REVEAL_PHYSICAL_ITEM P-027; REVEAL_PHYSICAL_ITEM P-028; REVEAL_PHYSICAL_ITEM P-029.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Final Friday Attendance Return\n\nSigned Attendance Sheet is now represented in the recovered site and can be inspected. Leave status card is now represented in the recovered site and can be inspected. Overtime return is now represented in the recovered site and can be inspected. Attendance amendment note is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "HR-09"
     },
@@ -12108,7 +12168,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-044",
-      "body": "DUTY & LEAVE STATUS SCHEDULE\n\nThis recovered HR-09 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-026.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Duty & Leave Status Schedule\n\nDuty Rota is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "HR-09"
     },
@@ -12168,7 +12228,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-004",
-      "body": "FACILITIES ACCESS AUTHORISATION\n\nThis recovered FM-04 record authorises or records the following state change in the reconstruction: RECONSTRUCT_ROOM FACILITIES.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Facilities Access Authorisation\n\nThe FACILITIES area has been reconstructed from the surviving archive.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "FM-04"
     },
@@ -12180,7 +12240,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-005",
-      "body": "INTERNAL CIRCULATION ACCESS PLAN\n\nThis recovered FM-04 record authorises or records the following state change in the reconstruction: UNLOCK_CONNECTION COR_REC; UNLOCK_CONNECTION COR_OFF; REVEAL_PHYSICAL_ITEM P-007; REVEAL_PHYSICAL_ITEM P-152; REVEAL_PHYSICAL_ITEM P-153; REVEAL_PHYSICAL_ITEM P-154; REVEAL_PHYSICAL_ITEM P-155; REVEAL_PHYSICAL_ITEM P-156; REVEAL_PHYSICAL_ITEM P-157; REVEAL_PHYSICAL_ITEM P-158.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Internal Circulation Access Plan\n\nA previously inaccessible internal route has been restored for investigation. Site Directory / room identification material is now represented in the recovered site and can be inspected. Reception room plate is now represented in the recovered site and can be inspected. Main Office room plate is now represented in the recovered site and can be inspected. Facilities room plate - corridor side is now represented in the recovered site and can be inspected. IT Support room plate is now represented in the recovered site and can be inspected. Security Office room plate is now represented in the recovered site and can be inspected. Staff Room door plate is now represented in the recovered site and can be inspected. Records Room door plate is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "FM-04"
     },
@@ -12240,7 +12300,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-008",
-      "body": "FINAL DECOMMISSIONING SCHEDULE\n\nThis recovered FM-07 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-034; REVEAL_PHYSICAL_ITEM P-035; REVEAL_PHYSICAL_ITEM P-036.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Final Decommissioning Schedule\n\nDecommissioning tag set is now represented in the recovered site and can be inspected. Asset transfer labels is now represented in the recovered site and can be inspected. Contractor clipboard is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "FM-07"
     },
@@ -12252,7 +12312,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-009",
-      "body": "RETAINED SERVICES SCHEDULE\n\nThis recovered FM-07 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-033.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Retained Services Schedule\n\nFinal Isolation Register is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "FM-07"
     },
@@ -12324,7 +12384,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-007",
-      "body": "MANUAL DISCHARGE CIRCUIT TEST RECORD\n\nThis recovered FM-13 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-032.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Manual Discharge Circuit Test Record\n\nSuppression-zone diagram is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "FM-13"
     },
@@ -12384,7 +12444,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-041",
-      "body": "ENVIRONMENTAL EVENT LOG\n\nThis recovered FM-18 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-037; REVEAL_PHYSICAL_ITEM P-038; REVEAL_PHYSICAL_ITEM P-039.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Environmental Event Log\n\nPrinted Environmental Event Log is now represented in the recovered site and can be inspected. Ventilation isolation chart is now represented in the recovered site and can be inspected. Environmental sensor summary is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "FM-18"
     },
@@ -12396,7 +12456,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-042",
-      "body": "FIRE SUPPRESSION EVENT RECORD\n\nThis recovered FM-18 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-103; REVEAL_PHYSICAL_ITEM P-104; REVEAL_PHYSICAL_ITEM P-105.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Fire Suppression Event Record\n\nServer Room environmental panel is now represented in the recovered site and can be inspected. Service tag is now represented in the recovered site and can be inspected. Ventilation status tag is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "FM-18"
     },
@@ -12468,7 +12528,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-030",
-      "body": "FINAL WEEK VISITOR ACCESS REGISTER\n\nThis recovered OS-07 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-001; REVEAL_PHYSICAL_ITEM P-003; REVEAL_PHYSICAL_ITEM P-004; REVEAL_PHYSICAL_ITEM P-005; REVEAL_PHYSICAL_ITEM P-006; REVEAL_PHYSICAL_ITEM P-121; REVEAL_PHYSICAL_ITEM P-122.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Final Week Visitor Access Register\n\nReception Visitor Registry is now represented in the recovered site and can be inspected. Visitor badge is now represented in the recovered site and can be inspected. Visitor log pencil is now represented in the recovered site and can be inspected. Contractor badge clip is now represented in the recovered site and can be inspected. Visitor register carbon copy is now represented in the recovered site and can be inspected. Reception contractor sign-in card is now represented in the recovered site and can be inspected. Temporary visitor lanyard is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "OS-07"
     },
@@ -12480,7 +12540,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-031",
-      "body": "CONTRACTOR ACCESS AUTHORISATIONS\n\nThis recovered OS-07 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-002.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Contractor Access Authorisations\n\nTemporary pass stub is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "OS-07"
     },
@@ -12540,7 +12600,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-033",
-      "body": "TEMPORARY RESTRICTED AREA AUTHORISATION\n\nThis recovered OS-18 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-160.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Temporary Restricted Area Authorisation\n\nTemporary Restricted Area Authorisation is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "OS-18"
     },
@@ -12552,7 +12612,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-032",
-      "body": "RESTRICTED AREA ACCESS MATRIX\n\nThis recovered OS-18 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-159.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Restricted Area Access Matrix\n\nRestricted Area Access Matrix is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "OS-18"
     },
@@ -12564,7 +12624,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-034",
-      "body": "INITIAL HALON INCIDENT REPORT\n\nThis recovered OS-26 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-085; REVEAL_PHYSICAL_ITEM P-088; REVEAL_PHYSICAL_ITEM P-089; REVEAL_PHYSICAL_ITEM P-090; REVEAL_PHYSICAL_ITEM P-091.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Initial Halon Incident Report\n\nIncident clipboard is now represented in the recovered site and can be inspected. Incident timing card is now represented in the recovered site and can be inspected. Evacuation roll-call pencil is now represented in the recovered site and can be inspected. Emergency route overlay is now represented in the recovered site and can be inspected. Incident reference envelope is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "OS-26"
     },
@@ -12576,7 +12636,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-035",
-      "body": "EVACUATION ACCOUNTABILITY RETURN\n\nThis recovered OS-26 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-086.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Evacuation Accountability Return\n\nEvacuation accountability sheet is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "OS-26"
     },
@@ -12588,7 +12648,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-036",
-      "body": "RESTRICTED AREA EVACUATION NOTE\n\nThis recovered OS-26 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-087.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Restricted Area Evacuation Note\n\nMarked evacuation plan is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "OS-26"
     },
@@ -12648,7 +12708,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-037",
-      "body": "SECURITY MEMO: MASTER CABINET REGISTER CONTROL\n\nThis recovered OS-34 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-092; RECORD_NOTEBOOK_FACT SECURITY_CABINET_CODE.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Security Memo: Master Cabinet Register Control\n\nMaster Secure Cabinet Access Register is now represented in the recovered site and can be inspected. A new finding has been added to the recovery notebook.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "OS-34"
     },
@@ -12660,7 +12720,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-038",
-      "body": "SECURE STORAGE ACCESS PROCEDURE\n\nThis recovered OS-34 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-094; REVEAL_PHYSICAL_ITEM P-095.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Secure Storage Access Procedure\n\nSecure Storage Access Procedure card is now represented in the recovered site and can be inspected. Key-control context sheet is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "OS-34"
     },
@@ -12708,7 +12768,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-039",
-      "body": "FINAL-DAY DUTY COMMUNICATIONS LOG\n\nThis recovered OS-41 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-161.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Final-Day Duty Communications Log\n\nSecurity Duty Communications Log Sheet is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "OS-41"
     },
@@ -12720,7 +12780,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-040",
-      "body": "CCTV COVERAGE & RETENTION INDEX\n\nThis recovered OS-48 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-096; REVEAL_PHYSICAL_ITEM P-097; REVEAL_PHYSICAL_ITEM P-098; REVEAL_PHYSICAL_ITEM P-099; REVEAL_PHYSICAL_ITEM P-100; REVEAL_PHYSICAL_ITEM P-101; REVEAL_PHYSICAL_ITEM P-102.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "CCTV Coverage & Retention Index\n\nCCTV coverage index binder is now represented in the recovered site and can be inspected. IT Support entrance event printout is now represented in the recovered site and can be inspected. CCTV camera map is now represented in the recovered site and can be inspected. Monitor-bank channel list is now represented in the recovered site and can be inspected. Retention label is now represented in the recovered site and can be inspected. Blank video tapes is now represented in the recovered site and can be inspected. Camera selector control is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "OS-48"
     },
@@ -12792,7 +12852,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-019",
-      "body": "OFFICE TERMINAL CONNECTIVITY FAULT REPORT\n\nThis recovered TS-02 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-017; REVEAL_PHYSICAL_ITEM P-018.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Office Terminal Connectivity Fault Report\n\nThe Main Office terminal connection and its network lead have been reconstructed for physical inspection. The recovered diagnostic card and terminal status printout are also present at the terminal desk and should be examined in context.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "TS-02"
     },
@@ -12804,7 +12864,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-020",
-      "body": "LOCAL TERMINAL DIAGNOSTIC RESULT\n\nThis recovered TS-02 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-019; REVEAL_PHYSICAL_ITEM P-020.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Local Terminal Diagnostic Result\n\nThe Main Office terminal connection and its network lead have been reconstructed for physical inspection. The recovered diagnostic card and terminal status printout are also present at the terminal desk and should be examined in context.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "TS-02"
     },
@@ -12864,7 +12924,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-021",
-      "body": "TERMINAL NETWORK CABLE ROUTE INVESTIGATION\n\nThis recovered TS-06 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-057; REVEAL_PHYSICAL_ITEM P-058.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Terminal Network Cable Route Investigation\n\nIT Support patch panel is now represented in the recovered site and can be inspected. Server-route label is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "TS-06"
     },
@@ -12876,7 +12936,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-022",
-      "body": "DISTRIBUTION PANEL TEST RECORD\n\nThis recovered TS-06 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-059; REVEAL_PHYSICAL_ITEM P-060; REVEAL_PHYSICAL_ITEM P-061.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Distribution Panel Test Record\n\nSpare patch lead is now represented in the recovered site and can be inspected. Cable tester is now represented in the recovered site and can be inspected. Retired port label is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "TS-06"
     },
@@ -12984,7 +13044,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-023",
-      "body": "FINAL DIGITAL HOLDINGS VERIFICATION REPORT\n\nThis recovered TS-10 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-066; REVEAL_PHYSICAL_ITEM P-068; REVEAL_PHYSICAL_ITEM P-069; REVEAL_PHYSICAL_ITEM P-070; REVEAL_PHYSICAL_ITEM P-134; REVEAL_PHYSICAL_ITEM P-135; REVEAL_PHYSICAL_ITEM P-136.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Final Digital Holdings Verification Report\n\nDigital verification pack is now represented in the recovered site and can be inspected. Spare media wallet is now represented in the recovered site and can be inspected. Checksum printout is now represented in the recovered site and can be inspected. Archive-transfer label sheet is now represented in the recovered site and can be inspected. Open screwdriver set is now represented in the recovered site and can be inspected. Box of assorted network leads is now represented in the recovered site and can be inspected. Handwritten port-reference strip is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "TS-10"
     },
@@ -12996,7 +13056,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-024",
-      "body": "VERIFICATION MEDIA PREPARATION RECORD\n\nThis recovered TS-10 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-067.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Verification Media Preparation Record\n\nTransfer media case is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "TS-10"
     },
@@ -13056,7 +13116,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-045",
-      "body": "SERVER AVAILABILITY & BACKUP OPERATIONS SUMMARY\n\nThis recovered TS-14 record authorises or records the following state change in the reconstruction: RECONSTRUCT_ROOM SERVER_ROOM.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Server Availability & Backup Operations Summary\n\nThe SERVER ROOM area has been reconstructed from the surviving archive.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "TS-14"
     },
@@ -13068,7 +13128,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-046",
-      "body": "FINAL BACKUP WINDOW SCHEDULE\n\nThis recovered TS-14 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-107; REVEAL_PHYSICAL_ITEM P-109; REVEAL_PHYSICAL_ITEM P-110.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Final Backup Window Schedule\n\nBackup rotation case is now represented in the recovered site and can be inspected. Backup logbook is now represented in the recovered site and can be inspected. Spare drive caddy is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "TS-14"
     },
@@ -13080,7 +13140,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-047",
-      "body": "ARCHIVE VERIFICATION DEPENDENCY NOTE\n\nThis recovered TS-14 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-106; REVEAL_PHYSICAL_ITEM P-108; REVEAL_PHYSICAL_ITEM P-111.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Archive Verification Dependency Note\n\nServer status panel is now represented in the recovered site and can be inspected. Rack labels is now represented in the recovered site and can be inspected. UPS status card is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "TS-14"
     },
@@ -13128,7 +13188,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-048",
-      "body": "SERVER ROOM CABLE RISER MAINTENANCE LOG\n\nThis recovered TS-18 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-112; REVEAL_PHYSICAL_ITEM P-115; REVEAL_PHYSICAL_ITEM P-116; REVEAL_PHYSICAL_ITEM P-117; REVEAL_PHYSICAL_ITEM P-118; REVEAL_PHYSICAL_ITEM P-119; REVEAL_PHYSICAL_ITEM P-120.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Server Room Cable Riser Maintenance Log\n\nCable-riser work area is now represented in the recovered site and can be inspected. Pulled network cable is now represented in the recovered site and can be inspected. Cable tester is now represented in the recovered site and can be inspected. Maintenance isolation tag is now represented in the recovered site and can be inspected. Empty patch-cable reel is now represented in the recovered site and can be inspected. Halon cylinder service label is now represented in the recovered site and can be inspected. Server recovery checklist is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "TS-18"
     },
@@ -13140,7 +13200,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-049",
-      "body": "SUPPRESSION EVENT DIAGNOSTIC\n\nThis recovered TS-18 record authorises or records the following state change in the reconstruction: REVEAL_PHYSICAL_ITEM P-113; REVEAL_PHYSICAL_ITEM P-114.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Suppression Event Diagnostic\n\nManual discharge wiring / control connection is now represented in the recovered site and can be inspected. Suppression event diagnostic panel is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "TS-18"
     },
@@ -13152,7 +13212,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-050",
-      "body": "POST-DISCHARGE SYSTEM RECOVERY SUMMARY\n\nThis recovered TS-18 record authorises or records the following state change in the reconstruction: GRANT_CAPABILITY STATUS_DIAGNOSTIC.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "Post-Discharge System Recovery Summary\n\nAdditional diagnostic material is now available to support the investigation.\n\nThe archive entry has been retained as part of the reconstruction record.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "TS-18"
     },
