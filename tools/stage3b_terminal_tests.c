@@ -384,12 +384,22 @@ static void Floppy144TestMultipleCollectionCommands(void)
         &sRunState,
         "OPEN RS-0107"
     );
-    F144_CHECK(
-        sTerminal.open_record_requested &&
-        sTerminal.requested_collection == eHr01 &&
-        sTerminal.requested_record_index == 1U,
-        "short OPEN resolves authored HR-01 override"
-    );
+    {
+        Floppy144CollectionId eExpectedCollection;
+        uint32_t uExpectedRecord;
+        bool bResolved = Floppy144DocumentFindRecordId(
+            "HR-01-RS-0107",
+            &eExpectedCollection,
+            &uExpectedRecord
+        );
+        F144_CHECK(
+            bResolved &&
+            sTerminal.open_record_requested &&
+            sTerminal.requested_collection == eExpectedCollection &&
+            sTerminal.requested_record_index == uExpectedRecord,
+            "short OPEN resolves authored HR-01 override"
+        );
+    }
     sTerminal.open_record_requested = false;
 
     Floppy144TestSubmitCommand(
@@ -413,12 +423,22 @@ static void Floppy144TestMultipleCollectionCommands(void)
         &sRunState,
         "OPEN RS-0001"
     );
-    F144_CHECK(
-        sTerminal.open_record_requested &&
-        sTerminal.requested_collection == eDr03 &&
-        sTerminal.requested_record_index == 0U,
-        "short OPEN follows updated restore context"
-    );
+    {
+        Floppy144CollectionId eExpectedCollection;
+        uint32_t uExpectedRecord;
+        bool bResolved = Floppy144DocumentFindRecordId(
+            "DR-03-RS-0001",
+            &eExpectedCollection,
+            &uExpectedRecord
+        );
+        F144_CHECK(
+            bResolved &&
+            sTerminal.open_record_requested &&
+            sTerminal.requested_collection == eExpectedCollection &&
+            sTerminal.requested_record_index == uExpectedRecord,
+            "short OPEN follows updated restore context"
+        );
+    }
     sTerminal.open_record_requested = false;
 
     Floppy144TestSubmitCommand(
