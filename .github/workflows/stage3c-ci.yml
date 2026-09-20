@@ -1,0 +1,48 @@
+name: Stage 3C Integration
+
+on:
+  push:
+    branches:
+      - development/stage-3c-complete
+  workflow_dispatch:
+
+jobs:
+  stage3c:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Regenerate canonical runtime data
+        shell: pwsh
+        run: .\tools\build_game_data.ps1
+
+      - name: Stage 3B regression
+        shell: pwsh
+        run: .\tools\test_stage3b.ps1
+
+      - name: Install Premake
+        shell: pwsh
+        run: choco install premake --no-progress -y
+
+      - name: Generate Visual Studio project
+        shell: pwsh
+        run: premake5 vs2022
+
+      - name: Release build
+        shell: pwsh
+        run: msbuild .\build\Floppy144.sln /m /p:Configuration=Release /p:Platform=x64
+
+      - name: Release size
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem -Recurse -Filter Floppy144.exe | Where-Object { $_.FullName -match 'Release' } | Select-Object -First 1
+          if(-not $exe) { throw "Release Floppy144.exe not found." }
+          Write-Host "Release bytes: $($exe.Length)"
+          if($exe.Length -gt 1474560) { throw "Release size gate failed." }
