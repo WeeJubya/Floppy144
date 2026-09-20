@@ -111,16 +111,15 @@ void Floppy144CatalogueBuildRecord(
         ) %
         FLOPPY144_RECORD_FORM_COUNT;
 
+    /*
+     * Catalogue position owns the player-facing number band. Filler records
+     * use the round decade value (0010, 0020, ...); an authored record placed
+     * in that slot receives a stable number inside the same decade. The list
+     * therefore remains numerically ordered while significant records stay
+     * dispersed among ordinary material.
+     */
     record_number =
-        definition->record_number_base +
-        (
-            (
-                index *
-                definition->record_number_multiplier
-            ) +
-            definition->record_number_offset
-        ) %
-        1000U;
+        (index + 1U) * 10U;
 
     snprintf(
         record_id,
