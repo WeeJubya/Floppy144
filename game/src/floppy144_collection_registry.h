@@ -46,7 +46,8 @@ typedef struct Floppy144CollectionDefinition
 
     Floppy144CollectionDomain domain;
 
-    uint32_t reconstruction_percent;
+    uint32_t size_kb;
+    bool required_for_completion;
 
     const char *description;
     const char *evidence_description;
