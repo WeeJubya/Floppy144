@@ -1,4 +1,4 @@
-/* Floppy//144 - data-driven player Notebook screen. */
+/* Floppy//144 - chronological continuous Notebook screen. */
 #include "floppy144_notebook_view.h"
 #include "floppy144_draw.h"
 #include "floppy144_game_data.h"
@@ -7,48 +7,112 @@
 #include <string.h>
 
 #define FLOPPY144_NOTEBOOK_BODY_LEFT 34U
-#define FLOPPY144_NOTEBOOK_BODY_TOP 92U
-#define FLOPPY144_NOTEBOOK_BODY_WIDTH 570U
+#define FLOPPY144_NOTEBOOK_BODY_TOP 54U
+#define FLOPPY144_NOTEBOOK_BODY_WIDTH 572U
 #define FLOPPY144_NOTEBOOK_LINE_HEIGHT 15U
-#define FLOPPY144_NOTEBOOK_MAX_LINES 12U
+#define FLOPPY144_NOTEBOOK_VISIBLE_LINES 14U
+#define FLOPPY144_NOTEBOOK_RENDER_LINES 512U
+#define FLOPPY144_NOTEBOOK_RENDER_LINE_CAPACITY 128U
 
-static void Floppy144NotebookDrawWrappedText(Floppy144Surface*pSurface,const char*pszText,uint32_t uColour)
+typedef struct Floppy144NotebookRenderBuffer
 {
-    const char*pszCursor=pszText;char szLine[128];uint32_t uLine=0U,uLength=0U;
-    if(!pSurface||!pszText)return;
-    while(*pszCursor!='\0'&&uLine<FLOPPY144_NOTEBOOK_MAX_LINES)
+    char lines[FLOPPY144_NOTEBOOK_RENDER_LINES][FLOPPY144_NOTEBOOK_RENDER_LINE_CAPACITY];
+    uint32_t count;
+} Floppy144NotebookRenderBuffer;
+
+static void Floppy144NotebookAppendWrapped(
+    Floppy144NotebookRenderBuffer *pBuffer,
+    const char *pszText
+)
+{
+    const char *p=pszText;char line[FLOPPY144_NOTEBOOK_RENDER_LINE_CAPACITY];uint32_t len=0U;bool first=true;
+    if(pBuffer==NULL||pszText==NULL||pBuffer->count>=FLOPPY144_NOTEBOOK_RENDER_LINES)return;
+    line[0]='*';line[1]=' ';len=2U;
+    while(*p!='\0'&&pBuffer->count<FLOPPY144_NOTEBOOK_RENDER_LINES)
     {
-        const char*pszWordStart;uint32_t uWordLength,uCandidateLength;char szCandidate[128];
-        if(*pszCursor=='\n'){if(uLength>0U){szLine[uLength]='\0';Floppy144DrawText(pSurface,FLOPPY144_NOTEBOOK_BODY_LEFT,FLOPPY144_NOTEBOOK_BODY_TOP+uLine*FLOPPY144_NOTEBOOK_LINE_HEIGHT,szLine,1U,uColour);++uLine;uLength=0U;}else ++uLine;++pszCursor;continue;}
-        while(*pszCursor==' '||*pszCursor=='\t')++pszCursor;if(*pszCursor=='\0')break;
-        pszWordStart=pszCursor;uWordLength=0U;while(pszCursor[uWordLength]!='\0'&&pszCursor[uWordLength]!=' '&&pszCursor[uWordLength]!='\t'&&pszCursor[uWordLength]!='\n')++uWordLength;
-        if(uWordLength>=sizeof(szLine))uWordLength=(uint32_t)sizeof(szLine)-1U;
-        uCandidateLength=uLength;if(uCandidateLength>0U&&uCandidateLength+1U<sizeof(szCandidate))szCandidate[uCandidateLength++]=' ';
-        if(uCandidateLength+uWordLength>=sizeof(szCandidate))uWordLength=(uint32_t)sizeof(szCandidate)-uCandidateLength-1U;
-        if(uLength>0U){uint32_t uCopy;for(uCopy=0U;uCopy<uLength;++uCopy)szCandidate[uCopy]=szLine[uCopy];}
-        {uint32_t uCopy;for(uCopy=0U;uCopy<uWordLength;++uCopy)szCandidate[uCandidateLength+uCopy]=pszWordStart[uCopy];}
-        uCandidateLength+=uWordLength;szCandidate[uCandidateLength]='\0';
-        if(uLength>0U&&Floppy144DrawTextWidth(szCandidate,1U)>FLOPPY144_NOTEBOOK_BODY_WIDTH){szLine[uLength]='\0';Floppy144DrawText(pSurface,FLOPPY144_NOTEBOOK_BODY_LEFT,FLOPPY144_NOTEBOOK_BODY_TOP+uLine*FLOPPY144_NOTEBOOK_LINE_HEIGHT,szLine,1U,uColour);++uLine;uLength=0U;if(uLine>=FLOPPY144_NOTEBOOK_MAX_LINES)break;continue;}
-        {uint32_t uCopy;for(uCopy=0U;uCopy<=uCandidateLength;++uCopy)szLine[uCopy]=szCandidate[uCopy];}
-        uLength=uCandidateLength;pszCursor+=uWordLength;
+        const char *word;uint32_t wordLen=0U,candidateLen;char candidate[FLOPPY144_NOTEBOOK_RENDER_LINE_CAPACITY];
+        while(*p==' '||*p=='\t'||*p=='\n'||*p=='\r')++p;if(*p=='\0')break;
+        word=p;while(p[wordLen]!='\0'&&p[wordLen]!=' '&&p[wordLen]!='\t'&&p[wordLen]!='\n'&&p[wordLen]!='\r')++wordLen;
+        candidateLen=len;if(candidateLen>2U&&candidateLen+1U<sizeof(candidate))candidate[candidateLen++]=' ';
+        if(candidateLen+wordLen>=sizeof(candidate))wordLen=(uint32_t)sizeof(candidate)-candidateLen-1U;
+        memcpy(candidate,line,len);memcpy(candidate+candidateLen,word,wordLen);candidateLen+=wordLen;candidate[candidateLen]='\0';
+        if(len>2U&&Floppy144DrawTextWidth(candidate,1U)>FLOPPY144_NOTEBOOK_BODY_WIDTH)
+        {
+            line[len]='\0';(void)snprintf(pBuffer->lines[pBuffer->count++],FLOPPY144_NOTEBOOK_RENDER_LINE_CAPACITY,"%s",line);
+            line[0]=' ';line[1]=' ';len=2U;first=false;continue;
+        }
+        memcpy(line,candidate,candidateLen+1U);len=candidateLen;p+=wordLen;
     }
-    if(uLength>0U&&uLine<FLOPPY144_NOTEBOOK_MAX_LINES){szLine[uLength]='\0';Floppy144DrawText(pSurface,FLOPPY144_NOTEBOOK_BODY_LEFT,FLOPPY144_NOTEBOOK_BODY_TOP+uLine*FLOPPY144_NOTEBOOK_LINE_HEIGHT,szLine,1U,uColour);}
+    if(len>2U&&pBuffer->count<FLOPPY144_NOTEBOOK_RENDER_LINES)
+    {
+        line[len]='\0';(void)snprintf(pBuffer->lines[pBuffer->count++],FLOPPY144_NOTEBOOK_RENDER_LINE_CAPACITY,"%s",line);
+    }
+    (void)first;
 }
 
-void Floppy144NotebookViewReset(Floppy144NotebookViewState*pNotebook){if(pNotebook)pNotebook->selected_entry=0U;}
-void Floppy144NotebookViewMove(Floppy144NotebookViewState*pNotebook,const Floppy144RunState*pRunState,int32_t nDirection)
+static void Floppy144NotebookBuild(
+    const Floppy144RunState *pRunState,
+    Floppy144NotebookRenderBuffer *pBuffer
+)
 {
-    uint32_t uCount;int32_t nNext;if(!pNotebook||!pRunState||nDirection==0)return;uCount=Floppy144GameDataNotebookEntryCount(pRunState);if(uCount==0U){pNotebook->selected_entry=0U;return;}if(pNotebook->selected_entry>=uCount)pNotebook->selected_entry=uCount-1U;nNext=(int32_t)pNotebook->selected_entry+nDirection;while(nNext<0)nNext+=(int32_t)uCount;while(nNext>=(int32_t)uCount)nNext-=(int32_t)uCount;pNotebook->selected_entry=(uint32_t)nNext;
+    uint32_t u,count;
+    if(pBuffer==NULL)return;pBuffer->count=0U;
+    if(pRunState==NULL)return;
+    count=Floppy144GameDataNotebookOrderedCount(pRunState);
+    for(u=0U;u<count&&pBuffer->count<FLOPPY144_NOTEBOOK_RENDER_LINES;++u)
+    {
+        const Floppy144DataRecord *pEntry=Floppy144GameDataNotebookOrderedEntryAt(pRunState,u);
+        if(pEntry!=NULL&&pEntry->pszA!=NULL)Floppy144NotebookAppendWrapped(pBuffer,pEntry->pszA);
+    }
 }
 
-void Floppy144NotebookViewDraw(F144Runtime*pRuntime,const Floppy144NotebookViewState*pNotebook,const Floppy144RunState*pRunState)
+void Floppy144NotebookViewReset(Floppy144NotebookViewState *pNotebook)
 {
-    const uint32_t uBackground=FLOPPY144_RGB(16,15,13),uPanel=FLOPPY144_RGB(42,39,32),uPage=FLOPPY144_RGB(61,57,46),uBorder=FLOPPY144_RGB(112,103,80),uText=FLOPPY144_RGB(218,211,184),uMuted=FLOPPY144_RGB(143,135,111),uAmber=FLOPPY144_RGB(194,153,76);
-    Floppy144Surface sSurface;uint32_t uCount,uSelected;const Floppy144DataRecord*pEntry;char szPosition[32],szTitle[96];
-    if(!pRuntime||!pNotebook||!pRunState||!pRuntime->backbuffer.data)return;sSurface.pixels=(uint32_t*)pRuntime->backbuffer.data;sSurface.width=pRuntime->backbuffer.width;sSurface.height=pRuntime->backbuffer.height;
-    uCount=Floppy144GameDataNotebookEntryCount(pRunState);uSelected=pNotebook->selected_entry;if(uCount>0U&&uSelected>=uCount)uSelected=uCount-1U;pEntry=uCount>0U?Floppy144GameDataNotebookEntryAt(pRunState,uSelected):NULL;
-    Floppy144DrawClear(&sSurface,uBackground);Floppy144DrawText(&sSurface,10U,5U,"RECOVERY NOTEBOOK",1U,uMuted);if(uCount>0U)snprintf(szPosition,sizeof(szPosition),"ENTRY %02u OF %02u",(unsigned)(uSelected+1U),(unsigned)uCount);else snprintf(szPosition,sizeof(szPosition),"NO ENTRIES");Floppy144DrawText(&sSurface,520U,5U,szPosition,1U,uAmber);
-    Floppy144DrawFillRect(&sSurface,10U,18U,610U,280U,uPanel);Floppy144DrawRect(&sSurface,10U,18U,610U,280U,uBorder);Floppy144DrawFillRect(&sSurface,24U,32U,582U,252U,uPage);Floppy144DrawRect(&sSurface,24U,32U,582U,252U,uBorder);
-    if(!pEntry){Floppy144DrawText(&sSurface,34U,54U,"NO NOTES RECORDED.",1U,uAmber);Floppy144DrawText(&sSurface,34U,78U,"RECOVERED FACTS WILL APPEAR HERE AS THE SITE IS RECONSTRUCTED.",1U,uMuted);}else{const char*pszType="RECOVERED NOTE";if(pEntry->pszB&&strcmp(pEntry->pszB,"FACT")==0)pszType="RECOVERED FACT";else if(pEntry->pszB&&strcmp(pEntry->pszB,"EVIDENCE")==0)pszType="EVIDENCE";else if(pEntry->pszB&&strcmp(pEntry->pszB,"INTERACTION")==0)pszType="INSPECTION NOTE";snprintf(szTitle,sizeof(szTitle),"%s  %s",pEntry->pszId?pEntry->pszId:"NOTE",pEntry->pszC?pEntry->pszC:"RECOVERED FACT");Floppy144DrawText(&sSurface,34U,50U,szTitle,1U,uAmber);Floppy144DrawText(&sSurface,34U,66U,pszType,1U,uMuted);Floppy144DrawFillRect(&sSurface,34U,82U,562U,1U,uBorder);Floppy144NotebookDrawWrappedText(&sSurface,pEntry->pszA,uText);}
-    Floppy144DrawFillRect(&sSurface,10U,306U,610U,28U,uBackground);Floppy144DrawRect(&sSurface,10U,306U,610U,28U,uBorder);Floppy144DrawText(&sSurface,22U,316U,"UP/DOWN ENTRY   PGUP/PGDN JUMP",1U,uText);Floppy144DrawText(&sSurface,476U,316U,"N/BACKSPACE RETURN",1U,uMuted);
+    if(pNotebook!=NULL)pNotebook->top_line=0U;
+}
+
+void Floppy144NotebookViewMove(
+    Floppy144NotebookViewState *pNotebook,
+    const Floppy144RunState *pRunState,
+    int32_t nDirection
+)
+{
+    Floppy144NotebookRenderBuffer b;int32_t next,maxTop;
+    if(pNotebook==NULL||pRunState==NULL||nDirection==0)return;
+    Floppy144NotebookBuild(pRunState,&b);
+    maxTop=b.count>FLOPPY144_NOTEBOOK_VISIBLE_LINES?(int32_t)(b.count-FLOPPY144_NOTEBOOK_VISIBLE_LINES):0;
+    next=(int32_t)pNotebook->top_line+nDirection;if(next<0)next=0;if(next>maxTop)next=maxTop;pNotebook->top_line=(uint32_t)next;
+}
+
+void Floppy144NotebookViewDraw(
+    F144Runtime *pRuntime,
+    const Floppy144NotebookViewState *pNotebook,
+    const Floppy144RunState *pRunState
+)
+{
+    const uint32_t bg=FLOPPY144_RGB(16,15,13),panel=FLOPPY144_RGB(42,39,32),page=FLOPPY144_RGB(61,57,46),border=FLOPPY144_RGB(112,103,80),text=FLOPPY144_RGB(218,211,184),muted=FLOPPY144_RGB(143,135,111),amber=FLOPPY144_RGB(194,153,76);
+    Floppy144Surface s;Floppy144NotebookRenderBuffer b;uint32_t top,u,count;char status[64];
+    if(pRuntime==NULL||pNotebook==NULL||pRunState==NULL||pRuntime->backbuffer.data==NULL)return;
+    s.pixels=(uint32_t*)pRuntime->backbuffer.data;s.width=pRuntime->backbuffer.width;s.height=pRuntime->backbuffer.height;
+    Floppy144NotebookBuild(pRunState,&b);count=Floppy144GameDataNotebookOrderedCount(pRunState);top=pNotebook->top_line;
+    if(b.count<=FLOPPY144_NOTEBOOK_VISIBLE_LINES)top=0U;else if(top>b.count-FLOPPY144_NOTEBOOK_VISIBLE_LINES)top=b.count-FLOPPY144_NOTEBOOK_VISIBLE_LINES;
+    (void)snprintf(status,sizeof(status),"%u NOTES  LINE %u/%u",(unsigned)count,(unsigned)(b.count?top+1U:0U),(unsigned)b.count);
+    Floppy144DrawClear(&s,bg);
+    Floppy144DrawText(&s,10U,5U,"RECOVERY NOTEBOOK",1U,muted);
+    Floppy144DrawText(&s,630U-Floppy144DrawTextWidth(status,1U),5U,status,1U,amber);
+    Floppy144DrawFillRect(&s,10U,18U,620U,280U,panel);Floppy144DrawRect(&s,10U,18U,620U,280U,border);
+    Floppy144DrawFillRect(&s,24U,32U,592U,252U,page);Floppy144DrawRect(&s,24U,32U,592U,252U,border);
+    if(b.count==0U)
+    {
+        Floppy144DrawText(&s,34U,54U,"NO NOTES RECORDED.",1U,amber);
+        Floppy144DrawText(&s,34U,78U,"RECOVERED FINDINGS WILL ACCUMULATE HERE.",1U,muted);
+    }
+    else
+    {
+        for(u=0U;u<FLOPPY144_NOTEBOOK_VISIBLE_LINES&&top+u<b.count;++u)
+            Floppy144DrawText(&s,FLOPPY144_NOTEBOOK_BODY_LEFT,FLOPPY144_NOTEBOOK_BODY_TOP+u*FLOPPY144_NOTEBOOK_LINE_HEIGHT,b.lines[top+u],1U,text);
+    }
+    Floppy144DrawFillRect(&s,10U,306U,620U,28U,bg);Floppy144DrawRect(&s,10U,306U,620U,28U,border);
+    Floppy144DrawText(&s,22U,316U,"UP/DOWN SCROLL   PGUP/PGDN PAGE",1U,text);
+    Floppy144DrawText(&s,630U-Floppy144DrawTextWidth("N RETURN",1U)-12U,316U,"N RETURN",1U,muted);
 }
