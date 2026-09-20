@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 
 typedef enum JsonType { J_NULL=0, J_BOOL, J_NUMBER, J_STRING, J_ARRAY, J_OBJECT } JsonType;
@@ -64,11 +65,11 @@ static FILE *openout(const char*dir,const char*name){char p[1024];snprintf(p,siz
 static void write_json2(FILE*f,JsonValue*v){size_t i;switch(v->type){case J_NULL:fputs("null",f);break;case J_BOOL:fputs(v->as.boolean?"true":"false",f);break;case J_NUMBER:fprintf(f,"%.15g",v->as.number);break;case J_STRING:{const unsigned char*p=(const unsigned char*)v->as.string;fputc('"',f);while(*p){unsigned char c=*p++;if(c=='\"'||c=='\\'){fputc('\\',f);fputc(c,f);}else if(c=='\n')fputs("\\n",f);else if(c=='\r')fputs("\\r",f);else if(c=='\t')fputs("\\t",f);else if(c<32)fprintf(f,"\\u%04x",c);else fputc(c,f);}fputc('"',f);break;}case J_ARRAY:fputc('[',f);for(i=0;i<v->as.array.count;i++){if(i)fputc(',',f);write_json2(f,v->as.array.items[i]);}fputc(']',f);break;case J_OBJECT:fputc('{',f);for(i=0;i<v->as.object.count;i++){if(i)fputc(',',f);cstr(f,v->as.object.items[i].key);fputc(':',f);write_json2(f,v->as.object.items[i].value);}fputc('}',f);break;}}
 static void emit_simple_def(JsonValue*root,const char*key,const char*macro,const char*outfile,const char*outdir){size_t i;JsonValue*a=get(root,key);FILE*f=openout(outdir,outfile);fprintf(f,"/* Generated from floppy144_game_data.json. Do not edit. */\n");for(i=0;i<count(a);i++){const char*id=strv(at(a,i),"id");if(!id)die("entry without id");fprintf(f,"%s(",macro);sym(f,id);fprintf(f,", ");{char compact[32];size_t j=0;const char*p=id;while(*p&&j+1<sizeof(compact)){if(*p!='-')compact[j++]=*p;p++;}compact[j]='\0';cstr(f,compact);}fprintf(f,")\n");}fclose(f);}
 static size_t authored_count_for(JsonValue*docs,const char*cid){size_t i,n=0;for(i=0;i<count(docs);i++)if(strv(at(docs,i),"collection_id")&&strcmp(strv(at(docs,i),"collection_id"),cid)==0)n++;return n;}
-static unsigned long stable_hash(const char *psz)
+static uint32_t stable_hash(const char *psz)
 {
-    unsigned long h = 2166136261UL;
+    uint32_t h = UINT32_C(2166136261);
     const unsigned char *p = (const unsigned char *)(psz ? psz : "");
-    while(*p) { h ^= (unsigned long)*p++; h *= 16777619UL; }
+    while(*p) { h ^= (uint32_t)*p++; h *= UINT32_C(16777619); }
     return h;
 }
 static long collection_record_count(JsonValue *root,const char *cid)
@@ -155,12 +156,12 @@ static void player_record_id(
     }
 
     {
-        unsigned long uHash =
+        uint32_t uHash =
             stable_hash(pszCanonicalId);
         unsigned long uNumber =
             (unsigned long)(nSlot + 1L) * 10UL +
             1UL +
-            (uHash % 8UL);
+            (unsigned long)(uHash % UINT32_C(8));
 
         (void)snprintf(
             pszBuffer,
