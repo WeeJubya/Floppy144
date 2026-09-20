@@ -96,6 +96,8 @@ static void Floppy144TestPrologueVerticalSlice(void)
     Floppy144CollectionId eDiskIndex;
     Floppy144TriggerId eDiskIndexTrigger;
     const Floppy144DocumentDefinition *pTriggerDocument;
+    Floppy144CollectionId eExpectedRecordCollection;
+    uint32_t uExpectedRecordIndex;
 
     Floppy144WorldReset(&sWorld);
     Floppy144RunStateBegin(&sRunState, 144U);
@@ -129,10 +131,15 @@ static void Floppy144TestPrologueVerticalSlice(void)
         "Reception does not exist before the recovery index"
     );
 
+    /*
+     * Stage 3C moved INITIATE guidance out of transcript history and into the
+     * dedicated prompt/guidance region. PrintNextAction must therefore leave
+     * the transcript untouched until archive services have been initialised.
+     */
     Floppy144TerminalPrintNextAction(&sTerminal, &sRunState);
     F144_CHECK(
-        Floppy144TestTerminalContains(&sTerminal, "INITIATE"),
-        "terminal directs player to INITIATE"
+        !Floppy144TestTerminalContains(&sTerminal, "INITIATE"),
+        "INITIATE guidance is not written into terminal transcript history"
     );
 
     Floppy144TestSubmitCommand(
@@ -197,6 +204,15 @@ static void Floppy144TestPrologueVerticalSlice(void)
         "terminal directs player to the pending trigger document"
     );
 
+    F144_CHECK(
+        Floppy144DocumentFindRecordId(
+            "DR-01-RS-0001",
+            &eExpectedRecordCollection,
+            &uExpectedRecordIndex
+        ),
+        "Disk Recovery Index stable record ID resolves through document registry"
+    );
+
     Floppy144TestSubmitCommand(
         &sTerminal,
         &sWorld,
@@ -208,9 +224,9 @@ static void Floppy144TestPrologueVerticalSlice(void)
         "OPEN requests the document viewer"
     );
     F144_CHECK(
-        sTerminal.requested_collection == eDiskIndex &&
-        sTerminal.requested_record_index == 0U,
-        "OPEN resolves the canonical document location"
+        sTerminal.requested_collection == eExpectedRecordCollection &&
+        sTerminal.requested_record_index == uExpectedRecordIndex,
+        "OPEN resolves the dispersed canonical document location"
     );
 
     F144_CHECK(
@@ -353,6 +369,8 @@ static void Floppy144TestCatalogueProloguePath(void)
     Floppy144CatalogueState sCatalogue;
     Floppy144CollectionId eDiskIndex;
     Floppy144TriggerId eDiskIndexTrigger;
+    Floppy144CollectionId eDocumentCollection;
+    uint32_t uDocumentRecordIndex;
 
     Floppy144WorldReset(&sWorld);
     Floppy144RunStateBegin(&sRunState, 145U);
@@ -385,12 +403,20 @@ static void Floppy144TestCatalogueProloguePath(void)
 
     Floppy144CatalogueReset(&sCatalogue, eDiskIndex);
     F144_CHECK(
+        Floppy144DocumentFindRecordId(
+            "DR-01-RS-0001",
+            &eDocumentCollection,
+            &uDocumentRecordIndex
+        ),
+        "catalogue path resolves dispersed Disk Recovery Index"
+    );
+    F144_CHECK(
         Floppy144CatalogueOpenRecord(
             &sCatalogue,
-            eDiskIndex,
-            0U
+            eDocumentCollection,
+            uDocumentRecordIndex
         ),
-        "catalogue opens the Disk Recovery Index"
+        "catalogue opens the dispersed Disk Recovery Index"
     );
     F144_CHECK(
         Floppy144DocumentApplyEffects(
