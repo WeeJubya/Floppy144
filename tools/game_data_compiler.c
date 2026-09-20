@@ -54,6 +54,7 @@ static const char *strv(JsonValue *o,const char *k){JsonValue*v=get(o,k);return(
 static long intv(JsonValue *o,const char *k,long d){JsonValue*v=get(o,k);return(v&&v->type==J_NUMBER)?(long)v->as.number:d;}
 static size_t count(JsonValue *a){return(a&&a->type==J_ARRAY)?a->as.array.count:0;}
 static JsonValue *at(JsonValue *a,size_t i){return(a&&a->type==J_ARRAY&&i<a->as.array.count)?a->as.array.items[i]:NULL;}
+static bool boolv(JsonValue *pObject,const char *pszKey,bool bDefault);
 static void cstr(FILE *f,const char *s){const unsigned char*p=(const unsigned char*)(s?s:"");fputc('"',f);while(*p){unsigned char c=*p++;if(c=='\\'||c=='\"'){fputc('\\',f);fputc(c,f);}else if(c=='\n')fputs("\\n",f);else if(c=='\r')fputs("\\r",f);else if(c=='\t')fputs("\\t",f);else if(c<32)fprintf(f,"\\x%02X",c);else fputc(c,f);}fputc('"',f);}
 static void sym(FILE*f,const char*id){for(;*id;id++){unsigned char c=(unsigned char)*id;if(isalnum(c))fputc((int)toupper(c),f);else if(c=='-'||c=='/'||c==' '){}else fputc('_',f);}}
 static const char *domain_enum(const char*d){if(!d)return"FLOPPY144_COLLECTION_DOMAIN_DR";if(strstr(d,"Human"))return"FLOPPY144_COLLECTION_DOMAIN_HR";if(strstr(d,"Facilities"))return"FLOPPY144_COLLECTION_DOMAIN_FM";if(strstr(d,"Operational"))return"FLOPPY144_COLLECTION_DOMAIN_OS";if(strstr(d,"Technology"))return"FLOPPY144_COLLECTION_DOMAIN_TS";return"FLOPPY144_COLLECTION_DOMAIN_DR";}
