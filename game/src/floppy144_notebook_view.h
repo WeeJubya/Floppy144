@@ -7,7 +7,7 @@
 
 typedef struct Floppy144NotebookViewState
 {
-    uint32_t selected_entry;
+    uint32_t top_line;
 }
 Floppy144NotebookViewState;
 
