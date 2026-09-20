@@ -142,6 +142,40 @@ static void Floppy144TestReachOpeningCollections(
     pTerminal->open_record_requested = false;
 }
 
+static bool Floppy144TestRecordNumber(
+    const char *pszRecordId,
+    uint32_t *pNumber
+)
+{
+    size_t uLength;
+    uint32_t uNumber = 0U;
+    uint32_t uDigit;
+
+    if(pszRecordId == NULL || pNumber == NULL)
+    {
+        return false;
+    }
+
+    uLength = strlen(pszRecordId);
+    if(uLength < 4U)
+    {
+        return false;
+    }
+
+    for(uDigit = 0U; uDigit < 4U; ++uDigit)
+    {
+        char ch = pszRecordId[uLength - 4U + uDigit];
+        if(ch < '0' || ch > '9')
+        {
+            return false;
+        }
+        uNumber = uNumber * 10U + (uint32_t)(ch - '0');
+    }
+
+    *pNumber = uNumber;
+    return true;
+}
+
 /*
  * Every catalogue ID must round-trip through the shared resolver. This covers
  * generated index entries and authored ID overrides with one generic test.
@@ -164,6 +198,7 @@ static void Floppy144TestCatalogueRecordResolution(void)
             Floppy144CollectionGet(eCollection);
 
         uint32_t uRecord;
+        uint32_t uPreviousRecordNumber = 0U;
 
         for(
             uRecord = 0U;
@@ -185,6 +220,29 @@ static void Floppy144TestCatalogueRecordResolution(void)
                 szTitle,
                 sizeof(szTitle)
             );
+
+            {
+                uint32_t uCurrentRecordNumber = 0U;
+                bool bNumberValid =
+                    Floppy144TestRecordNumber(
+                        szRecordId,
+                        &uCurrentRecordNumber
+                    );
+
+                F144_CHECK(
+                    bNumberValid &&
+                    (
+                        uRecord == 0U ||
+                        uCurrentRecordNumber > uPreviousRecordNumber
+                    ),
+                    "catalogue rows remain in numerical record-ID order"
+                );
+
+                if(bNumberValid)
+                {
+                    uPreviousRecordNumber = uCurrentRecordNumber;
+                }
+            }
 
             F144_CHECK(
                 Floppy144CatalogueFindRecord(
@@ -223,6 +281,97 @@ static void Floppy144TestCatalogueRecordResolution(void)
             "unknown record ID is rejected"
         );
     }
+}
+
+/*
+ * Stage 3C collection LIST presentation owns a fixed-width table. The header
+ * and rows must share separator columns, and unavailable identities must remain
+ * opaque rather than looking like plausible collection names.
+ */
+static void Floppy144TestCollectionListPresentation(void)
+{
+    Floppy144WorldState sWorld;
+    Floppy144RunState sRunState;
+    Floppy144TerminalState sTerminal;
+    uint32_t auHeaderBars[3] = {0U,0U,0U};
+    uint32_t auRowBars[3] = {0U,0U,0U};
+    uint32_t uHeaderBarCount = 0U;
+    uint32_t uRowBarCount = 0U;
+    uint32_t uIndex;
+
+    Floppy144TestReachOpeningCollections(
+        &sWorld,
+        &sRunState,
+        &sTerminal
+    );
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "LIST"
+    );
+
+    F144_CHECK(
+        Floppy144TerminalRecordPagerActive(&sTerminal) &&
+        sTerminal.record_pager_collection == FLOPPY144_COLLECTION_COUNT,
+        "bare LIST opens the full collection pager"
+    );
+
+    F144_CHECK(
+        sTerminal.output_count >= 3U,
+        "collection LIST renders heading, page label and rows"
+    );
+
+    if(sTerminal.output_count >= 3U)
+    {
+        for(
+            uIndex = 0U;
+            sTerminal.output[0][uIndex] != '\0';
+            ++uIndex
+        )
+        {
+            if(
+                sTerminal.output[0][uIndex] == '|' &&
+                uHeaderBarCount < 3U
+            )
+            {
+                auHeaderBars[uHeaderBarCount++] = uIndex;
+            }
+        }
+
+        for(
+            uIndex = 0U;
+            sTerminal.output[2][uIndex] != '\0';
+            ++uIndex
+        )
+        {
+            if(
+                sTerminal.output[2][uIndex] == '|' &&
+                uRowBarCount < 3U
+            )
+            {
+                auRowBars[uRowBarCount++] = uIndex;
+            }
+        }
+
+        F144_CHECK(
+            uHeaderBarCount == 3U &&
+            uRowBarCount == 3U &&
+            auHeaderBars[0] == auRowBars[0] &&
+            auHeaderBars[1] == auRowBars[1] &&
+            auHeaderBars[2] == auRowBars[2],
+            "collection LIST headings align with row columns"
+        );
+    }
+
+    F144_CHECK(
+        Floppy144TestTerminalContains(&sTerminal, "N/A") &&
+        !Floppy144TestTerminalContains(&sTerminal, "UX-") &&
+        !Floppy144TestTerminalContains(&sTerminal, "BLANK PACKET") &&
+        !Floppy144TestTerminalContains(&sTerminal, "DR-04"),
+        "N/A collection identity is opaque and does not leak real ID"
+    );
 }
 
 /*
@@ -298,7 +447,7 @@ static void Floppy144TestMultipleCollectionCommands(void)
         &sTerminal,
         &sWorld,
         &sRunState,
-        "OPEN RS-0001"
+        "OPEN RS-0010"
     );
     F144_CHECK(
         sTerminal.open_record_requested &&
@@ -312,7 +461,7 @@ static void Floppy144TestMultipleCollectionCommands(void)
         &sTerminal,
         &sWorld,
         &sRunState,
-        "OPEN HR-01-RS-0001"
+        "OPEN HR-01-RS-0036"
     );
     F144_CHECK(
         !sTerminal.open_record_requested,
@@ -421,13 +570,13 @@ static void Floppy144TestMultipleCollectionCommands(void)
         &sTerminal,
         &sWorld,
         &sRunState,
-        "OPEN RS-0001"
+        "OPEN RS-0024"
     );
     {
         Floppy144CollectionId eExpectedCollection;
         uint32_t uExpectedRecord;
         bool bResolved = Floppy144DocumentFindRecordId(
-            "DR-03-RS-0001",
+            "DR-03-RS-0024",
             &eExpectedCollection,
             &uExpectedRecord
         );
@@ -713,7 +862,7 @@ static void Floppy144TestBranchDocumentAccessGate(void)
         &sTerminal,
         &sWorld,
         &sRunState,
-        "OPEN DR-04-RS-0001"
+        "OPEN DR-04-RS-0037"
     );
 
     F144_CHECK(
@@ -746,7 +895,7 @@ static void Floppy144TestBranchDocumentAccessGate(void)
         &sTerminal,
         &sWorld,
         &sRunState,
-        "OPEN DR-04-RS-0002"
+        "OPEN DR-04-RS-0064"
     );
 
     F144_CHECK(
@@ -779,7 +928,7 @@ static void Floppy144TestBranchDocumentAccessGate(void)
         &sTerminal,
         &sWorld,
         &sRunState,
-        "OPEN DR-04-RS-0002"
+        "OPEN DR-04-RS-0064"
     );
 
     F144_CHECK(
@@ -791,6 +940,7 @@ static void Floppy144TestBranchDocumentAccessGate(void)
 int main(void)
 {
     Floppy144TestCatalogueRecordResolution();
+    Floppy144TestCollectionListPresentation();
     Floppy144TestMultipleCollectionCommands();
     Floppy144TestCommandHistory();
     Floppy144TestBranchDocumentAccessGate();
