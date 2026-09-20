@@ -8,6 +8,7 @@
 #include "floppy144_catalogue.h"
 #include "floppy144_collection_registry.h"
 #include "floppy144_document.h"
+#include "floppy144_draw.h"
 #include "floppy144_game_data.h"
 #include "floppy144_run_state.h"
 #include "floppy144_terminal.h"
@@ -140,6 +141,50 @@ static void Floppy144TestReachOpeningCollections(
     }
 
     pTerminal->open_record_requested = false;
+}
+
+static void Floppy144TestExtendedGlyphs(void)
+{
+    uint32_t auPixels[64U * 16U] = {0U};
+    Floppy144Surface sSurface =
+    {
+        auPixels,
+        64U,
+        16U
+    };
+    uint32_t uPixel;
+    uint32_t uLit = 0U;
+
+    F144_CHECK(
+        Floppy144DrawTextWidth("A|B#C", 1U) == 29U,
+        "extended ASCII interface glyphs retain one-cell text width"
+    );
+    F144_CHECK(
+        Floppy144DrawTextWidth("\xE2\x80\xA2", 1U) == 5U,
+        "Unicode Notebook bullet normalises to one glyph"
+    );
+
+    Floppy144DrawText(
+        &sSurface,
+        0U,
+        0U,
+        "\xE2\x80\xA2|#'",
+        1U,
+        UINT32_MAX
+    );
+
+    for(uPixel = 0U; uPixel < 64U * 16U; ++uPixel)
+    {
+        if(auPixels[uPixel] != 0U)
+        {
+            ++uLit;
+        }
+    }
+
+    F144_CHECK(
+        uLit > 0U,
+        "Notebook bullet and interface punctuation render visible glyph pixels"
+    );
 }
 
 static bool Floppy144TestRecordNumber(
@@ -939,6 +984,7 @@ static void Floppy144TestBranchDocumentAccessGate(void)
 
 int main(void)
 {
+    Floppy144TestExtendedGlyphs();
     Floppy144TestCatalogueRecordResolution();
     Floppy144TestCollectionListPresentation();
     Floppy144TestMultipleCollectionCommands();
