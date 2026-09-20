@@ -30,7 +30,8 @@ typedef enum Floppy144CollectionId
     code,                                                          \
     title,                                                         \
     domain,                                                        \
-    reconstruction_percent,                                        \
+    size_kb,                                                       \
+    required_for_completion,                                       \
     description,                                                   \
     evidence_description,                                          \
     catalogue_record_count,                                        \
