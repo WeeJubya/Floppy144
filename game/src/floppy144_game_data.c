@@ -428,8 +428,42 @@ static bool Floppy144GameDataNotebookRecordVisible(
     if(Floppy144StringEqual(pRecord->pszB,"INTERACTION")){Floppy144InteractionId e=Floppy144GameDataInteractionId(pRecord->pszId);return e!=FLOPPY144_INTERACTION_COUNT&&Floppy144RunStateInteractionCompleted(pState,e);}
     return false;
 }
-uint32_t Floppy144GameDataNotebookEntryCount(const Floppy144RunState*pState){uint32_t u,n=0;if(!pState)return 0U;for(u=0;u<F144_COUNT(g_asGameData);++u)if(Floppy144GameDataNotebookRecordVisible(pState,&g_asGameData[u]))++n;return n;}
-const Floppy144DataRecord *Floppy144GameDataNotebookEntryAt(const Floppy144RunState*pState,uint32_t uVisibleIndex){uint32_t u,n=0;if(!pState)return NULL;for(u=0;u<F144_COUNT(g_asGameData);++u){const Floppy144DataRecord*p=&g_asGameData[u];if(!Floppy144GameDataNotebookRecordVisible(pState,p))continue;if(n==uVisibleIndex)return p;++n;}return NULL;}
+static const Floppy144DataRecord *Floppy144GameDataNotebookRecordAtOrdinal(uint32_t uOrdinal)
+{
+    uint32_t u,n=0U;
+    for(u=0U;u<F144_COUNT(g_asGameData);++u){if(g_asGameData[u].eKind!=FLOPPY144_DATA_NOTEBOOK)continue;if(n==uOrdinal)return &g_asGameData[u];++n;}
+    return NULL;
+}
+
+void Floppy144GameDataCaptureNewNotebookEntries(Floppy144RunState *pState)
+{
+    uint32_t u,n=0U;
+    if(pState==NULL)return;
+    for(u=0U;u<F144_COUNT(g_asGameData);++u)
+    {
+        const Floppy144DataRecord *p=&g_asGameData[u];
+        if(p->eKind!=FLOPPY144_DATA_NOTEBOOK)continue;
+        if(Floppy144GameDataNotebookRecordVisible(pState,p))(void)Floppy144RunStateAppendNotebookEntry(pState,n);
+        ++n;
+    }
+}
+
+uint32_t Floppy144GameDataNotebookOrderedCount(const Floppy144RunState *pState)
+{
+    return pState!=NULL?(uint32_t)pState->notebook_order_count:0U;
+}
+
+const Floppy144DataRecord *Floppy144GameDataNotebookOrderedEntryAt(const Floppy144RunState *pState,uint32_t uIndex)
+{
+    uint32_t uOrdinal;
+    if(pState==NULL||uIndex>=(uint32_t)pState->notebook_order_count)return NULL;
+    uOrdinal=(uint32_t)pState->notebook_order[uIndex];
+    return Floppy144GameDataNotebookRecordAtOrdinal(uOrdinal);
+}
+
+/* Compatibility wrappers now present the same chronological order. */
+uint32_t Floppy144GameDataNotebookEntryCount(const Floppy144RunState*pState){return Floppy144GameDataNotebookOrderedCount(pState);}
+const Floppy144DataRecord *Floppy144GameDataNotebookEntryAt(const Floppy144RunState*pState,uint32_t uVisibleIndex){return Floppy144GameDataNotebookOrderedEntryAt(pState,uVisibleIndex);}
 
 bool Floppy144GameDataWorkstreamAvailable(
     const Floppy144RunState *pState,
@@ -583,14 +617,14 @@ bool Floppy144GameDataTriggerDocumentAccessible(
 
     return true;
 }
-bool Floppy144GameDataTriggerTryFire(Floppy144WorldState*pWorld,Floppy144RunState*pState,Floppy144TriggerId eTrigger){const Floppy144DataRecord*pTrigger;uint32_t u;if(!Floppy144GameDataTriggerCanFire(pState,eTrigger))return false;pTrigger=Floppy144Nth(FLOPPY144_DATA_TRIGGER,(int32_t)eTrigger);if(!pTrigger||!Floppy144RunStateFireTrigger(pState,eTrigger))return false;for(u=0;u<F144_COUNT(g_asGameData);++u){const Floppy144DataRecord*p=&g_asGameData[u];if(p->eKind==FLOPPY144_DATA_TRIGGER_EFFECT&&Floppy144StringEqual(p->pszId,pTrigger->pszId))(void)Floppy144GameDataExecuteEffect(pWorld,pState,p->pszA,p->pszB);}return true;}
+bool Floppy144GameDataTriggerTryFire(Floppy144WorldState*pWorld,Floppy144RunState*pState,Floppy144TriggerId eTrigger){const Floppy144DataRecord*pTrigger;uint32_t u;if(!Floppy144GameDataTriggerCanFire(pState,eTrigger))return false;pTrigger=Floppy144Nth(FLOPPY144_DATA_TRIGGER,(int32_t)eTrigger);if(!pTrigger||!Floppy144RunStateFireTrigger(pState,eTrigger))return false;for(u=0;u<F144_COUNT(g_asGameData);++u){const Floppy144DataRecord*p=&g_asGameData[u];if(p->eKind==FLOPPY144_DATA_TRIGGER_EFFECT&&Floppy144StringEqual(p->pszId,pTrigger->pszId))(void)Floppy144GameDataExecuteEffect(pWorld,pState,p->pszA,p->pszB);}Floppy144GameDataCaptureNewNotebookEntries(pState);return true;}
 
 static bool Floppy144EvidenceOwnsInteraction(const char*pszEvidenceId,const char*pszInteractionId){const Floppy144DataRecord*pEvidence=Floppy144GameDataFind(FLOPPY144_DATA_EVIDENCE,pszEvidenceId);uint32_t u;if(!pEvidence||!pEvidence->b0)return false;for(u=0;u<F144_COUNT(g_asGameData);++u){const Floppy144DataRecord*p=&g_asGameData[u];if(p->eKind==FLOPPY144_DATA_EVIDENCE_REQUIREMENT&&Floppy144StringEqual(p->pszId,pszEvidenceId)&&Floppy144StringEqual(p->pszA,pszInteractionId))return true;}return false;}
 static bool Floppy144AnySecureCabinetUnlocked(const Floppy144RunState*pState){uint32_t u;int32_t n=0;if(!pState)return false;if(Floppy144RunStateHasCapability(pState,FLOPPY144_CAPABILITY_MASTER_SECURE_CABINET_CODES))return true;for(u=0;u<F144_COUNT(g_asGameData);++u){const Floppy144DataRecord*p=&g_asGameData[u];if(p->eKind!=FLOPPY144_DATA_INTERACTION)continue;if(p->pszB&&strstr(p->pszB,"SECURE_CABINET")&&Floppy144RunStateInteractionCompleted(pState,(Floppy144InteractionId)n))return true;++n;}return false;}
 static bool Floppy144InteractionPrerequisiteSatisfied(const Floppy144RunState*pState,const Floppy144DataRecord*pInteraction,const char*psz){if(!psz||!*psz)return true;if(psz[0]=='T'&&psz[1]=='-'){Floppy144TriggerId e=Floppy144GameDataTriggerId(psz);return e!=FLOPPY144_TRIGGER_COUNT&&Floppy144RunStateTriggerFired(pState,e);}if(psz[0]=='E'&&psz[1]=='-'){Floppy144EvidenceId e=Floppy144GameDataEvidenceId(psz);return e!=FLOPPY144_EVIDENCE_COUNT&&Floppy144RunStateEvidenceEstablished(pState,e);}if(psz[0]=='I'&&psz[1]=='-'){Floppy144InteractionId e=Floppy144GameDataInteractionId(psz);if(pInteraction&&pInteraction->pszE&&Floppy144EvidenceOwnsInteraction(pInteraction->pszE,psz))return true;return e!=FLOPPY144_INTERACTION_COUNT&&Floppy144RunStateInteractionCompleted(pState,e);}if(Floppy144StringEqual(psz,"ROOM_SECURITY"))return Floppy144GameDataRoomAccessible(pState,"SECURITY");if(Floppy144StringEqual(psz,"ROOM_SERVER_ROOM"))return Floppy144RunStateRoomReconstructed(pState,FLOPPY144_ROOM_SERVER_ROOM);if(Floppy144StringEqual(psz,"CABINET_UNLOCKED"))return Floppy144AnySecureCabinetUnlocked(pState);if(Floppy144StringEqual(psz,"SECURITY_CODE_KNOWN")||Floppy144StringEqual(psz,"CODE_KNOWN"))return Floppy144GameDataFactRecorded(pState,"SECURITY_CABINET_CODE")||Floppy144RunStateHasCapability(pState,FLOPPY144_CAPABILITY_MASTER_SECURE_CABINET_CODES);if(Floppy144StringEqual(psz,"CABINET_CONSTRUCTED"))return true;{Floppy144CapabilityId e=Floppy144GameDataCapabilityId(psz);return e!=FLOPPY144_CAPABILITY_COUNT&&Floppy144RunStateHasCapability(pState,e);}}
 bool Floppy144GameDataInteractionCanRun(const Floppy144RunState*pState,Floppy144InteractionId eInteraction){const Floppy144DataRecord*pInteraction;uint32_t u;if(!pState||(uint32_t)eInteraction>=(uint32_t)FLOPPY144_INTERACTION_COUNT||Floppy144RunStateInteractionCompleted(pState,eInteraction))return false;pInteraction=Floppy144Nth(FLOPPY144_DATA_INTERACTION,(int32_t)eInteraction);if(!pInteraction)return false;for(u=0;u<F144_COUNT(g_asGameData);++u){const Floppy144DataRecord*p=&g_asGameData[u];if(p->eKind==FLOPPY144_DATA_INTERACTION_PREREQUISITE&&Floppy144StringEqual(p->pszId,pInteraction->pszId)&&!Floppy144InteractionPrerequisiteSatisfied(pState,pInteraction,p->pszA))return false;}return true;}
-bool Floppy144GameDataInteractionTryRun(Floppy144WorldState*pWorld,Floppy144RunState*pState,Floppy144InteractionId eInteraction){const Floppy144DataRecord*pInteraction;uint32_t u;if(!Floppy144GameDataInteractionCanRun(pState,eInteraction))return false;pInteraction=Floppy144Nth(FLOPPY144_DATA_INTERACTION,(int32_t)eInteraction);if(!pInteraction)return false;(void)Floppy144RunStateCompleteInteraction(pState,eInteraction);for(u=0;u<F144_COUNT(g_asGameData);++u){const Floppy144DataRecord*p=&g_asGameData[u];if(p->eKind==FLOPPY144_DATA_INTERACTION_EFFECT&&Floppy144StringEqual(p->pszId,pInteraction->pszId))(void)Floppy144GameDataExecuteEffect(pWorld,pState,p->pszA,p->pszB);}Floppy144GameDataResolveEvidence(pState);return true;}
-void Floppy144GameDataResolveEvidence(Floppy144RunState*pState){uint32_t uPass;if(!pState)return;for(uPass=0;uPass<(uint32_t)FLOPPY144_EVIDENCE_COUNT;++uPass){uint32_t u;bool bChanged=false;for(u=0;u<F144_COUNT(g_asGameData);++u){const Floppy144DataRecord*pE=&g_asGameData[u];Floppy144EvidenceId e;uint32_t k;bool ok=true;if(pE->eKind!=FLOPPY144_DATA_EVIDENCE)continue;e=Floppy144GameDataEvidenceId(pE->pszId);if(e==FLOPPY144_EVIDENCE_COUNT||Floppy144RunStateEvidenceEstablished(pState,e))continue;for(k=0;k<F144_COUNT(g_asGameData);++k){const Floppy144DataRecord*p=&g_asGameData[k];if(p->eKind==FLOPPY144_DATA_EVIDENCE_REQUIREMENT&&Floppy144StringEqual(p->pszId,pE->pszId)){Floppy144InteractionId r=Floppy144GameDataInteractionId(p->pszA);if(r==FLOPPY144_INTERACTION_COUNT||!Floppy144RunStateInteractionCompleted(pState,r)){ok=false;break;}}}if(!ok)continue;for(k=0;k<F144_COUNT(g_asGameData);++k){const Floppy144DataRecord*p=&g_asGameData[k];if(p->eKind==FLOPPY144_DATA_EVIDENCE_CONDITION&&Floppy144StringEqual(p->pszId,pE->pszId)&&!Floppy144GameDataConditionSatisfied(pState,p->pszA,p->pszB)){ok=false;break;}}if(ok&&Floppy144RunStateEstablishEvidence(pState,e))bChanged=true;}if(!bChanged)break;}}
+bool Floppy144GameDataInteractionTryRun(Floppy144WorldState*pWorld,Floppy144RunState*pState,Floppy144InteractionId eInteraction){const Floppy144DataRecord*pInteraction;uint32_t u;if(!Floppy144GameDataInteractionCanRun(pState,eInteraction))return false;pInteraction=Floppy144Nth(FLOPPY144_DATA_INTERACTION,(int32_t)eInteraction);if(!pInteraction)return false;(void)Floppy144RunStateCompleteInteraction(pState,eInteraction);for(u=0;u<F144_COUNT(g_asGameData);++u){const Floppy144DataRecord*p=&g_asGameData[u];if(p->eKind==FLOPPY144_DATA_INTERACTION_EFFECT&&Floppy144StringEqual(p->pszId,pInteraction->pszId))(void)Floppy144GameDataExecuteEffect(pWorld,pState,p->pszA,p->pszB);}Floppy144GameDataResolveEvidence(pState);Floppy144GameDataCaptureNewNotebookEntries(pState);return true;}
+void Floppy144GameDataResolveEvidence(Floppy144RunState*pState){uint32_t uPass;if(!pState)return;for(uPass=0;uPass<(uint32_t)FLOPPY144_EVIDENCE_COUNT;++uPass){uint32_t u;bool bChanged=false;for(u=0;u<F144_COUNT(g_asGameData);++u){const Floppy144DataRecord*pE=&g_asGameData[u];Floppy144EvidenceId e;uint32_t k;bool ok=true;if(pE->eKind!=FLOPPY144_DATA_EVIDENCE)continue;e=Floppy144GameDataEvidenceId(pE->pszId);if(e==FLOPPY144_EVIDENCE_COUNT||Floppy144RunStateEvidenceEstablished(pState,e))continue;for(k=0;k<F144_COUNT(g_asGameData);++k){const Floppy144DataRecord*p=&g_asGameData[k];if(p->eKind==FLOPPY144_DATA_EVIDENCE_REQUIREMENT&&Floppy144StringEqual(p->pszId,pE->pszId)){Floppy144InteractionId r=Floppy144GameDataInteractionId(p->pszA);if(r==FLOPPY144_INTERACTION_COUNT||!Floppy144RunStateInteractionCompleted(pState,r)){ok=false;break;}}}if(!ok)continue;for(k=0;k<F144_COUNT(g_asGameData);++k){const Floppy144DataRecord*p=&g_asGameData[k];if(p->eKind==FLOPPY144_DATA_EVIDENCE_CONDITION&&Floppy144StringEqual(p->pszId,pE->pszId)&&!Floppy144GameDataConditionSatisfied(pState,p->pszA,p->pszB)){ok=false;break;}}if(ok&&Floppy144RunStateEstablishEvidence(pState,e))bChanged=true;}if(!bChanged)break;}Floppy144GameDataCaptureNewNotebookEntries(pState);}
 
 static uint32_t Floppy144MonthDay(uint32_t m,uint32_t d){return m*100U+d;}
 static uint32_t Floppy144ParseMonthDay(const char*s){if(!s||strlen(s)!=5U||s[2]!='-')return 0U;return(uint32_t)(s[0]-'0')*1000U+(uint32_t)(s[1]-'0')*100U+(uint32_t)(s[3]-'0')*10U+(uint32_t)(s[4]-'0');}
