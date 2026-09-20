@@ -13,6 +13,8 @@
 #include "floppy144_site_2d.h"
 
 #include "floppy144_draw.h"
+#include "floppy144_drawing_runtime.h"
+#include "floppy144_game_data.h"
 #include "floppy144_cabinet.h"
 #include "floppy144_site.h"
 #include "floppy144_site_object.h"
@@ -23,6 +25,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
 /*
  * Fixed zoom.
@@ -1363,6 +1366,592 @@ static void Floppy144Site2DDrawCabinetDetails(
     );
 }
 
+
+/*
+ * Stage 3C Task 12 renderer bridge.
+ *
+ * SiteRect remains deliberately compact, so presentation metadata is resolved
+ * from the generated furniture/fixture records using the authored room and
+ * geometry. This keeps variant-specific artwork out of collision/persistence
+ * state while allowing the renderer to honour the JSON drawing contract.
+ */
+static const Floppy144DataRecord *Floppy144Site2DPlacementForRect(
+    const Floppy144SiteRect *rect
+)
+{
+    uint32_t index;
+
+    if(rect == NULL || rect->room >= (uint8_t)FLOPPY144_ROOM_COUNT)
+    {
+        return NULL;
+    }
+
+    for(index = 0U; index < Floppy144GameDataRecordCount(); ++index)
+    {
+        const Floppy144DataRecord *record =
+            Floppy144GameDataRecordAt(index);
+
+        if(
+            record == NULL ||
+            (
+                record->eKind != FLOPPY144_DATA_FURNITURE &&
+                record->eKind != FLOPPY144_DATA_FIXTURE
+            ) ||
+            record->pszA == NULL ||
+            Floppy144GameDataRoomId(record->pszA) !=
+                (Floppy144RoomId)rect->room ||
+            record->n0 != (int32_t)rect->x ||
+            record->n1 != (int32_t)rect->y ||
+            record->n2 != (int32_t)rect->width ||
+            record->n3 != (int32_t)rect->height
+        )
+        {
+            continue;
+        }
+
+        return record;
+    }
+
+    return NULL;
+}
+
+static bool Floppy144Site2DVariantIs(
+    const Floppy144DataRecord *placement,
+    const char *variant
+)
+{
+    return
+        placement != NULL &&
+        placement->pszC != NULL &&
+        variant != NULL &&
+        strcmp(placement->pszC, variant) == 0;
+}
+
+static uint32_t Floppy144Site2DClutterHash(
+    const Floppy144SiteRect *rect
+)
+{
+    uint32_t value = 2166136261U;
+
+    if(rect == NULL)
+    {
+        return value;
+    }
+
+#define FLOPPY144_SITE_2D_HASH_BYTE(v) \
+    do { value ^= (uint32_t)(v); value *= 16777619U; } while(0)
+
+    FLOPPY144_SITE_2D_HASH_BYTE(rect->room);
+    FLOPPY144_SITE_2D_HASH_BYTE(rect->type);
+    FLOPPY144_SITE_2D_HASH_BYTE(rect->x);
+    FLOPPY144_SITE_2D_HASH_BYTE(rect->y);
+    FLOPPY144_SITE_2D_HASH_BYTE(rect->width);
+    FLOPPY144_SITE_2D_HASH_BYTE(rect->height);
+
+#undef FLOPPY144_SITE_2D_HASH_BYTE
+
+    return value;
+}
+
+/*
+ * Draw deterministic visual clutter without creating runtime objects.
+ *
+ * Facilities shelving is intentionally busier than ordinary bookcases and
+ * shelving. The authored rectangle identity is the seed, therefore save/load,
+ * redraws and projection changes do not reshuffle the scene.
+ */
+static void Floppy144Site2DDrawShelfClutter(
+    Floppy144Surface *surface,
+    const Floppy144SiteRect *rect,
+    const Floppy144SiteScreenRect *screen_rect,
+    bool wall_shelving
+)
+{
+    const uint32_t paper_colour = FLOPPY144_RGB(188, 183, 161);
+    const uint32_t box_colour = FLOPPY144_RGB(117, 100, 75);
+    uint32_t state;
+    int32_t count;
+    int32_t index;
+    int32_t margin_x;
+    int32_t margin_y;
+    int32_t usable_w;
+    int32_t usable_h;
+
+    if(surface == NULL || rect == NULL || screen_rect == NULL)
+    {
+        return;
+    }
+
+    margin_x = screen_rect->width > 12 ? 4 : 2;
+    margin_y = screen_rect->height > 12 ? 4 : 2;
+    usable_w = screen_rect->width - margin_x * 2;
+    usable_h = screen_rect->height - margin_y * 2;
+
+    if(usable_w < 4 || usable_h < 4)
+    {
+        return;
+    }
+
+    count =
+        rect->room == (uint8_t)FLOPPY144_ROOM_FACILITIES
+            ? 15
+            : (wall_shelving ? 8 : 6);
+
+    state = Floppy144Site2DClutterHash(rect);
+
+    for(index = 0; index < count; ++index)
+    {
+        int32_t x;
+        int32_t y;
+        int32_t w;
+        int32_t h;
+
+        state = state * 1664525U + 1013904223U;
+        x =
+            screen_rect->x + margin_x +
+            (int32_t)(state % (uint32_t)usable_w);
+
+        state = state * 1664525U + 1013904223U;
+        y =
+            screen_rect->y + margin_y +
+            (int32_t)(state % (uint32_t)usable_h);
+
+        state = state * 1664525U + 1013904223U;
+        w = 2 + (int32_t)(state % 4U);
+
+        state = state * 1664525U + 1013904223U;
+        h = 2 + (int32_t)(state % 3U);
+
+        if(x + w > screen_rect->x + screen_rect->width - margin_x)
+        {
+            x = screen_rect->x + screen_rect->width - margin_x - w;
+        }
+
+        if(y + h > screen_rect->y + screen_rect->height - margin_y)
+        {
+            y = screen_rect->y + screen_rect->height - margin_y - h;
+        }
+
+        Floppy144Site2DFill(
+            surface,
+            x,
+            y,
+            w,
+            h,
+            (state & 1U) != 0U ? paper_colour : box_colour
+        );
+    }
+}
+
+/*
+ * Wall fixtures occupy their authored collision footprint but are visually
+ * shallow. Ordinary boards/panels/cabinets project only 0.5 Site units from
+ * the wall. The CRT monitor bank remains one unit deep and the IT shelving
+ * keeps its authored two-unit depth.
+ */
+static void Floppy144Site2DWallFixtureVisualRect(
+    const Floppy144SiteRect *rect,
+    const Floppy144DataRecord *placement,
+    const Floppy144SiteScreenRect *screen_rect,
+    Floppy144SiteScreenRect *visual_rect
+)
+{
+    int32_t depth_pixels =
+        FLOPPY144_SITE_2D_PIXELS_PER_UNIT / 2;
+
+    if(screen_rect == NULL || visual_rect == NULL)
+    {
+        return;
+    }
+
+    *visual_rect = *screen_rect;
+
+    if(Floppy144Site2DVariantIs(placement, "MONITOR_BANK"))
+    {
+        depth_pixels = FLOPPY144_SITE_2D_PIXELS_PER_UNIT;
+    }
+    else if(
+        rect != NULL &&
+        rect->room == (uint8_t)FLOPPY144_ROOM_IT_SUPPORT &&
+        Floppy144Site2DVariantIs(placement, "SHELVING")
+    )
+    {
+        depth_pixels =
+            FLOPPY144_SITE_2D_PIXELS_PER_UNIT * 2;
+    }
+
+    if(visual_rect->width <= visual_rect->height)
+    {
+        if(depth_pixels < visual_rect->width)
+        {
+            visual_rect->x +=
+                (visual_rect->width - depth_pixels) / 2;
+            visual_rect->width = depth_pixels;
+        }
+    }
+    else
+    {
+        if(depth_pixels < visual_rect->height)
+        {
+            visual_rect->y +=
+                (visual_rect->height - depth_pixels) / 2;
+            visual_rect->height = depth_pixels;
+        }
+    }
+}
+
+static void Floppy144Site2DDrawWallFixture(
+    Floppy144Surface *surface,
+    const Floppy144SiteRect *rect,
+    const Floppy144DataRecord *placement,
+    const Floppy144SiteScreenRect *screen_rect,
+    uint32_t edge_colour
+)
+{
+    const uint32_t detail_colour = FLOPPY144_RGB(65, 70, 68);
+    const uint32_t light_colour = FLOPPY144_RGB(151, 151, 137);
+    const uint32_t paper_colour = FLOPPY144_RGB(188, 183, 161);
+    const uint32_t screen_colour = FLOPPY144_RGB(58, 112, 117);
+    const uint32_t amber_colour = FLOPPY144_RGB(202, 155, 69);
+    Floppy144SiteScreenRect visual;
+    int32_t index;
+
+    if(surface == NULL || rect == NULL || screen_rect == NULL)
+    {
+        return;
+    }
+
+    Floppy144Site2DWallFixtureVisualRect(
+        rect,
+        placement,
+        screen_rect,
+        &visual
+    );
+
+    /*
+     * Prefer the authored drawing definition. Task 12 may replace the generic
+     * wall-item definition with a variant recipe without requiring renderer
+     * changes. The compact overlays below also keep the older Stage 3B data
+     * visually distinct.
+     */
+    if(
+        placement == NULL ||
+        placement->pszE == NULL ||
+        !Floppy144DrawingRuntimeDraw(
+            surface,
+            placement->pszE,
+            visual.x,
+            visual.y,
+            visual.width,
+            visual.height
+        )
+    )
+    {
+        Floppy144Site2DFill(
+            surface,
+            visual.x,
+            visual.y,
+            visual.width,
+            visual.height,
+            light_colour
+        );
+
+        Floppy144Site2DOutline(
+            surface,
+            visual.x,
+            visual.y,
+            visual.width,
+            visual.height,
+            edge_colour
+        );
+    }
+
+    if(Floppy144Site2DVariantIs(placement, "SITE_DIRECTORY"))
+    {
+        for(index = 1; index < 4; ++index)
+        {
+            Floppy144Site2DFill(
+                surface,
+                visual.x + visual.width / 6,
+                visual.y + visual.height * index / 5,
+                visual.width * 2 / 3,
+                2,
+                detail_colour
+            );
+        }
+    }
+    else if(Floppy144Site2DVariantIs(placement, "SUPPRESSION_PANEL"))
+    {
+        Floppy144Site2DFill(
+            surface,
+            visual.x + visual.width / 5,
+            visual.y + visual.height / 5,
+            visual.width * 3 / 5,
+            visual.height * 3 / 5,
+            detail_colour
+        );
+
+        Floppy144Site2DFill(
+            surface,
+            visual.x + visual.width / 2 - 2,
+            visual.y + visual.height / 2 - 2,
+            4,
+            4,
+            amber_colour
+        );
+    }
+    else if(Floppy144Site2DVariantIs(placement, "PATCH_PANEL"))
+    {
+        int32_t ports =
+            visual.width >= visual.height ? 8 : 5;
+
+        for(index = 0; index < ports; ++index)
+        {
+            int32_t x =
+                visual.x +
+                visual.width * (index + 1) / (ports + 1);
+
+            Floppy144Site2DFill(
+                surface,
+                x - 1,
+                visual.y + visual.height / 2 - 1,
+                3,
+                3,
+                screen_colour
+            );
+        }
+    }
+    else if(Floppy144Site2DVariantIs(placement, "NOTICEBOARD"))
+    {
+        Floppy144Site2DFill(
+            surface,
+            visual.x + 3,
+            visual.y + 3,
+            visual.width - 6,
+            visual.height - 6,
+            paper_colour
+        );
+
+        Floppy144Site2DFill(
+            surface,
+            visual.x + visual.width / 3,
+            visual.y + visual.height / 4,
+            3,
+            3,
+            amber_colour
+        );
+    }
+    else if(Floppy144Site2DVariantIs(placement, "KEY_CABINET"))
+    {
+        Floppy144Site2DOutline(
+            surface,
+            visual.x + 3,
+            visual.y + 3,
+            visual.width - 6,
+            visual.height - 6,
+            edge_colour
+        );
+
+        for(index = 1; index < 4; ++index)
+        {
+            Floppy144Site2DFill(
+                surface,
+                visual.x + visual.width * index / 4,
+                visual.y + visual.height / 3,
+                2,
+                visual.height / 3,
+                amber_colour
+            );
+        }
+    }
+    else if(Floppy144Site2DVariantIs(placement, "FIRST_AID_KIT"))
+    {
+        int32_t centre_x = visual.x + visual.width / 2;
+        int32_t centre_y = visual.y + visual.height / 2;
+
+        Floppy144Site2DFill(
+            surface,
+            centre_x - 2,
+            visual.y + visual.height / 5,
+            4,
+            visual.height * 3 / 5,
+            light_colour
+        );
+
+        Floppy144Site2DFill(
+            surface,
+            visual.x + visual.width / 5,
+            centre_y - 2,
+            visual.width * 3 / 5,
+            4,
+            light_colour
+        );
+    }
+    else if(Floppy144Site2DVariantIs(placement, "MONITOR_BANK"))
+    {
+        int32_t screens =
+            visual.width >= visual.height ? 4 : 6;
+
+        for(index = 0; index < screens; ++index)
+        {
+            int32_t x;
+            int32_t y;
+            int32_t w;
+            int32_t h;
+
+            if(visual.width >= visual.height)
+            {
+                w = visual.width / screens - 3;
+                h = visual.height - 6;
+                x = visual.x + 2 + index * visual.width / screens;
+                y = visual.y + 3;
+            }
+            else
+            {
+                w = visual.width - 6;
+                h = visual.height / screens - 3;
+                x = visual.x + 3;
+                y = visual.y + 2 + index * visual.height / screens;
+            }
+
+            if(w > 2 && h > 2)
+            {
+                Floppy144Site2DFill(
+                    surface,
+                    x,
+                    y,
+                    w,
+                    h,
+                    screen_colour
+                );
+
+                Floppy144Site2DOutline(
+                    surface,
+                    x,
+                    y,
+                    w,
+                    h,
+                    edge_colour
+                );
+            }
+        }
+    }
+    else if(Floppy144Site2DVariantIs(placement, "SHELVING"))
+    {
+        for(index = 1; index < 4; ++index)
+        {
+            if(visual.width >= visual.height)
+            {
+                Floppy144Site2DFill(
+                    surface,
+                    visual.x + visual.width * index / 4,
+                    visual.y + 2,
+                    2,
+                    visual.height - 4,
+                    edge_colour
+                );
+            }
+            else
+            {
+                Floppy144Site2DFill(
+                    surface,
+                    visual.x + 2,
+                    visual.y + visual.height * index / 4,
+                    visual.width - 4,
+                    2,
+                    edge_colour
+                );
+            }
+        }
+
+        Floppy144Site2DDrawShelfClutter(
+            surface,
+            rect,
+            &visual,
+            true
+        );
+    }
+}
+
+static void Floppy144Site2DDrawRecessedSink(
+    Floppy144Surface *surface,
+    const Floppy144SiteScreenRect *screen_rect,
+    uint32_t edge_colour
+)
+{
+    const uint32_t bowl_colour = FLOPPY144_RGB(54, 68, 70);
+    const uint32_t rim_colour = FLOPPY144_RGB(151, 151, 137);
+    int32_t inset_x;
+    int32_t inset_y;
+    int32_t inset_w;
+    int32_t inset_h;
+    int32_t tap_x;
+    int32_t tap_y;
+
+    if(surface == NULL || screen_rect == NULL)
+    {
+        return;
+    }
+
+    inset_x = screen_rect->x + screen_rect->width / 6;
+    inset_y = screen_rect->y + screen_rect->height / 6;
+    inset_w = screen_rect->width * 2 / 3;
+    inset_h = screen_rect->height * 2 / 3;
+
+    Floppy144Site2DFill(
+        surface,
+        inset_x,
+        inset_y,
+        inset_w,
+        inset_h,
+        bowl_colour
+    );
+
+    Floppy144Site2DOutline(
+        surface,
+        inset_x,
+        inset_y,
+        inset_w,
+        inset_h,
+        rim_colour
+    );
+
+    /*
+     * Mixer tap: stem plus short spout. It is intentionally drawn from the
+     * rear edge of the recess instead of treating the sink as a freestanding
+     * four-unit block.
+     */
+    tap_x = screen_rect->x + screen_rect->width / 2;
+    tap_y = screen_rect->y + 2;
+
+    Floppy144Site2DFill(
+        surface,
+        tap_x - 1,
+        tap_y,
+        3,
+        screen_rect->height / 4,
+        rim_colour
+    );
+
+    Floppy144Site2DFill(
+        surface,
+        tap_x,
+        tap_y,
+        screen_rect->width / 5,
+        2,
+        rim_colour
+    );
+
+    Floppy144Site2DFill(
+        surface,
+        inset_x + inset_w / 2 - 1,
+        inset_y + inset_h / 2 - 1,
+        3,
+        3,
+        edge_colour
+    );
+}
+
 static void Floppy144Site2DDrawFurnitureDetails(
     Floppy144Surface *surface,
     Floppy144SiteElement element,
@@ -2055,6 +2644,7 @@ static void Floppy144Site2DDrawSiteRect(
 
     Floppy144SiteElement element;
     const Floppy144SiteStyle2D *style;
+    const Floppy144DataRecord *placement;
     Floppy144SiteScreenRect screen_rect;
 
     if(
@@ -2083,6 +2673,9 @@ static void Floppy144Site2DDrawSiteRect(
 
     style =
         &floppy144_site_styles[element];
+
+    placement =
+        Floppy144Site2DPlacementForRect(rect);
 
     if(Floppy144Site2DIsFloor(element))
     {
@@ -2213,6 +2806,33 @@ static void Floppy144Site2DDrawSiteRect(
         return;
     }
 
+    if(element == FLOPPY144_SITE_WALL_MOUNTED_ITEM)
+    {
+        Floppy144Site2DDrawWallFixture(
+            surface,
+            rect,
+            placement,
+            &screen_rect,
+            edge_colour
+        );
+
+        return;
+    }
+
+    if(
+        element == FLOPPY144_SITE_SINK &&
+        rect->room == (uint8_t)FLOPPY144_ROOM_STAFF_ROOM
+    )
+    {
+        Floppy144Site2DDrawRecessedSink(
+            surface,
+            &screen_rect,
+            edge_colour
+        );
+
+        return;
+    }
+
     if(
         Floppy144Site2DRotationIsDiagonal(
             rect->rotation
@@ -2247,6 +2867,19 @@ static void Floppy144Site2DDrawSiteRect(
         rect->rotation,
         edge_colour
     );
+
+    if(
+        element == FLOPPY144_SITE_BOOKCASE ||
+        element == FLOPPY144_SITE_SHELVING_FULL
+    )
+    {
+        Floppy144Site2DDrawShelfClutter(
+            surface,
+            rect,
+            &screen_rect,
+            false
+        );
+    }
 }
 
 static void Floppy144Site2DDrawPlayer(
