@@ -878,6 +878,14 @@ static bool Floppy144SiteParentInspectable(
         Floppy144SiteDataStringEqual(
             pParent->pszB,
             "WINDOW"
+        ) ||
+        Floppy144SiteDataStringEqual(
+            pParent->pszB,
+            "SECURE_CABINET_HALF"
+        ) ||
+        Floppy144SiteDataStringEqual(
+            pParent->pszB,
+            "SECURE_CABINET_FULL"
         )
     )
     {
@@ -1394,17 +1402,24 @@ bool Floppy144SiteResolveInspectionTarget(
                 pPhysicalItem
             );
 
-        if(bVisible)
+        /*
+         * Hidden progression items do not create a phantom Inspect action.
+         * The action appears only when a physical child is actually present
+         * in the reconstructed Site.
+         */
+        if(!bVisible)
         {
-            uPriority =
-                Floppy144SitePhysicalItemPriority(
-                    pState,
-                    pPhysicalItem,
-                    &eInteraction,
-                    &bAvailable,
-                    &bCompleted
-                );
+            continue;
         }
+
+        uPriority =
+            Floppy144SitePhysicalItemPriority(
+                pState,
+                pPhysicalItem,
+                &eInteraction,
+                &bAvailable,
+                &bCompleted
+            );
 
         nSourceOrder = pPhysicalItem->n0;
 
@@ -1425,31 +1440,20 @@ bool Floppy144SiteResolveInspectionTarget(
             pTarget->pszParentId =
                 pPhysicalItem->pszC;
 
-            if(bVisible)
-            {
-                pTarget->pszPhysicalItemId =
-                    pPhysicalItem->pszId;
+            pTarget->pszPhysicalItemId =
+                pPhysicalItem->pszId;
 
-                pTarget->pszPhysicalItemName =
-                    pPhysicalItem->pszA;
+            pTarget->pszPhysicalItemName =
+                pPhysicalItem->pszA;
 
-                pTarget->eInteraction =
-                    eInteraction;
+            pTarget->eInteraction =
+                eInteraction;
 
-                pTarget->bInteractionAvailable =
-                    bAvailable;
+            pTarget->bInteractionAvailable =
+                bAvailable;
 
-                pTarget->bInteractionCompleted =
-                    bCompleted;
-            }
-            else
-            {
-                pTarget->pszPhysicalItemId = NULL;
-                pTarget->pszPhysicalItemName = NULL;
-                pTarget->eInteraction = FLOPPY144_INTERACTION_COUNT;
-                pTarget->bInteractionAvailable = false;
-                pTarget->bInteractionCompleted = false;
-            }
+            pTarget->bInteractionCompleted =
+                bCompleted;
 
             uBestDistance = uDistance;
             uBestPriority = uPriority;
