@@ -316,10 +316,11 @@ function Test-Stage3B5CoordinatorWiring {
     $MainPath = Join-Path $SourceDir "floppy144_main.c"
     $RunStateHeaderPath = Join-Path $SourceDir "floppy144_run_state.h"
     $PersistenceHeaderPath = Join-Path $SourceDir "floppy144_persistence.h"
+    $PersistenceSourcePath = Join-Path $SourceDir "floppy144_persistence.c"
     $Site2DPath = Join-Path $SourceDir "floppy144_site_2d.c"
     $SiteIsoPath = Join-Path $SourceDir "floppy144_site_isometric.c"
 
-    foreach($Path in @($MainPath, $RunStateHeaderPath, $PersistenceHeaderPath, $Site2DPath, $SiteIsoPath)) {
+    foreach($Path in @($MainPath, $RunStateHeaderPath, $PersistenceHeaderPath, $PersistenceSourcePath, $Site2DPath, $SiteIsoPath)) {
         if(-not (Test-Path $Path)) {
             throw "Stage 3B.5 wiring source is missing: $Path"
         }
@@ -328,6 +329,7 @@ function Test-Stage3B5CoordinatorWiring {
     $MainSource = Get-Content -Raw -Path $MainPath
     $RunStateHeader = Get-Content -Raw -Path $RunStateHeaderPath
     $PersistenceHeader = Get-Content -Raw -Path $PersistenceHeaderPath
+    $PersistenceSource = Get-Content -Raw -Path $PersistenceSourcePath
     $Site2DSource = Get-Content -Raw -Path $Site2DPath
     $SiteIsoSource = Get-Content -Raw -Path $SiteIsoPath
 
@@ -349,8 +351,11 @@ function Test-Stage3B5CoordinatorWiring {
         throw "Stage 3B.5 per-cabinet unlock state is not present in RunState."
     }
 
-    if($PersistenceHeader -notmatch 'secure_cabinets_unlocked') {
-        throw "Stage 3B.5 per-cabinet unlock state is not included in persistence payload sizing."
+    if(
+        $PersistenceHeader -notmatch 'FLOPPY144_SAVE_PAYLOAD_V2_SIZE' -or
+        $PersistenceSource -notmatch 'secure_cabinets_unlocked'
+    ) {
+        throw "Stage 3B.5 per-cabinet unlock state is not included in the Stage 3C V2 persistence payload."
     }
 
     foreach($Renderer in @($Site2DSource, $SiteIsoSource)) {
