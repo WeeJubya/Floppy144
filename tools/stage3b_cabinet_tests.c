@@ -143,8 +143,8 @@ static void Floppy144TestGeneratedCabinetDiscovery(void)
     );
 
     F144_CHECK(
-        Floppy144CabinetRequiredDigits(&sCabinet) == 4U,
-        "early-recovery Main Office cabinet requires four digits"
+        Floppy144CabinetRequiredDigits(&sCabinet) == 6U,
+        "Main Office cabinet uses authored six-digit code metadata"
     );
 
     F144_CHECK(
@@ -160,6 +160,8 @@ static void Floppy144TestSecurityCabinetUnlockAndContents(void)
     Floppy144CabinetState sCabinet;
     Floppy144TriggerId eT037;
     const Floppy144DataRecord *pItem;
+    char szExpected[FLOPPY144_CABINET_CODE_CAPACITY + 1U];
+    char szWrong[FLOPPY144_CABINET_CODE_CAPACITY + 1U];
 
     Floppy144TestReset(&sWorld, &sState, &sCabinet);
     Floppy144TestPlaceAtCabinet(&sState, "SECURITY_SECURE_CABINET");
@@ -174,7 +176,15 @@ static void Floppy144TestSecurityCabinetUnlockAndContents(void)
         "Security secure cabinet requires eight digits"
     );
 
-    Floppy144TestDigitEntry(&sCabinet, "12345678");
+    Floppy144CabinetExpectedCode(
+        &sCabinet,
+        sState.recovery_seed,
+        szExpected,
+        (uint32_t)sizeof(szExpected)
+    );
+    (void)snprintf(szWrong, sizeof(szWrong), "%s", szExpected);
+    szWrong[0] = szWrong[0] == '9' ? '0' : (char)(szWrong[0] + 1);
+    Floppy144TestDigitEntry(&sCabinet, szWrong);
 
     F144_CHECK(
         !Floppy144CabinetSubmitCode(
@@ -183,7 +193,7 @@ static void Floppy144TestSecurityCabinetUnlockAndContents(void)
             &sState
         ) &&
         !Floppy144CabinetInteriorOpen(&sCabinet),
-        "unknown Security code cannot unlock cabinet"
+        "incorrect Security code cannot unlock cabinet"
     );
 
     eT037 = Floppy144GameDataTriggerId("T-037");
@@ -199,7 +209,7 @@ static void Floppy144TestSecurityCabinetUnlockAndContents(void)
     );
 
     Floppy144CabinetClearInput(&sCabinet);
-    Floppy144TestDigitEntry(&sCabinet, "87654321");
+    Floppy144TestDigitEntry(&sCabinet, szExpected);
 
     F144_CHECK(
         Floppy144CabinetSubmitCode(
@@ -207,7 +217,7 @@ static void Floppy144TestSecurityCabinetUnlockAndContents(void)
             &sWorld,
             &sState
         ),
-        "known eight-digit Security code unlocks selected cabinet"
+        "exact generated eight-digit Security code unlocks selected cabinet"
     );
 
     F144_CHECK(
@@ -277,7 +287,8 @@ static void Floppy144TestPerCabinetUnlockPersistence(void)
     Floppy144RunState sState;
     Floppy144RunState sDecoded;
     Floppy144CabinetState sCabinet;
-    uint8_t auPayload[FLOPPY144_SAVE_PAYLOAD_V1_SIZE];
+    char szExpected[FLOPPY144_CABINET_CODE_CAPACITY + 1U];
+    uint8_t auPayload[FLOPPY144_SAVE_PAYLOAD_V2_SIZE];
 
     Floppy144TestReset(&sWorld, &sState, &sCabinet);
 
@@ -296,7 +307,13 @@ static void Floppy144TestPerCabinetUnlockPersistence(void)
         "Main Office cabinet opens keypad"
     );
 
-    Floppy144TestDigitEntry(&sCabinet, "1440");
+    Floppy144CabinetExpectedCode(
+        &sCabinet,
+        sState.recovery_seed,
+        szExpected,
+        (uint32_t)sizeof(szExpected)
+    );
+    Floppy144TestDigitEntry(&sCabinet, szExpected);
 
     F144_CHECK(
         Floppy144CabinetSubmitCode(
@@ -304,7 +321,7 @@ static void Floppy144TestPerCabinetUnlockPersistence(void)
             &sWorld,
             &sState
         ),
-        "known four-digit cabinet code unlocks Main Office cabinet"
+        "exact generated Main Office cabinet code unlocks cabinet"
     );
 
     /*
@@ -388,8 +405,8 @@ static void Floppy144TestActLengthContract(void)
 
     F144_CHECK(
         Floppy144CabinetOpenNearby(&sCabinet, &sState) &&
-        Floppy144CabinetRequiredDigits(&sCabinet) == 8U,
-        "late-recovery Director cabinet requires eight digits"
+        Floppy144CabinetRequiredDigits(&sCabinet) == 6U,
+        "Director cabinet uses authored six-digit code metadata"
     );
 }
 
