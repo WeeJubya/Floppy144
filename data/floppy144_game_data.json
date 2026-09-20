@@ -11412,7 +11412,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "GDR ARCHIVE RECOVERY TERMINAL\n\nINITIATE starts archive services for the current recovery. LIST shows collections currently available. RESTORE <CODE> reconstructs an available collection, subject to the recovery quota. OPEN <RECORD-ID> opens a recovered readable record. EXIT returns to the reconstructed Site.\n\nCommands operate only on material present on Disk 144. A missing record is not evidence that the original record never existed.",
+      "body": "GDR ARCHIVE RECOVERY TERMINAL\n\nINITIATE starts archive services for the current recovery. LIST shows collections currently available. RESTORE <CODE> reconstructs an available collection, subject to available recovery capacity. OPEN <RECORD-ID> opens a recovered readable record. EXIT returns to the reconstructed Site.\n\nCommands operate only on material present on Disk 144. A missing record is not evidence that the original record never existed.",
       "source_status": "preserved-stage-1",
       "parent_collection_id": "DR-01"
     },
@@ -11424,7 +11424,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "COLLECTION RESTORATION\n\nRecovered collections contribute reconstruction data to the Site. Restoration is persistent for the current recovery and cannot be undone. The available collection pool intentionally exceeds one complete recovery, so choices made during the session can change which material becomes available before the reconstruction reaches 100 percent.\n\nRestoration reconstructs archived state. It does not invent absent information.",
+      "body": "COLLECTION RESTORATION\n\nRecovered collections contribute reconstruction data to the Site. Restoration is persistent for the current recovery and cannot be undone. The available collection pool intentionally exceeds one complete recovery, so choices made during the session can change which material becomes available before Disk 144 is full.\n\nRestoration reconstructs archived state. It does not invent absent information.",
       "source_status": "preserved-stage-1",
       "parent_collection_id": "DR-01"
     },
