@@ -63,12 +63,83 @@ static FILE *openout(const char*dir,const char*name){char p[1024];snprintf(p,siz
 static void write_json2(FILE*f,JsonValue*v){size_t i;switch(v->type){case J_NULL:fputs("null",f);break;case J_BOOL:fputs(v->as.boolean?"true":"false",f);break;case J_NUMBER:fprintf(f,"%.15g",v->as.number);break;case J_STRING:{const unsigned char*p=(const unsigned char*)v->as.string;fputc('"',f);while(*p){unsigned char c=*p++;if(c=='\"'||c=='\\'){fputc('\\',f);fputc(c,f);}else if(c=='\n')fputs("\\n",f);else if(c=='\r')fputs("\\r",f);else if(c=='\t')fputs("\\t",f);else if(c<32)fprintf(f,"\\u%04x",c);else fputc(c,f);}fputc('"',f);break;}case J_ARRAY:fputc('[',f);for(i=0;i<v->as.array.count;i++){if(i)fputc(',',f);write_json2(f,v->as.array.items[i]);}fputc(']',f);break;case J_OBJECT:fputc('{',f);for(i=0;i<v->as.object.count;i++){if(i)fputc(',',f);cstr(f,v->as.object.items[i].key);fputc(':',f);write_json2(f,v->as.object.items[i].value);}fputc('}',f);break;}}
 static void emit_simple_def(JsonValue*root,const char*key,const char*macro,const char*outfile,const char*outdir){size_t i;JsonValue*a=get(root,key);FILE*f=openout(outdir,outfile);fprintf(f,"/* Generated from floppy144_game_data.json. Do not edit. */\n");for(i=0;i<count(a);i++){const char*id=strv(at(a,i),"id");if(!id)die("entry without id");fprintf(f,"%s(",macro);sym(f,id);fprintf(f,", ");{char compact[32];size_t j=0;const char*p=id;while(*p&&j+1<sizeof(compact)){if(*p!='-')compact[j++]=*p;p++;}compact[j]='\0';cstr(f,compact);}fprintf(f,")\n");}fclose(f);}
 static size_t authored_count_for(JsonValue*docs,const char*cid){size_t i,n=0;for(i=0;i<count(docs);i++)if(strv(at(docs,i),"collection_id")&&strcmp(strv(at(docs,i),"collection_id"),cid)==0)n++;return n;}
-static void emit_collections(JsonValue*root,const char*outdir){JsonValue*a=get(root,"collections"),*docs=get(root,"documents");size_t i;FILE*f=openout(outdir,"floppy144_collections.generated.def");fputs("/* Generated from floppy144_game_data.json. Do not edit. */\n",f);for(i=0;i<count(a);i++){JsonValue*c=at(a,i),*b=get(c,"content_budget");const char*id=strv(c,"id"),*name=strv(c,"name"),*domain=strv(c,"domain");long rq=intv(c,"reconstruction_quota_percent",0),records=0;size_t ac=authored_count_for(docs,id);if(b&&b->type==J_OBJECT)records=intv(b,"records",0);if(records<(long)ac)records=(long)ac;fprintf(f,"FLOPPY144_COLLECTION(\n    ");sym(f,id);fprintf(f,", ");cstr(f,id);fprintf(f,", ");cstr(f,name);fprintf(f,",\n    %s, %ldU,\n    ",domain_enum(domain),rq);cstr(f,"DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.");fprintf(f,", NULL, %ldU, ",records);cstr(f,name);fprintf(f,", ");{char pref[32];snprintf(pref,sizeof(pref),"%s-RS",id);cstr(f,pref);}fprintf(f,",\n    floppy144_generated_generic_subjects, 12U, false, %luU, 37U, %luU\n)\n\n",1000UL+(unsigned long)i*100UL,11UL+(unsigned long)i*17UL); }fclose(f);}
-static void emit_documents(JsonValue*root,const char*outdir){JsonValue*a=get(root,"documents");size_t i;FILE*f=openout(outdir,"floppy144_documents.generated.inc");fputs("/* Generated from floppy144_game_data.json. Do not edit. */\n",f);for(i=0;i<count(a);i++){JsonValue*d=at(a,i);const char*cid=strv(d,"collection_id"),*rid=strv(d,"id"),*title=strv(d,"title"),*body=strv(d,"body"),*tid=strv(d,"trigger_id");long idx=intv(d,"record_index",0);fprintf(f,"    { FLOPPY144_COLLECTION_");sym(f,cid);fprintf(f,", %ldU, ",idx);cstr(f,rid);fprintf(f,", ");cstr(f,title);if(title && strcmp(title,"Suppression Control Panel Service Note")==0) fputs(", FLOPPY144_DOCUMENT_VIEW_FM13_SUPPRESSION_SERVICE, ",f); else if(title && strcmp(title,"Temporary Desk Reallocation Notice")==0) fputs(", FLOPPY144_DOCUMENT_VIEW_HR01_DESK_REALLOCATION, ",f); else if(title && strcmp(title,"Disk Recovery Index")==0) fputs(", FLOPPY144_DOCUMENT_VIEW_DR01_DISK_RECOVERY_INDEX, ",f); else fputs(", FLOPPY144_DOCUMENT_VIEW_GENERIC, ",f);if(tid){fprintf(f,"FLOPPY144_TRIGGER_");sym(f,tid);}else fputs("FLOPPY144_TRIGGER_COUNT",f);fprintf(f,", NULL, 0U, ");cstr(f,body);fprintf(f," },\n");}fclose(f);}
+static unsigned long stable_hash(const char *psz)
+{
+    unsigned long h = 2166136261UL;
+    const unsigned char *p = (const unsigned char *)(psz ? psz : "");
+    while(*p) { h ^= (unsigned long)*p++; h *= 16777619UL; }
+    return h;
+}
+static long collection_record_count(JsonValue *root,const char *cid)
+{
+    JsonValue *a=get(root,"collections"); size_t i;
+    for(i=0;i<count(a);++i){JsonValue*c=at(a,i),*b=get(c,"content_budget");if(strv(c,"id")&&strcmp(strv(c,"id"),cid)==0){long n=b?intv(b,"records",0):0;long ac=(long)authored_count_for(get(root,"documents"),cid);return n<ac?ac:n;}}
+    return 0;
+}
+static void emit_collections(JsonValue*root,const char*outdir)
+{
+    JsonValue*a=get(root,"collections"),*docs=get(root,"documents");size_t i;FILE*f=openout(outdir,"floppy144_collections.generated.def");
+    fputs("/* Generated from floppy144_game_data.json. Do not edit. */\n",f);
+    for(i=0;i<count(a);i++){
+        JsonValue*c=at(a,i),*b=get(c,"content_budget");const char*id=strv(c,"id"),*name=strv(c,"name"),*domain=strv(c,"domain");
+        long size_kb=intv(c,"size_kb",0),records=0;int required=boolv(c,"required_for_completion",false)?1:0;size_t ac=authored_count_for(docs,id);
+        if(b&&b->type==J_OBJECT)records=intv(b,"records",0);if(records<(long)ac)records=(long)ac;
+        fprintf(f,"FLOPPY144_COLLECTION(\n    ");sym(f,id);fprintf(f,", ");cstr(f,id);fprintf(f,", ");cstr(f,name);
+        fprintf(f,",\n    %s, %ldU, %s,\n    ",domain_enum(domain),size_kb,required?"true":"false");
+        cstr(f,"DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.");fprintf(f,", NULL, %ldU, ",records);cstr(f,name);fprintf(f,", ");
+        {char pref[32];snprintf(pref,sizeof(pref),"%s-RS",id);cstr(f,pref);}
+        fprintf(f,",\n    floppy144_generated_generic_subjects, 12U, false, %luU, 37U, %luU\n)\n\n",1000UL+(unsigned long)i*100UL,11UL+(unsigned long)i*17UL);
+    }
+    fclose(f);
+}
+static void emit_documents(JsonValue*root,const char*outdir)
+{
+    JsonValue*collections=get(root,"collections"),*docs=get(root,"documents");size_t ci,di;FILE*f=openout(outdir,"floppy144_documents.generated.inc");
+    fputs("/* Generated from floppy144_game_data.json. Do not edit. */\n",f);
+    for(ci=0;ci<count(collections);++ci){
+        JsonValue*c=at(collections,ci);const char*cid=strv(c,"id");long records=collection_record_count(root,cid);unsigned char *used;
+        if(records<=0) continue;
+        used=(unsigned char*)calloc((size_t)records,1U);if(!used)die("out of memory assigning document slots");
+        for(di=0;di<count(docs);++di){
+            JsonValue*d=at(docs,di);const char*dcid=strv(d,"collection_id"),*rid=strv(d,"id"),*title=strv(d,"title"),*body=strv(d,"body"),*tid=strv(d,"trigger_id");long idx;unsigned long h;
+            if(!dcid||strcmp(dcid,cid)!=0)continue;
+            h=stable_hash(cid)^(stable_hash(rid)*16777619UL);idx=(long)(h%(unsigned long)records);
+            while(used[idx])idx=(idx+1L)%records;used[idx]=1U;
+            fprintf(f,"    { FLOPPY144_COLLECTION_");sym(f,cid);fprintf(f,", %ldU, ",idx);cstr(f,rid);fprintf(f,", ");cstr(f,title);
+            if(title && strcmp(title,"Suppression Control Panel Service Note")==0) fputs(", FLOPPY144_DOCUMENT_VIEW_FM13_SUPPRESSION_SERVICE, ",f);
+            else if(title && strcmp(title,"Temporary Desk Reallocation Notice")==0) fputs(", FLOPPY144_DOCUMENT_VIEW_HR01_DESK_REALLOCATION, ",f);
+            else if(title && strcmp(title,"Disk Recovery Index")==0) fputs(", FLOPPY144_DOCUMENT_VIEW_DR01_DISK_RECOVERY_INDEX, ",f);
+            else fputs(", FLOPPY144_DOCUMENT_VIEW_GENERIC, ",f);
+            if(tid){fprintf(f,"FLOPPY144_TRIGGER_");sym(f,tid);}else fputs("FLOPPY144_TRIGGER_COUNT",f);
+            fprintf(f,", NULL, 0U, ");cstr(f,body);fprintf(f," },\n");
+        }
+        free(used);
+    }
+    fclose(f);
+}
 static void emit_physical(JsonValue*root,const char*outdir){JsonValue*a=get(root,"physical_items");size_t i;FILE*f=openout(outdir,"floppy144_physical_items.generated.inc");fputs("/* id, name, room, parent, drawing */\n",f);for(i=0;i<count(a);i++){JsonValue*p=at(a,i);fprintf(f,"FLOPPY144_PHYSICAL_ITEM(%lu, ",(unsigned long)i);cstr(f,strv(p,"id"));fputs(", ",f);cstr(f,strv(p,"name"));fputs(", ",f);cstr(f,strv(p,"room_id"));fputs(", ",f);cstr(f,strv(p,"parent_id"));fputs(", ",f);cstr(f,strv(p,"drawing_definition_id"));fputs(")\n",f);}fclose(f);}
 static void emit_ambient(JsonValue*root,const char*outdir){JsonValue*a=get(root,"ambient_interactions");size_t i;FILE*f=openout(outdir,"floppy144_ambient.generated.inc");fputs("/* Generated ambient text. */\n",f);for(i=0;i<count(a);i++){JsonValue*x=at(a,i);fprintf(f,"FLOPPY144_AMBIENT(");cstr(f,strv(x,"id"));fputs(", ",f);cstr(f,strv(x,"target_id"));fputs(", ",f);cstr(f,strv(x,"title"));fputs(", ",f);cstr(f,strv(x,"text"));fputs(")\n",f);}fclose(f);}
 static void emit_runtime_ledger(JsonValue*root,const char*outdir){JsonValue *tr=get(root,"triggers"),*in=get(root,"interactions"),*ev=get(root,"evidence");size_t i,j;FILE*f=openout(outdir,"floppy144_runtime_ledger.generated.inc");fputs("/* Machine-readable generated ledger metadata. */\n",f);for(i=0;i<count(tr);i++){JsonValue*t=at(tr,i),*cs=get(t,"conditions"),*fx=get(t,"effects");fprintf(f,"FLOPPY144_TRIGGER_META(");cstr(f,strv(t,"id"));fputs(", ",f);cstr(f,strv(t,"collection_id"));fputs(", ",f);cstr(f,strv(t,"trigger_document"));fprintf(f,", %luU, %luU)\n",(unsigned long)count(cs),(unsigned long)count(fx));for(j=0;j<count(cs);j++){JsonValue*c=at(cs,j);fputs("FLOPPY144_TRIGGER_CONDITION(",f);cstr(f,strv(t,"id"));fputs(", ",f);cstr(f,strv(c,"kind"));fputs(", ",f);cstr(f,strv(c,"target"));fputs(")\n",f);}for(j=0;j<count(fx);j++){JsonValue*x=at(fx,j);fputs("FLOPPY144_TRIGGER_EFFECT(",f);cstr(f,strv(t,"id"));fputs(", ",f);cstr(f,strv(x,"op"));fputs(", ",f);cstr(f,strv(x,"target"));fputs(")\n",f);}}
 for(i=0;i<count(in);i++){JsonValue*x=at(in,i);fputs("FLOPPY144_INTERACTION_META(",f);cstr(f,strv(x,"id"));fputs(", ",f);cstr(f,strv(x,"physical_source"));fputs(", ",f);cstr(f,strv(x,"player_action"));fputs(")\n",f);}for(i=0;i<count(ev);i++){JsonValue*x=at(ev,i),*sy=get(x,"synthesis"),*req=sy?get(sy,"required_interaction_ids"):NULL;fputs("FLOPPY144_EVIDENCE_META(",f);cstr(f,strv(x,"id"));fputs(", ",f);cstr(f,strv(x,"statement"));fprintf(f,", %luU)\n",(unsigned long)count(req));}fclose(f);}
 #include "game_data_emit_runtime.inc"
 static char *read_file(const char *path,size_t *n){FILE*f=fopen(path,"rb");char*b;long z;if(!f){fprintf(stderr,"ERROR: cannot open %s\n",path);exit(1);}fseek(f,0,SEEK_END);z=ftell(f);fseek(f,0,SEEK_SET);if(z<0)die("ftell failed");b=(char*)xmalloc((size_t)z+1);if(fread(b,1,(size_t)z,f)!=(size_t)z)die("read failed");fclose(f);b[z]='\0';*n=(size_t)z;return b;}
-int main(int argc,char**argv){char*text;size_t n;Parser p;JsonValue*root,*site;FILE*f;if(argc!=3){fprintf(stderr,"usage: %s floppy144_game_data.json output_directory\n",argv[0]);return 2;}ensure_dir(argv[2]);text=read_file(argv[1],&n);memset(&p,0,sizeof(p));p.s=text;p.n=n;p.line=1;p.col=1;root=parse_value(&p);skip_ws(&p);if(p.error||!root||root->type!=J_OBJECT||p.p!=p.n){fprintf(stderr,"ERROR: JSON parse failed line %d column %d: %s\n",p.line,p.col,p.error?p.error:"trailing input");return 1;}if(strcmp(strv(root,"game_id")?strv(root,"game_id"):"","FLOPPY144")!=0)die("wrong game_id");if(count(get(root,"collections"))!=35||count(get(root,"triggers"))!=50||count(get(root,"interactions"))!=40||count(get(root,"evidence"))!=23||count(get(root,"physical_items"))!=161)die("stable ledger counts do not match Floppy//144 contract");emit_collections(root,argv[2]);emit_documents(root,argv[2]);emit_simple_def(root,"triggers","FLOPPY144_TRIGGER","floppy144_triggers.generated.def",argv[2]);emit_simple_def(root,"interactions","FLOPPY144_INTERACTION","floppy144_interactions.generated.def",argv[2]);emit_simple_def(root,"evidence","FLOPPY144_EVIDENCE","floppy144_evidence.generated.def",argv[2]);emit_physical(root,argv[2]);emit_ambient(root,argv[2]);emit_runtime_ledger(root,argv[2]);emit_flat_runtime(root,argv[2]);site=get(root,"site_layout_source");if(!site)die("site_layout_source missing");f=openout(argv[2],"site_layout.generated.jsonc");fputs("/* Generated from floppy144_game_data.json by game_data_compiler. */\n",f);write_json2(f,site);fputc('\n',f);fclose(f);printf("Floppy//144 game data compiled: 35 collections, 157 documents, 50 triggers, 40 interactions, 23 evidence, 161 physical items.\n");jfree(root);free(text);return 0;}
+int main(int argc,char**argv)
+{
+    char*text;size_t n;Parser p;JsonValue*root,*site,*collections,*furniture;FILE*f;size_t i;unsigned long total_kb=0UL,required_kb=0UL;
+    if(argc!=3){fprintf(stderr,"usage: %s floppy144_game_data.json output_directory\n",argv[0]);return 2;}
+    ensure_dir(argv[2]);text=read_file(argv[1],&n);memset(&p,0,sizeof(p));p.s=text;p.n=n;p.line=1;p.col=1;root=parse_value(&p);skip_ws(&p);
+    if(p.error||!root||root->type!=J_OBJECT||p.p!=p.n){fprintf(stderr,"ERROR: JSON parse failed line %d column %d: %s\n",p.line,p.col,p.error?p.error:"trailing input");return 1;}
+    if(strcmp(strv(root,"game_id")?strv(root,"game_id"):"","FLOPPY144")!=0)die("wrong game_id");
+    if(count(get(root,"collections"))!=35||count(get(root,"triggers"))!=50||count(get(root,"interactions"))!=40||count(get(root,"evidence"))!=23||count(get(root,"physical_items"))!=161)die("stable ledger counts do not match Floppy//144 contract");
+    collections=get(root,"collections");
+    for(i=0;i<count(collections);++i){JsonValue*c=at(collections,i);long kb=intv(c,"size_kb",0);if(kb<=0)die("every collection must define positive size_kb");total_kb+=(unsigned long)kb;if(boolv(c,"required_for_completion",false))required_kb+=(unsigned long)kb;}
+    if(total_kb!=2371UL)die("collection size total must remain 2371 KB");
+    if(required_kb!=1208UL)die("required collection total must remain 1208 KB");
+    if(required_kb>1440UL||total_kb<=1440UL)die("recovery capacity contract invalid");
+    furniture=get(root,"furniture");
+    for(i=0;i<count(furniture);++i){JsonValue*x=at(furniture,i);if(strv(x,"variant")&&strcmp(strv(x,"variant"),"SECURE_CABINET")==0){long d=intv(x,"code_digits",0);if(d!=6&&d!=8)die("secure cabinet code_digits must be 6 or 8");}}
+    emit_collections(root,argv[2]);emit_documents(root,argv[2]);emit_simple_def(root,"triggers","FLOPPY144_TRIGGER","floppy144_triggers.generated.def",argv[2]);emit_simple_def(root,"interactions","FLOPPY144_INTERACTION","floppy144_interactions.generated.def",argv[2]);emit_simple_def(root,"evidence","FLOPPY144_EVIDENCE","floppy144_evidence.generated.def",argv[2]);emit_physical(root,argv[2]);emit_ambient(root,argv[2]);emit_runtime_ledger(root,argv[2]);emit_flat_runtime(root,argv[2]);
+    site=get(root,"site_layout_source");if(!site)die("site_layout_source missing");f=openout(argv[2],"site_layout.generated.jsonc");fputs("/* Generated from floppy144_game_data.json by game_data_compiler. */\n",f);write_json2(f,site);fputc('\n',f);fclose(f);
+    printf("Floppy//144 game data compiled: 35 collections, 157 documents, 50 triggers, 40 interactions, 23 evidence, 161 physical items; %lu/%lu KB.\n",required_kb,total_kb);
+    jfree(root);free(text);return 0;
+}
