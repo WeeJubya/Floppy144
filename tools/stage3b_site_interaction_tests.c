@@ -601,6 +601,14 @@ static void Floppy144TestRotatedParentTargeting(void)
         FLOPPY144_ROOM_DIRECTOR_OFFICE
     );
 
+    F144_CHECK(
+        Floppy144RunStateFireTrigger(
+            &sState,
+            Floppy144GameDataTriggerId("T-029")
+        ),
+        "rotated-parent fixture reveals one Director desk item"
+    );
+
     Floppy144TestSetPosition(&sState, 48, 9);
 
     F144_CHECK(
@@ -811,10 +819,27 @@ static void Floppy144TestNotebookPopulation(void)
         FLOPPY144_ROOM_FACILITIES
     );
 
+    Floppy144TestSetPosition(&sState, 68, 90);
+    F144_CHECK(
+        (
+            Floppy144SiteAvailableActions(&sState) &
+            FLOPPY144_SITE_ACTION_INSPECT
+        ) == 0U,
+        "hidden physical item does not advertise Inspect"
+    );
+
     (void)Floppy144TriggerTryFire(
         &sWorld,
         &sState,
         Floppy144GameDataTriggerId("T-006")
+    );
+
+    F144_CHECK(
+        (
+            Floppy144SiteAvailableActions(&sState) &
+            FLOPPY144_SITE_ACTION_INSPECT
+        ) != 0U,
+        "revealed physical item advertises Inspect"
     );
 
     eI001 = Floppy144GameDataInteractionId("I-001");
@@ -829,9 +854,24 @@ static void Floppy144TestNotebookPopulation(void)
     );
 
     F144_CHECK(
-        Floppy144GameDataNotebookEntryCount(&sState) > uBefore,
-        "Notebook gains interaction/evidence notes after physical inspection"
+        Floppy144GameDataNotebookEntryCount(&sState) == uBefore + 1U,
+        "evidence inspection adds one Notebook finding without duplicate title note"
     );
+
+    {
+        const Floppy144DataRecord *pLatest =
+            Floppy144GameDataNotebookEntryAt(
+                &sState,
+                Floppy144GameDataNotebookEntryCount(&sState) - 1U
+            );
+
+        F144_CHECK(
+            pLatest != NULL &&
+            pLatest->pszId != NULL &&
+            strcmp(pLatest->pszId, "E-001") == 0,
+            "suppression-panel Notebook finding uses canonical evidence entry"
+        );
+    }
 }
 
 /*
