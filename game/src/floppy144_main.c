@@ -1810,7 +1810,7 @@ static LRESULT CALLBACK Floppy144WindowProc(
                             Floppy144NotebookViewMove(
                                 &global_notebook,
                                 &global_run_state,
-                                -5
+                                -12
                             );
 
                             Floppy144Redraw(window);
@@ -1822,7 +1822,7 @@ static LRESULT CALLBACK Floppy144WindowProc(
                             Floppy144NotebookViewMove(
                                 &global_notebook,
                                 &global_run_state,
-                                5
+                                12
                             );
 
                             Floppy144Redraw(window);
