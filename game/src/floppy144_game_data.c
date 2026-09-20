@@ -425,7 +425,36 @@ static bool Floppy144GameDataNotebookRecordVisible(
     if(!pState||!pRecord||pRecord->eKind!=FLOPPY144_DATA_NOTEBOOK||!pRecord->pszId||!pRecord->pszA||!pRecord->pszB)return false;
     if(Floppy144StringEqual(pRecord->pszB,"FACT"))return Floppy144GameDataFactRecorded(pState,pRecord->pszId);
     if(Floppy144StringEqual(pRecord->pszB,"EVIDENCE")){Floppy144EvidenceId e=Floppy144GameDataEvidenceId(pRecord->pszId);return e!=FLOPPY144_EVIDENCE_COUNT&&Floppy144RunStateEvidenceEstablished(pState,e);}
-    if(Floppy144StringEqual(pRecord->pszB,"INTERACTION")){Floppy144InteractionId e=Floppy144GameDataInteractionId(pRecord->pszId);return e!=FLOPPY144_INTERACTION_COUNT&&Floppy144RunStateInteractionCompleted(pState,e);}
+    if(Floppy144StringEqual(pRecord->pszB,"INTERACTION"))
+    {
+        const Floppy144DataRecord *pInteraction =
+            Floppy144GameDataFind(
+                FLOPPY144_DATA_INTERACTION,
+                pRecord->pszId
+            );
+        Floppy144InteractionId e;
+
+        /*
+         * Evidence-producing inspections already contribute the canonical
+         * evidence Notebook sentence. Hiding their shorter interaction note
+         * prevents the same finding appearing twice (for example the
+         * suppression-panel inspection). Interactions without evidence keep
+         * their own Notebook note.
+         */
+        if(
+            pInteraction != NULL &&
+            pInteraction->pszE != NULL &&
+            pInteraction->pszE[0] != '\0'
+        )
+        {
+            return false;
+        }
+
+        e = Floppy144GameDataInteractionId(pRecord->pszId);
+        return
+            e != FLOPPY144_INTERACTION_COUNT &&
+            Floppy144RunStateInteractionCompleted(pState,e);
+    }
     return false;
 }
 static const Floppy144DataRecord *Floppy144GameDataNotebookRecordAtOrdinal(uint32_t uOrdinal)
@@ -458,15 +487,72 @@ void Floppy144GameDataCaptureNewNotebookEntries(Floppy144RunState *pState)
 
 uint32_t Floppy144GameDataNotebookOrderedCount(const Floppy144RunState *pState)
 {
-    return pState!=NULL?(uint32_t)pState->notebook_order_count:0U;
+    uint32_t uOrderIndex;
+    uint32_t uVisibleCount = 0U;
+
+    if(pState == NULL)
+    {
+        return 0U;
+    }
+
+    for(
+        uOrderIndex = 0U;
+        uOrderIndex < (uint32_t)pState->notebook_order_count;
+        ++uOrderIndex
+    )
+    {
+        const Floppy144DataRecord *pRecord =
+            Floppy144GameDataNotebookRecordAtOrdinal(
+                (uint32_t)pState->notebook_order[uOrderIndex]
+            );
+
+        if(Floppy144GameDataNotebookRecordVisible(pState, pRecord))
+        {
+            ++uVisibleCount;
+        }
+    }
+
+    return uVisibleCount;
 }
 
-const Floppy144DataRecord *Floppy144GameDataNotebookOrderedEntryAt(const Floppy144RunState *pState,uint32_t uIndex)
+const Floppy144DataRecord *Floppy144GameDataNotebookOrderedEntryAt(
+    const Floppy144RunState *pState,
+    uint32_t uIndex
+)
 {
-    uint32_t uOrdinal;
-    if(pState==NULL||uIndex>=(uint32_t)pState->notebook_order_count)return NULL;
-    uOrdinal=(uint32_t)pState->notebook_order[uIndex];
-    return Floppy144GameDataNotebookRecordAtOrdinal(uOrdinal);
+    uint32_t uOrderIndex;
+    uint32_t uVisibleIndex = 0U;
+
+    if(pState == NULL)
+    {
+        return NULL;
+    }
+
+    for(
+        uOrderIndex = 0U;
+        uOrderIndex < (uint32_t)pState->notebook_order_count;
+        ++uOrderIndex
+    )
+    {
+        const Floppy144DataRecord *pRecord =
+            Floppy144GameDataNotebookRecordAtOrdinal(
+                (uint32_t)pState->notebook_order[uOrderIndex]
+            );
+
+        if(!Floppy144GameDataNotebookRecordVisible(pState, pRecord))
+        {
+            continue;
+        }
+
+        if(uVisibleIndex == uIndex)
+        {
+            return pRecord;
+        }
+
+        ++uVisibleIndex;
+    }
+
+    return NULL;
 }
 
 /* Compatibility wrappers now present the same chronological order. */
