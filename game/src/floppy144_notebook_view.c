@@ -114,5 +114,4 @@ void Floppy144NotebookViewDraw(
     }
     Floppy144DrawFillRect(&s,10U,306U,620U,28U,bg);Floppy144DrawRect(&s,10U,306U,620U,28U,border);
     Floppy144DrawText(&s,22U,316U,"UP/DOWN SCROLL   PGUP/PGDN PAGE",1U,text);
-    Floppy144DrawText(&s,630U-Floppy144DrawTextWidth("N RETURN",1U)-12U,316U,"N RETURN",1U,muted);
 }
