@@ -825,53 +825,6 @@ typedef enum Floppy144OfficeInteractionMode
 }
 Floppy144OfficeInteractionMode;
 
-/*
- * Convert a stable data identifier into compact player-facing Site text.
- * This is used only when a reconstructed parent exists but all of its physical
- * children are still hidden by progression.
- */
-static void Floppy144OfficeParentLabel(
-    char *pszOutput,
-    size_t uOutputCapacity,
-    const char *pszId
-)
-{
-    size_t uRead = 0U;
-    size_t uWrite = 0U;
-
-    if(
-        pszOutput == NULL ||
-        uOutputCapacity == 0U
-    )
-    {
-        return;
-    }
-
-    pszOutput[0] = '\0';
-
-    if(pszId == NULL)
-    {
-        return;
-    }
-
-    while(
-        pszId[uRead] != '\0' &&
-        uWrite + 1U < uOutputCapacity
-    )
-    {
-        char cCharacter = pszId[uRead++];
-
-        if(cCharacter == '_')
-        {
-            cCharacter = ' ';
-        }
-
-        pszOutput[uWrite++] = cCharacter;
-    }
-
-    pszOutput[uWrite] = '\0';
-}
-
 static void Floppy144OfficeSetItemNotice(
     const char *pszItemName,
     const char *pszSuffix
@@ -940,6 +893,34 @@ static void Floppy144InteractOffice(
     if(eMode == FLOPPY144_OFFICE_INTERACTION_INSPECT)
     {
         Floppy144SiteInspectionTarget sTarget;
+        Floppy144CabinetState sNearbyCabinet;
+
+        /*
+         * Inspect is not the route into a locked secure cabinet. If the player
+         * presses I anyway, give an in-world access denial instead of implying
+         * that the cabinet is merely empty. A=Access remains the keypad route.
+         */
+        Floppy144CabinetReset(&sNearbyCabinet);
+        if(
+            Floppy144CabinetOpenNearby(
+                &sNearbyCabinet,
+                &global_run_state
+            ) &&
+            !Floppy144CabinetUnlocked(
+                &sNearbyCabinet,
+                &global_run_state
+            )
+        )
+        {
+            (void)snprintf(
+                global_office_notice_buffer,
+                sizeof(global_office_notice_buffer),
+                "UNAUTHORISED ACCESS - SECURE CABINET LOCKED."
+            );
+            global_office_notice = global_office_notice_buffer;
+            Floppy144Redraw(window);
+            return;
+        }
 
         if(
             !Floppy144SiteResolveInspectionTarget(
@@ -948,37 +929,6 @@ static void Floppy144InteractOffice(
             )
         )
         {
-            return;
-        }
-
-        /*
-         * The furniture/fixture is reconstructed, but every physical child on
-         * it is still progression-hidden. Report only the parent so no future
-         * evidence or story wording leaks early.
-         */
-        if(sTarget.pszPhysicalItemName == NULL)
-        {
-            char szParentLabel[96];
-
-            Floppy144OfficeParentLabel(
-                szParentLabel,
-                sizeof(szParentLabel),
-                sTarget.pszParentId
-            );
-
-            snprintf(
-                global_office_notice_buffer,
-                sizeof(global_office_notice_buffer),
-                "%s: NO RECOVERED ITEM VISIBLE.",
-                szParentLabel[0] != '\0'
-                    ? szParentLabel
-                    : "RECONSTRUCTED OBJECT"
-            );
-
-            global_office_notice =
-                global_office_notice_buffer;
-
-            Floppy144Redraw(window);
             return;
         }
 
