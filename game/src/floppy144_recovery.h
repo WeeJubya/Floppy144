@@ -52,6 +52,12 @@ void Floppy144SplashDraw(
 /*
  * GDR session-control menu renderer.
  */
+void Floppy144RecoveryFormatCapacity(
+    const Floppy144RunState *pState,
+    char *pszBuffer,
+    uint32_t uBufferCapacity
+);
+
 void Floppy144MainMenuDraw(
     F144Runtime *runtime,
     Floppy144MainMenuOption selected_option,
