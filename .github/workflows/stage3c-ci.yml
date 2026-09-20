@@ -53,7 +53,7 @@ jobs:
 
       - name: Release build
         shell: pwsh
-        run: msbuild .\build\Floppy144.sln /m /p:Configuration=Release /p:Platform=x64 /p:WarningLevel=Level4 /p:TreatWarningsAsErrors=true
+        run: msbuild .\build\Floppy144.sln /m /p:Configuration=release /p:Platform=windows /p:WarningLevel=Level4 /p:TreatWarningsAsErrors=true
 
       - name: Release size
         shell: pwsh
