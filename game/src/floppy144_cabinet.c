@@ -101,38 +101,13 @@ static uint32_t Floppy144CabinetDistanceSquared(
     return (uint32_t)(nDx * nDx + nDy * nDy);
 }
 
-static uint8_t Floppy144CabinetDigitsForRoom(
-    Floppy144RoomId eRoom
-)
+static uint32_t Floppy144CabinetCodeHash(const char *pszId,uint32_t uSeed)
 {
-    /*
-     * Frozen Stage 3 access contract:
-     *   early recovery  = 4 digits
-     *   middle recovery = 6 digits
-     *   late recovery   = 8 digits
-     *
-     * The Site rooms below are the concrete authored recovery phases. No
-     * numeric code values are invented here; only the already-agreed lengths
-     * are represented.
-     */
-    switch(eRoom)
-    {
-        case FLOPPY144_ROOM_RECEPTION:
-        case FLOPPY144_ROOM_MAIN_OFFICE:
-        case FLOPPY144_ROOM_FACILITIES:
-            return 4U;
-
-        case FLOPPY144_ROOM_RECORDS_OFFICE:
-        case FLOPPY144_ROOM_IT_SUPPORT:
-            return 6U;
-
-        case FLOPPY144_ROOM_SECURITY:
-        case FLOPPY144_ROOM_SERVER_ROOM:
-        case FLOPPY144_ROOM_SECRETARY_OFFICE:
-        case FLOPPY144_ROOM_DIRECTOR_OFFICE:
-        default:
-            return 8U;
-    }
+    uint32_t h=2166136261U^uSeed;
+    const unsigned char *p=(const unsigned char *)(pszId?pszId:"");
+    while(*p){h^=(uint32_t)*p++;h*=16777619U;}
+    h^=h>>16;h*=0x7feb352dU;h^=h>>15;h*=0x846ca68bU;h^=h>>16;
+    return h;
 }
 
 static void Floppy144CabinetMakeDisplayName(
@@ -260,7 +235,8 @@ bool Floppy144CabinetOpenNearby(
     Floppy144CabinetMakeDisplayName(pCabinet, pBest->pszId);
 
     pCabinet->uCabinetOrdinal = (uint8_t)nOrdinal;
-    pCabinet->uRequiredDigits = Floppy144CabinetDigitsForRoom(eRoom);
+    pCabinet->uRequiredDigits = (uint8_t)pBest->n5;
+    if(pCabinet->uRequiredDigits!=6U&&pCabinet->uRequiredDigits!=8U)pCabinet->uRequiredDigits=6U;
 
     pCabinet->bInteriorOpen =
         Floppy144RunStateSecureCabinetUnlocked(
@@ -294,11 +270,31 @@ const char *Floppy144CabinetId(
     return pCabinet->szCabinetId;
 }
 
-uint8_t Floppy144CabinetRequiredDigits(
-    const Floppy144CabinetState *pCabinet
+uint8_t Floppy144CabinetCodeDigits(const Floppy144CabinetState *pCabinet)
+{
+    return pCabinet!=NULL?pCabinet->uRequiredDigits:0U;
+}
+
+uint8_t Floppy144CabinetRequiredDigits(const Floppy144CabinetState *pCabinet)
+{
+    return Floppy144CabinetCodeDigits(pCabinet);
+}
+
+void Floppy144CabinetExpectedCode(
+    const Floppy144CabinetState *pCabinet,
+    uint32_t uRecoverySeed,
+    char *pszCode,
+    uint32_t uCapacity
 )
 {
-    return pCabinet != NULL ? pCabinet->uRequiredDigits : 0U;
+    uint32_t h,u;bool bAnyNonZero=false;uint8_t digits=Floppy144CabinetCodeDigits(pCabinet);
+    if(pszCode==NULL||uCapacity==0U){return;}
+    pszCode[0]='\0';
+    if(pCabinet==NULL||digits==0U||uCapacity<=(uint32_t)digits)return;
+    h=Floppy144CabinetCodeHash(pCabinet->szCabinetId,uRecoverySeed);
+    for(u=0U;u<(uint32_t)digits;++u){h=Floppy144CabinetCodeHash(pCabinet->szCabinetId,h^(u*0x9e3779b9U));pszCode[u]=(char)('0'+(h%10U));if(pszCode[u]!='0')bAnyNonZero=true;}
+    if(!bAnyNonZero)pszCode[digits-1U]='7';
+    pszCode[digits]='\0';
 }
 
 bool Floppy144CabinetCodeKnown(
@@ -410,84 +406,19 @@ bool Floppy144CabinetSubmitCode(
     Floppy144RunState *pRunState
 )
 {
-    Floppy144InteractionId eInteraction = FLOPPY144_INTERACTION_COUNT;
-
-    if(pCabinet == NULL || pRunState == NULL || pCabinet->bInteriorOpen)
-        return false;
-
-    if(!Floppy144CabinetCodeKnown(pCabinet, pRunState))
-    {
-        pCabinet->pszStatus = "ACCESS DENIED - CODE NOT RECOVERED";
-        return false;
-    }
-
-    if(
-        pCabinet->uRequiredDigits == 0U ||
-        pCabinet->uInputLength != pCabinet->uRequiredDigits
-    )
-    {
-        pCabinet->pszStatus = "ACCESS DENIED - INCOMPLETE CODE";
-        return false;
-    }
-
-    if(
-        !Floppy144RunStateSecureCabinetUnlocked(
-            pRunState,
-            (uint32_t)pCabinet->uCabinetOrdinal
-        )
-    )
-    {
-        if(
-            !Floppy144RunStateUnlockSecureCabinet(
-                pRunState,
-                (uint32_t)pCabinet->uCabinetOrdinal
-            )
-        )
-        {
-            pCabinet->pszStatus = "ACCESS STATE ERROR";
-            return false;
-        }
-    }
-
-    if(
-        Floppy144CabinetStringEqual(
-            pCabinet->szCabinetId,
-            "SECURITY_SECURE_CABINET"
-        )
-    )
-    {
-        eInteraction = Floppy144GameDataInteractionId("I-038");
-    }
-    else
-    {
-        eInteraction = Floppy144GameDataInteractionId("I-040");
-    }
-
-    /*
-     * I-040 is a generic authored interaction and can persist only once. The
-     * per-cabinet RunState bit above is the authoritative physical unlock for
-     * every cabinet; running the canonical interaction once preserves its
-     * authored progression semantics without conflating all cabinets.
-     */
-    if(
-        eInteraction < FLOPPY144_INTERACTION_COUNT &&
-        Floppy144InteractionCanRun(pRunState, eInteraction)
-    )
-    {
-        (void)Floppy144InteractionTryRun(
-            pWorld,
-            pRunState,
-            eInteraction
-        );
-    }
-
-    pCabinet->bInteriorOpen = true;
-    pCabinet->bDetailOpen = false;
-    pCabinet->uSelectedContent = 0U;
-    pCabinet->pszStatus = "CODE ACCEPTED - CABINET UNLOCKED";
-
+    Floppy144InteractionId eInteraction=FLOPPY144_INTERACTION_COUNT;char szExpected[FLOPPY144_CABINET_CODE_CAPACITY+1U];bool bMatch;
+    if(pCabinet==NULL||pRunState==NULL||pCabinet->bInteriorOpen)return false;
+    Floppy144CabinetExpectedCode(pCabinet,pRunState->recovery_seed,szExpected,(uint32_t)sizeof(szExpected));
+    bMatch=pCabinet->uRequiredDigits>0U&&pCabinet->uInputLength==pCabinet->uRequiredDigits&&strcmp(pCabinet->szInput,szExpected)==0;
     Floppy144CabinetClearInput(pCabinet);
-
+    if(!bMatch){pCabinet->pszStatus="ACCESS DENIED - INCORRECT CODE";return false;}
+    if(!Floppy144RunStateSecureCabinetUnlocked(pRunState,(uint32_t)pCabinet->uCabinetOrdinal))
+    {
+        if(!Floppy144RunStateUnlockSecureCabinet(pRunState,(uint32_t)pCabinet->uCabinetOrdinal)){pCabinet->pszStatus="ACCESS STATE ERROR";return false;}
+    }
+    eInteraction=Floppy144GameDataInteractionId(Floppy144CabinetStringEqual(pCabinet->szCabinetId,"SECURITY_SECURE_CABINET")?"I-038":"I-040");
+    if(eInteraction<FLOPPY144_INTERACTION_COUNT&&Floppy144InteractionCanRun(pRunState,eInteraction))(void)Floppy144InteractionTryRun(pWorld,pRunState,eInteraction);
+    pCabinet->bInteriorOpen=true;pCabinet->bDetailOpen=false;pCabinet->uSelectedContent=0U;pCabinet->pszStatus="CODE ACCEPTED - CABINET UNLOCKED";
     return true;
 }
 
@@ -819,18 +750,17 @@ static void Floppy144CabinetDrawKeypad(
         }
     }
 
-    Floppy144DrawText(
-        pSurface,
-        118U,
-        204U,
-        pCabinet->pszStatus != NULL
-            ? pCabinet->pszStatus
-            : "CODE ENTRY REQUIRED",
-        1U,
-        Floppy144CabinetCodeKnown(pCabinet, pRunState)
-            ? uText
-            : uAmber
-    );
+    if(Floppy144CabinetCodeKnown(pCabinet,pRunState))
+    {
+        char szExpected[FLOPPY144_CABINET_CODE_CAPACITY+1U];char szKnown[48];
+        Floppy144CabinetExpectedCode(pCabinet,pRunState->recovery_seed,szExpected,(uint32_t)sizeof(szExpected));
+        (void)snprintf(szKnown,sizeof(szKnown),"RECOVERED CODE: %s",szExpected);
+        Floppy144DrawText(pSurface,118U,204U,szKnown,1U,uText);
+    }
+    else
+    {
+        Floppy144DrawText(pSurface,118U,204U,pCabinet->pszStatus!=NULL?pCabinet->pszStatus:"CODE ENTRY REQUIRED",1U,uAmber);
+    }
 
     Floppy144DrawText(
         pSurface,
