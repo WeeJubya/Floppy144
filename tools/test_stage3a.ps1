@@ -20,6 +20,7 @@ $sources = @(
     "game\src\floppy144_run_state.c",
     "game\src\floppy144_world.c",
     "game\src\floppy144_terminal.c",
+    "game\src\floppy144_recovery.c",
     "game\src\floppy144_catalogue.c",
     "game\src\floppy144_document.c",
     "game\src\floppy144_effect.c",
