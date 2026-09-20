@@ -354,91 +354,92 @@ bool Floppy144RunStateCollectionRestored
     );
 }
 
-bool Floppy144RunStateCanRestoreCollection
-(
-    const Floppy144RunState *state,
- Floppy144CollectionId collection
-){
-    const Floppy144CollectionDefinition *definition;
-    uint32_t current_percent;
-
-    if(
-        state == NULL ||
-        !Floppy144RunStateCollectionValid(collection)
-    )
+uint32_t Floppy144RunStateRecoveredKb(const Floppy144RunState *pState)
+{
+    uint32_t uIndex,uUsed=0U;
+    if(pState==NULL)return 0U;
+    for(uIndex=0U;uIndex<(uint32_t)FLOPPY144_COLLECTION_COUNT;++uIndex)
     {
-        return false;
+        if(Floppy144RunStateCollectionRestored(pState,(Floppy144CollectionId)uIndex))
+        {
+            const Floppy144CollectionDefinition *pDefinition=Floppy144CollectionGet((Floppy144CollectionId)uIndex);
+            if(pDefinition!=NULL)uUsed+=pDefinition->size_kb;
+        }
     }
-
-    if(
-        Floppy144RunStateCollectionRestored(
-            state,
-            collection
-        )
-    )
-    {
-        return false;
-    }
-
-    definition =
-    Floppy144CollectionGet(
-        collection
-    );
-
-    if(definition == NULL)
-    {
-        return false;
-    }
-
-    current_percent =
-    Floppy144RunStateReconstructionPercent(
-        state
-    );
-
-    /*
-     * More than 100 percent is an invalid run state.
-     *
-     * Use subtraction rather than addition for the capacity test so the
-     * comparison cannot overflow if reconstruction values are edited later.
-     */
-    if(current_percent > 100U)
-    {
-        return false;
-    }
-
-    return
-    definition->reconstruction_percent <=
-    (100U - current_percent);
+    return uUsed;
 }
 
-bool Floppy144RunStateRestoreCollection
-(
-    Floppy144RunState *state,
- Floppy144CollectionId collection
-){
-    if(
-        !Floppy144RunStateCanRestoreCollection(
-            state,
-            collection
-        )
-    )
+uint32_t Floppy144RunStateFreeKb(const Floppy144RunState *pState)
+{
+    uint32_t uUsed=Floppy144RunStateRecoveredKb(pState);
+    return uUsed>=FLOPPY144_RECOVERY_CAPACITY_KB?0U:FLOPPY144_RECOVERY_CAPACITY_KB-uUsed;
+}
+
+uint32_t Floppy144RunStateRecoveredPercent(const Floppy144RunState *pState)
+{
+    return (Floppy144RunStateRecoveredKb(pState)*100U)/FLOPPY144_RECOVERY_CAPACITY_KB;
+}
+
+uint32_t Floppy144RunStateRequiredTotalKb(void)
+{
+    uint32_t uIndex,uTotal=0U;
+    for(uIndex=0U;uIndex<(uint32_t)FLOPPY144_COLLECTION_COUNT;++uIndex)
     {
-        return false;
+        const Floppy144CollectionDefinition *pDefinition=Floppy144CollectionGet((Floppy144CollectionId)uIndex);
+        if(pDefinition!=NULL&&pDefinition->required_for_completion)uTotal+=pDefinition->size_kb;
     }
+    return uTotal;
+}
 
-    if(
-        !Floppy144RunStateBitSet(
-            state->collections,
-            (uint32_t)collection
-        )
-    )
+uint32_t Floppy144RunStateRequiredRecoveredKb(const Floppy144RunState *pState)
+{
+    uint32_t uIndex,uTotal=0U;
+    if(pState==NULL)return 0U;
+    for(uIndex=0U;uIndex<(uint32_t)FLOPPY144_COLLECTION_COUNT;++uIndex)
     {
-        return false;
+        const Floppy144CollectionDefinition *pDefinition=Floppy144CollectionGet((Floppy144CollectionId)uIndex);
+        if(pDefinition!=NULL&&pDefinition->required_for_completion&&Floppy144RunStateCollectionRestored(pState,(Floppy144CollectionId)uIndex))uTotal+=pDefinition->size_kb;
     }
+    return uTotal;
+}
 
-    state->dirty = 1;
+uint32_t Floppy144RunStateRequiredCoveragePercent(const Floppy144RunState *pState)
+{
+    uint32_t uTotal=Floppy144RunStateRequiredTotalKb();
+    return uTotal==0U?0U:(Floppy144RunStateRequiredRecoveredKb(pState)*100U)/uTotal;
+}
 
+bool Floppy144RunStateCanRestoreCollection(const Floppy144RunState *pState,Floppy144CollectionId eCollection)
+{
+    const Floppy144CollectionDefinition *pDefinition;
+    if(pState==NULL||!Floppy144RunStateCollectionValid(eCollection)||Floppy144RunStateCollectionRestored(pState,eCollection))return false;
+    pDefinition=Floppy144CollectionGet(eCollection);
+    return pDefinition!=NULL&&pDefinition->size_kb<=Floppy144RunStateFreeKb(pState);
+}
+
+bool Floppy144RunStateRestoreCollection(Floppy144RunState *pState,Floppy144CollectionId eCollection)
+{
+    if(pState==NULL||!Floppy144RunStateCollectionAvailable(pState,eCollection)||!Floppy144RunStateCanRestoreCollection(pState,eCollection))return false;
+    if(!Floppy144RunStateBitSet(pState->collections,(uint32_t)eCollection))return false;
+    pState->dirty=1U;
     return true;
+}
+
+bool Floppy144RunStateAnyUnrestoredCollectionFits(const Floppy144RunState *pState)
+{
+    uint32_t uIndex;
+    if(pState==NULL)return false;
+    for(uIndex=0U;uIndex<(uint32_t)FLOPPY144_COLLECTION_COUNT;++uIndex)
+    {
+        Floppy144CollectionId e=(Floppy144CollectionId)uIndex;
+        if(!Floppy144RunStateCollectionRestored(pState,e)&&Floppy144RunStateCanRestoreCollection(pState,e))return true;
+    }
+    return false;
+}
+
+bool Floppy144RunStateRecoveryExhausted(const Floppy144RunState *pState)
+{
+    return pState!=NULL&&!Floppy144RunStateAnyUnrestoredCollectionFits(pState);
 }
 
 bool Floppy144RunStateTriggerFired
@@ -605,31 +606,22 @@ bool Floppy144RunStateNotebookEntryRecorded
     );
 }
 
-bool Floppy144RunStateRecordNotebookEntry
-(
-    Floppy144RunState *state,
- Floppy144NotebookId entry
-){
-    if(
-        state == NULL ||
-        !Floppy144RunStateNotebookEntryValid(entry)
-    )
-    {
-        return false;
-    }
+bool Floppy144RunStateAppendNotebookEntry(Floppy144RunState *pState,uint32_t uNotebookOrdinal)
+{
+    uint16_t u;
+    if(pState==NULL||uNotebookOrdinal>=(uint32_t)FLOPPY144_NOTEBOOK_COUNT||pState->notebook_order_count>=FLOPPY144_NOTEBOOK_ORDER_MAX)return false;
+    for(u=0U;u<pState->notebook_order_count;++u)if((uint32_t)pState->notebook_order[u]==uNotebookOrdinal)return false;
+    pState->notebook_order[pState->notebook_order_count++]=(uint16_t)uNotebookOrdinal;
+    pState->dirty=1U;
+    return true;
+}
 
-    if(
-        !Floppy144RunStateBitSet(
-            state->notebook,
-            (uint32_t)entry
-        )
-    )
-    {
-        return false;
-    }
-
-    state->dirty = 1;
-
+bool Floppy144RunStateRecordNotebookEntry(Floppy144RunState *pState,Floppy144NotebookId eEntry)
+{
+    if(pState==NULL||!Floppy144RunStateNotebookEntryValid(eEntry))return false;
+    if(!Floppy144RunStateBitSet(pState->notebook,(uint32_t)eEntry))return false;
+    (void)Floppy144RunStateAppendNotebookEntry(pState,(uint32_t)eEntry);
+    pState->dirty=1U;
     return true;
 }
 
@@ -1404,49 +1396,9 @@ void Floppy144RunStateBegin
     state->dirty = 1;
 }
 
-uint32_t Floppy144RunStateReconstructionPercent
-(
-    const Floppy144RunState *state
-){
-    uint32_t collection_index;
-    uint32_t percentage =
-    0U;
-
-    if(state == NULL)
-    {
-        return 0U;
-    }
-
-    for(
-        collection_index = 0U;
-    collection_index <
-    (uint32_t)FLOPPY144_COLLECTION_COUNT;
-    ++collection_index
-    )
-    {
-        Floppy144CollectionId collection =
-        (Floppy144CollectionId)collection_index;
-
-        const Floppy144CollectionDefinition *definition =
-        Floppy144CollectionGet(
-            collection
-        );
-
-        if(
-            !Floppy144RunStateCollectionRestored(
-                state,
-                collection
-            )
-        )
-        {
-            continue;
-        }
-
-        percentage +=
-        definition->reconstruction_percent;
-    }
-
-    return percentage;
+uint32_t Floppy144RunStateReconstructionPercent(const Floppy144RunState *pState)
+{
+    return Floppy144RunStateRecoveredPercent(pState);
 }
 
 bool Floppy144RunStateArchiveServicesInitialised
