@@ -9,6 +9,7 @@
 #include "floppy144_site_isometric.h"
 
 #include "floppy144_draw.h"
+#include "floppy144_game_data.h"
 #include "floppy144_cabinet.h"
 #include "floppy144_site.h"
 #include "floppy144_site_object.h"
@@ -17,6 +18,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
 #define FLOPPY144_ISO_ORIGIN_X              320
 #define FLOPPY144_ISO_ORIGIN_Y               45
@@ -119,6 +121,664 @@ static void Floppy144IsometricProject(
     }
 }
 
+
+/*
+ * Stage 3C Task 12 presentation helpers.
+ *
+ * Half-unit fixture depth is represented in x16 fixed-point space. This keeps
+ * the ISO renderer integer-only while allowing wall-mounted objects to project
+ * as genuinely shallow 0.5U boxes rather than full furniture blocks.
+ */
+static void Floppy144IsometricProjectX16(
+    int32_t nWorldX16,
+    int32_t nWorldY16,
+    int32_t nHeight16,
+    int32_t *pnScreenX,
+    int32_t *pnScreenY
+)
+{
+    if(pnScreenX != NULL)
+    {
+        *pnScreenX =
+            FLOPPY144_ISO_ORIGIN_X +
+            (
+                (nWorldX16 - nWorldY16) *
+                FLOPPY144_ISO_HALF_TILE_X
+            ) / FLOPPY144_SITE_FIXED_ONE;
+    }
+
+    if(pnScreenY != NULL)
+    {
+        *pnScreenY =
+            FLOPPY144_ISO_ORIGIN_Y +
+            (
+                (nWorldX16 + nWorldY16) *
+                FLOPPY144_ISO_HALF_TILE_Y
+            ) / FLOPPY144_SITE_FIXED_ONE -
+            (
+                nHeight16 *
+                FLOPPY144_ISO_HEIGHT_SCALE
+            ) / FLOPPY144_SITE_FIXED_ONE;
+    }
+}
+
+static const Floppy144DataRecord *Floppy144IsometricPlacementForRect(
+    const Floppy144SiteRect *pRect
+)
+{
+    uint32_t uIndex;
+
+    if(
+        pRect == NULL ||
+        pRect->room >= (uint8_t)FLOPPY144_ROOM_COUNT
+    )
+    {
+        return NULL;
+    }
+
+    for(uIndex = 0U; uIndex < Floppy144GameDataRecordCount(); ++uIndex)
+    {
+        const Floppy144DataRecord *pRecord =
+            Floppy144GameDataRecordAt(uIndex);
+
+        if(
+            pRecord == NULL ||
+            (
+                pRecord->eKind != FLOPPY144_DATA_FURNITURE &&
+                pRecord->eKind != FLOPPY144_DATA_FIXTURE
+            ) ||
+            pRecord->pszA == NULL ||
+            Floppy144GameDataRoomId(pRecord->pszA) !=
+                (Floppy144RoomId)pRect->room ||
+            pRecord->n0 != (int32_t)pRect->x ||
+            pRecord->n1 != (int32_t)pRect->y ||
+            pRecord->n2 != (int32_t)pRect->width ||
+            pRecord->n3 != (int32_t)pRect->height
+        )
+        {
+            continue;
+        }
+
+        return pRecord;
+    }
+
+    return NULL;
+}
+
+static bool Floppy144IsometricVariantIs(
+    const Floppy144DataRecord *pPlacement,
+    const char *pszVariant
+)
+{
+    return
+        pPlacement != NULL &&
+        pPlacement->pszC != NULL &&
+        pszVariant != NULL &&
+        strcmp(pPlacement->pszC, pszVariant) == 0;
+}
+
+static uint32_t Floppy144IsometricClutterHash(
+    const Floppy144SiteRect *pRect
+)
+{
+    uint32_t uValue = 2166136261U;
+
+    if(pRect == NULL)
+    {
+        return uValue;
+    }
+
+#define FLOPPY144_ISO_HASH_BYTE(v) \
+    do { uValue ^= (uint32_t)(v); uValue *= 16777619U; } while(0)
+
+    FLOPPY144_ISO_HASH_BYTE(pRect->room);
+    FLOPPY144_ISO_HASH_BYTE(pRect->type);
+    FLOPPY144_ISO_HASH_BYTE(pRect->x);
+    FLOPPY144_ISO_HASH_BYTE(pRect->y);
+    FLOPPY144_ISO_HASH_BYTE(pRect->width);
+    FLOPPY144_ISO_HASH_BYTE(pRect->height);
+
+#undef FLOPPY144_ISO_HASH_BYTE
+
+    return uValue;
+}
+
+static void Floppy144IsometricDrawPrismX16(
+    Floppy144Surface *pSurface,
+    int32_t nX16,
+    int32_t nY16,
+    int32_t nWidth16,
+    int32_t nDepth16,
+    int32_t nBaseHeight16,
+    int32_t nTopHeight16,
+    uint32_t uColour
+)
+{
+    int32_t ax, ay, bx, by, cx, cy, dx, dy;
+    int32_t atx, aty, btx, bty, ctx, cty, dtx, dty;
+
+    Floppy144IsometricProjectX16(
+        nX16,
+        nY16,
+        nBaseHeight16,
+        &ax,
+        &ay
+    );
+    Floppy144IsometricProjectX16(
+        nX16 + nWidth16,
+        nY16,
+        nBaseHeight16,
+        &bx,
+        &by
+    );
+    Floppy144IsometricProjectX16(
+        nX16 + nWidth16,
+        nY16 + nDepth16,
+        nBaseHeight16,
+        &cx,
+        &cy
+    );
+    Floppy144IsometricProjectX16(
+        nX16,
+        nY16 + nDepth16,
+        nBaseHeight16,
+        &dx,
+        &dy
+    );
+
+    Floppy144IsometricProjectX16(
+        nX16,
+        nY16,
+        nTopHeight16,
+        &atx,
+        &aty
+    );
+    Floppy144IsometricProjectX16(
+        nX16 + nWidth16,
+        nY16,
+        nTopHeight16,
+        &btx,
+        &bty
+    );
+    Floppy144IsometricProjectX16(
+        nX16 + nWidth16,
+        nY16 + nDepth16,
+        nTopHeight16,
+        &ctx,
+        &cty
+    );
+    Floppy144IsometricProjectX16(
+        nX16,
+        nY16 + nDepth16,
+        nTopHeight16,
+        &dtx,
+        &dty
+    );
+
+    Floppy144IsometricLine(pSurface, ax, ay, bx, by, uColour);
+    Floppy144IsometricLine(pSurface, bx, by, cx, cy, uColour);
+    Floppy144IsometricLine(pSurface, cx, cy, dx, dy, uColour);
+    Floppy144IsometricLine(pSurface, dx, dy, ax, ay, uColour);
+
+    Floppy144IsometricLine(pSurface, atx, aty, btx, bty, uColour);
+    Floppy144IsometricLine(pSurface, btx, bty, ctx, cty, uColour);
+    Floppy144IsometricLine(pSurface, ctx, cty, dtx, dty, uColour);
+    Floppy144IsometricLine(pSurface, dtx, dty, atx, aty, uColour);
+
+    Floppy144IsometricLine(pSurface, ax, ay, atx, aty, uColour);
+    Floppy144IsometricLine(pSurface, bx, by, btx, bty, uColour);
+    Floppy144IsometricLine(pSurface, cx, cy, ctx, cty, uColour);
+    Floppy144IsometricLine(pSurface, dx, dy, dtx, dty, uColour);
+}
+
+static void Floppy144IsometricDrawWallFixture(
+    Floppy144Surface *pSurface,
+    const Floppy144SiteRect *pRect,
+    const Floppy144DataRecord *pPlacement
+)
+{
+    const uint32_t uBody = FLOPPY144_RGB(152, 159, 155);
+    const uint32_t uDetail = FLOPPY144_RGB(65, 70, 68);
+    const uint32_t uScreen = FLOPPY144_RGB(58, 112, 117);
+    const uint32_t uPaper = FLOPPY144_RGB(188, 183, 161);
+    const uint32_t uAmber = FLOPPY144_RGB(202, 155, 69);
+
+    int32_t nX16;
+    int32_t nY16;
+    int32_t nWidth16;
+    int32_t nDepth16;
+    int32_t nMountBase16;
+    int32_t nMountTop16;
+    bool bThinX;
+    int32_t nLineIndex;
+    int32_t x0, y0, x1, y1;
+
+    if(pSurface == NULL || pRect == NULL)
+    {
+        return;
+    }
+
+    nX16 = (int32_t)pRect->x * FLOPPY144_SITE_FIXED_ONE;
+    nY16 = (int32_t)pRect->y * FLOPPY144_SITE_FIXED_ONE;
+    nWidth16 = (int32_t)pRect->width * FLOPPY144_SITE_FIXED_ONE;
+    nDepth16 = (int32_t)pRect->height * FLOPPY144_SITE_FIXED_ONE;
+    bThinX = pRect->width <= pRect->height;
+
+    /*
+     * Centre the shallow projection inside the authored collision footprint.
+     * MONITOR_BANK remains 1U deep; IT shelving retains its 2U authored depth.
+     */
+    if(Floppy144IsometricVariantIs(pPlacement, "MONITOR_BANK"))
+    {
+        if(bThinX)
+        {
+            nWidth16 = FLOPPY144_SITE_FIXED_ONE;
+            nX16 +=
+                (
+                    (int32_t)pRect->width *
+                    FLOPPY144_SITE_FIXED_ONE -
+                    nWidth16
+                ) / 2;
+        }
+        else
+        {
+            nDepth16 = FLOPPY144_SITE_FIXED_ONE;
+            nY16 +=
+                (
+                    (int32_t)pRect->height *
+                    FLOPPY144_SITE_FIXED_ONE -
+                    nDepth16
+                ) / 2;
+        }
+    }
+    else if(
+        pRect->room == (uint8_t)FLOPPY144_ROOM_IT_SUPPORT &&
+        Floppy144IsometricVariantIs(pPlacement, "SHELVING")
+    )
+    {
+        /* authored 2U depth is the deliberate exception */
+    }
+    else
+    {
+        if(bThinX)
+        {
+            nWidth16 = FLOPPY144_SITE_FIXED_ONE / 2;
+            nX16 +=
+                (
+                    (int32_t)pRect->width *
+                    FLOPPY144_SITE_FIXED_ONE -
+                    nWidth16
+                ) / 2;
+        }
+        else
+        {
+            nDepth16 = FLOPPY144_SITE_FIXED_ONE / 2;
+            nY16 +=
+                (
+                    (int32_t)pRect->height *
+                    FLOPPY144_SITE_FIXED_ONE -
+                    nDepth16
+                ) / 2;
+        }
+    }
+
+    nMountBase16 = 6 * FLOPPY144_SITE_FIXED_ONE;
+    nMountTop16 = 9 * FLOPPY144_SITE_FIXED_ONE;
+
+    if(Floppy144IsometricVariantIs(pPlacement, "MONITOR_BANK"))
+    {
+        nMountBase16 = 4 * FLOPPY144_SITE_FIXED_ONE;
+        nMountTop16 = 10 * FLOPPY144_SITE_FIXED_ONE;
+    }
+    else if(Floppy144IsometricVariantIs(pPlacement, "SHELVING"))
+    {
+        nMountBase16 = 1 * FLOPPY144_SITE_FIXED_ONE;
+        nMountTop16 = 9 * FLOPPY144_SITE_FIXED_ONE;
+    }
+
+    Floppy144IsometricDrawPrismX16(
+        pSurface,
+        nX16,
+        nY16,
+        nWidth16,
+        nDepth16,
+        nMountBase16,
+        nMountTop16,
+        uBody
+    );
+
+    /*
+     * Variant marks are intentionally tiny in ISO. They only need to make
+     * panels, boards, key storage, monitor glass and shelving read as different
+     * objects at the compact 640x360 projection.
+     */
+    if(Floppy144IsometricVariantIs(pPlacement, "MONITOR_BANK"))
+    {
+        for(nLineIndex = 1; nLineIndex < 5; ++nLineIndex)
+        {
+            int32_t nZ16 =
+                nMountBase16 +
+                (nMountTop16 - nMountBase16) *
+                nLineIndex / 5;
+
+            Floppy144IsometricProjectX16(
+                nX16,
+                nY16,
+                nZ16,
+                &x0,
+                &y0
+            );
+            Floppy144IsometricProjectX16(
+                nX16 + nWidth16,
+                nY16 + nDepth16,
+                nZ16,
+                &x1,
+                &y1
+            );
+            Floppy144IsometricLine(
+                pSurface,
+                x0,
+                y0,
+                x1,
+                y1,
+                uScreen
+            );
+        }
+    }
+    else if(
+        Floppy144IsometricVariantIs(pPlacement, "PATCH_PANEL") ||
+        Floppy144IsometricVariantIs(pPlacement, "SUPPRESSION_PANEL")
+    )
+    {
+        int32_t nZ16 =
+            (nMountBase16 + nMountTop16) / 2;
+
+        Floppy144IsometricProjectX16(
+            nX16,
+            nY16,
+            nZ16,
+            &x0,
+            &y0
+        );
+        Floppy144IsometricProjectX16(
+            nX16 + nWidth16,
+            nY16 + nDepth16,
+            nZ16,
+            &x1,
+            &y1
+        );
+        Floppy144IsometricLine(
+            pSurface,
+            x0,
+            y0,
+            x1,
+            y1,
+            Floppy144IsometricVariantIs(
+                pPlacement,
+                "SUPPRESSION_PANEL"
+            ) ? uAmber : uScreen
+        );
+    }
+    else if(
+        Floppy144IsometricVariantIs(pPlacement, "SITE_DIRECTORY") ||
+        Floppy144IsometricVariantIs(pPlacement, "NOTICEBOARD")
+    )
+    {
+        int32_t nZ16 =
+            nMountBase16 +
+            (nMountTop16 - nMountBase16) / 2;
+
+        Floppy144IsometricProjectX16(
+            nX16 + nWidth16 / 5,
+            nY16 + nDepth16 / 5,
+            nZ16,
+            &x0,
+            &y0
+        );
+        Floppy144IsometricProjectX16(
+            nX16 + nWidth16 * 4 / 5,
+            nY16 + nDepth16 * 4 / 5,
+            nZ16,
+            &x1,
+            &y1
+        );
+        Floppy144IsometricLine(
+            pSurface,
+            x0,
+            y0,
+            x1,
+            y1,
+            uPaper
+        );
+    }
+    else if(
+        Floppy144IsometricVariantIs(pPlacement, "KEY_CABINET") ||
+        Floppy144IsometricVariantIs(pPlacement, "FIRST_AID_KIT")
+    )
+    {
+        int32_t nZ16 =
+            (nMountBase16 + nMountTop16) / 2;
+
+        Floppy144IsometricProjectX16(
+            nX16 + nWidth16 / 2,
+            nY16 + nDepth16 / 2,
+            nZ16 - FLOPPY144_SITE_FIXED_ONE,
+            &x0,
+            &y0
+        );
+        Floppy144IsometricProjectX16(
+            nX16 + nWidth16 / 2,
+            nY16 + nDepth16 / 2,
+            nZ16 + FLOPPY144_SITE_FIXED_ONE,
+            &x1,
+            &y1
+        );
+        Floppy144IsometricLine(
+            pSurface,
+            x0,
+            y0,
+            x1,
+            y1,
+            Floppy144IsometricVariantIs(
+                pPlacement,
+                "KEY_CABINET"
+            ) ? uAmber : uDetail
+        );
+    }
+}
+
+static void Floppy144IsometricDrawSink(
+    Floppy144Surface *pSurface,
+    const Floppy144SiteRect *pRect
+)
+{
+    const uint32_t uRim = FLOPPY144_RGB(151, 151, 137);
+    const uint32_t uBowl = FLOPPY144_RGB(54, 68, 70);
+    int32_t nX16;
+    int32_t nY16;
+    int32_t nW16;
+    int32_t nD16;
+    int32_t ax, ay, bx, by, cx, cy, dx, dy;
+    int32_t tap0x, tap0y, tap1x, tap1y, spoutx, spouty;
+
+    if(pSurface == NULL || pRect == NULL)
+    {
+        return;
+    }
+
+    nX16 =
+        (int32_t)pRect->x * FLOPPY144_SITE_FIXED_ONE +
+        FLOPPY144_SITE_FIXED_ONE / 2;
+
+    nY16 =
+        (int32_t)pRect->y * FLOPPY144_SITE_FIXED_ONE +
+        FLOPPY144_SITE_FIXED_ONE / 2;
+
+    nW16 =
+        (int32_t)pRect->width * FLOPPY144_SITE_FIXED_ONE -
+        FLOPPY144_SITE_FIXED_ONE;
+
+    nD16 =
+        (int32_t)pRect->height * FLOPPY144_SITE_FIXED_ONE -
+        FLOPPY144_SITE_FIXED_ONE;
+
+    /* Recessed bowl sits below the four-unit worktop surface. */
+    Floppy144IsometricProjectX16(
+        nX16,
+        nY16,
+        3 * FLOPPY144_SITE_FIXED_ONE,
+        &ax,
+        &ay
+    );
+    Floppy144IsometricProjectX16(
+        nX16 + nW16,
+        nY16,
+        3 * FLOPPY144_SITE_FIXED_ONE,
+        &bx,
+        &by
+    );
+    Floppy144IsometricProjectX16(
+        nX16 + nW16,
+        nY16 + nD16,
+        3 * FLOPPY144_SITE_FIXED_ONE,
+        &cx,
+        &cy
+    );
+    Floppy144IsometricProjectX16(
+        nX16,
+        nY16 + nD16,
+        3 * FLOPPY144_SITE_FIXED_ONE,
+        &dx,
+        &dy
+    );
+
+    Floppy144IsometricLine(pSurface, ax, ay, bx, by, uBowl);
+    Floppy144IsometricLine(pSurface, bx, by, cx, cy, uBowl);
+    Floppy144IsometricLine(pSurface, cx, cy, dx, dy, uBowl);
+    Floppy144IsometricLine(pSurface, dx, dy, ax, ay, uBowl);
+
+    /* Mixer stem rises above the rear edge, then bends over the bowl. */
+    Floppy144IsometricProjectX16(
+        nX16 + nW16 / 2,
+        nY16,
+        4 * FLOPPY144_SITE_FIXED_ONE,
+        &tap0x,
+        &tap0y
+    );
+    Floppy144IsometricProjectX16(
+        nX16 + nW16 / 2,
+        nY16,
+        5 * FLOPPY144_SITE_FIXED_ONE,
+        &tap1x,
+        &tap1y
+    );
+    Floppy144IsometricProjectX16(
+        nX16 + nW16 / 2,
+        nY16 + FLOPPY144_SITE_FIXED_ONE / 2,
+        5 * FLOPPY144_SITE_FIXED_ONE,
+        &spoutx,
+        &spouty
+    );
+
+    Floppy144IsometricLine(
+        pSurface,
+        tap0x,
+        tap0y,
+        tap1x,
+        tap1y,
+        uRim
+    );
+    Floppy144IsometricLine(
+        pSurface,
+        tap1x,
+        tap1y,
+        spoutx,
+        spouty,
+        uRim
+    );
+}
+
+static void Floppy144IsometricDrawShelfClutter(
+    Floppy144Surface *pSurface,
+    const Floppy144SiteRect *pRect,
+    int32_t nTopHeight
+)
+{
+    const uint32_t uPaper = FLOPPY144_RGB(188, 183, 161);
+    const uint32_t uBox = FLOPPY144_RGB(117, 100, 75);
+    uint32_t uState;
+    int32_t nCount;
+    int32_t nIndex;
+
+    if(pSurface == NULL || pRect == NULL)
+    {
+        return;
+    }
+
+    nCount =
+        pRect->room == (uint8_t)FLOPPY144_ROOM_FACILITIES
+            ? 15
+            : 6;
+
+    uState = Floppy144IsometricClutterHash(pRect);
+
+    for(nIndex = 0; nIndex < nCount; ++nIndex)
+    {
+        int32_t nX16;
+        int32_t nY16;
+        int32_t nW16;
+        int32_t nD16;
+        int32_t nZ16;
+
+        uState = uState * 1664525U + 1013904223U;
+        nX16 =
+            (int32_t)pRect->x * FLOPPY144_SITE_FIXED_ONE +
+            (
+                (int32_t)(uState % 12U) *
+                (
+                    (int32_t)pRect->width *
+                    FLOPPY144_SITE_FIXED_ONE
+                )
+            ) / 16;
+
+        uState = uState * 1664525U + 1013904223U;
+        nY16 =
+            (int32_t)pRect->y * FLOPPY144_SITE_FIXED_ONE +
+            (
+                (int32_t)(uState % 12U) *
+                (
+                    (int32_t)pRect->height *
+                    FLOPPY144_SITE_FIXED_ONE
+                )
+            ) / 16;
+
+        uState = uState * 1664525U + 1013904223U;
+        nW16 =
+            FLOPPY144_SITE_FIXED_ONE / 4 +
+            (int32_t)(uState % 5U);
+
+        uState = uState * 1664525U + 1013904223U;
+        nD16 =
+            FLOPPY144_SITE_FIXED_ONE / 4 +
+            (int32_t)(uState % 5U);
+
+        nZ16 =
+            nTopHeight *
+            FLOPPY144_SITE_FIXED_ONE;
+
+        Floppy144IsometricDrawPrismX16(
+            pSurface,
+            nX16,
+            nY16,
+            nW16,
+            nD16,
+            nZ16,
+            nZ16 + FLOPPY144_SITE_FIXED_ONE / 3,
+            (uState & 1U) != 0U ? uPaper : uBox
+        );
+    }
+}
+
 /* Floors stay flat. Furniture is low; walls/partitions rise further. */
 static int32_t Floppy144IsometricElementHeight(Floppy144SiteElement eElement)
 {
@@ -189,6 +849,8 @@ static void Floppy144IsometricDrawRect(
     const Floppy144SiteRect *pRect
 )
 {
+    const Floppy144DataRecord *pPlacement;
+
     int32_t nX0;
     int32_t nY0;
     int32_t nX1;
@@ -217,6 +879,33 @@ static void Floppy144IsometricDrawRect(
     eElement = (Floppy144SiteElement)pRect->type;
     nHeight = Floppy144IsometricElementHeight(eElement);
     uColour = Floppy144IsometricElementColour(eElement);
+
+    pPlacement =
+        Floppy144IsometricPlacementForRect(pRect);
+
+    if(eElement == FLOPPY144_SITE_WALL_MOUNTED_ITEM)
+    {
+        Floppy144IsometricDrawWallFixture(
+            pSurface,
+            pRect,
+            pPlacement
+        );
+
+        return;
+    }
+
+    if(
+        eElement == FLOPPY144_SITE_SINK &&
+        pRect->room == (uint8_t)FLOPPY144_ROOM_STAFF_ROOM
+    )
+    {
+        Floppy144IsometricDrawSink(
+            pSurface,
+            pRect
+        );
+
+        return;
+    }
 
     Floppy144IsometricProject(pRect->x, pRect->y, 0, &nX0, &nY0);
     Floppy144IsometricProject(pRect->x + pRect->width, pRect->y, 0, &nX1, &nY1);
@@ -247,6 +936,18 @@ static void Floppy144IsometricDrawRect(
     Floppy144IsometricLine(pSurface, nX1, nY1, nTopX1, nTopY1, uColour);
     Floppy144IsometricLine(pSurface, nX2, nY2, nTopX2, nTopY2, uColour);
     Floppy144IsometricLine(pSurface, nX3, nY3, nTopX3, nTopY3, uColour);
+
+    if(
+        eElement == FLOPPY144_SITE_BOOKCASE ||
+        eElement == FLOPPY144_SITE_SHELVING_FULL
+    )
+    {
+        Floppy144IsometricDrawShelfClutter(
+            pSurface,
+            pRect,
+            nHeight
+        );
+    }
 }
 
 static const char *Floppy144IsometricRoomLabel(Floppy144RoomId eRoom)
