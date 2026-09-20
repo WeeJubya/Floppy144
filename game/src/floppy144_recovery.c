@@ -746,7 +746,7 @@ void Floppy144MainMenuDraw(
 
         uint32_t reconstruction_percent =
         display_state != NULL
-        ? Floppy144RunStateReconstructionPercent(
+        ? Floppy144RunStateRecoveredPercent(
             display_state
         )
         : 0U;
