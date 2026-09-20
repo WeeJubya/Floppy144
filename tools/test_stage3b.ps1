@@ -191,6 +191,7 @@ $TerminalSources = @(
     (Join-Path $SourceDir "floppy144_run_state.c"),
     (Join-Path $SourceDir "floppy144_world.c"),
     (Join-Path $SourceDir "floppy144_terminal.c"),
+    (Join-Path $SourceDir "floppy144_recovery.c"),
     (Join-Path $SourceDir "floppy144_catalogue.c"),
     (Join-Path $SourceDir "floppy144_document.c"),
     (Join-Path $SourceDir "floppy144_effect.c"),
