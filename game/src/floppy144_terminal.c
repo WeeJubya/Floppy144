@@ -3797,7 +3797,7 @@ void Floppy144TerminalDraw(
         {
             const char *pszReturnPrompt =
                 terminal->record_pager_active
-                    ? "EXIT: Q"
+                    ? "Q: EXIT"
                     : "Q RETURN";
 
             Floppy144DrawText(
