@@ -1854,7 +1854,7 @@ static void Floppy144TerminalPrintCollectionPage(
     (void)snprintf(
         szLine,
         sizeof(szLine),
-        "PAGE %u OF %u",
+        "PAGE %u OF %u   Q: EXIT",
         (unsigned)pTerminal->record_pager_page,
         (unsigned)uPageCount
     );
