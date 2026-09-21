@@ -368,6 +368,12 @@ static void Floppy144TestCollectionListPresentation(void)
         "collection LIST renders heading, page label and rows"
     );
 
+    F144_CHECK(
+        sTerminal.output_count >= 2U &&
+        strstr(sTerminal.output[1], "Q: EXIT") != NULL,
+        "collection LIST page visibly advertises Q: EXIT"
+    );
+
     if(sTerminal.output_count >= 3U)
     {
         for(
