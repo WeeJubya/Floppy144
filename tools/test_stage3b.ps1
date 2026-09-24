@@ -364,6 +364,30 @@ function Test-Stage3B5CoordinatorWiring {
         }
     }
 
+    if(
+        $MainSource -notmatch 'FLOPPY144_SITE_ACTION_INSPECT' -or
+        $MainSource -notmatch 'Floppy144SiteAvailableActions'
+    ) {
+        throw "Stage 3C coordinator does not gate blind Inspect keypresses through Site action availability."
+    }
+
+    foreach($RequiredRendererToken in @(
+        'Floppy144Site2DWallFixtureAttachment',
+        'FLOPPY144_SITE_2D_WALL_LEFT',
+        'FLOPPY144_SITE_2D_WALL_BOTTOM'
+    )) {
+        if($Site2DSource -notmatch [regex]::Escape($RequiredRendererToken)) {
+            throw "Stage 3C 2D wall-fixture anchoring is missing: $RequiredRendererToken"
+        }
+    }
+
+    if(
+        $Site2DSource -notmatch
+        'Floppy144Site2DClipRect\s*\(\s*surface,\s*&visual\.x'
+    ) {
+        throw "Stage 3C wall fixtures are not clipped to the Site viewport before authored drawing."
+    }
+
     Write-Host "STAGE 3B.5 CABINET COORDINATOR WIRING AUDIT: PASS"
 }
 
