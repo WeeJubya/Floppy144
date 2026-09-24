@@ -371,6 +371,13 @@ function Test-Stage3B5CoordinatorWiring {
         throw "Stage 3C coordinator does not gate blind Inspect keypresses through Site action availability."
     }
 
+    if(
+        $MainSource -match
+        'UNAUTHORISED ACCESS - SECURE CABINET LOCKED'
+    ) {
+        throw "Stage 3C still gives a hidden Inspect response beside locked secure cabinets."
+    }
+
     foreach($RequiredRendererToken in @(
         'Floppy144Site2DWallFixtureAttachment',
         'FLOPPY144_SITE_2D_WALL_LEFT',
