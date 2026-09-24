@@ -893,40 +893,12 @@ static void Floppy144InteractOffice(
     if(eMode == FLOPPY144_OFFICE_INTERACTION_INSPECT)
     {
         Floppy144SiteInspectionTarget sTarget;
-        Floppy144CabinetState sNearbyCabinet;
 
         /*
-         * Inspect is not the route into a locked secure cabinet. If the player
-         * presses I anyway, give an in-world access denial instead of implying
-         * that the cabinet is merely empty. A=Access remains the keypad route.
-         */
-        Floppy144CabinetReset(&sNearbyCabinet);
-        if(
-            Floppy144CabinetOpenNearby(
-                &sNearbyCabinet,
-                &global_run_state
-            ) &&
-            !Floppy144CabinetUnlocked(
-                &sNearbyCabinet,
-                &global_run_state
-            )
-        )
-        {
-            (void)snprintf(
-                global_office_notice_buffer,
-                sizeof(global_office_notice_buffer),
-                "UNAUTHORISED ACCESS - SECURE CABINET LOCKED."
-            );
-            global_office_notice = global_office_notice_buffer;
-            Floppy144Redraw(window);
-            return;
-        }
-
-        /*
-         * The footer and the keyboard must agree. A hidden physical child must
-         * neither advertise I: INSPECT nor respond to a blind I keypress.
-         * Locked secure cabinets are deliberately handled above so they can
-         * still return the explicit UNAUTHORISED ACCESS message.
+         * The footer and the keyboard share one contract. If I: INSPECT is not
+         * advertised, a blind I keypress is a true no-op. Secure cabinets are
+         * accessed only through A: ACCESS; being beside a locked cabinet does
+         * not create a hidden Inspect response.
          */
         if(
             (
