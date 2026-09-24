@@ -229,6 +229,8 @@ static void Floppy144TestCatalogueRecordResolution(void)
 {
     uint32_t uCollection;
     uint32_t uChecked = 0U;
+    uint32_t uComparedGaps = 0U;
+    uint32_t uIrregularGaps = 0U;
 
     for(
         uCollection = 0U;
@@ -285,6 +287,19 @@ static void Floppy144TestCatalogueRecordResolution(void)
 
                 if(bNumberValid)
                 {
+                    if(uRecord > 0U)
+                    {
+                        ++uComparedGaps;
+
+                        if(
+                            uCurrentRecordNumber -
+                            uPreviousRecordNumber != 10U
+                        )
+                        {
+                            ++uIrregularGaps;
+                        }
+                    }
+
                     uPreviousRecordNumber = uCurrentRecordNumber;
                 }
             }
@@ -311,6 +326,12 @@ static void Floppy144TestCatalogueRecordResolution(void)
     F144_CHECK(
         uChecked > 0U,
         "catalogue resolver exercised registered records"
+    );
+
+    F144_CHECK(
+        uComparedGaps > 0U &&
+        uIrregularGaps * 4U > uComparedGaps * 3U,
+        "catalogue record IDs use irregular Technical-Slice-style spacing"
     );
 
     {
