@@ -187,6 +187,98 @@ static void Floppy144TestExtendedGlyphs(void)
     );
 }
 
+static bool Floppy144TestCatalogueRecordId(
+    Floppy144CollectionId eCollection,
+    uint32_t uRecordIndex,
+    char *pszFullId,
+    size_t uFullCapacity,
+    char *pszShortId,
+    size_t uShortCapacity
+)
+{
+    char szTitle[48];
+    const char *pszShort;
+
+    if(
+        pszFullId == NULL ||
+        uFullCapacity == 0U
+    )
+    {
+        return false;
+    }
+
+    Floppy144CatalogueBuildRecord(
+        eCollection,
+        uRecordIndex,
+        pszFullId,
+        uFullCapacity,
+        szTitle,
+        sizeof(szTitle)
+    );
+
+    pszShort = strstr(pszFullId, "-RS-");
+
+    if(
+        pszShortId != NULL &&
+        uShortCapacity > 0U
+    )
+    {
+        if(pszShort == NULL)
+        {
+            return false;
+        }
+
+        (void)snprintf(
+            pszShortId,
+            uShortCapacity,
+            "%s",
+            pszShort + 1
+        );
+    }
+
+    return true;
+}
+
+static const Floppy144DocumentDefinition *
+Floppy144TestDocumentForTrigger(
+    Floppy144CollectionId eCollection,
+    Floppy144TriggerId eTrigger
+)
+{
+    const Floppy144CollectionDefinition *pCollection =
+        Floppy144CollectionGet(eCollection);
+
+    uint32_t uRecordIndex;
+
+    if(pCollection == NULL)
+    {
+        return NULL;
+    }
+
+    for(
+        uRecordIndex = 0U;
+        uRecordIndex < pCollection->catalogue.record_count;
+        ++uRecordIndex
+    )
+    {
+        const Floppy144DocumentDefinition *pDocument =
+            Floppy144DocumentGet(
+                eCollection,
+                uRecordIndex
+            );
+
+        if(
+            pDocument != NULL &&
+            pDocument->trigger == eTrigger
+        )
+        {
+            return pDocument;
+        }
+    }
+
+    return NULL;
+}
+
 static bool Floppy144TestRecordNumber(
     const char *pszRecordId,
     uint32_t *pNumber
@@ -515,26 +607,78 @@ static void Floppy144TestMultipleCollectionCommands(void)
         "most recently restored collection becomes short-ID context"
     );
 
-    Floppy144TestSubmitCommand(
-        &sTerminal,
-        &sWorld,
-        &sRunState,
-        "OPEN RS-0010"
-    );
-    F144_CHECK(
-        sTerminal.open_record_requested &&
-        sTerminal.requested_collection == eDr02 &&
-        sTerminal.requested_record_index == 0U,
-        "short OPEN resolves against most recently restored collection"
-    );
+    {
+        char szFullId[24];
+        char szShortId[16];
+        char szCommand[40];
+
+        F144_CHECK(
+            Floppy144TestCatalogueRecordId(
+                eDr02,
+                0U,
+                szFullId,
+                sizeof(szFullId),
+                szShortId,
+                sizeof(szShortId)
+            ),
+            "DR-02 first catalogue ID is generated"
+        );
+
+        (void)snprintf(
+            szCommand,
+            sizeof(szCommand),
+            "OPEN %s",
+            szShortId
+        );
+
+        Floppy144TestSubmitCommand(
+            &sTerminal,
+            &sWorld,
+            &sRunState,
+            szCommand
+        );
+
+        F144_CHECK(
+            sTerminal.open_record_requested &&
+            sTerminal.requested_collection == eDr02 &&
+            sTerminal.requested_record_index == 0U,
+            "short OPEN resolves against most recently restored collection"
+        );
+    }
     sTerminal.open_record_requested = false;
 
-    Floppy144TestSubmitCommand(
-        &sTerminal,
-        &sWorld,
-        &sRunState,
-        "OPEN HR-01-RS-0036"
-    );
+    {
+        const Floppy144DocumentDefinition *pHrOpening =
+            Floppy144TestDocumentForTrigger(
+                eHr01,
+                Floppy144GameDataTriggerId("T-002")
+            );
+
+        char szCommand[48];
+
+        F144_CHECK(
+            pHrOpening != NULL &&
+            pHrOpening->record_id_override != NULL,
+            "HR-01 opening authored record resolves from trigger registry"
+        );
+
+        (void)snprintf(
+            szCommand,
+            sizeof(szCommand),
+            "OPEN %s",
+            pHrOpening != NULL &&
+            pHrOpening->record_id_override != NULL
+                ? pHrOpening->record_id_override
+                : "HR-01-RS-0000"
+        );
+
+        Floppy144TestSubmitCommand(
+            &sTerminal,
+            &sWorld,
+            &sRunState,
+            szCommand
+        );
+    }
     F144_CHECK(
         !sTerminal.open_record_requested,
         "full OPEN cannot retrieve an unrestored collection"
@@ -638,25 +782,41 @@ static void Floppy144TestMultipleCollectionCommands(void)
         "latest restore replaces short-ID context"
     );
 
-    Floppy144TestSubmitCommand(
-        &sTerminal,
-        &sWorld,
-        &sRunState,
-        "OPEN RS-0024"
-    );
     {
-        Floppy144CollectionId eExpectedCollection;
-        uint32_t uExpectedRecord;
-        bool bResolved = Floppy144DocumentFindRecordId(
-            "DR-03-RS-0024",
-            &eExpectedCollection,
-            &uExpectedRecord
-        );
+        char szFullId[24];
+        char szShortId[16];
+        char szCommand[40];
+
         F144_CHECK(
-            bResolved &&
+            Floppy144TestCatalogueRecordId(
+                eDr03,
+                0U,
+                szFullId,
+                sizeof(szFullId),
+                szShortId,
+                sizeof(szShortId)
+            ),
+            "DR-03 first catalogue ID is generated"
+        );
+
+        (void)snprintf(
+            szCommand,
+            sizeof(szCommand),
+            "OPEN %s",
+            szShortId
+        );
+
+        Floppy144TestSubmitCommand(
+            &sTerminal,
+            &sWorld,
+            &sRunState,
+            szCommand
+        );
+
+        F144_CHECK(
             sTerminal.open_record_requested &&
-            sTerminal.requested_collection == eExpectedCollection &&
-            sTerminal.requested_record_index == uExpectedRecord,
+            sTerminal.requested_collection == eDr03 &&
+            sTerminal.requested_record_index == 0U,
             "short OPEN follows updated restore context"
         );
     }
@@ -847,6 +1007,9 @@ static void Floppy144TestBranchDocumentAccessGate(void)
     Floppy144EvidenceId eE003;
     Floppy144TriggerId eT026;
     Floppy144TriggerId eT028;
+    const Floppy144DocumentDefinition *pRecordsBranchDocument;
+    const Floppy144DocumentDefinition *pTechnologyBranchDocument;
+    char szBranchCommand[48];
 
     Floppy144WorldReset(
         &sWorld
@@ -895,6 +1058,26 @@ static void Floppy144TestBranchDocumentAccessGate(void)
         "branch fixture IDs resolve"
     );
 
+    pRecordsBranchDocument =
+        Floppy144TestDocumentForTrigger(
+            eDr04,
+            Floppy144GameDataTriggerId("T-010")
+        );
+
+    pTechnologyBranchDocument =
+        Floppy144TestDocumentForTrigger(
+            eDr04,
+            Floppy144GameDataTriggerId("T-011")
+        );
+
+    F144_CHECK(
+        pRecordsBranchDocument != NULL &&
+        pRecordsBranchDocument->record_id_override != NULL &&
+        pTechnologyBranchDocument != NULL &&
+        pTechnologyBranchDocument->record_id_override != NULL,
+        "both DR-04 branch documents resolve from trigger registry"
+    );
+
     /*
      * This fixture starts at the already-recovered DR-04 branch point. Set the
      * restored bit directly so the test is independent of reconstruction
@@ -930,11 +1113,21 @@ static void Floppy144TestBranchDocumentAccessGate(void)
         "E-003 exposes both branch records initially"
     );
 
+    (void)snprintf(
+        szBranchCommand,
+        sizeof(szBranchCommand),
+        "OPEN %s",
+        pRecordsBranchDocument != NULL &&
+        pRecordsBranchDocument->record_id_override != NULL
+            ? pRecordsBranchDocument->record_id_override
+            : "DR-04-RS-0000"
+    );
+
     Floppy144TestSubmitCommand(
         &sTerminal,
         &sWorld,
         &sRunState,
-        "OPEN DR-04-RS-0037"
+        szBranchCommand
     );
 
     F144_CHECK(
@@ -963,11 +1156,21 @@ static void Floppy144TestBranchDocumentAccessGate(void)
         "opening first workstream commits Records branch"
     );
 
+    (void)snprintf(
+        szBranchCommand,
+        sizeof(szBranchCommand),
+        "OPEN %s",
+        pTechnologyBranchDocument != NULL &&
+        pTechnologyBranchDocument->record_id_override != NULL
+            ? pTechnologyBranchDocument->record_id_override
+            : "DR-04-RS-0000"
+    );
+
     Floppy144TestSubmitCommand(
         &sTerminal,
         &sWorld,
         &sRunState,
-        "OPEN DR-04-RS-0064"
+        szBranchCommand
     );
 
     F144_CHECK(
@@ -996,11 +1199,21 @@ static void Floppy144TestBranchDocumentAccessGate(void)
         "T-028 releases the alternate workstream"
     );
 
+    (void)snprintf(
+        szBranchCommand,
+        sizeof(szBranchCommand),
+        "OPEN %s",
+        pTechnologyBranchDocument != NULL &&
+        pTechnologyBranchDocument->record_id_override != NULL
+            ? pTechnologyBranchDocument->record_id_override
+            : "DR-04-RS-0000"
+    );
+
     Floppy144TestSubmitCommand(
         &sTerminal,
         &sWorld,
         &sRunState,
-        "OPEN DR-04-RS-0064"
+        szBranchCommand
     );
 
     F144_CHECK(
