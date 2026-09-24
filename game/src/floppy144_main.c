@@ -922,6 +922,24 @@ static void Floppy144InteractOffice(
             return;
         }
 
+        /*
+         * The footer and the keyboard must agree. A hidden physical child must
+         * neither advertise I: INSPECT nor respond to a blind I keypress.
+         * Locked secure cabinets are deliberately handled above so they can
+         * still return the explicit UNAUTHORISED ACCESS message.
+         */
+        if(
+            (
+                Floppy144SiteAvailableActions(
+                    &global_run_state
+                ) &
+                FLOPPY144_SITE_ACTION_INSPECT
+            ) == 0U
+        )
+        {
+            return;
+        }
+
         if(
             !Floppy144SiteResolveInspectionTarget(
                 &global_run_state,
