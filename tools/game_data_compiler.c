@@ -65,13 +65,6 @@ static FILE *openout(const char*dir,const char*name){char p[1024];snprintf(p,siz
 static void write_json2(FILE*f,JsonValue*v){size_t i;switch(v->type){case J_NULL:fputs("null",f);break;case J_BOOL:fputs(v->as.boolean?"true":"false",f);break;case J_NUMBER:fprintf(f,"%.15g",v->as.number);break;case J_STRING:{const unsigned char*p=(const unsigned char*)v->as.string;fputc('"',f);while(*p){unsigned char c=*p++;if(c=='\"'||c=='\\'){fputc('\\',f);fputc(c,f);}else if(c=='\n')fputs("\\n",f);else if(c=='\r')fputs("\\r",f);else if(c=='\t')fputs("\\t",f);else if(c<32)fprintf(f,"\\u%04x",c);else fputc(c,f);}fputc('"',f);break;}case J_ARRAY:fputc('[',f);for(i=0;i<v->as.array.count;i++){if(i)fputc(',',f);write_json2(f,v->as.array.items[i]);}fputc(']',f);break;case J_OBJECT:fputc('{',f);for(i=0;i<v->as.object.count;i++){if(i)fputc(',',f);cstr(f,v->as.object.items[i].key);fputc(':',f);write_json2(f,v->as.object.items[i].value);}fputc('}',f);break;}}
 static void emit_simple_def(JsonValue*root,const char*key,const char*macro,const char*outfile,const char*outdir){size_t i;JsonValue*a=get(root,key);FILE*f=openout(outdir,outfile);fprintf(f,"/* Generated from floppy144_game_data.json. Do not edit. */\n");for(i=0;i<count(a);i++){const char*id=strv(at(a,i),"id");if(!id)die("entry without id");fprintf(f,"%s(",macro);sym(f,id);fprintf(f,", ");{char compact[32];size_t j=0;const char*p=id;while(*p&&j+1<sizeof(compact)){if(*p!='-')compact[j++]=*p;p++;}compact[j]='\0';cstr(f,compact);}fprintf(f,")\n");}fclose(f);}
 static size_t authored_count_for(JsonValue*docs,const char*cid){size_t i,n=0;for(i=0;i<count(docs);i++)if(strv(at(docs,i),"collection_id")&&strcmp(strv(at(docs,i),"collection_id"),cid)==0)n++;return n;}
-static uint32_t stable_hash(const char *psz)
-{
-    uint32_t h = UINT32_C(2166136261);
-    const unsigned char *p = (const unsigned char *)(psz ? psz : "");
-    while(*p) { h ^= (uint32_t)*p++; h *= UINT32_C(16777619); }
-    return h;
-}
 static long collection_record_count(JsonValue *root,const char *cid)
 {
     JsonValue *a=get(root,"collections"); size_t i;
@@ -90,7 +83,7 @@ static void emit_collections(JsonValue*root,const char*outdir)
         fprintf(f,",\n    %s, %ldU, %s,\n    ",domain_enum(domain),size_kb,required?"true":"false");
         cstr(f,"DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.");fprintf(f,", NULL, %ldU, ",records);cstr(f,name);fprintf(f,", ");
         {char pref[32];snprintf(pref,sizeof(pref),"%s-RS",id);cstr(f,pref);}
-        fprintf(f,",\n    floppy144_generated_generic_subjects, 12U, false, %luU, 37U, %luU\n)\n\n",1000UL+(unsigned long)i*100UL,11UL+(unsigned long)i*17UL);
+        fprintf(f,",\n    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, %luU\n)\n\n",11UL+(unsigned long)i*17UL);
     }
     fclose(f);
 }
@@ -120,13 +113,95 @@ static long preserved_document_slot(
     if(
         pszRecordId != NULL &&
         strcmp(pszRecordId,"HR-01-RS-0107") == 0 &&
-        nRecordCount > 9
+        nRecordCount > 10
     )
     {
-        return 9L;
+        return 10L;
     }
 
     return -1L;
+}
+
+#define FLOPPY144_RECORD_NUMBER_DENSITY 11UL
+
+/*
+ * Return the numerically ordered member of a Technical-Slice-style sequence.
+ *
+ * The old technical slice used a multiplier/offset permutation, which produced
+ * wonderfully non-decimal-looking record numbers but displayed them out of
+ * numerical order. Stage 3C keeps that texture while sorting the generated
+ * values before assigning catalogue slots. The result is stable, irregular and
+ * still easy to scan from top to bottom.
+ */
+static unsigned long generated_record_number(
+    size_t uCollectionOrdinal,
+    long nRecordCount,
+    long nSlot
+)
+{
+    unsigned long uModulus;
+    unsigned long uOffset;
+    unsigned long uSource;
+
+    if(nRecordCount <= 0L || nSlot < 0L || nSlot >= nRecordCount)
+    {
+        die("invalid generated record-number request");
+    }
+
+    uModulus =
+        (unsigned long)nRecordCount *
+        FLOPPY144_RECORD_NUMBER_DENSITY;
+
+    uOffset =
+        11UL +
+        (unsigned long)uCollectionOrdinal * 17UL;
+
+    for(uSource = 0UL; uSource < (unsigned long)nRecordCount; ++uSource)
+    {
+        unsigned long uCandidate =
+            1UL +
+            (
+                (
+                    uSource * 37UL +
+                    uOffset
+                ) %
+                uModulus
+            );
+
+        unsigned long uRank = 0UL;
+        unsigned long uOther;
+
+        for(uOther = 0UL; uOther < (unsigned long)nRecordCount; ++uOther)
+        {
+            unsigned long uOtherCandidate =
+                1UL +
+                (
+                    (
+                        uOther * 37UL +
+                        uOffset
+                    ) %
+                    uModulus
+                );
+
+            if(uOtherCandidate == uCandidate && uOther != uSource)
+            {
+                die("generated record-number sequence collision");
+            }
+
+            if(uOtherCandidate < uCandidate)
+            {
+                ++uRank;
+            }
+        }
+
+        if(uRank == (unsigned long)nSlot)
+        {
+            return uCandidate;
+        }
+    }
+
+    die("could not rank generated record number");
+    return 0UL;
 }
 
 static void player_record_id(
@@ -134,7 +209,9 @@ static void player_record_id(
     size_t uCapacity,
     const char *pszCollectionId,
     const char *pszCanonicalId,
-    long nSlot
+    long nSlot,
+    size_t uCollectionOrdinal,
+    long nRecordCount
 )
 {
     if(
@@ -156,12 +233,12 @@ static void player_record_id(
     }
 
     {
-        uint32_t uHash =
-            stable_hash(pszCanonicalId);
         unsigned long uNumber =
-            (unsigned long)(nSlot + 1L) * 10UL +
-            1UL +
-            (unsigned long)(uHash % UINT32_C(8));
+            generated_record_number(
+                uCollectionOrdinal,
+                nRecordCount,
+                nSlot
+            );
 
         (void)snprintf(
             pszBuffer,
@@ -205,7 +282,15 @@ static void emit_documents(JsonValue*root,const char*outdir)
                 used[idx]=1U;
             }
             ++authored_ordinal;
-            player_record_id(player_id,sizeof(player_id),cid,rid,idx);
+            player_record_id(
+                player_id,
+                sizeof(player_id),
+                cid,
+                rid,
+                idx,
+                ci,
+                records
+            );
             fprintf(f,"    { FLOPPY144_COLLECTION_");sym(f,cid);fprintf(f,", %ldU, ",idx);cstr(f,player_id);fprintf(f,", ");cstr(f,title);
             if(title && strcmp(title,"Suppression Control Panel Service Note")==0) fputs(", FLOPPY144_DOCUMENT_VIEW_FM13_SUPPRESSION_SERVICE, ",f);
             else if(title && strcmp(title,"Temporary Desk Reallocation Notice")==0) fputs(", FLOPPY144_DOCUMENT_VIEW_HR01_DESK_REALLOCATION, ",f);
