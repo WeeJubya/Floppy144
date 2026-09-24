@@ -3,244 +3,244 @@ FLOPPY144_COLLECTION(
     DR01, "DR-01", "Disk Recovery Index",
     FLOPPY144_COLLECTION_DOMAIN_DR, 4U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 8U, "Disk Recovery Index", "DR-01-RS",
-    floppy144_generated_generic_subjects, 12U, false, 1000U, 37U, 11U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 11U
 )
 
 FLOPPY144_COLLECTION(
     DR02, "DR-02", "Terminal Operations Guide",
     FLOPPY144_COLLECTION_DOMAIN_DR, 1U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 6U, "Terminal Operations Guide", "DR-02-RS",
-    floppy144_generated_generic_subjects, 12U, false, 1100U, 37U, 28U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 28U
 )
 
 FLOPPY144_COLLECTION(
     DR03, "DR-03", "Site Reconstruction Guide",
     FLOPPY144_COLLECTION_DOMAIN_DR, 1U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 6U, "Site Reconstruction Guide", "DR-03-RS",
-    floppy144_generated_generic_subjects, 12U, false, 1200U, 37U, 45U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 45U
 )
 
 FLOPPY144_COLLECTION(
     DR04, "DR-04", "Site Closure & Building Handover",
     FLOPPY144_COLLECTION_DOMAIN_DR, 7U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 18U, "Site Closure & Building Handover", "DR-04-RS",
-    floppy144_generated_generic_subjects, 12U, false, 1300U, 37U, 62U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 62U
 )
 
 FLOPPY144_COLLECTION(
     DR07, "DR-07", "Archive Holdings & Reconciliation",
     FLOPPY144_COLLECTION_DOMAIN_DR, 6U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 24U, "Archive Holdings & Reconciliation", "DR-07-RS",
-    floppy144_generated_generic_subjects, 12U, false, 1400U, 37U, 79U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 79U
 )
 
 FLOPPY144_COLLECTION(
     DR23, "DR-23", "Historical Filing Exceptions & Recovery Actions",
     FLOPPY144_COLLECTION_DOMAIN_DR, 3U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 12U, "Historical Filing Exceptions & Recovery Actions", "DR-23-RS",
-    floppy144_generated_generic_subjects, 12U, false, 1500U, 37U, 96U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 96U
 )
 
 FLOPPY144_COLLECTION(
     DR29, "DR-29", "Archive Transfer & Custody",
     FLOPPY144_COLLECTION_DOMAIN_DR, 6U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 20U, "Archive Transfer & Custody", "DR-29-RS",
-    floppy144_generated_generic_subjects, 12U, false, 1600U, 37U, 113U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 113U
 )
 
 FLOPPY144_COLLECTION(
     DR31, "DR-31", "Archive Transfer Authorisation & Exceptions",
     FLOPPY144_COLLECTION_DOMAIN_DR, 6U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 18U, "Archive Transfer Authorisation & Exceptions", "DR-31-RS",
-    floppy144_generated_generic_subjects, 12U, false, 1700U, 37U, 130U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 130U
 )
 
 FLOPPY144_COLLECTION(
     DR47, "DR-47", "Final Closure Exceptions & Incident Review",
     FLOPPY144_COLLECTION_DOMAIN_DR, 9U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 20U, "Final Closure Exceptions & Incident Review", "DR-47-RS",
-    floppy144_generated_generic_subjects, 12U, false, 1800U, 37U, 147U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 147U
 )
 
 FLOPPY144_COLLECTION(
     DR53, "DR-53", "Executive Closure Correspondence",
     FLOPPY144_COLLECTION_DOMAIN_DR, 5U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 18U, "Executive Closure Correspondence", "DR-53-RS",
-    floppy144_generated_generic_subjects, 12U, false, 1900U, 37U, 164U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 164U
 )
 
 FLOPPY144_COLLECTION(
     HR01, "HR-01", "Site Establishment",
     FLOPPY144_COLLECTION_DOMAIN_HR, 6U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 18U, "Site Establishment", "HR-01-RS",
-    floppy144_generated_generic_subjects, 12U, false, 2000U, 37U, 181U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 181U
 )
 
 FLOPPY144_COLLECTION(
     HR05, "HR-05", "Staff Welfare & Shared Facilities",
     FLOPPY144_COLLECTION_DOMAIN_HR, 4U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 16U, "Staff Welfare & Shared Facilities", "HR-05-RS",
-    floppy144_generated_generic_subjects, 12U, false, 2100U, 37U, 198U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 198U
 )
 
 FLOPPY144_COLLECTION(
     HR09, "HR-09", "Attendance, Leave & Duty Status",
     FLOPPY144_COLLECTION_DOMAIN_HR, 5U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 18U, "Attendance, Leave & Duty Status", "HR-09-RS",
-    floppy144_generated_generic_subjects, 12U, false, 2200U, 37U, 215U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 215U
 )
 
 FLOPPY144_COLLECTION(
     HR14, "HR-14", "Learning, Development & Competency",
     FLOPPY144_COLLECTION_DOMAIN_HR, 1U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 0U, "Learning, Development & Competency", "HR-14-RS",
-    floppy144_generated_generic_subjects, 12U, false, 2300U, 37U, 232U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 232U
 )
 
 FLOPPY144_COLLECTION(
     HR27, "HR-27", "Payroll, Allowances & Closure Payments",
     FLOPPY144_COLLECTION_DOMAIN_HR, 1U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 0U, "Payroll, Allowances & Closure Payments", "HR-27-RS",
-    floppy144_generated_generic_subjects, 12U, false, 2400U, 37U, 249U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 249U
 )
 
 FLOPPY144_COLLECTION(
     HR36, "HR-36", "Personnel Files & Postings",
     FLOPPY144_COLLECTION_DOMAIN_HR, 2U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 0U, "Personnel Files & Postings", "HR-36-RS",
-    floppy144_generated_generic_subjects, 12U, false, 2500U, 37U, 266U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 266U
 )
 
 FLOPPY144_COLLECTION(
     FM04, "FM-04", "Site Infrastructure & Maintenance",
     FLOPPY144_COLLECTION_DOMAIN_FM, 8U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 25U, "Site Infrastructure & Maintenance", "FM-04-RS",
-    floppy144_generated_generic_subjects, 12U, false, 2600U, 37U, 283U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 283U
 )
 
 FLOPPY144_COLLECTION(
     FM07, "FM-07", "Asset Management & Decommissioning",
     FLOPPY144_COLLECTION_DOMAIN_FM, 6U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 20U, "Asset Management & Decommissioning", "FM-07-RS",
-    floppy144_generated_generic_subjects, 12U, false, 2700U, 37U, 300U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 300U
 )
 
 FLOPPY144_COLLECTION(
     FM13, "FM-13", "Site Safety & Suppression Systems",
     FLOPPY144_COLLECTION_DOMAIN_FM, 6U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 22U, "Site Safety & Suppression Systems", "FM-13-RS",
-    floppy144_generated_generic_subjects, 12U, false, 2800U, 37U, 317U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 317U
 )
 
 FLOPPY144_COLLECTION(
     FM18, "FM-18", "Environmental Monitoring & Plant Logs",
     FLOPPY144_COLLECTION_DOMAIN_FM, 6U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 18U, "Environmental Monitoring & Plant Logs", "FM-18-RS",
-    floppy144_generated_generic_subjects, 12U, false, 2900U, 37U, 334U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 334U
 )
 
 FLOPPY144_COLLECTION(
     FM23, "FM-23", "Site Maps & Room Organisation",
     FLOPPY144_COLLECTION_DOMAIN_FM, 5U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 1U, "Site Maps & Room Organisation", "FM-23-RS",
-    floppy144_generated_generic_subjects, 12U, false, 3000U, 37U, 351U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 351U
 )
 
 FLOPPY144_COLLECTION(
     FM32, "FM-32", "Utilities, Plant & Environmental Services",
     FLOPPY144_COLLECTION_DOMAIN_FM, 2U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 0U, "Utilities, Plant & Environmental Services", "FM-32-RS",
-    floppy144_generated_generic_subjects, 12U, false, 3100U, 37U, 368U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 368U
 )
 
 FLOPPY144_COLLECTION(
     OS07, "OS-07", "Visitor & Access Management",
     FLOPPY144_COLLECTION_DOMAIN_OS, 7U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 20U, "Visitor & Access Management", "OS-07-RS",
-    floppy144_generated_generic_subjects, 12U, false, 3200U, 37U, 385U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 385U
 )
 
 FLOPPY144_COLLECTION(
     OS18, "OS-18", "Access Control & Restricted Areas",
     FLOPPY144_COLLECTION_DOMAIN_OS, 2U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 2U, "Access Control & Restricted Areas", "OS-18-RS",
-    floppy144_generated_generic_subjects, 12U, false, 3300U, 37U, 402U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 402U
 )
 
 FLOPPY144_COLLECTION(
     OS26, "OS-26", "Incident Reporting & Evacuation",
     FLOPPY144_COLLECTION_DOMAIN_OS, 8U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 22U, "Incident Reporting & Evacuation", "OS-26-RS",
-    floppy144_generated_generic_subjects, 12U, false, 3400U, 37U, 419U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 419U
 )
 
 FLOPPY144_COLLECTION(
     OS34, "OS-34", "Secure Storage & Key Control",
     FLOPPY144_COLLECTION_DOMAIN_OS, 6U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 16U, "Secure Storage & Key Control", "OS-34-RS",
-    floppy144_generated_generic_subjects, 12U, false, 3500U, 37U, 436U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 436U
 )
 
 FLOPPY144_COLLECTION(
     OS41, "OS-41", "Telephone & Duty Communications Logs",
     FLOPPY144_COLLECTION_DOMAIN_OS, 1U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 1U, "Telephone & Duty Communications Logs", "OS-41-RS",
-    floppy144_generated_generic_subjects, 12U, false, 3600U, 37U, 453U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 453U
 )
 
 FLOPPY144_COLLECTION(
     OS48, "OS-48", "CCTV Index & Retention",
     FLOPPY144_COLLECTION_DOMAIN_OS, 5U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 18U, "CCTV Index & Retention", "OS-48-RS",
-    floppy144_generated_generic_subjects, 12U, false, 3700U, 37U, 470U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 470U
 )
 
 FLOPPY144_COLLECTION(
     TS02, "TS-02", "Terminal Network Support",
     FLOPPY144_COLLECTION_DOMAIN_TS, 6U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 20U, "Terminal Network Support", "TS-02-RS",
-    floppy144_generated_generic_subjects, 12U, false, 3800U, 37U, 487U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 487U
 )
 
 FLOPPY144_COLLECTION(
     TS06, "TS-06", "Network Infrastructure & Cabling",
     FLOPPY144_COLLECTION_DOMAIN_TS, 6U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 22U, "Network Infrastructure & Cabling", "TS-06-RS",
-    floppy144_generated_generic_subjects, 12U, false, 3900U, 37U, 504U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 504U
 )
 
 FLOPPY144_COLLECTION(
     TS08, "TS-08", "Support History & Fault Trends",
     FLOPPY144_COLLECTION_DOMAIN_TS, 3U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 12U, "Support History & Fault Trends", "TS-08-RS",
-    floppy144_generated_generic_subjects, 12U, false, 4000U, 37U, 521U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 521U
 )
 
 FLOPPY144_COLLECTION(
     TS10, "TS-10", "Digital Holdings & Verification",
     FLOPPY144_COLLECTION_DOMAIN_TS, 6U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 20U, "Digital Holdings & Verification", "TS-10-RS",
-    floppy144_generated_generic_subjects, 12U, false, 4100U, 37U, 538U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 538U
 )
 
 FLOPPY144_COLLECTION(
     TS14, "TS-14", "Backup Operations & Server Availability",
     FLOPPY144_COLLECTION_DOMAIN_TS, 7U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 20U, "Backup Operations & Server Availability", "TS-14-RS",
-    floppy144_generated_generic_subjects, 12U, false, 4200U, 37U, 555U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 555U
 )
 
 FLOPPY144_COLLECTION(
     TS18, "TS-18", "Server Operations & Recovery Logs",
     FLOPPY144_COLLECTION_DOMAIN_TS, 7U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 24U, "Server Operations & Recovery Logs", "TS-18-RS",
-    floppy144_generated_generic_subjects, 12U, false, 4300U, 37U, 572U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 572U
 )
 
 FLOPPY144_COLLECTION(
     TS27, "TS-27", "Telephony & Internal Communications",
     FLOPPY144_COLLECTION_DOMAIN_TS, 1U,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 0U, "Telephony & Internal Communications", "TS-27-RS",
-    floppy144_generated_generic_subjects, 12U, false, 4400U, 37U, 589U
+    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 589U
 )
 
