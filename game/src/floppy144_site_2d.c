@@ -1543,6 +1543,190 @@ static void Floppy144Site2DDrawShelfClutter(
     }
 }
 
+typedef enum Floppy144Site2DWallAttachment
+{
+    FLOPPY144_SITE_2D_WALL_NONE = 0,
+    FLOPPY144_SITE_2D_WALL_LEFT,
+    FLOPPY144_SITE_2D_WALL_RIGHT,
+    FLOPPY144_SITE_2D_WALL_TOP,
+    FLOPPY144_SITE_2D_WALL_BOTTOM
+}
+Floppy144Site2DWallAttachment;
+
+static bool Floppy144Site2DRangesOverlap(
+    int32_t a0,
+    int32_t a1,
+    int32_t b0,
+    int32_t b1
+)
+{
+    return a0 < b1 && b0 < a1;
+}
+
+/*
+ * Identify which edge of a wall-mounted fixture actually touches its wall.
+ *
+ * Partition walls are explicit Site rectangles. Perimeter walls are generated
+ * from the inset floor boundary, so a fixture touching a floor edge is treated
+ * as mounted to the corresponding perimeter wall. This keeps the authored 1U
+ * placement footprint for targeting/collision while letting the visual recipe
+ * project only 0.5U into the room.
+ */
+static Floppy144Site2DWallAttachment
+Floppy144Site2DWallFixtureAttachment(
+    const Floppy144SiteRect *rect
+)
+{
+    uint32_t index;
+    uint32_t rect_count;
+    bool vertical;
+
+    if(rect == NULL)
+    {
+        return FLOPPY144_SITE_2D_WALL_NONE;
+    }
+
+    vertical = rect->width <= rect->height;
+    rect_count = Floppy144SiteRectCount();
+
+    /* Prefer an explicit partition-wall neighbour. */
+    for(index = 0U; index < rect_count; ++index)
+    {
+        const Floppy144SiteRect *other =
+            Floppy144SiteRectAt(index);
+
+        if(
+            other == NULL ||
+            other == rect ||
+            other->room != rect->room ||
+            other->type != (uint8_t)FLOPPY144_SITE_PARTITION_WALL
+        )
+        {
+            continue;
+        }
+
+        if(
+            vertical &&
+            Floppy144Site2DRangesOverlap(
+                (int32_t)rect->y,
+                (int32_t)rect->y + (int32_t)rect->height,
+                (int32_t)other->y,
+                (int32_t)other->y + (int32_t)other->height
+            )
+        )
+        {
+            if(
+                (int32_t)other->x + (int32_t)other->width ==
+                (int32_t)rect->x
+            )
+            {
+                return FLOPPY144_SITE_2D_WALL_LEFT;
+            }
+
+            if(
+                (int32_t)rect->x + (int32_t)rect->width ==
+                (int32_t)other->x
+            )
+            {
+                return FLOPPY144_SITE_2D_WALL_RIGHT;
+            }
+        }
+        else if(
+            !vertical &&
+            Floppy144Site2DRangesOverlap(
+                (int32_t)rect->x,
+                (int32_t)rect->x + (int32_t)rect->width,
+                (int32_t)other->x,
+                (int32_t)other->x + (int32_t)other->width
+            )
+        )
+        {
+            if(
+                (int32_t)other->y + (int32_t)other->height ==
+                (int32_t)rect->y
+            )
+            {
+                return FLOPPY144_SITE_2D_WALL_TOP;
+            }
+
+            if(
+                (int32_t)rect->y + (int32_t)rect->height ==
+                (int32_t)other->y
+            )
+            {
+                return FLOPPY144_SITE_2D_WALL_BOTTOM;
+            }
+        }
+    }
+
+    /* Fall back to the owning room's inset floor edge. */
+    for(index = 0U; index < rect_count; ++index)
+    {
+        const Floppy144SiteRect *floor =
+            Floppy144SiteRectAt(index);
+
+        if(
+            floor == NULL ||
+            floor->room != rect->room ||
+            !Floppy144Site2DIsFloor(
+                (Floppy144SiteElement)floor->type
+            )
+        )
+        {
+            continue;
+        }
+
+        if(
+            vertical &&
+            Floppy144Site2DRangesOverlap(
+                (int32_t)rect->y,
+                (int32_t)rect->y + (int32_t)rect->height,
+                (int32_t)floor->y,
+                (int32_t)floor->y + (int32_t)floor->height
+            )
+        )
+        {
+            if(rect->x == floor->x)
+            {
+                return FLOPPY144_SITE_2D_WALL_LEFT;
+            }
+
+            if(
+                (int32_t)rect->x + (int32_t)rect->width ==
+                (int32_t)floor->x + (int32_t)floor->width
+            )
+            {
+                return FLOPPY144_SITE_2D_WALL_RIGHT;
+            }
+        }
+        else if(
+            !vertical &&
+            Floppy144Site2DRangesOverlap(
+                (int32_t)rect->x,
+                (int32_t)rect->x + (int32_t)rect->width,
+                (int32_t)floor->x,
+                (int32_t)floor->x + (int32_t)floor->width
+            )
+        )
+        {
+            if(rect->y == floor->y)
+            {
+                return FLOPPY144_SITE_2D_WALL_TOP;
+            }
+
+            if(
+                (int32_t)rect->y + (int32_t)rect->height ==
+                (int32_t)floor->y + (int32_t)floor->height
+            )
+            {
+                return FLOPPY144_SITE_2D_WALL_BOTTOM;
+            }
+        }
+    }
+
+    return FLOPPY144_SITE_2D_WALL_NONE;
+}
+
 /*
  * Wall fixtures occupy their authored collision footprint but are visually
  * shallow. Ordinary boards/panels/cabinets project only 0.5 Site units from
@@ -1584,8 +1768,20 @@ static void Floppy144Site2DWallFixtureVisualRect(
     {
         if(depth_pixels < visual_rect->width)
         {
-            visual_rect->x +=
-                (visual_rect->width - depth_pixels) / 2;
+            Floppy144Site2DWallAttachment attachment =
+                Floppy144Site2DWallFixtureAttachment(rect);
+
+            if(attachment == FLOPPY144_SITE_2D_WALL_RIGHT)
+            {
+                visual_rect->x +=
+                    visual_rect->width - depth_pixels;
+            }
+            else if(attachment != FLOPPY144_SITE_2D_WALL_LEFT)
+            {
+                visual_rect->x +=
+                    (visual_rect->width - depth_pixels) / 2;
+            }
+
             visual_rect->width = depth_pixels;
         }
     }
@@ -1593,8 +1789,20 @@ static void Floppy144Site2DWallFixtureVisualRect(
     {
         if(depth_pixels < visual_rect->height)
         {
-            visual_rect->y +=
-                (visual_rect->height - depth_pixels) / 2;
+            Floppy144Site2DWallAttachment attachment =
+                Floppy144Site2DWallFixtureAttachment(rect);
+
+            if(attachment == FLOPPY144_SITE_2D_WALL_BOTTOM)
+            {
+                visual_rect->y +=
+                    visual_rect->height - depth_pixels;
+            }
+            else if(attachment != FLOPPY144_SITE_2D_WALL_TOP)
+            {
+                visual_rect->y +=
+                    (visual_rect->height - depth_pixels) / 2;
+            }
+
             visual_rect->height = depth_pixels;
         }
     }
@@ -1627,6 +1835,24 @@ static void Floppy144Site2DDrawWallFixture(
         screen_rect,
         &visual
     );
+
+    /*
+     * Drawing recipes bypass the small clipped-fill helpers below. Clip the
+     * fixture rectangle itself before invoking them so a wall board at the
+     * camera edge cannot paint over the fixed Site viewport/frame.
+     */
+    if(
+        !Floppy144Site2DClipRect(
+            surface,
+            &visual.x,
+            &visual.y,
+            &visual.width,
+            &visual.height
+        )
+    )
+    {
+        return;
+    }
 
     /*
      * Prefer the authored drawing definition. Task 12 may replace the generic
