@@ -201,7 +201,6 @@ static unsigned long generated_record_number(
     }
 
     die("could not rank generated record number");
-    return 0UL;
 }
 
 static void player_record_id(
