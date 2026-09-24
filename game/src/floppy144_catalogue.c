@@ -48,6 +48,84 @@ static const char *floppy144_record_forms[10] =
     ((uint32_t)(sizeof(floppy144_record_forms) /                   \
                 sizeof(floppy144_record_forms[0])))
 
+
+#define FLOPPY144_RECORD_NUMBER_DENSITY 11U
+
+/*
+ * Build the nth numerically ordered member of the collection's deterministic
+ * permutation. This restores the less mechanical record-number texture from
+ * the Technical Slice without returning to an out-of-order catalogue.
+ */
+static uint32_t Floppy144CatalogueOrderedRecordNumber(
+    const Floppy144CatalogueDefinition *definition,
+    uint32_t index
+)
+{
+    uint32_t modulus;
+    uint32_t source;
+
+    if(
+        definition == NULL ||
+        definition->record_count == 0U ||
+        index >= definition->record_count
+    )
+    {
+        return 0U;
+    }
+
+    modulus =
+        definition->record_count *
+        FLOPPY144_RECORD_NUMBER_DENSITY;
+
+    for(source = 0U; source < definition->record_count; ++source)
+    {
+        uint32_t candidate =
+            definition->record_number_base +
+            1U +
+            (
+                (
+                    source *
+                    definition->record_number_multiplier +
+                    definition->record_number_offset
+                ) %
+                modulus
+            );
+
+        uint32_t rank = 0U;
+        uint32_t other;
+
+        for(other = 0U; other < definition->record_count; ++other)
+        {
+            uint32_t other_candidate =
+                definition->record_number_base +
+                1U +
+                (
+                    (
+                        other *
+                        definition->record_number_multiplier +
+                        definition->record_number_offset
+                    ) %
+                    modulus
+                );
+
+            if(other_candidate < candidate)
+            {
+                ++rank;
+            }
+        }
+
+        if(rank == index)
+        {
+            return candidate;
+        }
+    }
+
+    return
+        definition->record_number_base +
+        index +
+        1U;
+}
+
 /*
  * Build a deterministic record ID and title
  *
@@ -112,14 +190,15 @@ void Floppy144CatalogueBuildRecord(
         FLOPPY144_RECORD_FORM_COUNT;
 
     /*
-     * Catalogue position owns the player-facing number band. Filler records
-     * use the round decade value (0010, 0020, ...); an authored record placed
-     * in that slot receives a stable number inside the same decade. The list
-     * therefore remains numerically ordered while significant records stay
-     * dispersed among ordinary material.
+     * Catalogue positions remain numerically ordered, but the numbers
+     * themselves come from the collection's deterministic permutation rather
+     * than a visible 0010/0020/0030 ladder.
      */
     record_number =
-        (index + 1U) * 10U;
+        Floppy144CatalogueOrderedRecordNumber(
+            definition,
+            index
+        );
 
     snprintf(
         record_id,
