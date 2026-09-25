@@ -1845,6 +1845,30 @@ static LRESULT CALLBACK Floppy144WindowProc(
                     switch(w_param)
                     {
                         case VK_UP:
+                        {
+                            if(
+                                Floppy144CatalogueDocumentOpen(
+                                    &global_catalogue
+                                )
+                            )
+                            {
+                                Floppy144CatalogueScrollDocument(
+                                    &global_catalogue,
+                                    -1
+                                );
+                            }
+                            else
+                            {
+                                Floppy144CatalogueMove(
+                                    &global_catalogue,
+                                    -1
+                                );
+                            }
+
+                            Floppy144Redraw(window);
+                            return 0;
+                        }
+
                         case 'W':
                         {
                             Floppy144CatalogueMove(
@@ -1857,6 +1881,30 @@ static LRESULT CALLBACK Floppy144WindowProc(
                         }
 
                         case VK_DOWN:
+                        {
+                            if(
+                                Floppy144CatalogueDocumentOpen(
+                                    &global_catalogue
+                                )
+                            )
+                            {
+                                Floppy144CatalogueScrollDocument(
+                                    &global_catalogue,
+                                    1
+                                );
+                            }
+                            else
+                            {
+                                Floppy144CatalogueMove(
+                                    &global_catalogue,
+                                    1
+                                );
+                            }
+
+                            Floppy144Redraw(window);
+                            return 0;
+                        }
+
                         case 'S':
                         {
                             Floppy144CatalogueMove(
