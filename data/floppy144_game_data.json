@@ -13328,7 +13328,7 @@
     },
     {
       "id": "E-003",
-      "statement": "Archive reconciliation and terminal-network remediation both remained outstanding when final Site handover was attempted.",
+      "statement": "Archive reconciliation and terminal-network remediation remained outstanding ahead of the planned final Site handover.",
       "physical_item_ids": [
         "P-014"
       ],
@@ -13341,7 +13341,7 @@
       ],
       "act": "Act I",
       "importance": "Core branch point",
-      "notebook_entry": "Archive reconciliation and terminal-network remediation both remained outstanding when final Site handover was attempted.",
+      "notebook_entry": "Archive reconciliation and terminal-network remediation remained outstanding ahead of the planned final Site handover.",
       "synthesis": {
         "required_interaction_ids": [
           "I-003"
@@ -13578,7 +13578,7 @@
     },
     {
       "id": "E-013",
-      "statement": "Reception and Security records contain no unexplained visitor access to the restricted areas during the relevant period.",
+      "statement": "Reception and Security records show no visitor access to the restricted areas during the incident window. This does not rule out unrecorded movement.",
       "physical_item_ids": [
         "P-001",
         "P-002"
@@ -13591,7 +13591,7 @@
       ],
       "act": "Act III",
       "importance": "Corroboration",
-      "notebook_entry": "Reception and Security records contain no unexplained visitor access to the restricted areas during the relevant period.",
+      "notebook_entry": "Reception and Security records show no visitor access to the restricted areas during the incident window. This does not rule out unrecorded movement.",
       "synthesis": {
         "required_interaction_ids": [
           "I-017",
@@ -13604,7 +13604,7 @@
     },
     {
       "id": "E-014",
-      "statement": "The relevant staff were recorded as present on Site on the final Friday and their duty status was consistent with their assigned work.",
+      "statement": "The closure staff signed in at the start of duty on the final Friday, with archive, IT, facilities and project leads listed on duty. These returns do not establish their later locations.",
       "physical_item_ids": [
         "P-025",
         "P-026"
@@ -13617,7 +13617,7 @@
       ],
       "act": "Act III",
       "importance": "Corroboration",
-      "notebook_entry": "The relevant staff were recorded as present on Site on the final Friday and their duty status was consistent with their assigned work.",
+      "notebook_entry": "The closure staff signed in at the start of duty on the final Friday, with archive, IT, facilities and project leads listed on duty. These returns do not establish their later locations.",
       "synthesis": {
         "required_interaction_ids": [
           "I-019",
@@ -13656,7 +13656,7 @@
     },
     {
       "id": "E-016",
-      "statement": "The Senior Archivist was present in the Server Room area when the evacuation occurred and was evacuated safely.",
+      "statement": "Security reported the Senior Archivist working in or immediately around the Server Room route before the alarm. The evacuation records account for the Senior Archivist safely.",
       "physical_item_ids": [
         "P-086",
         "P-087"
@@ -13669,7 +13669,7 @@
       ],
       "act": "Act III",
       "importance": "Core chronology",
-      "notebook_entry": "The Senior Archivist was present in the Server Room area when the evacuation occurred and was evacuated safely.",
+      "notebook_entry": "Security reported the Senior Archivist working in or immediately around the Server Room route before the alarm. The evacuation records account for the Senior Archivist safely.",
       "synthesis": {
         "required_interaction_ids": [
           "I-022",
@@ -13682,7 +13682,7 @@
     },
     {
       "id": "E-017",
-      "statement": "CCTV and Security duty records show expected staff activity around IT Support immediately before the incident, with no unexplained entry recorded; CCTV did not cover the protected Server Room interior.",
+      "statement": "CCTV and Security duty records support expected staff movements around IT Support before the alarm, with no unexplained entry recorded there. CCTV did not cover the Server Room interior or cable riser.",
       "physical_item_ids": [
         "P-096",
         "P-097",
@@ -13697,7 +13697,7 @@
       ],
       "act": "Act III",
       "importance": "Optional corroboration",
-      "notebook_entry": "CCTV and Security duty records show expected staff activity around IT Support immediately before the incident, with no unexplained entry recorded; CCTV did not cover the protected Server Room interior.",
+      "notebook_entry": "CCTV and Security duty records support expected staff movements around IT Support before the alarm, with no unexplained entry recorded there. CCTV did not cover the Server Room interior or cable riser.",
       "synthesis": {
         "required_interaction_ids": [
           "I-024",
@@ -13787,7 +13787,7 @@
     },
     {
       "id": "E-021",
-      "statement": "The still-connected manual-discharge wiring ran through the same cable-riser work area being disturbed during network remediation.",
+      "statement": "The still-connected manual-discharge circuit passed through the same cable-riser work area as the network cabling. Sharing the route does not by itself establish what caused the release input.",
       "physical_item_ids": [
         "P-113",
         "P-115"
@@ -13800,7 +13800,7 @@
       ],
       "act": "Act III",
       "importance": "Core",
-      "notebook_entry": "The still-connected manual-discharge wiring ran through the same cable-riser work area being disturbed during network remediation.",
+      "notebook_entry": "The still-connected manual-discharge circuit passed through the same cable-riser work area as the network cabling. Sharing the route does not by itself establish what caused the release input.",
       "synthesis": {
         "required_interaction_ids": [
           "I-032"
@@ -13812,7 +13812,7 @@
     },
     {
       "id": "E-022",
-      "statement": "Suppression diagnostics recorded a manual-release input at the time of the Halon discharge rather than a release initiated by fire detection.",
+      "statement": "Suppression diagnostics recorded the manual-release electrical channel as the initiating input, with no preceding fire-detection condition recorded. This does not establish that anyone operated a manual switch.",
       "physical_item_ids": [
         "P-037",
         "P-103",
@@ -13827,7 +13827,7 @@
       ],
       "act": "Act III",
       "importance": "Core",
-      "notebook_entry": "Suppression diagnostics recorded a manual-release input at the time of the Halon discharge rather than a release initiated by fire detection.",
+      "notebook_entry": "Suppression diagnostics recorded the manual-release electrical channel as the initiating input, with no preceding fire-detection condition recorded. This does not establish that anyone operated a manual switch.",
       "synthesis": {
         "required_interaction_ids": [
           "I-033"
@@ -13844,7 +13844,7 @@
     },
     {
       "id": "E-023",
-      "statement": "Physical cable condition and suppression diagnostics establish that disturbance of the still-connected manual-discharge circuit during cable remediation generated the release input.",
+      "statement": "The cable-riser condition, work sequence and suppression diagnostics support a reconstruction in which cable remediation accidentally activated the still-connected manual-release circuit. These findings do not establish individual responsibility.",
       "physical_item_ids": [
         "P-112",
         "P-113",
@@ -13858,7 +13858,7 @@
       ],
       "act": "Act III",
       "importance": "Core resolution",
-      "notebook_entry": "Physical cable condition and suppression diagnostics establish that disturbance of the still-connected manual-discharge circuit during cable remediation generated the release input.",
+      "notebook_entry": "The cable-riser condition, work sequence and suppression diagnostics support a reconstruction in which cable remediation accidentally activated the still-connected manual-release circuit. These findings do not establish individual responsibility.",
       "synthesis": {
         "required_interaction_ids": [
           "I-034"
@@ -15478,7 +15478,7 @@
         }
       ],
       "evidence_id": "E-003",
-      "notebook": "Archive reconciliation and terminal-network remediation remained outstanding",
+      "notebook": "Archive reconciliation and terminal-network remediation remained outstanding ahead of planned handover",
       "follow_on": "DR-04",
       "persistent": true,
       "source_order": 3
@@ -15830,7 +15830,7 @@
         }
       ],
       "evidence_id": "E-013",
-      "notebook": "No unexplained visitor access to restricted areas recorded",
+      "notebook": "No visitor access to restricted areas recorded during the incident window; unrecorded movement is not ruled out",
       "follow_on": null,
       "persistent": true,
       "source_order": 18
@@ -15876,7 +15876,7 @@
         }
       ],
       "evidence_id": "E-014",
-      "notebook": "Relevant staff were recorded on Site on final Friday",
+      "notebook": "Closure staff signed in at start of duty on final Friday; later locations are not established by the duty returns",
       "follow_on": null,
       "persistent": true,
       "source_order": 20
@@ -15921,7 +15921,7 @@
         }
       ],
       "evidence_id": "E-015",
-      "notebook": "Halon discharge triggered evacuation; everyone accounted for; no injuries",
+      "notebook": "Halon discharge triggered evacuation; all personnel accounted for; no injuries reported",
       "follow_on": "Supports E-016",
       "persistent": true,
       "source_order": 22
@@ -15944,7 +15944,7 @@
         }
       ],
       "evidence_id": "E-016",
-      "notebook": "Senior Archivist was safely evacuated from Server Room area",
+      "notebook": "Security reported Senior Archivist on the Server Room route before the alarm and accounted for safely after evacuation",
       "follow_on": null,
       "persistent": true,
       "source_order": 23
@@ -16012,7 +16012,7 @@
         }
       ],
       "evidence_id": "E-017",
-      "notebook": "Expected activity around IT Support; no unexplained entry; Server Room interior not covered",
+      "notebook": "Expected staff movements around IT Support; no unexplained entry recorded there; Server Room interior and cable riser not covered",
       "follow_on": null,
       "persistent": true,
       "source_order": 26
@@ -16058,7 +16058,7 @@
         }
       ],
       "evidence_id": "E-018",
-      "notebook": "Environmental systems recorded Halon discharge without preceding fire condition",
+      "notebook": "Environmental systems recorded Halon discharge and ventilation isolation with no preceding fire condition recorded",
       "follow_on": "Supports E-022",
       "persistent": true,
       "source_order": 28
@@ -16147,7 +16147,7 @@
         }
       ],
       "evidence_id": "E-021",
-      "notebook": "Still-connected discharge circuit ran through network-work area",
+      "notebook": "Still-connected manual-discharge circuit shared the cable-riser work area with network cabling; cause not yet established",
       "follow_on": null,
       "persistent": true,
       "source_order": 32
@@ -16170,7 +16170,7 @@
         }
       ],
       "evidence_id": "E-022",
-      "notebook": "Suppression system received manual-release input; no fire initiated it",
+      "notebook": "Manual-release electrical input recorded with no preceding fire-detection condition; deliberate switch operation not established",
       "follow_on": "Enables I-034",
       "persistent": true,
       "source_order": 33
@@ -16198,7 +16198,7 @@
         }
       ],
       "evidence_id": "E-023",
-      "notebook": "Disturbance of still-connected discharge circuit during cable work generated Halon release input",
+      "notebook": "Combined findings support accidental activation of the manual-release circuit during cable work; individual responsibility not established",
       "follow_on": "Core incident resolved",
       "persistent": true,
       "source_order": 34
