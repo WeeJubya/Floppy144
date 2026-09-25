@@ -28,6 +28,12 @@ typedef struct Floppy144CatalogueState
     Floppy144CollectionId collection;
     uint32_t selected_index;
     uint32_t top_index;
+
+    /*
+     * Zero-based wrapped body line at the top of the document viewport.
+     * List navigation and document scrolling deliberately keep separate state.
+     */
+    uint32_t document_scroll_line;
     bool document_open;
 } Floppy144CatalogueState;
 
@@ -84,6 +90,18 @@ void Floppy144CatalogueOpenDocument(
 
 void Floppy144CatalogueCloseDocument(
     Floppy144CatalogueState *catalogue
+);
+
+/*
+ * Scroll an open authored document by wrapped text lines.
+ *
+ * Movement is clamped between the first line and the last position that keeps
+ * a full 13-line viewport visible. Non-authored and short documents do not
+ * scroll.
+ */
+void Floppy144CatalogueScrollDocument(
+    Floppy144CatalogueState *catalogue,
+    int32_t direction
 );
 
 bool Floppy144CatalogueDocumentOpen(
