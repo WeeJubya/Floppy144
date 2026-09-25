@@ -12852,7 +12852,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-019",
-      "body": "Office Terminal Connectivity Fault Report\n\nThe Main Office terminal connection and its network lead have been reconstructed for physical inspection. The recovered diagnostic card and terminal status printout are also present at the terminal desk and should be examined in context.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nOFFICE TERMINAL CONNECTIVITY FAULT REPORT\n\nAsset: Main Office archive terminal\nReported: Final Thursday\nStatus: terminal operational / network service unavailable\n\nLocal power-on test is satisfactory. Keyboard, display and local diagnostic routine complete normally. Link indication is absent at the desk network connection.\n\nInitial action:\n- retain terminal in place;\n- replace local lead for test;\n- compare with diagnostic card;\n- trace service upstream if link remains absent.\n\nDo not exchange the terminal until the network path has been tested. The machine is old, not automatically guilty.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "TS-02"
     },
@@ -12864,7 +12864,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-020",
-      "body": "Local Terminal Diagnostic Result\n\nThe Main Office terminal connection and its network lead have been reconstructed for physical inspection. The recovered diagnostic card and terminal status printout are also present at the terminal desk and should be examined in context.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nLOCAL TERMINAL DIAGNOSTIC RESULT\n\nMain Office archive terminal.\n\nSelf-test ............... PASS\nLocal storage ........... PASS\nDisplay ................. PASS\nKeyboard ................ PASS\nNetwork interface ....... PASS\nDesk link ............... NO CARRIER\n\nA known-good short lead produces the same result at the desk outlet.\n\nFinding:\nThe terminal is serviceable. The fault lies beyond the local machine or at the building network path.\n\nNext action:\nCheck IT Support patch panel and onward route before changing terminal hardware.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "TS-02"
     },
@@ -12876,7 +12876,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "TEMPORARY WORKSTATION NOTE\n\nCollection: TS-02 - Terminal Network Support.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nTEMPORARY WORKSTATION NOTE\n\nIT Support will work from Main Office Desk 04 while the archive terminal fault remains open.\n\nReason:\nThe affected terminal must remain available for repeated link tests and closure staff require immediate support.\n\nTemporary equipment at Desk 04:\n- cable tester;\n- diagnostic card;\n- spare patch leads;\n- terminal-status printouts.\n\nDo not relocate the test kit to IT Support without leaving a note. The last two hours of Thursday were spent looking for the cable tester because somebody had put it away properly.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "TS-02"
     },
@@ -12888,7 +12888,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "NETWORK LEAD TEST\n\nCollection: TS-02 - Terminal Network Support.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nNETWORK LEAD TEST\n\nDesk lead removed and tested.\n\nPair continuity: PASS\nConnector condition: serviceable\nSubstitute lead test: no change to fault\nLocal terminal interface: serviceable\n\nConclusion:\nThe loose lead between terminal and desk outlet is not the cause of the missing network service.\n\nLead returned to desk for identification purposes.\n\nEscalate to fixed route and patch-panel checks.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "TS-02"
     },
@@ -12900,7 +12900,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "TERMINAL HARDWARE CHECK\n\nCollection: TS-02 - Terminal Network Support.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nTERMINAL HARDWARE CHECK\n\nArchive terminal opened for closure-period hardware inspection.\n\nNo failed board indicators.\nNo overheated component.\nNetwork interface seated correctly.\nLocal diagnostic routine repeats cleanly.\nClock discrepancy within known tolerance.\nDust level classified as \"historic but non-operational\".\n\nNo hardware replacement recommended.\n\nThe continuing network fault should be investigated as infrastructure.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "TS-02"
     },
@@ -12912,7 +12912,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "ESCALATION TO INFRASTRUCTURE\n\nCollection: TS-02 - Terminal Network Support.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nESCALATION TO INFRASTRUCTURE\n\nThe Main Office terminal fault is transferred from endpoint support to network infrastructure.\n\nEvidence from local checks:\n- terminal powers and self-tests correctly;\n- network interface reports healthy;\n- local patch lead tests correctly;\n- service remains absent at the desk outlet.\n\nRequired:\nTrace the assigned circuit at the IT Support patch panel and verify continuity toward the Server Room distribution route.\n\nClosure impact:\nDigital holdings verification remains blocked until connectivity is restored.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "TS-02"
     },
@@ -12924,7 +12924,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-021",
-      "body": "Terminal Network Cable Route Investigation\n\nIT Support patch panel is now represented in the recovered site and can be inspected. Server-route label is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nTERMINAL NETWORK CABLE ROUTE INVESTIGATION\n\nCircuit: Main Office archive terminal\n\nIT Support patch-panel records identify the office outlet and its onward route toward the Server Room distribution point.\n\nThe local patch position is correctly labelled and connected. No cross-patch or retired-port error was found.\n\nThe route continues through the Server Room cable riser, where closure-period cable work is already scheduled.\n\nAction:\nPerform continuity tests from both ends before replacing the fixed run.\n\nNote:\nThe riser also contains non-network control cabling. Observe Facilities isolation requirements before disturbing bundles.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "TS-06"
     },
@@ -12936,7 +12936,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-022",
-      "body": "Distribution Panel Test Record\n\nSpare patch lead is now represented in the recovered site and can be inspected. Cable tester is now represented in the recovered site and can be inspected. Retired port label is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nDISTRIBUTION PANEL TEST RECORD\n\nMain Office archive circuit.\n\nIT Support panel port: signal path present to intermediate point.\nServer-side route: intermittent/open under movement.\nPatch lead substitution: no improvement.\nPort re-seat: no lasting improvement.\n\nThe fault appears to be on the fixed route between IT Support and the Server Room termination rather than at either active device.\n\nCable-riser access is required.\n\nFacilities to be notified before intrusive work because the riser carries suppression-control wiring in addition to network services.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "TS-06"
     },
@@ -12948,7 +12948,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "PATCH PANEL PORT SCHEDULE\n\nCollection: TS-06 - Network Infrastructure & Cabling.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nPATCH PANEL PORT SCHEDULE\n\nMAIN OFFICE ARCHIVE TERMINAL\nDesk outlet: MO-T04\nIT Support panel: P2-17\nServer route: SR-RISER / N-17\nService: archive verification network\nStatus: FAULT OPEN\n\nAdjacent positions:\nP2-16 general office\nP2-18 spare\nP2-19 retired\n\nHandwritten correction:\n\"17, not 19. The faded label is older than the person reading it.\"\n\nRetired labels are to remain struck through until final cable removal so they cannot be mistaken for live routes.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "TS-06"
     },
@@ -12960,7 +12960,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "SERVER ROUTE IDENTIFICATION\n\nCollection: TS-06 - Network Infrastructure & Cabling.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nSERVER ROUTE IDENTIFICATION\n\nThe affected archive-terminal circuit enters the Server Room via the shared cable riser and terminates at the distribution side of the server network.\n\nThe riser contains:\n- network copper;\n- legacy telephone pairs;\n- suppression manual-release/control wiring;\n- service labels from previous modifications.\n\nThe network route can be worked without altering suppression equipment, but the cable bundle is physically close.\n\nFacilities isolation must be confirmed before pulling, rethreading or separating cables in the riser.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "TS-06"
     },
@@ -12972,7 +12972,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "CABLE CONTINUITY TEST\n\nCollection: TS-06 - Network Infrastructure & Cabling.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nCABLE CONTINUITY TEST\n\nCircuit N-17.\n\nStatic test: intermittent continuity failure.\nFlex test at IT Support end: no change.\nFlex test at Server Room riser: fault changes state.\nConnector terminations: visually serviceable.\nCable jacket near riser: compressed among older control wiring.\n\nFinding:\nFault localised to the riser section.\n\nProposed action:\nFree the affected network cable, inspect damage and replace the local section if required.\n\nSafety condition:\nConfirm isolation status of adjacent suppression-control circuit before disturbing the bundle.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "TS-06"
     },
@@ -12984,7 +12984,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "NETWORK REMEDIATION WORK ORDER\n\nCollection: TS-06 - Network Infrastructure & Cabling.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nNETWORK REMEDIATION WORK ORDER\n\nWork order: restore Main Office archive-terminal route.\n\nTasks:\n1. Obtain Server Room access.\n2. Confirm Facilities control-circuit isolation.\n3. Photograph or sketch cable-riser condition.\n4. Free network circuit N-17 from compressed bundle.\n5. Replace damaged section as necessary.\n6. Test end-to-end.\n7. Restore digital verification service.\n8. Record any unexpected wiring interaction.\n\nFriday note:\nWork commenced pending Facilities attendance. Full circuit isolation confirmation not yet signed at time of last entry.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "TS-06"
     },
@@ -12996,7 +12996,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "HISTORICAL TERMINAL FAULT 1\n\nCollection: TS-08 - Support History & Fault Trends.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nHISTORICAL TERMINAL FAULT 1\n\nPrevious incident: archive terminal intermittently lost network service after furniture movement.\n\nCause:\nDesk patch lead partially unseated.\n\nResolution:\nConnector reseated and retaining clip replaced.\n\nRelevance to current fault:\nLow. The present desk lead and terminal interface have both passed test.\n\nFiled for trend comparison because the same symptom has previously had a much simpler cause.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "TS-08"
     },
@@ -13008,7 +13008,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "HISTORICAL TERMINAL FAULT 2\n\nCollection: TS-08 - Support History & Fault Trends.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nHISTORICAL TERMINAL FAULT 2\n\nPrevious incident: archive terminal displayed \"host unavailable\" for approximately 40 minutes.\n\nCause:\nServer maintenance overran.\n\nTerminal hardware was not at fault.\n\nResolution:\nService restored when server returned.\n\nRelevance to current fault:\nThe present server remains available to other services, making a general server outage unlikely.\n\nSupport note:\nIdentical messages can have different causes. This is why we test things.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "TS-08"
     },
@@ -13020,7 +13020,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "LEGACY PATCH WORKAROUND\n\nCollection: TS-08 - Support History & Fault Trends.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nLEGACY PATCH WORKAROUND\n\nAn earlier office rearrangement left one network route using an intermediate patch position that is no longer shown clearly on the wall label.\n\nTemporary workaround was documented pending a full recable that never became sufficiently urgent to fund.\n\nThe archive-terminal circuit does not use that retired position, but the nearby labels remain confusing.\n\nClosure action:\nRemove obsolete labels only after all live circuits have been positively identified.\n\nIT Support note:\n\"Temporary\" has survived three office managers and one budget cycle.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "TS-08"
     },
@@ -13032,7 +13032,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "SUPPORT TREND SUMMARY\n\nCollection: TS-08 - Support History & Fault Trends.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nSUPPORT TREND SUMMARY\n\nArchive-terminal faults over the previous two years fall into three categories:\n\nLocal lead/connector ........ several minor incidents\nServer availability ......... two planned/known incidents\nFixed building route ........ rare\n\nCurrent case differs from the common local faults:\nthe endpoint is healthy and the fixed route shows movement-sensitive continuity at the Server Room riser.\n\nHistorical frequency should inform diagnosis, not override current test results.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "TS-08"
     },
@@ -13044,7 +13044,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-023",
-      "body": "Final Digital Holdings Verification Report\n\nDigital verification pack is now represented in the recovered site and can be inspected. Spare media wallet is now represented in the recovered site and can be inspected. Checksum printout is now represented in the recovered site and can be inspected. Archive-transfer label sheet is now represented in the recovered site and can be inspected. Open screwdriver set is now represented in the recovered site and can be inspected. Box of assorted network leads is now represented in the recovered site and can be inspected. Handwritten port-reference strip is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nFINAL DIGITAL HOLDINGS VERIFICATION REPORT\n\nStatus: NOT COMPLETED\n\nVerification media and checksum lists have been prepared. The Main Office archive terminal cannot currently reach the server holdings because of the open network-route fault.\n\nCompleted:\n- verification set identified;\n- media prepared;\n- expected checksums printed;\n- transfer labels prepared.\n\nOutstanding:\n- live comparison against server holdings;\n- exception resolution;\n- Senior Archivist confirmation.\n\nNo discrepancy in the holdings is asserted at this stage. The verification has not run.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "TS-10"
     },
@@ -13056,7 +13056,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-024",
-      "body": "Verification Media Preparation Record\n\nTransfer media case is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nVERIFICATION MEDIA PREPARATION RECORD\n\nTransfer verification set prepared for final archive handover.\n\nMedia case sealed for working custody but not final transfer.\nChecksum printout enclosed separately.\nSpare media retained in IT Support.\nArchive-transfer labels prepared.\nSenior Archivist review required after successful comparison.\n\nThe prepared media must not be overwritten while the network fault remains unresolved.\n\nPrepared is not verified.\nLabelled is not transferred.\nFriday is not yet finished.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "TS-10"
     },
@@ -13068,7 +13068,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "CHECKSUM PREPARATION SHEET\n\nCollection: TS-10 - Digital Holdings & Verification.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nCHECKSUM PREPARATION SHEET\n\nExpected checksum list generated from the last confirmed server index before final verification.\n\nPurpose:\nDetect missing, altered or duplicated digital holdings during the closure comparison.\n\nThe sheet is a reference set only. It does not prove the current server state until the live comparison is completed.\n\nAny mismatch is to be recorded before corrective action so the original condition remains auditable.\n\nDo not manually \"correct\" a checksum because the filename looks right.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "TS-10"
     },
@@ -13080,7 +13080,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "ARCHIVE TRANSFER MEDIA LIST\n\nCollection: TS-10 - Digital Holdings & Verification.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nARCHIVE TRANSFER MEDIA LIST\n\nFinal verification case contains:\n\nMedia A  catalogue export\nMedia B  document-index copy\nMedia C  closure-period change set\nMedia D  verification utilities\nPrinted checksum sheet\nTransfer labels\n\nSpare media wallet remains in IT Support and is not part of the transfer set.\n\nFinal seal is to be applied only after live verification and Senior Archivist sign-off.\n\nThe case is ready to use, not ready to leave.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "TS-10"
     },
@@ -13092,7 +13092,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "VERIFICATION BLOCKER NOTE\n\nCollection: TS-10 - Digital Holdings & Verification.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nVERIFICATION BLOCKER NOTE\n\nBlocker: Main Office archive terminal cannot reach server holdings.\n\nEndpoint checks: PASS\nIT Support patching: PASS to intermediate route\nFixed circuit: fault localised toward Server Room cable riser\n\nImpact:\nFinal digital holdings comparison cannot proceed.\nPhysical transfer batch remains awaiting paired verification.\nSenior Archivist cannot sign final archive release.\n\nOwner: IT Support\nDependency: network remediation work order.\n\nWorkaround rejected:\nUsing an unverified older copy would satisfy the timetable, not the control.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "TS-10"
     },
@@ -13104,7 +13104,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "DIGITAL HOLDINGS HANDOVER CHECKLIST\n\nCollection: TS-10 - Digital Holdings & Verification.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nDIGITAL HOLDINGS HANDOVER CHECKLIST\n\n[OK] Verification media prepared\n[OK] Expected checksum set printed\n[OK] Transfer labels prepared\n[  ] Network route restored\n[  ] Live server comparison complete\n[  ] Differences resolved\n[  ] Senior Archivist review\n[  ] Final media seal\n[  ] Handover receipt\n\nStatus: HOLD\n\nDo not initial future work in advance.\n\nThis instruction was added after somebody described empty boxes as \"administrative latency\".",
       "source_status": "authored-for-integration",
       "parent_collection_id": "TS-10"
     },
@@ -13116,7 +13116,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-045",
-      "body": "Server Availability & Backup Operations Summary\n\nThe SERVER ROOM area has been reconstructed from the surviving archive.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nSERVER AVAILABILITY & BACKUP OPERATIONS SUMMARY\n\nThe Server Room remains operational through final Site closure.\n\nReason:\n- final backup rotation;\n- archive holdings verification;\n- transfer preparation;\n- controlled shutdown after acceptance.\n\nServer services were not scheduled for early removal or power isolation.\n\nAccess remains restricted under the normal matrix.\n\nTechnology Services will release the room to Facilities only after backup and verification dependencies are closed.\n\nThe building may be nearly empty. The servers are still working.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "TS-14"
     },
@@ -13128,7 +13128,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-046",
-      "body": "Final Backup Window Schedule\n\nBackup rotation case is now represented in the recovered site and can be inspected. Backup logbook is now represented in the recovered site and can be inspected. Spare drive caddy is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nFINAL BACKUP WINDOW SCHEDULE\n\nThursday 18:00  routine incremental\nFriday 07:00    final pre-handover backup\nFriday 13:00    verification snapshot\nFriday 16:00    contingency copy if handover delayed\n\nFriday 07:00 backup completed.\n13:00 snapshot completed with server services available.\n\nAny incident after the snapshot requires Technology Services to decide whether a further copy is necessary before shutdown.\n\nBackup completion does not replace archive verification. They protect different risks.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "TS-14"
     },
@@ -13140,7 +13140,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-047",
-      "body": "Archive Verification Dependency Note\n\nServer status panel is now represented in the recovered site and can be inspected. Rack labels is now represented in the recovered site and can be inspected. UPS status card is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nARCHIVE VERIFICATION DEPENDENCY NOTE\n\nFinal archive verification depends on:\n\n1. server holdings remaining online;\n2. the Main Office terminal route being restored;\n3. prepared verification media remaining unchanged;\n4. Senior Archivist access for sign-off.\n\nThe server side is available.\nThe network path remains the blocking dependency.\n\nDo not shut down the server merely because the office terminal cannot currently reach it.\n\nA road closure does not prove the destination has vanished.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "TS-14"
     },
@@ -13152,7 +13152,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "BACKUP ROTATION LOG\n\nCollection: TS-14 - Backup Operations & Server Availability.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nBACKUP ROTATION LOG\n\nTHU 18:00  Incremental set B7 ........ COMPLETE\nFRI 07:00  Final full set C1 ......... COMPLETE\nFRI 13:00  Verification snapshot C1-V  COMPLETE\n\nMedia C1 retained in Server Room backup case pending handover.\nPrevious rotation retained until final acceptance.\n\nNo failed backup is recorded in the relevant period.\n\nOperator note at 13:12:\n\"Server fine. Network route still not fine. These are separate facts.\"",
       "source_status": "authored-for-integration",
       "parent_collection_id": "TS-14"
     },
@@ -13164,7 +13164,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "SERVER AVAILABILITY CHECKLIST\n\nCollection: TS-14 - Backup Operations & Server Availability.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nSERVER AVAILABILITY CHECKLIST\n\n[OK] Core services running\n[OK] Archive holdings accessible locally\n[OK] Storage health normal\n[OK] Backup completed\n[OK] UPS normal\n[OK] Rack temperatures normal\n[  ] Main Office route restored\n[  ] Final verification complete\n[  ] Shutdown authorised\n\nCurrent state: KEEP IN SERVICE.\n\nNo server fault explains the Main Office terminal's missing connection.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "TS-14"
     },
@@ -13176,7 +13176,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "UPS & RACK STATUS SUMMARY\n\nCollection: TS-14 - Backup Operations & Server Availability.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nUPS & RACK STATUS SUMMARY\n\nUPS load: normal\nBattery status: serviceable\nRack power: stable\nTemperature: normal\nDrive alarms: none\nNetwork core: active\n\nClosure work has removed non-essential equipment from adjacent spaces, but the server rack remains in normal operating state.\n\nThe anti-static strap and spare caddy remain on the Server Room shelving until technical release.\n\nNo abnormal power event is recorded before the suppression discharge.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "TS-14"
     },
@@ -13188,7 +13188,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-048",
-      "body": "Server Room Cable Riser Maintenance Log\n\nCable-riser work area is now represented in the recovered site and can be inspected. Pulled network cable is now represented in the recovered site and can be inspected. Cable tester is now represented in the recovered site and can be inspected. Maintenance isolation tag is now represented in the recovered site and can be inspected. Empty patch-cable reel is now represented in the recovered site and can be inspected. Halon cylinder service label is now represented in the recovered site and can be inspected. Server recovery checklist is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nSERVER ROOM CABLE RISER MAINTENANCE LOG\n\nFriday work: restore archive-terminal circuit N-17.\n\n14:05  Route confirmed at riser.\n14:10  Cable tester connected.\n14:14  Damaged/compressed section identified.\n14:18  Network cable partly freed from shared bundle.\n14:22  Adjacent control wiring observed in same route.\n14:24  Work paused briefly to check labels.\n14:27  Cable bundle repositioned for access.\n14:29  Site alarm / suppression discharge. Work abandoned.\n\nFacilities isolation signature was not present on the work sheet at the time of evacuation.\n\nTools and cable were left as found after the alarm.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "TS-18"
     },
@@ -13200,7 +13200,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-049",
-      "body": "Suppression Event Diagnostic\n\nManual discharge wiring / control connection is now represented in the recovered site and can be inspected. Suppression event diagnostic panel is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nSUPPRESSION EVENT DIAGNOSTIC\n\nControl diagnostic recovered after the Server Room discharge.\n\nFire detection state before release: NORMAL\nHeat detection state before release: NORMAL\nManual release input: ACTIVE at 14:28:49\nRelease logic response: VALID\nVentilation interlock: OPERATED\nHalon discharge: CONFIRMED\n\nThe diagnostic identifies the manual-release electrical channel as the initiating input.\n\nIt does not show a manual switch being deliberately operated.\n\nFurther examination required:\ntrace the manual-input circuit through the cable-riser work area.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "TS-18"
     },
@@ -13212,7 +13212,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-050",
-      "body": "Post-Discharge System Recovery Summary\n\nAdditional diagnostic material is now available to support the investigation.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nPOST-DISCHARGE SYSTEM RECOVERY SUMMARY\n\nServer services survived the suppression event and controlled re-entry.\n\nInitial recovery:\n- verify atmosphere safe;\n- inspect rack power and UPS;\n- preserve suppression diagnostic;\n- leave cable-riser work undisturbed;\n- confirm backups intact;\n- prevent automatic overwrite of relevant logs.\n\nNo evidence of fire damage or server failure was found.\n\nTechnical investigation priority:\ncompare the manual-release wiring path with the exact network cable area being worked immediately before discharge.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "TS-18"
     },
@@ -13224,7 +13224,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "CABLE REMEDIATION WORK SHEET\n\nCollection: TS-18 - Server Operations & Recovery Logs.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nCABLE REMEDIATION WORK SHEET\n\nCircuit N-17 showed movement-sensitive failure at the Server Room riser.\n\nPhysical condition after incident:\n- network cable partly withdrawn;\n- outer jacket compressed at bundle crossing;\n- adjacent legacy control pair displaced from its previous lay;\n- temporary tools still present;\n- no deliberate cut observed.\n\nThe network cable and suppression-control pair occupy the same constrained working space.\n\nBefore further repair:\nphotograph, label and test both circuits independently.\n\nDo not restore neat cable dressing until the incident condition has been recorded.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "TS-18"
     },
@@ -13236,7 +13236,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "MANUAL RELEASE INPUT TRACE\n\nCollection: TS-18 - Server Operations & Recovery Logs.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nMANUAL RELEASE INPUT TRACE\n\nThe suppression manual-release input was traced from the control logic through the Server Room cable riser.\n\nContinuity testing identified an intermittent condition in the section adjacent to network circuit N-17.\n\nWhen the affected bundle is moved, the manual-input circuit can momentarily present the same electrical state as an intentional release command.\n\nThe behaviour reproduces the type of input recorded at 14:28:49.\n\nTest performed under safe isolation with discharge output disabled.\n\nFinding requires comparison with the pre-incident Facilities service note, which records earlier instability under cable movement.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "TS-18"
     },
@@ -13248,7 +13248,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "SERVER ROOM RECOVERY CHECKLIST\n\nCollection: TS-18 - Server Operations & Recovery Logs.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nSERVER ROOM RECOVERY CHECKLIST\n\n[OK] Atmosphere declared safe\n[OK] Server power stable\n[OK] Backup media intact\n[OK] Diagnostic logs preserved\n[OK] Cable-riser condition recorded\n[OK] Manual-release circuit safely isolated\n[OK] Network fault area identified\n[  ] Permanent cable repair\n[  ] Suppression-control repair\n[  ] Final archive verification\n[  ] Closure release\n\nNo permanent repair is to begin until Security accepts the incident documentation.\n\nPreserve first. Repair second.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "TS-18"
     },
@@ -13260,7 +13260,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "HALON CONTROL WIRING NOTE\n\nCollection: TS-18 - Server Operations & Recovery Logs.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nHALON CONTROL WIRING NOTE\n\nThe Server Room suppression system uses a manual-release electrical path that shares the service riser with older network cabling.\n\nThe circuits are functionally separate but were installed close together and have been altered at different times.\n\nFacilities records show the manual path remained connected through final closure because the Server Room stayed operational. A Thursday service note also records a brief unstable manual-input indication while adjacent cabling was disturbed.\n\nRecommendation:\nreroute or mechanically separate the control pair during permanent remediation.\n\n\"Separate systems\" is an electrical description, not always a physical one.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "TS-18"
     },
@@ -13272,7 +13272,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "FINAL TECHNICAL RECONSTRUCTION\n\nCollection: TS-18 - Server Operations & Recovery Logs.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nFINAL TECHNICAL RECONSTRUCTION\n\nSubject: Server Room Halon discharge, final Friday.\n\nEstablished sequence:\n\n1. The Main Office archive terminal had a genuine fixed-route network fault.\n2. The fault was localised to circuit N-17 at the Server Room cable riser.\n3. The riser also carried the still-connected suppression manual-release circuit.\n4. Facilities had previously recorded manual-input instability when adjacent cabling was moved.\n5. Network remediation disturbed the shared bundle immediately before the incident.\n6. Suppression diagnostics recorded no preceding fire condition and identified the manual-release electrical channel.\n7. Isolated testing reproduced a release-state input when the affected wiring was disturbed.\n\nTechnical conclusion:\nThe discharge was initiated accidentally when cable-remediation work disturbed the still-connected manual-release circuit. No deliberate operation of the suppression control is required to explain the event.\n\nThis conclusion addresses mechanism. Questions of procedure, isolation and responsibility remain matters for the closure review.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "TS-18"
     }
