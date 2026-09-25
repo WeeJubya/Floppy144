@@ -442,6 +442,115 @@ static void Floppy144TestCatalogueRecordResolution(void)
 }
 
 /*
+ * Long recovered documents use a 13-line viewport. FM-04-RS-0035 is a compact
+ * permanent fixture for scroll behaviour because its in-universe body wraps
+ * beyond that window.
+ */
+static void Floppy144TestDocumentBodyScrolling(void)
+{
+    Floppy144CatalogueState sCatalogue;
+    Floppy144CollectionId eCollection =
+        FLOPPY144_COLLECTION_COUNT;
+    uint32_t uRecordIndex = UINT32_MAX;
+    uint32_t uMaximumScroll;
+    uint32_t uStep;
+
+    F144_CHECK(
+        Floppy144CatalogueFindRecord(
+            "FM-04-RS-0035",
+            &eCollection,
+            &uRecordIndex
+        ),
+        "FM-04-RS-0035 resolves for document-scroll regression"
+    );
+
+    if(eCollection == FLOPPY144_COLLECTION_COUNT)
+    {
+        return;
+    }
+
+    Floppy144CatalogueReset(
+        &sCatalogue,
+        eCollection
+    );
+
+    F144_CHECK(
+        Floppy144CatalogueOpenRecord(
+            &sCatalogue,
+            eCollection,
+            uRecordIndex
+        ) &&
+        Floppy144CatalogueDocumentOpen(
+            &sCatalogue
+        ) &&
+        sCatalogue.document_scroll_line == 0U,
+        "long document opens at first wrapped body line"
+    );
+
+    Floppy144CatalogueScrollDocument(
+        &sCatalogue,
+        1
+    );
+
+    F144_CHECK(
+        sCatalogue.document_scroll_line == 1U,
+        "Down scrolls long document by one wrapped line"
+    );
+
+    for(uStep = 0U; uStep < 100U; ++uStep)
+    {
+        Floppy144CatalogueScrollDocument(
+            &sCatalogue,
+            1
+        );
+    }
+
+    uMaximumScroll =
+        sCatalogue.document_scroll_line;
+
+    F144_CHECK(
+        uMaximumScroll > 1U &&
+        uMaximumScroll < 100U,
+        "document scrolling clamps at final full viewport"
+    );
+
+    Floppy144CatalogueScrollDocument(
+        &sCatalogue,
+        1
+    );
+
+    F144_CHECK(
+        sCatalogue.document_scroll_line == uMaximumScroll,
+        "Down at document end remains clamped"
+    );
+
+    for(uStep = 0U; uStep < 100U; ++uStep)
+    {
+        Floppy144CatalogueScrollDocument(
+            &sCatalogue,
+            -1
+        );
+    }
+
+    F144_CHECK(
+        sCatalogue.document_scroll_line == 0U,
+        "Up clamps at first document line"
+    );
+
+    Floppy144CatalogueCloseDocument(
+        &sCatalogue
+    );
+
+    F144_CHECK(
+        !Floppy144CatalogueDocumentOpen(
+            &sCatalogue
+        ) &&
+        sCatalogue.document_scroll_line == 0U,
+        "closing document clears scroll position"
+    );
+}
+
+/*
  * Stage 3C collection LIST presentation owns a fixed-width table. The header
  * and rows must share separator columns, and unavailable identities must remain
  * opaque rather than looking like plausible collection names.
@@ -1226,6 +1335,7 @@ int main(void)
 {
     Floppy144TestExtendedGlyphs();
     Floppy144TestCatalogueRecordResolution();
+    Floppy144TestDocumentBodyScrolling();
     Floppy144TestCollectionListPresentation();
     Floppy144TestMultipleCollectionCommands();
     Floppy144TestCommandHistory();
