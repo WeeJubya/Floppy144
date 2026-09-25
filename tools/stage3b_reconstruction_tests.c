@@ -1343,7 +1343,10 @@ static void Floppy144TestRecordsOfficeLeftWallClear(void)
 {
     uint32_t uRectIndex;
     bool bDesk04Found = false;
+    bool bTopLeftChairCentred = false;
+    bool bRecordsDoorCentred = false;
     uint32_t uLeftCabinetsFound = 0U;
+    uint32_t uRightWallCabinetsFound = 0U;
 
     for(
         uRectIndex = 0U;
@@ -1354,8 +1357,33 @@ static void Floppy144TestRecordsOfficeLeftWallClear(void)
         const Floppy144SiteRect *pRect =
             Floppy144SiteRectAt(uRectIndex);
 
+        if(pRect == NULL)
+        {
+            continue;
+        }
+
         if(
-            pRect == NULL ||
+            pRect->type == (uint8_t)FLOPPY144_SITE_DOOR &&
+            pRect->x == 59U &&
+            pRect->y == 46U &&
+            pRect->width == 5U &&
+            pRect->height == 1U &&
+            (
+                (
+                    pRect->from_room == (uint8_t)FLOPPY144_ROOM_CORRIDOR &&
+                    pRect->to_room == (uint8_t)FLOPPY144_ROOM_RECORDS_OFFICE
+                ) ||
+                (
+                    pRect->to_room == (uint8_t)FLOPPY144_ROOM_CORRIDOR &&
+                    pRect->from_room == (uint8_t)FLOPPY144_ROOM_RECORDS_OFFICE
+                )
+            )
+        )
+        {
+            bRecordsDoorCentred = true;
+        }
+
+        if(
             pRect->room !=
                 (uint8_t)FLOPPY144_ROOM_RECORDS_OFFICE
         )
@@ -1405,6 +1433,33 @@ static void Floppy144TestRecordsOfficeLeftWallClear(void)
         {
             ++uLeftCabinetsFound;
         }
+
+        if(
+            pRect->type ==
+                (uint8_t)FLOPPY144_SITE_SECURE_CABINET_FULL &&
+            pRect->x == 65U &&
+            pRect->width == 2U &&
+            pRect->height == 6U &&
+            (
+                pRect->y == 33U ||
+                pRect->y == 40U
+            )
+        )
+        {
+            ++uRightWallCabinetsFound;
+        }
+
+        if(
+            pRect->type == (uint8_t)FLOPPY144_SITE_CHAIR &&
+            pRect->x == 59U &&
+            pRect->y == 5U &&
+            pRect->width == 2U &&
+            pRect->height == 2U &&
+            pRect->rotation == 180U
+        )
+        {
+            bTopLeftChairCentred = true;
+        }
     }
 
     F144_CHECK(
@@ -1415,6 +1470,21 @@ static void Floppy144TestRecordsOfficeLeftWallClear(void)
     F144_CHECK(
         uLeftCabinetsFound == 5U,
         "Records Office left cabinet bank is shifted one unit inside wall"
+    );
+
+    F144_CHECK(
+        uRightWallCabinetsFound == 2U,
+        "Records Office door-side cabinets sit flush against right-hand wall"
+    );
+
+    F144_CHECK(
+        bTopLeftChairCentred,
+        "Records Office top-left desk chair is centred on Desk 04"
+    );
+
+    F144_CHECK(
+        bRecordsDoorCentred,
+        "Records Office corridor door is centred on the narrow room leg"
     );
 }
 
