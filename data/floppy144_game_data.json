@@ -757,7 +757,7 @@
             "type": "STANDARD_DESK",
             "variant": "STANDARD_DESK",
             "object": "RECORDS_OFFICE_DESK_04",
-            "x": 56,
+            "x": 57,
             "y": 1,
             "width": 6,
             "height": 4,
@@ -899,7 +899,7 @@
             "type": "SECURE_CABINET_FULL",
             "variant": "SECURE_CABINET",
             "object": "RECORDS_OFFICE_SECURE_CABINET_13",
-            "x": 56,
+            "x": 57,
             "y": 12,
             "width": 2,
             "height": 6
@@ -909,7 +909,7 @@
             "type": "SECURE_CABINET_FULL",
             "variant": "SECURE_CABINET",
             "object": "RECORDS_OFFICE_SECURE_CABINET_14",
-            "x": 56,
+            "x": 57,
             "y": 19,
             "width": 2,
             "height": 6
@@ -919,7 +919,7 @@
             "type": "SECURE_CABINET_FULL",
             "variant": "SECURE_CABINET",
             "object": "RECORDS_OFFICE_SECURE_CABINET_15",
-            "x": 56,
+            "x": 57,
             "y": 26,
             "width": 2,
             "height": 6
@@ -929,7 +929,7 @@
             "type": "SECURE_CABINET_FULL",
             "variant": "SECURE_CABINET",
             "object": "RECORDS_OFFICE_SECURE_CABINET_16",
-            "x": 56,
+            "x": 57,
             "y": 33,
             "width": 2,
             "height": 6
@@ -939,7 +939,7 @@
             "type": "SECURE_CABINET_FULL",
             "variant": "SECURE_CABINET",
             "object": "RECORDS_OFFICE_SECURE_CABINET_17",
-            "x": 56,
+            "x": 57,
             "y": 40,
             "width": 2,
             "height": 6
@@ -5149,7 +5149,7 @@
       "variant": "STANDARD_DESK",
       "object_id": "RECORDS_OFFICE_DESK_04",
       "geometry": {
-        "x": 56,
+        "x": 57,
         "y": 1,
         "width": 6,
         "height": 4,
@@ -5359,7 +5359,7 @@
       "variant": "SECURE_CABINET",
       "object_id": "RECORDS_OFFICE_SECURE_CABINET_13",
       "geometry": {
-        "x": 56,
+        "x": 57,
         "y": 12,
         "width": 2,
         "height": 6
@@ -5374,7 +5374,7 @@
       "variant": "SECURE_CABINET",
       "object_id": "RECORDS_OFFICE_SECURE_CABINET_14",
       "geometry": {
-        "x": 56,
+        "x": 57,
         "y": 19,
         "width": 2,
         "height": 6
@@ -5389,7 +5389,7 @@
       "variant": "SECURE_CABINET",
       "object_id": "RECORDS_OFFICE_SECURE_CABINET_15",
       "geometry": {
-        "x": 56,
+        "x": 57,
         "y": 26,
         "width": 2,
         "height": 6
@@ -5404,7 +5404,7 @@
       "variant": "SECURE_CABINET",
       "object_id": "RECORDS_OFFICE_SECURE_CABINET_16",
       "geometry": {
-        "x": 56,
+        "x": 57,
         "y": 33,
         "width": 2,
         "height": 6
@@ -5419,7 +5419,7 @@
       "variant": "SECURE_CABINET",
       "object_id": "RECORDS_OFFICE_SECURE_CABINET_17",
       "geometry": {
-        "x": 56,
+        "x": 57,
         "y": 40,
         "width": 2,
         "height": 6
