@@ -1334,6 +1334,90 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
     );
 }
 
+/*
+ * Records Office furniture must begin inside the floor, not on the one-unit
+ * wall cell immediately to its left. The narrow Records Office leg has floor
+ * beginning at x=57, so x=56 is wall space and must remain clear of furniture.
+ */
+static void Floppy144TestRecordsOfficeLeftWallClear(void)
+{
+    uint32_t uRectIndex;
+    bool bDesk04Found = false;
+    uint32_t uLeftCabinetsFound = 0U;
+
+    for(
+        uRectIndex = 0U;
+        uRectIndex < Floppy144SiteRectCount();
+        ++uRectIndex
+    )
+    {
+        const Floppy144SiteRect *pRect =
+            Floppy144SiteRectAt(uRectIndex);
+
+        if(
+            pRect == NULL ||
+            pRect->room !=
+                (uint8_t)FLOPPY144_ROOM_RECORDS_OFFICE
+        )
+        {
+            continue;
+        }
+
+        if(
+            pRect->type ==
+                (uint8_t)FLOPPY144_SITE_STANDARD_DESK ||
+            pRect->type ==
+                (uint8_t)FLOPPY144_SITE_SECURE_CABINET_FULL
+        )
+        {
+            F144_CHECK(
+                pRect->x != 56U,
+                "Records Office furniture does not occupy left wall cell x=56"
+            );
+        }
+
+        if(
+            pRect->type ==
+                (uint8_t)FLOPPY144_SITE_STANDARD_DESK &&
+            pRect->x == 57U &&
+            pRect->y == 1U &&
+            pRect->width == 6U &&
+            pRect->height == 4U
+        )
+        {
+            bDesk04Found = true;
+        }
+
+        if(
+            pRect->type ==
+                (uint8_t)FLOPPY144_SITE_SECURE_CABINET_FULL &&
+            pRect->x == 57U &&
+            pRect->width == 2U &&
+            pRect->height == 6U &&
+            (
+                pRect->y == 12U ||
+                pRect->y == 19U ||
+                pRect->y == 26U ||
+                pRect->y == 33U ||
+                pRect->y == 40U
+            )
+        )
+        {
+            ++uLeftCabinetsFound;
+        }
+    }
+
+    F144_CHECK(
+        bDesk04Found,
+        "Records Office Desk 04 is shifted one unit inside left wall"
+    );
+
+    F144_CHECK(
+        uLeftCabinetsFound == 5U,
+        "Records Office left cabinet bank is shifted one unit inside wall"
+    );
+}
+
 /* Room reconstruction bits are part of the versioned save payload. */
 static void Floppy144TestReconstructionPersistence(void)
 {
@@ -1410,6 +1494,7 @@ int main(void)
     Floppy144TestActIiBranchChoiceGate();
     Floppy144TestReceptionFurnitureFacing();
     Floppy144TestFullSiteFurnitureGeometry();
+    Floppy144TestRecordsOfficeLeftWallClear();
     Floppy144TestReconstructionPersistence();
 
     if(g_nFailures != 0)
