@@ -125,6 +125,8 @@ static DWORD global_splash_started_ticks;
 #define FLOPPY144_SPLASH_ANIMATION_MS     3700U
 
 #define FLOPPY144_AUTOSAVE_TIMER_ID        145U
+#define FLOPPY144_TERMINAL_CURSOR_TIMER_ID 146U
+#define FLOPPY144_TERMINAL_CURSOR_MS       500U
 
 static const char *Floppy144PersistenceWarningText(
     void
@@ -1044,6 +1046,11 @@ static LRESULT CALLBACK Floppy144WindowProc(
                 FLOPPY144_AUTOSAVE_TIMER_ID
             );
 
+            KillTimer(
+                window,
+                FLOPPY144_TERMINAL_CURSOR_TIMER_ID
+            );
+
             PostQuitMessage(0);
             return 0;
         }
@@ -1058,6 +1065,11 @@ static LRESULT CALLBACK Floppy144WindowProc(
             KillTimer(
                 window,
                 FLOPPY144_AUTOSAVE_TIMER_ID
+            );
+
+            KillTimer(
+                window,
+                FLOPPY144_TERMINAL_CURSOR_TIMER_ID
             );
 
             PostQuitMessage(0);
@@ -1365,6 +1377,19 @@ static LRESULT CALLBACK Floppy144WindowProc(
                         window,
                         FLOPPY144_SPLASH_TIMER_ID
                     );
+                }
+
+                return 0;
+            }
+
+            if(w_param == FLOPPY144_TERMINAL_CURSOR_TIMER_ID)
+            {
+                if(global_screen == FLOPPY144_SCREEN_TERMINAL)
+                {
+                    global_terminal.cursor_visible =
+                        !global_terminal.cursor_visible;
+
+                    Floppy144Redraw(window);
                 }
 
                 return 0;
@@ -2394,6 +2419,13 @@ int CALLBACK WinMain(
         runtime.window,
         FLOPPY144_SPLASH_TIMER_ID,
         FLOPPY144_SPLASH_FRAME_MS,
+        NULL
+    );
+
+    SetTimer(
+        runtime.window,
+        FLOPPY144_TERMINAL_CURSOR_TIMER_ID,
+        FLOPPY144_TERMINAL_CURSOR_MS,
         NULL
     );
 

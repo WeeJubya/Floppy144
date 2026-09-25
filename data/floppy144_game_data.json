@@ -15500,7 +15500,7 @@
         }
       ],
       "evidence_id": null,
-      "notebook": null,
+      "notebook": "Trolley record awaits refiling; its registered location is Records Office Secure Cabinet 05.",
       "follow_on": "Await P-041",
       "persistent": true,
       "source_order": 4
@@ -15549,7 +15549,7 @@
         }
       ],
       "evidence_id": null,
-      "notebook": null,
+      "notebook": "Transfer box is staged for removal; its withdrawal marker is in Records Office Secure Cabinet 06.",
       "follow_on": "Await P-047",
       "persistent": true,
       "source_order": 6

@@ -42,6 +42,7 @@ typedef struct Floppy144TerminalState
     bool open_record_requested;
     bool record_pager_active;
     bool help_pager_active;
+    bool cursor_visible;
 
     /*
      * Terminal capability and contextual-record state.

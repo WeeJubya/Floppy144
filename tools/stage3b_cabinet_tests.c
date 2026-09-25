@@ -385,6 +385,50 @@ static void Floppy144TestPerCabinetUnlockPersistence(void)
     );
 }
 
+static void Floppy144TestRecoveredChildRevealsCabinetCode(void)
+{
+    Floppy144WorldState sWorld;
+    Floppy144RunState sState;
+    Floppy144CabinetState sCabinet;
+    Floppy144TriggerId eT014;
+
+    Floppy144TestReset(&sWorld, &sState, &sCabinet);
+
+    eT014 = Floppy144GameDataTriggerId("T-014");
+    F144_CHECK(
+        eT014 < FLOPPY144_TRIGGER_COUNT &&
+        Floppy144RunStateFireTrigger(&sState, eT014),
+        "Records reconciliation fixture reveals Cabinet 05 marker"
+    );
+
+    Floppy144TestPlaceAtCabinet(
+        &sState,
+        "RECORDS_OFFICE_SECURE_CABINET_05"
+    );
+
+    F144_CHECK(
+        Floppy144CabinetOpenNearby(&sCabinet, &sState),
+        "Records Office Cabinet 05 opens keypad"
+    );
+
+    F144_CHECK(
+        Floppy144CabinetCodeKnown(&sCabinet, &sState),
+        "revealed Cabinet 05 child recovers only that cabinet code"
+    );
+
+    Floppy144CabinetReset(&sCabinet);
+    Floppy144TestPlaceAtCabinet(
+        &sState,
+        "RECORDS_OFFICE_SECURE_CABINET_06"
+    );
+
+    F144_CHECK(
+        Floppy144CabinetOpenNearby(&sCabinet, &sState) &&
+        !Floppy144CabinetCodeKnown(&sCabinet, &sState),
+        "unrevealed neighbouring cabinet code remains unavailable"
+    );
+}
+
 static void Floppy144TestActLengthContract(void)
 {
     Floppy144WorldState sWorld;
@@ -413,6 +457,7 @@ static void Floppy144TestActLengthContract(void)
 int main(void)
 {
     Floppy144TestGeneratedCabinetDiscovery();
+    Floppy144TestRecoveredChildRevealsCabinetCode();
     Floppy144TestSecurityCabinetUnlockAndContents();
     Floppy144TestPerCabinetUnlockPersistence();
     Floppy144TestActLengthContract();

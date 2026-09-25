@@ -880,6 +880,59 @@ static void Floppy144TestNotebookPopulation(void)
  * remain silent. Any explicit inspection notice is supplied separately by the
  * renderer and therefore overwrites these labels.
  */
+static void Floppy144TestRecordsTrolleyNotebookGuidance(void)
+{
+    Floppy144WorldState sWorld;
+    Floppy144RunState sState;
+    Floppy144InteractionId eI004;
+    Floppy144TriggerId eT013;
+    uint32_t uBefore;
+
+    Floppy144TestReset(&sWorld, &sState);
+
+    eT013 = Floppy144GameDataTriggerId("T-013");
+    eI004 = Floppy144GameDataInteractionId("I-004");
+
+    F144_CHECK(
+        eT013 < FLOPPY144_TRIGGER_COUNT &&
+        Floppy144RunStateFireTrigger(&sState, eT013),
+        "Records trolley Notebook fixture records T-013"
+    );
+
+    uBefore = Floppy144GameDataNotebookEntryCount(&sState);
+
+    F144_CHECK(
+        eI004 < FLOPPY144_INTERACTION_COUNT &&
+        Floppy144InteractionTryRun(
+            &sWorld,
+            &sState,
+            eI004
+        ),
+        "Records trolley interaction completes"
+    );
+
+    F144_CHECK(
+        Floppy144GameDataNotebookEntryCount(&sState) == uBefore + 1U,
+        "Records trolley inspection immediately adds a Notebook breadcrumb"
+    );
+
+    {
+        const Floppy144DataRecord *pLatest =
+            Floppy144GameDataNotebookEntryAt(
+                &sState,
+                Floppy144GameDataNotebookEntryCount(&sState) - 1U
+            );
+
+        F144_CHECK(
+            pLatest != NULL &&
+            pLatest->pszId != NULL &&
+            strcmp(pLatest->pszId, "I-004") == 0 &&
+            strstr(pLatest->pszA, "Secure Cabinet 05") != NULL,
+            "trolley Notebook breadcrumb points to the next comparison location"
+        );
+    }
+}
+
 static void Floppy144TestContextLabels(void)
 {
     Floppy144WorldState sWorld;
@@ -1029,6 +1082,7 @@ int main(void)
     Floppy144TestInspectionRange();
     Floppy144TestHiddenGeometryDoesNotCollide();
     Floppy144TestNotebookPopulation();
+    Floppy144TestRecordsTrolleyNotebookGuidance();
     Floppy144TestContextLabels();
     Floppy144TestExteriorExitBehaviour();
 

@@ -902,6 +902,8 @@ void Floppy144TerminalInputCharacter(
     terminal->input[terminal->input_length] =
         character;
 
+    terminal->cursor_visible = true;
+
     ++terminal->input_length;
 
     terminal->input[terminal->input_length] =
@@ -929,6 +931,8 @@ void Floppy144TerminalBackspace(
     );
 
     --terminal->input_length;
+
+    terminal->cursor_visible = true;
 
     terminal->input[terminal->input_length] =
         '\0';
@@ -1810,6 +1814,10 @@ static void Floppy144TerminalPrintCollectionPage(
     uint32_t uFirst;
     uint32_t uFinal;
     uint32_t uIndex;
+    uint32_t uNameWidth = 15U;
+    const uint32_t uFixedCharacters = 38U;
+    const uint32_t uMaximumNameWidth =
+        FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY - 1U - uFixedCharacters;
     char szLine[FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
 
     if(
@@ -1838,13 +1846,54 @@ static void Floppy144TerminalPrintCollectionPage(
     if(uFinal > (uint32_t)FLOPPY144_COLLECTION_COUNT)
         uFinal = (uint32_t)FLOPPY144_COLLECTION_COUNT;
 
+    /*
+     * Use the widest collection name actually shown on this page. STATUS and
+     * SIZE keep fixed columns; the name may consume all remaining terminal
+     * characters before it is finally truncated.
+     */
+    for(uIndex = uFirst; uIndex < uFinal; ++uIndex)
+    {
+        Floppy144CollectionId eCollection = (Floppy144CollectionId)uIndex;
+        const Floppy144CollectionDefinition *pDefinition =
+            Floppy144CollectionGet(eCollection);
+        bool bRestored =
+            Floppy144RunStateCollectionRestored(pRunState, eCollection);
+        bool bAvailable =
+            Floppy144RunStateCollectionAvailable(pRunState, eCollection);
+        char szPseudoCode[16];
+        char szPseudoName[40];
+        const char *pszName = pDefinition->title;
+        uint32_t uLength;
+
+        if(!bRestored && !bAvailable)
+        {
+            Floppy144TerminalPseudoCollectionIdentity(
+                pRunState->recovery_seed,
+                uIndex,
+                szPseudoCode,
+                (uint32_t)sizeof(szPseudoCode),
+                szPseudoName,
+                (uint32_t)sizeof(szPseudoName)
+            );
+            pszName = szPseudoName;
+        }
+
+        uLength = (uint32_t)strlen(pszName);
+        if(uLength > uNameWidth)
+            uNameWidth = uLength;
+    }
+
+    if(uNameWidth > uMaximumNameWidth)
+        uNameWidth = uMaximumNameWidth;
+
     pTerminal->output_count = 0U;
 
     (void)snprintf(
         szLine,
         sizeof(szLine),
-        "%-13s | %-27s | %-9s | %s",
+        "%-13s | %-*s | %-9s | %7s",
         "COLLECTION ID",
+        (int)uNameWidth,
         "COLLECTION NAME",
         "STATUS",
         "SIZE"
@@ -1893,8 +1942,10 @@ static void Floppy144TerminalPrintCollectionPage(
         (void)snprintf(
             szLine,
             sizeof(szLine),
-            "%-13s | %-27.27s | %-9s | %4u KB",
+            "%-13s | %-*.*s | %-9s | %4u KB",
             pszCode,
+            (int)uNameWidth,
+            (int)uNameWidth,
             pszName,
             pszStatus,
             (unsigned)pDefinition->size_kb
@@ -3238,6 +3289,9 @@ void Floppy144TerminalReset(
     terminal->help_pager_active =
         false;
 
+    terminal->cursor_visible =
+        true;
+
     terminal->open_command_available =
         Floppy144TerminalRecordAccessAvailable(
             world
@@ -3771,14 +3825,17 @@ void Floppy144TerminalDraw(
             1U,
             bright
         );
-        Floppy144DrawFillRect(
-            &surface,
-            34U + Floppy144DrawTextWidth(prompt, 1U),
-            uPromptY,
-            5U,
-            8U,
-            bright
-        );
+        if(terminal->cursor_visible)
+        {
+            Floppy144DrawFillRect(
+                &surface,
+                34U + Floppy144DrawTextWidth(prompt, 1U),
+                uPromptY,
+                5U,
+                8U,
+                bright
+            );
+        }
     }
 
     Floppy144DrawFillRect(&surface, 10U, 306U, 620U, 28U, background);

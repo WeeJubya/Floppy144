@@ -328,6 +328,44 @@ bool Floppy144CabinetCodeKnown(
         );
     }
 
+    /*
+     * A revealed physical record may identify the cabinet holding the other
+     * half of a comparison before the later master-code register is recovered.
+     * Recover only that specific cabinet's deterministic code, rather than
+     * granting the site-wide code capability early.
+     */
+    {
+        uint32_t uRecordIndex;
+
+        for(
+            uRecordIndex = 0U;
+            uRecordIndex < Floppy144GameDataRecordCount();
+            ++uRecordIndex
+        )
+        {
+            const Floppy144DataRecord *pRecord =
+                Floppy144GameDataRecordAt(uRecordIndex);
+
+            if(
+                pRecord == NULL ||
+                pRecord->eKind != FLOPPY144_DATA_PHYSICAL_ITEM ||
+                !Floppy144CabinetStringEqual(
+                    pRecord->pszC,
+                    pCabinet->szCabinetId
+                ) ||
+                !Floppy144GameDataPhysicalItemRevealed(
+                    pRunState,
+                    pRecord->pszId
+                )
+            )
+            {
+                continue;
+            }
+
+            return true;
+        }
+    }
+
     return false;
 }
 
