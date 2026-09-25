@@ -12024,7 +12024,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-002",
-      "body": "Site Establishment Register\n\nThe archive now contains enough context to advance the recovery investigation. The MAIN OFFICE area has been reconstructed from the surviving archive.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nSITE ESTABLISHMENT REGISTER\n\nAccommodation return: closure-period staffing.\n\nThe Main Office remains the administrative centre for the Site until final handover. Posts still requiring a physical desk are:\n\n- Project Manager\n- Senior Archivist\n- Records Officer\n- IT Support\n- Facilities liaison\n- Administrative support\n\nVacated posts and surplus furniture are excluded from the final-week allocation.\n\nHR instruction:\nDo not remove desk numbers until archive, technology and handover work is complete. Temporary moves must be recorded because staff location forms part of the final attendance and emergency-accountability return.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "HR-01"
     },
@@ -12036,7 +12036,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-003",
-      "body": "Main Office Staffing Allocation\n\nA previously inaccessible internal route has been restored for investigation. Main Office desk-number labels is now represented in the recovered site and can be inspected. Temporary desk allocation slip is now represented in the recovered site and can be inspected. HR hot desking note is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nMAIN OFFICE STAFFING ALLOCATION\n\nFINAL WEEK - DESK PLAN\n\nDesk 01  Senior Archivist / archive closure work\nDesk 02  Records Officer / reconciliation support\nDesk 03  Administrative support\nDesk 04  IT Support / temporary technical position\nDesk 05  Facilities liaison / closure paperwork\nDesk 06  Project Manager / handover control\n\nDesk 04 is temporary while the terminal cable fault is investigated. Staff may move for operational work, but the allocation remains the reference point for post, telephone and accountability.\n\nPlease leave the adhesive numbers in place. Facilities have already removed them once.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "HR-01"
     },
@@ -12048,7 +12048,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "ORGANISATIONAL CHART\n\nCollection: HR-01 - Site Establishment.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nSITE ORGANISATIONAL CHART - CLOSURE PERIOD\n\nDIRECTOR\n  |\nPROJECT MANAGER\n  |-- SENIOR ARCHIVIST\n  |     |-- RECORDS OFFICER\n  |\n  |-- IT SUPPORT\n  |\n  |-- FACILITIES LIAISON\n  |\n  |-- ADMINISTRATIVE SUPPORT\n\nOperational Security retains an independent duty line to the Director for access and incident matters.\n\nDuring closure, temporary tasking does not alter reporting responsibility. In particular, technical access remains an IT responsibility and archive release remains a Senior Archivist responsibility.\n\nThe chart replaces the earlier full-establishment version, which contained posts already transferred off Site.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "HR-01"
     },
@@ -12060,7 +12060,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "FROM: SENIOR ARCHIVIST\nTO: RECORDS OFFICER\nSUBJECT: TEMPORARY DESK REALLOCATION\n\nIT SUPPORT IS TO REMAIN AT DESK 04 UNTIL THE TERMINAL CABLE HAS BEEN REPLACED.\n\nTHE MUG AT DESK 01 IS NOT AN ARCHIVE ITEM AND SHOULD NOT BE ENTERED ON FORM AR-7.\n\nSIGNED: SENIOR ARCHIVIST",
+      "body": "FROM: SENIOR ARCHIVIST\nTO: RECORDS OFFICER\nSUBJECT: TEMPORARY DESK REALLOCATION\n\nIT SUPPORT IS TO REMAIN AT DESK 04 UNTIL THE TERMINAL CABLE HAS BEEN REPLACED.\n\nTHE MUG AT DESK 01 IS NOT AN ARCHIVE ITEM AND SHOULD NOT BE ENTERED ON FORM AR-7.\n\nIF ANYONE MOVES MY IN-TRAY, IT WILL BECOME AN ARCHIVE ITEM OUT OF SPITE.\n\nSIGNED: SENIOR ARCHIVIST",
       "source_status": "preserved-stage-1",
       "parent_collection_id": "HR-01"
     },
@@ -12072,7 +12072,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "VACANCY & HOT-DESK PROVISION\n\nCollection: HR-01 - Site Establishment.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nVACANCY & HOT-DESK PROVISION\n\nSeveral posts have transferred ahead of Site closure. Their former desks may be used temporarily by closure staff, subject to the following:\n\n- retain the original desk number;\n- do not store classified material overnight;\n- leave a written allocation slip;\n- redirect calls through the current staff telephone list;\n- clear personal property before handover.\n\nDesk 04 is reserved for IT Support while the Main Office terminal fault remains open.\n\nA hot desk is still a desk. HR has been asked to make this explicit after an argument nobody wishes to document twice.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "HR-01"
     },
@@ -12084,7 +12084,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "STAFF CONTACT DIRECTORY\n\nCollection: HR-01 - Site Establishment.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nSTAFF CONTACT DIRECTORY - FINAL WEEK\n\nDirector ................. Director's Office\nProject Manager .......... Main Office, Desk 06\nSenior Archivist ......... Main Office, Desk 01 / Records Office\nRecords Officer .......... Main Office, Desk 02 / Records Office\nIT Support ............... Main Office, Desk 04 / IT Support\nFacilities liaison ....... Main Office, Desk 05 / Facilities\nSecurity Duty Officer .... Security Office\n\nInternal extensions remain in service until handover.\n\nFor emergency traffic use Security first. For closure scheduling use the Project Manager. For missing files use the Records Officer before using the word \"missing\" loudly.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "HR-01"
     },
@@ -12096,7 +12096,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-012",
-      "body": "Staff Welfare & Amenities Allocation\n\nThe STAFF ROOM area has been reconstructed from the surviving archive. A previously inaccessible internal route has been restored for investigation. Mouldy cheese sandwich is now represented in the recovered site and can be inspected. Named mugs is now represented in the recovered site and can be inspected. Dog-eared paperback is now represented in the recovered site and can be inspected. Half-finished crossword is now represented in the recovered site and can be inspected. Noticeboard social poster is now represented in the recovered site and can be inspected. Coffee jar is now represented in the recovered site and can be inspected. Labelled milk bottle is now represented in the recovered site and can be inspected. Birthday card is now represented in the recovered site and can be inspected. Forgotten umbrella is now represented in the recovered site and can be inspected. Completed newspaper crossword is now represented in the recovered site and can be inspected. Seasonal staff-social notice is now represented in the recovered site and can be inspected. Ancient workplace first-aid manual is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nSTAFF WELFARE & AMENITIES ALLOCATION\n\nThe Staff Room is to remain available throughout the final closure week.\n\nFacilities are to retain power to the refrigerator, kettle point and coffee equipment until the last staffed day. HR welfare materials and the noticeboard may remain in place until final housekeeping.\n\nNo archive material is to be stored in the Staff Room.\n\nPersonal food left after handover will be discarded without accession, cataloguing or ceremonial transfer.\n\nThe social committee has requested that this paragraph be read as a threat.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "HR-05"
     },
@@ -12108,7 +12108,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "SHARED FACILITIES INVENTORY\n\nCollection: HR-05 - Staff Welfare & Shared Facilities.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nSHARED FACILITIES INVENTORY\n\nStaff Room items retained to final day:\n\nRefrigerator .......... in service\nCoffee maker .......... in service\nMugs .................. assorted, ownership disputed\nBookcases ............. retain until clearance\nNoticeboard ........... retain closure notices\nFirst-aid guidance .... obsolete copy to be discarded\nUmbrella .............. owner unknown\nPaperback books ....... personal property unless claimed\n\nInventory excludes consumables.\n\nA cheese sandwich in the refrigerator is specifically not departmental property, despite having achieved a degree of permanence normally associated with fixtures.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "HR-05"
     },
@@ -12120,7 +12120,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "STAFF ROOM CLEANING ROTA\n\nCollection: HR-05 - Staff Welfare & Shared Facilities.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nSTAFF ROOM CLEANING ROTA\n\nMONDAY       Administrative support\nTUESDAY      Records Officer\nWEDNESDAY    IT Support\nTHURSDAY     Facilities liaison\nFRIDAY       Everyone, allegedly\n\nTasks:\n- wipe worktop;\n- empty bin;\n- rinse coffee pot;\n- remove expired milk;\n- leave noticeboard material until closure;\n- do not throw away labelled transfer paperwork carried in by mistake: return it to its owner.\n\nFriday note added in pencil:\n\"If the sandwich is still here, it wins.\"",
       "source_status": "authored-for-integration",
       "parent_collection_id": "HR-05"
     },
@@ -12132,7 +12132,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "TEA & COFFEE CONTRIBUTION NOTE\n\nCollection: HR-05 - Staff Welfare & Shared Facilities.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nTEA & COFFEE CONTRIBUTION NOTE\n\nFinal-week contributions remain voluntary.\n\nTea: sufficient.\nCoffee: running low.\nSugar: inexplicably abundant.\nMilk: label bottles, particularly on Friday.\nBiscuits: no central provision.\n\nThe closure budget does not contain a line for \"morale caffeine\", despite several submissions.\n\nAny balance remaining in the tea tin after handover will be donated to the receiving office, provided the receiving office accepts coins sticky enough to qualify as heritage material.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "HR-05"
     },
@@ -12144,7 +12144,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "SOCIAL COMMITTEE CIRCULAR\n\nCollection: HR-05 - Staff Welfare & Shared Facilities.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nSOCIAL COMMITTEE CIRCULAR\n\nSUBJECT: LAST-DAY TEA, 15:30, STAFF ROOM\n\nAssuming the Site has not yet been handed over, evacuated, disconnected, flooded or absorbed into the central archive, staff are invited to a brief final tea.\n\nPlease sign the card on the noticeboard before Friday lunch.\n\nNo speeches longer than the kettle cycle.\nNo departmental records on the cake table.\nThe Project Manager has asked us not to call this \"the closure party\" until the Director has actually signed the closure.\n\nThis is probably wise.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "HR-05"
     },
@@ -12156,7 +12156,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-043",
-      "body": "Final Friday Attendance Return\n\nSigned Attendance Sheet is now represented in the recovered site and can be inspected. Leave status card is now represented in the recovered site and can be inspected. Overtime return is now represented in the recovered site and can be inspected. Attendance amendment note is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nFINAL FRIDAY ATTENDANCE RETURN\n\nSigned present at start of duty:\n\nProject Manager .......... PRESENT\nSenior Archivist ......... PRESENT\nRecords Officer .......... PRESENT\nIT Support ............... PRESENT\nFacilities liaison ....... PRESENT\nAdministrative support ... PRESENT\n\nOperational Security duty staff are recorded on the separate Security rota.\n\nThe return confirms presence on Site. It does not establish where an individual was at any later minute.\n\nAmendments after evacuation must be countersigned and must not replace the original signed sheet.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "HR-09"
     },
@@ -12168,7 +12168,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-044",
-      "body": "Duty & Leave Status Schedule\n\nDuty Rota is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nDUTY & LEAVE STATUS SCHEDULE\n\nFINAL FRIDAY\n\nSenior Archivist:\nOn duty. Archive reconciliation and final verification.\n\nRecords Officer:\nOn duty. Records Office reconciliation and transfer staging.\n\nIT Support:\nOn duty. Terminal network remediation and server-route checks.\n\nProject Manager:\nOn duty. Closure coordination.\n\nFacilities liaison:\nOn duty. Decommissioning and retained services.\n\nNo listed member is recorded as annual leave, sick leave or external duty during the relevant closure window.\n\nSeparate movement records apply to restricted areas.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "HR-09"
     },
@@ -12180,7 +12180,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "FINAL-WEEK LEAVE SUMMARY\n\nCollection: HR-09 - Attendance, Leave & Duty Status.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nFINAL-WEEK LEAVE SUMMARY\n\nMost routine leave was cleared before the final closure week.\n\nApproved leave affecting Site staffing:\n- two posts already transferred to Central Office;\n- one administrative half-day on Wednesday;\n- no leave recorded for Friday's archive, IT, facilities or project leads.\n\nManagers were instructed not to cancel pre-booked leave merely to make the building look busier.\n\nFor Friday, the closure team shown on the attendance return constitutes the expected staffed complement.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "HR-09"
     },
@@ -12192,7 +12192,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "OVERTIME AUTHORISATION\n\nCollection: HR-09 - Attendance, Leave & Duty Status.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nOVERTIME AUTHORISATION\n\nAuthorised where required to complete closure tasks beyond normal hours:\n\nSenior Archivist: archive transfer exceptions\nRecords Officer: reconciliation and transfer staging\nIT Support: terminal/server remediation\nFacilities liaison: contractor and retained-service support\n\nMaximum: two hours without Project Manager extension.\n\nOvertime authorisation is not permission to bypass access controls, lone-working rules or equipment isolation.\n\nThe building may be closing. Employment law has not been notified.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "HR-09"
     },
@@ -12204,7 +12204,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "TEMPORARY DUTY ALLOCATION\n\nCollection: HR-09 - Attendance, Leave & Duty Status.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nTEMPORARY DUTY ALLOCATION\n\nDuring the closure period:\n\nIT Support may work from Main Office Desk 04 while tracing the terminal fault.\n\nThe Senior Archivist may work between Main Office, Records Office and authorised verification locations.\n\nThe Records Officer retains day-to-day control of the Records Office.\n\nFacilities staff may enter operational rooms for scheduled decommissioning subject to local access rules.\n\nTemporary location does not transfer responsibility for another officer's records, keys or equipment.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "HR-09"
     },
@@ -12216,7 +12216,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "ATTENDANCE AMENDMENT REGISTER\n\nCollection: HR-09 - Attendance, Leave & Duty Status.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nATTENDANCE AMENDMENT REGISTER\n\nFriday amendments:\n\n14:30 - Site evacuation. All persons marked OUT pending roll-call.\n15:10 - Security advises all closure staff accounted for.\n15:20 - Essential personnel permitted to remain available under Security direction.\n\nNo correction has been made to the original morning attendance signatures.\n\nReason:\nThe morning return answers \"who reported for duty?\" The evacuation sheet answers \"who was accounted for after the incident?\" Combining them would make both records less useful.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "HR-09"
     },
@@ -12228,7 +12228,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-004",
-      "body": "Facilities Access Authorisation\n\nThe FACILITIES area has been reconstructed from the surviving archive.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nFACILITIES ACCESS AUTHORISATION\n\nThe Facilities Office remains operational for the duration of the closure programme.\n\nAuthorised users:\n- Facilities liaison;\n- approved maintenance contractors under escort;\n- Project Manager;\n- Security staff where required.\n\nThe room contains current maintenance schedules, service labels, plant references and decommissioning paperwork.\n\nDo not clear shelving until the final retained-services check has been signed.\n\nFacilities note:\nAnyone seeking a key should state which door it opens. \"The one down the corridor\" is no longer an acceptable asset description.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "FM-04"
     },
@@ -12240,7 +12240,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-005",
-      "body": "Internal Circulation Access Plan\n\nA previously inaccessible internal route has been restored for investigation. Site Directory / room identification material is now represented in the recovered site and can be inspected. Reception room plate is now represented in the recovered site and can be inspected. Main Office room plate is now represented in the recovered site and can be inspected. Facilities room plate - corridor side is now represented in the recovered site and can be inspected. IT Support room plate is now represented in the recovered site and can be inspected. Security Office room plate is now represented in the recovered site and can be inspected. Staff Room door plate is now represented in the recovered site and can be inspected. Records Room door plate is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nINTERNAL CIRCULATION ACCESS PLAN\n\nClosure-period internal routes are to remain available between Reception, Main Office and the occupied support rooms.\n\nDoor plates are to remain fitted until handover so contractors and temporary staff can identify rooms without relying on memory.\n\nControlled rooms retain their normal access rules. Opening the corridor for closure traffic does not make restricted areas unrestricted.\n\nFacilities will remove surplus signage only after the Project Manager confirms that all final inspections are complete.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "FM-04"
     },
@@ -12252,7 +12252,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "SITE DIRECTORY MAINTENANCE NOTE\n\nCollection: FM-04 - Site Infrastructure & Maintenance.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nSITE DIRECTORY MAINTENANCE NOTE\n\nThe corridor Site Directory has been amended to reflect closure-period room use.\n\nRemove:\n- offices already vacated;\n- obsolete team labels.\n\nRetain:\n- Reception;\n- Main Office;\n- Facilities;\n- Records Office;\n- IT Support;\n- Security Office;\n- Staff Room;\n- Server Room;\n- Director and Secretary accommodation.\n\nTemporary paper labels are acceptable where permanent plates have already been scheduled for removal.\n\nPlease stop correcting the map with pencil. Facilities owns a ruler.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "FM-04"
     },
@@ -12264,7 +12264,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "ROOM IDENTIFICATION SCHEDULE\n\nCollection: FM-04 - Site Infrastructure & Maintenance.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nROOM IDENTIFICATION SCHEDULE\n\nReception ............... Public arrival / visitor control\nMain Office ............. Closure administration\nFacilities .............. Maintenance and decommissioning\nRecords Office .......... Archive holdings and transfer staging\nIT Support .............. Local technology support\nSecurity Office ......... Access and incident control\nStaff Room .............. Welfare\nServer Room ............. Restricted technical services\nSecretary Office ........ Executive support\nDirector Office ......... Executive / handover authority\n\nRoom plates remain the authoritative local labels until physical handover.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "FM-04"
     },
@@ -12276,7 +12276,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "MAINTENANCE RESPONSIBILITY MATRIX\n\nCollection: FM-04 - Site Infrastructure & Maintenance.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nMAINTENANCE RESPONSIBILITY MATRIX\n\nLighting ................. Facilities\nPower distribution ....... Facilities / contractor\nSuppression equipment .... Facilities / specialist contractor\nTerminal equipment ....... IT Support\nNetwork cabling .......... IT Support\nServer hardware .......... IT Support\nSecure locks and keys .... Security\nArchive cabinets ......... Records / Security for access control\nFire routes .............. Facilities / Security\n\nCross-discipline work must identify an owner before it begins.\n\nThe cable riser is specifically marked as a shared work area: network cabling and suppression-control wiring occupy the same service route.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "FM-04"
     },
@@ -12288,7 +12288,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "FINAL WEEK WORK ORDER SUMMARY\n\nCollection: FM-04 - Site Infrastructure & Maintenance.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nFINAL WEEK WORK ORDER SUMMARY\n\nOPEN:\n- remove surplus furniture labels;\n- inspect retained suppression controls;\n- support terminal cable remediation;\n- defer final service isolation until archive verification completes;\n- final corridor signage removal after handover.\n\nCLOSED:\n- redundant office lighting circuits;\n- non-essential storage clearance;\n- contractor welfare arrangements.\n\nHOLD:\n- Server Room services;\n- suppression system;\n- main archive terminal supply.\n\nHold items require explicit release. Closure does not mean \"switch off everything in alphabetical order.\"",
       "source_status": "authored-for-integration",
       "parent_collection_id": "FM-04"
     },
@@ -12300,7 +12300,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-008",
-      "body": "Final Decommissioning Schedule\n\nDecommissioning tag set is now represented in the recovered site and can be inspected. Asset transfer labels is now represented in the recovered site and can be inspected. Contractor clipboard is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nFINAL DECOMMISSIONING SCHEDULE\n\nDecommissioning is sequenced after operational dependency, not room number.\n\nStage 1: surplus furniture and non-essential equipment.\nStage 2: vacated office services.\nStage 3: archive and IT equipment after verification.\nStage 4: retained life-safety and security systems at handover.\n\nThe Server Room, archive terminal, access control and suppression system remain operational until their owning workstreams release them.\n\nContractors are not to act on an old schedule where a HOLD label is present.\n\nA red tag beats a calendar.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "FM-07"
     },
@@ -12312,7 +12312,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-009",
-      "body": "Retained Services Schedule\n\nFinal Isolation Register is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nRETAINED SERVICES SCHEDULE\n\nRETAIN THROUGH FINAL HANDOVER:\n- emergency lighting;\n- access control;\n- fire detection;\n- Halon suppression serving the Server Room;\n- Server Room power and ventilation;\n- archive terminal power;\n- essential network route;\n- internal telephone service.\n\nThe Halon system is deliberately retained because the Server Room remains live for backup and verification work.\n\nNo retained service is to be isolated merely because its surrounding office is otherwise ready for closure.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "FM-07"
     },
@@ -12324,7 +12324,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "ASSET TRANSFER REGISTER\n\nCollection: FM-07 - Asset Management & Decommissioning.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nASSET TRANSFER REGISTER\n\nItems marked TRANSFER remain departmental property.\nItems marked DISPOSE may be removed only after local data, records and labels are cleared.\nItems marked RETAIN remain with the building until handover.\n\nServer, network and archive equipment are not to move until IT and Records release them.\n\nAsset labels must not be used as substitute packing tape.\n\nThe closure team has been reminded that an object may be obsolete, heavy and unpopular while still requiring a signature.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "FM-07"
     },
@@ -12336,7 +12336,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "UTILITY ISOLATION PLAN\n\nCollection: FM-07 - Asset Management & Decommissioning.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nUTILITY ISOLATION PLAN\n\nPlanned isolations follow completion of dependent work.\n\nDo not isolate:\n- Server Room power while final backup or verification remains open;\n- ventilation while the room is occupied;\n- suppression controls independently of the approved safety procedure;\n- telephone service before Security releases emergency communications.\n\nFacilities must record actual isolation time, not planned isolation time.\n\nBlank times on this form are preferable to invented punctuality.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "FM-07"
     },
@@ -12348,7 +12348,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "CONTRACTOR COORDINATION NOTE\n\nCollection: FM-07 - Asset Management & Decommissioning.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nCONTRACTOR COORDINATION NOTE\n\nClosure contractors will encounter staff still working in rooms that appear otherwise vacant.\n\nBefore work:\n1. confirm room owner;\n2. check HOLD tags;\n3. identify shared cable or control routes;\n4. agree any isolation;\n5. record completion.\n\nParticular caution: Server Room cable-riser work shares space with suppression-control wiring.\n\nContractors are not authorised to disconnect labelled control wiring unless the work order expressly includes it.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "FM-07"
     },
@@ -12360,7 +12360,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "FINAL ASSET SWEEP\n\nCollection: FM-07 - Asset Management & Decommissioning.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nFINAL ASSET SWEEP\n\nThe final sweep is to occur after operational work has ceased.\n\nCheck:\n- desks and drawers;\n- shelving;\n- equipment labels;\n- temporary work areas;\n- cable reels and tools;\n- transfer boxes;\n- keys and access cards.\n\nDo not remove items from an active incident or reconciliation area for tidiness.\n\nA neat empty room is not the objective. An accountable room is.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "FM-07"
     },
@@ -12372,7 +12372,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-006",
-      "body": "FM-13-RS-0047\nSUPPRESSION CONTROL PANEL SERVICE NOTE\nCLASS: OPERATIONAL MAINTENANCE RECORD\nLOCATION: SERVER ROOM CABLE RISER / SUPPRESSION CONTROL\nDATE: FRIDAY - FINAL WORKING DAY BEFORE BANK HOLIDAY\n\nMANUAL DISCHARGE CONTROL RETAINED PENDING REPLACEMENT OF THE SERVER-ROOM CABLE RISER.\nINTERMITTENT PANEL INPUT RECORDED DURING MAINTENANCE ACCESS. NO DISCHARGE COMMAND CONFIRMED DURING THE TEST WINDOW.\nFURTHER TESTING DEFERRED UNTIL TUESDAY AFTER BANK HOLIDAY.\n\nENGINEERING NOTE: ISOLATE CONTROL BEFORE CABLE WORK.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nSUPPRESSION CONTROL PANEL SERVICE NOTE\n\nLocation: Server Room cable-riser / suppression control\nStatus: retained in service through closure\n\nThe manual discharge circuit remains connected pending completion of cable-riser works. The control route shares the riser with network cabling.\n\nDuring Thursday maintenance, an intermittent input was observed while adjacent cabling was handled. No discharge command was confirmed and the panel returned to normal after the cable bundle was settled.\n\nAction:\nIsolate the manual release circuit before further intrusive riser work.\n\nFollow-up test deferred to Tuesday after the bank holiday unless closure activity requires earlier access.",
       "source_status": "preserved-stage-1",
       "parent_collection_id": "FM-13"
     },
@@ -12384,7 +12384,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-007",
-      "body": "Manual Discharge Circuit Test Record\n\nSuppression-zone diagram is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nMANUAL DISCHARGE CIRCUIT TEST RECORD\n\nTest point: Main Office suppression control / Server Room release circuit.\n\nIndicator test: PASS\nContinuity: PASS\nManual input path: LIVE\nAutomatic detection path: PASS\nIsolation fitted for test: YES\nIsolation removed after test: YES\n\nObservation:\nMovement of the shared riser bundle produced a brief unstable reading on the manual-input monitor. Reading did not persist long enough to operate the release sequence during the test.\n\nRecommendation:\nIsolate before network cable replacement or any work likely to disturb the riser bundle.\n\nSigned: Facilities engineer.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "FM-13"
     },
@@ -12396,7 +12396,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "SUPPRESSION ZONE DIAGRAM REGISTER\n\nCollection: FM-13 - Site Safety & Suppression Systems.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nSUPPRESSION ZONE DIAGRAM REGISTER\n\nZone SR-1 covers the Server Room.\n\nAutomatic inputs:\n- fire detection loop;\n- confirmed alarm sequence.\n\nManual input:\n- discharge control circuit routed through the cable riser to the local release/control arrangement.\n\nOn discharge:\n- Halon release;\n- ventilation isolation;\n- local alarm;\n- Site evacuation response.\n\nDrawing note:\nNetwork services and the manual release circuit share part of the riser route. Maintain separation during cable work and isolate controls where separation cannot be assured.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "FM-13"
     },
@@ -12408,7 +12408,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "HALON CYLINDER SERVICE RECORD\n\nCollection: FM-13 - Site Safety & Suppression Systems.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nHALON CYLINDER SERVICE RECORD\n\nServer Room suppression cylinders inspected during closure maintenance.\n\nPressure: within service band.\nSeals: intact.\nActuation hardware: serviceable.\nReplacement due: after planned Site handover.\nStatus: RETAIN IN SERVICE.\n\nReason for retention:\nServer equipment remains powered for final backup and archive verification.\n\nThe system is not to be discharged for testing during closure. Manual circuit tests must use the approved electrical isolation.\n\nService label applied to cylinder bank and copied to Facilities file.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "FM-13"
     },
@@ -12420,7 +12420,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "ALARM LOOP MAINTENANCE NOTE\n\nCollection: FM-13 - Site Safety & Suppression Systems.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nALARM LOOP MAINTENANCE NOTE\n\nFire-detection loop checked following routine closure-period maintenance.\n\nNo persistent detector fault found.\nNo detector bypass left in place.\nServer Room detector indications normal.\nSuppression release circuit remains separately monitored.\n\nThe alarm loop and the manual release input are distinct paths. A release input can therefore be recorded without a preceding fire-detection condition.\n\nTechnicians are reminded not to describe every suppression activation as a \"fire alarm\" in maintenance paperwork.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "FM-13"
     },
@@ -12432,7 +12432,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "SERVER ROOM SAFETY INSPECTION\n\nCollection: FM-13 - Site Safety & Suppression Systems.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nSERVER ROOM SAFETY INSPECTION\n\nPre-closure inspection:\n\n[OK] Exit route clear\n[OK] Warning signage visible\n[OK] Ventilation operating\n[OK] Halon cylinders in service\n[OK] Detection loop normal\n[OK] Manual controls labelled\n[!] Cable-riser work remains open\n\nRestriction:\nAny intrusive work in the riser requires coordination between IT and Facilities because suppression-control wiring passes through the same area.\n\nInspection does not close the outstanding network work order.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "FM-13"
     },
@@ -12444,7 +12444,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-041",
-      "body": "Environmental Event Log\n\nPrinted Environmental Event Log is now represented in the recovered site and can be inspected. Ventilation isolation chart is now represented in the recovered site and can be inspected. Environmental sensor summary is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nENVIRONMENTAL EVENT LOG\n\nFINAL FRIDAY\n\n14:28:41  Server Room temperature normal.\n14:28:44  Smoke detection: normal.\n14:28:46  Heat detection: normal.\n14:28:49  Suppression release sequence begins.\n14:28:50  Ventilation isolation commanded.\n14:28:52  Site alarm active.\n14:29:03  Server Room pressure event consistent with Halon discharge.\n\nNo preceding fire condition is recorded by the environmental system.\n\nThe log records sensor states and control events only. It does not identify the cause of the release input.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "FM-18"
     },
@@ -12456,7 +12456,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-042",
-      "body": "Fire Suppression Event Record\n\nServer Room environmental panel is now represented in the recovered site and can be inspected. Service tag is now represented in the recovered site and can be inspected. Ventilation status tag is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nFIRE SUPPRESSION EVENT RECORD\n\nEvent: Server Room Halon discharge\nTime: approximately 14:29 Friday\n\nAutomatic fire criteria before release:\nSmoke detector ........ NO\nHeat detector ......... NO\nCombined fire state ... NO\n\nRelease input recorded:\nMANUAL RELEASE CHANNEL\n\nAutomatic responses:\nVentilation isolated.\nAlarm raised.\nEvacuation initiated.\n\nThe event record does not establish that a person operated a manual control. \"Manual channel\" identifies the electrical release path, not the hand that caused the signal.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "FM-18"
     },
@@ -12468,7 +12468,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "VENTILATION ISOLATION SEQUENCE\n\nCollection: FM-18 - Environmental Monitoring & Plant Logs.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nVENTILATION ISOLATION SEQUENCE\n\nThe Server Room ventilation system is interlocked with suppression discharge.\n\nOn valid release:\n1. close supply damper;\n2. stop extract;\n3. confirm isolation;\n4. permit suppression sequence;\n5. maintain isolation until authorised reset.\n\nFriday event:\nIsolation command received and completed within expected interval.\n\nNo evidence of ventilation fault preceding the discharge.\n\nThe isolation performed as designed. The question lies upstream of it.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "FM-18"
     },
@@ -12480,7 +12480,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "ENVIRONMENTAL SENSOR SUMMARY\n\nCollection: FM-18 - Environmental Monitoring & Plant Logs.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nENVIRONMENTAL SENSOR SUMMARY\n\nReview period: 13:30-14:35 Friday.\n\nTemperature remained within normal operating range.\nNo smoke alarm was recorded.\nNo heat alarm was recorded.\nNo abnormal humidity event was recorded.\nVentilation status was normal until commanded to isolate during suppression.\n\nThe first abnormal event in the environmental sequence is the suppression release command.\n\nThis summary should be read with the suppression-control diagnostic, not as a standalone cause report.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "FM-18"
     },
@@ -12492,7 +12492,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "PLANT RESPONSE TIMELINE\n\nCollection: FM-18 - Environmental Monitoring & Plant Logs.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nPLANT RESPONSE TIMELINE\n\n14:28:49  Suppression release input accepted.\n14:28:50  Ventilation isolation begins.\n14:28:52  Local and Site alarms activate.\n14:28:57  Halon release confirmed.\n14:29:03  Environmental pressure change recorded.\n14:31:00  Facilities acknowledges plant alarm.\n14:36:00  Server Room access prohibited pending atmosphere check.\n\nAll automatic plant responses occurred in the expected order after the release input.\n\nNo plant action explains how that input arose.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "FM-18"
     },
@@ -12504,7 +12504,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "POST-INCIDENT ENVIRONMENTAL CHECK\n\nCollection: FM-18 - Environmental Monitoring & Plant Logs.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nPOST-INCIDENT ENVIRONMENTAL CHECK\n\nServer Room entry permitted only after atmosphere confirmation.\n\nPost-event findings:\n- no fire damage observed;\n- no heat source identified;\n- ventilation equipment serviceable after reset;\n- Halon system discharged as designed;\n- cable-riser work area left in active-work condition;\n- control diagnostics retained for technical review.\n\nFacilities recommendation:\nDo not reset or reterminate the manual release circuit until IT and Security have documented the riser condition.\n\nThe room is safe to investigate, not safe to tidy.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "FM-18"
     },
@@ -12516,7 +12516,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-025",
-      "body": "REQUEST FOR PREPARATION OF ISOMETRIC ACCOMMODATION PLANS\n\nThis recovered FM-23 record authorises or records the following state change in the reconstruction: SET_PROJECTION ISOMETRIC.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nREQUEST FOR PREPARATION OF ISOMETRIC ACCOMMODATION PLANS\n\nTo: Drawing Office\nSubject: Closure-period Site plan\n\nPlease prepare an isometric accommodation plan from the current room schedule and corridor survey.\n\nPurpose:\nThe existing flat plan is adequate for floor area but poor at showing door relationships, furniture clearances and the relative position of service features during the handover walk-round.\n\nInclude only confirmed room boundaries and fixed or recorded major items. Do not infer concealed service routes.\n\nOne copy to Project Manager.\nOne copy to Facilities file.\n\nPencil perspective sketches are not to be filed as measured drawings, irrespective of confidence.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "FM-23"
     },
