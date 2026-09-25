@@ -11400,7 +11400,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-001",
-      "body": "DISK 144 RECOVERY INDEX\n\nThe medium contains a partial archive of a Government Department of Records Site during its final closure period. Recoverable material includes administrative records, reconstructed rooms, physical-object references and cross-linked evidence.\n\nThe archive is incomplete by design. Restore collections, inspect reconstructed physical material and distinguish what the archive claims from what the surviving physical record can establish.\n\nWHAT VERSION OF THE TRUTH ARE YOU WILLING TO ACCEPT?",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nARCHIVE RECOVERY ENVIRONMENT\nDISK 144 - RECOVERY INDEX\n\nMedium status: readable with losses.\nSource: closure-period working copy, Site identifier partially unrecoverable.\nRecovered classes: correspondence, registers, plans, equipment records, access records and selected spatial references.\n\nThe source medium is not a complete copy of the Departmental archive. File headers may survive where body text does not. Room and object positions are reconstructed only where surviving records provide sufficient agreement.\n\nOperators are reminded that absence from this medium is evidence of absence from this medium only.\n\nWHAT VERSION OF THE TRUTH ARE YOU WILLING TO ACCEPT?",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-01"
     },
@@ -11412,7 +11412,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "GDR ARCHIVE RECOVERY TERMINAL\n\nINITIATE starts archive services for the current recovery. LIST shows collections currently available. RESTORE <CODE> reconstructs an available collection, subject to available recovery capacity. OPEN <RECORD-ID> opens a recovered readable record. EXIT returns to the reconstructed Site.\n\nCommands operate only on material present on Disk 144. A missing record is not evidence that the original record never existed.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nARCHIVE RECOVERY ENVIRONMENT\nTERMINAL QUICK REFERENCE\n\nINITIATE      Mount the recovered archive and prepare the working index.\nLIST          Display collections presently available to the operator.\nRESTORE code  Recover the named collection into the current working set.\nOPEN record   Display the recovered text associated with a record identifier.\nEXIT          Leave the terminal and return to the Site view.\n\nCommands do not alter the source medium. Where only catalogue metadata survives, the terminal will identify the record but will not manufacture missing text.\n\nOperator note: a failed OPEN request is not proof that the original document never existed.",
       "source_status": "preserved-stage-1",
       "parent_collection_id": "DR-01"
     },
@@ -11424,7 +11424,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "COLLECTION RESTORATION\n\nRecovered collections contribute reconstruction data to the Site. Restoration is persistent for the current recovery and cannot be undone. The available collection pool intentionally exceeds one complete recovery, so choices made during the session can change which material becomes available before Disk 144 is full.\n\nRestoration reconstructs archived state. It does not invent absent information.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nARCHIVE RECOVERY ENVIRONMENT\nCOLLECTION RESTORATION NOTE\n\nThe working environment has less storage than the total amount of recoverable material identified on Disk 144. Collections are therefore restored selectively.\n\nOnce a collection has been admitted to the working set, its recovered records and any corroborated Site references remain available for the duration of that recovery session. Restoration cannot be rolled back to reclaim space.\n\nThe system may reconstruct rooms, objects or labels from surviving administrative references. Such reconstructions indicate that the item was recorded, not that every recorded detail is correct.\n\nWhere records disagree, retain the disagreement.",
       "source_status": "preserved-stage-1",
       "parent_collection_id": "DR-01"
     },
@@ -11436,7 +11436,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "LISTING & OPENING RECORDS\n\nLIST presents the collections known to the recovery environment. Each restored collection may contain generated catalogue entries and a smaller number of readable authored records. OPEN accepts a stable record identifier.\n\nCatalogue metadata may survive even where document content does not. Such entries are shown as unavailable rather than silently reconstructed.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nARCHIVE RECOVERY ENVIRONMENT\nCATALOGUE AND RECORD HANDLING\n\nThe catalogue and the documents are separate survivals.\n\nA catalogue entry may retain a title, reference and filing location after the document body has been lost. Conversely, a recovered text fragment may survive without all of its original catalogue fields. The recovery terminal preserves both conditions rather than filling gaps by assumption.\n\nUse LIST to locate a collection and OPEN with the full record reference to inspect available text.\n\nDo not treat a tidy index as a tidy history.",
       "source_status": "preserved-stage-1",
       "parent_collection_id": "DR-01"
     },
@@ -11448,7 +11448,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "TERMINAL ACCESS & COMMAND REFERENCE\n\nCollection: DR-02 - Terminal Operations Guide.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nINFORMATION SYSTEMS CIRCULAR\nTERMINAL ACCESS & COMMAND REFERENCE\n\nArchive recovery terminals are intended for supervised examination of damaged departmental media. The source device is mounted read-only.\n\nNormal sequence:\n1. INITIATE the recovery environment.\n2. LIST available holdings.\n3. RESTORE only the collections required for the current examination.\n4. OPEN individual record references as required.\n5. EXIT before removing power or changing media.\n\nRepeated commands are harmless. Repeated assumptions are not.\n\nFaults affecting the terminal itself are to be logged separately from faults found in the recovered archive.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-02"
     },
@@ -11460,7 +11460,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "ARCHIVE COMMAND SYNTAX\n\nCollection: DR-02 - Terminal Operations Guide.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTERMINAL OPERATIONS GUIDE\nARCHIVE COMMAND SYNTAX\n\nCommands are entered as plain text and are not case-sensitive.\n\nINITIATE\nStarts archive services and verifies the mounted recovery medium.\n\nLIST\nPrints the currently visible collection codes and recovery status.\n\nRESTORE XX-00\nCopies recoverable material for the named collection into the working area.\n\nOPEN XX-00-RS-0000\nDisplays the selected recovered record.\n\nEXIT\nCloses the terminal session without writing to the source medium.\n\nDo not abbreviate record identifiers. A valid-looking reference can still point to a record whose body was not recovered.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-02"
     },
@@ -11472,7 +11472,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "ERROR & RECOVERY MESSAGES\n\nCollection: DR-02 - Terminal Operations Guide.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTERMINAL OPERATIONS GUIDE\nERROR & RECOVERY MESSAGES\n\nNO SUCH COLLECTION\nThe catalogue does not contain the requested collection code.\n\nCOLLECTION NOT AVAILABLE\nThe holding exists but its current dependencies have not been recovered.\n\nRECORD BODY UNRECOVERABLE\nCatalogue metadata survives; readable content does not.\n\nRECOVERY CAPACITY EXCEEDED\nThe working set cannot accept further restored material.\n\nCHECKSUM DISAGREEMENT\nTwo recovered copies differ. Neither copy is to be silently preferred.\n\nSESSION NOT INITIALISED\nRun INITIATE before archive commands.\n\nOperators are to record recurring checksum faults, not cure them with imagination.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-02"
     },
@@ -11484,7 +11484,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "TERMINAL SESSION SAFEGUARDS\n\nCollection: DR-02 - Terminal Operations Guide.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTERMINAL OPERATIONS GUIDE\nTERMINAL SESSION SAFEGUARDS\n\nThe recovery terminal must never write to original media.\n\nSession history is temporary and is cleared when the recovery environment is closed. Recovered documents remain unchanged by viewing. Notes made by the examiner are held in the working session only unless separately exported.\n\nIf a record appears inconsistent with a reconstructed room or object, inspect the physical reference and retain both observations.\n\nDo not:\n- rename damaged records for convenience;\n- infer missing signatures;\n- merge contradictory versions;\n- treat an access failure as evidence of wrongdoing.\n\nPreservation includes preserving uncertainty.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-02"
     },
@@ -11496,7 +11496,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "RECONSTRUCTION & COLLECTION RECOVERY PROCEDURES\n\nCollection: DR-03 - Site Reconstruction Guide.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nARCHIVE RECOVERY UNIT\nRECONSTRUCTION & COLLECTION RECOVERY PROCEDURES\n\nSite reconstruction is derived from surviving room schedules, asset registers, access plans, desk allocations and maintenance records.\n\nA room is admitted to the working model only when the recovery system has enough independent references to place it with reasonable confidence. Movable items require a recorded location or a surviving physical association. Decorative detail is omitted unless specifically evidenced.\n\nRecovered collections may add new references and therefore improve the Site model.\n\nThe resulting Site is an evidential aid. It is not a photograph, a memory, or permission to assume what the records do not say.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-03"
     },
@@ -11508,7 +11508,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "RECONSTRUCTION QUOTA NOTES\n\nCollection: DR-03 - Site Reconstruction Guide.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nARCHIVE RECOVERY UNIT\nWORKING-CAPACITY NOTE\n\nDisk 144 contains more recoverable material than can be expanded into one working recovery.\n\nPriority is therefore determined by the examiner. Essential administrative chains should be restored before peripheral holdings. When the working capacity is exhausted, the session is to end with a record of what was recovered and what remains outside the current working set.\n\nCapacity limits are technical, not evidential. Material omitted because there was no room for it has not thereby become irrelevant.\n\nA second recovery may produce a different but equally valid view of the same source medium.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-03"
     },
@@ -11520,7 +11520,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "PHYSICAL ITEM RECONSTRUCTION RULES\n\nCollection: DR-03 - Site Reconstruction Guide.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nARCHIVE RECOVERY UNIT\nPHYSICAL-REFERENCE RECONSTRUCTION RULES\n\nPhysical items may be represented in the Site model where one or more surviving records identify both the object and its location.\n\nExamples include labelled folders, equipment panels, access cards, desk notes, transfer boxes and cabinet markers.\n\nA reconstructed item means:\n- the archive says an item of that description was there;\n- the location is sufficiently supported to be useful;\n- the object may be examined alongside the documentary record.\n\nIt does not mean:\n- the item is complete;\n- every label is legible;\n- its recorded purpose was its actual use.\n\nWhere an object contradicts a document, keep looking.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-03"
     },
@@ -11532,7 +11532,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "EVIDENCE & NOTEBOOK BEHAVIOUR\n\nCollection: DR-03 - Site Reconstruction Guide.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nARCHIVE RECOVERY UNIT\nEXAMINER'S NOTEBOOK GUIDANCE\n\nThe recovery environment may copy confirmed observations into the examiner's Notebook. Entries should be factual and should identify what has actually been established.\n\nGood: \"The transfer box was on the Records Trolley.\"\nPoor: \"Someone hid the transfer box.\"\n\nGood: \"No visitor entry was recorded for the restricted area.\"\nPoor: \"No visitor entered the restricted area.\"\n\nThe Notebook is intended to prevent the examiner's memory from becoming more confident than the archive.\n\nConclusions should arise from several records, physical references and timings. Suspicion is useful. Certainty is expensive.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-03"
     },
@@ -11544,7 +11544,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-010",
-      "body": "Physical Archive Reconciliation Workstream\n\nThe archive now contains enough context to advance the recovery investigation. The recovered material establishes a new line of enquiry for the reconstruction. The RECORDS OFFICE area has been reconstructed from the surviving archive. A previously inaccessible internal route has been restored for investigation.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nSITE CLOSURE PROJECT\nPHYSICAL ARCHIVE RECONCILIATION WORKSTREAM\n\nOwner: Senior Archivist\nStatus at Friday 09:00: OPEN\n\nFinal cabinet-to-catalogue reconciliation is incomplete. Several holdings have been withdrawn for transfer, one trolley remains awaiting refiling, and the closure file contains unresolved location exceptions.\n\nRecords Office access is required for completion. The trolley, withdrawal markers and transfer staging material are to remain undisturbed until the Senior Archivist has signed the exception register.\n\nHandover may not be certified while the physical holdings total differs from the signed catalogue total.\n\nProject Manager note: this is a records problem until somebody proves otherwise.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-04"
     },
@@ -11556,7 +11556,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-011",
-      "body": "Terminal Network Remediation Workstream\n\nThe archive now contains enough context to advance the recovery investigation. The recovered material establishes a new line of enquiry for the reconstruction. The IT SUPPORT area has been reconstructed from the surviving archive. A previously inaccessible internal route has been restored for investigation.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nSITE CLOSURE PROJECT\nTERMINAL NETWORK REMEDIATION WORKSTREAM\n\nOwner: IT Support\nStatus at Friday 09:00: OPEN\n\nThe Main Office archive terminal is locally serviceable but cannot complete digital verification against the server holdings. Initial tests place the fault beyond the terminal desk.\n\nIT Support is to trace the affected circuit through the local patching and onward to the Server Room route. Archive verification media has already been prepared and is not to be reused for any other purpose.\n\nHandover may not be certified until the route is restored or a formally accepted workaround is recorded.\n\nDo not replace working terminal equipment merely because it is easier to reach.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-04"
     },
@@ -11568,7 +11568,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "HANDOVER READINESS CHECKLIST\n\nCollection: DR-04 - Site Closure & Building Handover.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nSITE CLOSURE PROJECT\nHANDOVER READINESS CHECKLIST\n\n[OK] Staff posting notices issued.\n[OK] Furniture and general assets marked for transfer or disposal.\n[OK] Visitor arrangements reduced to closure staffing.\n[OK] Routine utilities decommissioning scheduled.\n[  ] Physical archive reconciliation complete.\n[  ] Digital holdings verification complete.\n[  ] Final security review complete.\n[  ] Director's handover certificate signed.\n\nTwo incomplete lines have been carried forward from Thursday.\n\nProject Manager annotation:\n\"Friday is still achievable provided nobody discovers a third workstream.\"",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-04"
     },
@@ -11580,7 +11580,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "OUTSTANDING WORKSTREAM SUMMARY\n\nCollection: DR-04 - Site Closure & Building Handover.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nSITE CLOSURE PROJECT\nOUTSTANDING WORKSTREAM SUMMARY\n\nAt close of business Thursday, two operational workstreams remained capable of delaying handover.\n\nRECORDS\nCabinet holdings and transfer staging require final reconciliation in the Records Office.\n\nTECHNOLOGY\nThe Main Office terminal route must be restored before digital holdings verification can be completed.\n\nThe workstreams may proceed independently, but both feed the same final handover decision. Neither is to be marked complete on the strength of verbal assurance.\n\nFacilities and Security are to support access as required.\n\nDistribution: Project Manager, Senior Archivist, IT Support, Security Duty Officer.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-04"
     },
@@ -11592,7 +11592,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "FINAL FRIDAY MILESTONE PLAN\n\nCollection: DR-04 - Site Closure & Building Handover.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nSITE CLOSURE PROJECT\nFINAL FRIDAY MILESTONE PLAN\n\n08:30  Closure team attendance confirmed.\n09:00  Records reconciliation resumes.\n09:00  Terminal fault investigation resumes.\n11:30  Preliminary exception review.\n13:00  Archive transfer staging check.\n14:00  Digital verification window, subject to network availability.\n15:30  Security and facilities final walk-round.\n16:00  Director handover review.\n16:30  Site closure target.\n\nContingency:\nAny incident affecting restricted areas, archive custody or life safety suspends the 16:30 handover review.\n\nHandwritten note:\n\"Tea has not been given a milestone because apparently we are still a serious Department.\"",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-04"
     },
@@ -11604,7 +11604,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "BUILDING HANDOVER DEPENDENCIES\n\nCollection: DR-04 - Site Closure & Building Handover.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nSITE CLOSURE PROJECT\nBUILDING HANDOVER DEPENDENCIES\n\nFinal handover requires all of the following:\n\nA. Physical holdings accounted for or recorded as authorised transfer exceptions.\nB. Digital holdings verification completed against prepared media.\nC. Restricted-area access and key custody reconciled.\nD. Essential services left in their agreed closure state.\nE. Outstanding incidents reviewed by Operational Security.\nF. Director's authority to release the building.\n\nAn incomplete dependency is not to be converted into \"not applicable\" solely to preserve the target date.\n\nThe Site will close late before it closes incorrectly.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-04"
     },
@@ -11616,7 +11616,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-013",
-      "body": "Archive Reconciliation Exception Report\n\nRecord on Records Trolley is now represented in the recovered site and can be inspected. Misfile slip is now represented in the recovered site and can be inspected. Trolley refiling divider is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nRECORDS OFFICE\nARCHIVE RECONCILIATION EXCEPTION REPORT\n\nException: one registered holding is not present in its assigned secure cabinet.\n\nCatalogue location: Cabinet 05.\nLast recorded action: withdrawn for internal handling.\nCurrent status: unresolved at time of report.\n\nA Records Trolley remains in use for material awaiting refiling. Staff are to check trolley holdings, dividers and temporary slips before escalating the item as missing.\n\nNo destruction authority is recorded against the reference.\n\nSenior Archivist:\n\"Please stop using the word 'lost' until we have looked in the places we put things.\"",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-07"
     },
@@ -11628,7 +11628,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-014",
-      "body": "Unlocated Holdings Schedule\n\nExternal withdrawal / location marker is now represented in the recovered site and can be inspected. Catalogue discrepancy card is now represented in the recovered site and can be inspected. Refiling note is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nRECORDS OFFICE\nUNLOCATED HOLDINGS SCHEDULE\n\nThe following location exception remains open:\n\nRegistered cabinet: 05\nExpected marker: external withdrawal/location card\nPhysical holding: not present at registered cabinet position\nSearch priority: trolley, active work folders, transfer staging\n\nA withdrawal marker is part of the custody trail and is not to be removed when the file itself is moved.\n\nIf the marker and the holding can be matched, amend the reconciliation sheet and return both to the Senior Archivist for sign-off.\n\nUnlocated does not mean unaccounted for. Not yet.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-07"
     },
@@ -11640,7 +11640,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "TROLLEY HOLDING RECONCILIATION\n\nCollection: DR-07 - Archive Holdings & Reconciliation.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nRECORDS OFFICE\nTROLLEY HOLDING RECONCILIATION\n\nThe Records Trolley was checked against the temporary refiling divider at 11:20.\n\nOne holding listed as absent from Cabinet 05 is present on the trolley behind the \"TO REFILE\" divider. A misfile slip is attached. The catalogue has not yet been amended.\n\nAction:\n- leave the record on the trolley;\n- retain the slip;\n- match it to the cabinet withdrawal marker;\n- obtain Senior Archivist initials before refiling.\n\nThis resolves location, not custody. The transfer batch remains a separate exercise.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-07"
     },
@@ -11652,7 +11652,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "CABINET LOCATION AUDIT\n\nCollection: DR-07 - Archive Holdings & Reconciliation.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nRECORDS OFFICE\nCABINET LOCATION AUDIT\n\nCabinets 01-04: no material exception noted.\nCabinet 05: one withdrawal marker present; corresponding holding not in shelf position.\nCabinet 06: transfer withdrawals in progress; see transfer register.\nOpen shelving: routine working material only.\nTrolley: awaiting full reconciliation.\n\nThe audit records where material was expected at the time of inspection. It is not a historical movement log.\n\nWhere a cabinet position is empty and a marker is present, follow the marker before raising an incident report.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-07"
     },
@@ -11664,7 +11664,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "REFILING EXCEPTION NOTES\n\nCollection: DR-07 - Archive Holdings & Reconciliation.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nRECORDS OFFICE\nREFILING EXCEPTION NOTES\n\nThree causes of temporary location mismatch were recorded during closure work:\n\n1. material removed for transfer-box preparation;\n2. material held on the trolley pending index amendment;\n3. material returned to the wrong divider after consultation.\n\nNone of the three automatically constitutes a custody failure.\n\nAll closure-period refiling is to use a written slip, even for movements within the Records Office. The rule has been reissued because \"I'll remember where I put it\" has again failed audit.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-07"
     },
@@ -11676,7 +11676,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "ARCHIVE RECONCILIATION SIGN-OFF\n\nCollection: DR-07 - Archive Holdings & Reconciliation.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nRECORDS OFFICE\nARCHIVE RECONCILIATION SIGN-OFF\n\nPhysical count: substantially complete.\nOpen exceptions: transfer batch and one trolley-held record.\nUnexplained losses: NONE CONFIRMED.\nDestruction discrepancies: NONE RECORDED.\n\nFinal sign-off withheld pending:\n- transfer manifest comparison;\n- custody-sheet completion;\n- return or formal relocation of trolley-held material.\n\nPrepared by: Records Officer\nFor review by: Senior Archivist\n\nMargin note:\n\"Do not sign the bottom box until the top boxes mean what they say.\"",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-07"
     },
@@ -11688,7 +11688,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "1962 INITIAL FILING DISCREPANCY\n\nCollection: DR-23 - Historical Filing Exceptions & Recovery Actions.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHISTORICAL EXCEPTIONS FILE\n12 OCTOBER 1962 - INITIAL FILING DISCREPANCY\n\nDuring the morning Top Secret holdings check, file TS/4/118 was not found in its registered box.\n\nThe index card showed no authorised withdrawal. Duty staff searched the immediate cabinet run twice without result. The discrepancy was reported to the Site Security Officer at 10:42.\n\nPending investigation, no conclusion was reached as to loss, removal or misfiling.\n\nThe original report contains the handwritten addition:\n\"Please establish location before establishing culprit.\"",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-23"
     },
@@ -11700,7 +11700,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "1962 SITE LOCKDOWN DIRECTION\n\nCollection: DR-23 - Historical Filing Exceptions & Recovery Actions.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHISTORICAL EXCEPTIONS FILE\n12 OCTOBER 1962 - SITE LOCKDOWN DIRECTION\n\nFollowing the unresolved absence of TS/4/118, outward movement of classified records is suspended.\n\nAll exits are to be controlled. Staff leaving the Site are to be identified and recorded. Archive boxes in the affected sequence are not to be rearranged.\n\nThis direction is precautionary and does not imply deliberate removal.\n\nReview interval: every six hours.\nMaximum initial duration: 72 hours without Director approval.\n\nSecurity Officer annotation:\n\"The building is closed. The filing cabinets remain, regrettably, at liberty.\"",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-23"
     },
@@ -11712,7 +11712,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "1962 MISFILE RECOVERY RECORD\n\nCollection: DR-23 - Historical Filing Exceptions & Recovery Actions.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHISTORICAL EXCEPTIONS FILE\n15 OCTOBER 1962 - MISFILE RECOVERY RECORD\n\nFile TS/4/118 was recovered at 07:35 from box TS/4/181.\n\nThe outer folders are visually similar and had been returned during a high-volume consultation period. No evidence of removal from the secure archive was found. The file contents and page count were complete.\n\nThe Site lockdown was lifted at 08:10.\n\nCause recorded: transposition during refiling.\n\nNo disciplinary action recommended beyond procedural review and one extremely pointed reminder concerning box numbers.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-23"
     },
@@ -11724,7 +11724,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "1962 PROCEDURAL REVIEW\n\nCollection: DR-23 - Historical Filing Exceptions & Recovery Actions.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHISTORICAL EXCEPTIONS FILE\n1962 PROCEDURAL REVIEW\n\nFinding:\nThe incident arose from a filing transposition, compounded by an index that recorded expected location but not the most recent handling step.\n\nActions approved:\n- temporary withdrawal slips for all classified consultations;\n- independent check of returned holdings;\n- clearer box-number typography;\n- escalation language to distinguish \"not located\" from \"lost\".\n\nReview conclusion:\nA serious discrepancy deserves a serious response. It does not deserve a preferred explanation before the search is complete.\n\nThis case is retained for training because certainty arrived three days later than suspicion.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-23"
     },
@@ -11736,7 +11736,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-015",
-      "body": "Final Transfer Batch Custody Register\n\nLabelled archive transfer box is now represented in the recovered site and can be inspected. Transfer Box Manifest is now represented in the recovered site and can be inspected. Custody tag is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nARCHIVE TRANSFER TEAM\nFINAL TRANSFER BATCH CUSTODY REGISTER\n\nBatch: FINAL-6\nStatus: staged in Records Office\n\nThe listed holdings have been deliberately withdrawn from normal cabinet storage for transfer preparation. Each withdrawal must be represented by a cabinet marker and must remain traceable to a labelled transfer box.\n\nCustody passes from Records Officer to Senior Archivist only when the manifest, seal number and holding count agree.\n\nAn empty cabinet position within this batch is therefore expected.\n\nDo not refile transfer material merely to make the cabinet look complete.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-29"
     },
@@ -11748,7 +11748,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-016",
-      "body": "Transfer Box Manifest\n\nTransfer withdrawal marker is now represented in the recovered site and can be inspected. Box seal strip is now represented in the recovered site and can be inspected. Transfer staging checklist is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nARCHIVE TRANSFER TEAM\nTRANSFER BOX MANIFEST\n\nBox: FINAL-6-B\nPrepared: Friday\n\nContents checked against transfer list.\nIndividual holding references: see attached sheet.\nTemporary withdrawal markers: to remain in source cabinets until receipt is confirmed.\nSeal: to be applied after Senior Archivist verification.\nDestination: central archive intake.\n\nThe box is staged on the Records Trolley pending final custody signature.\n\nA sealed box without a signed manifest is not a completed transfer. It is merely a box that has become harder to inspect.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-29"
     },
@@ -11760,7 +11760,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "ARCHIVE TRANSFER STAGING PLAN\n\nCollection: DR-29 - Archive Transfer & Custody.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nARCHIVE TRANSFER TEAM\nARCHIVE TRANSFER STAGING PLAN\n\nClosure-period transfer material is to be assembled on the Records Trolley by batch.\n\nSequence:\n1. withdraw holding and place marker in cabinet;\n2. compare reference with transfer list;\n3. place holding in labelled box;\n4. prepare manifest;\n5. obtain Senior Archivist verification;\n6. seal box;\n7. record handover.\n\nThe trolley is a controlled staging point, not an alternative filing system.\n\nNormal refiling and transfer staging must not share the same divider.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-29"
     },
@@ -11772,7 +11772,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "CUSTODY SEAL REGISTER\n\nCollection: DR-29 - Archive Transfer & Custody.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nARCHIVE TRANSFER TEAM\nCUSTODY SEAL REGISTER\n\nUnused seals remain with the Records Officer.\nApplied seals are entered against box number, date, time and witness.\n\nFINAL-6-B: seal reserved, NOT YET APPLIED.\nReason: verification outstanding.\n\nAny seal removed after application is to be retained and attached to the exception sheet.\n\nThere is no requirement to seal an incomplete box for the convenience of the closure timetable.\n\nUnsigned correction in margin:\n\"Nor does writing 'FINAL' on something make it final.\"",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-29"
     },
@@ -11784,7 +11784,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "TRANSFER BATCH EXCEPTION NOTE\n\nCollection: DR-29 - Archive Transfer & Custody.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nARCHIVE TRANSFER TEAM\nTRANSFER BATCH EXCEPTION NOTE\n\nBatch FINAL-6 cannot be released.\n\nReason:\nOne physical reconciliation exception remains open and the corresponding digital verification has not been completed. The transfer box is otherwise prepared.\n\nRequired before release:\n- confirm the location and custody status of the outstanding holding;\n- complete digital holdings comparison;\n- Senior Archivist signature.\n\nThe exception is administrative. No loss or compromise is asserted by this note.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-29"
     },
@@ -11796,7 +11796,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "DIGITAL VERIFICATION DEPENDENCY\n\nCollection: DR-29 - Archive Transfer & Custody.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nARCHIVE TRANSFER TEAM\nDIGITAL VERIFICATION DEPENDENCY\n\nPhysical transfer and digital verification are paired closure controls.\n\nThe paper manifest confirms what is intended to leave the Site. The verification media confirms that the corresponding digital holdings were prepared and checked before systems are withdrawn.\n\nA completed physical box does not waive the digital check.\nA completed checksum does not account for a physical file.\n\nBoth records are required before the Senior Archivist may release the final batch.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-29"
     },
@@ -11808,7 +11808,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-017",
-      "body": "Final Transfer Exception Register\n\nFinal Transfer Exception Register is now represented in the recovered site and can be inspected. Senior Archivist verification note is now represented in the recovered site and can be inspected. In-tray card is now represented in the recovered site and can be inspected. Paperclip tin is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nARCHIVE TRANSFER AUTHORITY\nFINAL TRANSFER EXCEPTION REGISTER\n\nOpen at 12:00 Friday:\n\nEX-1  Cabinet 05 holding on trolley pending refiling confirmation.\nEX-2  Final transfer box awaiting custody verification.\nEX-3  Digital holdings check blocked by network fault.\n\nOwner for closure: Senior Archivist.\n\nNo exception is marked as suspected interference. All remain operationally unresolved.\n\nThe register is to be reviewed with the Project Manager before handover, or immediately following any incident that interrupts the closure programme.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-31"
     },
@@ -11820,7 +11820,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-018",
-      "body": "Senior Archivist Verification Assignment\n\nSigned Custody Sheet is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nARCHIVE TRANSFER AUTHORITY\nSENIOR ARCHIVIST VERIFICATION ASSIGNMENT\n\nFor the final closure period, the Senior Archivist is personally assigned to verify:\n\n- physical transfer exceptions;\n- custody signatures;\n- final transfer-box contents;\n- digital holdings comparison;\n- any variance between cabinet, trolley and manifest.\n\nRestricted-area access may be requested where necessary to complete digital verification or inspect systems supporting the archive.\n\nThis assignment is a control measure, not a change of post.\n\nThe Senior Archivist is not to delegate final signature to staff whose work is being verified.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-31"
     },
@@ -11832,7 +11832,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "CUSTODY EXCEPTION SIGN-OFF\n\nCollection: DR-31 - Archive Transfer Authorisation & Exceptions.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nARCHIVE TRANSFER AUTHORITY\nCUSTODY EXCEPTION SIGN-OFF\n\nException sign-off requires three questions to be answered:\n\nWhere is the holding?\nWho has custody?\nWhy does that differ from the normal catalogue location?\n\nIf all three answers are documented and authorised, the location variance may be closed without treating it as a loss.\n\nIf any answer depends on recollection alone, retain the exception.\n\nFinal closure has produced an unusual quantity of temporary movement. The purpose of the register is to make temporary movement visible, not suspicious by default.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-31"
     },
@@ -11844,7 +11844,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "UNVERIFIED HOLDINGS LIST\n\nCollection: DR-31 - Archive Transfer Authorisation & Exceptions.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nARCHIVE TRANSFER AUTHORITY\nUNVERIFIED HOLDINGS LIST\n\nThe following categories remain outside final verification:\n\n- material in the last transfer box;\n- records represented by temporary withdrawal markers;\n- one trolley-held refiling exception;\n- digital holdings awaiting server comparison.\n\nThis list is deliberately broader than the incident list.\n\nUnverified means the closure check is incomplete. It does not mean the underlying holding is damaged, missing or compromised.\n\nNext review: after network service is restored or at 15:00, whichever occurs first.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-31"
     },
@@ -11856,7 +11856,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "HANDOVER AUTHORITY NOTE\n\nCollection: DR-31 - Archive Transfer Authorisation & Exceptions.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nARCHIVE TRANSFER AUTHORITY\nHANDOVER AUTHORITY NOTE\n\nThe Director may accept the building only after receiving the Senior Archivist's completed transfer release and the Project Manager's closure certificate.\n\nWhere an incident occurs before signature, existing release authority lapses until Security has completed an initial review.\n\nNo officer is authorised to back-date a handover certificate to the planned closure time.\n\nThe planned time is a target, not a historical fact.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-31"
     },
@@ -11868,7 +11868,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "TRANSFER RELEASE CHECKLIST\n\nCollection: DR-31 - Archive Transfer Authorisation & Exceptions.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nARCHIVE TRANSFER AUTHORITY\nTRANSFER RELEASE CHECKLIST\n\n[  ] Physical exceptions reconciled\n[  ] Transfer manifest agreed\n[  ] Custody sheet signed\n[  ] Box seal applied and recorded\n[  ] Digital verification complete\n[  ] Security exceptions cleared\n[  ] Senior Archivist release signed\n\nStatus at time of filing: INCOMPLETE\n\nInstruction:\nLeave unchecked boxes unchecked. The receiving archive would rather inherit an honest delay than an immaculate fiction.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-31"
     },
@@ -11880,7 +11880,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-026",
-      "body": "Final Closure Exception Summary\n\nThe archive now contains enough context to advance the recovery investigation. Project Manager Exception Sheet is now represented in the recovered site and can be inspected. Closure suspension note is now represented in the recovered site and can be inspected. Security review referral is now represented in the recovered site and can be inspected. Remaining-workstream release sheet is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nSITE CLOSURE PROJECT\nFINAL CLOSURE EXCEPTION SUMMARY\n\nFollowing the suppression-system discharge and evacuation, the planned Friday handover is suspended.\n\nOpen matters now include:\n- incident review by Operational Security;\n- confirmation of all personnel and restricted-area access;\n- completion of the archive reconciliation workstream;\n- completion of the terminal-network remediation workstream;\n- confirmation that essential server services remain stable.\n\nNo material is to be destroyed, transferred off Site or reclassified until the exception review is complete.\n\nProject Manager:\n\"Friday's deadline has ceased to be the most important thing that happened on Friday.\"",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-47"
     },
@@ -11892,7 +11892,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-027",
-      "body": "Operational Security Review Requirement\n\nThe SECURITY area has been reconstructed from the surviving archive. The SECRETARY OFFICE area has been reconstructed from the surviving archive. A previously inaccessible internal route has been restored for investigation.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nSITE CLOSURE PROJECT\nOPERATIONAL SECURITY REVIEW REQUIREMENT\n\nThe Site will remain under controlled closure pending a formal review of the suppression discharge.\n\nSecurity Office is to assemble:\n- access records;\n- visitor records;\n- attendance returns;\n- evacuation accountability;\n- duty communications;\n- CCTV coverage and relevant retained footage.\n\nThe Secretary's Office is to preserve Director correspondence, appointment material and incident-related incoming messages.\n\nThis review is fact-finding. No individual is to be identified as responsible solely because they were authorised to be present.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-47"
     },
@@ -11904,7 +11904,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-028",
-      "body": "REMAINING WORKSTREAM RELEASE AUTHORITY\n\nThis recovered DR-47 record authorises or records the following state change in the reconstruction: RELEASE_ALTERNATE_WORKSTREAM.\n\nThe entry is retained as a persistent recovery trigger. Reopening this record does not duplicate reconstructed objects or reverse previously established state.\n\nOperational note: follow-on conclusions require physical inspection where the evidence ledger specifies one.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nSITE CLOSURE PROJECT\nREMAINING WORKSTREAM RELEASE AUTHORITY\n\nThe closure suspension does not cancel the unfinished Records and Technology workstreams.\n\nOnce the initial safety state is confirmed, the Project Manager authorises both teams to resume the minimum work required to establish:\n1. the true custody state of final archive holdings; and\n2. the technical condition of the terminal/server route.\n\nAny work that may disturb incident-relevant equipment must be documented before continuation.\n\nThe previously deferred workstream is no longer to be held back for scheduling reasons.\n\nThere is no longer a Friday timetable to protect.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-47"
     },
@@ -11916,7 +11916,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "INCIDENT REVIEW REFERRAL\n\nCollection: DR-47 - Final Closure Exceptions & Incident Review.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nSITE CLOSURE PROJECT\nINCIDENT REVIEW REFERRAL\n\nReferral to: Operational Security\nIncident: automatic Site evacuation following Halon discharge\nLocation of concern: Server Room / associated suppression controls\nInjury report: none at initial return\nFire report: not yet established\nCause: not established\n\nQuestions for review:\n- Was the discharge initiated by detection or manual release?\n- Who was authorised in the restricted area?\n- What maintenance or network work was under way?\n- Did any visitor or unauthorised person enter the relevant area?\n\nDo not answer the questions in the referral.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-47"
     },
@@ -11928,7 +11928,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "CLOSURE SUSPENSION NOTICE\n\nCollection: DR-47 - Final Closure Exceptions & Incident Review.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nSITE CLOSURE PROJECT\nCLOSURE SUSPENSION NOTICE\n\nEffective immediately, the planned building handover is paused.\n\nStaff required for incident review, archive custody, technical recovery and essential services may remain or return under Security direction. All other closure activity is suspended.\n\nTransfer vehicles are not to depart with the final archive batch.\nDecommissioning contractors are not to isolate further services.\nNo cabinet or cable-riser arrangement is to be tidied for appearance.\n\nPreserve the Site as found after evacuation, subject to life-safety requirements.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-47"
     },
@@ -11940,7 +11940,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "REVISED HANDOVER CONDITIONS\n\nCollection: DR-47 - Final Closure Exceptions & Incident Review.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nSITE CLOSURE PROJECT\nREVISED HANDOVER CONDITIONS\n\nThe revised handover will require, in addition to the original closure controls:\n\n- completed incident chronology;\n- explanation of the suppression release input;\n- confirmation of personnel and visitor movements;\n- confirmation that archive exceptions are accounted for;\n- confirmation that server and backup services are stable;\n- Director approval after Security review.\n\nThe handover date is now \"when complete\".\n\nThis wording has been approved despite objections from the calendar.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-47"
     },
@@ -11952,7 +11952,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-029",
-      "body": "Site Closure Direction\n\nSigned closure briefing is now represented in the recovered site and can be inspected. Director annotated copy is now represented in the recovered site and can be inspected. Meeting notes card is now represented in the recovered site and can be inspected. Briefing binder is now represented in the recovered site and can be inspected. Final-day diary card is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nDIRECTOR'S OFFICE\nSITE CLOSURE DIRECTION\n\nThe Site is to close as part of the Department's approved centralisation programme.\n\nRecords functions will transfer to the central archive. Digital holdings will move to the consolidated service. Local administrative posts will be reassigned or concluded under existing personnel arrangements.\n\nThe closure is not a response to a security breach, disciplinary action or emergency condition.\n\nThe building is to be handed over only after archive custody, digital verification and essential safety controls are complete.\n\nSigned,\nDIRECTOR\n\nDistribution: Project Manager, Senior Archivist, Facilities, Security, IT Support.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-53"
     },
@@ -11964,7 +11964,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "EXECUTIVE CLOSURE BRIEFING\n\nCollection: DR-53 - Executive Closure Correspondence.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nDIRECTOR'S OFFICE\nEXECUTIVE CLOSURE BRIEFING\n\nPurpose:\nComplete an orderly transfer of the Site's remaining records and services before building handover.\n\nKnown pressure points:\n- final archive batch;\n- terminal-to-server verification route;\n- contractor sequencing;\n- restricted-area access during closure work.\n\nThe programme assumes routine operations until handover. Existing security and safety rules remain in force throughout.\n\nThe Director has specifically rejected any proposal to \"simplify\" closure by treating incomplete verification as post-handover work.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-53"
     },
@@ -11976,7 +11976,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "CENTRALISATION PROGRAMME SUMMARY\n\nCollection: DR-53 - Executive Closure Correspondence.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nDIRECTOR'S OFFICE\nCENTRALISATION PROGRAMME SUMMARY\n\nThe Department is reducing small local records sites and consolidating holdings, specialist staff and computing services.\n\nExpected benefits:\n- fewer duplicate catalogues;\n- improved digital preservation;\n- central custody of high-classification holdings;\n- reduced building and support costs.\n\nKnown risks:\n- temporary workload increase during transfer;\n- overlap between physical and digital verification;\n- dependence on ageing local systems during the final weeks.\n\nThe Site closure forms one scheduled part of this programme. It is not an exceptional shutdown.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-53"
     },
@@ -11988,7 +11988,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "DIRECTOR ANNOTATION RECORD\n\nCollection: DR-53 - Executive Closure Correspondence.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nDIRECTOR'S ANNOTATED COPY\nCLOSURE BRIEFING - MARGIN NOTES TRANSCRIBED\n\n\"Do not let the date become the objective.\"\n\n\"Records: I want signed custody, not 'everyone knows where the box is'.\"\n\n\"IT: keep the servers until verification is actually finished.\"\n\n\"Security: normal rules until the last person leaves.\"\n\n\"Facilities: confirm suppression system remains safe while contractors are in the building.\"\n\nFinal annotation beside Friday handover target:\n\"Only if true.\"",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-53"
     },
@@ -12000,7 +12000,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "HANDOVER AUTHORITY CHAIN\n\nCollection: DR-53 - Executive Closure Correspondence.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nDIRECTOR'S OFFICE\nHANDOVER AUTHORITY CHAIN\n\nOperational workstream owners certify completion to the Project Manager.\n\nThe Senior Archivist certifies archive custody and transfer readiness.\n\nIT Support certifies digital verification capability and final technical status.\n\nSecurity certifies access, incident and restricted-area exceptions.\n\nFacilities certifies building systems and decommissioning status.\n\nThe Project Manager assembles the closure certificate.\n\nThe Director alone releases the Site for handover.\n\nNo lower signature may substitute for a missing higher one, however attractively the empty box is initialled.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-53"
     },
@@ -12012,7 +12012,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "FINAL-DAY EXECUTIVE DIARY EXTRACT\n\nCollection: DR-53 - Executive Closure Correspondence.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nDIRECTOR'S OFFICE\nFINAL-DAY DIARY EXTRACT\n\n08:15  Closure progress review.\n10:30  Central archive telephone update.\n12:00  Project Manager: two workstreams still open.\n13:45  Handover briefing moved to 16:00.\n14:25  Secretary notes interruption from Security duty call.\n14:30  Site evacuation; meeting abandoned.\n15:10  Initial accountability reported complete.\n15:25  Closure formally suspended.\n\nHandwritten below the final line:\n\"Ask what happened before asking who did it.\"",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-53"
     },
