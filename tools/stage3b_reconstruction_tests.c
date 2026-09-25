@@ -1201,7 +1201,7 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
                 (uint8_t)FLOPPY144_ROOM_STAFF_ROOM &&
             pRect->type ==
                 (uint8_t)FLOPPY144_SITE_TABLE &&
-            pRect->x == 7U &&
+            pRect->x == 12U &&
             pRect->y == 34U &&
             pRect->width == 6U &&
             pRect->height == 6U
@@ -1222,7 +1222,7 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
                 (uint8_t)FLOPPY144_SITE_CHAIR
         )
         {
-            if(pRect->x == 13U && pRect->y == 36U)
+            if(pRect->x == 18U && pRect->y == 36U)
             {
                 bStaffChairNorth = true;
                 F144_CHECK(
@@ -1230,7 +1230,7 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
                     "Staff dining north chair uses border facing plus 45 degrees"
                 );
             }
-            else if(pRect->x == 9U && pRect->y == 32U)
+            else if(pRect->x == 14U && pRect->y == 32U)
             {
                 bStaffChairWest = true;
                 F144_CHECK(
@@ -1238,7 +1238,7 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
                     "Staff dining west chair uses border facing plus 45 degrees"
                 );
             }
-            else if(pRect->x == 9U && pRect->y == 40U)
+            else if(pRect->x == 14U && pRect->y == 40U)
             {
                 bStaffChairEast = true;
                 F144_CHECK(
@@ -1246,7 +1246,7 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
                     "Staff dining east chair uses border facing plus 45 degrees"
                 );
             }
-            else if(pRect->x == 5U && pRect->y == 36U)
+            else if(pRect->x == 10U && pRect->y == 36U)
             {
                 bStaffChairSouth = true;
                 F144_CHECK(
@@ -1331,6 +1331,188 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
         bSecurityDeskLeft &&
         bSecurityDeskRight,
         "Security Office keeps two adjacent 6x2 standard desks"
+    );
+}
+
+/*
+ * Locked Staff Room spreadsheet regression.
+ *
+ * The dining cluster was only one visible symptom of a stale room import.
+ * Keep the rest of the final spreadsheet geometry under test too: utility
+ * fixtures, sofas, the moved exterior window bank and the Corridor door.
+ */
+static void Floppy144TestStaffRoomSpreadsheetGeometry(void)
+{
+    uint32_t uRectIndex;
+    uint32_t uCompactSofas = 0U;
+    uint32_t uRightWallWindows = 0U;
+    bool bUtilityChair = false;
+    bool bNoticeboard = false;
+    bool bFridge = false;
+    bool bWorktop = false;
+    bool bSink = false;
+    bool bCoffeeMaker = false;
+    bool bStaffDoor = false;
+
+    for(
+        uRectIndex = 0U;
+        uRectIndex < Floppy144SiteRectCount();
+        ++uRectIndex
+    )
+    {
+        const Floppy144SiteRect *pRect =
+            Floppy144SiteRectAt(uRectIndex);
+
+        if(pRect == NULL)
+        {
+            continue;
+        }
+
+        if(
+            pRect->type == (uint8_t)FLOPPY144_SITE_DOOR &&
+            pRect->x == 2U &&
+            pRect->y == 46U &&
+            pRect->width == 5U &&
+            pRect->height == 1U &&
+            (
+                (
+                    pRect->from_room == (uint8_t)FLOPPY144_ROOM_CORRIDOR &&
+                    pRect->to_room == (uint8_t)FLOPPY144_ROOM_STAFF_ROOM
+                ) ||
+                (
+                    pRect->to_room == (uint8_t)FLOPPY144_ROOM_CORRIDOR &&
+                    pRect->from_room == (uint8_t)FLOPPY144_ROOM_STAFF_ROOM
+                )
+            )
+        )
+        {
+            bStaffDoor = true;
+        }
+
+        if(
+            pRect->room != (uint8_t)FLOPPY144_ROOM_STAFF_ROOM
+        )
+        {
+            continue;
+        }
+
+        if(
+            pRect->type == (uint8_t)FLOPPY144_SITE_CHAIR &&
+            pRect->x == 1U &&
+            pRect->y == 10U &&
+            pRect->width == 2U &&
+            pRect->height == 2U &&
+            pRect->rotation == 90U
+        )
+        {
+            bUtilityChair = true;
+        }
+        else if(
+            pRect->type == (uint8_t)FLOPPY144_SITE_WALL_MOUNTED_ITEM &&
+            pRect->x == 11U &&
+            pRect->y == 45U &&
+            pRect->width == 10U &&
+            pRect->height == 1U
+        )
+        {
+            bNoticeboard = true;
+        }
+        else if(
+            pRect->type == (uint8_t)FLOPPY144_SITE_FRIDGE &&
+            pRect->x == 1U &&
+            pRect->y == 1U &&
+            pRect->width == 5U &&
+            pRect->height == 5U
+        )
+        {
+            bFridge = true;
+        }
+        else if(
+            pRect->type == (uint8_t)FLOPPY144_SITE_WORKTOP &&
+            pRect->x == 6U &&
+            pRect->y == 1U &&
+            pRect->width == 18U &&
+            pRect->height == 5U
+        )
+        {
+            bWorktop = true;
+        }
+        else if(
+            pRect->type == (uint8_t)FLOPPY144_SITE_SINK &&
+            pRect->x == 7U &&
+            pRect->y == 2U &&
+            pRect->width == 4U &&
+            pRect->height == 3U
+        )
+        {
+            bSink = true;
+        }
+        else if(
+            pRect->type == (uint8_t)FLOPPY144_SITE_COFFEE_MAKER &&
+            pRect->x == 13U &&
+            pRect->y == 2U &&
+            pRect->width == 4U &&
+            pRect->height == 2U
+        )
+        {
+            bCoffeeMaker = true;
+        }
+
+        if(
+            pRect->type == (uint8_t)FLOPPY144_SITE_SOFA &&
+            pRect->width == 3U &&
+            pRect->height == 6U &&
+            (
+                (pRect->x == 21U && pRect->y == 13U) ||
+                (pRect->x == 21U && pRect->y == 23U) ||
+                (pRect->x == 1U && pRect->y == 13U) ||
+                (pRect->x == 1U && pRect->y == 23U)
+            )
+        )
+        {
+            ++uCompactSofas;
+        }
+
+        if(
+            pRect->type == (uint8_t)FLOPPY144_SITE_WINDOW &&
+            pRect->x == 24U &&
+            pRect->width == 1U &&
+            pRect->height == 9U &&
+            (
+                pRect->y == 35U ||
+                pRect->y == 24U ||
+                pRect->y == 13U ||
+                pRect->y == 2U
+            )
+        )
+        {
+            ++uRightWallWindows;
+        }
+    }
+
+    F144_CHECK(
+        bUtilityChair &&
+        bNoticeboard &&
+        bFridge &&
+        bWorktop &&
+        bSink &&
+        bCoffeeMaker,
+        "Staff Room utility furniture matches locked spreadsheet"
+    );
+
+    F144_CHECK(
+        uCompactSofas == 4U,
+        "Staff Room sofa footprints match locked spreadsheet"
+    );
+
+    F144_CHECK(
+        uRightWallWindows == 4U,
+        "Staff Room four-window bank is on spreadsheet right-hand wall"
+    );
+
+    F144_CHECK(
+        bStaffDoor,
+        "Staff Room Corridor door matches locked spreadsheet position"
     );
 }
 
@@ -1564,6 +1746,7 @@ int main(void)
     Floppy144TestActIiBranchChoiceGate();
     Floppy144TestReceptionFurnitureFacing();
     Floppy144TestFullSiteFurnitureGeometry();
+    Floppy144TestStaffRoomSpreadsheetGeometry();
     Floppy144TestRecordsOfficeLeftWallClear();
     Floppy144TestReconstructionPersistence();
 
