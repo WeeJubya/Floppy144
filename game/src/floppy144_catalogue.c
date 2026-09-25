@@ -995,28 +995,37 @@ static void Floppy144CatalogueDrawFm13ServiceNote(
  * newlines from the JSON are honoured and long paragraphs are wrapped to the
  * panel width. Bodies in the Stage 2 data set fit within the available page.
  */
-static void Floppy144CatalogueDrawBodyText(
+#define FLOPPY144_DOCUMENT_BODY_MAX_LINES 13U
+#define FLOPPY144_DOCUMENT_BODY_MAX_WIDTH 536U
+#define FLOPPY144_DOCUMENT_BODY_LINE_HEIGHT 14U
+#define FLOPPY144_DOCUMENT_BODY_LEFT 52U
+#define FLOPPY144_DOCUMENT_BODY_TOP 102U
+
+/*
+ * Wrap the complete authored body using the exact same rules whether we are
+ * drawing it or merely counting it for scroll bounds.
+ *
+ * uFirstLine selects the wrapped line shown at the top of the viewport. Passing
+ * NULL for pSurface performs a count-only pass.
+ */
+static uint32_t Floppy144CatalogueProcessBodyText(
     Floppy144Surface *pSurface,
     const char *pszBody,
-    uint32_t uColour
+    uint32_t uColour,
+    uint32_t uFirstLine
 )
 {
-    const uint32_t uLeft = 52U;
-    const uint32_t uTop = 102U;
-    const uint32_t uMaxWidth = 536U;
-    const uint32_t uLineHeight = 14U;
-    const uint32_t uMaxLines = 13U;
     const char *pszCursor = pszBody;
     char szLine[128];
-    uint32_t uLine = 0U;
+    uint32_t uWrappedLine = 0U;
     uint32_t uLength = 0U;
 
-    if(pSurface == NULL || pszBody == NULL)
+    if(pszBody == NULL)
     {
-        return;
+        return 0U;
     }
 
-    while(*pszCursor != '\0' && uLine < uMaxLines)
+    while(*pszCursor != '\0')
     {
         const char *pszWordStart;
         uint32_t uWordLength;
@@ -1025,25 +1034,32 @@ static void Floppy144CatalogueDrawBodyText(
 
         if(*pszCursor == '\n')
         {
-            if(uLength > 0U)
+            if(
+                pSurface != NULL &&
+                uLength > 0U &&
+                uWrappedLine >= uFirstLine &&
+                uWrappedLine <
+                    uFirstLine + FLOPPY144_DOCUMENT_BODY_MAX_LINES
+            )
             {
                 szLine[uLength] = '\0';
+
                 Floppy144DrawText(
                     pSurface,
-                    uLeft,
-                    uTop + uLine * uLineHeight,
+                    FLOPPY144_DOCUMENT_BODY_LEFT,
+                    FLOPPY144_DOCUMENT_BODY_TOP +
+                        (
+                            uWrappedLine - uFirstLine
+                        ) *
+                        FLOPPY144_DOCUMENT_BODY_LINE_HEIGHT,
                     szLine,
                     1U,
                     uColour
                 );
-                ++uLine;
-                uLength = 0U;
-            }
-            else
-            {
-                ++uLine;
             }
 
+            ++uWrappedLine;
+            uLength = 0U;
             ++pszCursor;
             continue;
         }
@@ -1058,8 +1074,14 @@ static void Floppy144CatalogueDrawBodyText(
             break;
         }
 
+        if(*pszCursor == '\n')
+        {
+            continue;
+        }
+
         pszWordStart = pszCursor;
         uWordLength = 0U;
+
         while(
             pszCursor[uWordLength] != '\0' &&
             pszCursor[uWordLength] != ' ' &&
@@ -1076,7 +1098,11 @@ static void Floppy144CatalogueDrawBodyText(
         }
 
         uCandidateLength = uLength;
-        if(uCandidateLength > 0U && uCandidateLength + 1U < sizeof(szCandidate))
+
+        if(
+            uCandidateLength > 0U &&
+            uCandidateLength + 1U < sizeof(szCandidate)
+        )
         {
             szCandidate[uCandidateLength++] = ' ';
         }
@@ -1084,12 +1110,15 @@ static void Floppy144CatalogueDrawBodyText(
         if(uCandidateLength + uWordLength >= sizeof(szCandidate))
         {
             uWordLength =
-                (uint32_t)sizeof(szCandidate) - uCandidateLength - 1U;
+                (uint32_t)sizeof(szCandidate) -
+                uCandidateLength -
+                1U;
         }
 
         if(uLength > 0U)
         {
             uint32_t uCopy;
+
             for(uCopy = 0U; uCopy < uLength; ++uCopy)
             {
                 szCandidate[uCopy] = szLine[uCopy];
@@ -1098,62 +1127,115 @@ static void Floppy144CatalogueDrawBodyText(
 
         {
             uint32_t uCopy;
+
             for(uCopy = 0U; uCopy < uWordLength; ++uCopy)
             {
-                szCandidate[uCandidateLength + uCopy] = pszWordStart[uCopy];
+                szCandidate[uCandidateLength + uCopy] =
+                    pszWordStart[uCopy];
             }
         }
+
         uCandidateLength += uWordLength;
         szCandidate[uCandidateLength] = '\0';
 
         if(
             uLength > 0U &&
-            Floppy144DrawTextWidth(szCandidate, 1U) > uMaxWidth
+            Floppy144DrawTextWidth(
+                szCandidate,
+                1U
+            ) > FLOPPY144_DOCUMENT_BODY_MAX_WIDTH
         )
         {
-            szLine[uLength] = '\0';
-            Floppy144DrawText(
-                pSurface,
-                uLeft,
-                uTop + uLine * uLineHeight,
-                szLine,
-                1U,
-                uColour
-            );
-            ++uLine;
-            uLength = 0U;
-
-            if(uLine >= uMaxLines)
+            if(
+                pSurface != NULL &&
+                uWrappedLine >= uFirstLine &&
+                uWrappedLine <
+                    uFirstLine + FLOPPY144_DOCUMENT_BODY_MAX_LINES
+            )
             {
-                break;
+                szLine[uLength] = '\0';
+
+                Floppy144DrawText(
+                    pSurface,
+                    FLOPPY144_DOCUMENT_BODY_LEFT,
+                    FLOPPY144_DOCUMENT_BODY_TOP +
+                        (
+                            uWrappedLine - uFirstLine
+                        ) *
+                        FLOPPY144_DOCUMENT_BODY_LINE_HEIGHT,
+                    szLine,
+                    1U,
+                    uColour
+                );
             }
 
+            ++uWrappedLine;
+            uLength = 0U;
             continue;
         }
 
         {
             uint32_t uCopy;
+
             for(uCopy = 0U; uCopy <= uCandidateLength; ++uCopy)
             {
                 szLine[uCopy] = szCandidate[uCopy];
             }
         }
+
         uLength = uCandidateLength;
         pszCursor += uWordLength;
     }
 
-    if(uLength > 0U && uLine < uMaxLines)
+    if(uLength > 0U)
     {
-        szLine[uLength] = '\0';
-        Floppy144DrawText(
-            pSurface,
-            uLeft,
-            uTop + uLine * uLineHeight,
-            szLine,
-            1U,
-            uColour
-        );
+        if(
+            pSurface != NULL &&
+            uWrappedLine >= uFirstLine &&
+            uWrappedLine <
+                uFirstLine + FLOPPY144_DOCUMENT_BODY_MAX_LINES
+        )
+        {
+            szLine[uLength] = '\0';
+
+            Floppy144DrawText(
+                pSurface,
+                FLOPPY144_DOCUMENT_BODY_LEFT,
+                FLOPPY144_DOCUMENT_BODY_TOP +
+                    (
+                        uWrappedLine - uFirstLine
+                    ) *
+                    FLOPPY144_DOCUMENT_BODY_LINE_HEIGHT,
+                szLine,
+                1U,
+                uColour
+            );
+        }
+
+        ++uWrappedLine;
     }
+
+    return uWrappedLine;
+}
+
+static uint32_t Floppy144CatalogueDrawBodyText(
+    Floppy144Surface *pSurface,
+    const char *pszBody,
+    uint32_t uColour,
+    uint32_t uFirstLine
+)
+{
+    if(pSurface == NULL)
+    {
+        return 0U;
+    }
+
+    return Floppy144CatalogueProcessBodyText(
+        pSurface,
+        pszBody,
+        uColour,
+        uFirstLine
+    );
 }
 
 static void Floppy144CatalogueDrawDocument(
@@ -1216,6 +1298,8 @@ static void Floppy144CatalogueDrawDocument(
     bool bAuthored =
         authored_document != NULL &&
         authored_document->pszBody != NULL;
+
+    uint32_t uBodyLineCount = 0U;
 
     Floppy144CatalogueBuildRecord(
         catalogue->collection,
@@ -1315,11 +1399,13 @@ static void Floppy144CatalogueDrawDocument(
     /* Draw complete authored JSON text when present. */
     if(bAuthored)
     {
-        Floppy144CatalogueDrawBodyText(
-            surface,
-            authored_document->pszBody,
-            text
-        );
+        uBodyLineCount =
+            Floppy144CatalogueDrawBodyText(
+                surface,
+                authored_document->pszBody,
+                text,
+                catalogue->document_scroll_line
+            );
     }
     else
     {
@@ -1369,7 +1455,12 @@ static void Floppy144CatalogueDrawDocument(
     Floppy144CatalogueTextCentred(
         surface,
         316,
-        "BACKSPACE BACK",
+        (
+            bAuthored &&
+            uBodyLineCount > FLOPPY144_DOCUMENT_BODY_MAX_LINES
+        )
+            ? "UP/DOWN SCROLL   BACKSPACE BACK"
+            : "BACKSPACE BACK",
         1,
         amber
     );
@@ -1390,6 +1481,7 @@ void Floppy144CatalogueReset(
     catalogue->collection = collection;
     catalogue->selected_index = 0;
     catalogue->top_index = 0;
+    catalogue->document_scroll_line = 0U;
     catalogue->document_open = false;
 }
 /*
@@ -1535,6 +1627,12 @@ void Floppy144CatalogueOpenDocument(
     Floppy144CatalogueState *catalogue
 )
 {
+    if(catalogue == NULL)
+    {
+        return;
+    }
+
+    catalogue->document_scroll_line = 0U;
     catalogue->document_open = true;
 }
 /*
@@ -1545,7 +1643,79 @@ void Floppy144CatalogueCloseDocument(
     Floppy144CatalogueState *catalogue
 )
 {
+    if(catalogue == NULL)
+    {
+        return;
+    }
+
+    catalogue->document_scroll_line = 0U;
     catalogue->document_open = false;
+}
+
+void Floppy144CatalogueScrollDocument(
+    Floppy144CatalogueState *catalogue,
+    int32_t direction
+)
+{
+    const Floppy144DocumentDefinition *pDocument;
+    uint32_t uLineCount;
+    uint32_t uMaximumScroll;
+    int32_t nNext;
+
+    if(
+        catalogue == NULL ||
+        !catalogue->document_open ||
+        direction == 0
+    )
+    {
+        return;
+    }
+
+    pDocument =
+        Floppy144DocumentGet(
+            catalogue->collection,
+            catalogue->selected_index
+        );
+
+    if(pDocument == NULL || pDocument->pszBody == NULL)
+    {
+        return;
+    }
+
+    uLineCount =
+        Floppy144CatalogueProcessBodyText(
+            NULL,
+            pDocument->pszBody,
+            0U,
+            0U
+        );
+
+    if(uLineCount <= FLOPPY144_DOCUMENT_BODY_MAX_LINES)
+    {
+        catalogue->document_scroll_line = 0U;
+        return;
+    }
+
+    uMaximumScroll =
+        uLineCount -
+        FLOPPY144_DOCUMENT_BODY_MAX_LINES;
+
+    nNext =
+        (int32_t)catalogue->document_scroll_line +
+        direction;
+
+    if(nNext < 0)
+    {
+        nNext = 0;
+    }
+
+    if(nNext > (int32_t)uMaximumScroll)
+    {
+        nNext = (int32_t)uMaximumScroll;
+    }
+
+    catalogue->document_scroll_line =
+        (uint32_t)nNext;
 }
 
 /*
