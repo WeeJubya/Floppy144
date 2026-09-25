@@ -12528,7 +12528,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-030",
-      "body": "Final Week Visitor Access Register\n\nReception Visitor Registry is now represented in the recovered site and can be inspected. Visitor badge is now represented in the recovered site and can be inspected. Visitor log pencil is now represented in the recovered site and can be inspected. Contractor badge clip is now represented in the recovered site and can be inspected. Visitor register carbon copy is now represented in the recovered site and can be inspected. Reception contractor sign-in card is now represented in the recovered site and can be inspected. Temporary visitor lanyard is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nFINAL WEEK VISITOR ACCESS REGISTER\n\nClosure-week visitor controls remain in force until the Director releases the Site.\n\nFriday entries:\n08:05  Archive transport liaison - Reception only - departed 08:27\n09:40  Facilities contractor - escorted - departed 11:15\n11:50  Central Office courier - Reception/Main Office - departed 12:08\n\nNo visitor entry is recorded after 12:08.\n\nNo visitor is recorded for the Server Room, Security Office or Records Office during the incident window.\n\nThis register records authorised sign-in. It should be checked against temporary-pass stubs and Security duty notes before any conclusion is drawn.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "OS-07"
     },
@@ -12540,7 +12540,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-031",
-      "body": "Contractor Access Authorisations\n\nTemporary pass stub is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nCONTRACTOR ACCESS AUTHORISATIONS\n\nFacilities contractor access for final-week works:\n\nPermitted:\n- Facilities Office;\n- agreed corridor routes;\n- non-restricted plant/service areas under escort.\n\nNot permitted without separate authority:\n- Records Office;\n- Security Office;\n- Server Room;\n- secure cabinets;\n- archive transfer material.\n\nFriday contractor activity concluded before midday.\n\nThe contractor's temporary pass was returned at Reception. No extension into the afternoon incident period is recorded.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "OS-07"
     },
@@ -12552,7 +12552,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "TEMPORARY PASS RECONCILIATION\n\nCollection: OS-07 - Visitor & Access Management.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nTEMPORARY PASS RECONCILIATION\n\nPass issue and return check, Friday:\n\nPass V-12 ........ issued 08:05 / returned 08:27\nPass C-04 ........ issued 09:40 / returned 11:15\nPass C-07 ........ issued 11:50 / returned 12:08\n\nOutstanding visitor passes at 14:00: NONE.\n\nA returned pass does not prove that every movement was observed. It does establish that no active visitor credential remained issued through Reception at the relevant time.\n\nReception carbon copies agree with the Security pass sheet.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "OS-07"
     },
@@ -12564,7 +12564,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "RECEPTION VISITOR SUMMARY\n\nCollection: OS-07 - Visitor & Access Management.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nRECEPTION VISITOR SUMMARY\n\nThe Site received three external visitors on Friday before lunch.\n\nAll were expected.\nAll were signed in.\nAll were assigned a host or escort where required.\nAll were recorded as departed before 12:10.\n\nNo late arrival, unscheduled delivery or replacement pass was recorded between 12:10 and the evacuation.\n\nSecurity review note:\nThe absence of an unexplained visitor narrows the access picture. It does not establish what authorised staff did.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "OS-07"
     },
@@ -12576,7 +12576,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "RESTRICTED VISITOR ESCORT NOTE\n\nCollection: OS-07 - Visitor & Access Management.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nRESTRICTED VISITOR ESCORT NOTE\n\nVisitors must not be left unescorted in routes giving access to restricted rooms.\n\nWhere a contractor requires work near a restricted boundary, the escort is to record:\n- purpose;\n- room or route;\n- arrival and departure;\n- any additional key or pass issued.\n\nNo Friday visitor escort entry identifies Server Room access.\n\nA Facilities contractor worked on closure tasks in the morning but was signed out before the afternoon incident period.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "OS-07"
     },
@@ -12588,7 +12588,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "VISITOR BADGE RETURN REGISTER\n\nCollection: OS-07 - Visitor & Access Management.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nVISITOR BADGE RETURN REGISTER\n\nFinal-week temporary badges are to be returned at Reception and counted at close of duty.\n\nFriday pre-evacuation count:\nIssued today: 3\nReturned today: 3\nPreviously issued and still active: 0\nUnaccounted badges: 0\n\nOne spare lanyard was found in the Reception desk drawer and has never been numbered or issued.\n\nDo not promote spare stationery into a security incident simply because it has a clip.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "OS-07"
     },
@@ -12600,7 +12600,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-033",
-      "body": "Temporary Restricted Area Authorisation\n\nTemporary Restricted Area Authorisation is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nTEMPORARY RESTRICTED AREA AUTHORISATION\n\nHolder: Senior Archivist\nArea: Server Room\nPeriod: final closure week only\nPurpose: archive verification and final transfer checks requiring comparison with server-held records.\n\nConditions:\n- access limited to verification activity;\n- coordinate technical work with IT Support;\n- no alteration to server or suppression equipment;\n- return authority on completion of closure.\n\nApproved by: Security Officer\nNoted by: Project Manager\n\nThis authority supplements normal archive duties. It does not grant general technical-control privileges.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "OS-18"
     },
@@ -12612,7 +12612,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-032",
-      "body": "Restricted Area Access Matrix\n\nRestricted Area Access Matrix is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nRESTRICTED AREA ACCESS MATRIX\n\nSERVER ROOM\n\nIT Support ................. STANDING ACCESS\nSecurity Duty Officer ...... STANDING ACCESS\nFacilities engineer ........ CONTROLLED / MAINTENANCE\nSenior Archivist ........... TEMPORARY AUTHORISATION - FINAL WEEK\nRecords Officer ............ NO ROUTINE ACCESS\nGeneral closure staff ...... NO ACCESS\nVisitors/contractors ....... ESCORT + SPECIFIC AUTHORITY\n\nThe matrix records who may enter, not who did enter.\n\nFriday movement evidence must be read with duty logs, attendance records and the temporary-authorisation sheet.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "OS-18"
     },
@@ -12624,7 +12624,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-034",
-      "body": "Initial Halon Incident Report\n\nIncident clipboard is now represented in the recovered site and can be inspected. Incident timing card is now represented in the recovered site and can be inspected. Evacuation roll-call pencil is now represented in the recovered site and can be inspected. Emergency route overlay is now represented in the recovered site and can be inspected. Incident reference envelope is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nINITIAL HALON INCIDENT REPORT\n\nDate: Final Friday\nTime notified: approximately 14:29\nLocation: Server Room\n\nThe Site alarm followed a suppression-system discharge in the Server Room. No preceding report of smoke or fire was received by Security.\n\nImmediate actions:\n- evacuate Site;\n- prohibit Server Room re-entry;\n- conduct roll-call;\n- notify Facilities and Director;\n- preserve access and incident records.\n\nCause at time of report: UNKNOWN.\n\nThe report is intentionally preliminary. Do not amend \"unknown\" merely because a later explanation appears plausible.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "OS-26"
     },
@@ -12636,7 +12636,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-035",
-      "body": "Evacuation Accountability Return\n\nEvacuation accountability sheet is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nEVACUATION ACCOUNTABILITY RETURN\n\nRoll-call completed after Friday suppression incident.\n\nProject Manager .......... accounted for\nSenior Archivist ......... accounted for\nRecords Officer .......... accounted for\nIT Support ............... accounted for\nFacilities liaison ....... accounted for\nAdministrative support ... accounted for\nSecurity duty staff ...... accounted for\n\nVisitors on Site at alarm: NONE RECORDED\nUnaccounted persons: NONE\nInjuries reported: NONE\n\nThe Senior Archivist and IT Support were reported from the restricted-area side of the Site during evacuation and were accounted for safely.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "OS-26"
     },
@@ -12648,7 +12648,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-036",
-      "body": "Restricted Area Evacuation Note\n\nMarked evacuation plan is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nRESTRICTED AREA EVACUATION NOTE\n\nSecurity sweep information indicates that two authorised staff were working in or immediately around the Server Room route before the alarm:\n\n- IT Support, conducting network remediation;\n- Senior Archivist, attending for final verification work.\n\nBoth held valid access at the time.\nBoth evacuated safely.\nNeither is identified by this note as having operated suppression equipment.\n\nThe Server Room was not re-entered until atmosphere and safety checks were complete.\n\nPreserve the access matrix and temporary authorisation with this note.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "OS-26"
     },
@@ -12660,7 +12660,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "INCIDENT TIMELINE WORKSHEET\n\nCollection: OS-26 - Incident Reporting & Evacuation.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nINCIDENT TIMELINE WORKSHEET\n\n14:20-14:28  Technical and verification work continues in restricted area.\n14:28:49        Suppression system accepts release input.\n14:28-14:29     Alarm and ventilation isolation sequence.\n14:29            Site evacuation begins.\n14:31            Security begins roll-call.\n15:10            All expected personnel accounted for.\n15:20            Initial no-injury status confirmed.\n\nOpen questions:\n- source of release input;\n- exact work being performed at the cable riser;\n- whether control wiring was disturbed;\n- whether any unrecorded access occurred.\n\nDo not convert questions into findings.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "OS-26"
     },
@@ -12672,7 +12672,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "POST-EVACUATION SITE CHECK\n\nCollection: OS-26 - Incident Reporting & Evacuation.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nPOST-EVACUATION SITE CHECK\n\nFollowing atmosphere clearance, Security and Facilities conducted a limited preservation check.\n\nObserved:\n- no fire damage in Server Room;\n- cable-riser work left incomplete;\n- tools and pulled network cable present;\n- suppression equipment discharged;\n- relevant panels and paperwork left in place;\n- no obvious forced entry to restricted rooms.\n\nNothing was repositioned except where required for safety.\n\nThe area was then held for technical examination.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "OS-26"
     },
@@ -12684,7 +12684,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "EMERGENCY SERVICES CONTACT NOTE\n\nCollection: OS-26 - Incident Reporting & Evacuation.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nEMERGENCY SERVICES CONTACT NOTE\n\n14:31  Internal alarm acknowledged by Security.\n14:33  Facilities confirms Halon discharge indication.\n14:35  External emergency advice line contacted.\n14:39  No fire condition reported; room remains sealed pending atmosphere check.\n14:48  Advice received: maintain exclusion until safe concentration confirmed.\n15:02  Facilities begins controlled ventilation/re-entry procedure.\n\nNo external firefighting action was required.\n\nThe absence of fire response does not diminish the seriousness of an accidental suppression discharge.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "OS-26"
     },
@@ -12696,7 +12696,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "NO-INJURY CONFIRMATION\n\nCollection: OS-26 - Incident Reporting & Evacuation.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nNO-INJURY CONFIRMATION\n\nFollowing the Server Room Halon discharge and Site evacuation:\n\nFatalities: NONE\nReported injuries: NONE\nMedical treatment required: NONE\nUnaccounted personnel: NONE\n\nAll staff present at the start of the evacuation were accounted for.\n\nThe incident remains reportable because of the suppression discharge, evacuation and potential exposure risk.\n\nThis form addresses people, not cause. Technical investigation remains open.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "OS-26"
     },
@@ -12708,7 +12708,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-037",
-      "body": "Security Memo: Master Cabinet Register Control\n\nMaster Secure Cabinet Access Register is now represented in the recovered site and can be inspected. A new finding has been added to the recovery notebook.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nSECURITY MEMO: MASTER CABINET REGISTER CONTROL\n\nSecure-cabinet access codes are controlled as records in their own right.\n\nThe current master register is held in the Security secure cabinet. It lists the valid code for each controlled cabinet and records the date of the last change.\n\nThe Security cabinet's own code is not to appear on desk copies, door labels or routine cabinet sheets. The authorised reference is held separately under Director-controlled procedure.\n\nWhen using a recovered copy, verify the cabinet identifier before relying on the number.\n\nA correct code for the wrong cabinet remains wrong in every useful sense.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "OS-34"
     },
@@ -12720,7 +12720,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-038",
-      "body": "Secure Storage Access Procedure\n\nSecure Storage Access Procedure card is now represented in the recovered site and can be inspected. Key-control context sheet is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nSECURE STORAGE ACCESS PROCEDURE\n\nBefore opening a secure cabinet:\n\n1. Confirm the cabinet identifier.\n2. Confirm your authority to access its contents.\n3. Obtain the current code from the approved register or authorised holder.\n4. Enter the code without leaving it written at the cabinet.\n5. Relock after use.\n6. Record access where the cabinet register requires it.\n\nCodes are cabinet-specific and may be changed independently.\n\nDo not test remembered numbers across several cabinets. Security calls this \"guessing\" even when the person guessing feels strongly about it.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "OS-34"
     },
@@ -12732,7 +12732,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "KEY SAFE CUSTODY NOTE\n\nCollection: OS-34 - Secure Storage & Key Control.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nKEY SAFE CUSTODY NOTE\n\nPhysical keys and combination-controlled storage are administered separately.\n\nThe complete Site key set remains in the Security key cabinet until handover. Keys removed for closure work must be signed out and returned before the end of duty.\n\nA key does not substitute for a cabinet combination where both controls are fitted.\n\nSpare and obsolete keys are to be tagged rather than tested experimentally against every lock in the building.\n\nThe final key count is part of building handover.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "OS-34"
     },
@@ -12744,7 +12744,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "MASTER CABINET REGISTER RECOVERY NOTE\n\nCollection: OS-34 - Secure Storage & Key Control.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nMASTER CABINET REGISTER RECOVERY NOTE\n\nThe closure file confirms that the master secure-cabinet register was still active on the final Friday.\n\nNo scheduled bulk code change occurred before the incident.\nNo cabinet was authorised to use a shared \"closure code\".\nIndividual cabinet codes remained in force.\n\nSecurity retained the master register for final reconciliation and handover.\n\nIf a local note disagrees with the master register, treat the local note as superseded unless its change is separately authorised.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "OS-34"
     },
@@ -12756,7 +12756,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "SECURE CABINET CODE HANDLING\n\nCollection: OS-34 - Secure Storage & Key Control.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nSECURE CABINET CODE HANDLING\n\nCode-handling reminders for closure staff:\n\n- never write a code on the cabinet;\n- never include a code in an unclassified handover checklist;\n- never reuse a room number as a code;\n- destroy superseded working slips;\n- report a suspected disclosure before changing anything;\n- record the authorised change afterward.\n\nClosure work creates more temporary paperwork than usual. It does not create a holiday from key control.\n\nSecurity will provide current codes to authorised staff on request.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "OS-34"
     },
@@ -12768,7 +12768,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-039",
-      "body": "Final-Day Duty Communications Log\n\nSecurity Duty Communications Log Sheet is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nFINAL-DAY DUTY COMMUNICATIONS LOG\n\n13:52  IT Support advises Main Office terminal fault traced beyond local desk connection.\n14:03  IT Support proceeding to check Server Room route.\n14:08  Senior Archivist requests access confirmation for final verification activity.\n14:11  Security confirms temporary authorisation remains valid.\n14:18  Facilities queried regarding cable-riser suppression isolation.\n14:21  Facilities advises service note applies; engineer not yet present at riser.\n14:29  Site alarm / suppression event.\n14:31  Evacuation roll-call opened.\n\nNo visitor or unexplained access call is recorded during this period.\n\nLog compiled from duty telephone sheet; timings are operator entries, not automated timestamps.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "OS-41"
     },
@@ -12780,7 +12780,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-040",
-      "body": "CCTV Coverage & Retention Index\n\nCCTV coverage index binder is now represented in the recovered site and can be inspected. IT Support entrance event printout is now represented in the recovered site and can be inspected. CCTV camera map is now represented in the recovered site and can be inspected. Monitor-bank channel list is now represented in the recovered site and can be inspected. Retention label is now represented in the recovered site and can be inspected. Blank video tapes is now represented in the recovered site and can be inspected. Camera selector control is now represented in the recovered site and can be inspected.\n\nThe archive entry has been retained as part of the reconstruction record.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nCCTV COVERAGE & RETENTION INDEX\n\nActive closure-period cameras cover:\n\nCAM 1  Reception entrance\nCAM 2  Reception desk / lobby\nCAM 3  Main corridor west\nCAM 4  IT Support entrance\nCAM 5  Records Office entrance\nCAM 6  Security approach\n\nNo camera covers the interior of the Server Room.\nNo camera covers the cable riser.\nRestricted-room interiors were deliberately excluded from routine CCTV coverage.\n\nRetention: standard rolling period unless marked for incident preservation.\n\nCoverage can show approach and entry. It cannot show what occurred beyond the protected door.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "OS-48"
     },
@@ -12792,7 +12792,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "IT SUPPORT ENTRANCE EVENT SUMMARY\n\nCollection: OS-48 - CCTV Index & Retention.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nIT SUPPORT ENTRANCE EVENT SUMMARY\n\nCAM 4 - Friday incident window\n\n13:47  IT Support enters.\n13:55  IT Support exits carrying cable tester.\n14:02  IT Support re-enters.\n14:17  Senior Archivist passes corridor toward restricted-area route.\n14:29  Alarm condition; staff movement toward exits.\n14:32  Corridor cleared.\n\nNo visitor or unknown person is recorded entering IT Support during the reviewed interval.\n\nCamera 4 does not view the Server Room interior and cannot establish activity at the cable riser.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "OS-48"
     },
@@ -12804,7 +12804,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "CAMERA COVERAGE DIAGRAM\n\nCollection: OS-48 - CCTV Index & Retention.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nCAMERA COVERAGE DIAGRAM - TEXT REGISTER\n\nReception cameras observe public arrival.\nCorridor cameras observe approaches to office doors.\nIT Support camera observes the room entrance and immediate corridor.\nRecords camera observes the Records Office entrance.\nSecurity approach is covered separately.\n\nDeliberate blind areas:\n- office interiors;\n- secure cabinet contents;\n- Server Room interior;\n- service risers.\n\nBlind areas are privacy/security design choices, not camera failures.\n\nUse access records where CCTV coverage ends.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "OS-48"
     },
@@ -12816,7 +12816,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "RETENTION SCHEDULE\n\nCollection: OS-48 - CCTV Index & Retention.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nCCTV RETENTION SCHEDULE\n\nNormal footage:\nRolling retention under standard Site schedule.\n\nIncident-marked footage:\nPreserve immediately and remove from automatic overwrite cycle.\n\nFriday channels marked for preservation:\nReception\nMain corridor\nIT Support entrance\nRecords Office entrance\nSecurity approach\n\nNo Server Room interior footage exists because no camera was installed there.\n\nA retention request cannot preserve a view that was never recorded.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "OS-48"
     },
@@ -12828,7 +12828,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "MONITOR BANK CHANNEL REGISTER\n\nCollection: OS-48 - CCTV Index & Retention.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nMONITOR BANK CHANNEL REGISTER\n\n1  Reception Entrance\n2  Reception Desk\n3  Main Corridor\n4  IT Support Entrance\n5  Records Office Entrance\n6  Security Approach\n7  Spare / no signal\n8  Spare / test\n\nChannel 4 label renewed during closure work.\nChannel 7 intermittent snow is an unused input, not a hidden camera.\n\nThe monitor bank selector corresponds to this register.\n\nSecurity staff are reminded to record channel number when noting an event.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "OS-48"
     },
@@ -12840,7 +12840,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "FINAL-DAY CCTV REVIEW NOTE\n\nCollection: OS-48 - CCTV Index & Retention.\n\nThis recovered record provides administrative context for the Site during the closure period. It records routine work, ownership, timing or procedure relevant to the collection without independently establishing a new evidential conclusion.\n\nCross-reference note: catalogue entries are retained separately from physical reconstruction. Where a corresponding physical item survives, it must be inspected before the recovery treats it as evidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nFINAL-DAY CCTV REVIEW NOTE\n\nReviewed period: 13:30 to evacuation.\n\nObserved movements are consistent with expected closure staffing:\n- IT Support moving between Main Office/IT Support and the restricted-area route;\n- Senior Archivist proceeding toward authorised verification work;\n- no unexplained visitor arrival;\n- no unidentified person entering the IT Support approach.\n\nLimit:\nCCTV does not show the Server Room interior or cable-riser work.\n\nConclusion:\nThe footage supports the access chronology but cannot determine the physical cause of the suppression release.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "OS-48"
     },
