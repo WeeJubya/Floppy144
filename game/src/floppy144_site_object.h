@@ -55,6 +55,15 @@ uint32_t Floppy144SiteAvailableActions(
 );
 
 /*
+ * Return true when the player is standing beside any authored Site Directory
+ * fixture in the current reconstructed room. Both Reception and Corridor use
+ * the same generic path, so future directories gain the map action for free.
+ */
+bool Floppy144SiteDirectoryNearby(
+    const Floppy144RunState *pState
+);
+
+/*
  * Resolve the GDR terminal reachable from the player's current position.
  * Returns false when no reconstructed-room terminal is within access range.
  */

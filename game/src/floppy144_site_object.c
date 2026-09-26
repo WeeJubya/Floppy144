@@ -1183,6 +1183,73 @@ static uint32_t Floppy144SitePhysicalItemPriority(
     return 250U;
 }
 
+bool Floppy144SiteDirectoryNearby(
+    const Floppy144RunState *pState
+)
+{
+    Floppy144RoomId eCurrentRoom;
+    uint32_t uRecordIndex;
+    const uint32_t uRangeSquared =
+        FLOPPY144_SITE_DATA_INTERACTION_RANGE_X16 *
+        FLOPPY144_SITE_DATA_INTERACTION_RANGE_X16;
+
+    if(pState == NULL)
+    {
+        return false;
+    }
+
+    eCurrentRoom =
+        Floppy144SiteRoomAtPosition(
+            pState->player_site_x,
+            pState->player_site_y
+        );
+
+    if(
+        (uint32_t)eCurrentRoom >= (uint32_t)FLOPPY144_ROOM_COUNT ||
+        !Floppy144RunStateRoomReconstructed(
+            pState,
+            eCurrentRoom
+        )
+    )
+    {
+        return false;
+    }
+
+    for(
+        uRecordIndex = 0U;
+        uRecordIndex < Floppy144GameDataRecordCount();
+        ++uRecordIndex
+    )
+    {
+        const Floppy144DataRecord *pRecord =
+            Floppy144GameDataRecordAt(uRecordIndex);
+
+        if(
+            pRecord == NULL ||
+            pRecord->eKind != FLOPPY144_DATA_FIXTURE ||
+            pRecord->pszA == NULL ||
+            pRecord->pszC == NULL ||
+            strcmp(pRecord->pszC, "SITE_DIRECTORY") != 0 ||
+            Floppy144GameDataRoomId(pRecord->pszA) != eCurrentRoom
+        )
+        {
+            continue;
+        }
+
+        if(
+            Floppy144SiteDataRecordDistanceSquared(
+                pState,
+                pRecord
+            ) <= uRangeSquared
+        )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool Floppy144SiteAccessTerminalRoom(
     const Floppy144RunState *pState,
     Floppy144RoomId *pRoom
@@ -1847,6 +1914,7 @@ uint32_t Floppy144SiteAvailableActions(
     }
 
     if(
+        Floppy144SiteDirectoryNearby(pState) ||
         Floppy144SiteResolveInspectionTarget(
             pState,
             &sTarget

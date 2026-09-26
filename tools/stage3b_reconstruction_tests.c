@@ -1170,10 +1170,10 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
     uint32_t uRectIndex;
 
     bool bStaffTable = false;
-    bool bStaffChairNorth = false;
-    bool bStaffChairWest = false;
-    bool bStaffChairEast = false;
-    bool bStaffChairSouth = false;
+    bool bStaffChair135 = false;
+    bool bStaffChair45 = false;
+    bool bStaffChair225 = false;
+    bool bStaffChair315 = false;
 
     bool bItDesk = false;
     bool bServerDesk = false;
@@ -1222,36 +1222,36 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
                 (uint8_t)FLOPPY144_SITE_CHAIR
         )
         {
-            if(pRect->x == 18U && pRect->y == 36U)
+            if(pRect->x == 18U && pRect->y == 40U)
             {
-                bStaffChairNorth = true;
+                bStaffChair135 = true;
                 F144_CHECK(
                     pRect->rotation == 135U,
-                    "Staff dining north chair uses border facing plus 45 degrees"
+                    "Staff dining 135-degree chair follows the table diagonal"
                 );
             }
-            else if(pRect->x == 14U && pRect->y == 32U)
+            else if(pRect->x == 10U && pRect->y == 40U)
             {
-                bStaffChairWest = true;
+                bStaffChair45 = true;
                 F144_CHECK(
                     pRect->rotation == 45U,
-                    "Staff dining west chair uses border facing plus 45 degrees"
+                    "Staff dining 45-degree chair follows the table diagonal"
                 );
             }
-            else if(pRect->x == 14U && pRect->y == 40U)
+            else if(pRect->x == 18U && pRect->y == 32U)
             {
-                bStaffChairEast = true;
+                bStaffChair225 = true;
                 F144_CHECK(
                     pRect->rotation == 225U,
-                    "Staff dining east chair uses border facing plus 45 degrees"
+                    "Staff dining 225-degree chair follows the table diagonal"
                 );
             }
-            else if(pRect->x == 10U && pRect->y == 36U)
+            else if(pRect->x == 10U && pRect->y == 32U)
             {
-                bStaffChairSouth = true;
+                bStaffChair315 = true;
                 F144_CHECK(
                     pRect->rotation == 315U,
-                    "Staff dining south chair uses border facing plus 45 degrees"
+                    "Staff dining 315-degree chair follows the table diagonal"
                 );
             }
         }
@@ -1310,11 +1310,11 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
 
     F144_CHECK(
         bStaffTable &&
-        bStaffChairNorth &&
-        bStaffChairWest &&
-        bStaffChairEast &&
-        bStaffChairSouth,
-        "Staff dining table/chair geometry is emitted from Full Site"
+        bStaffChair135 &&
+        bStaffChair45 &&
+        bStaffChair225 &&
+        bStaffChair315,
+        "Staff dining chairs follow the rotated table rather than cardinal axes"
     );
 
     F144_CHECK(
@@ -1331,6 +1331,60 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
         bSecurityDeskLeft &&
         bSecurityDeskRight,
         "Security Office keeps two adjacent 6x2 standard desks"
+    );
+}
+
+
+/*
+ * Both authored Site Directory fixtures must expose the same Inspect action.
+ * Reception used to be inert because only the Corridor directory owned a
+ * contextual physical child.
+ */
+static void Floppy144TestSiteDirectoryActions(void)
+{
+    Floppy144WorldState sWorld;
+    Floppy144RunState sState;
+
+    Floppy144TestReset(&sWorld, &sState);
+
+    (void)Floppy144RunStateReconstructRoom(
+        &sState,
+        FLOPPY144_ROOM_RECEPTION
+    );
+
+    sState.player_site_x =
+        79 * FLOPPY144_SITE_FIXED_ONE;
+    sState.player_site_y =
+        43 * FLOPPY144_SITE_FIXED_ONE;
+
+    F144_CHECK(
+        Floppy144SiteDirectoryNearby(&sState) &&
+        (
+            Floppy144SiteAvailableActions(&sState) &
+            FLOPPY144_SITE_ACTION_INSPECT
+        ) != 0U,
+        "Reception Site Directory exposes the restored-room map action"
+    );
+
+    Floppy144TestReset(&sWorld, &sState);
+
+    (void)Floppy144RunStateReconstructRoom(
+        &sState,
+        FLOPPY144_ROOM_CORRIDOR
+    );
+
+    sState.player_site_x =
+        38 * FLOPPY144_SITE_FIXED_ONE;
+    sState.player_site_y =
+        54 * FLOPPY144_SITE_FIXED_ONE;
+
+    F144_CHECK(
+        Floppy144SiteDirectoryNearby(&sState) &&
+        (
+            Floppy144SiteAvailableActions(&sState) &
+            FLOPPY144_SITE_ACTION_INSPECT
+        ) != 0U,
+        "Corridor Site Directory exposes the restored-room map action"
     );
 }
 
@@ -1746,6 +1800,7 @@ int main(void)
     Floppy144TestActIiBranchChoiceGate();
     Floppy144TestReceptionFurnitureFacing();
     Floppy144TestFullSiteFurnitureGeometry();
+    Floppy144TestSiteDirectoryActions();
     Floppy144TestStaffRoomSpreadsheetGeometry();
     Floppy144TestRecordsOfficeLeftWallClear();
     Floppy144TestReconstructionPersistence();

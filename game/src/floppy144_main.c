@@ -22,6 +22,7 @@
 #include "floppy144_run_state.h"
 #include "floppy144_persistence.h"
 #include "floppy144_site_2d.h"
+#include "floppy144_site_directory.h"
 #include "floppy144_site_isometric.h"
 #include "floppy144_site_object.h"
 #include "floppy144_site_rooms.h"
@@ -43,6 +44,7 @@ typedef enum Floppy144Screen
     FLOPPY144_SCREEN_SPLASH,
     FLOPPY144_SCREEN_MAIN_MENU,
     FLOPPY144_SCREEN_OFFICE,
+    FLOPPY144_SCREEN_SITE_DIRECTORY,
     FLOPPY144_SCREEN_CABINET,
     FLOPPY144_SCREEN_NOTEBOOK,
     FLOPPY144_SCREEN_TERMINAL,
@@ -213,6 +215,16 @@ static void Floppy144Redraw(
                     global_office_notice
                 );
             }
+
+            break;
+        }
+
+        case FLOPPY144_SCREEN_SITE_DIRECTORY:
+        {
+            Floppy144SiteDirectoryDraw(
+                global_runtime,
+                &global_run_state
+            );
 
             break;
         }
@@ -914,6 +926,20 @@ static void Floppy144InteractOffice(
             return;
         }
 
+        /*
+         * Site Directory fixtures are UI gateways rather than evidence items.
+         * They deliberately take precedence over contextual material mounted
+         * on the same fixture.
+         */
+        if(Floppy144SiteDirectoryNearby(&global_run_state))
+        {
+            global_office_notice = NULL;
+            global_resume_screen = FLOPPY144_SCREEN_OFFICE;
+            global_screen = FLOPPY144_SCREEN_SITE_DIRECTORY;
+            Floppy144Redraw(window);
+            return;
+        }
+
         if(
             !Floppy144SiteResolveInspectionTarget(
                 &global_run_state,
@@ -1432,6 +1458,20 @@ static LRESULT CALLBACK Floppy144WindowProc(
         }
         case WM_KEYDOWN:
         {
+            /*
+             * The Site Directory is a transient overlay over exploration.
+             * Its opening key must not also close it, so only a subsequent
+             * key-down is handled here. Escape is included and returns to the
+             * player rather than opening Session Control.
+             */
+            if(global_screen == FLOPPY144_SCREEN_SITE_DIRECTORY)
+            {
+                global_resume_screen = FLOPPY144_SCREEN_OFFICE;
+                global_screen = FLOPPY144_SCREEN_OFFICE;
+                Floppy144Redraw(window);
+                return 0;
+            }
+
             /*
              * Escape never terminates the application.
              *
