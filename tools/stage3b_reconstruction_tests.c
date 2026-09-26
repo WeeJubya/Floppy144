@@ -1399,7 +1399,7 @@ static void Floppy144TestStaffRoomSpreadsheetGeometry(void)
 {
     uint32_t uRectIndex;
     uint32_t uCompactSofas = 0U;
-    uint32_t uRightWallWindows = 0U;
+    uint32_t uRightWallWindowSegments = 0U;
     bool bUtilityChair = false;
     bool bNoticeboard = false;
     bool bFridge = false;
@@ -1530,17 +1530,64 @@ static void Floppy144TestStaffRoomSpreadsheetGeometry(void)
         if(
             pRect->type == (uint8_t)FLOPPY144_SITE_WINDOW &&
             pRect->x == 24U &&
-            pRect->width == 1U &&
-            pRect->height == 9U &&
-            (
-                pRect->y == 35U ||
-                pRect->y == 24U ||
-                pRect->y == 13U ||
-                pRect->y == 2U
-            )
+            pRect->width == 1U
         )
         {
-            ++uRightWallWindows;
+            Floppy144RoomId eExpectedNeighbour =
+                FLOPPY144_ROOM_COUNT;
+
+            if(pRect->y == 35U && pRect->height == 9U)
+            {
+                eExpectedNeighbour =
+                    FLOPPY144_ROOM_SECRETARY_OFFICE;
+            }
+            else if(
+                pRect->y == 31U &&
+                pRect->height == 2U
+            )
+            {
+                eExpectedNeighbour =
+                    FLOPPY144_ROOM_SECRETARY_OFFICE;
+            }
+            else if(
+                (
+                    pRect->y == 24U &&
+                    pRect->height == 6U
+                ) ||
+                (
+                    pRect->y == 13U &&
+                    pRect->height == 9U
+                ) ||
+                (
+                    pRect->y == 2U &&
+                    pRect->height == 9U
+                )
+            )
+            {
+                eExpectedNeighbour =
+                    FLOPPY144_ROOM_DIRECTOR_OFFICE;
+            }
+
+            if(eExpectedNeighbour != FLOPPY144_ROOM_COUNT)
+            {
+                ++uRightWallWindowSegments;
+
+                F144_CHECK(
+                    (
+                        pRect->from_room ==
+                            (uint8_t)FLOPPY144_ROOM_STAFF_ROOM &&
+                        pRect->to_room ==
+                            (uint8_t)eExpectedNeighbour
+                    ) ||
+                    (
+                        pRect->to_room ==
+                            (uint8_t)FLOPPY144_ROOM_STAFF_ROOM &&
+                        pRect->from_room ==
+                            (uint8_t)eExpectedNeighbour
+                    ),
+                    "Staff Room right-wall windows resolve to the adjacent office"
+                );
+            }
         }
     }
 
@@ -1560,8 +1607,8 @@ static void Floppy144TestStaffRoomSpreadsheetGeometry(void)
     );
 
     F144_CHECK(
-        uRightWallWindows == 4U,
-        "Staff Room four-window bank is on spreadsheet right-hand wall"
+        uRightWallWindowSegments == 5U,
+        "Staff Room four-window bank follows the right-hand wall without crossing the Director/Secretary partition"
     );
 
     F144_CHECK(

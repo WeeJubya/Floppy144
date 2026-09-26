@@ -646,14 +646,6 @@ static void Floppy144TestCollectionListPresentation(void)
         "N/A collection identity is opaque and does not leak real ID"
     );
 
-    if(uHeaderBarCount == 3U)
-    {
-        F144_CHECK(
-            auHeaderBars[1] > 43U,
-            "collection LIST expands the name column beyond the old 27-character width"
-        );
-    }
-
     for(uIndex = 0U; uIndex < sTerminal.output_count; ++uIndex)
     {
         F144_CHECK(
@@ -662,6 +654,42 @@ static void Floppy144TestCollectionListPresentation(void)
             "collection LIST rows remain within terminal line capacity"
         );
     }
+
+    /*
+     * Re-run the same page with two long collection names visible. The old
+     * fixed 27-character column truncated both; the dynamic column must keep
+     * them intact while preserving STATUS and SIZE.
+     */
+    Floppy144TerminalCloseRecordPager(&sTerminal);
+
+    (void)Floppy144RunStateBitSet(
+        sRunState.collections,
+        (uint32_t)FLOPPY144_COLLECTION_DR04
+    );
+
+    (void)Floppy144RunStateBitSet(
+        sRunState.collections,
+        (uint32_t)FLOPPY144_COLLECTION_DR07
+    );
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "LIST"
+    );
+
+    F144_CHECK(
+        Floppy144TestTerminalContains(
+            &sTerminal,
+            "Site Closure & Building Handover"
+        ) &&
+        Floppy144TestTerminalContains(
+            &sTerminal,
+            "Archive Holdings & Reconciliation"
+        ),
+        "collection LIST expands its name column to preserve visible collection names"
+    );
 
     F144_CHECK(
         sTerminal.cursor_visible,
