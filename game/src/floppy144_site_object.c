@@ -1795,6 +1795,11 @@ static const char *Floppy144SiteFurnitureLabel(
     {
         case FLOPPY144_SITE_STANDARD_DESK:        return "DESK";
         case FLOPPY144_SITE_TERMINAL_DESK:        return "TERMINAL DESK";
+        /*
+         * Wall fixtures are physical Site objects too.  Keep the label generic
+         * here; authored Inspect behaviour, where present, remains data-driven.
+         */
+        case FLOPPY144_SITE_WALL_MOUNTED_ITEM:     return "WALL-MOUNTED ITEM";
         case FLOPPY144_SITE_CHAIR:                return "CHAIR";
         case FLOPPY144_SITE_NONSECURE_CABINET:
         case FLOPPY144_SITE_SECURE_CABINET_HALF:
