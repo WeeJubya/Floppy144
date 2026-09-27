@@ -1004,7 +1004,13 @@ static void Floppy144TestContextLabels(void)
         &sState,
         FLOPPY144_ROOM_SECURITY
     );
-    Floppy144TestSetPosition(&sState, 45, 73);
+    /*
+     * Use y74 rather than y73. The player's 2U-deep collision footprint at
+     * y73 also touches the terminal desk's y71 edge, making both fixtures
+     * equally near and legitimately allowing the earlier terminal label to
+     * win the passive-label tie. At y74 only the key cabinet is adjacent.
+     */
+    Floppy144TestSetPosition(&sState, 45, 74);
     pszLabel = Floppy144SiteContextLabel(&sState);
     F144_CHECK(
         pszLabel != NULL &&
