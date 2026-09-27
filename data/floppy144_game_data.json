@@ -8009,7 +8009,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 1
+      "source_order": 1,
+      "description": "Reception Visitor Registry. Recovered in RECEPTION."
     },
     {
       "id": "P-002",
@@ -8025,7 +8026,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 2
+      "source_order": 2,
+      "description": "Temporary pass stub. Recovered in RECEPTION."
     },
     {
       "id": "P-003",
@@ -8039,7 +8041,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 3
+      "source_order": 3,
+      "description": "Visitor badge. Recovered in RECEPTION."
     },
     {
       "id": "P-004",
@@ -8053,7 +8056,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 4
+      "source_order": 4,
+      "description": "Visitor log pencil. Recovered in RECEPTION."
     },
     {
       "id": "P-005",
@@ -8067,7 +8071,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 5
+      "source_order": 5,
+      "description": "Contractor badge clip. Recovered in RECEPTION."
     },
     {
       "id": "P-006",
@@ -8081,7 +8086,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 6
+      "source_order": 6,
+      "description": "Visitor register carbon copy. Recovered in RECEPTION."
     },
     {
       "id": "P-007",
@@ -8095,7 +8101,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 7
+      "source_order": 7,
+      "description": "Site Directory / room identification material. Recovered in CORRIDOR."
     },
     {
       "id": "P-008",
@@ -8109,7 +8116,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 8
+      "source_order": 8,
+      "description": "Main Office desk-number labels. Recovered in MAIN OFFICE."
     },
     {
       "id": "P-009",
@@ -8123,7 +8131,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 9
+      "source_order": 9,
+      "description": "Temporary desk allocation slip. Recovered in MAIN OFFICE."
     },
     {
       "id": "P-010",
@@ -8137,7 +8146,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 10
+      "source_order": 10,
+      "description": "HR hot desking note. Recovered in MAIN OFFICE."
     },
     {
       "id": "P-011",
@@ -8151,7 +8161,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 11
+      "source_order": 11,
+      "description": "Corridor access notice. Recovered in MAIN OFFICE."
     },
     {
       "id": "P-012",
@@ -8167,7 +8178,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 12
+      "source_order": 12,
+      "description": "Main Office suppression control panel. Recovered in MAIN OFFICE."
     },
     {
       "id": "P-013",
@@ -8181,7 +8193,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 13
+      "source_order": 13,
+      "description": "Panel service label. Recovered in MAIN OFFICE."
     },
     {
       "id": "P-014",
@@ -8198,7 +8211,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 14
+      "source_order": 14,
+      "description": "Site Closure Handover Folder. Recovered in MAIN OFFICE."
     },
     {
       "id": "P-015",
@@ -8212,7 +8226,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 15
+      "source_order": 15,
+      "description": "Project Manager desk calendar. Recovered in MAIN OFFICE."
     },
     {
       "id": "P-016",
@@ -8226,7 +8241,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 16
+      "source_order": 16,
+      "description": "Final sign-off checklist. Recovered in MAIN OFFICE."
     },
     {
       "id": "P-017",
@@ -8242,7 +8258,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 17
+      "source_order": 17,
+      "description": "Office Terminal network connection. Recovered in MAIN OFFICE."
     },
     {
       "id": "P-018",
@@ -8256,7 +8273,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 18
+      "source_order": 18,
+      "description": "Network lead. Recovered in MAIN OFFICE."
     },
     {
       "id": "P-019",
@@ -8272,7 +8290,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 19
+      "source_order": 19,
+      "description": "Local terminal diagnostic card. Recovered in MAIN OFFICE."
     },
     {
       "id": "P-020",
@@ -8286,7 +8305,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 20
+      "source_order": 20,
+      "description": "Terminal status printout. Recovered in MAIN OFFICE."
     },
     {
       "id": "P-021",
@@ -8302,7 +8322,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 21
+      "source_order": 21,
+      "description": "Project Manager Exception Sheet. Recovered in MAIN OFFICE."
     },
     {
       "id": "P-022",
@@ -8316,7 +8337,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 22
+      "source_order": 22,
+      "description": "Closure suspension note. Recovered in MAIN OFFICE."
     },
     {
       "id": "P-023",
@@ -8330,7 +8352,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 23
+      "source_order": 23,
+      "description": "Security review referral. Recovered in MAIN OFFICE."
     },
     {
       "id": "P-024",
@@ -8344,7 +8367,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 24
+      "source_order": 24,
+      "description": "Remaining-workstream release sheet. Recovered in MAIN OFFICE."
     },
     {
       "id": "P-025",
@@ -8360,7 +8384,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 25
+      "source_order": 25,
+      "description": "Signed Attendance Sheet. Recovered in MAIN OFFICE."
     },
     {
       "id": "P-026",
@@ -8376,7 +8401,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 26
+      "source_order": 26,
+      "description": "Duty Rota. Recovered in MAIN OFFICE."
     },
     {
       "id": "P-027",
@@ -8390,7 +8416,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 27
+      "source_order": 27,
+      "description": "Leave status card. Recovered in MAIN OFFICE."
     },
     {
       "id": "P-028",
@@ -8404,7 +8431,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 28
+      "source_order": 28,
+      "description": "Overtime return. Recovered in MAIN OFFICE."
     },
     {
       "id": "P-029",
@@ -8418,7 +8446,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 29
+      "source_order": 29,
+      "description": "Attendance amendment note. Recovered in MAIN OFFICE."
     },
     {
       "id": "P-030",
@@ -8432,7 +8461,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 30
+      "source_order": 30,
+      "description": "Facilities room plate. Recovered in CORRIDOR."
     },
     {
       "id": "P-031",
@@ -8446,7 +8476,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 31
+      "source_order": 31,
+      "description": "Maintenance calendar. Recovered in FACILITIES."
     },
     {
       "id": "P-032",
@@ -8460,7 +8491,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 32
+      "source_order": 32,
+      "description": "Suppression-zone diagram. Recovered in FACILITIES."
     },
     {
       "id": "P-033",
@@ -8476,7 +8508,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 33
+      "source_order": 33,
+      "description": "Final Isolation Register. Recovered in FACILITIES."
     },
     {
       "id": "P-034",
@@ -8490,7 +8523,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 34
+      "source_order": 34,
+      "description": "Decommissioning tag set. Recovered in FACILITIES."
     },
     {
       "id": "P-035",
@@ -8504,7 +8538,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 35
+      "source_order": 35,
+      "description": "Asset transfer labels. Recovered in FACILITIES."
     },
     {
       "id": "P-036",
@@ -8518,7 +8553,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 36
+      "source_order": 36,
+      "description": "Contractor clipboard. Recovered in FACILITIES."
     },
     {
       "id": "P-037",
@@ -8535,7 +8571,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 37
+      "source_order": 37,
+      "description": "Printed Environmental Event Log. Recovered in FACILITIES."
     },
     {
       "id": "P-038",
@@ -8549,7 +8586,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 38
+      "source_order": 38,
+      "description": "Ventilation isolation chart. Recovered in FACILITIES."
     },
     {
       "id": "P-039",
@@ -8563,7 +8601,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 39
+      "source_order": 39,
+      "description": "Environmental sensor summary. Recovered in FACILITIES."
     },
     {
       "id": "P-040",
@@ -8579,7 +8618,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 40
+      "source_order": 40,
+      "description": "Record on Records Trolley. Recovered in RECORDS OFFICE."
     },
     {
       "id": "P-041",
@@ -8595,7 +8635,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 41
+      "source_order": 41,
+      "description": "External withdrawal / location marker. Recovered in RECORDS OFFICE."
     },
     {
       "id": "P-042",
@@ -8609,7 +8650,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 42
+      "source_order": 42,
+      "description": "Misfile slip. Recovered in RECORDS OFFICE."
     },
     {
       "id": "P-043",
@@ -8623,7 +8665,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 43
+      "source_order": 43,
+      "description": "Trolley refiling divider. Recovered in RECORDS OFFICE."
     },
     {
       "id": "P-044",
@@ -8637,7 +8680,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 44
+      "source_order": 44,
+      "description": "Catalogue discrepancy card. Recovered in RECORDS OFFICE."
     },
     {
       "id": "P-045",
@@ -8651,7 +8695,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 45
+      "source_order": 45,
+      "description": "Refiling note. Recovered in RECORDS OFFICE."
     },
     {
       "id": "P-046",
@@ -8667,7 +8712,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 46
+      "source_order": 46,
+      "description": "Labelled archive transfer box. Recovered in RECORDS OFFICE."
     },
     {
       "id": "P-047",
@@ -8683,7 +8729,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 47
+      "source_order": 47,
+      "description": "Transfer withdrawal marker. Recovered in RECORDS OFFICE."
     },
     {
       "id": "P-048",
@@ -8697,7 +8744,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 48
+      "source_order": 48,
+      "description": "Transfer Box Manifest. Recovered in RECORDS OFFICE."
     },
     {
       "id": "P-049",
@@ -8711,7 +8759,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 49
+      "source_order": 49,
+      "description": "Custody tag. Recovered in RECORDS OFFICE."
     },
     {
       "id": "P-050",
@@ -8725,7 +8774,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 50
+      "source_order": 50,
+      "description": "Box seal strip. Recovered in RECORDS OFFICE."
     },
     {
       "id": "P-051",
@@ -8739,7 +8789,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 51
+      "source_order": 51,
+      "description": "Transfer staging checklist. Recovered in RECORDS OFFICE."
     },
     {
       "id": "P-052",
@@ -8755,7 +8806,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 52
+      "source_order": 52,
+      "description": "Signed Custody Sheet. Recovered in RECORDS OFFICE."
     },
     {
       "id": "P-053",
@@ -8769,7 +8821,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 53
+      "source_order": 53,
+      "description": "Final Transfer Exception Register. Recovered in RECORDS OFFICE."
     },
     {
       "id": "P-054",
@@ -8783,7 +8836,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 54
+      "source_order": 54,
+      "description": "Senior Archivist verification note. Recovered in RECORDS OFFICE."
     },
     {
       "id": "P-055",
@@ -8797,7 +8851,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 55
+      "source_order": 55,
+      "description": "In-tray card. Recovered in RECORDS OFFICE."
     },
     {
       "id": "P-056",
@@ -8811,7 +8866,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 56
+      "source_order": 56,
+      "description": "Paperclip tin. Recovered in RECORDS OFFICE."
     },
     {
       "id": "P-057",
@@ -8827,7 +8883,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 57
+      "source_order": 57,
+      "description": "IT Support patch panel. Recovered in IT SUPPORT."
     },
     {
       "id": "P-058",
@@ -8843,7 +8900,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 58
+      "source_order": 58,
+      "description": "Server-route label. Recovered in IT SUPPORT."
     },
     {
       "id": "P-059",
@@ -8857,7 +8915,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 59
+      "source_order": 59,
+      "description": "Spare patch lead. Recovered in IT SUPPORT."
     },
     {
       "id": "P-060",
@@ -8871,7 +8930,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 60
+      "source_order": 60,
+      "description": "Cable tester. Recovered in IT SUPPORT."
     },
     {
       "id": "P-061",
@@ -8885,7 +8945,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 61
+      "source_order": 61,
+      "description": "Retired port label. Recovered in IT SUPPORT."
     },
     {
       "id": "P-062",
@@ -8899,7 +8960,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 62
+      "source_order": 62,
+      "description": "Obsolete connector. Recovered in IT SUPPORT."
     },
     {
       "id": "P-063",
@@ -8913,7 +8975,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 63
+      "source_order": 63,
+      "description": "Retired patch lead. Recovered in IT SUPPORT."
     },
     {
       "id": "P-064",
@@ -8927,7 +8990,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 64
+      "source_order": 64,
+      "description": "Old terminal key. Recovered in IT SUPPORT."
     },
     {
       "id": "P-065",
@@ -8941,7 +9005,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 65
+      "source_order": 65,
+      "description": "Legacy support sticker. Recovered in IT SUPPORT."
     },
     {
       "id": "P-066",
@@ -8957,7 +9022,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 66
+      "source_order": 66,
+      "description": "Digital verification pack. Recovered in IT SUPPORT."
     },
     {
       "id": "P-067",
@@ -8973,7 +9039,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 67
+      "source_order": 67,
+      "description": "Transfer media case. Recovered in IT SUPPORT."
     },
     {
       "id": "P-068",
@@ -8987,7 +9054,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 68
+      "source_order": 68,
+      "description": "Spare media wallet. Recovered in IT SUPPORT."
     },
     {
       "id": "P-069",
@@ -9001,7 +9069,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 69
+      "source_order": 69,
+      "description": "Checksum printout. Recovered in IT SUPPORT."
     },
     {
       "id": "P-070",
@@ -9015,7 +9084,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 70
+      "source_order": 70,
+      "description": "Archive-transfer label sheet. Recovered in IT SUPPORT."
     },
     {
       "id": "P-071",
@@ -9029,7 +9099,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 71
+      "source_order": 71,
+      "description": "Mouldy cheese sandwich. Recovered in STAFF ROOM."
     },
     {
       "id": "P-072",
@@ -9043,7 +9114,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 72
+      "source_order": 72,
+      "description": "Named mugs. Recovered in STAFF ROOM."
     },
     {
       "id": "P-073",
@@ -9057,7 +9129,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 73
+      "source_order": 73,
+      "description": "Dog-eared paperback. Recovered in STAFF ROOM."
     },
     {
       "id": "P-074",
@@ -9071,7 +9144,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 74
+      "source_order": 74,
+      "description": "Half-finished crossword. Recovered in STAFF ROOM."
     },
     {
       "id": "P-075",
@@ -9085,7 +9159,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 75
+      "source_order": 75,
+      "description": "Noticeboard social poster. Recovered in STAFF ROOM."
     },
     {
       "id": "P-076",
@@ -9099,7 +9174,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 76
+      "source_order": 76,
+      "description": "Coffee jar. Recovered in STAFF ROOM."
     },
     {
       "id": "P-077",
@@ -9113,7 +9189,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 77
+      "source_order": 77,
+      "description": "Labelled milk bottle. Recovered in STAFF ROOM."
     },
     {
       "id": "P-078",
@@ -9127,7 +9204,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 78
+      "source_order": 78,
+      "description": "Birthday card. Recovered in STAFF ROOM."
     },
     {
       "id": "P-079",
@@ -9141,7 +9219,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 79
+      "source_order": 79,
+      "description": "Forgotten umbrella. Recovered in STAFF ROOM."
     },
     {
       "id": "P-080",
@@ -9157,7 +9236,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 80
+      "source_order": 80,
+      "description": "Signed closure briefing. Recovered in DIRECTOR OFFICE."
     },
     {
       "id": "P-081",
@@ -9171,7 +9251,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 81
+      "source_order": 81,
+      "description": "Director annotated copy. Recovered in DIRECTOR OFFICE."
     },
     {
       "id": "P-082",
@@ -9185,7 +9266,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 82
+      "source_order": 82,
+      "description": "Meeting notes card. Recovered in DIRECTOR OFFICE."
     },
     {
       "id": "P-083",
@@ -9199,7 +9281,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 83
+      "source_order": 83,
+      "description": "Briefing binder. Recovered in DIRECTOR OFFICE."
     },
     {
       "id": "P-084",
@@ -9213,7 +9296,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 84
+      "source_order": 84,
+      "description": "Final-day diary card. Recovered in DIRECTOR OFFICE."
     },
     {
       "id": "P-085",
@@ -9229,7 +9313,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 85
+      "source_order": 85,
+      "description": "Incident clipboard. Recovered in SECURITY."
     },
     {
       "id": "P-086",
@@ -9246,7 +9331,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 86
+      "source_order": 86,
+      "description": "Evacuation accountability sheet. Recovered in SECURITY."
     },
     {
       "id": "P-087",
@@ -9262,7 +9348,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 87
+      "source_order": 87,
+      "description": "Marked evacuation plan. Recovered in SECURITY."
     },
     {
       "id": "P-088",
@@ -9276,7 +9363,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 88
+      "source_order": 88,
+      "description": "Incident timing card. Recovered in SECURITY."
     },
     {
       "id": "P-089",
@@ -9290,7 +9378,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 89
+      "source_order": 89,
+      "description": "Evacuation roll-call pencil. Recovered in SECURITY."
     },
     {
       "id": "P-090",
@@ -9304,7 +9393,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 90
+      "source_order": 90,
+      "description": "Emergency route overlay. Recovered in SECURITY."
     },
     {
       "id": "P-091",
@@ -9318,7 +9408,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 91
+      "source_order": 91,
+      "description": "Incident reference envelope. Recovered in SECURITY."
     },
     {
       "id": "P-092",
@@ -9332,7 +9423,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 92
+      "source_order": 92,
+      "description": "Master Secure Cabinet Access Register. Recovered in SECURITY."
     },
     {
       "id": "P-093",
@@ -9346,7 +9438,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 93
+      "source_order": 93,
+      "description": "Complete Site key set. Recovered in SECURITY."
     },
     {
       "id": "P-094",
@@ -9360,7 +9453,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 94
+      "source_order": 94,
+      "description": "Secure Storage Access Procedure card. Recovered in SECURITY."
     },
     {
       "id": "P-095",
@@ -9374,7 +9468,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 95
+      "source_order": 95,
+      "description": "Key-control context sheet. Recovered in SECURITY."
     },
     {
       "id": "P-096",
@@ -9390,7 +9485,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 96
+      "source_order": 96,
+      "description": "CCTV coverage index binder. Recovered in SECURITY."
     },
     {
       "id": "P-097",
@@ -9406,7 +9502,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 97
+      "source_order": 97,
+      "description": "IT Support entrance event printout. Recovered in SECURITY."
     },
     {
       "id": "P-098",
@@ -9420,7 +9517,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 98
+      "source_order": 98,
+      "description": "CCTV camera map. Recovered in SECURITY."
     },
     {
       "id": "P-099",
@@ -9434,7 +9532,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 99
+      "source_order": 99,
+      "description": "Monitor-bank channel list. Recovered in SECURITY."
     },
     {
       "id": "P-100",
@@ -9448,7 +9547,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 100
+      "source_order": 100,
+      "description": "Retention label. Recovered in SECURITY."
     },
     {
       "id": "P-101",
@@ -9462,7 +9562,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 101
+      "source_order": 101,
+      "description": "Blank video tapes. Recovered in SECURITY."
     },
     {
       "id": "P-102",
@@ -9476,7 +9577,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 102
+      "source_order": 102,
+      "description": "Camera selector control. Recovered in SECURITY."
     },
     {
       "id": "P-103",
@@ -9493,7 +9595,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 103
+      "source_order": 103,
+      "description": "Server Room environmental panel. Recovered in SERVER ROOM."
     },
     {
       "id": "P-104",
@@ -9507,7 +9610,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 104
+      "source_order": 104,
+      "description": "Service tag. Recovered in SERVER ROOM."
     },
     {
       "id": "P-105",
@@ -9521,7 +9625,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 105
+      "source_order": 105,
+      "description": "Ventilation status tag. Recovered in SERVER ROOM."
     },
     {
       "id": "P-106",
@@ -9537,7 +9642,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 106
+      "source_order": 106,
+      "description": "Server status panel. Recovered in SERVER ROOM."
     },
     {
       "id": "P-107",
@@ -9553,7 +9659,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 107
+      "source_order": 107,
+      "description": "Backup rotation case. Recovered in SERVER ROOM."
     },
     {
       "id": "P-108",
@@ -9567,7 +9674,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 108
+      "source_order": 108,
+      "description": "Rack labels. Recovered in SERVER ROOM."
     },
     {
       "id": "P-109",
@@ -9581,7 +9689,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 109
+      "source_order": 109,
+      "description": "Backup logbook. Recovered in SERVER ROOM."
     },
     {
       "id": "P-110",
@@ -9595,7 +9704,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 110
+      "source_order": 110,
+      "description": "Spare drive caddy. Recovered in SERVER ROOM."
     },
     {
       "id": "P-111",
@@ -9609,7 +9719,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 111
+      "source_order": 111,
+      "description": "UPS status card. Recovered in SERVER ROOM."
     },
     {
       "id": "P-112",
@@ -9626,7 +9737,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 112
+      "source_order": 112,
+      "description": "Cable-riser work area. Recovered in SERVER ROOM."
     },
     {
       "id": "P-113",
@@ -9643,7 +9755,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 113
+      "source_order": 113,
+      "description": "Manual discharge wiring / control connection. Recovered in SERVER ROOM."
     },
     {
       "id": "P-114",
@@ -9660,7 +9773,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 114
+      "source_order": 114,
+      "description": "Suppression event diagnostic panel. Recovered in SERVER ROOM."
     },
     {
       "id": "P-115",
@@ -9676,7 +9790,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 115
+      "source_order": 115,
+      "description": "Pulled network cable. Recovered in SERVER ROOM."
     },
     {
       "id": "P-116",
@@ -9690,7 +9805,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 116
+      "source_order": 116,
+      "description": "Cable tester. Recovered in SERVER ROOM."
     },
     {
       "id": "P-117",
@@ -9704,7 +9820,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 117
+      "source_order": 117,
+      "description": "Maintenance isolation tag. Recovered in SERVER ROOM."
     },
     {
       "id": "P-118",
@@ -9718,7 +9835,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 118
+      "source_order": 118,
+      "description": "Empty patch-cable reel. Recovered in SERVER ROOM."
     },
     {
       "id": "P-119",
@@ -9732,7 +9850,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 119
+      "source_order": 119,
+      "description": "Halon cylinder service label. Recovered in SERVER ROOM."
     },
     {
       "id": "P-120",
@@ -9746,7 +9865,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 120
+      "source_order": 120,
+      "description": "Server recovery checklist. Recovered in SERVER ROOM."
     },
     {
       "id": "P-121",
@@ -9760,7 +9880,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 121
+      "source_order": 121,
+      "description": "Reception contractor sign-in card. Recovered in RECEPTION."
     },
     {
       "id": "P-122",
@@ -9774,7 +9895,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 122
+      "source_order": 122,
+      "description": "Temporary visitor lanyard. Recovered in RECEPTION."
     },
     {
       "id": "P-123",
@@ -9788,7 +9910,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 123
+      "source_order": 123,
+      "description": "Staff telephone list. Recovered in MAIN OFFICE."
     },
     {
       "id": "P-124",
@@ -9802,7 +9925,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 124
+      "source_order": 124,
+      "description": "Course feedback forms. Recovered in MAIN OFFICE."
     },
     {
       "id": "P-125",
@@ -9816,7 +9940,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 125
+      "source_order": 125,
+      "description": "Stationery requisition pad. Recovered in MAIN OFFICE."
     },
     {
       "id": "P-126",
@@ -9830,7 +9955,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 126
+      "source_order": 126,
+      "description": "Calculator tape. Recovered in MAIN OFFICE."
     },
     {
       "id": "P-127",
@@ -9844,7 +9970,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 127
+      "source_order": 127,
+      "description": "Closure milestone board card. Recovered in MAIN OFFICE."
     },
     {
       "id": "P-128",
@@ -9856,7 +9983,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 128
+      "source_order": 128,
+      "description": "Facilities ring of equipment labels. Recovered in FACILITIES."
     },
     {
       "id": "P-129",
@@ -9868,7 +9996,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 129
+      "source_order": 129,
+      "description": "Spare fuse envelope. Recovered in FACILITIES."
     },
     {
       "id": "P-130",
@@ -9880,7 +10009,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 130
+      "source_order": 130,
+      "description": "Plant-room key tag. Recovered in FACILITIES."
     },
     {
       "id": "P-131",
@@ -9892,7 +10022,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 131
+      "source_order": 131,
+      "description": "Asset serial-number cards. Recovered in FACILITIES."
     },
     {
       "id": "P-132",
@@ -9904,7 +10035,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 132
+      "source_order": 132,
+      "description": "Date stamp and ink pad. Recovered in RECORDS OFFICE."
     },
     {
       "id": "P-133",
@@ -9916,7 +10048,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 133
+      "source_order": 133,
+      "description": "Refiling divider cards. Recovered in RECORDS OFFICE."
     },
     {
       "id": "P-134",
@@ -9930,7 +10063,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 134
+      "source_order": 134,
+      "description": "Open screwdriver set. Recovered in IT SUPPORT."
     },
     {
       "id": "P-135",
@@ -9944,7 +10078,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 135
+      "source_order": 135,
+      "description": "Box of assorted network leads. Recovered in IT SUPPORT."
     },
     {
       "id": "P-136",
@@ -9958,7 +10093,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 136
+      "source_order": 136,
+      "description": "Handwritten port-reference strip. Recovered in IT SUPPORT."
     },
     {
       "id": "P-137",
@@ -9972,7 +10108,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 137
+      "source_order": 137,
+      "description": "Completed newspaper crossword. Recovered in STAFF ROOM."
     },
     {
       "id": "P-138",
@@ -9986,7 +10123,8 @@
       "role": "Dynamic worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 138
+      "source_order": 138,
+      "description": "Seasonal staff-social notice. Recovered in STAFF ROOM."
     },
     {
       "id": "P-139",
@@ -10000,7 +10138,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 139
+      "source_order": 139,
+      "description": "Ancient workplace first-aid manual. Recovered in STAFF ROOM."
     },
     {
       "id": "P-140",
@@ -10012,7 +10151,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 140
+      "source_order": 140,
+      "description": "Incoming correspondence tray. Recovered in SECRETARY OFFICE."
     },
     {
       "id": "P-141",
@@ -10024,7 +10164,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 141
+      "source_order": 141,
+      "description": "Director's appointment card stack. Recovered in SECRETARY OFFICE."
     },
     {
       "id": "P-142",
@@ -10036,7 +10177,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 142
+      "source_order": 142,
+      "description": "Civil Service directory. Recovered in SECRETARY OFFICE."
     },
     {
       "id": "P-143",
@@ -10048,7 +10190,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 143
+      "source_order": 143,
+      "description": "Site Closure meeting agenda copies. Recovered in DIRECTOR OFFICE."
     },
     {
       "id": "P-144",
@@ -10060,7 +10203,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 144
+      "source_order": 144,
+      "description": "Water jug and glasses. Recovered in DIRECTOR OFFICE."
     },
     {
       "id": "P-145",
@@ -10072,7 +10216,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 145
+      "source_order": 145,
+      "description": "Boardroom pencil set. Recovered in DIRECTOR OFFICE."
     },
     {
       "id": "P-146",
@@ -10084,7 +10229,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 146
+      "source_order": 146,
+      "description": "Sterile dressing packet. Recovered in SECURITY."
     },
     {
       "id": "P-147",
@@ -10096,7 +10242,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 147
+      "source_order": 147,
+      "description": "Accident-book envelope. Recovered in SECURITY."
     },
     {
       "id": "P-148",
@@ -10108,7 +10255,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 148
+      "source_order": 148,
+      "description": "Torch. Recovered in SECURITY."
     },
     {
       "id": "P-149",
@@ -10120,7 +10268,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 149
+      "source_order": 149,
+      "description": "Spare radio battery. Recovered in SECURITY."
     },
     {
       "id": "P-150",
@@ -10132,7 +10281,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 150
+      "source_order": 150,
+      "description": "Anti-static wrist strap. Recovered in SERVER ROOM."
     },
     {
       "id": "P-151",
@@ -10144,7 +10294,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 151
+      "source_order": 151,
+      "description": "Half-finished cup of tea. Recovered in SERVER ROOM."
     },
     {
       "id": "P-152",
@@ -10158,7 +10309,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 152
+      "source_order": 152,
+      "description": "Reception room plate. Recovered in CORRIDOR."
     },
     {
       "id": "P-153",
@@ -10172,7 +10324,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 153
+      "source_order": 153,
+      "description": "Main Office room plate. Recovered in CORRIDOR."
     },
     {
       "id": "P-154",
@@ -10186,7 +10339,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 154
+      "source_order": 154,
+      "description": "Facilities room plate - corridor side. Recovered in CORRIDOR."
     },
     {
       "id": "P-155",
@@ -10200,7 +10354,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 155
+      "source_order": 155,
+      "description": "IT Support room plate. Recovered in CORRIDOR."
     },
     {
       "id": "P-156",
@@ -10214,7 +10369,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 156
+      "source_order": 156,
+      "description": "Security Office room plate. Recovered in CORRIDOR."
     },
     {
       "id": "P-157",
@@ -10228,7 +10384,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 157
+      "source_order": 157,
+      "description": "Staff Room door plate. Recovered in CORRIDOR."
     },
     {
       "id": "P-158",
@@ -10242,7 +10399,8 @@
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
-      "source_order": 158
+      "source_order": 158,
+      "description": "Records Room door plate. Recovered in CORRIDOR."
     },
     {
       "id": "P-159",
@@ -10258,7 +10416,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 159
+      "source_order": 159,
+      "description": "Restricted Area Access Matrix. Recovered in SECURITY."
     },
     {
       "id": "P-160",
@@ -10274,7 +10433,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 160
+      "source_order": 160,
+      "description": "Temporary Restricted Area Authorisation. Recovered in SECURITY."
     },
     {
       "id": "P-161",
@@ -10290,7 +10450,8 @@
       "role": "Evidence",
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
-      "source_order": 161
+      "source_order": 161,
+      "description": "Security Duty Communications Log Sheet. Recovered in SECURITY."
     }
   ],
   "collections": [
@@ -15702,7 +15863,7 @@
         }
       ],
       "evidence_id": null,
-      "notebook": null,
+      "notebook": "Inspected Transfer media case in IT SUPPORT.",
       "follow_on": "Corroboration only",
       "persistent": true,
       "source_order": 12
@@ -15769,7 +15930,7 @@
         }
       ],
       "evidence_id": null,
-      "notebook": null,
+      "notebook": "Inspected Restricted Area Access Matrix in SECURITY.",
       "follow_on": "Await P-160",
       "persistent": true,
       "source_order": 15
@@ -15814,7 +15975,7 @@
         }
       ],
       "evidence_id": null,
-      "notebook": null,
+      "notebook": "Inspected Reception Visitor Registry in RECEPTION.",
       "follow_on": "Await P-002",
       "persistent": true,
       "source_order": 17
@@ -15860,7 +16021,7 @@
         }
       ],
       "evidence_id": null,
-      "notebook": null,
+      "notebook": "Inspected Signed Attendance Sheet in MAIN OFFICE.",
       "follow_on": "Await P-026",
       "persistent": true,
       "source_order": 19
@@ -15905,7 +16066,7 @@
         }
       ],
       "evidence_id": null,
-      "notebook": null,
+      "notebook": "Inspected Incident clipboard in SECURITY.",
       "follow_on": "Await P-086",
       "persistent": true,
       "source_order": 21
@@ -15973,7 +16134,7 @@
         }
       ],
       "evidence_id": null,
-      "notebook": null,
+      "notebook": "Inspected CCTV coverage index binder in SECURITY.",
       "follow_on": "Await movement records",
       "persistent": true,
       "source_order": 24
@@ -15995,7 +16156,7 @@
         }
       ],
       "evidence_id": null,
-      "notebook": null,
+      "notebook": "Inspected IT Support entrance event printout in SECURITY.",
       "follow_on": "Await duty log",
       "persistent": true,
       "source_order": 25
@@ -16042,7 +16203,7 @@
         }
       ],
       "evidence_id": null,
-      "notebook": null,
+      "notebook": "Inspected Printed Environmental Event Log in FACILITIES.",
       "follow_on": "Compare P-103",
       "persistent": true,
       "source_order": 27
@@ -16087,7 +16248,7 @@
         }
       ],
       "evidence_id": null,
-      "notebook": null,
+      "notebook": "Inspected Server status panel in SERVER ROOM.",
       "follow_on": "Await P-107",
       "persistent": true,
       "source_order": 29
