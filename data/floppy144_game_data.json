@@ -707,14 +707,14 @@
         "geometry": [
           {
             "type": "FLOOR_C",
-            "x": 67,
+            "x": 66,
             "y": 1,
-            "width": 32,
+            "width": 33,
             "height": 32
           },
           {
             "type": "FLOOR_C",
-            "x": 57,
+            "x": 56,
             "y": 1,
             "width": 10,
             "height": 45
