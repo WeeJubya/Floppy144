@@ -938,17 +938,32 @@ static void Floppy144CabinetDrawInterior(
 
         if(pItem != NULL)
         {
-            char szId[80];
             char szName[68];
-            char szRole[68];
+            char szDetail[80];
 
-            snprintf(szId, sizeof(szId), "ID: %s", pItem->pszId != NULL ? pItem->pszId : "-");
-            snprintf(szName, sizeof(szName), "ITEM: %.52s", pItem->pszA != NULL ? pItem->pszA : "RECOVERED ITEM");
-            snprintf(szRole, sizeof(szRole), "ROLE: %.52s", pItem->pszD != NULL ? pItem->pszD : "CONTEXT");
+            /*
+             * Cabinet Interior is a player-facing evidence view.  Internal
+             * P- identifiers and ledger roles belong to the data/compiler
+             * layer, so show only the authored in-world item information.
+             */
+            snprintf(
+                szName,
+                sizeof(szName),
+                "ITEM: %.52s",
+                pItem->pszA != NULL ? pItem->pszA : "RECOVERED ITEM"
+            );
 
-            Floppy144DrawText(pSurface, 94U, 138U, szId, 1U, uText);
-            Floppy144DrawText(pSurface, 94U, 160U, szName, 1U, uText);
-            Floppy144DrawText(pSurface, 94U, 182U, szRole, 1U, uText);
+            snprintf(
+                szDetail,
+                sizeof(szDetail),
+                "%.68s",
+                pItem->pszF != NULL ?
+                    pItem->pszF :
+                    "A recovered physical item from the reconstructed site."
+            );
+
+            Floppy144DrawText(pSurface, 94U, 148U, szName, 1U, uText);
+            Floppy144DrawText(pSurface, 94U, 178U, szDetail, 1U, uText);
         }
 
         Floppy144DrawText(
