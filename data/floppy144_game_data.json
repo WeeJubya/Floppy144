@@ -8995,7 +8995,7 @@
     },
     {
       "id": "P-065",
-      "name": "Legacy support sticker",
+      "name": "Claire Hughes workbench nameplate",
       "room_id": "IT_SUPPORT",
       "parent_id": "IT_SUPPORT_WORKBENCH",
       "collection_ids": [
@@ -9006,7 +9006,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 65,
-      "description": "Legacy support sticker. Recovered in IT Support."
+      "description": "CLAIRE HUGHES\\nIT Support"
     },
     {
       "id": "P-066",
@@ -9256,7 +9256,7 @@
     },
     {
       "id": "P-082",
-      "name": "Meeting notes card",
+      "name": "Helen Cartwright desk nameplate",
       "room_id": "DIRECTOR_OFFICE",
       "parent_id": "DIRECTOR_OFFICE_DESK",
       "collection_ids": [
@@ -9267,7 +9267,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 82,
-      "description": "Meeting notes card. Recovered in Director Office."
+      "description": "HELEN CARTWRIGHT\\nSite Director"
     },
     {
       "id": "P-083",
@@ -9368,7 +9368,7 @@
     },
     {
       "id": "P-089",
-      "name": "Evacuation roll-call pencil",
+      "name": "Rachel Morgan desk nameplate",
       "room_id": "SECURITY",
       "parent_id": "SECURITY_DESK_01",
       "collection_ids": [
@@ -9379,7 +9379,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 89,
-      "description": "Evacuation roll-call pencil. Recovered in Security."
+      "description": "RACHEL MORGAN\\nSecurity Duty Officer"
     },
     {
       "id": "P-090",
