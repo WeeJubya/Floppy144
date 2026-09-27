@@ -1014,7 +1014,7 @@
             "x": 50,
             "y": 95,
             "width": 6,
-            "height": 2,
+            "height": 4,
             "rotation": 90
           },
           {
@@ -1025,7 +1025,7 @@
             "x": 44,
             "y": 95,
             "width": 6,
-            "height": 2
+            "height": 4
           },
           {
             "id": "IT_SUPPORT_TERMINAL_DESK",
@@ -1055,7 +1055,7 @@
             "object": "IT_SUPPORT_BOOKCASE",
             "x": 45,
             "y": 79,
-            "width": 1,
+            "width": 2,
             "height": 6
           },
           {
@@ -1343,7 +1343,7 @@
             "x": 50,
             "y": 59,
             "width": 6,
-            "height": 2,
+            "height": 4,
             "rotation": 90
           },
           {
@@ -1354,7 +1354,7 @@
             "x": 44,
             "y": 59,
             "width": 6,
-            "height": 2,
+            "height": 4,
             "rotation": 90
           },
           {
@@ -1385,7 +1385,7 @@
             "object": "SECURITY_BOOKCASE",
             "x": 50,
             "y": 76,
-            "width": 5,
+            "width": 6,
             "height": 2
           },
           {
@@ -5576,7 +5576,7 @@
       "geometry": {
         "x": 45,
         "y": 79,
-        "width": 1,
+        "width": 2,
         "height": 6
       },
       "drawing_definition_id": "DRAW_BOOKCASE"
@@ -5864,7 +5864,7 @@
         "x": 50,
         "y": 59,
         "width": 6,
-        "height": 2,
+        "height": 4,
         "rotation": 90
       },
       "drawing_definition_id": "DRAW_STANDARD_DESK"
@@ -5879,7 +5879,7 @@
         "x": 44,
         "y": 59,
         "width": 6,
-        "height": 2,
+        "height": 4,
         "rotation": 90
       },
       "drawing_definition_id": "DRAW_STANDARD_DESK"
@@ -5923,7 +5923,7 @@
       "geometry": {
         "x": 50,
         "y": 76,
-        "width": 5,
+        "width": 6,
         "height": 2
       },
       "drawing_definition_id": "DRAW_NONSECURE_CABINET"
