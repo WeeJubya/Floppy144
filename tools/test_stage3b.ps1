@@ -400,6 +400,49 @@ function Test-Stage3B5CoordinatorWiring {
 
 Test-Stage3B5CoordinatorWiring
 
+function Test-PhysicalItemPlayerFacingContract {
+    Write-Host ""
+    Write-Host "=== PHYSICAL ITEM PLAYER-FACING CONTRACT ==="
+
+    $GameDataPath = Join-Path $Root "data\floppy144_game_data.json"
+    $CabinetPath = Join-Path $SourceDir "floppy144_cabinet.c"
+    $Site2DPath = Join-Path $SourceDir "floppy144_site_2d.c"
+    $GameData = Get-Content -Raw -Path $GameDataPath | ConvertFrom-Json
+    $CabinetSource = Get-Content -Raw -Path $CabinetPath
+    $Site2DSource = Get-Content -Raw -Path $Site2DPath
+
+    foreach($Item in $GameData.physical_items) {
+        if([string]::IsNullOrWhiteSpace($Item.description)) {
+            throw "Physical item $($Item.id) has no player-facing description."
+        }
+    }
+
+    foreach($Interaction in $GameData.interactions) {
+        if(
+            $Interaction.physical_source -match '^P-' -and
+            $Interaction.type -in @('Inspect','Synthesis','Capability') -and
+            [string]::IsNullOrWhiteSpace($Interaction.notebook)
+        ) {
+            throw "Physical inspection $($Interaction.id) can complete without a Notebook observation."
+        }
+    }
+
+    if($CabinetSource -match '"ID: %s"' -or $CabinetSource -match '"ROLE:') {
+        throw "Cabinet Interior still exposes internal physical-item metadata."
+    }
+
+    if(
+        $Site2DSource -notmatch
+        'Floppy144Site2DRotationIsDiagonal\(rotation\)'
+    ) {
+        throw "Diagonal desk details no longer inherit the desk orientation."
+    }
+
+    Write-Host "PHYSICAL ITEM PLAYER-FACING CONTRACT: PASS"
+}
+
+Test-PhysicalItemPlayerFacingContract
+
 $CabinetSources = @(
     (Join-Path $ScriptDir "stage3b_cabinet_tests.c"),
     (Join-Path $SourceDir "floppy144_cabinet.c"),
