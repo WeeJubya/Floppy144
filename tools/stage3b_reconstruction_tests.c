@@ -1264,7 +1264,7 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
             pRect->x == 50U &&
             pRect->y == 95U &&
             pRect->width == 6U &&
-            pRect->height == 2U &&
+            pRect->height == 4U &&
             pRect->rotation == 90U
         )
         {
@@ -1293,7 +1293,7 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
                 (uint8_t)FLOPPY144_ROOM_SECURITY &&
             pRect->y == 59U &&
             pRect->width == 6U &&
-            pRect->height == 2U &&
+            pRect->height == 4U &&
             pRect->rotation == 90U
         )
         {
@@ -1319,7 +1319,7 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
 
     F144_CHECK(
         bItDesk,
-        "IT Support standard desk uses Full Site 6x2 footprint"
+        "IT Support standard desk uses locked-plan 6x4 footprint"
     );
 
     F144_CHECK(
@@ -1330,7 +1330,7 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
     F144_CHECK(
         bSecurityDeskLeft &&
         bSecurityDeskRight,
-        "Security Office keeps two adjacent 6x2 standard desks"
+        "Security Office keeps two adjacent locked-plan 6x4 standard desks"
     );
 }
 
