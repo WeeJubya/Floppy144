@@ -994,6 +994,23 @@ static void Floppy144TestContextLabels(void)
         pszLabel == NULL || strcmp(pszLabel, "LOCKED DOOR") != 0,
         "unlocked door no longer exposes a door label"
     );
+
+    /*
+     * Wall-mounted fixtures must participate in the same proximity-label
+     * system as freestanding furniture.  Security's key cabinet occupies
+     * x44 y72 w1 h3.
+     */
+    (void)Floppy144RunStateReconstructRoom(
+        &sState,
+        FLOPPY144_ROOM_SECURITY
+    );
+    Floppy144TestSetPosition(&sState, 45, 73);
+    pszLabel = Floppy144SiteContextLabel(&sState);
+    F144_CHECK(
+        pszLabel != NULL &&
+        strcmp(pszLabel, "WALL-MOUNTED ITEM") == 0,
+        "wall-mounted Security fixture exposes a context label"
+    );
 }
 
 /*
