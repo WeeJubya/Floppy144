@@ -2242,7 +2242,80 @@ static void Floppy144Site2DDrawFurnitureDetails(
             int32_t paper_y;
 
             /*
-             * Directional detail follows the authored back-edge rotation.
+             * Diagonal desks need their desktop objects rotated with the desk,
+             * rather than snapped to the nearest cardinal orientation.  The
+             * desk body already renders as a diamond, so use the same geometry
+             * for the equipment and a diagonal stroke for the loose paper.
+             */
+            if(Floppy144Site2DRotationIsDiagonal(rotation))
+            {
+                Floppy144SiteScreenRect equipment_rect;
+                uint16_t diagonal_facing =
+                    (uint16_t)(
+                        (((rotation % 360U) + 22U) / 45U) * 45U
+                    ) % 360U;
+
+                equipment_rect.width = equipment_w;
+                equipment_rect.height = equipment_h;
+
+                if(diagonal_facing == 45U || diagonal_facing == 225U)
+                {
+                    equipment_rect.x =
+                        screen_rect->x + screen_rect->width * 9 / 16 -
+                        equipment_w / 2;
+                    equipment_rect.y =
+                        screen_rect->y + screen_rect->height * 5 / 16 -
+                        equipment_h / 2;
+                }
+                else
+                {
+                    equipment_rect.x =
+                        screen_rect->x + screen_rect->width * 7 / 16 -
+                        equipment_w / 2;
+                    equipment_rect.y =
+                        screen_rect->y + screen_rect->height * 5 / 16 -
+                        equipment_h / 2;
+                }
+
+                Floppy144Site2DFillDiamond(
+                    surface,
+                    &equipment_rect,
+                    detail_colour
+                );
+                Floppy144Site2DOutlineDiamond(
+                    surface,
+                    &equipment_rect,
+                    edge_colour
+                );
+
+                if(diagonal_facing == 45U || diagonal_facing == 225U)
+                {
+                    Floppy144Site2DLine(
+                        surface,
+                        screen_rect->x + screen_rect->width * 7 / 16,
+                        screen_rect->y + screen_rect->height * 10 / 16,
+                        screen_rect->x + screen_rect->width * 11 / 16,
+                        screen_rect->y + screen_rect->height * 6 / 16,
+                        paper_colour
+                    );
+                }
+                else
+                {
+                    Floppy144Site2DLine(
+                        surface,
+                        screen_rect->x + screen_rect->width * 5 / 16,
+                        screen_rect->y + screen_rect->height * 6 / 16,
+                        screen_rect->x + screen_rect->width * 9 / 16,
+                        screen_rect->y + screen_rect->height * 10 / 16,
+                        paper_colour
+                    );
+                }
+
+                break;
+            }
+
+            /*
+             * Cardinal detail follows the authored back-edge rotation.
              */
             switch(facing)
             {
