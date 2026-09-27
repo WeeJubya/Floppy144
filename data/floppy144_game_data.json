@@ -8010,7 +8010,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 1,
-      "description": "Reception Visitor Registry. Recovered in RECEPTION."
+      "description": "Reception Visitor Registry. Recovered in Reception."
     },
     {
       "id": "P-002",
@@ -8027,7 +8027,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 2,
-      "description": "Temporary pass stub. Recovered in RECEPTION."
+      "description": "Temporary pass stub. Recovered in Reception."
     },
     {
       "id": "P-003",
@@ -8042,7 +8042,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 3,
-      "description": "Visitor badge. Recovered in RECEPTION."
+      "description": "Visitor badge. Recovered in Reception."
     },
     {
       "id": "P-004",
@@ -8057,7 +8057,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 4,
-      "description": "Visitor log pencil. Recovered in RECEPTION."
+      "description": "Visitor log pencil. Recovered in Reception."
     },
     {
       "id": "P-005",
@@ -8072,7 +8072,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 5,
-      "description": "Contractor badge clip. Recovered in RECEPTION."
+      "description": "Contractor badge clip. Recovered in Reception."
     },
     {
       "id": "P-006",
@@ -8087,7 +8087,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 6,
-      "description": "Visitor register carbon copy. Recovered in RECEPTION."
+      "description": "Visitor register carbon copy. Recovered in Reception."
     },
     {
       "id": "P-007",
@@ -8102,7 +8102,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 7,
-      "description": "Site Directory / room identification material. Recovered in CORRIDOR."
+      "description": "Site Directory / room identification material. Recovered in Corridor."
     },
     {
       "id": "P-008",
@@ -8117,7 +8117,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 8,
-      "description": "Main Office desk-number labels. Recovered in MAIN OFFICE."
+      "description": "Main Office desk-number labels. Recovered in Main Office."
     },
     {
       "id": "P-009",
@@ -8132,7 +8132,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 9,
-      "description": "Temporary desk allocation slip. Recovered in MAIN OFFICE."
+      "description": "Temporary desk allocation slip. Recovered in Main Office."
     },
     {
       "id": "P-010",
@@ -8147,7 +8147,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 10,
-      "description": "HR hot desking note. Recovered in MAIN OFFICE."
+      "description": "HR hot desking note. Recovered in Main Office."
     },
     {
       "id": "P-011",
@@ -8162,7 +8162,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 11,
-      "description": "Corridor access notice. Recovered in MAIN OFFICE."
+      "description": "Corridor access notice. Recovered in Main Office."
     },
     {
       "id": "P-012",
@@ -8179,7 +8179,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 12,
-      "description": "Main Office suppression control panel. Recovered in MAIN OFFICE."
+      "description": "Main Office suppression control panel. Recovered in Main Office."
     },
     {
       "id": "P-013",
@@ -8194,7 +8194,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 13,
-      "description": "Panel service label. Recovered in MAIN OFFICE."
+      "description": "Panel service label. Recovered in Main Office."
     },
     {
       "id": "P-014",
@@ -8212,7 +8212,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 14,
-      "description": "Site Closure Handover Folder. Recovered in MAIN OFFICE."
+      "description": "Site Closure Handover Folder. Recovered in Main Office."
     },
     {
       "id": "P-015",
@@ -8227,7 +8227,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 15,
-      "description": "Project Manager desk calendar. Recovered in MAIN OFFICE."
+      "description": "Project Manager desk calendar. Recovered in Main Office."
     },
     {
       "id": "P-016",
@@ -8242,7 +8242,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 16,
-      "description": "Final sign-off checklist. Recovered in MAIN OFFICE."
+      "description": "Final sign-off checklist. Recovered in Main Office."
     },
     {
       "id": "P-017",
@@ -8259,7 +8259,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 17,
-      "description": "Office Terminal network connection. Recovered in MAIN OFFICE."
+      "description": "Office Terminal network connection. Recovered in Main Office."
     },
     {
       "id": "P-018",
@@ -8274,7 +8274,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 18,
-      "description": "Network lead. Recovered in MAIN OFFICE."
+      "description": "Network lead. Recovered in Main Office."
     },
     {
       "id": "P-019",
@@ -8291,7 +8291,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 19,
-      "description": "Local terminal diagnostic card. Recovered in MAIN OFFICE."
+      "description": "Local terminal diagnostic card. Recovered in Main Office."
     },
     {
       "id": "P-020",
@@ -8306,7 +8306,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 20,
-      "description": "Terminal status printout. Recovered in MAIN OFFICE."
+      "description": "Terminal status printout. Recovered in Main Office."
     },
     {
       "id": "P-021",
@@ -8323,7 +8323,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 21,
-      "description": "Project Manager Exception Sheet. Recovered in MAIN OFFICE."
+      "description": "Project Manager Exception Sheet. Recovered in Main Office."
     },
     {
       "id": "P-022",
@@ -8338,7 +8338,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 22,
-      "description": "Closure suspension note. Recovered in MAIN OFFICE."
+      "description": "Closure suspension note. Recovered in Main Office."
     },
     {
       "id": "P-023",
@@ -8353,7 +8353,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 23,
-      "description": "Security review referral. Recovered in MAIN OFFICE."
+      "description": "Security review referral. Recovered in Main Office."
     },
     {
       "id": "P-024",
@@ -8368,7 +8368,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 24,
-      "description": "Remaining-workstream release sheet. Recovered in MAIN OFFICE."
+      "description": "Remaining-workstream release sheet. Recovered in Main Office."
     },
     {
       "id": "P-025",
@@ -8385,7 +8385,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 25,
-      "description": "Signed Attendance Sheet. Recovered in MAIN OFFICE."
+      "description": "Signed Attendance Sheet. Recovered in Main Office."
     },
     {
       "id": "P-026",
@@ -8402,7 +8402,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 26,
-      "description": "Duty Rota. Recovered in MAIN OFFICE."
+      "description": "Duty Rota. Recovered in Main Office."
     },
     {
       "id": "P-027",
@@ -8417,7 +8417,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 27,
-      "description": "Leave status card. Recovered in MAIN OFFICE."
+      "description": "Leave status card. Recovered in Main Office."
     },
     {
       "id": "P-028",
@@ -8432,7 +8432,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 28,
-      "description": "Overtime return. Recovered in MAIN OFFICE."
+      "description": "Overtime return. Recovered in Main Office."
     },
     {
       "id": "P-029",
@@ -8447,7 +8447,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 29,
-      "description": "Attendance amendment note. Recovered in MAIN OFFICE."
+      "description": "Attendance amendment note. Recovered in Main Office."
     },
     {
       "id": "P-030",
@@ -8462,7 +8462,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 30,
-      "description": "Facilities room plate. Recovered in CORRIDOR."
+      "description": "Facilities room plate. Recovered in Corridor."
     },
     {
       "id": "P-031",
@@ -8477,7 +8477,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 31,
-      "description": "Maintenance calendar. Recovered in FACILITIES."
+      "description": "Maintenance calendar. Recovered in Facilities."
     },
     {
       "id": "P-032",
@@ -8492,7 +8492,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 32,
-      "description": "Suppression-zone diagram. Recovered in FACILITIES."
+      "description": "Suppression-zone diagram. Recovered in Facilities."
     },
     {
       "id": "P-033",
@@ -8509,7 +8509,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 33,
-      "description": "Final Isolation Register. Recovered in FACILITIES."
+      "description": "Final Isolation Register. Recovered in Facilities."
     },
     {
       "id": "P-034",
@@ -8524,7 +8524,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 34,
-      "description": "Decommissioning tag set. Recovered in FACILITIES."
+      "description": "Decommissioning tag set. Recovered in Facilities."
     },
     {
       "id": "P-035",
@@ -8539,7 +8539,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 35,
-      "description": "Asset transfer labels. Recovered in FACILITIES."
+      "description": "Asset transfer labels. Recovered in Facilities."
     },
     {
       "id": "P-036",
@@ -8554,7 +8554,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 36,
-      "description": "Contractor clipboard. Recovered in FACILITIES."
+      "description": "Contractor clipboard. Recovered in Facilities."
     },
     {
       "id": "P-037",
@@ -8572,7 +8572,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 37,
-      "description": "Printed Environmental Event Log. Recovered in FACILITIES."
+      "description": "Printed Environmental Event Log. Recovered in Facilities."
     },
     {
       "id": "P-038",
@@ -8587,7 +8587,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 38,
-      "description": "Ventilation isolation chart. Recovered in FACILITIES."
+      "description": "Ventilation isolation chart. Recovered in Facilities."
     },
     {
       "id": "P-039",
@@ -8602,7 +8602,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 39,
-      "description": "Environmental sensor summary. Recovered in FACILITIES."
+      "description": "Environmental sensor summary. Recovered in Facilities."
     },
     {
       "id": "P-040",
@@ -8619,7 +8619,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 40,
-      "description": "Record on Records Trolley. Recovered in RECORDS OFFICE."
+      "description": "Record on Records Trolley. Recovered in Records Office."
     },
     {
       "id": "P-041",
@@ -8636,7 +8636,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 41,
-      "description": "External withdrawal / location marker. Recovered in RECORDS OFFICE."
+      "description": "External withdrawal / location marker. Recovered in Records Office."
     },
     {
       "id": "P-042",
@@ -8651,7 +8651,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 42,
-      "description": "Misfile slip. Recovered in RECORDS OFFICE."
+      "description": "Misfile slip. Recovered in Records Office."
     },
     {
       "id": "P-043",
@@ -8666,7 +8666,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 43,
-      "description": "Trolley refiling divider. Recovered in RECORDS OFFICE."
+      "description": "Trolley refiling divider. Recovered in Records Office."
     },
     {
       "id": "P-044",
@@ -8681,7 +8681,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 44,
-      "description": "Catalogue discrepancy card. Recovered in RECORDS OFFICE."
+      "description": "Catalogue discrepancy card. Recovered in Records Office."
     },
     {
       "id": "P-045",
@@ -8696,7 +8696,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 45,
-      "description": "Refiling note. Recovered in RECORDS OFFICE."
+      "description": "Refiling note. Recovered in Records Office."
     },
     {
       "id": "P-046",
@@ -8713,7 +8713,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 46,
-      "description": "Labelled archive transfer box. Recovered in RECORDS OFFICE."
+      "description": "Labelled archive transfer box. Recovered in Records Office."
     },
     {
       "id": "P-047",
@@ -8730,7 +8730,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 47,
-      "description": "Transfer withdrawal marker. Recovered in RECORDS OFFICE."
+      "description": "Transfer withdrawal marker. Recovered in Records Office."
     },
     {
       "id": "P-048",
@@ -8745,7 +8745,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 48,
-      "description": "Transfer Box Manifest. Recovered in RECORDS OFFICE."
+      "description": "Transfer Box Manifest. Recovered in Records Office."
     },
     {
       "id": "P-049",
@@ -8760,7 +8760,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 49,
-      "description": "Custody tag. Recovered in RECORDS OFFICE."
+      "description": "Custody tag. Recovered in Records Office."
     },
     {
       "id": "P-050",
@@ -8775,7 +8775,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 50,
-      "description": "Box seal strip. Recovered in RECORDS OFFICE."
+      "description": "Box seal strip. Recovered in Records Office."
     },
     {
       "id": "P-051",
@@ -8790,7 +8790,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 51,
-      "description": "Transfer staging checklist. Recovered in RECORDS OFFICE."
+      "description": "Transfer staging checklist. Recovered in Records Office."
     },
     {
       "id": "P-052",
@@ -8807,7 +8807,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 52,
-      "description": "Signed Custody Sheet. Recovered in RECORDS OFFICE."
+      "description": "Signed Custody Sheet. Recovered in Records Office."
     },
     {
       "id": "P-053",
@@ -8822,7 +8822,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 53,
-      "description": "Final Transfer Exception Register. Recovered in RECORDS OFFICE."
+      "description": "Final Transfer Exception Register. Recovered in Records Office."
     },
     {
       "id": "P-054",
@@ -8837,7 +8837,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 54,
-      "description": "Senior Archivist verification note. Recovered in RECORDS OFFICE."
+      "description": "Senior Archivist verification note. Recovered in Records Office."
     },
     {
       "id": "P-055",
@@ -8852,7 +8852,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 55,
-      "description": "In-tray card. Recovered in RECORDS OFFICE."
+      "description": "In-tray card. Recovered in Records Office."
     },
     {
       "id": "P-056",
@@ -8867,7 +8867,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 56,
-      "description": "Paperclip tin. Recovered in RECORDS OFFICE."
+      "description": "Paperclip tin. Recovered in Records Office."
     },
     {
       "id": "P-057",
@@ -8884,7 +8884,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 57,
-      "description": "IT Support patch panel. Recovered in IT SUPPORT."
+      "description": "IT Support patch panel. Recovered in IT Support."
     },
     {
       "id": "P-058",
@@ -8901,7 +8901,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 58,
-      "description": "Server-route label. Recovered in IT SUPPORT."
+      "description": "Server-route label. Recovered in IT Support."
     },
     {
       "id": "P-059",
@@ -8916,7 +8916,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 59,
-      "description": "Spare patch lead. Recovered in IT SUPPORT."
+      "description": "Spare patch lead. Recovered in IT Support."
     },
     {
       "id": "P-060",
@@ -8931,7 +8931,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 60,
-      "description": "Cable tester. Recovered in IT SUPPORT."
+      "description": "Cable tester. Recovered in IT Support."
     },
     {
       "id": "P-061",
@@ -8946,7 +8946,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 61,
-      "description": "Retired port label. Recovered in IT SUPPORT."
+      "description": "Retired port label. Recovered in IT Support."
     },
     {
       "id": "P-062",
@@ -8961,7 +8961,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 62,
-      "description": "Obsolete connector. Recovered in IT SUPPORT."
+      "description": "Obsolete connector. Recovered in IT Support."
     },
     {
       "id": "P-063",
@@ -8976,7 +8976,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 63,
-      "description": "Retired patch lead. Recovered in IT SUPPORT."
+      "description": "Retired patch lead. Recovered in IT Support."
     },
     {
       "id": "P-064",
@@ -8991,7 +8991,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 64,
-      "description": "Old terminal key. Recovered in IT SUPPORT."
+      "description": "Old terminal key. Recovered in IT Support."
     },
     {
       "id": "P-065",
@@ -9006,7 +9006,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 65,
-      "description": "Legacy support sticker. Recovered in IT SUPPORT."
+      "description": "Legacy support sticker. Recovered in IT Support."
     },
     {
       "id": "P-066",
@@ -9023,7 +9023,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 66,
-      "description": "Digital verification pack. Recovered in IT SUPPORT."
+      "description": "Digital verification pack. Recovered in IT Support."
     },
     {
       "id": "P-067",
@@ -9040,7 +9040,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 67,
-      "description": "Transfer media case. Recovered in IT SUPPORT."
+      "description": "Transfer media case. Recovered in IT Support."
     },
     {
       "id": "P-068",
@@ -9055,7 +9055,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 68,
-      "description": "Spare media wallet. Recovered in IT SUPPORT."
+      "description": "Spare media wallet. Recovered in IT Support."
     },
     {
       "id": "P-069",
@@ -9070,7 +9070,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 69,
-      "description": "Checksum printout. Recovered in IT SUPPORT."
+      "description": "Checksum printout. Recovered in IT Support."
     },
     {
       "id": "P-070",
@@ -9085,7 +9085,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 70,
-      "description": "Archive-transfer label sheet. Recovered in IT SUPPORT."
+      "description": "Archive-transfer label sheet. Recovered in IT Support."
     },
     {
       "id": "P-071",
@@ -9100,7 +9100,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 71,
-      "description": "Mouldy cheese sandwich. Recovered in STAFF ROOM."
+      "description": "Mouldy cheese sandwich. Recovered in Staff Room."
     },
     {
       "id": "P-072",
@@ -9115,7 +9115,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 72,
-      "description": "Named mugs. Recovered in STAFF ROOM."
+      "description": "Named mugs. Recovered in Staff Room."
     },
     {
       "id": "P-073",
@@ -9130,7 +9130,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 73,
-      "description": "Dog-eared paperback. Recovered in STAFF ROOM."
+      "description": "Dog-eared paperback. Recovered in Staff Room."
     },
     {
       "id": "P-074",
@@ -9145,7 +9145,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 74,
-      "description": "Half-finished crossword. Recovered in STAFF ROOM."
+      "description": "Half-finished crossword. Recovered in Staff Room."
     },
     {
       "id": "P-075",
@@ -9160,7 +9160,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 75,
-      "description": "Noticeboard social poster. Recovered in STAFF ROOM."
+      "description": "Noticeboard social poster. Recovered in Staff Room."
     },
     {
       "id": "P-076",
@@ -9175,7 +9175,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 76,
-      "description": "Coffee jar. Recovered in STAFF ROOM."
+      "description": "Coffee jar. Recovered in Staff Room."
     },
     {
       "id": "P-077",
@@ -9190,7 +9190,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 77,
-      "description": "Labelled milk bottle. Recovered in STAFF ROOM."
+      "description": "Labelled milk bottle. Recovered in Staff Room."
     },
     {
       "id": "P-078",
@@ -9205,7 +9205,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 78,
-      "description": "Birthday card. Recovered in STAFF ROOM."
+      "description": "Birthday card. Recovered in Staff Room."
     },
     {
       "id": "P-079",
@@ -9220,7 +9220,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 79,
-      "description": "Forgotten umbrella. Recovered in STAFF ROOM."
+      "description": "Forgotten umbrella. Recovered in Staff Room."
     },
     {
       "id": "P-080",
@@ -9237,7 +9237,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 80,
-      "description": "Signed closure briefing. Recovered in DIRECTOR OFFICE."
+      "description": "Signed closure briefing. Recovered in Director Office."
     },
     {
       "id": "P-081",
@@ -9252,7 +9252,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 81,
-      "description": "Director annotated copy. Recovered in DIRECTOR OFFICE."
+      "description": "Director annotated copy. Recovered in Director Office."
     },
     {
       "id": "P-082",
@@ -9267,7 +9267,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 82,
-      "description": "Meeting notes card. Recovered in DIRECTOR OFFICE."
+      "description": "Meeting notes card. Recovered in Director Office."
     },
     {
       "id": "P-083",
@@ -9282,7 +9282,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 83,
-      "description": "Briefing binder. Recovered in DIRECTOR OFFICE."
+      "description": "Briefing binder. Recovered in Director Office."
     },
     {
       "id": "P-084",
@@ -9297,7 +9297,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 84,
-      "description": "Final-day diary card. Recovered in DIRECTOR OFFICE."
+      "description": "Final-day diary card. Recovered in Director Office."
     },
     {
       "id": "P-085",
@@ -9314,7 +9314,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 85,
-      "description": "Incident clipboard. Recovered in SECURITY."
+      "description": "Incident clipboard. Recovered in Security."
     },
     {
       "id": "P-086",
@@ -9332,7 +9332,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 86,
-      "description": "Evacuation accountability sheet. Recovered in SECURITY."
+      "description": "Evacuation accountability sheet. Recovered in Security."
     },
     {
       "id": "P-087",
@@ -9349,7 +9349,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 87,
-      "description": "Marked evacuation plan. Recovered in SECURITY."
+      "description": "Marked evacuation plan. Recovered in Security."
     },
     {
       "id": "P-088",
@@ -9364,7 +9364,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 88,
-      "description": "Incident timing card. Recovered in SECURITY."
+      "description": "Incident timing card. Recovered in Security."
     },
     {
       "id": "P-089",
@@ -9379,7 +9379,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 89,
-      "description": "Evacuation roll-call pencil. Recovered in SECURITY."
+      "description": "Evacuation roll-call pencil. Recovered in Security."
     },
     {
       "id": "P-090",
@@ -9394,7 +9394,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 90,
-      "description": "Emergency route overlay. Recovered in SECURITY."
+      "description": "Emergency route overlay. Recovered in Security."
     },
     {
       "id": "P-091",
@@ -9409,7 +9409,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 91,
-      "description": "Incident reference envelope. Recovered in SECURITY."
+      "description": "Incident reference envelope. Recovered in Security."
     },
     {
       "id": "P-092",
@@ -9424,7 +9424,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 92,
-      "description": "Master Secure Cabinet Access Register. Recovered in SECURITY."
+      "description": "Master Secure Cabinet Access Register. Recovered in Security."
     },
     {
       "id": "P-093",
@@ -9439,7 +9439,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 93,
-      "description": "Complete Site key set. Recovered in SECURITY."
+      "description": "Complete Site key set. Recovered in Security."
     },
     {
       "id": "P-094",
@@ -9454,7 +9454,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 94,
-      "description": "Secure Storage Access Procedure card. Recovered in SECURITY."
+      "description": "Secure Storage Access Procedure card. Recovered in Security."
     },
     {
       "id": "P-095",
@@ -9469,7 +9469,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 95,
-      "description": "Key-control context sheet. Recovered in SECURITY."
+      "description": "Key-control context sheet. Recovered in Security."
     },
     {
       "id": "P-096",
@@ -9486,7 +9486,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 96,
-      "description": "CCTV coverage index binder. Recovered in SECURITY."
+      "description": "CCTV coverage index binder. Recovered in Security."
     },
     {
       "id": "P-097",
@@ -9503,7 +9503,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 97,
-      "description": "IT Support entrance event printout. Recovered in SECURITY."
+      "description": "IT Support entrance event printout. Recovered in Security."
     },
     {
       "id": "P-098",
@@ -9518,7 +9518,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 98,
-      "description": "CCTV camera map. Recovered in SECURITY."
+      "description": "CCTV camera map. Recovered in Security."
     },
     {
       "id": "P-099",
@@ -9533,7 +9533,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 99,
-      "description": "Monitor-bank channel list. Recovered in SECURITY."
+      "description": "Monitor-bank channel list. Recovered in Security."
     },
     {
       "id": "P-100",
@@ -9548,7 +9548,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 100,
-      "description": "Retention label. Recovered in SECURITY."
+      "description": "Retention label. Recovered in Security."
     },
     {
       "id": "P-101",
@@ -9563,7 +9563,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 101,
-      "description": "Blank video tapes. Recovered in SECURITY."
+      "description": "Blank video tapes. Recovered in Security."
     },
     {
       "id": "P-102",
@@ -9578,7 +9578,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 102,
-      "description": "Camera selector control. Recovered in SECURITY."
+      "description": "Camera selector control. Recovered in Security."
     },
     {
       "id": "P-103",
@@ -9596,7 +9596,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 103,
-      "description": "Server Room environmental panel. Recovered in SERVER ROOM."
+      "description": "Server Room environmental panel. Recovered in Server Room."
     },
     {
       "id": "P-104",
@@ -9611,7 +9611,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 104,
-      "description": "Service tag. Recovered in SERVER ROOM."
+      "description": "Service tag. Recovered in Server Room."
     },
     {
       "id": "P-105",
@@ -9626,7 +9626,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 105,
-      "description": "Ventilation status tag. Recovered in SERVER ROOM."
+      "description": "Ventilation status tag. Recovered in Server Room."
     },
     {
       "id": "P-106",
@@ -9643,7 +9643,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 106,
-      "description": "Server status panel. Recovered in SERVER ROOM."
+      "description": "Server status panel. Recovered in Server Room."
     },
     {
       "id": "P-107",
@@ -9660,7 +9660,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 107,
-      "description": "Backup rotation case. Recovered in SERVER ROOM."
+      "description": "Backup rotation case. Recovered in Server Room."
     },
     {
       "id": "P-108",
@@ -9675,7 +9675,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 108,
-      "description": "Rack labels. Recovered in SERVER ROOM."
+      "description": "Rack labels. Recovered in Server Room."
     },
     {
       "id": "P-109",
@@ -9690,7 +9690,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 109,
-      "description": "Backup logbook. Recovered in SERVER ROOM."
+      "description": "Backup logbook. Recovered in Server Room."
     },
     {
       "id": "P-110",
@@ -9705,7 +9705,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 110,
-      "description": "Spare drive caddy. Recovered in SERVER ROOM."
+      "description": "Spare drive caddy. Recovered in Server Room."
     },
     {
       "id": "P-111",
@@ -9720,7 +9720,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 111,
-      "description": "UPS status card. Recovered in SERVER ROOM."
+      "description": "UPS status card. Recovered in Server Room."
     },
     {
       "id": "P-112",
@@ -9738,7 +9738,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 112,
-      "description": "Cable-riser work area. Recovered in SERVER ROOM."
+      "description": "Cable-riser work area. Recovered in Server Room."
     },
     {
       "id": "P-113",
@@ -9756,7 +9756,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 113,
-      "description": "Manual discharge wiring / control connection. Recovered in SERVER ROOM."
+      "description": "Manual discharge wiring / control connection. Recovered in Server Room."
     },
     {
       "id": "P-114",
@@ -9774,7 +9774,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 114,
-      "description": "Suppression event diagnostic panel. Recovered in SERVER ROOM."
+      "description": "Suppression event diagnostic panel. Recovered in Server Room."
     },
     {
       "id": "P-115",
@@ -9791,7 +9791,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 115,
-      "description": "Pulled network cable. Recovered in SERVER ROOM."
+      "description": "Pulled network cable. Recovered in Server Room."
     },
     {
       "id": "P-116",
@@ -9806,7 +9806,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 116,
-      "description": "Cable tester. Recovered in SERVER ROOM."
+      "description": "Cable tester. Recovered in Server Room."
     },
     {
       "id": "P-117",
@@ -9821,7 +9821,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 117,
-      "description": "Maintenance isolation tag. Recovered in SERVER ROOM."
+      "description": "Maintenance isolation tag. Recovered in Server Room."
     },
     {
       "id": "P-118",
@@ -9836,7 +9836,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 118,
-      "description": "Empty patch-cable reel. Recovered in SERVER ROOM."
+      "description": "Empty patch-cable reel. Recovered in Server Room."
     },
     {
       "id": "P-119",
@@ -9851,7 +9851,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 119,
-      "description": "Halon cylinder service label. Recovered in SERVER ROOM."
+      "description": "Halon cylinder service label. Recovered in Server Room."
     },
     {
       "id": "P-120",
@@ -9866,7 +9866,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 120,
-      "description": "Server recovery checklist. Recovered in SERVER ROOM."
+      "description": "Server recovery checklist. Recovered in Server Room."
     },
     {
       "id": "P-121",
@@ -9881,7 +9881,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 121,
-      "description": "Reception contractor sign-in card. Recovered in RECEPTION."
+      "description": "Reception contractor sign-in card. Recovered in Reception."
     },
     {
       "id": "P-122",
@@ -9896,7 +9896,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 122,
-      "description": "Temporary visitor lanyard. Recovered in RECEPTION."
+      "description": "Temporary visitor lanyard. Recovered in Reception."
     },
     {
       "id": "P-123",
@@ -9911,7 +9911,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 123,
-      "description": "Staff telephone list. Recovered in MAIN OFFICE."
+      "description": "Staff telephone list. Recovered in Main Office."
     },
     {
       "id": "P-124",
@@ -9926,7 +9926,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 124,
-      "description": "Course feedback forms. Recovered in MAIN OFFICE."
+      "description": "Course feedback forms. Recovered in Main Office."
     },
     {
       "id": "P-125",
@@ -9941,7 +9941,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 125,
-      "description": "Stationery requisition pad. Recovered in MAIN OFFICE."
+      "description": "Stationery requisition pad. Recovered in Main Office."
     },
     {
       "id": "P-126",
@@ -9956,7 +9956,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 126,
-      "description": "Calculator tape. Recovered in MAIN OFFICE."
+      "description": "Calculator tape. Recovered in Main Office."
     },
     {
       "id": "P-127",
@@ -9971,7 +9971,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 127,
-      "description": "Closure milestone board card. Recovered in MAIN OFFICE."
+      "description": "Closure milestone board card. Recovered in Main Office."
     },
     {
       "id": "P-128",
@@ -9984,7 +9984,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 128,
-      "description": "Facilities ring of equipment labels. Recovered in FACILITIES."
+      "description": "Facilities ring of equipment labels. Recovered in Facilities."
     },
     {
       "id": "P-129",
@@ -9997,7 +9997,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 129,
-      "description": "Spare fuse envelope. Recovered in FACILITIES."
+      "description": "Spare fuse envelope. Recovered in Facilities."
     },
     {
       "id": "P-130",
@@ -10010,7 +10010,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 130,
-      "description": "Plant-room key tag. Recovered in FACILITIES."
+      "description": "Plant-room key tag. Recovered in Facilities."
     },
     {
       "id": "P-131",
@@ -10023,7 +10023,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 131,
-      "description": "Asset serial-number cards. Recovered in FACILITIES."
+      "description": "Asset serial-number cards. Recovered in Facilities."
     },
     {
       "id": "P-132",
@@ -10036,7 +10036,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 132,
-      "description": "Date stamp and ink pad. Recovered in RECORDS OFFICE."
+      "description": "Date stamp and ink pad. Recovered in Records Office."
     },
     {
       "id": "P-133",
@@ -10049,7 +10049,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 133,
-      "description": "Refiling divider cards. Recovered in RECORDS OFFICE."
+      "description": "Refiling divider cards. Recovered in Records Office."
     },
     {
       "id": "P-134",
@@ -10064,7 +10064,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 134,
-      "description": "Open screwdriver set. Recovered in IT SUPPORT."
+      "description": "Open screwdriver set. Recovered in IT Support."
     },
     {
       "id": "P-135",
@@ -10079,7 +10079,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 135,
-      "description": "Box of assorted network leads. Recovered in IT SUPPORT."
+      "description": "Box of assorted network leads. Recovered in IT Support."
     },
     {
       "id": "P-136",
@@ -10094,7 +10094,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 136,
-      "description": "Handwritten port-reference strip. Recovered in IT SUPPORT."
+      "description": "Handwritten port-reference strip. Recovered in IT Support."
     },
     {
       "id": "P-137",
@@ -10109,7 +10109,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 137,
-      "description": "Completed newspaper crossword. Recovered in STAFF ROOM."
+      "description": "Completed newspaper crossword. Recovered in Staff Room."
     },
     {
       "id": "P-138",
@@ -10124,7 +10124,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 138,
-      "description": "Seasonal staff-social notice. Recovered in STAFF ROOM."
+      "description": "Seasonal staff-social notice. Recovered in Staff Room."
     },
     {
       "id": "P-139",
@@ -10139,7 +10139,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 139,
-      "description": "Ancient workplace first-aid manual. Recovered in STAFF ROOM."
+      "description": "Ancient workplace first-aid manual. Recovered in Staff Room."
     },
     {
       "id": "P-140",
@@ -10152,7 +10152,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 140,
-      "description": "Incoming correspondence tray. Recovered in SECRETARY OFFICE."
+      "description": "Incoming correspondence tray. Recovered in Secretary Office."
     },
     {
       "id": "P-141",
@@ -10165,7 +10165,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 141,
-      "description": "Director's appointment card stack. Recovered in SECRETARY OFFICE."
+      "description": "Director's appointment card stack. Recovered in Secretary Office."
     },
     {
       "id": "P-142",
@@ -10178,7 +10178,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 142,
-      "description": "Civil Service directory. Recovered in SECRETARY OFFICE."
+      "description": "Civil Service directory. Recovered in Secretary Office."
     },
     {
       "id": "P-143",
@@ -10191,7 +10191,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 143,
-      "description": "Site Closure meeting agenda copies. Recovered in DIRECTOR OFFICE."
+      "description": "Site Closure meeting agenda copies. Recovered in Director Office."
     },
     {
       "id": "P-144",
@@ -10204,7 +10204,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 144,
-      "description": "Water jug and glasses. Recovered in DIRECTOR OFFICE."
+      "description": "Water jug and glasses. Recovered in Director Office."
     },
     {
       "id": "P-145",
@@ -10217,7 +10217,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 145,
-      "description": "Boardroom pencil set. Recovered in DIRECTOR OFFICE."
+      "description": "Boardroom pencil set. Recovered in Director Office."
     },
     {
       "id": "P-146",
@@ -10230,7 +10230,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 146,
-      "description": "Sterile dressing packet. Recovered in SECURITY."
+      "description": "Sterile dressing packet. Recovered in Security."
     },
     {
       "id": "P-147",
@@ -10243,7 +10243,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 147,
-      "description": "Accident-book envelope. Recovered in SECURITY."
+      "description": "Accident-book envelope. Recovered in Security."
     },
     {
       "id": "P-148",
@@ -10256,7 +10256,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 148,
-      "description": "Torch. Recovered in SECURITY."
+      "description": "Torch. Recovered in Security."
     },
     {
       "id": "P-149",
@@ -10269,7 +10269,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 149,
-      "description": "Spare radio battery. Recovered in SECURITY."
+      "description": "Spare radio battery. Recovered in Security."
     },
     {
       "id": "P-150",
@@ -10282,7 +10282,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 150,
-      "description": "Anti-static wrist strap. Recovered in SERVER ROOM."
+      "description": "Anti-static wrist strap. Recovered in Server Room."
     },
     {
       "id": "P-151",
@@ -10295,7 +10295,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 151,
-      "description": "Half-finished cup of tea. Recovered in SERVER ROOM."
+      "description": "Half-finished cup of tea. Recovered in Server Room."
     },
     {
       "id": "P-152",
@@ -10310,7 +10310,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 152,
-      "description": "Reception room plate. Recovered in CORRIDOR."
+      "description": "Reception room plate. Recovered in Corridor."
     },
     {
       "id": "P-153",
@@ -10325,7 +10325,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 153,
-      "description": "Main Office room plate. Recovered in CORRIDOR."
+      "description": "Main Office room plate. Recovered in Corridor."
     },
     {
       "id": "P-154",
@@ -10340,7 +10340,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 154,
-      "description": "Facilities room plate - corridor side. Recovered in CORRIDOR."
+      "description": "Facilities room plate - corridor side. Recovered in Corridor."
     },
     {
       "id": "P-155",
@@ -10355,7 +10355,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 155,
-      "description": "IT Support room plate. Recovered in CORRIDOR."
+      "description": "IT Support room plate. Recovered in Corridor."
     },
     {
       "id": "P-156",
@@ -10370,7 +10370,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 156,
-      "description": "Security Office room plate. Recovered in CORRIDOR."
+      "description": "Security Office room plate. Recovered in Corridor."
     },
     {
       "id": "P-157",
@@ -10385,7 +10385,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 157,
-      "description": "Staff Room door plate. Recovered in CORRIDOR."
+      "description": "Staff Room door plate. Recovered in Corridor."
     },
     {
       "id": "P-158",
@@ -10400,7 +10400,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 158,
-      "description": "Records Room door plate. Recovered in CORRIDOR."
+      "description": "Records Room door plate. Recovered in Corridor."
     },
     {
       "id": "P-159",
@@ -10417,7 +10417,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 159,
-      "description": "Restricted Area Access Matrix. Recovered in SECURITY."
+      "description": "Restricted Area Access Matrix. Recovered in Security."
     },
     {
       "id": "P-160",
@@ -10434,7 +10434,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 160,
-      "description": "Temporary Restricted Area Authorisation. Recovered in SECURITY."
+      "description": "Temporary Restricted Area Authorisation. Recovered in Security."
     },
     {
       "id": "P-161",
@@ -10451,7 +10451,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 161,
-      "description": "Security Duty Communications Log Sheet. Recovered in SECURITY."
+      "description": "Security Duty Communications Log Sheet. Recovered in Security."
     }
   ],
   "collections": [
@@ -15930,7 +15930,7 @@
         }
       ],
       "evidence_id": null,
-      "notebook": "Inspected Restricted Area Access Matrix in SECURITY.",
+      "notebook": "Inspected Restricted Area Access Matrix in Security.",
       "follow_on": "Await P-160",
       "persistent": true,
       "source_order": 15
@@ -15975,7 +15975,7 @@
         }
       ],
       "evidence_id": null,
-      "notebook": "Inspected Reception Visitor Registry in RECEPTION.",
+      "notebook": "Inspected Reception Visitor Registry in Reception.",
       "follow_on": "Await P-002",
       "persistent": true,
       "source_order": 17
@@ -16066,7 +16066,7 @@
         }
       ],
       "evidence_id": null,
-      "notebook": "Inspected Incident clipboard in SECURITY.",
+      "notebook": "Inspected Incident clipboard in Security.",
       "follow_on": "Await P-086",
       "persistent": true,
       "source_order": 21
@@ -16134,7 +16134,7 @@
         }
       ],
       "evidence_id": null,
-      "notebook": "Inspected CCTV coverage index binder in SECURITY.",
+      "notebook": "Inspected CCTV coverage index binder in Security.",
       "follow_on": "Await movement records",
       "persistent": true,
       "source_order": 24
@@ -16156,7 +16156,7 @@
         }
       ],
       "evidence_id": null,
-      "notebook": "Inspected IT Support entrance event printout in SECURITY.",
+      "notebook": "Inspected IT Support entrance event printout in Security.",
       "follow_on": "Await duty log",
       "persistent": true,
       "source_order": 25
@@ -16203,7 +16203,7 @@
         }
       ],
       "evidence_id": null,
-      "notebook": "Inspected Printed Environmental Event Log in FACILITIES.",
+      "notebook": "Inspected Printed Environmental Event Log in Facilities.",
       "follow_on": "Compare P-103",
       "persistent": true,
       "source_order": 27
