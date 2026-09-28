@@ -64,6 +64,19 @@ typedef struct Floppy144DocumentDefinition
 
     /* Complete recovered body text compiled from the canonical JSON. */
     const char *pszBody;
+
+    /*
+     * Optional recovery guidance metadata, authored in canonical JSON.
+     *
+     * recovery_entry_point marks a neutral document that should be suggested
+     * immediately after its collection is restored, before branch-trigger
+     * documents are offered.
+     *
+     * offer_pending_trigger_choices asks the terminal to show every currently
+     * eligible trigger document in this collection after this record is opened.
+     */
+    bool recovery_entry_point;
+    bool offer_pending_trigger_choices;
 }
 Floppy144DocumentDefinition;
 
@@ -98,6 +111,23 @@ bool Floppy144DocumentFindRecordId(
 const Floppy144DocumentDefinition *Floppy144DocumentFirstPendingTrigger(
     const Floppy144RunState *pRunState,
     Floppy144CollectionId eCollection
+);
+
+/*
+ * Locate the authored recovery entry point for one collection, if present.
+ */
+const Floppy144DocumentDefinition *Floppy144DocumentRecoveryEntryPoint(
+    Floppy144CollectionId eCollection
+);
+
+/*
+ * Locate the Nth currently eligible trigger document in authored order.
+ * Ordinal zero is equivalent to Floppy144DocumentFirstPendingTrigger().
+ */
+const Floppy144DocumentDefinition *Floppy144DocumentPendingTriggerAt(
+    const Floppy144RunState *pRunState,
+    Floppy144CollectionId eCollection,
+    uint32_t uOrdinal
 );
 
 /*
