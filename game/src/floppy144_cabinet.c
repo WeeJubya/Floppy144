@@ -719,15 +719,6 @@ void Floppy144CabinetMoveSelection(
 
     uCount = Floppy144CabinetVisibleContentCount(pCabinet, pRunState);
 
-    Floppy144CabinetDrawContentMarkers(
-        pSurface,
-        pCabinet,
-        uCount,
-        pCabinet->uSelectedContent,
-        uEdge,
-        uBright
-    );
-
     if(uCount == 0U)
     {
         pCabinet->uSelectedContent = 0U;
@@ -1173,6 +1164,15 @@ static void Floppy144CabinetDrawInterior(
     );
 
     uCount = Floppy144CabinetVisibleContentCount(pCabinet, pRunState);
+
+    Floppy144CabinetDrawContentMarkers(
+        pSurface,
+        pCabinet,
+        uCount,
+        pCabinet->uSelectedContent,
+        uEdge,
+        uBright
+    );
 
     if(uCount == 0U)
     {
