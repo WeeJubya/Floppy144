@@ -102,6 +102,29 @@ function Invoke-Stage3BRegression {
     }
 }
 
+$script:Stage3BFailures = @()
+
+function Invoke-Stage3BStep {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$Label,
+
+        [Parameter(Mandatory=$true)]
+        [scriptblock]$Action
+    )
+
+    try {
+        & $Action
+    }
+    catch {
+        $Message = $_.Exception.Message
+        $script:Stage3BFailures += "$Label :: $Message"
+        Write-Host ""
+        Write-Host "=== $Label FAILED; CONTINUING ==="
+        Write-Host $Message
+    }
+}
+
 function Test-PlayerFacingActLabels {
     Write-Host ""
     Write-Host "=== PLAYER-FACING ACT LABEL AUDIT ==="
@@ -178,7 +201,9 @@ function Test-PlayerFacingActLabels {
 }
 
 Import-VcEnvironment
-Test-PlayerFacingActLabels
+Invoke-Stage3BStep -Label "PLAYER-FACING ACT LABEL AUDIT" -Action {
+    Test-PlayerFacingActLabels
+}
 
 Write-Host ""
 Write-Host "=== FLOPPY//144 STAGE 3B REGRESSION ==="
@@ -203,11 +228,13 @@ $TerminalSources = @(
     (Join-Path $SourceDir "floppy144_collection_registry.c")
 )
 
-Invoke-Stage3BRegression `
-    -Label "STAGE 3B.1 TERMINAL REGRESSION" `
-    -BuildFolder "stage3b_terminal_tests" `
-    -ExecutableName "stage3b_terminal_tests.exe" `
-    -Sources $TerminalSources
+Invoke-Stage3BStep -Label "STAGE 3B.1 TERMINAL REGRESSION" -Action {
+    Invoke-Stage3BRegression `
+        -Label "STAGE 3B.1 TERMINAL REGRESSION" `
+        -BuildFolder "stage3b_terminal_tests" `
+        -ExecutableName "stage3b_terminal_tests.exe" `
+        -Sources $TerminalSources
+}
 
 $SiteInteractionSources = @(
     (Join-Path $ScriptDir "stage3b_site_interaction_tests.c"),
@@ -223,11 +250,13 @@ $SiteInteractionSources = @(
     (Join-Path $SourceDir "floppy144_collection_registry.c")
 )
 
-Invoke-Stage3BRegression `
-    -Label "STAGE 3B.2 SITE INTERACTION REGRESSION" `
-    -BuildFolder "stage3b_site_interaction_tests" `
-    -ExecutableName "stage3b_site_interaction_tests.exe" `
-    -Sources $SiteInteractionSources
+Invoke-Stage3BStep -Label "STAGE 3B.2 SITE INTERACTION REGRESSION" -Action {
+    Invoke-Stage3BRegression `
+        -Label "STAGE 3B.2 SITE INTERACTION REGRESSION" `
+        -BuildFolder "stage3b_site_interaction_tests" `
+        -ExecutableName "stage3b_site_interaction_tests.exe" `
+        -Sources $SiteInteractionSources
+}
 
 $ReconstructionSources = @(
     (Join-Path $ScriptDir "stage3b_reconstruction_tests.c"),
@@ -246,11 +275,13 @@ $ReconstructionSources = @(
     (Join-Path $SourceDir "floppy144_settings.c")
 )
 
-Invoke-Stage3BRegression `
-    -Label "STAGE 3B.3 RECONSTRUCTION REGRESSION" `
-    -BuildFolder "stage3b_reconstruction_tests" `
-    -ExecutableName "stage3b_reconstruction_tests.exe" `
-    -Sources $ReconstructionSources
+Invoke-Stage3BStep -Label "STAGE 3B.3 RECONSTRUCTION REGRESSION" -Action {
+    Invoke-Stage3BRegression `
+        -Label "STAGE 3B.3 RECONSTRUCTION REGRESSION" `
+        -BuildFolder "stage3b_reconstruction_tests" `
+        -ExecutableName "stage3b_reconstruction_tests.exe" `
+        -Sources $ReconstructionSources
+}
 
 
 function Test-Stage3B4CoordinatorWiring {
@@ -287,7 +318,9 @@ function Test-Stage3B4CoordinatorWiring {
     Write-Host "STAGE 3B.4 COORDINATOR WIRING AUDIT: PASS"
 }
 
-Test-Stage3B4CoordinatorWiring
+Invoke-Stage3BStep -Label "STAGE 3B.4 COORDINATOR WIRING AUDIT" -Action {
+    Test-Stage3B4CoordinatorWiring
+}
 
 $DoorAccessSources = @(
     (Join-Path $ScriptDir "stage3b_door_access_tests.c"),
@@ -303,11 +336,13 @@ $DoorAccessSources = @(
     (Join-Path $SourceDir "floppy144_collection_registry.c")
 )
 
-Invoke-Stage3BRegression `
-    -Label "STAGE 3B.4 DOOR / ACCESS REGRESSION" `
-    -BuildFolder "stage3b_door_access_tests" `
-    -ExecutableName "stage3b_door_access_tests.exe" `
-    -Sources $DoorAccessSources
+Invoke-Stage3BStep -Label "STAGE 3B.4 DOOR / ACCESS REGRESSION" -Action {
+    Invoke-Stage3BRegression `
+        -Label "STAGE 3B.4 DOOR / ACCESS REGRESSION" `
+        -BuildFolder "stage3b_door_access_tests" `
+        -ExecutableName "stage3b_door_access_tests.exe" `
+        -Sources $DoorAccessSources
+}
 
 function Test-Stage3B5CoordinatorWiring {
     Write-Host ""
@@ -399,7 +434,9 @@ function Test-Stage3B5CoordinatorWiring {
     Write-Host "STAGE 3B.5 CABINET COORDINATOR WIRING AUDIT: PASS"
 }
 
-Test-Stage3B5CoordinatorWiring
+Invoke-Stage3BStep -Label "STAGE 3B.5 CABINET COORDINATOR WIRING AUDIT" -Action {
+    Test-Stage3B5CoordinatorWiring
+}
 
 function Test-PhysicalItemPlayerFacingContract {
     Write-Host ""
@@ -483,7 +520,9 @@ function Test-PhysicalItemPlayerFacingContract {
     Write-Host "PHYSICAL ITEM PLAYER-FACING CONTRACT: PASS"
 }
 
-Test-PhysicalItemPlayerFacingContract
+Invoke-Stage3BStep -Label "PHYSICAL ITEM PLAYER-FACING CONTRACT" -Action {
+    Test-PhysicalItemPlayerFacingContract
+}
 
 $CabinetSources = @(
     (Join-Path $ScriptDir "stage3b_cabinet_tests.c"),
@@ -504,8 +543,20 @@ $CabinetSources = @(
     (Join-Path $SourceDir "floppy144_settings.c")
 )
 
-Invoke-Stage3BRegression `
-    -Label "STAGE 3B.5 PARENT CONTENTS / SECURE CABINET REGRESSION" `
-    -BuildFolder "stage3b_cabinet_tests" `
-    -ExecutableName "stage3b_cabinet_tests.exe" `
-    -Sources $CabinetSources
+Invoke-Stage3BStep -Label "STAGE 3B.5 PARENT CONTENTS / SECURE CABINET REGRESSION" -Action {
+    Invoke-Stage3BRegression `
+        -Label "STAGE 3B.5 PARENT CONTENTS / SECURE CABINET REGRESSION" `
+        -BuildFolder "stage3b_cabinet_tests" `
+        -ExecutableName "stage3b_cabinet_tests.exe" `
+        -Sources $CabinetSources
+}
+Write-Host ""
+if($script:Stage3BFailures.Count -gt 0) {
+    Write-Host "=== STAGE 3B REGRESSION SUMMARY: FAIL ==="
+    foreach($Failure in $script:Stage3BFailures) {
+        Write-Host (" - " + $Failure)
+    }
+    throw "Stage 3B regression completed with $($script:Stage3BFailures.Count) failing step(s)."
+}
+
+Write-Host "=== STAGE 3B REGRESSION SUMMARY: PASS ==="
