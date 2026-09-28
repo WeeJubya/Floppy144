@@ -624,6 +624,85 @@ void Floppy144TerminalPrintNextAction(
     );
 }
 
+
+void Floppy144TerminalPrintPostOpenAction(
+    Floppy144TerminalState *pTerminal,
+    const Floppy144RunState *pRunState,
+    Floppy144CollectionId eCollection,
+    uint32_t uRecordIndex
+)
+{
+    const Floppy144DocumentDefinition *pOpenedDocument;
+    const Floppy144DocumentDefinition *pFirstChoice;
+    const Floppy144DocumentDefinition *pSecondChoice;
+    char szLine[FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
+
+    if(pTerminal == NULL || pRunState == NULL)
+    {
+        return;
+    }
+
+    pOpenedDocument =
+        Floppy144DocumentGet(
+            eCollection,
+            uRecordIndex
+        );
+
+    if(
+        pOpenedDocument != NULL &&
+        pOpenedDocument->offer_pending_trigger_choices
+    )
+    {
+        pFirstChoice =
+            Floppy144DocumentPendingTriggerAt(
+                pRunState,
+                eCollection,
+                0U
+            );
+
+        pSecondChoice =
+            Floppy144DocumentPendingTriggerAt(
+                pRunState,
+                eCollection,
+                1U
+            );
+
+        if(
+            pFirstChoice != NULL &&
+            pSecondChoice != NULL &&
+            pFirstChoice->record_id_override != NULL &&
+            pSecondChoice->record_id_override != NULL
+        )
+        {
+            snprintf(
+                szLine,
+                sizeof(szLine),
+                "NEXT RECOVERY ACTION: OPEN %s || %s",
+                Floppy144TerminalDisplayRecordId(
+                    pTerminal,
+                    pFirstChoice->record_id_override
+                ),
+                Floppy144TerminalDisplayRecordId(
+                    pTerminal,
+                    pSecondChoice->record_id_override
+                )
+            );
+
+            Floppy144TerminalPushWrappedLine(
+                pTerminal,
+                szLine
+            );
+
+            return;
+        }
+    }
+
+    Floppy144TerminalPrintNextAction(
+        pTerminal,
+        pRunState
+    );
+}
+
 /*
  * Push text into terminal history, wrapping it to the visible panel width.
  */
@@ -2745,10 +2824,45 @@ static void Floppy144TerminalRestoreCollection(
     );
     Floppy144TerminalPushLine(terminal, line);
 
-    Floppy144TerminalPrintNextAction(
-        terminal,
-        run_state
-    );
+    {
+        const Floppy144DocumentDefinition *pEntryDocument =
+            Floppy144DocumentRecoveryEntryPoint(
+                collection
+            );
+
+        if(
+            pEntryDocument != NULL &&
+            pEntryDocument->record_id_override != NULL &&
+            Floppy144DocumentAccessible(
+                run_state,
+                collection,
+                pEntryDocument->record_index
+            )
+        )
+        {
+            snprintf(
+                line,
+                sizeof(line),
+                "NEXT RECOVERY ACTION: OPEN %s",
+                Floppy144TerminalDisplayRecordId(
+                    terminal,
+                    pEntryDocument->record_id_override
+                )
+            );
+
+            Floppy144TerminalPushWrappedLine(
+                terminal,
+                line
+            );
+        }
+        else
+        {
+            Floppy144TerminalPrintNextAction(
+                terminal,
+                run_state
+            );
+        }
+    }
 }
 
 /*
