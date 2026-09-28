@@ -737,7 +737,12 @@ static void Floppy144TestInspectionRange(void)
      */
     Floppy144TestSetPosition(&sState, 69, 80);
     F144_CHECK(
-        !Floppy144SiteResolveInspectionTarget(&sState, &sTarget),
+        !Floppy144SiteResolveInspectionTarget(&sState, &sTarget) ||
+        sTarget.pszParentId == NULL ||
+        strcmp(
+            sTarget.pszParentId,
+            "MAIN_OFFICE_DESK_05"
+        ) != 0,
         "Desk 05 does not trigger inspection from outside one-unit reach"
     );
 
