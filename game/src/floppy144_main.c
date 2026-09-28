@@ -1328,9 +1328,11 @@ static LRESULT CALLBACK Floppy144WindowProc(
                              * state. It becomes visible when the player returns
                              * from the document to the terminal.
                              */
-                            Floppy144TerminalPrintNextAction(
+                            Floppy144TerminalPrintPostOpenAction(
                                 &global_terminal,
-                                &global_run_state
+                                &global_run_state,
+                                global_terminal.requested_collection,
+                                global_terminal.requested_record_index
                             );
 
                             global_catalogue_direct_document =
@@ -2050,9 +2052,11 @@ static LRESULT CALLBACK Floppy144WindowProc(
                                     global_catalogue.selected_index
                                 );
 
-                                Floppy144TerminalPrintNextAction(
+                                Floppy144TerminalPrintPostOpenAction(
                                     &global_terminal,
-                                    &global_run_state
+                                    &global_run_state,
+                                    global_catalogue.collection,
+                                    global_catalogue.selected_index
                                 );
                             }
 
