@@ -58,6 +58,56 @@ static void Floppy144TestReset(
 }
 
 /*
+ * Test fixture helper for a collection which is already restored in the
+ * player route.  Some Site objects retain a legacy required_collection gate,
+ * so firing their trigger without restoring the owning collection produces a
+ * state the real game cannot reach.
+ */
+static bool Floppy144TestRestoreCollection(
+    Floppy144WorldState *pWorld,
+    Floppy144RunState *pState,
+    const char *pszCollectionId
+)
+{
+    Floppy144CollectionId eCollection;
+
+    if(
+        pWorld == NULL ||
+        pState == NULL ||
+        pszCollectionId == NULL
+    )
+    {
+        return false;
+    }
+
+    eCollection =
+        Floppy144GameDataCollectionId(
+            pszCollectionId
+        );
+
+    if(eCollection >= FLOPPY144_COLLECTION_COUNT)
+    {
+        return false;
+    }
+
+    if(
+        !Floppy144RunStateBitSet(
+            pState->collections,
+            (uint32_t)eCollection
+        )
+    )
+    {
+        return false;
+    }
+
+    return
+        Floppy144WorldRestoreCollection(
+            pWorld,
+            eCollection
+        );
+}
+
+/*
  * Every canonical physical item must terminate at a generated Site parent.
  * This is the data contract which replaces the small hand-authored location
  * table used by the technical slice.
@@ -436,6 +486,15 @@ static void Floppy144TestPhysicalInteractionExecution(void)
     (void)Floppy144RunStateReconstructRoom(
         &sState,
         FLOPPY144_ROOM_FACILITIES
+    );
+
+    F144_CHECK(
+        Floppy144TestRestoreCollection(
+            &sWorld,
+            &sState,
+            "FM-13"
+        ),
+        "physical interaction fixture restores FM-13"
     );
 
     F144_CHECK(
@@ -830,6 +889,15 @@ static void Floppy144TestNotebookPopulation(void)
     (void)Floppy144RunStateReconstructRoom(
         &sState,
         FLOPPY144_ROOM_FACILITIES
+    );
+
+    F144_CHECK(
+        Floppy144TestRestoreCollection(
+            &sWorld,
+            &sState,
+            "FM-13"
+        ),
+        "Notebook fixture restores FM-13 before panel service note"
     );
 
     pPanelContext =
