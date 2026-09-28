@@ -1044,6 +1044,15 @@ static void Floppy144CabinetDrawContainerBody(
         return;
     }
 
+    if(Floppy144CabinetTypeContains(pCabinet, "DOOR"))
+    {
+        Floppy144DrawFillRect(pSurface, 82U, 76U, 164U, 232U, uBody);
+        Floppy144DrawRect(pSurface, 82U, 76U, 164U, 232U, uEdge);
+        Floppy144DrawRect(pSurface, 112U, 108U, 104U, 42U, uEdge);
+        Floppy144DrawFillRect(pSurface, 214U, 194U, 10U, 10U, uEdge);
+        return;
+    }
+
     if(Floppy144CabinetTypeContains(pCabinet, "WALL_MOUNTED_ITEM"))
     {
         Floppy144DrawFillRect(pSurface, 62U, 104U, 210U, 142U, uBody);
