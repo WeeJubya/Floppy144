@@ -10540,10 +10540,10 @@
         "trigger_documents_budget": 2
       },
       "document_ids": [
+        "DR-04-RS-0004",
         "DR-04-RS-0001",
         "DR-04-RS-0002",
         "DR-04-RS-0003",
-        "DR-04-RS-0004",
         "DR-04-RS-0005",
         "DR-04-RS-0006"
       ],
@@ -11705,9 +11705,23 @@
       "parent_collection_id": "DR-03"
     },
     {
-      "id": "DR-04-RS-0001",
+      "id": "DR-04-RS-0004",
       "collection_id": "DR-04",
       "record_index": 0,
+      "title": "Outstanding Workstream Summary",
+      "classification": "GDR INTERNAL / RECOVERED",
+      "document_type": "readable_record",
+      "trigger_id": null,
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nSITE CLOSURE PROJECT\nOUTSTANDING WORKSTREAM SUMMARY\n\nAt close of business Thursday, two operational workstreams remained capable of delaying handover.\n\nRECORDS\nCabinet holdings and transfer staging require final reconciliation in the Records Office.\n\nTECHNOLOGY\nThe Main Office terminal route must be restored before digital holdings verification can be completed.\n\nThe workstreams may proceed independently, but both feed the same final handover decision. Neither is to be marked complete on the strength of verbal assurance.\n\nFacilities and Security are to support access as required.\n\nDistribution: Project Manager (Martin Webb), Senior Archivist (Priya Patel), IT Support (Claire Hughes), Security Duty Officer (Rachel Morgan).",
+      "source_status": "authored-for-integration",
+      "parent_collection_id": "DR-04",
+      "recovery_entry_point": true,
+      "offer_pending_trigger_choices": true
+    },
+    {
+      "id": "DR-04-RS-0001",
+      "collection_id": "DR-04",
+      "record_index": 1,
       "title": "Physical Archive Reconciliation Workstream",
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
@@ -11719,7 +11733,7 @@
     {
       "id": "DR-04-RS-0002",
       "collection_id": "DR-04",
-      "record_index": 1,
+      "record_index": 2,
       "title": "Terminal Network Remediation Workstream",
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
@@ -11731,24 +11745,12 @@
     {
       "id": "DR-04-RS-0003",
       "collection_id": "DR-04",
-      "record_index": 2,
+      "record_index": 3,
       "title": "Handover Readiness Checklist",
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
       "body": "GOVERNMENT DEPARTMENT OF RECORDS\nSITE CLOSURE PROJECT\nHANDOVER READINESS CHECKLIST\n\n[OK] Staff posting notices issued.\n[OK] Furniture and general assets marked for transfer or disposal.\n[OK] Visitor arrangements reduced to closure staffing.\n[OK] Routine utilities decommissioning scheduled.\n[  ] Physical archive reconciliation complete.\n[  ] Digital holdings verification complete.\n[  ] Final security review complete.\n[  ] Director's handover certificate signed.\n\nTwo incomplete lines have been carried forward from Thursday.\n\nProject Manager (Martin Webb) annotation:\n\"Friday is still achievable provided nobody discovers a third workstream.\"",
-      "source_status": "authored-for-integration",
-      "parent_collection_id": "DR-04"
-    },
-    {
-      "id": "DR-04-RS-0004",
-      "collection_id": "DR-04",
-      "record_index": 3,
-      "title": "Outstanding Workstream Summary",
-      "classification": "GDR INTERNAL / RECOVERED",
-      "document_type": "readable_record",
-      "trigger_id": null,
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nSITE CLOSURE PROJECT\nOUTSTANDING WORKSTREAM SUMMARY\n\nAt close of business Thursday, two operational workstreams remained capable of delaying handover.\n\nRECORDS\nCabinet holdings and transfer staging require final reconciliation in the Records Office.\n\nTECHNOLOGY\nThe Main Office terminal route must be restored before digital holdings verification can be completed.\n\nThe workstreams may proceed independently, but both feed the same final handover decision. Neither is to be marked complete on the strength of verbal assurance.\n\nFacilities and Security are to support access as required.\n\nDistribution: Project Manager (Martin Webb), Senior Archivist (Priya Patel), IT Support (Claire Hughes), Security Duty Officer (Rachel Morgan).",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-04"
     },
