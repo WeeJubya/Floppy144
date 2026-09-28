@@ -8106,7 +8106,7 @@
     },
     {
       "id": "P-008",
-      "name": "Priya Patel desk nameplate",
+      "name": "Main Office desk-number labels",
       "room_id": "MAIN_OFFICE",
       "parent_id": "MAIN_OFFICE_DESK_01",
       "collection_ids": [
@@ -8117,11 +8117,11 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 8,
-      "description": "PRIYA PATEL\\nSenior Archivist"
+      "description": "Main Office desk-number labels. Desk 01 is marked PRIYA PATEL / Senior Archivist."
     },
     {
       "id": "P-009",
-      "name": "Daniel Price desk nameplate",
+      "name": "Temporary desk allocation slip",
       "room_id": "MAIN_OFFICE",
       "parent_id": "MAIN_OFFICE_DESK_02",
       "collection_ids": [
@@ -8132,7 +8132,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 9,
-      "description": "DANIEL PRICE\\nRecords Officer"
+      "description": "Temporary desk allocation slip. Desk 02 is allocated to DANIEL PRICE / Records Officer."
     },
     {
       "id": "P-010",
