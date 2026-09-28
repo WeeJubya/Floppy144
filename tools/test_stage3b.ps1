@@ -337,6 +337,7 @@ function Test-Stage3B5CoordinatorWiring {
         'floppy144_cabinet.h',
         'FLOPPY144_SCREEN_CABINET',
         'Floppy144CabinetOpenNearby',
+        'Floppy144CabinetOpenParent',
         'Floppy144CabinetDraw',
         'Floppy144CabinetSubmitCode',
         'Floppy144CabinetInspectSelected',
@@ -411,6 +412,10 @@ function Test-PhysicalItemPlayerFacingContract {
     $CabinetSource = Get-Content -Raw -Path $CabinetPath
     $Site2DSource = Get-Content -Raw -Path $Site2DPath
 
+    if($GameData.physical_items.Count -ne 500) {
+        throw "Physical-item ledger count is $($GameData.physical_items.Count); expected 500."
+    }
+
     foreach($Item in $GameData.physical_items) {
         if([string]::IsNullOrWhiteSpace($Item.description)) {
             throw "Physical item $($Item.id) has no player-facing description."
@@ -463,7 +468,7 @@ $CabinetSources = @(
 )
 
 Invoke-Stage3BRegression `
-    -Label "STAGE 3B.5 SECURE CABINET / INTERIOR REGRESSION" `
+    -Label "STAGE 3B.5 PARENT CONTENTS / SECURE CABINET REGRESSION" `
     -BuildFolder "stage3b_cabinet_tests" `
     -ExecutableName "stage3b_cabinet_tests.exe" `
     -Sources $CabinetSources
