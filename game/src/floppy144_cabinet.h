@@ -1,8 +1,9 @@
 /*
- * Floppy//144 - reusable secure-cabinet access and Cabinet Interior view
+ * Floppy//144 - reusable parent-contents view with secure-cabinet access
  *
- * Secure cabinets are discovered from generated FURNITURE records. The module
- * owns only transient screen state; persistent unlocks live in RunState.
+ * Furniture and fixtures can expose their recovered physical children through
+ * one transient contents screen. Secure cabinets add a keypad gate; persistent
+ * unlocks remain in RunState.
  */
 
 #pragma once
