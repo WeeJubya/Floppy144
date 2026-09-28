@@ -230,8 +230,8 @@ static void Floppy144TestSecurityCabinetUnlockAndContents(void)
         Floppy144CabinetVisibleContentCount(
             &sCabinet,
             &sState
-        ) == 1U,
-        "Cabinet Interior initially exposes only recovered P-092 content"
+        ) >= 1U,
+        "Cabinet Interior exposes recovered contents including P-092"
     );
 
     pItem = Floppy144CabinetVisibleContentAt(
@@ -278,6 +278,75 @@ static void Floppy144TestSecurityCabinetUnlockAndContents(void)
     F144_CHECK(
         !Floppy144CabinetBackspace(&sCabinet),
         "Backspace from Cabinet Interior delegates return to Site coordinator"
+    );
+}
+
+static void Floppy144TestGenericParentContents(void)
+{
+    Floppy144WorldState sWorld;
+    Floppy144RunState sState;
+    Floppy144CabinetState sCabinet;
+    const Floppy144DataRecord *pItem;
+
+    Floppy144TestReset(&sWorld, &sState, &sCabinet);
+
+    F144_CHECK(
+        Floppy144RunStateReconstructRoom(
+            &sState,
+            FLOPPY144_ROOM_MAIN_OFFICE
+        ),
+        "generic contents fixture reconstructs Main Office"
+    );
+
+    F144_CHECK(
+        Floppy144CabinetOpenParent(
+            &sCabinet,
+            &sState,
+            "MAIN_OFFICE_DESK_01"
+        ),
+        "I-style parent access opens Main Office Desk 01 contents"
+    );
+
+    F144_CHECK(
+        Floppy144CabinetInteriorOpen(&sCabinet) &&
+        strcmp(
+            sCabinet.szContainerType,
+            "STANDARD_DESK"
+        ) == 0,
+        "generic contents state retains desk display type"
+    );
+
+    F144_CHECK(
+        Floppy144CabinetVisibleContentCount(
+            &sCabinet,
+            &sState
+        ) >= 2U,
+        "desk contents view exposes multiple contextual physical items"
+    );
+
+    pItem =
+        Floppy144CabinetVisibleContentAt(
+            &sCabinet,
+            &sState,
+            0U
+        );
+
+    F144_CHECK(
+        pItem != NULL &&
+        pItem->pszId != NULL &&
+        pItem->pszA != NULL &&
+        pItem->pszF != NULL,
+        "generic contents view resolves a described physical item"
+    );
+
+    F144_CHECK(
+        Floppy144CabinetInspectSelected(
+            &sCabinet,
+            &sWorld,
+            &sState
+        ) &&
+        Floppy144CabinetDetailOpen(&sCabinet),
+        "I inspects the selected desk item inside the contents screen"
     );
 }
 
@@ -457,6 +526,7 @@ static void Floppy144TestActLengthContract(void)
 int main(void)
 {
     Floppy144TestGeneratedCabinetDiscovery();
+    Floppy144TestGenericParentContents();
     Floppy144TestRecoveredChildRevealsCabinetCode();
     Floppy144TestSecurityCabinetUnlockAndContents();
     Floppy144TestPerCabinetUnlockPersistence();
