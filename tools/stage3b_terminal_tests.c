@@ -1166,6 +1166,7 @@ static void Floppy144TestBranchDocumentAccessGate(void)
     Floppy144EvidenceId eE003;
     Floppy144TriggerId eT026;
     Floppy144TriggerId eT028;
+    const Floppy144DocumentDefinition *pEntryDocument;
     const Floppy144DocumentDefinition *pRecordsBranchDocument;
     const Floppy144DocumentDefinition *pTechnologyBranchDocument;
     char szBranchCommand[48];
@@ -1217,6 +1218,11 @@ static void Floppy144TestBranchDocumentAccessGate(void)
         "branch fixture IDs resolve"
     );
 
+    pEntryDocument =
+        Floppy144DocumentRecoveryEntryPoint(
+            eDr04
+        );
+
     pRecordsBranchDocument =
         Floppy144TestDocumentForTrigger(
             eDr04,
@@ -1230,11 +1236,29 @@ static void Floppy144TestBranchDocumentAccessGate(void)
         );
 
     F144_CHECK(
+        pEntryDocument != NULL &&
+        pEntryDocument->record_id_override != NULL &&
+        strcmp(
+            pEntryDocument->record_id_override,
+            "DR-04-RS-0037"
+        ) == 0,
+        "DR-04 briefing is the first player-facing recovery document"
+    );
+
+    F144_CHECK(
         pRecordsBranchDocument != NULL &&
         pRecordsBranchDocument->record_id_override != NULL &&
+        strcmp(
+            pRecordsBranchDocument->record_id_override,
+            "DR-04-RS-0063"
+        ) == 0 &&
         pTechnologyBranchDocument != NULL &&
-        pTechnologyBranchDocument->record_id_override != NULL,
-        "both DR-04 branch documents resolve from trigger registry"
+        pTechnologyBranchDocument->record_id_override != NULL &&
+        strcmp(
+            pTechnologyBranchDocument->record_id_override,
+            "DR-04-RS-0087"
+        ) == 0,
+        "both DR-04 branch documents follow the neutral briefing"
     );
 
     /*
@@ -1270,6 +1294,34 @@ static void Floppy144TestBranchDocumentAccessGate(void)
             eE003
         ),
         "E-003 exposes both branch records initially"
+    );
+
+    /*
+     * Simulate the collection-local shorthand established by RESTORE DR-04.
+     * Opening the neutral briefing must offer both eligible workstreams rather
+     * than selecting Records merely because its trigger appears first.
+     */
+    sTerminal.default_record_collection =
+        eDr04;
+
+    sTerminal.default_record_collection_valid =
+        true;
+
+    Floppy144TerminalPrintPostOpenAction(
+        &sTerminal,
+        &sRunState,
+        eDr04,
+        pEntryDocument != NULL
+            ? pEntryDocument->record_index
+            : 0U
+    );
+
+    F144_CHECK(
+        Floppy144TestTerminalContains(
+            &sTerminal,
+            "NEXT RECOVERY ACTION: OPEN RS-0063 || RS-0087"
+        ),
+        "DR-04 briefing offers Records or Technology as an equal branch choice"
     );
 
     (void)snprintf(
