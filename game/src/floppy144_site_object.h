@@ -9,6 +9,7 @@
 #pragma once
 
 #include "floppy144_object.h"
+#include "floppy144_game_data.h"
 #include "floppy144_run_state.h"
 #include "floppy144_site.h"
 
