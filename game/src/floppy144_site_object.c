@@ -1067,7 +1067,7 @@ static bool Floppy144SitePhysicalItemRevealControlled(
     return false;
 }
 
-static bool Floppy144SitePhysicalItemVisible(
+bool Floppy144SitePhysicalItemVisible(
     const Floppy144RunState *pState,
     const Floppy144DataRecord *pPhysicalItem
 )
