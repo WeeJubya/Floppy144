@@ -340,17 +340,6 @@ bool Floppy144CabinetOpenParent(
         return false;
     }
 
-    if(
-        pParent->pszA == NULL ||
-        !Floppy144RunStateRoomReconstructed(
-            pRunState,
-            Floppy144GameDataRoomId(pParent->pszA)
-        )
-    )
-    {
-        return false;
-    }
-
     for(
         uRecordIndex = 0U;
         uRecordIndex < Floppy144GameDataRecordCount();
