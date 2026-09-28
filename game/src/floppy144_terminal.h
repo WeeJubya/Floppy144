@@ -182,6 +182,17 @@ void Floppy144TerminalPrintNextAction(
     const Floppy144RunState *pRunState
 );
 
+/*
+ * Append recovery guidance after one document has been opened. Documents may
+ * opt into presenting all currently eligible branch-trigger choices.
+ */
+void Floppy144TerminalPrintPostOpenAction(
+    Floppy144TerminalState *pTerminal,
+    const Floppy144RunState *pRunState,
+    Floppy144CollectionId eCollection,
+    uint32_t uRecordIndex
+);
+
 void Floppy144TerminalCloseDetail(
     Floppy144TerminalState *terminal
 );
