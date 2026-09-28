@@ -7,6 +7,7 @@
 #include "floppy144_draw.h"
 #include "floppy144_interaction_engine.h"
 #include "floppy144_site.h"
+#include "floppy144_site_object.h"
 #include "floppy144_site_rooms.h"
 
 #include <stddef.h>
@@ -35,6 +36,54 @@ static bool Floppy144CabinetRecordIsSecure(
             pRecord->pszC,
             "SECURE_CABINET"
         );
+}
+
+static const Floppy144DataRecord *Floppy144CabinetParentRecord(
+    const char *pszParentId
+)
+{
+    const Floppy144DataRecord *pRecord;
+
+    if(pszParentId == NULL)
+        return NULL;
+
+    pRecord =
+        Floppy144GameDataFind(
+            FLOPPY144_DATA_FURNITURE,
+            pszParentId
+        );
+
+    if(pRecord != NULL)
+        return pRecord;
+
+    return
+        Floppy144GameDataFind(
+            FLOPPY144_DATA_FIXTURE,
+            pszParentId
+        );
+}
+
+static void Floppy144CabinetSetContainerType(
+    Floppy144CabinetState *pCabinet,
+    const Floppy144DataRecord *pParent
+)
+{
+    const char *pszType;
+
+    if(pCabinet == NULL)
+        return;
+
+    pszType =
+        pParent != NULL && pParent->pszB != NULL
+            ? pParent->pszB
+            : "CONTAINER";
+
+    (void)snprintf(
+        pCabinet->szContainerType,
+        sizeof(pCabinet->szContainerType),
+        "%s",
+        pszType
+    );
 }
 
 static int32_t Floppy144CabinetOrdinalForId(
@@ -233,6 +282,8 @@ bool Floppy144CabinetOpenNearby(
     );
 
     Floppy144CabinetMakeDisplayName(pCabinet, pBest->pszId);
+    Floppy144CabinetSetContainerType(pCabinet, pBest);
+    pCabinet->bSecureContainer = true;
 
     pCabinet->uCabinetOrdinal = (uint8_t)nOrdinal;
     pCabinet->uRequiredDigits = (uint8_t)pBest->n5;
@@ -256,6 +307,93 @@ bool Floppy144CabinetOpenNearby(
     {
         pCabinet->pszStatus = "ACCESS CODE NOT RECOVERED";
     }
+
+    return true;
+}
+
+bool Floppy144CabinetOpenParent(
+    Floppy144CabinetState *pCabinet,
+    const Floppy144RunState *pRunState,
+    const char *pszParentId
+)
+{
+    const Floppy144DataRecord *pParent;
+    uint32_t uRecordIndex;
+    bool bHasVisibleContent = false;
+
+    if(
+        pCabinet == NULL ||
+        pRunState == NULL ||
+        pszParentId == NULL
+    )
+    {
+        return false;
+    }
+
+    pParent =
+        Floppy144CabinetParentRecord(
+            pszParentId
+        );
+
+    if(pParent == NULL || Floppy144CabinetRecordIsSecure(pParent))
+    {
+        return false;
+    }
+
+    for(
+        uRecordIndex = 0U;
+        uRecordIndex < Floppy144GameDataRecordCount();
+        ++uRecordIndex
+    )
+    {
+        const Floppy144DataRecord *pItem =
+            Floppy144GameDataRecordAt(uRecordIndex);
+
+        if(
+            pItem != NULL &&
+            pItem->eKind == FLOPPY144_DATA_PHYSICAL_ITEM &&
+            Floppy144CabinetStringEqual(
+                pItem->pszC,
+                pszParentId
+            ) &&
+            Floppy144SitePhysicalItemVisible(
+                pRunState,
+                pItem
+            )
+        )
+        {
+            bHasVisibleContent = true;
+            break;
+        }
+    }
+
+    if(!bHasVisibleContent)
+        return false;
+
+    Floppy144CabinetReset(pCabinet);
+
+    (void)snprintf(
+        pCabinet->szCabinetId,
+        sizeof(pCabinet->szCabinetId),
+        "%s",
+        pszParentId
+    );
+
+    Floppy144CabinetMakeDisplayName(
+        pCabinet,
+        pszParentId
+    );
+
+    Floppy144CabinetSetContainerType(
+        pCabinet,
+        pParent
+    );
+
+    pCabinet->bSecureContainer = false;
+    pCabinet->bInteriorOpen = true;
+    pCabinet->bDetailOpen = false;
+    pCabinet->uSelectedContent = 0U;
+    pCabinet->pszStatus = "RECOVERED CONTENTS";
 
     return true;
 }
