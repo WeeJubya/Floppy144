@@ -296,7 +296,7 @@ static void emit_documents(JsonValue*root,const char*outdir)
             else if(title && strcmp(title,"Disk Recovery Index")==0) fputs(", FLOPPY144_DOCUMENT_VIEW_DR01_DISK_RECOVERY_INDEX, ",f);
             else fputs(", FLOPPY144_DOCUMENT_VIEW_GENERIC, ",f);
             if(tid){fprintf(f,"FLOPPY144_TRIGGER_");sym(f,tid);}else fputs("FLOPPY144_TRIGGER_COUNT",f);
-            fprintf(f,", NULL, 0U, ");cstr(f,body);fprintf(f," },\n");
+            fprintf(f,", NULL, 0U, ");cstr(f,body);fprintf(f,", %s, %s },\\n",\n                boolv(d,"recovery_entry_point",false)?"true":"false",\n                boolv(d,"offer_pending_trigger_choices",false)?"true":"false");
         }
         free(used);
     }
