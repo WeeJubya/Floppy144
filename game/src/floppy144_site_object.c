@@ -858,8 +858,10 @@ static const Floppy144DataRecord *Floppy144SitePhysicalParentRecord(
 }
 
 /*
- * Doors and windows are deliberately left to the later connection/access pass.
- * Everything else which owns physical material is eligible for inspection.
+ * Any generated parent with recovered physical material may expose a contents
+ * view. Windows remain non-interactive scenery and secure cupboards retain
+ * their dedicated Access/keypad gate; ordinary doors may still expose mounted
+ * notices and room plates through Inspect.
  */
 static bool Floppy144SiteParentInspectable(
     const Floppy144DataRecord *pParent
@@ -871,10 +873,6 @@ static bool Floppy144SiteParentInspectable(
     }
 
     if(
-        Floppy144SiteDataStringEqual(
-            pParent->pszB,
-            "DOOR"
-        ) ||
         Floppy144SiteDataStringEqual(
             pParent->pszB,
             "WINDOW"
