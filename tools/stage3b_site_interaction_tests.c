@@ -655,8 +655,9 @@ static void Floppy144TestSceneryDoesNotBecomeInteraction(void)
 
 /*
  * Site inspection reach is measured from the player's collision footprint.
- * Four half-unit movement steps away from the Main Office desks is too far;
- * moving to within one Site unit enables inspection.
+ * The resolver may legitimately find a different nearby object, so the
+ * out-of-range assertions below are target-specific rather than assuming that
+ * the surrounding Site contains no other inspectable physical material.
  */
 static void Floppy144TestInspectionRange(void)
 {
@@ -691,7 +692,12 @@ static void Floppy144TestInspectionRange(void)
 
     Floppy144TestSetPosition(&sState, 69, 86);
     F144_CHECK(
-        !Floppy144SiteResolveInspectionTarget(&sState, &sTarget),
+        !Floppy144SiteResolveInspectionTarget(&sState, &sTarget) ||
+        sTarget.pszParentId == NULL ||
+        strcmp(
+            sTarget.pszParentId,
+            "MAIN_OFFICE_DESK_06"
+        ) != 0,
         "Desk 06 does not trigger inspection from outside one-unit reach"
     );
 
@@ -779,6 +785,7 @@ static void Floppy144TestNotebookPopulation(void)
     Floppy144RunState sState;
     Floppy144CollectionId eDr01;
     Floppy144InteractionId eI001;
+    const Floppy144DataRecord *pPanelContext;
     uint32_t uBefore;
 
     Floppy144TestReset(&sWorld, &sState);
@@ -825,19 +832,43 @@ static void Floppy144TestNotebookPopulation(void)
         FLOPPY144_ROOM_FACILITIES
     );
 
+    pPanelContext =
+        Floppy144GameDataFind(
+            FLOPPY144_DATA_PHYSICAL_ITEM,
+            "P-200"
+        );
+
+    F144_CHECK(
+        pPanelContext != NULL &&
+        !Floppy144SitePhysicalItemVisible(
+            &sState,
+            pPanelContext
+        ),
+        "contextual child of hidden panel remains hidden"
+    );
+
     Floppy144TestSetPosition(&sState, 68, 90);
     F144_CHECK(
         (
             Floppy144SiteAvailableActions(&sState) &
             FLOPPY144_SITE_ACTION_INSPECT
         ) == 0U,
-        "hidden physical item does not advertise Inspect"
+        "hidden physical parent does not advertise Inspect"
     );
 
     (void)Floppy144TriggerTryFire(
         &sWorld,
         &sState,
         Floppy144GameDataTriggerId("T-006")
+    );
+
+    F144_CHECK(
+        pPanelContext != NULL &&
+        Floppy144SitePhysicalItemVisible(
+            &sState,
+            pPanelContext
+        ),
+        "contextual child appears when hidden parent is revealed"
     );
 
     F144_CHECK(
