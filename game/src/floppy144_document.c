@@ -123,12 +123,14 @@ bool Floppy144DocumentFindRecordId(
  * authored progression order. Trigger eligibility remains owned by the generic
  * trigger engine; this function only joins those two existing registries.
  */
-const Floppy144DocumentDefinition *Floppy144DocumentFirstPendingTrigger(
+const Floppy144DocumentDefinition *Floppy144DocumentPendingTriggerAt(
     const Floppy144RunState *pRunState,
-    Floppy144CollectionId eCollection
+    Floppy144CollectionId eCollection,
+    uint32_t uOrdinal
 )
 {
     uint32_t uDocumentIndex;
+    uint32_t uMatchOrdinal = 0U;
 
     if(
         pRunState == NULL ||
@@ -161,13 +163,65 @@ const Floppy144DocumentDefinition *Floppy144DocumentFirstPendingTrigger(
             )
         )
         {
-            return pDocument;
+            if(uMatchOrdinal == uOrdinal)
+            {
+                return pDocument;
+            }
+
+            ++uMatchOrdinal;
         }
     }
 
     return NULL;
 }
 
+const Floppy144DocumentDefinition *Floppy144DocumentFirstPendingTrigger(
+    const Floppy144RunState *pRunState,
+    Floppy144CollectionId eCollection
+)
+{
+    return
+        Floppy144DocumentPendingTriggerAt(
+            pRunState,
+            eCollection,
+            0U
+        );
+}
+
+const Floppy144DocumentDefinition *Floppy144DocumentRecoveryEntryPoint(
+    Floppy144CollectionId eCollection
+)
+{
+    uint32_t uDocumentIndex;
+
+    if(
+        (uint32_t)eCollection >=
+            (uint32_t)FLOPPY144_COLLECTION_COUNT
+    )
+    {
+        return NULL;
+    }
+
+    for(
+        uDocumentIndex = 0U;
+        uDocumentIndex < FLOPPY144_DOCUMENT_COUNT;
+        ++uDocumentIndex
+    )
+    {
+        const Floppy144DocumentDefinition *pDocument =
+            &floppy144_documents[uDocumentIndex];
+
+        if(
+            pDocument->collection == eCollection &&
+            pDocument->recovery_entry_point
+        )
+        {
+            return pDocument;
+        }
+    }
+
+    return NULL;
+}
 
 /*
  * Query whether one recovered document is currently readable.
