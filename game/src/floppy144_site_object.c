@@ -894,6 +894,61 @@ static bool Floppy144SiteParentInspectable(
 }
 
 /*
+ * Physical children cannot exist independently of a progression-controlled
+ * parent.  This mirrors Floppy144SiteObjectGeometryVisible(): ordinary
+ * furniture with no legacy visibility hook is present as soon as its room is
+ * reconstructed, while a top-level hooked object such as the suppression
+ * panel must itself be visible before any of its contextual children can be
+ * inspected.
+ */
+static bool Floppy144SitePhysicalParentVisible(
+    const Floppy144RunState *pState,
+    const Floppy144DataRecord *pParent
+)
+{
+    Floppy144ObjectId eObject;
+    const Floppy144ObjectDefinition *pDefinition;
+
+    if(pState == NULL || pParent == NULL)
+    {
+        return false;
+    }
+
+    eObject =
+        Floppy144SiteObjectFromGeneratedHook(
+            pParent->pszD
+        );
+
+    if(eObject == FLOPPY144_OBJECT_NONE)
+    {
+        return true;
+    }
+
+    pDefinition =
+        Floppy144ObjectGet(
+            eObject
+        );
+
+    /*
+     * A generated parent may carry a legacy child hook.  As with Site
+     * geometry, a child hook must not make the furniture containing it vanish.
+     */
+    if(
+        pDefinition == NULL ||
+        pDefinition->parent != FLOPPY144_OBJECT_NONE
+    )
+    {
+        return true;
+    }
+
+    return
+        Floppy144SiteObjectEffectivelyVisible(
+            pState,
+            eObject
+        );
+}
+
+/*
  * Runtime furniture records normally carry x/y/width/height in n0..n3.
  * Rotated centre-authored furniture carries centre_x/centre_y in n4/n5 and
  * sets b0. The Stage 3B.2 compiler emitter adds that small piece of metadata so
@@ -1070,11 +1125,33 @@ bool Floppy144SitePhysicalItemVisible(
     const Floppy144DataRecord *pPhysicalItem
 )
 {
+    const Floppy144DataRecord *pParent;
+
     if(
         pState == NULL ||
         pPhysicalItem == NULL ||
         pPhysicalItem->eKind !=
             FLOPPY144_DATA_PHYSICAL_ITEM
+    )
+    {
+        return false;
+    }
+
+    pParent =
+        Floppy144SitePhysicalParentRecord(
+            pPhysicalItem->pszC
+        );
+
+    /*
+     * A contextual child added during the 500-PI world pass must not expose a
+     * progression-hidden parent.  The suppression panel is the canonical
+     * example: P-200..P-206 remain unavailable until the panel itself exists.
+     */
+    if(
+        !Floppy144SitePhysicalParentVisible(
+            pState,
+            pParent
+        )
     )
     {
         return false;
