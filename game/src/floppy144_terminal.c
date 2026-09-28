@@ -409,6 +409,55 @@ static void Floppy144TerminalPushWrappedLine(
 );
 
 /*
+ * Prefer collection-local RS-#### identifiers while a default collection is
+ * active. Full IDs remain the fallback when the document belongs elsewhere.
+ */
+static const char *Floppy144TerminalDisplayRecordId(
+    const Floppy144TerminalState *pTerminal,
+    const char *pszRecordId
+)
+{
+    const Floppy144CollectionDefinition *pDefaultDefinition;
+    size_t uCodeLength;
+
+    if(
+        pTerminal == NULL ||
+        pszRecordId == NULL ||
+        !pTerminal->default_record_collection_valid
+    )
+    {
+        return pszRecordId;
+    }
+
+    pDefaultDefinition =
+        Floppy144CollectionGet(
+            pTerminal->default_record_collection
+        );
+
+    if(pDefaultDefinition == NULL)
+    {
+        return pszRecordId;
+    }
+
+    uCodeLength =
+        strlen(pDefaultDefinition->code);
+
+    if(
+        strncmp(
+            pszRecordId,
+            pDefaultDefinition->code,
+            uCodeLength
+        ) == 0 &&
+        pszRecordId[uCodeLength] == '-'
+    )
+    {
+        return pszRecordId + uCodeLength + 1U;
+    }
+
+    return pszRecordId;
+}
+
+/*
  * Print the next useful recovery action from current persistent state.
  *
  * Priority is deliberate:
@@ -458,36 +507,10 @@ void Floppy144TerminalPrintNextAction(
         if(pDocument != NULL && pDocument->record_id_override != NULL)
         {
             const char *pszRecordId =
-                pDocument->record_id_override;
-
-            /*
-             * Immediately after a collection is restored, allow the player
-             * to use the collection-local RS-#### form. The full identifier
-             * remains valid at all times.
-             */
-            if(pTerminal->default_record_collection_valid)
-            {
-                const Floppy144CollectionDefinition *pDefaultDefinition =
-                    Floppy144CollectionGet(
-                        pTerminal->default_record_collection
-                    );
-
-                size_t uCodeLength =
-                    strlen(pDefaultDefinition->code);
-
-                if(
-                    strncmp(
-                        pszRecordId,
-                        pDefaultDefinition->code,
-                        uCodeLength
-                    ) == 0 &&
-                    pszRecordId[uCodeLength] == '-'
-                )
-                {
-                    pszRecordId +=
-                        uCodeLength + 1U;
-                }
-            }
+                Floppy144TerminalDisplayRecordId(
+                    pTerminal,
+                    pDocument->record_id_override
+                );
 
             snprintf(
                 szLine,
