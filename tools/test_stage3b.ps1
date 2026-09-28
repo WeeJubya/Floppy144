@@ -420,6 +420,10 @@ function Test-PhysicalItemPlayerFacingContract {
         if([string]::IsNullOrWhiteSpace($Item.description)) {
             throw "Physical item $($Item.id) has no player-facing description."
         }
+
+        if($Item.description.Length -gt 100) {
+            throw "Physical item $($Item.id) description exceeds the 100-character UI contract."
+        }
     }
 
     $RestoredPhysicalNames = @{
