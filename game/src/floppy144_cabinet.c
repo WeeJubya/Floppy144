@@ -719,6 +719,15 @@ void Floppy144CabinetMoveSelection(
 
     uCount = Floppy144CabinetVisibleContentCount(pCabinet, pRunState);
 
+    Floppy144CabinetDrawContentMarkers(
+        pSurface,
+        pCabinet,
+        uCount,
+        pCabinet->uSelectedContent,
+        uEdge,
+        uBright
+    );
+
     if(uCount == 0U)
     {
         pCabinet->uSelectedContent = 0U;
@@ -1056,6 +1065,60 @@ static void Floppy144CabinetDrawContainerBody(
         uint32_t uY = 80U + (224U * uIndex) / 4U;
         Floppy144DrawFillRect(pSurface, 48U, uY, 238U, 2U, uEdge);
         Floppy144DrawFillRect(pSurface, 150U, uY - 9U, 34U, 4U, uEdge);
+    }
+}
+
+static void Floppy144CabinetDrawContentMarkers(
+    Floppy144Surface *pSurface,
+    const Floppy144CabinetState *pCabinet,
+    uint32_t uCount,
+    uint32_t uSelected,
+    uint32_t uEdge,
+    uint32_t uBright
+)
+{
+    uint32_t uIndex;
+    uint32_t uVisible =
+        uCount < 9U ? uCount : 9U;
+
+    if(pSurface == NULL || pCabinet == NULL)
+        return;
+
+    for(uIndex = 0U; uIndex < uVisible; ++uIndex)
+    {
+        uint32_t uX;
+        uint32_t uY;
+        uint32_t uMarker =
+            uIndex == uSelected ? uBright : uEdge;
+
+        if(
+            Floppy144CabinetTypeContains(pCabinet, "DESK") ||
+            Floppy144CabinetTypeContains(pCabinet, "TABLE") ||
+            Floppy144CabinetTypeContains(pCabinet, "WORKTOP")
+        )
+        {
+            uX = 50U + uIndex * 25U;
+            uY = 104U;
+        }
+        else if(Floppy144CabinetTypeContains(pCabinet, "FRIDGE"))
+        {
+            uX = 96U + (uIndex % 3U) * 44U;
+            uY = 172U + (uIndex / 3U) * 30U;
+        }
+        else
+        {
+            uX = 64U + (uIndex % 3U) * 72U;
+            uY = 96U + (uIndex / 3U) * 58U;
+        }
+
+        Floppy144DrawFillRect(
+            pSurface,
+            uX,
+            uY,
+            14U,
+            10U,
+            uMarker
+        );
     }
 }
 
