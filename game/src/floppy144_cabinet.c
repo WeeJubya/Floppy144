@@ -951,6 +951,114 @@ static void Floppy144CabinetDrawKeypad(
     );
 }
 
+static bool Floppy144CabinetTypeContains(
+    const Floppy144CabinetState *pCabinet,
+    const char *pszToken
+)
+{
+    return
+        pCabinet != NULL &&
+        pszToken != NULL &&
+        strstr(
+            pCabinet->szContainerType,
+            pszToken
+        ) != NULL;
+}
+
+static void Floppy144CabinetDrawContainerBody(
+    Floppy144Surface *pSurface,
+    const Floppy144CabinetState *pCabinet,
+    uint32_t uBody,
+    uint32_t uEdge
+)
+{
+    uint32_t uIndex;
+
+    if(pSurface == NULL || pCabinet == NULL)
+        return;
+
+    if(
+        Floppy144CabinetTypeContains(pCabinet, "DESK") ||
+        Floppy144CabinetTypeContains(pCabinet, "TABLE") ||
+        Floppy144CabinetTypeContains(pCabinet, "WORKTOP")
+    )
+    {
+        /* Front-on desk/table: broad top with two supporting pedestals. */
+        Floppy144DrawFillRect(pSurface, 42U, 118U, 250U, 24U, uBody);
+        Floppy144DrawRect(pSurface, 42U, 118U, 250U, 24U, uEdge);
+        Floppy144DrawFillRect(pSurface, 54U, 142U, 54U, 144U, uBody);
+        Floppy144DrawRect(pSurface, 54U, 142U, 54U, 144U, uEdge);
+        Floppy144DrawFillRect(pSurface, 226U, 142U, 54U, 144U, uBody);
+        Floppy144DrawRect(pSurface, 226U, 142U, 54U, 144U, uEdge);
+        for(uIndex = 0U; uIndex < 3U; ++uIndex)
+        {
+            uint32_t uY = 160U + uIndex * 38U;
+            Floppy144DrawRect(pSurface, 62U, uY, 38U, 24U, uEdge);
+            Floppy144DrawRect(pSurface, 234U, uY, 38U, 24U, uEdge);
+        }
+        return;
+    }
+
+    if(Floppy144CabinetTypeContains(pCabinet, "FRIDGE"))
+    {
+        Floppy144DrawFillRect(pSurface, 76U, 82U, 172U, 216U, uBody);
+        Floppy144DrawRect(pSurface, 76U, 82U, 172U, 216U, uEdge);
+        Floppy144DrawFillRect(pSurface, 82U, 152U, 160U, 2U, uEdge);
+        Floppy144DrawFillRect(pSurface, 222U, 112U, 8U, 28U, uEdge);
+        Floppy144DrawFillRect(pSurface, 222U, 174U, 8U, 54U, uEdge);
+        return;
+    }
+
+    if(Floppy144CabinetTypeContains(pCabinet, "TROLLEY"))
+    {
+        Floppy144DrawFillRect(pSurface, 54U, 102U, 226U, 154U, uBody);
+        Floppy144DrawRect(pSurface, 54U, 102U, 226U, 154U, uEdge);
+        for(uIndex = 1U; uIndex < 3U; ++uIndex)
+        {
+            uint32_t uY = 102U + uIndex * 48U;
+            Floppy144DrawFillRect(pSurface, 60U, uY, 214U, 2U, uEdge);
+        }
+        Floppy144DrawFillRect(pSurface, 74U, 264U, 28U, 10U, uEdge);
+        Floppy144DrawFillRect(pSurface, 232U, 264U, 28U, 10U, uEdge);
+        return;
+    }
+
+    if(Floppy144CabinetTypeContains(pCabinet, "SERVER"))
+    {
+        Floppy144DrawFillRect(pSurface, 78U, 80U, 168U, 224U, uBody);
+        Floppy144DrawRect(pSurface, 78U, 80U, 168U, 224U, uEdge);
+        for(uIndex = 0U; uIndex < 7U; ++uIndex)
+        {
+            uint32_t uY = 94U + uIndex * 28U;
+            Floppy144DrawRect(pSurface, 92U, uY, 140U, 16U, uEdge);
+        }
+        return;
+    }
+
+    if(Floppy144CabinetTypeContains(pCabinet, "WALL_MOUNTED_ITEM"))
+    {
+        Floppy144DrawFillRect(pSurface, 62U, 104U, 210U, 142U, uBody);
+        Floppy144DrawRect(pSurface, 62U, 104U, 210U, 142U, uEdge);
+        Floppy144DrawRect(pSurface, 82U, 126U, 170U, 96U, uEdge);
+        return;
+    }
+
+    /*
+     * Cabinet/bookcase/shelving and unknown storage use the familiar cupboard
+     * silhouette. Secure cupboards therefore retain their existing visual
+     * language while sharing the same contents browser as every other parent.
+     */
+    Floppy144DrawFillRect(pSurface, 42U, 80U, 250U, 224U, uBody);
+    Floppy144DrawRect(pSurface, 42U, 80U, 250U, 224U, uEdge);
+
+    for(uIndex = 1U; uIndex < 4U; ++uIndex)
+    {
+        uint32_t uY = 80U + (224U * uIndex) / 4U;
+        Floppy144DrawFillRect(pSurface, 48U, uY, 238U, 2U, uEdge);
+        Floppy144DrawFillRect(pSurface, 150U, uY - 9U, 34U, 4U, uEdge);
+    }
+}
+
 static void Floppy144CabinetDrawInterior(
     Floppy144Surface *pSurface,
     const Floppy144CabinetState *pCabinet,
@@ -966,19 +1074,22 @@ static void Floppy144CabinetDrawInterior(
     uint32_t uCount;
     uint32_t uIndex;
 
-    Floppy144DrawText(pSurface, 28U, 20U, "CABINET INTERIOR", 2U, uBright);
+    Floppy144DrawText(
+        pSurface,
+        28U,
+        20U,
+        pCabinet->bSecureContainer ? "CABINET INTERIOR" : "RECOVERED CONTENTS",
+        2U,
+        uBright
+    );
     Floppy144DrawText(pSurface, 28U, 48U, pCabinet->szDisplayName, 1U, uText);
 
-    /* Front-on reusable metal cabinet body. */
-    Floppy144DrawFillRect(pSurface, 42U, 80U, 250U, 224U, uMetal);
-    Floppy144DrawRect(pSurface, 42U, 80U, 250U, 224U, uEdge);
-
-    for(uIndex = 1U; uIndex < 4U; ++uIndex)
-    {
-        uint32_t uY = 80U + (224U * uIndex) / 4U;
-        Floppy144DrawFillRect(pSurface, 48U, uY, 238U, 2U, uEdge);
-        Floppy144DrawFillRect(pSurface, 150U, uY - 9U, 34U, 4U, uEdge);
-    }
+    Floppy144CabinetDrawContainerBody(
+        pSurface,
+        pCabinet,
+        uMetal,
+        uEdge
+    );
 
     Floppy144DrawText(
         pSurface,
@@ -1120,7 +1231,9 @@ static void Floppy144CabinetDrawInterior(
             pSurface,
             94U,
             266U,
-            "BACKSPACE: CABINET",
+            pCabinet->bSecureContainer
+                ? "BACKSPACE: CABINET"
+                : "BACKSPACE: CONTENTS",
             1U,
             uMuted
         );
