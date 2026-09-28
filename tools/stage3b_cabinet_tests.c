@@ -120,6 +120,55 @@ static void Floppy144TestDigitEntry(
     }
 }
 
+static uint32_t Floppy144TestVisibleContentIndex(
+    const Floppy144CabinetState *pCabinet,
+    const Floppy144RunState *pState,
+    const char *pszPhysicalItemId
+)
+{
+    uint32_t uIndex;
+    uint32_t uCount;
+
+    if(
+        pCabinet == NULL ||
+        pState == NULL ||
+        pszPhysicalItemId == NULL
+    )
+    {
+        return UINT32_MAX;
+    }
+
+    uCount =
+        Floppy144CabinetVisibleContentCount(
+            pCabinet,
+            pState
+        );
+
+    for(uIndex = 0U; uIndex < uCount; ++uIndex)
+    {
+        const Floppy144DataRecord *pItem =
+            Floppy144CabinetVisibleContentAt(
+                pCabinet,
+                pState,
+                uIndex
+            );
+
+        if(
+            pItem != NULL &&
+            pItem->pszId != NULL &&
+            strcmp(
+                pItem->pszId,
+                pszPhysicalItemId
+            ) == 0
+        )
+        {
+            return uIndex;
+        }
+    }
+
+    return UINT32_MAX;
+}
+
 static void Floppy144TestGeneratedCabinetDiscovery(void)
 {
     Floppy144WorldState sWorld;
@@ -160,6 +209,7 @@ static void Floppy144TestSecurityCabinetUnlockAndContents(void)
     Floppy144CabinetState sCabinet;
     Floppy144TriggerId eT037;
     const Floppy144DataRecord *pItem;
+    uint32_t uP092Index;
     char szExpected[FLOPPY144_CABINET_CODE_CAPACITY + 1U];
     char szWrong[FLOPPY144_CABINET_CODE_CAPACITY + 1U];
 
@@ -234,16 +284,41 @@ static void Floppy144TestSecurityCabinetUnlockAndContents(void)
         "Cabinet Interior exposes recovered contents including P-092"
     );
 
-    pItem = Floppy144CabinetVisibleContentAt(
-        &sCabinet,
-        &sState,
-        0U
+    uP092Index =
+        Floppy144TestVisibleContentIndex(
+            &sCabinet,
+            &sState,
+            "P-092"
+        );
+
+    F144_CHECK(
+        uP092Index != UINT32_MAX,
+        "Cabinet Interior contains recovered Master Access Register"
     );
+
+    if(uP092Index != UINT32_MAX)
+    {
+        Floppy144CabinetMoveSelection(
+            &sCabinet,
+            &sState,
+            (int32_t)uP092Index
+        );
+    }
+
+    pItem =
+        uP092Index != UINT32_MAX
+            ? Floppy144CabinetVisibleContentAt(
+                &sCabinet,
+                &sState,
+                uP092Index
+            )
+            : NULL;
 
     F144_CHECK(
         pItem != NULL &&
+        pItem->pszId != NULL &&
         strcmp(pItem->pszId, "P-092") == 0,
-        "Cabinet Interior resolves recovered Master Access Register"
+        "Cabinet Interior resolves recovered Master Access Register by ID"
     );
 
     F144_CHECK(
