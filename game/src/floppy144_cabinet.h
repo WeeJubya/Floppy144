@@ -18,6 +18,7 @@
 
 #define FLOPPY144_CABINET_ID_CAPACITY       64U
 #define FLOPPY144_CABINET_DISPLAY_CAPACITY  72U
+#define FLOPPY144_CABINET_TYPE_CAPACITY     40U
 #define FLOPPY144_CABINET_CODE_CAPACITY      8U
 #define FLOPPY144_CABINET_INTERACTION_RANGE  2U
 
@@ -25,6 +26,7 @@ typedef struct Floppy144CabinetState
 {
     char szCabinetId[FLOPPY144_CABINET_ID_CAPACITY];
     char szDisplayName[FLOPPY144_CABINET_DISPLAY_CAPACITY];
+    char szContainerType[FLOPPY144_CABINET_TYPE_CAPACITY];
 
     uint8_t uCabinetOrdinal;
     uint8_t uRequiredDigits;
@@ -36,6 +38,7 @@ typedef struct Floppy144CabinetState
 
     bool bInteriorOpen;
     bool bDetailOpen;
+    bool bSecureContainer;
 
     const char *pszStatus;
 }
@@ -52,6 +55,19 @@ void Floppy144CabinetReset(
 bool Floppy144CabinetOpenNearby(
     Floppy144CabinetState *pCabinet,
     const Floppy144RunState *pRunState
+);
+
+/*
+ * Open the reusable contents view for one generated furniture/fixture parent.
+ *
+ * This is the non-secure path used by desks, tables, shelves, worktops,
+ * fridges, panels and other parents which own physical items. Secure storage
+ * continues to enter through Floppy144CabinetOpenNearby() and its keypad.
+ */
+bool Floppy144CabinetOpenParent(
+    Floppy144CabinetState *pCabinet,
+    const Floppy144RunState *pRunState,
+    const char *pszParentId
 );
 
 const char *Floppy144CabinetId(
