@@ -631,9 +631,9 @@ uint32_t Floppy144CabinetVisibleContentCount(
                 pRecord->pszC,
                 pCabinet->szCabinetId
             ) ||
-            !Floppy144GameDataPhysicalItemRevealed(
+            !Floppy144SitePhysicalItemVisible(
                 pRunState,
-                pRecord->pszId
+                pRecord
             )
         )
         {
@@ -680,9 +680,9 @@ const Floppy144DataRecord *Floppy144CabinetVisibleContentAt(
                 pRecord->pszC,
                 pCabinet->szCabinetId
             ) ||
-            !Floppy144GameDataPhysicalItemRevealed(
+            !Floppy144SitePhysicalItemVisible(
                 pRunState,
-                pRecord->pszId
+                pRecord
             )
         )
         {
@@ -797,7 +797,10 @@ bool Floppy144CabinetBackspace(
     if(pCabinet->bDetailOpen)
     {
         pCabinet->bDetailOpen = false;
-        pCabinet->pszStatus = "CABINET INTERIOR";
+        pCabinet->pszStatus =
+            pCabinet->bSecureContainer
+                ? "CABINET INTERIOR"
+                : "RECOVERED CONTENTS";
         return true;
     }
 
