@@ -422,6 +422,39 @@ function Test-PhysicalItemPlayerFacingContract {
         }
     }
 
+    $RestoredPhysicalNames = @{
+        'P-065' = 'Legacy support sticker'
+        'P-082' = 'Meeting notes card'
+        'P-089' = 'Evacuation roll-call pencil'
+        'P-125' = 'Stationery requisition pad'
+        'P-126' = 'Calculator tape'
+        'P-127' = 'Closure milestone board card'
+    }
+
+    foreach($Pair in $RestoredPhysicalNames.GetEnumerator()) {
+        $Item = $GameData.physical_items | Where-Object { $_.id -eq $Pair.Key }
+        if($null -eq $Item -or $Item.name -ne $Pair.Value) {
+            throw "Physical item $($Pair.Key) no longer preserves its canonical identity."
+        }
+    }
+
+    $ExpectedNameplates = @(
+        'Priya Patel desk nameplate',
+        'Daniel Price desk nameplate',
+        'Andrew Collins desk nameplate',
+        'Claire Hughes desk nameplate',
+        'Imran Shah desk nameplate',
+        'Martin Webb desk nameplate',
+        'Helen Cartwright desk nameplate',
+        'Rachel Morgan desk nameplate'
+    )
+
+    foreach($Nameplate in $ExpectedNameplates) {
+        if(-not ($GameData.physical_items | Where-Object { $_.name -eq $Nameplate })) {
+            throw "Canonical staff nameplate is missing: $Nameplate"
+        }
+    }
+
     foreach($Interaction in $GameData.interactions) {
         if(
             $Interaction.physical_source -match '^P-' -and
