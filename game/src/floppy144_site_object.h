@@ -82,6 +82,18 @@ bool Floppy144SiteResolveInspectionTarget(
 );
 
 /*
+ * Query whether one canonical physical item is currently visible.
+ *
+ * Ordinary contextual items appear with their reconstructed room. Items named
+ * by REVEAL_PHYSICAL_ITEM effects remain hidden until that persistent effect
+ * has fired. Container screens and Site targeting share this rule.
+ */
+bool Floppy144SitePhysicalItemVisible(
+    const Floppy144RunState *pState,
+    const Floppy144DataRecord *pPhysicalItem
+);
+
+/*
  * Runtime visibility contract for generated Site rectangles.
  *
  * Ordinary geometry requires its owning room to be reconstructed. Internal
