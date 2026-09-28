@@ -1,5 +1,5 @@
 /*
- * Floppy//144 - reusable secure-cabinet access and Cabinet Interior view
+ * Floppy//144 - reusable parent-contents view with secure-cabinet access
  */
 
 #include "floppy144_cabinet.h"
