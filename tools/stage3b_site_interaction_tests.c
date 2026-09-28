@@ -89,6 +89,12 @@ static void Floppy144TestPhysicalParentCoverage(void)
 
         ++uPhysicalCount;
 
+        F144_CHECK(
+            pRecord->pszF != NULL &&
+            pRecord->pszF[0] != '\0',
+            "physical item carries a player-facing short description"
+        );
+
         pParent =
             Floppy144GameDataFind(
                 FLOPPY144_DATA_FURNITURE,
@@ -149,8 +155,8 @@ static void Floppy144TestPhysicalParentCoverage(void)
     }
 
     F144_CHECK(
-        uPhysicalCount == 161U,
-        "all 161 physical items participate in Site parent audit"
+        uPhysicalCount == 500U,
+        "all 500 physical items participate in Site parent audit"
     );
 
     F144_CHECK(
