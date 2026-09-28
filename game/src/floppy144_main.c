@@ -950,90 +950,32 @@ static void Floppy144InteractOffice(
             return;
         }
 
-        /* Ordinary physical context needs no persistent interaction bit. */
+        /*
+         * Every inspectable parent now opens the reusable contents screen.
+         * The Site resolver still chooses the most useful nearby parent, but
+         * item selection and interaction happen inside that parent view. This
+         * prevents one arbitrary child from representing an entire desk,
+         * shelf, worktop or cupboard.
+         */
         if(
-            sTarget.eInteraction ==
-            FLOPPY144_INTERACTION_COUNT
-        )
-        {
-            Floppy144OfficeSetItemNotice(
-                sTarget.pszPhysicalItemName,
-                "."
-            );
-
-            Floppy144Redraw(window);
-            return;
-        }
-
-        if(sTarget.bInteractionCompleted)
-        {
-            Floppy144OfficeSetItemNotice(
-                sTarget.pszPhysicalItemName,
-                ": INSPECTION ALREADY RECORDED."
-            );
-
-            Floppy144Redraw(window);
-            return;
-        }
-
-        if(!sTarget.bInteractionAvailable)
-        {
-            Floppy144OfficeSetItemNotice(
-                sTarget.pszPhysicalItemName,
-                ": NO ACTIONABLE FINDING YET."
-            );
-
-            Floppy144Redraw(window);
-            return;
-        }
-
-        if(
-            Floppy144InteractionTryRun(
-                &global_world,
+            Floppy144CabinetOpenParent(
+                &global_cabinet,
                 &global_run_state,
-                sTarget.eInteraction
+                sTarget.pszParentId
             )
         )
         {
-            const Floppy144DataRecord *pInteraction =
-                Floppy144InteractionRecord(
-                    sTarget.eInteraction
-                );
-
-            bool bEvidenceRecorded = false;
-
-            if(
-                pInteraction != NULL &&
-                pInteraction->pszE != NULL
-            )
-            {
-                Floppy144EvidenceId eEvidence =
-                    Floppy144GameDataEvidenceId(
-                        pInteraction->pszE
-                    );
-
-                bEvidenceRecorded =
-                    eEvidence != FLOPPY144_EVIDENCE_COUNT &&
-                    Floppy144RunStateEvidenceEstablished(
-                        &global_run_state,
-                        eEvidence
-                    );
-            }
-
-            Floppy144OfficeSetItemNotice(
-                sTarget.pszPhysicalItemName,
-                bEvidenceRecorded
-                    ? ": EVIDENCE RECORDED."
-                    : ": INSPECTION RECORDED."
-            );
+            global_office_notice = NULL;
+            global_resume_screen = FLOPPY144_SCREEN_CABINET;
+            global_screen = FLOPPY144_SCREEN_CABINET;
+            Floppy144Redraw(window);
+            return;
         }
-        else
-        {
-            Floppy144OfficeSetItemNotice(
-                sTarget.pszPhysicalItemName,
-                ": INSPECTION COULD NOT BE RECORDED."
-            );
-        }
+
+        Floppy144OfficeSetItemNotice(
+            sTarget.pszPhysicalItemName,
+            ": CONTENTS COULD NOT BE OPENED."
+        );
 
         Floppy144Redraw(window);
     }
