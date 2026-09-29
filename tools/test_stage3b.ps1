@@ -354,8 +354,19 @@ function Test-Stage3B5CoordinatorWiring {
     $PersistenceSourcePath = Join-Path $SourceDir "floppy144_persistence.c"
     $Site2DPath = Join-Path $SourceDir "floppy144_site_2d.c"
     $SiteIsoPath = Join-Path $SourceDir "floppy144_site_isometric.c"
+    $DrawingRuntimeHeaderPath = Join-Path $SourceDir "floppy144_drawing_runtime.h"
+    $DrawingRuntimeSourcePath = Join-Path $SourceDir "floppy144_drawing_runtime.c"
 
-    foreach($Path in @($MainPath, $RunStateHeaderPath, $PersistenceHeaderPath, $PersistenceSourcePath, $Site2DPath, $SiteIsoPath)) {
+    foreach($Path in @(
+        $MainPath,
+        $RunStateHeaderPath,
+        $PersistenceHeaderPath,
+        $PersistenceSourcePath,
+        $Site2DPath,
+        $SiteIsoPath,
+        $DrawingRuntimeHeaderPath,
+        $DrawingRuntimeSourcePath
+    )) {
         if(-not (Test-Path $Path)) {
             throw "Stage 3B.5 wiring source is missing: $Path"
         }
@@ -367,6 +378,8 @@ function Test-Stage3B5CoordinatorWiring {
     $PersistenceSource = Get-Content -Raw -Path $PersistenceSourcePath
     $Site2DSource = Get-Content -Raw -Path $Site2DPath
     $SiteIsoSource = Get-Content -Raw -Path $SiteIsoPath
+    $DrawingRuntimeHeader = Get-Content -Raw -Path $DrawingRuntimeHeaderPath
+    $DrawingRuntimeSource = Get-Content -Raw -Path $DrawingRuntimeSourcePath
 
     foreach($Required in @(
         'floppy144_cabinet.h',
@@ -429,6 +442,51 @@ function Test-Stage3B5CoordinatorWiring {
         'Floppy144Site2DClipRect\s*\(\s*surface,\s*&visual\.x'
     ) {
         throw "Stage 3C wall fixtures are not clipped to the Site viewport before authored drawing."
+    }
+
+    if(
+        $Site2DSource -notmatch 'Floppy144Site2DWallAttachmentToView' -or
+        $Site2DSource -notmatch 'Floppy144DrawingRuntimeDrawClipped' -or
+        $DrawingRuntimeHeader -notmatch 'Floppy144DrawingRuntimeDrawClipped' -or
+        $DrawingRuntimeSource -notmatch 'Floppy144DrawingRuntimeDrawClipped'
+    ) {
+        throw "Stage 3C wall-hanging camera clipping contract is incomplete."
+    }
+
+    $Z1 = $Site2DSource.IndexOf("/* Z1: room floor. */")
+    $Z2 = $Site2DSource.IndexOf("/* Z2: furniture.")
+    $Z3 = $Site2DSource.IndexOf("/* Z3: wall-hangings")
+    $Z4 = $Site2DSource.IndexOf("/* Z4: camera view.")
+
+    if(
+        $Z1 -lt 0 -or
+        $Z2 -le $Z1 -or
+        $Z3 -le $Z2 -or
+        $Z4 -le $Z3
+    ) {
+        throw "Stage 3C 2D renderer no longer preserves Floor > Furniture > Wall-Hangings > Camera View ordering."
+    }
+
+    $WallFixtureStart =
+        $Site2DSource.IndexOf("static void Floppy144Site2DDrawWallFixture(")
+    $WallFixtureEnd =
+        $Site2DSource.IndexOf("static void Floppy144Site2DDrawFurnitureBase(", $WallFixtureStart)
+
+    if($WallFixtureStart -lt 0 -or $WallFixtureEnd -le $WallFixtureStart) {
+        throw "Could not isolate the Stage 3C wall-fixture renderer."
+    }
+
+    $WallFixtureSource =
+        $Site2DSource.Substring(
+            $WallFixtureStart,
+            $WallFixtureEnd - $WallFixtureStart
+        )
+
+    if(
+        $WallFixtureSource -notmatch 'visible_probe' -or
+        $WallFixtureSource -notmatch 'Floppy144DrawingRuntimeDrawClipped'
+    ) {
+        throw "Stage 3C wall fixtures can again be resized by camera clipping."
     }
 
     Write-Host "STAGE 3B.5 CABINET COORDINATOR WIRING AUDIT: PASS"
