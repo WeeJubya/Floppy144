@@ -470,7 +470,7 @@ function Test-Stage3B5CoordinatorWiring {
     $WallFixtureStart =
         $Site2DSource.IndexOf("static void Floppy144Site2DDrawWallFixture(")
     $WallFixtureEnd =
-        $Site2DSource.IndexOf("static void Floppy144Site2DDrawFurnitureBase(", $WallFixtureStart)
+        $Site2DSource.IndexOf("static void Floppy144Site2DDrawFurnitureDetails(", $WallFixtureStart)
 
     if($WallFixtureStart -lt 0 -or $WallFixtureEnd -le $WallFixtureStart) {
         throw "Could not isolate the Stage 3C wall-fixture renderer."
