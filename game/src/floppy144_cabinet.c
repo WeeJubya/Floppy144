@@ -1312,9 +1312,9 @@ static void Floppy144CabinetDrawInterior(
             char szDetail[80];
 
             /*
-             * The recovered item's authored name is the screen heading. Internal
-             * ledger terminology such as "Recovered Physical Item" and P- IDs
-             * stays in the data layer rather than leaking into the fiction.
+             * The recovered item's authored name is the screen heading.
+             * Generic ledger labels and P- IDs stay in the data layer rather
+             * than leaking into the fiction.
              */
             Floppy144CabinetCopyForDisplay(
                 szName,
