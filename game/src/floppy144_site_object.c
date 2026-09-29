@@ -1870,11 +1870,7 @@ static const char *Floppy144SiteFurnitureLabel(
     {
         case FLOPPY144_SITE_STANDARD_DESK:        return "DESK";
         case FLOPPY144_SITE_TERMINAL_DESK:        return "TERMINAL DESK";
-        /*
-         * Wall fixtures are physical Site objects too.  Keep the label generic
-         * here; authored Inspect behaviour, where present, remains data-driven.
-         */
-        case FLOPPY144_SITE_WALL_MOUNTED_ITEM:     return "WALL-MOUNTED ITEM";
+        case FLOPPY144_SITE_WALL_MOUNTED_ITEM:    return "WALL HANGING";
         case FLOPPY144_SITE_CHAIR:                return "CHAIR";
         case FLOPPY144_SITE_NONSECURE_CABINET:
         case FLOPPY144_SITE_SECURE_CABINET_HALF:
@@ -1891,6 +1887,76 @@ static const char *Floppy144SiteFurnitureLabel(
         case FLOPPY144_SITE_TABLE:                return "TABLE";
         default:                                  return NULL;
     }
+}
+
+static const char *Floppy144SiteWallHangingLabel(
+    const Floppy144SiteRect *pRect
+)
+{
+    uint32_t uRecordIndex;
+
+    if(
+        pRect == NULL ||
+        pRect->type != (uint8_t)FLOPPY144_SITE_WALL_MOUNTED_ITEM
+    )
+    {
+        return NULL;
+    }
+
+    for(
+        uRecordIndex = 0U;
+        uRecordIndex < Floppy144GameDataRecordCount();
+        ++uRecordIndex
+    )
+    {
+        const Floppy144DataRecord *pRecord =
+            Floppy144GameDataRecordAt(uRecordIndex);
+
+        const char *pszVariant;
+
+        if(
+            pRecord == NULL ||
+            pRecord->eKind != FLOPPY144_DATA_FIXTURE ||
+            pRecord->pszA == NULL ||
+            Floppy144GameDataRoomId(pRecord->pszA) !=
+                (Floppy144RoomId)pRect->room ||
+            pRecord->n0 != (int32_t)pRect->x ||
+            pRecord->n1 != (int32_t)pRect->y ||
+            pRecord->n2 != (int32_t)pRect->width ||
+            pRecord->n3 != (int32_t)pRect->height
+        )
+        {
+            continue;
+        }
+
+        pszVariant = pRecord->pszC;
+
+        if(pszVariant == NULL)
+            break;
+
+        if(strcmp(pszVariant, "SITE_DIRECTORY") == 0)
+            return "SITE DIRECTORY";
+        if(strcmp(pszVariant, "SUPPRESSION_PANEL") == 0)
+            return "SUPPRESSION PANEL";
+        if(strcmp(pszVariant, "PATCH_PANEL") == 0)
+            return "PATCH PANEL";
+        if(strcmp(pszVariant, "SHELVING") == 0)
+            return "WALL SHELVING";
+        if(strcmp(pszVariant, "NOTICEBOARD") == 0)
+            return "NOTICEBOARD";
+        if(strcmp(pszVariant, "KEY_CABINET") == 0)
+            return "KEY CABINET";
+        if(strcmp(pszVariant, "FIRST_AID_KIT") == 0)
+            return "FIRST AID KIT";
+        if(strcmp(pszVariant, "MONITOR_BANK") == 0)
+            return "MONITOR BANK";
+        if(strcmp(pszVariant, "CABLE_RISER") == 0)
+            return "CABLE RISER";
+
+        break;
+    }
+
+    return "WALL HANGING";
 }
 
 const char *Floppy144SiteContextLabel(
@@ -1934,6 +2000,16 @@ const char *Floppy144SiteContextLabel(
             {
                 pszLabel = "LOCKED DOOR";
             }
+        }
+        else if(
+            pRect->type ==
+                (uint8_t)FLOPPY144_SITE_WALL_MOUNTED_ITEM
+        )
+        {
+            pszLabel =
+                Floppy144SiteWallHangingLabel(
+                    pRect
+                );
         }
         else
         {
