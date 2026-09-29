@@ -16649,7 +16649,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nSITE ORGANISATIONAL CHART - CLOSURE PERIOD\n\nHELEN CARTWRIGHT, DIRECTOR\n  |\nPROJECT MANAGER\n  |-- SENIOR ARCHIVIST\n  |     |-- RECORDS OFFICER\n  |\n  |-- IT SUPPORT\n  |\n  |-- FACILITIES LIAISON\n  |\n  |-- ADMINISTRATIVE SUPPORT\n\nOperational Security retains an independent duty line to the Director for access and incident matters.\n\nDuring closure, temporary tasking does not alter reporting responsibility. In particular, technical access remains an IT responsibility and archive release remains a Senior Archivist responsibility.\n\nThe chart replaces the earlier full-establishment version, which contained posts already transferred off Site.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nSITE ORGANISATIONAL CHART - CLOSURE PERIOD\n\nHELEN CARTWRIGHT, DIRECTOR\n  |\n  |-- Priya Patel, SENIOR ARCHIVIST\n  |\n  |-- Rachel Morgan, SECURITY Manager  |\n  |-- Daniel Price, RECORDS OFFICER\n  |\n  |-- Claire Hughes, IT Manager\n  |\n  |-- Imran Shah, FACILITIES LIAISON\n  |\n  |-- Andrew Collins, ADMINISTRATIVE SUPPORT\n  |-- Martin Webb, PROJECT MANAGER\n\nOperational Security retains an independent duty line to the Director for access and incident matters.\n\nDuring closure, temporary tasking does not alter reporting responsibility. In particular, technical access remains an IT responsibility and archive release remains a Senior Archivist responsibility.\n\nThe chart replaces the earlier full-establishment version, which contained posts already transferred off Site.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "HR-01"
     },
@@ -16757,7 +16757,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-043",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nFINAL FRIDAY ATTENDANCE RETURN\n\nSigned present at start of duty:\n\nMartin Webb, Project Manager ............. PRESENT\nPriya Patel, Senior Archivist ............ PRESENT\nDaniel Price, Records Officer ............ PRESENT\nClaire Hughes, IT Support ................ PRESENT\nImran Shah, Facilities liaison ........... PRESENT\nAndrew Collins, Administrative support ... PRESENT\n\nOperational Security duty staff are recorded on the separate Security rota.\n\nThe return confirms presence on Site. It does not establish where an individual was at any later minute.\n\nAmendments after evacuation must be countersigned and must not replace the original signed sheet.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nFINAL FRIDAY ATTENDANCE RETURN\n\nSigned present at start of duty:\n\nMartin Webb, Project Manager ............. PRESENT\nPriya Patel, Senior Archivist ............ PRESENT\nDaniel Price, Records Officer ............ PRESENT\nClaire Hughes, IT Manager ................ PRESENT\nImran Shah, Facilities liaison ........... PRESENT\nAndrew Collins, Administrative support ... PRESENT\n\nOperational Security duty staff are recorded on the separate Security rota.\n\nThe return confirms presence on Site. It does not establish where an individual was at any later minute.\n\nAmendments after evacuation must be countersigned and must not replace the original signed sheet.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "HR-09"
     },
@@ -17237,7 +17237,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-035",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nEVACUATION ACCOUNTABILITY RETURN\n\nRoll-call completed after Friday suppression incident.\n\nMartin Webb, Project Manager .............. accounted for\nPriya Patel, Senior Archivist ............. accounted for\nDaniel Price, Records Officer ............. accounted for\nClaire Hughes, IT Support ................. accounted for\nImran Shah, Facilities liaison ............ accounted for\nAndrew Collins, Administrative support .... accounted for\nRachel Morgan, Security duty officer ...... accounted for\n\nVisitors on Site at alarm: NONE RECORDED\nUnaccounted persons: NONE\nInjuries reported: NONE\n\nThe Senior Archivist and IT Support were reported from the restricted-area side of the Site during evacuation and were accounted for safely.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nEVACUATION ACCOUNTABILITY RETURN\n\nRoll-call completed after Friday suppression incident.\n\nMartin Webb, Project Manager .............. accounted for\nPriya Patel, Senior Archivist ............. accounted for\nDaniel Price, Records Officer ............. accounted for\nClaire Hughes, IT Manager ................. accounted for\nImran Shah, Facilities liaison ............ accounted for\nAndrew Collins, Administrative support .... accounted for\nRachel Morgan, Security Manager ........... accounted for\n\nVisitors on Site at alarm: NONE RECORDED\nUnaccounted persons: NONE\nInjuries reported: NONE\n\nThe Senior Archivist and IT Support were reported from the restricted-area side of the Site during evacuation and were accounted for safely.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "OS-26"
     },
@@ -17249,7 +17249,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-036",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nRESTRICTED AREA EVACUATION NOTE\n\nSecurity sweep information indicates that two authorised staff were working in or immediately around the Server Room route before the alarm:\n\n- Claire Hughes, IT Support, conducting network remediation;\n- Priya Patel, Senior Archivist, attending for final verification work.\n\nBoth held valid access at the time.\nBoth evacuated safely.\nNeither is identified by this note as having operated suppression equipment.\n\nThe Server Room was not re-entered until atmosphere and safety checks were complete.\n\nPreserve the access matrix and temporary authorisation with this note.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nRESTRICTED AREA EVACUATION NOTE\n\nSecurity sweep information indicates that two authorised staff were working in or immediately around the Server Room route before the alarm:\n\n- Claire Hughes, IT Manager, conducting network remediation;\n- Priya Patel, Senior Archivist, attending for final verification work.\n\nBoth held valid access at the time.\nBoth evacuated safely.\nNeither is identified by this note as having operated suppression equipment.\n\nThe Server Room was not re-entered until atmosphere and safety checks were complete.\n\nPreserve the access matrix and temporary authorisation with this note.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "OS-26"
     },
