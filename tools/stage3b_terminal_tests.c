@@ -62,6 +62,21 @@ static void Floppy144TestSubmitCommand(
         pWorld,
         pRunState
     );
+
+    /*
+     * Player-facing RESTORE now owns a short size-weighted progress animation.
+     * Existing command tests care about the completed command semantics, so
+     * advance any pending restore deterministically instead of sleeping.
+     */
+    if(Floppy144TerminalRestoreInProgress(pTerminal))
+    {
+        Floppy144TerminalAdvanceRestore(
+            pTerminal,
+            pWorld,
+            pRunState,
+            pTerminal->restoration_duration_ms
+        );
+    }
 }
 
 static bool Floppy144TestTerminalContains(
@@ -141,6 +156,112 @@ static void Floppy144TestReachOpeningCollections(
     }
 
     pTerminal->open_record_requested = false;
+}
+
+static void Floppy144TestRestoreProgress(void)
+{
+    Floppy144WorldState sWorld;
+    Floppy144RunState sRunState;
+    Floppy144TerminalState sTerminal;
+    Floppy144CollectionId eDr01;
+    const Floppy144CollectionDefinition *pDefinition;
+    const char *pszCommand = "RESTORE DR-01";
+    const char *pszCharacter;
+
+    Floppy144WorldReset(&sWorld);
+    Floppy144RunStateBegin(&sRunState, 144U);
+    Floppy144TerminalReset(&sTerminal, &sWorld);
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "INITIATE"
+    );
+
+    eDr01 =
+        Floppy144GameDataCollectionId(
+            "DR-01"
+        );
+    pDefinition =
+        Floppy144CollectionGet(
+            eDr01
+        );
+
+    for(
+        pszCharacter = pszCommand;
+        *pszCharacter != '\0';
+        ++pszCharacter
+    )
+    {
+        Floppy144TerminalInputCharacter(
+            &sTerminal,
+            *pszCharacter
+        );
+    }
+
+    Floppy144TerminalSubmitInput(
+        &sTerminal,
+        &sWorld,
+        &sRunState
+    );
+
+    F144_CHECK(
+        Floppy144TerminalRestoreInProgress(&sTerminal),
+        "RESTORE starts a visible progress phase before collection commit"
+    );
+
+    F144_CHECK(
+        pDefinition != NULL &&
+        sTerminal.restoration_duration_ms ==
+            300U + pDefinition->size_kb * 18U,
+        "restore duration scales from the collection size"
+    );
+
+    F144_CHECK(
+        !Floppy144RunStateCollectionRestored(
+            &sRunState,
+            eDr01
+        ),
+        "collection remains uncommitted while progress is incomplete"
+    );
+
+    Floppy144TerminalAdvanceRestore(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        sTerminal.restoration_duration_ms / 2U
+    );
+
+    F144_CHECK(
+        Floppy144TerminalRestoreProgressPercent(
+            &sTerminal
+        ) >= 49U &&
+        Floppy144TerminalRestoreProgressPercent(
+            &sTerminal
+        ) <= 50U,
+        "restore progress tracks elapsed size-weighted duration"
+    );
+
+    Floppy144TerminalAdvanceRestore(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        sTerminal.restoration_duration_ms
+    );
+
+    F144_CHECK(
+        !Floppy144TerminalRestoreInProgress(&sTerminal) &&
+        Floppy144RunStateCollectionRestored(
+            &sRunState,
+            eDr01
+        ) &&
+        Floppy144WorldCollectionRestored(
+            &sWorld,
+            eDr01
+        ),
+        "collection commits only when progress reaches 100 percent"
+    );
 }
 
 static void Floppy144TestExtendedGlyphs(void)
@@ -1435,6 +1556,7 @@ static void Floppy144TestBranchDocumentAccessGate(void)
 
 int main(void)
 {
+    Floppy144TestRestoreProgress();
     Floppy144TestExtendedGlyphs();
     Floppy144TestCatalogueRecordResolution();
     Floppy144TestDocumentBodyScrolling();
