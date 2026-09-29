@@ -765,18 +765,34 @@ bool Floppy144CabinetInspectSelected(
 
     eInteraction = Floppy144InteractionForPhysicalSource(pItem->pszId);
 
-    if(
-        eInteraction < FLOPPY144_INTERACTION_COUNT &&
-        Floppy144InteractionCanRun(pRunState, eInteraction)
-    )
+    if(eInteraction < FLOPPY144_INTERACTION_COUNT)
     {
-        (void)Floppy144InteractionTryRun(
-            pWorld,
-            pRunState,
-            eInteraction
-        );
+        bool bNotebookUpdated =
+            Floppy144RunStateInteractionCompleted(
+                pRunState,
+                eInteraction
+            );
 
-        pCabinet->pszStatus = "ITEM INSPECTED - NOTEBOOK UPDATED";
+        if(
+            !bNotebookUpdated &&
+            Floppy144InteractionCanRun(
+                pRunState,
+                eInteraction
+            )
+        )
+        {
+            bNotebookUpdated =
+                Floppy144InteractionTryRun(
+                    pWorld,
+                    pRunState,
+                    eInteraction
+                );
+        }
+
+        pCabinet->pszStatus =
+            bNotebookUpdated
+                ? "ITEM INSPECTED - NOTEBOOK UPDATED"
+                : "ITEM INSPECTED";
     }
     else
     {
