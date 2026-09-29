@@ -16,6 +16,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#define FLOPPY144_TERMINAL_RESTORE_BASE_MS      300U
+#define FLOPPY144_TERMINAL_RESTORE_MS_PER_KB     18U
+
 /*
  * Small terminal drawing helpers
  *
@@ -962,11 +965,13 @@ void Floppy144TerminalInputCharacter(
     char character
 )
 {
-    if(terminal == NULL)
+    if(
+        terminal == NULL ||
+        terminal->restoration_in_progress
+    )
     {
         return;
     }
-
 
     if(
         character >= 'a' &&
@@ -1022,6 +1027,7 @@ void Floppy144TerminalBackspace(
 {
     if(
         terminal == NULL ||
+        terminal->restoration_in_progress ||
         terminal->input_length == 0U
     )
     {
@@ -1054,6 +1060,7 @@ void Floppy144TerminalMoveHistory(
 {
     if(
         terminal == NULL ||
+        terminal->restoration_in_progress ||
         terminal->history_count == 0U ||
         direction == 0
     )
@@ -2639,127 +2646,30 @@ void Floppy144TerminalCloseHelpPager(
     false;
 }
 
-static void Floppy144TerminalRestoreCollection(
+static bool Floppy144TerminalCompleteRestore(
     Floppy144TerminalState *terminal,
     Floppy144WorldState *world,
     Floppy144RunState *run_state,
-    const char *code
+    Floppy144CollectionId collection
 )
 {
-    Floppy144CollectionId collection;
-
     const Floppy144CollectionDefinition *definition;
-
-    char line
-        [FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
+    char line[FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
 
     if(
-        !Floppy144TerminalFindCollection(
-            code,
-            &collection
-        )
+        terminal == NULL ||
+        world == NULL ||
+        run_state == NULL
     )
     {
-        snprintf(
-            line,
-            sizeof(line),
-            "COLLECTION %s NOT FOUND ON DISK 144.",
-            code
-        );
-
-        Floppy144TerminalPushWrappedLine(
-            terminal,
-            line
-        );
-
-        return;
+        return false;
     }
 
     definition =
-        Floppy144CollectionGet(
-            collection
-        );
-
-        if(
-            !Floppy144RunStateCollectionAvailable(
-                run_state,
-                collection
-            )
-        )
-        {
-            Floppy144TerminalPushLine(
-                terminal,
-                "COLLECTION NOT YET AVAILABLE FOR RECOVERY."
-            );
-
-            return;
-        }
+        Floppy144CollectionGet(collection);
 
     if(
-        Floppy144WorldCollectionRestored(
-            world,
-            collection
-        )
-    )
-    {
-        snprintf(
-            line,
-            sizeof(line),
-            "COLLECTION %s ALREADY RESTORED.",
-            definition->code
-        );
-
-        Floppy144TerminalPushLine(
-            terminal,
-            line
-        );
-
-        return;
-    }
-
-    if(
-        !Floppy144RunStateCanRestoreCollection(
-            run_state,
-            collection
-        )
-    )
-    {
-        Floppy144TerminalPushLine(terminal, "");
-        Floppy144TerminalPushLine(terminal, "RESTORE REFUSED.");
-        Floppy144TerminalPushLine(
-            terminal,
-            "INSUFFICIENT RECOVERY CAPACITY."
-        );
-
-        (void)snprintf(
-            line,
-            sizeof(line),
-            "FREE %u KB  COLLECTION REQUIRES %u KB",
-            (unsigned)Floppy144RunStateFreeKb(run_state),
-            (unsigned)definition->size_kb
-        );
-        Floppy144TerminalPushLine(terminal, line);
-        return;
-    }
-
-    snprintf(
-        line,
-        sizeof(line),
-        "RESTORING COLLECTION %s...",
-        definition->code
-    );
-
-    Floppy144TerminalPushLine(
-        terminal,
-        ""
-    );
-
-    Floppy144TerminalPushLine(
-        terminal,
-        line
-    );
-
-    if(
+        definition == NULL ||
         !Floppy144RunStateRestoreCollection(
             run_state,
             collection
@@ -2770,26 +2680,20 @@ static void Floppy144TerminalRestoreCollection(
             terminal,
             "COLLECTION RESTORATION FAILED."
         );
-
-        return;
+        return false;
     }
 
     /*
-     * RunState is authoritative. WorldState mirrors a restoration only after the
-     * authoritative state has accepted it.
+     * RunState is authoritative. WorldState mirrors the restoration only after
+     * the progress bar has completed and RunState has accepted the collection.
      */
     Floppy144WorldRestoreCollection(
         world,
         collection
     );
 
-    /*
-     * Record shorthand is session-local. The most recently restored
-     * collection becomes the implicit prefix for OPEN RS-####.
-     */
     terminal->default_record_collection =
         collection;
-
     terminal->default_record_collection_valid =
         true;
 
@@ -2798,11 +2702,6 @@ static void Floppy144TerminalRestoreCollection(
         "COLLECTION RESTORED."
     );
 
-    /*
-     * OPEN is intentionally withheld until a restored collection actually
-     * exposes catalogue records. DR-01 is the first such collection in the
-     * Prologue, but the rule itself remains data-driven.
-     */
     if(
         !terminal->open_command_available &&
         definition->catalogue.record_count > 0U
@@ -2822,7 +2721,10 @@ static void Floppy144TerminalRestoreCollection(
         line,
         (uint32_t)sizeof(line)
     );
-    Floppy144TerminalPushLine(terminal, line);
+    Floppy144TerminalPushLine(
+        terminal,
+        line
+    );
 
     {
         const Floppy144DocumentDefinition *pEntryDocument =
@@ -2863,6 +2765,238 @@ static void Floppy144TerminalRestoreCollection(
             );
         }
     }
+
+    return true;
+}
+
+static void Floppy144TerminalRestoreCollection(
+    Floppy144TerminalState *terminal,
+    Floppy144WorldState *world,
+    Floppy144RunState *run_state,
+    const char *code
+)
+{
+    Floppy144CollectionId collection;
+    const Floppy144CollectionDefinition *definition;
+    char line[FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
+
+    if(
+        terminal == NULL ||
+        world == NULL ||
+        run_state == NULL
+    )
+    {
+        return;
+    }
+
+    if(
+        !Floppy144TerminalFindCollection(
+            code,
+            &collection
+        )
+    )
+    {
+        snprintf(
+            line,
+            sizeof(line),
+            "COLLECTION %s NOT FOUND ON DISK 144.",
+            code
+        );
+
+        Floppy144TerminalPushWrappedLine(
+            terminal,
+            line
+        );
+        return;
+    }
+
+    definition =
+        Floppy144CollectionGet(collection);
+
+    if(
+        !Floppy144RunStateCollectionAvailable(
+            run_state,
+            collection
+        )
+    )
+    {
+        Floppy144TerminalPushLine(
+            terminal,
+            "COLLECTION NOT YET AVAILABLE FOR RECOVERY."
+        );
+        return;
+    }
+
+    if(
+        Floppy144WorldCollectionRestored(
+            world,
+            collection
+        )
+    )
+    {
+        snprintf(
+            line,
+            sizeof(line),
+            "COLLECTION %s ALREADY RESTORED.",
+            definition->code
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            line
+        );
+        return;
+    }
+
+    if(
+        !Floppy144RunStateCanRestoreCollection(
+            run_state,
+            collection
+        )
+    )
+    {
+        Floppy144TerminalPushLine(terminal, "");
+        Floppy144TerminalPushLine(terminal, "RESTORE REFUSED.");
+        Floppy144TerminalPushLine(
+            terminal,
+            "INSUFFICIENT RECOVERY CAPACITY."
+        );
+
+        (void)snprintf(
+            line,
+            sizeof(line),
+            "FREE %u KB  COLLECTION REQUIRES %u KB",
+            (unsigned)Floppy144RunStateFreeKb(run_state),
+            (unsigned)definition->size_kb
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            line
+        );
+        return;
+    }
+
+    snprintf(
+        line,
+        sizeof(line),
+        "RESTORING COLLECTION %s...",
+        definition->code
+    );
+
+    Floppy144TerminalPushLine(
+        terminal,
+        ""
+    );
+    Floppy144TerminalPushLine(
+        terminal,
+        line
+    );
+
+    terminal->restoration_in_progress =
+        true;
+    terminal->restoration_collection =
+        collection;
+    terminal->restoration_elapsed_ms =
+        0U;
+    terminal->restoration_duration_ms =
+        FLOPPY144_TERMINAL_RESTORE_BASE_MS +
+        definition->size_kb *
+        FLOPPY144_TERMINAL_RESTORE_MS_PER_KB;
+    terminal->cursor_visible =
+        false;
+}
+
+bool Floppy144TerminalRestoreInProgress(
+    const Floppy144TerminalState *terminal
+)
+{
+    return
+        terminal != NULL &&
+        terminal->restoration_in_progress;
+}
+
+uint32_t Floppy144TerminalRestoreProgressPercent(
+    const Floppy144TerminalState *terminal
+)
+{
+    if(
+        terminal == NULL ||
+        !terminal->restoration_in_progress ||
+        terminal->restoration_duration_ms == 0U
+    )
+    {
+        return 0U;
+    }
+
+    if(
+        terminal->restoration_elapsed_ms >=
+        terminal->restoration_duration_ms
+    )
+    {
+        return 100U;
+    }
+
+    return
+        (
+            terminal->restoration_elapsed_ms *
+            100U
+        ) /
+        terminal->restoration_duration_ms;
+}
+
+void Floppy144TerminalAdvanceRestore(
+    Floppy144TerminalState *terminal,
+    Floppy144WorldState *world,
+    Floppy144RunState *run_state,
+    uint32_t elapsed_milliseconds
+)
+{
+    if(
+        terminal == NULL ||
+        world == NULL ||
+        run_state == NULL ||
+        !terminal->restoration_in_progress
+    )
+    {
+        return;
+    }
+
+    if(
+        elapsed_milliseconds >=
+        terminal->restoration_duration_ms -
+        terminal->restoration_elapsed_ms
+    )
+    {
+        terminal->restoration_elapsed_ms =
+            terminal->restoration_duration_ms;
+    }
+    else
+    {
+        terminal->restoration_elapsed_ms +=
+            elapsed_milliseconds;
+    }
+
+    if(
+        terminal->restoration_elapsed_ms <
+        terminal->restoration_duration_ms
+    )
+    {
+        return;
+    }
+
+    terminal->restoration_in_progress =
+        false;
+
+    (void)Floppy144TerminalCompleteRestore(
+        terminal,
+        world,
+        run_state,
+        terminal->restoration_collection
+    );
+
+    terminal->cursor_visible =
+        true;
 }
 
 /*
@@ -3056,6 +3190,7 @@ void Floppy144TerminalSubmitInput(
         terminal == NULL ||
         world == NULL ||
         run_state == NULL ||
+        terminal->restoration_in_progress ||
         terminal->input_length == 0U
     )
     {
@@ -3428,6 +3563,15 @@ void Floppy144TerminalReset(
 
     terminal->cursor_visible =
         true;
+
+    terminal->restoration_in_progress =
+        false;
+    terminal->restoration_collection =
+        FLOPPY144_COLLECTION_DR01;
+    terminal->restoration_elapsed_ms =
+        0U;
+    terminal->restoration_duration_ms =
+        0U;
 
     terminal->open_command_available =
         Floppy144TerminalRecordAccessAvailable(
@@ -3935,7 +4079,77 @@ void Floppy144TerminalDraw(
 
     Floppy144DrawFillRect(&surface, 30U, 260U, 580U, 1U, border);
 
-    if(!pager_active)
+    if(
+        !pager_active &&
+        terminal->restoration_in_progress
+    )
+    {
+        const Floppy144CollectionDefinition *pRestoreDefinition =
+            Floppy144CollectionGet(
+                terminal->restoration_collection
+            );
+
+        uint32_t uPercent =
+            Floppy144TerminalRestoreProgressPercent(
+                terminal
+            );
+
+        uint32_t uCollectionKb =
+            pRestoreDefinition != NULL
+                ? pRestoreDefinition->size_kb
+                : 0U;
+
+        uint32_t uRecoveredKb =
+            (uCollectionKb * uPercent) / 100U;
+
+        uint32_t uBarWidth =
+            (550U * uPercent) / 100U;
+
+        char szRestore[80];
+
+        (void)snprintf(
+            szRestore,
+            sizeof(szRestore),
+            "RESTORING %s  %u / %u KB  %u%%",
+            pRestoreDefinition != NULL
+                ? pRestoreDefinition->code
+                : "COLLECTION",
+            (unsigned)uRecoveredKb,
+            (unsigned)uCollectionKb,
+            (unsigned)uPercent
+        );
+
+        Floppy144DrawText(
+            &surface,
+            34U,
+            268U,
+            szRestore,
+            1U,
+            bright
+        );
+
+        Floppy144DrawRect(
+            &surface,
+            34U,
+            282U,
+            558U,
+            10U,
+            border
+        );
+
+        if(uBarWidth > 0U)
+        {
+            Floppy144DrawFillRect(
+                &surface,
+                38U,
+                285U,
+                uBarWidth,
+                4U,
+                bright
+            );
+        }
+    }
+    else if(!pager_active)
     {
         uint32_t uPromptY =
             Floppy144RunStateArchiveServicesInitialised(run_state)
@@ -3962,6 +4176,7 @@ void Floppy144TerminalDraw(
             1U,
             bright
         );
+
         if(terminal->cursor_visible)
         {
             Floppy144DrawFillRect(
@@ -3978,7 +4193,18 @@ void Floppy144TerminalDraw(
     Floppy144DrawFillRect(&surface, 10U, 306U, 620U, 28U, background);
     Floppy144DrawRect(&surface, 10U, 306U, 620U, 28U, border);
 
-    if(pager_active)
+    if(terminal->restoration_in_progress)
+    {
+        Floppy144DrawText(
+            &surface,
+            22U,
+            316U,
+            "COLLECTION RECOVERY IN PROGRESS",
+            1U,
+            text
+        );
+    }
+    else if(pager_active)
     {
         Floppy144DrawText(
             &surface,
