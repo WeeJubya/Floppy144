@@ -1124,8 +1124,8 @@ static void Floppy144TestContextLabels(void)
     pszLabel = Floppy144SiteContextLabel(&sState);
     F144_CHECK(
         pszLabel != NULL &&
-        strcmp(pszLabel, "WALL-MOUNTED ITEM") == 0,
-        "wall-mounted Security fixture exposes a context label"
+        strcmp(pszLabel, "KEY CABINET") == 0,
+        "wall-mounted Security fixture exposes its authored context label"
     );
 }
 
