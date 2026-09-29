@@ -10571,7 +10571,7 @@
       "drawing_definition_id": "DRAW_STANDARD_DESK",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 169,
-      "description": "RACHEL MORGAN / Security Duty Officer"
+      "description": "RACHEL MORGAN / Security Manager"
     },
     {
       "id": "P-170",
@@ -16143,7 +16143,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nSITE CLOSURE PROJECT\nOUTSTANDING WORKSTREAM SUMMARY\n\nAt close of business Thursday, two operational workstreams remained capable of delaying handover.\n\nRECORDS\nCabinet holdings and transfer staging require final reconciliation in the Records Office.\n\nTECHNOLOGY\nThe Main Office terminal route must be restored before digital holdings verification can be completed.\n\nThe workstreams may proceed independently, but both feed the same final handover decision. Neither is to be marked complete on the strength of verbal assurance.\n\nFacilities and Security are to support access as required.\n\nDistribution: Martin Webb, Project Manager, Priya Patel, Senior Archivist, Claire Hughes, IT Support, Rachel Morgan (Security Duty Officer).",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nSITE CLOSURE PROJECT\nOUTSTANDING WORKSTREAM SUMMARY\n\nAt close of business Thursday, two operational workstreams remained capable of delaying handover.\n\nRECORDS\nCabinet holdings and transfer staging require final reconciliation in the Records Office.\n\nTECHNOLOGY\nThe Main Office terminal route must be restored before digital holdings verification can be completed.\n\nThe workstreams may proceed independently, but both feed the same final handover decision. Neither is to be marked complete on the strength of verbal assurance.\n\nFacilities and Security are to support access as required.\n\nDistribution: Martin Webb, Project Manager, Priya Patel, Senior Archivist, Claire Hughes, IT Manager, Rachel Morgan, Security Manager.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-04",
       "recovery_entry_point": true,
@@ -16685,7 +16685,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nSTAFF CONTACT DIRECTORY - FINAL WEEK\n\nHelen Cartwright, Director ................... Director's Office\nMartin Webb, Project Manager ................. Main Office, Desk 06\nPriyaPatel, Senior Archivist ................ Main Office, Desk 01 / Records Office\nDaniel Price, Records Officer ................ Main Office, Desk 02 / Records Office\nClaire Hughes, IT Support .................... Main Office, Desk 04 / IT Support\nImran Shah, Facilities liaison ............... Main Office, Desk 05 / Facilities\nRachel Morgan, Security Duty Officer ......... Security Office\n\nInternal extensions remain in service until handover.\n\nFor emergency traffic use Security first. For closure scheduling use the Project Manager. For missing files use the Records Officer before using the word \"missing\" loudly.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nSTAFF CONTACT DIRECTORY - FINAL WEEK\n\nHelen Cartwright, Director ................... Director's Office\nPriya Patel, Senior Archivist ................ Main Office, Desk 01 / Records Office\nDaniel Price, Records Officer ................ Main Office, Desk 02 / Records Office\nClaire Hughes, IT Manager .................... Main Office, Desk 04 / IT Support\nImran Shah, Facilities liaison ............... Main Office, Desk 05 / Facilities\nMartin Webb, Project Manager ................. Main Office, Desk 06\nRachel Morgan, Security Manager .............. Security Office\n\nInternal extensions remain in service until handover.\n\nFor emergency traffic use Security first. For closure scheduling use the Project Manager. For missing files use the Records Officer before using the word \"missing\" loudly.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "HR-01"
     },
@@ -16793,7 +16793,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nOVERTIME AUTHORISATION\n\nAuthorised where required to complete closure tasks beyond normal hours:\n\nPriya Patel, Senior Archivist: archive transfer exceptions\nDaniel Price, Records Officer: reconciliation and transfer staging\nClaire Hughes, IT Support: terminal/server remediation\nImran Shah, Facilities liaison: contractor and retained-service support\n\nMaximum: two hours without Project Manager extension.\n\nOvertime authorisation is not permission to bypass access controls, lone-working rules or equipment isolation.\n\nThe building may be closing. Employment law has not been notified.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nOVERTIME AUTHORISATION\n\nAuthorised where required to complete closure tasks beyond normal hours:\n\nPriya Patel, Senior Archivist: archive transfer exceptions\nDaniel Price, Records Officer: reconciliation and transfer staging\nClaire Hughes, IT Manager: terminal/server remediation\nImran Shah, Facilities liaison: contractor and retained-service support\n\nMaximum: two hours without Project Manager extension.\n\nOvertime authorisation is not permission to bypass access controls, lone-working rules or equipment isolation.\n\nThe building may be closing. Employment law has not been notified.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "HR-09"
     },
