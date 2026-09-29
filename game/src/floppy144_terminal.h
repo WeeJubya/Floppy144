@@ -45,6 +45,16 @@ typedef struct Floppy144TerminalState
     bool cursor_visible;
 
     /*
+     * Collection restoration is deliberately terminal-local until its progress
+     * bar reaches 100%. Duration is derived from the collection's size_kb so a
+     * larger archive visibly takes longer to reconstruct.
+     */
+    bool restoration_in_progress;
+    Floppy144CollectionId restoration_collection;
+    uint32_t restoration_elapsed_ms;
+    uint32_t restoration_duration_ms;
+
+    /*
      * Terminal capability and contextual-record state.
      *
      * open_command_available prevents OPEN being advertised before the
@@ -170,6 +180,21 @@ void Floppy144TerminalSubmitInput(
     Floppy144TerminalState *terminal,
     Floppy144WorldState *world,
     Floppy144RunState *run_state
+);
+
+bool Floppy144TerminalRestoreInProgress(
+    const Floppy144TerminalState *terminal
+);
+
+uint32_t Floppy144TerminalRestoreProgressPercent(
+    const Floppy144TerminalState *terminal
+);
+
+void Floppy144TerminalAdvanceRestore(
+    Floppy144TerminalState *terminal,
+    Floppy144WorldState *world,
+    Floppy144RunState *run_state,
+    uint32_t elapsed_milliseconds
 );
 
 /*
