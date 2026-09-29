@@ -424,6 +424,14 @@ function Test-Stage3B5CoordinatorWiring {
     }
 
     if(
+        $MainSource -notmatch 'FLOPPY144_TERMINAL_RESTORE_TIMER_ID' -or
+        $MainSource -notmatch 'Floppy144TerminalAdvanceRestore' -or
+        $MainSource -notmatch 'Floppy144TerminalRestoreInProgress'
+    ) {
+        throw "Collection restore progress is not wired into the Win32 terminal coordinator."
+    }
+
+    if(
         $MainSource -match
         'UNAUTHORISED ACCESS - SECURE CABINET LOCKED'
     ) {
