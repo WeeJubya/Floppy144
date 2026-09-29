@@ -1767,34 +1767,19 @@ Floppy144Site2DWallFixtureAttachment(
 }
 
 /*
- * Attachment detection above operates in canonical Site coordinates.
- * The 2D view is rotated 90 degrees clockwise, so convert the wall side into
- * view/screen orientation before applying visual depth. Without this mapping
- * a left-wall fixture is centred vertically after projection instead of
- * remaining attached to the top wall seen by the player.
+ * Canonical Site coordinates are already player-facing.
+ *
+ * The old renderer rotated world coordinates 90 degrees clockwise at runtime,
+ * which also required LEFT/TOP/etc. wall attachments to be rotated. Stage 3B.3
+ * removed that hidden transform: floppy144_site_view.c is now deliberately an
+ * identity facade. Wall attachment directions must therefore remain unchanged.
  */
 static Floppy144Site2DWallAttachment
 Floppy144Site2DWallAttachmentToView(
     Floppy144Site2DWallAttachment attachment
 )
 {
-    switch(attachment)
-    {
-        case FLOPPY144_SITE_2D_WALL_LEFT:
-            return FLOPPY144_SITE_2D_WALL_TOP;
-
-        case FLOPPY144_SITE_2D_WALL_RIGHT:
-            return FLOPPY144_SITE_2D_WALL_BOTTOM;
-
-        case FLOPPY144_SITE_2D_WALL_TOP:
-            return FLOPPY144_SITE_2D_WALL_RIGHT;
-
-        case FLOPPY144_SITE_2D_WALL_BOTTOM:
-            return FLOPPY144_SITE_2D_WALL_LEFT;
-
-        default:
-            return FLOPPY144_SITE_2D_WALL_NONE;
-    }
+    return attachment;
 }
 
 /*
