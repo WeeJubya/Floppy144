@@ -437,11 +437,23 @@ function Test-Stage3B5CoordinatorWiring {
         }
     }
 
+    /*
+     * Stage 3C camera clipping contract:
+     *
+     * Do NOT clip visual.x/visual.y/visual.width/visual.height before handing
+     * the object to the drawing recipe. That old behaviour changed the authored
+     * dimensions as an object crossed the viewport edge and made wall-hangings
+     * appear to shrink/grow.
+     *
+     * A disposable visible_probe may be clipped for visibility rejection, while
+     * authored drawing must use Floppy144DrawingRuntimeDrawClipped so primitive
+     * output is clipped without changing the object's geometry.
+     */
     if(
-        $Site2DSource -notmatch
+        $Site2DSource -match
         'Floppy144Site2DClipRect\s*\(\s*surface,\s*&visual\.x'
     ) {
-        throw "Stage 3C wall fixtures are not clipped to the Site viewport before authored drawing."
+        throw "Stage 3C wall fixtures are again clipping object geometry before authored drawing."
     }
 
     if(
