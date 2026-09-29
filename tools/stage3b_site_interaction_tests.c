@@ -1127,6 +1127,32 @@ static void Floppy144TestContextLabels(void)
         strcmp(pszLabel, "KEY CABINET") == 0,
         "wall-mounted Security fixture exposes its authored context label"
     );
+
+    Floppy144TestReset(&sWorld, &sState);
+    (void)Floppy144RunStateReconstructRoom(
+        &sState,
+        FLOPPY144_ROOM_RECEPTION
+    );
+    Floppy144TestSetPosition(&sState, 79, 43);
+    pszLabel = Floppy144SiteContextLabel(&sState);
+    F144_CHECK(
+        pszLabel != NULL &&
+        strcmp(pszLabel, "SITE DIRECTORY") == 0,
+        "Reception wall hanging is labelled Site Directory"
+    );
+
+    Floppy144TestReset(&sWorld, &sState);
+    (void)Floppy144RunStateReconstructRoom(
+        &sState,
+        FLOPPY144_ROOM_CORRIDOR
+    );
+    Floppy144TestSetPosition(&sState, 38, 54);
+    pszLabel = Floppy144SiteContextLabel(&sState);
+    F144_CHECK(
+        pszLabel != NULL &&
+        strcmp(pszLabel, "SITE DIRECTORY") == 0,
+        "Corridor wall hanging is labelled Site Directory"
+    );
 }
 
 /*
