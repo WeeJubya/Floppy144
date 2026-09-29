@@ -1810,8 +1810,13 @@ static void Floppy144Site2DWallFixtureVisualRect(
     Floppy144SiteScreenRect *visual_rect
 )
 {
+    const int32_t mount_pixels =
+        FLOPPY144_SITE_2D_PIXELS_PER_UNIT / 2;
+
     int32_t depth_pixels =
         FLOPPY144_SITE_2D_PIXELS_PER_UNIT / 2;
+
+    Floppy144Site2DWallAttachment attachment;
 
     if(screen_rect == NULL || visual_rect == NULL)
     {
@@ -1819,6 +1824,11 @@ static void Floppy144Site2DWallFixtureVisualRect(
     }
 
     *visual_rect = *screen_rect;
+
+    attachment =
+        Floppy144Site2DWallAttachmentToView(
+            Floppy144Site2DWallFixtureAttachment(rect)
+        );
 
     if(Floppy144Site2DVariantIs(placement, "MONITOR_BANK"))
     {
@@ -1834,15 +1844,15 @@ static void Floppy144Site2DWallFixtureVisualRect(
             FLOPPY144_SITE_2D_PIXELS_PER_UNIT * 2;
     }
 
+    /*
+     * First preserve the authored run along the wall while reducing only the
+     * depth projecting into the room. Attachment is already converted into
+     * screen orientation, so the same rule works on every wall after rotation.
+     */
     if(visual_rect->width <= visual_rect->height)
     {
         if(depth_pixels < visual_rect->width)
         {
-            Floppy144Site2DWallAttachment attachment =
-                Floppy144Site2DWallAttachmentToView(
-                    Floppy144Site2DWallFixtureAttachment(rect)
-                );
-
             if(attachment == FLOPPY144_SITE_2D_WALL_RIGHT)
             {
                 visual_rect->x +=
@@ -1861,11 +1871,6 @@ static void Floppy144Site2DWallFixtureVisualRect(
     {
         if(depth_pixels < visual_rect->height)
         {
-            Floppy144Site2DWallAttachment attachment =
-                Floppy144Site2DWallAttachmentToView(
-                    Floppy144Site2DWallFixtureAttachment(rect)
-                );
-
             if(attachment == FLOPPY144_SITE_2D_WALL_BOTTOM)
             {
                 visual_rect->y +=
@@ -1879,6 +1884,35 @@ static void Floppy144Site2DWallFixtureVisualRect(
 
             visual_rect->height = depth_pixels;
         }
+    }
+
+    /*
+     * Authored fixture coordinates live on the first interior Site cell so
+     * targeting remains simple. Visually move a wall-hanging half a Site unit
+     * outward onto the room's wall plane. This keeps Site Directories,
+     * suppression panels, patch panels and other hangings on the wall without
+     * changing collision or interaction geometry.
+     */
+    switch(attachment)
+    {
+        case FLOPPY144_SITE_2D_WALL_LEFT:
+            visual_rect->x -= mount_pixels;
+            break;
+
+        case FLOPPY144_SITE_2D_WALL_RIGHT:
+            visual_rect->x += mount_pixels;
+            break;
+
+        case FLOPPY144_SITE_2D_WALL_TOP:
+            visual_rect->y -= mount_pixels;
+            break;
+
+        case FLOPPY144_SITE_2D_WALL_BOTTOM:
+            visual_rect->y += mount_pixels;
+            break;
+
+        default:
+            break;
     }
 }
 
