@@ -595,6 +595,21 @@ function Test-PhysicalItemPlayerFacingContract {
         }
     }
 
+    $Fm13ContractRecord =
+        $GameData.documents |
+        Where-Object {
+            $_.collection_id -eq 'FM-13' -and
+            $_.record_index -eq 1
+        }
+
+    if(
+        $null -eq $Fm13ContractRecord -or
+        $Fm13ContractRecord.body -notmatch 'Daniel Mercer' -or
+        $Fm13ContractRecord.body -notmatch 'Alderwick Fire & Safety Ltd'
+    ) {
+        throw "FM-13-RS-0076 no longer resolves to the named external contractor record."
+    }
+
     if($CabinetSource -match '"ID: %s"' -or $CabinetSource -match '"ROLE:') {
         throw "Cabinet Interior still exposes internal physical-item metadata."
     }
