@@ -580,6 +580,39 @@ function Test-PhysicalItemPlayerFacingContract {
         throw "Cabinet Interior still exposes internal physical-item metadata."
     }
 
+    if($CabinetSource -match 'RECOVERED PHYSICAL ITEM') {
+        throw "Contents detail still exposes the backend-style Recovered Physical Item heading."
+    }
+
+    if(
+        $CabinetSource -notmatch
+            'UP/DOWN SELECT  ENTER VIEW  BACKSPACE SITE' -or
+        $CabinetSource -notmatch
+            'ITEM INSPECTED - NOTEBOOK UPDATED'
+    ) {
+        throw "Contents screen player-facing Enter/Notebook wording has regressed."
+    }
+
+    if(
+        $CabinetSource -notmatch
+            'uY = 124U;' -or
+        $CabinetSource -notmatch
+            'Marker coordinates are deliberately derived from the silhouette'
+    ) {
+        throw "Desk contents markers are no longer constrained to the parent silhouette."
+    }
+
+    if(
+        $Site2DSource -notmatch
+            'const int32_t mount_pixels' -or
+        $Site2DSource -notmatch
+            'visual_rect->y -= mount_pixels' -or
+        $Site2DSource -notmatch
+            'visual_rect->x -= mount_pixels'
+    ) {
+        throw "Wall hangings are no longer visually mounted onto the wall plane."
+    }
+
     if(
         $Site2DSource -notmatch
         'Floppy144Site2DRotationIsDiagonal\(rotation\)'
