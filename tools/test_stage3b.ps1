@@ -354,6 +354,7 @@ function Test-Stage3B5CoordinatorWiring {
     $PersistenceSourcePath = Join-Path $SourceDir "floppy144_persistence.c"
     $Site2DPath = Join-Path $SourceDir "floppy144_site_2d.c"
     $SiteIsoPath = Join-Path $SourceDir "floppy144_site_isometric.c"
+    $SiteDirectoryPath = Join-Path $SourceDir "floppy144_site_directory.c"
     $DrawingRuntimeHeaderPath = Join-Path $SourceDir "floppy144_drawing_runtime.h"
     $DrawingRuntimeSourcePath = Join-Path $SourceDir "floppy144_drawing_runtime.c"
 
@@ -364,6 +365,7 @@ function Test-Stage3B5CoordinatorWiring {
         $PersistenceSourcePath,
         $Site2DPath,
         $SiteIsoPath,
+        $SiteDirectoryPath,
         $DrawingRuntimeHeaderPath,
         $DrawingRuntimeSourcePath
     )) {
@@ -378,6 +380,7 @@ function Test-Stage3B5CoordinatorWiring {
     $PersistenceSource = Get-Content -Raw -Path $PersistenceSourcePath
     $Site2DSource = Get-Content -Raw -Path $Site2DPath
     $SiteIsoSource = Get-Content -Raw -Path $SiteIsoPath
+    $SiteDirectorySource = Get-Content -Raw -Path $SiteDirectoryPath
     $DrawingRuntimeHeader = Get-Content -Raw -Path $DrawingRuntimeHeaderPath
     $DrawingRuntimeSource = Get-Content -Raw -Path $DrawingRuntimeSourcePath
 
@@ -454,6 +457,14 @@ function Test-Stage3B5CoordinatorWiring {
         'Floppy144Site2DClipRect\s*\(\s*surface,\s*&visual\.x'
     ) {
         throw "Stage 3C wall fixtures are again clipping object geometry before authored drawing."
+    }
+
+    if(
+        $SiteDirectorySource -match 'FLOPPY144_DIRECTORY_FOOTER_' -or
+        $SiteDirectorySource -notmatch
+            'FLOPPY144_DIRECTORY_MAP_SIZE\s+320U'
+    ) {
+        throw "Site Directory no longer owns the former footer area as part of its full-screen map."
     }
 
     if(
