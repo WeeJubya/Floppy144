@@ -776,7 +776,7 @@ bool Floppy144CabinetInspectSelected(
             eInteraction
         );
 
-        pCabinet->pszStatus = "INSPECTION RECORDED";
+        pCabinet->pszStatus = "ITEM INSPECTED - NOTEBOOK UPDATED";
     }
     else
     {
@@ -1091,22 +1091,53 @@ static void Floppy144CabinetDrawContentMarkers(
         uint32_t uMarker =
             uIndex == uSelected ? uBright : uEdge;
 
+        /*
+         * Marker coordinates are deliberately derived from the silhouette
+         * drawn by Floppy144CabinetDrawContainerBody. Recovered items therefore
+         * appear on/in their parent rather than floating outside it.
+         */
         if(
             Floppy144CabinetTypeContains(pCabinet, "DESK") ||
             Floppy144CabinetTypeContains(pCabinet, "TABLE") ||
             Floppy144CabinetTypeContains(pCabinet, "WORKTOP")
         )
         {
-            uX = 50U + uIndex * 25U;
-            uY = 104U;
+            uX = 50U + uIndex * 26U;
+            uY = 124U;
         }
         else if(Floppy144CabinetTypeContains(pCabinet, "FRIDGE"))
         {
             uX = 96U + (uIndex % 3U) * 44U;
             uY = 172U + (uIndex / 3U) * 30U;
         }
+        else if(Floppy144CabinetTypeContains(pCabinet, "TROLLEY"))
+        {
+            uX = 72U + (uIndex % 3U) * 66U;
+            uY = 120U + (uIndex / 3U) * 48U;
+        }
+        else if(Floppy144CabinetTypeContains(pCabinet, "SERVER"))
+        {
+            uX = 96U + (uIndex % 3U) * 48U;
+            uY = 104U + (uIndex / 3U) * 56U;
+        }
+        else if(Floppy144CabinetTypeContains(pCabinet, "DOOR"))
+        {
+            uX = 102U + (uIndex % 3U) * 46U;
+            uY = 116U + (uIndex / 3U) * 54U;
+        }
+        else if(
+            Floppy144CabinetTypeContains(
+                pCabinet,
+                "WALL_MOUNTED_ITEM"
+            )
+        )
+        {
+            uX = 88U + (uIndex % 3U) * 58U;
+            uY = 136U + (uIndex / 3U) * 38U;
+        }
         else
         {
+            /* Cupboards, bookcases and shelving. */
             uX = 64U + (uIndex % 3U) * 72U;
             uY = 96U + (uIndex / 3U) * 58U;
         }
@@ -1242,7 +1273,7 @@ static void Floppy144CabinetDrawInterior(
         pSurface,
         318U,
         294U,
-        "UP/DOWN SELECT  I INSPECT  BACKSPACE SITE",
+        "UP/DOWN SELECT  ENTER VIEW  BACKSPACE SITE",
         1U,
         uMuted
     );
@@ -1258,23 +1289,22 @@ static void Floppy144CabinetDrawInterior(
 
         Floppy144DrawFillRect(pSurface, 70U, 74U, 500U, 224U, uPanel);
         Floppy144DrawRect(pSurface, 70U, 74U, 500U, 224U, uEdge);
-        Floppy144DrawText(pSurface, 94U, 94U, "RECOVERED PHYSICAL ITEM", 2U, uBright);
 
         if(pItem != NULL)
         {
-            char szName[68];
+            char szName[48];
             char szDetail[80];
 
             /*
-             * Cabinet Interior is a player-facing evidence view.  Internal
-             * P- identifiers and ledger roles belong to the data/compiler
-             * layer, so show only the authored in-world item information.
+             * The recovered item's authored name is the screen heading. Internal
+             * ledger terminology such as "Recovered Physical Item" and P- IDs
+             * stays in the data layer rather than leaking into the fiction.
              */
-            snprintf(
+            Floppy144CabinetCopyForDisplay(
                 szName,
                 sizeof(szName),
-                "ITEM: %.52s",
-                pItem->pszA != NULL ? pItem->pszA : "RECOVERED ITEM"
+                pItem->pszA != NULL ? pItem->pszA : "RECOVERED ITEM",
+                38U
             );
 
             snprintf(
@@ -1286,8 +1316,8 @@ static void Floppy144CabinetDrawInterior(
                     "A recovered physical item from the reconstructed site."
             );
 
-            Floppy144DrawText(pSurface, 94U, 148U, szName, 1U, uText);
-            Floppy144DrawText(pSurface, 94U, 178U, szDetail, 1U, uText);
+            Floppy144DrawText(pSurface, 94U, 94U, szName, 2U, uBright);
+            Floppy144DrawText(pSurface, 94U, 158U, szDetail, 1U, uText);
         }
 
         Floppy144DrawText(
