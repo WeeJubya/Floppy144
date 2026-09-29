@@ -1133,7 +1133,12 @@ static void Floppy144TestContextLabels(void)
         &sState,
         FLOPPY144_ROOM_RECEPTION
     );
-    Floppy144TestSetPosition(&sState, 79, 43);
+    /*
+     * Stand on the authored fixture footprint so the assertion tests the
+     * Directory's label rather than whichever nearby object wins proximity.
+     * RECEPTION_SITE_DIRECTORY: x77 y40 w1 h6.
+     */
+    Floppy144TestSetPosition(&sState, 77, 43);
     pszLabel = Floppy144SiteContextLabel(&sState);
     F144_CHECK(
         pszLabel != NULL &&
@@ -1146,7 +1151,11 @@ static void Floppy144TestContextLabels(void)
         &sState,
         FLOPPY144_ROOM_CORRIDOR
     );
-    Floppy144TestSetPosition(&sState, 38, 54);
+    /*
+     * CORRIDOR_SITE_DIRECTORY: x35 y55 w6 h1. Use its centre line for an
+     * unambiguous zero-distance context-label lookup.
+     */
+    Floppy144TestSetPosition(&sState, 38, 55);
     pszLabel = Floppy144SiteContextLabel(&sState);
     F144_CHECK(
         pszLabel != NULL &&
