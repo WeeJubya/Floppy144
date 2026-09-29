@@ -592,23 +592,62 @@ static void Floppy144Site2DOutline(
 )
 {
     if(
-        Floppy144Site2DClipRect(
-            surface,
-            &x,
-            &y,
-            &width,
-            &height
-        )
+        surface == NULL ||
+        width <= 0 ||
+        height <= 0
     )
     {
-        Floppy144DrawRect(
+        return;
+    }
+
+    /*
+     * Preserve the authored rectangle when it crosses the camera edge.
+     * Clipping the rectangle first and then outlining the clipped result
+     * creates a false edge at the viewport and makes objects appear to resize.
+     */
+    Floppy144Site2DFill(
+        surface,
+        x,
+        y,
+        width,
+        1,
+        colour
+    );
+
+    if(height > 1)
+    {
+        Floppy144Site2DFill(
             surface,
-            (uint32_t)x,
-            (uint32_t)y,
-            (uint32_t)width,
-            (uint32_t)height,
+            x,
+            y + height - 1,
+            width,
+            1,
             colour
         );
+    }
+
+    if(height > 2)
+    {
+        Floppy144Site2DFill(
+            surface,
+            x,
+            y + 1,
+            1,
+            height - 2,
+            colour
+        );
+
+        if(width > 1)
+        {
+            Floppy144Site2DFill(
+                surface,
+                x + width - 1,
+                y + 1,
+                1,
+                height - 2,
+                colour
+            );
+        }
     }
 }
 
@@ -1728,6 +1767,37 @@ Floppy144Site2DWallFixtureAttachment(
 }
 
 /*
+ * Attachment detection above operates in canonical Site coordinates.
+ * The 2D view is rotated 90 degrees clockwise, so convert the wall side into
+ * view/screen orientation before applying visual depth. Without this mapping
+ * a left-wall fixture is centred vertically after projection instead of
+ * remaining attached to the top wall seen by the player.
+ */
+static Floppy144Site2DWallAttachment
+Floppy144Site2DWallAttachmentToView(
+    Floppy144Site2DWallAttachment attachment
+)
+{
+    switch(attachment)
+    {
+        case FLOPPY144_SITE_2D_WALL_LEFT:
+            return FLOPPY144_SITE_2D_WALL_TOP;
+
+        case FLOPPY144_SITE_2D_WALL_RIGHT:
+            return FLOPPY144_SITE_2D_WALL_BOTTOM;
+
+        case FLOPPY144_SITE_2D_WALL_TOP:
+            return FLOPPY144_SITE_2D_WALL_RIGHT;
+
+        case FLOPPY144_SITE_2D_WALL_BOTTOM:
+            return FLOPPY144_SITE_2D_WALL_LEFT;
+
+        default:
+            return FLOPPY144_SITE_2D_WALL_NONE;
+    }
+}
+
+/*
  * Wall fixtures occupy their authored collision footprint but are visually
  * shallow. Ordinary boards/panels/cabinets project only 0.5 Site units from
  * the wall. The CRT monitor bank remains one unit deep and the IT shelving
@@ -1769,7 +1839,9 @@ static void Floppy144Site2DWallFixtureVisualRect(
         if(depth_pixels < visual_rect->width)
         {
             Floppy144Site2DWallAttachment attachment =
-                Floppy144Site2DWallFixtureAttachment(rect);
+                Floppy144Site2DWallAttachmentToView(
+                    Floppy144Site2DWallFixtureAttachment(rect)
+                );
 
             if(attachment == FLOPPY144_SITE_2D_WALL_RIGHT)
             {
@@ -1790,7 +1862,9 @@ static void Floppy144Site2DWallFixtureVisualRect(
         if(depth_pixels < visual_rect->height)
         {
             Floppy144Site2DWallAttachment attachment =
-                Floppy144Site2DWallFixtureAttachment(rect);
+                Floppy144Site2DWallAttachmentToView(
+                    Floppy144Site2DWallFixtureAttachment(rect)
+                );
 
             if(attachment == FLOPPY144_SITE_2D_WALL_BOTTOM)
             {
@@ -1837,21 +1911,26 @@ static void Floppy144Site2DDrawWallFixture(
     );
 
     /*
-     * Drawing recipes bypass the small clipped-fill helpers below. Clip the
-     * fixture rectangle itself before invoking them so a wall board at the
-     * camera edge cannot paint over the fixed Site viewport/frame.
+     * Camera clipping is a separate Z-level from world geometry. Keep the
+     * complete projected fixture rectangle intact and use primitive-level
+     * clipping instead. A partially visible wall hanging must therefore retain
+     * exactly the same width/height as it scrolls through the camera edge.
      */
-    if(
-        !Floppy144Site2DClipRect(
-            surface,
-            &visual.x,
-            &visual.y,
-            &visual.width,
-            &visual.height
-        )
-    )
     {
-        return;
+        Floppy144SiteScreenRect visible_probe = visual;
+
+        if(
+            !Floppy144Site2DClipRect(
+                surface,
+                &visible_probe.x,
+                &visible_probe.y,
+                &visible_probe.width,
+                &visible_probe.height
+            )
+        )
+        {
+            return;
+        }
     }
 
     /*
@@ -1863,13 +1942,17 @@ static void Floppy144Site2DDrawWallFixture(
     if(
         placement == NULL ||
         placement->pszE == NULL ||
-        !Floppy144DrawingRuntimeDraw(
+        !Floppy144DrawingRuntimeDrawClipped(
             surface,
             placement->pszE,
             visual.x,
             visual.y,
             visual.width,
-            visual.height
+            visual.height,
+            FLOPPY144_SITE_2D_VIEWPORT_X,
+            FLOPPY144_SITE_2D_VIEWPORT_Y,
+            FLOPPY144_SITE_2D_VIEWPORT_WIDTH,
+            FLOPPY144_SITE_2D_VIEWPORT_HEIGHT
         )
     )
     {
@@ -3599,7 +3682,19 @@ void Floppy144Site2DDraw(
         rect_count =
             Floppy144SiteRectCount();
 
-        /* Room floors first. */
+        /*
+         * Four independent visual Z-levels:
+         *
+         *   1. FLOOR / ROOM SHELL
+         *   2. FURNITURE
+         *   3. WALL-HANGINGS
+         *   4. CAMERA VIEW (player plus viewport/frame)
+         *
+         * A rectangle belongs to one visual layer only. In particular,
+         * wall-mounted fixtures never alter furniture placement or dimensions.
+         */
+
+        /* Z1: room floor. */
         for(index = 0U; index < rect_count; ++index)
         {
             const Floppy144SiteRect *rect =
@@ -3632,21 +3727,26 @@ void Floppy144Site2DDraw(
             }
         }
 
+        /*
+         * The room shell belongs to the floor/background level. Boundaries
+         * replace the generated wall cells but do not participate in furniture
+         * or wall-hanging ordering.
+         */
         Floppy144Site2DDrawRoomBorder(
             &surface,
             &camera,
             active_room
         );
 
-        /* Door thresholds above the room border. */
         for(index = 0U; index < rect_count; ++index)
         {
             const Floppy144SiteRect *rect =
                 Floppy144SiteRectAt(index);
 
+            Floppy144SiteElement element;
+
             if(
                 rect == NULL ||
-                rect->type != (uint8_t)FLOPPY144_SITE_DOOR ||
                 !Floppy144Site2DRectVisibleInRoom(
                     run_state,
                     active_room,
@@ -3657,18 +3757,26 @@ void Floppy144Site2DDraw(
                 continue;
             }
 
-            Floppy144Site2DDrawSiteRect(
-                &surface,
-                &camera,
-                rect
-            );
+            element =
+                (Floppy144SiteElement)rect->type;
+
+            if(
+                element == FLOPPY144_SITE_DOOR ||
+                element == FLOPPY144_SITE_WINDOW ||
+                element == FLOPPY144_SITE_PARTITION_WALL
+            )
+            {
+                Floppy144Site2DDrawSiteRect(
+                    &surface,
+                    &camera,
+                    rect
+                );
+            }
         }
 
         /*
-         * Chairs are deliberately drawn before desks and other furniture.
-         * This gives desk/chair groupings a consistent visual hierarchy when
-         * their projected rectangles touch or slightly overlap, without
-         * changing any collision geometry. The rule applies Site-wide.
+         * Z2: furniture. Chairs are drawn first within this one layer so desk
+         * groupings retain their existing local presentation order.
          */
         for(index = 0U; index < rect_count; ++index)
         {
@@ -3695,7 +3803,6 @@ void Floppy144Site2DDraw(
             );
         }
 
-        /* Structure, non-chair furniture and fixtures above the chairs. */
         for(index = 0U; index < rect_count; ++index)
         {
             const Floppy144SiteRect *rect =
@@ -3721,6 +3828,9 @@ void Floppy144Site2DDraw(
             if(
                 Floppy144Site2DIsFloor(element) ||
                 element == FLOPPY144_SITE_DOOR ||
+                element == FLOPPY144_SITE_WINDOW ||
+                element == FLOPPY144_SITE_PARTITION_WALL ||
+                element == FLOPPY144_SITE_WALL_MOUNTED_ITEM ||
                 element == FLOPPY144_SITE_CHAIR
             )
             {
@@ -3734,6 +3844,37 @@ void Floppy144Site2DDraw(
             );
         }
 
+        /* Z3: wall-hangings, independently above all furniture. */
+        for(index = 0U; index < rect_count; ++index)
+        {
+            const Floppy144SiteRect *rect =
+                Floppy144SiteRectAt(index);
+
+            if(
+                rect == NULL ||
+                rect->type !=
+                    (uint8_t)FLOPPY144_SITE_WALL_MOUNTED_ITEM ||
+                !Floppy144Site2DRectVisibleInRoom(
+                    run_state,
+                    active_room,
+                    rect
+                )
+            )
+            {
+                continue;
+            }
+
+            Floppy144Site2DDrawSiteRect(
+                &surface,
+                &camera,
+                rect
+            );
+        }
+
+        /*
+         * Z4: camera view. The player is composited after world layers; the
+         * fixed viewport/frame below then masks the world at the camera edge.
+         */
         Floppy144Site2DDrawPlayer(
             &surface,
             &camera,
