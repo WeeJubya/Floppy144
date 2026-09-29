@@ -339,6 +339,15 @@ static void Floppy144TestSecurityCabinetUnlockAndContents(void)
     );
 
     F144_CHECK(
+        sCabinet.pszStatus != NULL &&
+        strstr(
+            sCabinet.pszStatus,
+            "NOTEBOOK UPDATED"
+        ) != NULL,
+        "gameplay physical-item inspection reports Notebook update"
+    );
+
+    F144_CHECK(
         Floppy144CabinetDetailOpen(&sCabinet),
         "inspection opens in-screen Cabinet Interior detail"
     );
