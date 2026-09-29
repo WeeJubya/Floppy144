@@ -1176,6 +1176,8 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
     bool bStaffChair315 = false;
 
     bool bItDesk = false;
+    bool bItBookcase = false;
+    bool bItPatchPanel = false;
     bool bServerDesk = false;
     bool bSecurityDeskLeft = false;
     bool bSecurityDeskRight = false;
@@ -1271,6 +1273,39 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
             bItDesk = true;
         }
 
+        /*
+         * Furniture and wall-hangings occupy independent visual Z-levels.
+         * The IT Support bookcase therefore sits directly against the x=44
+         * wall plane even though the patch panel is mounted on that same wall.
+         */
+        if(
+            pRect->room ==
+                (uint8_t)FLOPPY144_ROOM_IT_SUPPORT &&
+            pRect->type ==
+                (uint8_t)FLOPPY144_SITE_BOOKCASE &&
+            pRect->x == 44U &&
+            pRect->y == 79U &&
+            pRect->width == 2U &&
+            pRect->height == 6U
+        )
+        {
+            bItBookcase = true;
+        }
+
+        if(
+            pRect->room ==
+                (uint8_t)FLOPPY144_ROOM_IT_SUPPORT &&
+            pRect->type ==
+                (uint8_t)FLOPPY144_SITE_WALL_MOUNTED_ITEM &&
+            pRect->x == 44U &&
+            pRect->y == 79U &&
+            pRect->width == 1U &&
+            pRect->height == 8U
+        )
+        {
+            bItPatchPanel = true;
+        }
+
         if(
             pRect->type ==
                 (uint8_t)FLOPPY144_SITE_STANDARD_DESK &&
@@ -1320,6 +1355,12 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
     F144_CHECK(
         bItDesk,
         "IT Support standard desk uses locked-plan 6x4 footprint"
+    );
+
+    F144_CHECK(
+        bItBookcase &&
+        bItPatchPanel,
+        "IT Support furniture and wall-hanging share the wall plane on separate Z-levels"
     );
 
     F144_CHECK(
