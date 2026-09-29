@@ -1831,8 +1831,8 @@ static void Floppy144Site2DWallFixtureVisualRect(
 
     /*
      * First preserve the authored run along the wall while reducing only the
-     * depth projecting into the room. Attachment is already converted into
-     * screen orientation, so the same rule works on every wall after rotation.
+     * depth projecting into the room. Canonical Site axes already match the
+     * screen-facing view, so the same attachment direction applies directly.
      */
     if(visual_rect->width <= visual_rect->height)
     {
