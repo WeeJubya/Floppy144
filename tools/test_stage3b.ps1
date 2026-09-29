@@ -453,10 +453,10 @@ function Test-Stage3B5CoordinatorWiring {
         throw "Stage 3C wall-hanging camera clipping contract is incomplete."
     }
 
-    $Z1 = $Site2DSource.IndexOf("/* Z1: room floor. */")
-    $Z2 = $Site2DSource.IndexOf("/* Z2: furniture.")
-    $Z3 = $Site2DSource.IndexOf("/* Z3: wall-hangings")
-    $Z4 = $Site2DSource.IndexOf("/* Z4: camera view.")
+    $Z1 = $Site2DSource.IndexOf("Z1: room floor.")
+    $Z2 = $Site2DSource.IndexOf("Z2: furniture.")
+    $Z3 = $Site2DSource.IndexOf("Z3: wall-hangings")
+    $Z4 = $Site2DSource.IndexOf("Z4: camera view.")
 
     if(
         $Z1 -lt 0 -or
