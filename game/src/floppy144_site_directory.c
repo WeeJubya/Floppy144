@@ -5,6 +5,8 @@
  * its canonical orientation, but only floor rectangles belonging to restored
  * rooms are drawn. That means the map reveals progress without leaking rooms,
  * furniture, fixtures or doors that the archive has not reconstructed yet.
+ * The schematic now uses the complete screen, including the ordinary footer
+ * area, because the directory closes on any subsequent key press.
  */
 
 #include "floppy144_site_directory.h"
@@ -19,15 +21,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#define FLOPPY144_DIRECTORY_MAP_X        176U
-#define FLOPPY144_DIRECTORY_MAP_Y         20U
-#define FLOPPY144_DIRECTORY_MAP_SIZE     288U
+#define FLOPPY144_DIRECTORY_MAP_X        160U
+#define FLOPPY144_DIRECTORY_MAP_Y         28U
+#define FLOPPY144_DIRECTORY_MAP_SIZE     320U
 #define FLOPPY144_DIRECTORY_SITE_SIZE    100U
-
-#define FLOPPY144_DIRECTORY_FOOTER_X      20U
-#define FLOPPY144_DIRECTORY_FOOTER_Y     312U
-#define FLOPPY144_DIRECTORY_FOOTER_WIDTH 600U
-#define FLOPPY144_DIRECTORY_FOOTER_HEIGHT 28U
 
 static bool Floppy144SiteDirectoryIsFloor(
     Floppy144SiteElement eElement
@@ -470,25 +467,8 @@ void Floppy144SiteDirectoryDraw(
     }
 
     /*
-     * Keep the standard footer footprint so the map behaves like every other
-     * game screen. It intentionally carries no close label: any subsequent
-     * key press returns directly to Site exploration.
+     * The Site Directory is a true full-screen overlay. It intentionally uses
+     * the former footer area as map space and closes on any subsequent key.
      */
-    Floppy144DrawFillRect(
-        &sSurface,
-        FLOPPY144_DIRECTORY_FOOTER_X,
-        FLOPPY144_DIRECTORY_FOOTER_Y,
-        FLOPPY144_DIRECTORY_FOOTER_WIDTH,
-        FLOPPY144_DIRECTORY_FOOTER_HEIGHT,
-        uBackground
-    );
 
-    Floppy144DrawRect(
-        &sSurface,
-        FLOPPY144_DIRECTORY_FOOTER_X,
-        FLOPPY144_DIRECTORY_FOOTER_Y,
-        FLOPPY144_DIRECTORY_FOOTER_WIDTH,
-        FLOPPY144_DIRECTORY_FOOTER_HEIGHT,
-        uRoomEdge
-    );
 }
