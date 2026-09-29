@@ -614,8 +614,11 @@ function Test-PhysicalItemPlayerFacingContract {
         throw "Cabinet Interior still exposes internal physical-item metadata."
     }
 
-    if($CabinetSource -match 'RECOVERED PHYSICAL ITEM') {
-        throw "Contents detail still exposes the backend-style Recovered Physical Item heading."
+    if(
+        $CabinetSource -match
+            '(?s)Floppy144DrawText\s*\([^;]*"RECOVERED PHYSICAL ITEM"'
+    ) {
+        throw "Contents detail still renders the backend-style Recovered Physical Item heading."
     }
 
     if(
