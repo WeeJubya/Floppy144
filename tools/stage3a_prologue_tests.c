@@ -62,6 +62,21 @@ static void Floppy144TestSubmitCommand(
         pWorld,
         pRunState
     );
+
+    /*
+     * RESTORE is now visibly asynchronous in the game. Stage 3A's command
+     * helper advances that UI phase to completion so these older semantic
+     * regressions remain deterministic and do not depend on a Win32 timer.
+     */
+    if(Floppy144TerminalRestoreInProgress(pTerminal))
+    {
+        Floppy144TerminalAdvanceRestore(
+            pTerminal,
+            pWorld,
+            pRunState,
+            pTerminal->restoration_duration_ms
+        );
+    }
 }
 
 /* Search the fixed terminal transcript without depending on line position. */
