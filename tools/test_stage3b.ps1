@@ -484,6 +484,32 @@ function Test-Stage3B5CoordinatorWiring {
         throw "Stage 3C wall-hanging camera clipping contract is incomplete."
     }
 
+    $AttachmentStart =
+        $Site2DSource.IndexOf(
+            "Floppy144Site2DWallAttachmentToView("
+        )
+
+    if($AttachmentStart -lt 0) {
+        throw "Could not locate the wall-attachment view mapping."
+    }
+
+    $AttachmentSource =
+        $Site2DSource.Substring(
+            $AttachmentStart,
+            [Math]::Min(
+                900,
+                $Site2DSource.Length - $AttachmentStart
+            )
+        )
+
+    if(
+        $AttachmentSource -notmatch 'return\s+attachment\s*;' -or
+        $AttachmentSource -match
+            'FLOPPY144_SITE_2D_WALL_LEFT\s*:\s*\r?\n\s*return\s+FLOPPY144_SITE_2D_WALL_TOP'
+    ) {
+        throw "Wall attachments are being rotated even though Site view coordinates are already player-facing."
+    }
+
     $Z1 = $Site2DSource.IndexOf("Z1: room floor.")
     $Z2 = $Site2DSource.IndexOf("Z2: furniture.")
     $Z3 = $Site2DSource.IndexOf("Z3: wall-hangings")
