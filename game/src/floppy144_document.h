@@ -72,8 +72,10 @@ typedef struct Floppy144DocumentDefinition
      * immediately after its collection is restored, before branch-trigger
      * documents are offered.
      *
-     * offer_pending_trigger_choices asks the terminal to show every currently
-     * eligible trigger document in this collection after this record is opened.
+     * offer_pending_trigger_choices asks the terminal to show the authored
+     * trigger-document choices in this collection after this record is opened.
+     * This describes the document's intended branching guidance rather than
+     * whatever subset of triggers happens still to be pending in run state.
      */
     bool recovery_entry_point;
     bool offer_pending_trigger_choices;
@@ -126,6 +128,19 @@ const Floppy144DocumentDefinition *Floppy144DocumentRecoveryEntryPoint(
  */
 const Floppy144DocumentDefinition *Floppy144DocumentPendingTriggerAt(
     const Floppy144RunState *pRunState,
+    Floppy144CollectionId eCollection,
+    uint32_t uOrdinal
+);
+
+/*
+ * Locate the Nth authored trigger document in one collection, regardless of
+ * whether that trigger has already fired or is temporarily deferred.
+ *
+ * This is used by neutral briefing documents whose player-facing purpose is to
+ * describe the available workstreams consistently even when the player later
+ * reopens the briefing after progressing one or both branches.
+ */
+const Floppy144DocumentDefinition *Floppy144DocumentTriggerAt(
     Floppy144CollectionId eCollection,
     uint32_t uOrdinal
 );
