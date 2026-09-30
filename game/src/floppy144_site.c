@@ -131,6 +131,18 @@ bool Floppy144SiteElementBlocksMovement(
         return true;
     }
 
+    /*
+     * Wall-mounted fixtures live on the Wall-Hangings visual/interaction
+     * layer. Their generated 1U footprint is retained for targeting, labels
+     * and physical-item parenting, but it must not consume walkable floor.
+     * The wall/boundary geometry behind the fixture already supplies the
+     * correct physical collision.
+     */
+    if(element == FLOPPY144_SITE_WALL_MOUNTED_ITEM)
+    {
+        return false;
+    }
+
     return element > FLOPPY144_SITE_DOOR;
 }
 
