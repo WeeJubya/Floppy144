@@ -135,7 +135,8 @@ bool Floppy144SiteElementBlocksMovement(
  *
  * The Site model owns geometry and footprint maths, while RunState decides
  * whether progression-controlled geometry currently exists. Returning false
- * from the callback removes that blocking rectangle from the collision pass.
+ * removes that rectangle from both walkable-ground support and the blocking
+ * geometry pass, keeping collision aligned with runtime reconstruction.
  */
 typedef bool (*Floppy144SiteCollisionFilter)(
     const Floppy144SiteRect *rect,

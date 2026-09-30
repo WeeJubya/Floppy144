@@ -179,9 +179,11 @@ static bool Floppy144SiteRectContainsCell(
         (uint16_t)y < max_y;
 }
 
-static bool Floppy144SiteCellHasWalkableGround(
+static bool Floppy144SiteCellHasWalkableGroundFiltered(
     uint8_t x,
-    uint8_t y
+    uint8_t y,
+    Floppy144SiteCollisionFilter filter,
+    void *context
 )
 {
     uint32_t index;
@@ -192,7 +194,11 @@ static bool Floppy144SiteCellHasWalkableGround(
 
         if(
             Floppy144SiteElementIsWalkableGround(rect->type) &&
-            Floppy144SiteRectContainsCell(rect, x, y)
+            Floppy144SiteRectContainsCell(rect, x, y) &&
+            (
+                filter == NULL ||
+                filter(rect, context)
+            )
         )
         {
             return true;
@@ -253,9 +259,10 @@ bool Floppy144SitePositionBlockedFiltered(
 
     /*
      * Empty JSONC space is not walkable. The entire player footprint must be
-     * supported by generated FLOOR_* or DOOR geometry. This makes authored
-     * floors the physical room interior as well as the room-ownership source,
-     * while shared door rectangles provide the only legal wall crossings.
+     * supported by currently visible generated FLOOR_* or DOOR geometry.
+     * Applying the same runtime filter here as the blocking pass prevents an
+     * unreconstructed room or hidden internal door from leaving a walkable
+     * "ghost threshold" in an otherwise solid wall.
      */
     cell_x0 = player_x0 / FLOPPY144_SITE_FIXED_ONE;
     cell_y0 = player_y0 / FLOPPY144_SITE_FIXED_ONE;
@@ -267,9 +274,11 @@ bool Floppy144SitePositionBlockedFiltered(
         for(cell_x = cell_x0; cell_x <= cell_x1; ++cell_x)
         {
             if(
-                !Floppy144SiteCellHasWalkableGround(
+                !Floppy144SiteCellHasWalkableGroundFiltered(
                     (uint8_t)cell_x,
-                    (uint8_t)cell_y
+                    (uint8_t)cell_y,
+                    filter,
+                    context
                 )
             )
             {

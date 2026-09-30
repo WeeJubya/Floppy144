@@ -687,6 +687,296 @@ static void Floppy144TestWallHangingCollisionContract(void)
 }
 
 /*
+ * Collision support must obey the same runtime visibility contract as drawing.
+ *
+ * Door cells are authored as walkable ground so an active doorway can bridge
+ * two room floors. Before the destination room exists, however, that same
+ * compiled door must not carve an invisible walkable slot into the wall.
+ */
+static bool Floppy144TestRuntimeCollisionVisible(
+    const Floppy144SiteRect *pRect,
+    void *pContext
+)
+{
+    return
+        Floppy144SiteRectRuntimeVisible(
+            (const Floppy144RunState *)pContext,
+            pRect
+        );
+}
+
+static const Floppy144SiteRect *Floppy144TestFindDoorBetweenRooms(
+    Floppy144RoomId eRoomA,
+    Floppy144RoomId eRoomB
+)
+{
+    uint32_t uRectIndex;
+
+    for(
+        uRectIndex = 0U;
+        uRectIndex < Floppy144SiteRectCount();
+        ++uRectIndex
+    )
+    {
+        const Floppy144SiteRect *pRect =
+            Floppy144SiteRectAt(uRectIndex);
+
+        if(
+            pRect != NULL &&
+            pRect->type == (uint8_t)FLOPPY144_SITE_DOOR &&
+            (
+                (
+                    pRect->from_room == (uint8_t)eRoomA &&
+                    pRect->to_room == (uint8_t)eRoomB
+                ) ||
+                (
+                    pRect->from_room == (uint8_t)eRoomB &&
+                    pRect->to_room == (uint8_t)eRoomA
+                )
+            )
+        )
+        {
+            return pRect;
+        }
+    }
+
+    return NULL;
+}
+
+static bool Floppy144TestPlayerFootprintOverlapsRect(
+    int32_t nCentreX16,
+    int32_t nCentreY16,
+    const Floppy144SiteRect *pRect
+)
+{
+    int32_t nPlayerX0;
+    int32_t nPlayerX1;
+    int32_t nPlayerY0;
+    int32_t nPlayerY1;
+    int32_t nRectX0;
+    int32_t nRectX1;
+    int32_t nRectY0;
+    int32_t nRectY1;
+
+    if(pRect == NULL)
+    {
+        return false;
+    }
+
+    nPlayerX0 =
+        nCentreX16 -
+        FLOPPY144_SITE_PLAYER_COLLISION_WIDTH_X16 / 2;
+    nPlayerX1 =
+        nCentreX16 +
+        FLOPPY144_SITE_PLAYER_COLLISION_WIDTH_X16 / 2;
+    nPlayerY0 =
+        nCentreY16 -
+        FLOPPY144_SITE_PLAYER_COLLISION_DEPTH_X16;
+    nPlayerY1 =
+        nCentreY16;
+
+    nRectX0 =
+        (int32_t)pRect->x *
+        FLOPPY144_SITE_FIXED_ONE;
+    nRectX1 =
+        ((int32_t)pRect->x + (int32_t)pRect->width) *
+        FLOPPY144_SITE_FIXED_ONE;
+    nRectY0 =
+        (int32_t)pRect->y *
+        FLOPPY144_SITE_FIXED_ONE;
+    nRectY1 =
+        ((int32_t)pRect->y + (int32_t)pRect->height) *
+        FLOPPY144_SITE_FIXED_ONE;
+
+    return
+        nPlayerX1 > nRectX0 &&
+        nPlayerX0 < nRectX1 &&
+        nPlayerY1 > nRectY0 &&
+        nPlayerY0 < nRectY1;
+}
+
+static void Floppy144TestHiddenDoorGroundPair(
+    Floppy144RoomId eVisibleRoom,
+    Floppy144RoomId eHiddenRoom,
+    const char *pszDoorMessage,
+    const char *pszVisibleMessage,
+    const char *pszHiddenMessage
+)
+{
+    Floppy144WorldState sHiddenWorld;
+    Floppy144RunState sHiddenState;
+    Floppy144WorldState sVisibleWorld;
+    Floppy144RunState sVisibleState;
+    const Floppy144SiteRect *pDoor;
+    int32_t nMinX16;
+    int32_t nMaxX16;
+    int32_t nMinY16;
+    int32_t nMaxY16;
+    int32_t nX16;
+    int32_t nY16;
+    bool bVisibleThreshold = false;
+    bool bGhostThreshold = false;
+
+    Floppy144TestReset(
+        &sHiddenWorld,
+        &sHiddenState
+    );
+    Floppy144TestReset(
+        &sVisibleWorld,
+        &sVisibleState
+    );
+
+    (void)Floppy144RunStateReconstructRoom(
+        &sHiddenState,
+        eVisibleRoom
+    );
+    (void)Floppy144RunStateReconstructRoom(
+        &sVisibleState,
+        eVisibleRoom
+    );
+    (void)Floppy144RunStateReconstructRoom(
+        &sVisibleState,
+        eHiddenRoom
+    );
+
+    pDoor =
+        Floppy144TestFindDoorBetweenRooms(
+            eVisibleRoom,
+            eHiddenRoom
+        );
+
+    F144_CHECK(
+        pDoor != NULL,
+        pszDoorMessage
+    );
+
+    if(pDoor == NULL)
+    {
+        return;
+    }
+
+    nMinX16 =
+        ((int32_t)pDoor->x - 3) *
+        FLOPPY144_SITE_FIXED_ONE;
+    nMaxX16 =
+        ((int32_t)pDoor->x + (int32_t)pDoor->width + 3) *
+        FLOPPY144_SITE_FIXED_ONE;
+    nMinY16 =
+        ((int32_t)pDoor->y - 3) *
+        FLOPPY144_SITE_FIXED_ONE;
+    nMaxY16 =
+        ((int32_t)pDoor->y + (int32_t)pDoor->height + 3) *
+        FLOPPY144_SITE_FIXED_ONE;
+
+    if(nMinX16 < 0) nMinX16 = 0;
+    if(nMinY16 < 0) nMinY16 = 0;
+    if(
+        nMaxX16 >
+        FLOPPY144_SITE_SIZE_UNITS * FLOPPY144_SITE_FIXED_ONE
+    )
+    {
+        nMaxX16 =
+            FLOPPY144_SITE_SIZE_UNITS *
+            FLOPPY144_SITE_FIXED_ONE;
+    }
+    if(
+        nMaxY16 >
+        FLOPPY144_SITE_SIZE_UNITS * FLOPPY144_SITE_FIXED_ONE
+    )
+    {
+        nMaxY16 =
+            FLOPPY144_SITE_SIZE_UNITS *
+            FLOPPY144_SITE_FIXED_ONE;
+    }
+
+    for(
+        nY16 = nMinY16;
+        nY16 <= nMaxY16;
+        nY16 += FLOPPY144_SITE_MOVE_STEP_X16
+    )
+    {
+        for(
+            nX16 = nMinX16;
+            nX16 <= nMaxX16;
+            nX16 += FLOPPY144_SITE_MOVE_STEP_X16
+        )
+        {
+            if(
+                !Floppy144TestPlayerFootprintOverlapsRect(
+                    nX16,
+                    nY16,
+                    pDoor
+                )
+            )
+            {
+                continue;
+            }
+
+            if(
+                !Floppy144SitePositionBlockedFiltered(
+                    nX16,
+                    nY16,
+                    Floppy144TestRuntimeCollisionVisible,
+                    &sVisibleState
+                )
+            )
+            {
+                bVisibleThreshold = true;
+            }
+
+            if(
+                !Floppy144SitePositionBlockedFiltered(
+                    nX16,
+                    nY16,
+                    Floppy144TestRuntimeCollisionVisible,
+                    &sHiddenState
+                )
+            )
+            {
+                bGhostThreshold = true;
+            }
+        }
+    }
+
+    F144_CHECK(
+        bVisibleThreshold,
+        pszVisibleMessage
+    );
+
+    F144_CHECK(
+        !bGhostThreshold,
+        pszHiddenMessage
+    );
+}
+
+static void Floppy144TestHiddenDoorsDoNotCreateGhostThresholds(void)
+{
+    Floppy144TestHiddenDoorGroundPair(
+        FLOPPY144_ROOM_IT_SUPPORT,
+        FLOPPY144_ROOM_SERVER_ROOM,
+        "IT Support / Server Room door fixture resolves",
+        "reconstructed IT Support / Server Room door has a walkable threshold",
+        "hidden Server Room door leaves no ghost threshold in IT Support"
+    );
+
+    Floppy144TestHiddenDoorGroundPair(
+        FLOPPY144_ROOM_CORRIDOR,
+        FLOPPY144_ROOM_RECORDS_OFFICE,
+        "Corridor / Records Office door fixture resolves",
+        "reconstructed Records Office door has a walkable threshold",
+        "hidden Records Office door leaves no ghost threshold in Corridor"
+    );
+
+    Floppy144TestHiddenDoorGroundPair(
+        FLOPPY144_ROOM_SECRETARY_OFFICE,
+        FLOPPY144_ROOM_DIRECTOR_OFFICE,
+        "Secretary / Director Office door fixture resolves",
+        "reconstructed Secretary / Director door has a walkable threshold",
+        "hidden Director Office door leaves no ghost threshold in Secretary Office"
+    );
+}
+
+/*
  * Rendering, collision and passive labels share one runtime geometry contract.
  */
 static void Floppy144TestRuntimeGeometryVisibility(void)
@@ -1914,6 +2204,7 @@ int main(void)
     Floppy144TestCanonicalRoomProgression();
     Floppy144TestWallHangingCollisionContract();
     Floppy144TestRuntimeGeometryVisibility();
+    Floppy144TestHiddenDoorsDoNotCreateGhostThresholds();
     Floppy144TestConnectionUnlockConditions();
     Floppy144TestActIiBranchChoiceGate();
     Floppy144TestReceptionFurnitureFacing();
