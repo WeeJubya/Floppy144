@@ -658,6 +658,35 @@ static void Floppy144TestCanonicalRoomProgression(void)
 }
 
 /*
+ * Wall hangings retain their authored Site rectangle for interaction targeting
+ * but do not consume walkable floor. Furniture and structural boundaries still
+ * participate in collision normally.
+ */
+static void Floppy144TestWallHangingCollisionContract(void)
+{
+    F144_CHECK(
+        !Floppy144SiteElementBlocksMovement(
+            FLOPPY144_SITE_WALL_MOUNTED_ITEM
+        ),
+        "wall-mounted items do not create a 1U floor collision box"
+    );
+
+    F144_CHECK(
+        Floppy144SiteElementBlocksMovement(
+            FLOPPY144_SITE_STANDARD_DESK
+        ),
+        "ordinary furniture still blocks player movement"
+    );
+
+    F144_CHECK(
+        Floppy144SiteElementBlocksMovement(
+            FLOPPY144_SITE_PARTITION_WALL
+        ),
+        "partition walls remain structural collision"
+    );
+}
+
+/*
  * Rendering, collision and passive labels share one runtime geometry contract.
  */
 static void Floppy144TestRuntimeGeometryVisibility(void)
@@ -1883,6 +1912,7 @@ int main(void)
     Floppy144TestGenericReconstructionVerb();
     Floppy144TestProgressionAvailability();
     Floppy144TestCanonicalRoomProgression();
+    Floppy144TestWallHangingCollisionContract();
     Floppy144TestRuntimeGeometryVisibility();
     Floppy144TestConnectionUnlockConditions();
     Floppy144TestActIiBranchChoiceGate();
