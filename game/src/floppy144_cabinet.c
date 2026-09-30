@@ -187,6 +187,212 @@ static void Floppy144CabinetMakeDisplayName(
     pCabinet->szDisplayName[uWrite] = '\0';
 }
 
+static void Floppy144CabinetRoomDisplayName(
+    const char *pszRoomId,
+    char *pszOutput,
+    uint32_t uCapacity
+)
+{
+    const char *pszKnown = NULL;
+    uint32_t uRead = 0U;
+    uint32_t uWrite = 0U;
+    bool bWordStart = true;
+
+    if(pszOutput == NULL || uCapacity == 0U)
+        return;
+
+    pszOutput[0] = '\0';
+
+    if(pszRoomId == NULL)
+        return;
+
+    if(strcmp(pszRoomId, "RECEPTION") == 0)
+        pszKnown = "Reception";
+    else if(strcmp(pszRoomId, "CORRIDOR") == 0)
+        pszKnown = "Corridor";
+    else if(strcmp(pszRoomId, "MAIN_OFFICE") == 0)
+        pszKnown = "Main Office";
+    else if(strcmp(pszRoomId, "FACILITIES") == 0)
+        pszKnown = "Facilities";
+    else if(strcmp(pszRoomId, "RECORDS_OFFICE") == 0)
+        pszKnown = "Records Office";
+    else if(strcmp(pszRoomId, "IT_SUPPORT") == 0)
+        pszKnown = "IT Support";
+    else if(strcmp(pszRoomId, "STAFF_ROOM") == 0)
+        pszKnown = "Staff Room";
+    else if(strcmp(pszRoomId, "SECURITY") == 0)
+        pszKnown = "Security Office";
+    else if(strcmp(pszRoomId, "SERVER_ROOM") == 0)
+        pszKnown = "Server Room";
+    else if(strcmp(pszRoomId, "SECRETARY_OFFICE") == 0)
+        pszKnown = "Secretary's Office";
+    else if(strcmp(pszRoomId, "DIRECTOR_OFFICE") == 0)
+        pszKnown = "Director's Office";
+    else if(strcmp(pszRoomId, "OUTSIDE") == 0)
+        pszKnown = "Outside";
+
+    if(pszKnown != NULL)
+    {
+        (void)snprintf(
+            pszOutput,
+            uCapacity,
+            "%s",
+            pszKnown
+        );
+        return;
+    }
+
+    while(
+        pszRoomId[uRead] != '\0' &&
+        uWrite + 1U < uCapacity
+    )
+    {
+        char ch = pszRoomId[uRead++];
+
+        if(ch == '_')
+        {
+            pszOutput[uWrite++] = ' ';
+            bWordStart = true;
+            continue;
+        }
+
+        if(ch >= 'A' && ch <= 'Z' && !bWordStart)
+            ch = (char)(ch - 'A' + 'a');
+
+        pszOutput[uWrite++] = ch;
+        bWordStart = false;
+    }
+
+    pszOutput[uWrite] = '\0';
+}
+
+static bool Floppy144CabinetMakeDoorDisplayName(
+    Floppy144CabinetState *pCabinet,
+    const Floppy144RunState *pRunState,
+    const char *pszConnectionId
+)
+{
+    const Floppy144DataRecord *pConnection;
+    const char *pszFirst;
+    const char *pszSecond;
+    Floppy144RoomId eCurrentRoom;
+    Floppy144RoomId eFirstRoom;
+    Floppy144RoomId eSecondRoom;
+    char szFirst[32];
+    char szSecond[32];
+
+    if(
+        pCabinet == NULL ||
+        pRunState == NULL ||
+        pszConnectionId == NULL
+    )
+    {
+        return false;
+    }
+
+    pConnection =
+        Floppy144GameDataFind(
+            FLOPPY144_DATA_CONNECTION,
+            pszConnectionId
+        );
+
+    if(
+        pConnection == NULL ||
+        pConnection->pszA == NULL ||
+        pConnection->pszB == NULL
+    )
+    {
+        return false;
+    }
+
+    pszFirst = pConnection->pszA;
+    pszSecond = pConnection->pszB;
+
+    eCurrentRoom =
+        Floppy144SiteRoomAtPosition(
+            pRunState->player_site_x,
+            pRunState->player_site_y
+        );
+
+    eFirstRoom =
+        Floppy144GameDataRoomId(
+            pszFirst
+        );
+
+    eSecondRoom =
+        Floppy144GameDataRoomId(
+            pszSecond
+        );
+
+    /*
+     * Put the room the player is currently standing in first. The connection
+     * ledger's authored order is an implementation detail and should not leak
+     * into the Contents screen.
+     */
+    if(
+        eCurrentRoom < FLOPPY144_ROOM_COUNT &&
+        eSecondRoom == eCurrentRoom &&
+        eFirstRoom != eCurrentRoom
+    )
+    {
+        const char *pszSwap = pszFirst;
+        pszFirst = pszSecond;
+        pszSecond = pszSwap;
+    }
+
+    Floppy144CabinetRoomDisplayName(
+        pszFirst,
+        szFirst,
+        (uint32_t)sizeof(szFirst)
+    );
+
+    Floppy144CabinetRoomDisplayName(
+        pszSecond,
+        szSecond,
+        (uint32_t)sizeof(szSecond)
+    );
+
+    if(strcmp(pszFirst, pszSecond) == 0)
+    {
+        (void)snprintf(
+            pCabinet->szDisplayName,
+            sizeof(pCabinet->szDisplayName),
+            "Door within %s",
+            szFirst
+        );
+    }
+    else if(strcmp(pszSecond, "OUTSIDE") == 0)
+    {
+        (void)snprintf(
+            pCabinet->szDisplayName,
+            sizeof(pCabinet->szDisplayName),
+            "Exterior Door - %s",
+            szFirst
+        );
+    }
+    else if(strcmp(pszFirst, "OUTSIDE") == 0)
+    {
+        (void)snprintf(
+            pCabinet->szDisplayName,
+            sizeof(pCabinet->szDisplayName),
+            "Exterior Door - %s",
+            szSecond
+        );
+    }
+    else
+    {
+        (void)snprintf(
+            pCabinet->szDisplayName,
+            sizeof(pCabinet->szDisplayName),
+            "Door between %s and %s",
+            szFirst,
+            szSecond
+        );
+    }
+
+    return true;
+}
+
 void Floppy144CabinetReset(
     Floppy144CabinetState *pCabinet
 )
@@ -383,6 +589,18 @@ bool Floppy144CabinetOpenParent(
         pCabinet,
         pszParentId
     );
+
+    if(
+        pParent->pszB != NULL &&
+        strcmp(pParent->pszB, "DOOR") == 0
+    )
+    {
+        (void)Floppy144CabinetMakeDoorDisplayName(
+            pCabinet,
+            pRunState,
+            pszParentId
+        );
+    }
 
     Floppy144CabinetSetContainerType(
         pCabinet,
@@ -1084,6 +1302,97 @@ static void Floppy144CabinetDrawContainerBody(
     }
 }
 
+static void Floppy144CabinetContentMarkerRegion(
+    const Floppy144CabinetState *pCabinet,
+    uint32_t *pX,
+    uint32_t *pY,
+    uint32_t *pWidth,
+    uint32_t *pHeight,
+    uint32_t *pMaximumColumns
+)
+{
+    if(
+        pX == NULL ||
+        pY == NULL ||
+        pWidth == NULL ||
+        pHeight == NULL ||
+        pMaximumColumns == NULL
+    )
+    {
+        return;
+    }
+
+    /*
+     * Regions sit inside the parent silhouette drawn immediately beforehand.
+     * They describe the useful visual centre of each parent, not the screen.
+     */
+    if(
+        Floppy144CabinetTypeContains(pCabinet, "DESK") ||
+        Floppy144CabinetTypeContains(pCabinet, "TABLE") ||
+        Floppy144CabinetTypeContains(pCabinet, "WORKTOP")
+    )
+    {
+        *pX = 48U;
+        *pY = 120U;
+        *pWidth = 238U;
+        *pHeight = 20U;
+        *pMaximumColumns = 9U;
+    }
+    else if(Floppy144CabinetTypeContains(pCabinet, "FRIDGE"))
+    {
+        *pX = 94U;
+        *pY = 166U;
+        *pWidth = 124U;
+        *pHeight = 106U;
+        *pMaximumColumns = 3U;
+    }
+    else if(Floppy144CabinetTypeContains(pCabinet, "TROLLEY"))
+    {
+        *pX = 72U;
+        *pY = 120U;
+        *pWidth = 190U;
+        *pHeight = 116U;
+        *pMaximumColumns = 3U;
+    }
+    else if(Floppy144CabinetTypeContains(pCabinet, "SERVER"))
+    {
+        *pX = 100U;
+        *pY = 102U;
+        *pWidth = 124U;
+        *pHeight = 180U;
+        *pMaximumColumns = 3U;
+    }
+    else if(Floppy144CabinetTypeContains(pCabinet, "DOOR"))
+    {
+        *pX = 104U;
+        *pY = 160U;
+        *pWidth = 112U;
+        *pHeight = 80U;
+        *pMaximumColumns = 3U;
+    }
+    else if(
+        Floppy144CabinetTypeContains(
+            pCabinet,
+            "WALL_MOUNTED_ITEM"
+        )
+    )
+    {
+        *pX = 82U;
+        *pY = 126U;
+        *pWidth = 170U;
+        *pHeight = 96U;
+        *pMaximumColumns = 3U;
+    }
+    else
+    {
+        *pX = 62U;
+        *pY = 96U;
+        *pWidth = 210U;
+        *pHeight = 192U;
+        *pMaximumColumns = 3U;
+    }
+}
+
 static void Floppy144CabinetDrawContentMarkers(
     Floppy144Surface *pSurface,
     const Floppy144CabinetState *pCabinet,
@@ -1093,77 +1402,114 @@ static void Floppy144CabinetDrawContentMarkers(
     uint32_t uBright
 )
 {
-    uint32_t uIndex;
+    const uint32_t uMarkerWidth = 14U;
+    const uint32_t uMarkerHeight = 10U;
+    const uint32_t uGapX = 20U;
+    const uint32_t uGapY = 20U;
+
     uint32_t uVisible =
         uCount < 9U ? uCount : 9U;
 
-    if(pSurface == NULL || pCabinet == NULL)
+    uint32_t uRegionX = 0U;
+    uint32_t uRegionY = 0U;
+    uint32_t uRegionWidth = 0U;
+    uint32_t uRegionHeight = 0U;
+    uint32_t uMaximumColumns = 3U;
+    uint32_t uColumns;
+    uint32_t uRows;
+    uint32_t uGroupHeight;
+    uint32_t uBaseY;
+    uint32_t uIndex;
+
+    if(
+        pSurface == NULL ||
+        pCabinet == NULL ||
+        uVisible == 0U
+    )
+    {
         return;
+    }
+
+    Floppy144CabinetContentMarkerRegion(
+        pCabinet,
+        &uRegionX,
+        &uRegionY,
+        &uRegionWidth,
+        &uRegionHeight,
+        &uMaximumColumns
+    );
+
+    uColumns =
+        uVisible < uMaximumColumns
+            ? uVisible
+            : uMaximumColumns;
+
+    uRows =
+        (uVisible + uColumns - 1U) /
+        uColumns;
+
+    uGroupHeight =
+        uRows * uMarkerHeight +
+        (uRows - 1U) * uGapY;
+
+    uBaseY =
+        uRegionY +
+        (
+            uRegionHeight > uGroupHeight
+                ? (uRegionHeight - uGroupHeight) / 2U
+                : 0U
+        );
 
     for(uIndex = 0U; uIndex < uVisible; ++uIndex)
     {
-        uint32_t uX;
-        uint32_t uY;
-        uint32_t uMarker =
-            uIndex == uSelected ? uBright : uEdge;
+        uint32_t uRow =
+            uIndex / uColumns;
 
-        /*
-         * Marker coordinates are deliberately derived from the silhouette
-         * drawn by Floppy144CabinetDrawContainerBody. Recovered items therefore
-         * appear on/in their parent rather than floating outside it.
-         */
-        if(
-            Floppy144CabinetTypeContains(pCabinet, "DESK") ||
-            Floppy144CabinetTypeContains(pCabinet, "TABLE") ||
-            Floppy144CabinetTypeContains(pCabinet, "WORKTOP")
-        )
-        {
-            uX = 50U + uIndex * 26U;
-            uY = 124U;
-        }
-        else if(Floppy144CabinetTypeContains(pCabinet, "FRIDGE"))
-        {
-            uX = 96U + (uIndex % 3U) * 44U;
-            uY = 172U + (uIndex / 3U) * 30U;
-        }
-        else if(Floppy144CabinetTypeContains(pCabinet, "TROLLEY"))
-        {
-            uX = 72U + (uIndex % 3U) * 66U;
-            uY = 120U + (uIndex / 3U) * 48U;
-        }
-        else if(Floppy144CabinetTypeContains(pCabinet, "SERVER"))
-        {
-            uX = 96U + (uIndex % 3U) * 48U;
-            uY = 104U + (uIndex / 3U) * 56U;
-        }
-        else if(Floppy144CabinetTypeContains(pCabinet, "DOOR"))
-        {
-            uX = 102U + (uIndex % 3U) * 46U;
-            uY = 116U + (uIndex / 3U) * 54U;
-        }
-        else if(
-            Floppy144CabinetTypeContains(
-                pCabinet,
-                "WALL_MOUNTED_ITEM"
-            )
-        )
-        {
-            uX = 88U + (uIndex % 3U) * 58U;
-            uY = 136U + (uIndex / 3U) * 38U;
-        }
-        else
-        {
-            /* Cupboards, bookcases and shelving. */
-            uX = 64U + (uIndex % 3U) * 72U;
-            uY = 96U + (uIndex / 3U) * 58U;
-        }
+        uint32_t uRowStart =
+            uRow * uColumns;
+
+        uint32_t uRemaining =
+            uVisible - uRowStart;
+
+        uint32_t uRowCount =
+            uRemaining < uColumns
+                ? uRemaining
+                : uColumns;
+
+        uint32_t uRowWidth =
+            uRowCount * uMarkerWidth +
+            (uRowCount - 1U) * uGapX;
+
+        uint32_t uBaseX =
+            uRegionX +
+            (
+                uRegionWidth > uRowWidth
+                    ? (uRegionWidth - uRowWidth) / 2U
+                    : 0U
+            );
+
+        uint32_t uColumn =
+            uIndex - uRowStart;
+
+        uint32_t uX =
+            uBaseX +
+            uColumn * (uMarkerWidth + uGapX);
+
+        uint32_t uY =
+            uBaseY +
+            uRow * (uMarkerHeight + uGapY);
+
+        uint32_t uMarker =
+            uIndex == uSelected
+                ? uBright
+                : uEdge;
 
         Floppy144DrawFillRect(
             pSurface,
             uX,
             uY,
-            14U,
-            10U,
+            uMarkerWidth,
+            uMarkerHeight,
             uMarker
         );
     }
