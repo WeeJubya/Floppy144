@@ -1111,7 +1111,7 @@
             "type": "TABLE",
             "variant": "DINING_TABLE",
             "object": "STAFF_ROOM_DINING_TABLE",
-            "x": 12,
+            "x": 7,
             "y": 34,
             "width": 6,
             "height": 6,
@@ -1202,14 +1202,14 @@
             "type": "WALL_MOUNTED_ITEM",
             "variant": "NOTICEBOARD",
             "object": "STAFF_ROOM_NOTICEBOARD",
-            "x": 11,
+            "x": 4,
             "y": 45,
             "width": 10,
             "height": 1
           },
           {
             "type": "CHAIR",
-            "x": 1,
+            "x": 22,
             "y": 10,
             "width": 2,
             "height": 2,
@@ -1217,32 +1217,32 @@
           },
           {
             "type": "CHAIR",
-            "x": 18,
-            "y": 40,
+            "x": 12,
+            "y": 39,
             "width": 2,
             "height": 2,
             "rotation": 135
           },
           {
             "type": "CHAIR",
-            "x": 10,
-            "y": 40,
+            "x": 6,
+            "y": 39,
             "width": 2,
             "height": 2,
             "rotation": 45
           },
           {
             "type": "CHAIR",
-            "x": 18,
-            "y": 32,
+            "x": 12,
+            "y": 33,
             "width": 2,
             "height": 2,
             "rotation": 225
           },
           {
             "type": "CHAIR",
-            "x": 10,
-            "y": 32,
+            "x": 6,
+            "y": 33,
             "width": 2,
             "height": 2,
             "rotation": 315
@@ -1280,7 +1280,7 @@
             "type": "FRIDGE",
             "variant": "FRIDGE",
             "object": "STAFF_ROOM_FRIDGE",
-            "x": 1,
+            "x": 19,
             "y": 1,
             "width": 5,
             "height": 5
@@ -1290,7 +1290,7 @@
             "type": "WORKTOP",
             "variant": "WORKTOP",
             "object": "STAFF_ROOM_WORKTOP",
-            "x": 6,
+            "x": 1,
             "y": 1,
             "width": 18,
             "height": 5
@@ -1300,7 +1300,7 @@
             "type": "SINK",
             "variant": "SINK",
             "object": "STAFF_ROOM_SINK",
-            "x": 7,
+            "x": 14,
             "y": 2,
             "width": 4,
             "height": 3
@@ -1310,7 +1310,7 @@
             "type": "COFFEE_MAKER",
             "variant": "COFFEE_MAKER",
             "object": "STAFF_ROOM_COFFEE_MAKER",
-            "x": 13,
+            "x": 8,
             "y": 2,
             "width": 4,
             "height": 2
@@ -2342,35 +2342,28 @@
       },
       {
         "type": "WINDOW",
-        "x": 24,
+        "x": 0,
         "y": 35,
         "width": 1,
         "height": 9
       },
       {
         "type": "WINDOW",
-        "x": 24,
+        "x": 0,
         "y": 24,
         "width": 1,
-        "height": 6
+        "height": 9
       },
       {
         "type": "WINDOW",
-        "x": 24,
-        "y": 31,
-        "width": 1,
-        "height": 2
-      },
-      {
-        "type": "WINDOW",
-        "x": 24,
+        "x": 0,
         "y": 13,
         "width": 1,
         "height": 9
       },
       {
         "type": "WINDOW",
-        "x": 24,
+        "x": 0,
         "y": 2,
         "width": 1,
         "height": 9
@@ -5603,7 +5596,7 @@
       "variant": "DINING_TABLE",
       "object_id": "STAFF_ROOM_DINING_TABLE",
       "geometry": {
-        "x": 12,
+        "x": 7,
         "y": 34,
         "width": 6,
         "height": 6,
@@ -5730,7 +5723,7 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "x": 1,
+        "x": 22,
         "y": 10,
         "width": 2,
         "height": 2,
@@ -5745,8 +5738,8 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "x": 18,
-        "y": 40,
+        "x": 12,
+        "y": 39,
         "width": 2,
         "height": 2,
         "rotation": 135
@@ -5760,8 +5753,8 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "x": 10,
-        "y": 40,
+        "x": 6,
+        "y": 39,
         "width": 2,
         "height": 2,
         "rotation": 45
@@ -5775,8 +5768,8 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "x": 18,
-        "y": 32,
+        "x": 12,
+        "y": 33,
         "width": 2,
         "height": 2,
         "rotation": 225
@@ -5790,8 +5783,8 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "x": 10,
-        "y": 32,
+        "x": 6,
+        "y": 33,
         "width": 2,
         "height": 2,
         "rotation": 315
@@ -6728,7 +6721,7 @@
       "variant": "NOTICEBOARD",
       "object_id": "STAFF_ROOM_NOTICEBOARD",
       "geometry": {
-        "x": 11,
+        "x": 4,
         "y": 45,
         "width": 10,
         "height": 1
@@ -6742,7 +6735,7 @@
       "variant": "FRIDGE",
       "object_id": "STAFF_ROOM_FRIDGE",
       "geometry": {
-        "x": 1,
+        "x": 19,
         "y": 1,
         "width": 5,
         "height": 5
@@ -6756,7 +6749,7 @@
       "variant": "WORKTOP",
       "object_id": "STAFF_ROOM_WORKTOP",
       "geometry": {
-        "x": 6,
+        "x": 1,
         "y": 1,
         "width": 18,
         "height": 5
@@ -6770,7 +6763,7 @@
       "variant": "SINK",
       "object_id": "STAFF_ROOM_SINK",
       "geometry": {
-        "x": 7,
+        "x": 14,
         "y": 2,
         "width": 4,
         "height": 3
@@ -6784,7 +6777,7 @@
       "variant": "COFFEE_MAKER",
       "object_id": "STAFF_ROOM_COFFEE_MAKER",
       "geometry": {
-        "x": 13,
+        "x": 8,
         "y": 2,
         "width": 4,
         "height": 2
@@ -7346,7 +7339,7 @@
       "variant": "DOOR",
       "object_id": null,
       "geometry": {
-        "x": 2,
+        "x": 18,
         "y": 46,
         "width": 5,
         "height": 1
