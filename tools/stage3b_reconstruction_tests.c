@@ -475,6 +475,18 @@ static void Floppy144TestProgressionAvailability(void)
         ),
         "HR-05 reconstructs Staff Room"
     );
+
+    F144_CHECK(
+        Floppy144RunStateRoomReconstructed(
+            &sState,
+            FLOPPY144_ROOM_STAFF_ROOM
+        ) &&
+        Floppy144GameDataConnectionUnlocked(
+            &sState,
+            "COR_STAFF"
+        ),
+        "HR-05 T-012 restores Staff Room and unlocks its Corridor door together"
+    );
 }
 
 /*
@@ -1767,6 +1779,7 @@ static void Floppy144TestStaffRoomSpreadsheetGeometry(void)
     bool bSink = false;
     bool bCoffeeMaker = false;
     bool bStaffDoor = false;
+    bool bStaffDoorBridgesRooms = false;
 
     for(
         uRectIndex = 0U;
@@ -1784,7 +1797,7 @@ static void Floppy144TestStaffRoomSpreadsheetGeometry(void)
 
         if(
             pRect->type == (uint8_t)FLOPPY144_SITE_DOOR &&
-            pRect->x == 2U &&
+            pRect->x == 18U &&
             pRect->y == 46U &&
             pRect->width == 5U &&
             pRect->height == 1U &&
@@ -1800,7 +1813,27 @@ static void Floppy144TestStaffRoomSpreadsheetGeometry(void)
             )
         )
         {
+            uint8_t uDoorCentreX =
+                (uint8_t)(
+                    pRect->x +
+                    pRect->width / 2U
+                );
+
             bStaffDoor = true;
+            bStaffDoorBridgesRooms =
+                pRect->y > 0U &&
+                (
+                    (uint16_t)pRect->y +
+                    (uint16_t)pRect->height
+                ) < FLOPPY144_SITE_SIZE_UNITS &&
+                Floppy144SiteRoomAtCell(
+                    uDoorCentreX,
+                    (uint8_t)(pRect->y - 1U)
+                ) == FLOPPY144_ROOM_STAFF_ROOM &&
+                Floppy144SiteRoomAtCell(
+                    uDoorCentreX,
+                    (uint8_t)(pRect->y + pRect->height)
+                ) == FLOPPY144_ROOM_CORRIDOR;
         }
 
         if(
@@ -1974,6 +2007,11 @@ static void Floppy144TestStaffRoomSpreadsheetGeometry(void)
     F144_CHECK(
         bStaffDoor,
         "Staff Room Corridor door matches locked spreadsheet position"
+    );
+
+    F144_CHECK(
+        bStaffDoorBridgesRooms,
+        "Staff Room Corridor door actually bridges the two authored floor areas"
     );
 }
 

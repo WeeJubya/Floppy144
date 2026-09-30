@@ -2124,7 +2124,7 @@
         "type": "DOOR",
         "from": "CORRIDOR",
         "to": "STAFF_ROOM",
-        "x": 2,
+        "x": 18,
         "y": 46,
         "width": 5,
         "height": 1
