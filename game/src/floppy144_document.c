@@ -188,6 +188,48 @@ const Floppy144DocumentDefinition *Floppy144DocumentFirstPendingTrigger(
         );
 }
 
+const Floppy144DocumentDefinition *Floppy144DocumentTriggerAt(
+    Floppy144CollectionId eCollection,
+    uint32_t uOrdinal
+)
+{
+    uint32_t uDocumentIndex;
+    uint32_t uMatchOrdinal = 0U;
+
+    if(
+        (uint32_t)eCollection >=
+            (uint32_t)FLOPPY144_COLLECTION_COUNT
+    )
+    {
+        return NULL;
+    }
+
+    for(
+        uDocumentIndex = 0U;
+        uDocumentIndex < FLOPPY144_DOCUMENT_COUNT;
+        ++uDocumentIndex
+    )
+    {
+        const Floppy144DocumentDefinition *pDocument =
+            &floppy144_documents[uDocumentIndex];
+
+        if(
+            pDocument->collection == eCollection &&
+            pDocument->trigger != FLOPPY144_TRIGGER_COUNT
+        )
+        {
+            if(uMatchOrdinal == uOrdinal)
+            {
+                return pDocument;
+            }
+
+            ++uMatchOrdinal;
+        }
+    }
+
+    return NULL;
+}
+
 const Floppy144DocumentDefinition *Floppy144DocumentRecoveryEntryPoint(
     Floppy144CollectionId eCollection
 )
