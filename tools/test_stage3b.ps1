@@ -658,11 +658,24 @@ function Test-PhysicalItemPlayerFacingContract {
 
     if(
         $CabinetSource -notmatch
-            'uY = 124U;' -or
+            'Floppy144CabinetContentMarkerRegion' -or
         $CabinetSource -notmatch
-            'Marker coordinates are deliberately derived from the silhouette'
+            'uRegionWidth > uRowWidth' -or
+        $CabinetSource -notmatch
+            '\(uRegionWidth - uRowWidth\) / 2U' -or
+        $CabinetSource -notmatch
+            '\(uRegionHeight - uGroupHeight\) / 2U'
     ) {
-        throw "Desk contents markers are no longer constrained to the parent silhouette."
+        throw "Contents markers are no longer centred as a group inside the parent silhouette."
+    }
+
+    if(
+        $CabinetSource -notmatch
+            'Door between %s and %s' -or
+        $CabinetSource -notmatch
+            'FLOPPY144_DATA_CONNECTION'
+    ) {
+        throw "Door Contents titles are no longer derived from player-facing connection names."
     }
 
     if(
