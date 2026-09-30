@@ -1458,7 +1458,7 @@ static void Floppy144TestBranchDocumentAccessGate(void)
     F144_CHECK(
         Floppy144TestTerminalContains(
             &sTerminal,
-            "NEXT RECOVERY ACTION: OPEN RS-0063 || RS-0087"
+            "NEXT RECOVERY ACTION: OPEN RS-0063 OR RS-0087"
         ),
         "DR-04 briefing offers Records or Technology as an equal branch choice"
     );
@@ -1504,6 +1504,30 @@ static void Floppy144TestBranchDocumentAccessGate(void)
         sRunState.branch ==
             (uint8_t)FLOPPY144_RUN_BRANCH_RECORDS_FIRST,
         "opening first workstream commits Records branch"
+    );
+
+    /*
+     * Reopening the neutral summary after one workstream has fired must still
+     * describe both authored workstreams. This reproduces the player case where
+     * other DR-04 documents have already been viewed before RS-0037 is reopened.
+     */
+    sTerminal.output_count = 0U;
+
+    Floppy144TerminalPrintPostOpenAction(
+        &sTerminal,
+        &sRunState,
+        eDr04,
+        pEntryDocument != NULL
+            ? pEntryDocument->record_index
+            : 0U
+    );
+
+    F144_CHECK(
+        Floppy144TestTerminalContains(
+            &sTerminal,
+            "NEXT RECOVERY ACTION: OPEN RS-0063 OR RS-0087"
+        ),
+        "DR-04 briefing keeps both workstream choices after one branch has fired"
     );
 
     (void)snprintf(
@@ -1569,6 +1593,38 @@ static void Floppy144TestBranchDocumentAccessGate(void)
     F144_CHECK(
         sTerminal.open_record_requested,
         "alternate branch record becomes readable after Act II"
+    );
+
+    if(sTerminal.open_record_requested)
+    {
+        F144_CHECK(
+            Floppy144DocumentApplyEffects(
+                &sWorld,
+                &sRunState,
+                sTerminal.requested_collection,
+                sTerminal.requested_record_index
+            ),
+            "alternate branch document applies effects after release"
+        );
+    }
+
+    sTerminal.output_count = 0U;
+
+    Floppy144TerminalPrintPostOpenAction(
+        &sTerminal,
+        &sRunState,
+        eDr04,
+        pEntryDocument != NULL
+            ? pEntryDocument->record_index
+            : 0U
+    );
+
+    F144_CHECK(
+        Floppy144TestTerminalContains(
+            &sTerminal,
+            "NEXT RECOVERY ACTION: OPEN RS-0063 OR RS-0087"
+        ),
+        "DR-04 briefing keeps both authored workstreams after both have been viewed"
     );
 }
 
