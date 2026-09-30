@@ -434,6 +434,77 @@ static void Floppy144TestGenericParentContents(void)
     );
 }
 
+static void Floppy144TestDoorParentDisplayName(void)
+{
+    Floppy144WorldState sWorld;
+    Floppy144RunState sState;
+    Floppy144CabinetState sCabinet;
+    Floppy144TriggerId eT003;
+    Floppy144TriggerId eT005;
+
+    Floppy144TestReset(&sWorld, &sState, &sCabinet);
+
+    F144_CHECK(
+        Floppy144RunStateReconstructRoom(
+            &sState,
+            FLOPPY144_ROOM_MAIN_OFFICE
+        ),
+        "door-title fixture reconstructs Main Office"
+    );
+
+    eT003 = Floppy144GameDataTriggerId("T-003");
+    eT005 = Floppy144GameDataTriggerId("T-005");
+
+    F144_CHECK(
+        eT003 < FLOPPY144_TRIGGER_COUNT &&
+        Floppy144RunStateFireTrigger(
+            &sState,
+            eT003
+        ),
+        "door-title fixture reveals Main Office corridor notice"
+    );
+
+    F144_CHECK(
+        eT005 < FLOPPY144_TRIGGER_COUNT &&
+        Floppy144RunStateFireTrigger(
+            &sState,
+            eT005
+        ),
+        "door-title fixture reveals Corridor room plate"
+    );
+
+    Floppy144RunStateSetPlayerSitePosition(
+        &sState,
+        70 * FLOPPY144_SITE_FIXED_ONE,
+        82 * FLOPPY144_SITE_FIXED_ONE
+    );
+
+    F144_CHECK(
+        Floppy144CabinetOpenParent(
+            &sCabinet,
+            &sState,
+            "COR_OFF"
+        ),
+        "door fixture opens reusable Contents screen"
+    );
+
+    F144_CHECK(
+        strcmp(
+            sCabinet.szDisplayName,
+            "Door between Main Office and Corridor"
+        ) == 0,
+        "door Contents title uses room names instead of COR_OFF"
+    );
+
+    F144_CHECK(
+        strstr(
+            sCabinet.szDisplayName,
+            "COR_OFF"
+        ) == NULL,
+        "door Contents title never exposes internal connection ID"
+    );
+}
+
 static void Floppy144TestPerCabinetUnlockPersistence(void)
 {
     Floppy144WorldState sWorld;
@@ -611,6 +682,7 @@ int main(void)
 {
     Floppy144TestGeneratedCabinetDiscovery();
     Floppy144TestGenericParentContents();
+    Floppy144TestDoorParentDisplayName();
     Floppy144TestRecoveredChildRevealsCabinetCode();
     Floppy144TestSecurityCabinetUnlockAndContents();
     Floppy144TestPerCabinetUnlockPersistence();
