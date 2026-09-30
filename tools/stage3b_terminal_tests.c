@@ -1021,6 +1021,24 @@ static void Floppy144TestMultipleCollectionCommands(void)
         sTerminal.record_pager_page == 1U,
         "record pager moves backward"
     );
+
+    F144_CHECK(
+        sTerminal.output_count == FLOPPY144_TERMINAL_OUTPUT_LINES,
+        "full ten-record pager page fits exactly within terminal output"
+    );
+
+    F144_CHECK(
+        strstr(
+            sTerminal.output[0],
+            "COLLECTION HR-01:"
+        ) != NULL &&
+        strstr(
+            sTerminal.output[0],
+            "            PAGE 1 OF 2"
+        ) != NULL,
+        "record pager keeps collection and page indicator together on first line"
+    );
+
     Floppy144TerminalCloseRecordPager(&sTerminal);
 
     Floppy144TestSubmitCommand(
