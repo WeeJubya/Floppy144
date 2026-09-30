@@ -656,16 +656,19 @@ void Floppy144TerminalPrintPostOpenAction(
         pOpenedDocument->offer_pending_trigger_choices
     )
     {
+        /*
+         * The briefing describes the authored workstreams, not merely the
+         * subset whose triggers are still pending. Reopening it after one
+         * branch has fired must therefore continue to name both choices.
+         */
         pFirstChoice =
-            Floppy144DocumentPendingTriggerAt(
-                pRunState,
+            Floppy144DocumentTriggerAt(
                 eCollection,
                 0U
             );
 
         pSecondChoice =
-            Floppy144DocumentPendingTriggerAt(
-                pRunState,
+            Floppy144DocumentTriggerAt(
                 eCollection,
                 1U
             );
@@ -680,7 +683,7 @@ void Floppy144TerminalPrintPostOpenAction(
             snprintf(
                 szLine,
                 sizeof(szLine),
-                "NEXT RECOVERY ACTION: OPEN %s || %s",
+                "NEXT RECOVERY ACTION: OPEN %s OR %s",
                 Floppy144TerminalDisplayRecordId(
                     pTerminal,
                     pFirstChoice->record_id_override
