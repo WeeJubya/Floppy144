@@ -2303,31 +2303,83 @@ static void Floppy144TerminalPrintRecordPage(
     terminal->output_count =
         0U;
 
-    snprintf(
-        line,
-        sizeof(line),
-        "COLLECTION %s: %s",
-        definition->code,
-        definition->title
-    );
+    {
+        const uint32_t uHeaderGap = 12U;
+        char szPrefix[32];
+        char szPage[24];
+        size_t uPrefixLength;
+        size_t uPageLength;
+        size_t uTitleLength;
+        size_t uMaximumTitleLength;
 
-    Floppy144TerminalPushWrappedLine(
-        terminal,
-        line
-    );
+        (void)snprintf(
+            szPrefix,
+            sizeof(szPrefix),
+            "COLLECTION %s: ",
+            definition->code
+        );
 
-    snprintf(
-        line,
-        sizeof(line),
-        "PAGE %u OF %u",
-        (unsigned)terminal->record_pager_page,
-        (unsigned)page_count
-    );
+        (void)snprintf(
+            szPage,
+            sizeof(szPage),
+            "PAGE %u OF %u",
+            (unsigned)terminal->record_pager_page,
+            (unsigned)page_count
+        );
 
-    Floppy144TerminalPushLine(
-        terminal,
-        line
-    );
+        uPrefixLength = strlen(szPrefix);
+        uPageLength = strlen(szPage);
+        uTitleLength = strlen(definition->title);
+
+        /*
+         * A full record page must fit the terminal's twelve retained output
+         * lines: one header, one spacer and ten record rows. Keep PAGE X OF Y
+         * on the collection header instead of spending a thirteenth line and
+         * scrolling that header out of view.
+         *
+         * Twelve spaces separate the collection title from the page marker.
+         * Only an exceptionally long title is shortened to preserve the page
+         * indicator within the fixed 95-character visible line width.
+         */
+        if(
+            uPrefixLength +
+            uHeaderGap +
+            uPageLength <
+            sizeof(line)
+        )
+        {
+            uMaximumTitleLength =
+                sizeof(line) -
+                1U -
+                uPrefixLength -
+                uHeaderGap -
+                uPageLength;
+        }
+        else
+        {
+            uMaximumTitleLength = 0U;
+        }
+
+        if(uTitleLength > uMaximumTitleLength)
+            uTitleLength = uMaximumTitleLength;
+
+        (void)snprintf(
+            line,
+            sizeof(line),
+            "%s%.*s%*s%s",
+            szPrefix,
+            (int)uTitleLength,
+            definition->title,
+            (int)uHeaderGap,
+            "",
+            szPage
+        );
+
+        Floppy144TerminalPushLine(
+            terminal,
+            line
+        );
+    }
 
     Floppy144TerminalPushLine(
         terminal,
