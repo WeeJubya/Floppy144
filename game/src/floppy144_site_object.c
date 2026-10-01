@@ -1959,6 +1959,53 @@ static const char *Floppy144SiteWallHangingLabel(
     return "WALL HANGING";
 }
 
+bool Floppy144SiteLockedDoorNearby(
+    const Floppy144RunState *pState
+)
+{
+    uint32_t uRectIndex;
+    const uint32_t uRangeSquared =
+        FLOPPY144_SITE_DATA_INTERACTION_RANGE_X16 *
+        FLOPPY144_SITE_DATA_INTERACTION_RANGE_X16;
+
+    if(pState == NULL)
+    {
+        return false;
+    }
+
+    for(
+        uRectIndex = 0U;
+        uRectIndex < Floppy144SiteRectCount();
+        ++uRectIndex
+    )
+    {
+        const Floppy144SiteRect *pRect =
+            Floppy144SiteRectAt(uRectIndex);
+
+        if(
+            pRect == NULL ||
+            pRect->type != (uint8_t)FLOPPY144_SITE_DOOR ||
+            !Floppy144SiteRectRuntimeVisible(pState, pRect) ||
+            !Floppy144SiteDoorLocked(pState, pRect)
+        )
+        {
+            continue;
+        }
+
+        if(
+            Floppy144SiteRectDistanceSquared(
+                pState,
+                pRect
+            ) <= uRangeSquared
+        )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 const char *Floppy144SiteContextLabel(
     const Floppy144RunState *pState
 )
@@ -2071,6 +2118,7 @@ uint32_t Floppy144SiteAvailableActions(
 
     if(
         Floppy144SiteDirectoryNearby(pState) ||
+        Floppy144SiteLockedDoorNearby(pState) ||
         Floppy144SiteResolveInspectionTarget(
             pState,
             &sTarget

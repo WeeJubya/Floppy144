@@ -1043,6 +1043,90 @@ static void Floppy144TestRecordsTrolleyNotebookGuidance(void)
     }
 }
 
+static void Floppy144TestLockedDoorInspectActions(void)
+{
+    Floppy144WorldState sWorld;
+    Floppy144RunState sState;
+
+    /*
+     * Fresh-run COR_REC fixture: both endpoint rooms exist, but the authored
+     * connection is still locked. The door must advertise Inspect without
+     * becoming traversable.
+     */
+    Floppy144TestReset(&sWorld, &sState);
+
+    (void)Floppy144RunStateReconstructRoom(
+        &sState,
+        FLOPPY144_ROOM_RECEPTION
+    );
+    (void)Floppy144RunStateReconstructRoom(
+        &sState,
+        FLOPPY144_ROOM_CORRIDOR
+    );
+
+    F144_CHECK(
+        !Floppy144GameDataConnectionUnlocked(
+            &sState,
+            "COR_REC"
+        ),
+        "fresh COR_REC fixture remains locked"
+    );
+
+    Floppy144TestSetPosition(&sState, 68, 56);
+
+    F144_CHECK(
+        Floppy144SiteLockedDoorNearby(&sState),
+        "locked COR_REC resolves as a nearby Inspect target"
+    );
+
+    F144_CHECK(
+        (
+            Floppy144SiteAvailableActions(&sState) &
+            FLOPPY144_SITE_ACTION_INSPECT
+        ) != 0U,
+        "locked COR_REC advertises Inspect"
+    );
+
+    /*
+     * REC_OFF uses the same rule. Reconstructing Main Office makes the shared
+     * boundary visible, but must not silently remove Inspect while the
+     * connection itself is still locked.
+     */
+    Floppy144TestReset(&sWorld, &sState);
+
+    (void)Floppy144RunStateReconstructRoom(
+        &sState,
+        FLOPPY144_ROOM_RECEPTION
+    );
+    (void)Floppy144RunStateReconstructRoom(
+        &sState,
+        FLOPPY144_ROOM_MAIN_OFFICE
+    );
+
+    F144_CHECK(
+        !Floppy144GameDataConnectionUnlocked(
+            &sState,
+            "REC_OFF"
+        ),
+        "fresh REC_OFF fixture remains locked"
+    );
+
+    Floppy144TestSetPosition(&sState, 71, 65);
+
+    F144_CHECK(
+        Floppy144SiteLockedDoorNearby(&sState),
+        "locked REC_OFF resolves as a nearby Inspect target"
+    );
+
+    F144_CHECK(
+        (
+            Floppy144SiteAvailableActions(&sState) &
+            FLOPPY144_SITE_ACTION_INSPECT
+        ) != 0U,
+        "locked REC_OFF advertises Inspect"
+    );
+}
+
 static void Floppy144TestContextLabels(void)
 {
     Floppy144WorldState sWorld;
@@ -1251,6 +1335,7 @@ int main(void)
     Floppy144TestHiddenGeometryDoesNotCollide();
     Floppy144TestNotebookPopulation();
     Floppy144TestRecordsTrolleyNotebookGuidance();
+    Floppy144TestLockedDoorInspectActions();
     Floppy144TestContextLabels();
     Floppy144TestExteriorExitBehaviour();
 

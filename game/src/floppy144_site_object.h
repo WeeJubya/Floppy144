@@ -108,6 +108,14 @@ bool Floppy144SiteRectRuntimeVisible(
 );
 
 /*
+ * Return true when a currently visible locked door is within normal Inspect
+ * range. Locked doors are inspectable even though traversal remains blocked.
+ */
+bool Floppy144SiteLockedDoorNearby(
+    const Floppy144RunState *pState
+);
+
+/*
  * Passive proximity label for ordinary Site geometry. Explicit interaction
  * notices always take precedence in the renderer. Locked doors identify
  * themselves; unlocked doors are deliberately silent.

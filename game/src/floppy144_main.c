@@ -867,10 +867,9 @@ static void Floppy144OfficeSetItemNotice(
 /*
  * Execute a projection-neutral Site action.
  *
- * Access is currently the GDR-terminal action. Doors/openable furniture remain
- * for the later connection/access pass. Inspect resolves the nearest canonical
- * physical item through generated furniture/fixture geometry and then routes
- * any progression through the generic interaction engine.
+ * Access is currently the GDR-terminal action. Inspect resolves canonical
+ * physical material through generated furniture/fixture geometry, while
+ * visible locked doors remain inspectable without becoming traversable.
  */
 static void Floppy144InteractOffice(
     HWND window,
@@ -949,6 +948,25 @@ static void Floppy144InteractOffice(
             )
         )
         {
+            /*
+             * Doors do not own cabinet contents, but a locked visible door is
+             * still a legitimate Inspect target. Keep the footer/action
+             * contract honest by giving the keypress a concrete response.
+             */
+            if(
+                Floppy144SiteLockedDoorNearby(
+                    &global_run_state
+                )
+            )
+            {
+                Floppy144OfficeSetItemNotice(
+                    "LOCKED DOOR",
+                    "."
+                );
+
+                Floppy144Redraw(window);
+            }
+
             return;
         }
 
