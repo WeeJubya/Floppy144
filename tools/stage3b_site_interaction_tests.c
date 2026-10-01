@@ -690,11 +690,16 @@ static void Floppy144TestRotatedParentTargeting(void)
     );
 }
 
-/* Pure visual chairs should not make the interaction prompt noisy. */
+/*
+ * Furniture now carries small physical context even when it has no gameplay
+ * role. A waiting chair may therefore advertise Inspect, but its incidental
+ * find must remain ordinary worldbuilding rather than a runnable interaction.
+ */
 static void Floppy144TestSceneryDoesNotBecomeInteraction(void)
 {
     Floppy144WorldState sWorld;
     Floppy144RunState sState;
+    Floppy144SiteInspectionTarget sTarget;
 
     Floppy144TestReset(&sWorld, &sState);
 
@@ -706,8 +711,28 @@ static void Floppy144TestSceneryDoesNotBecomeInteraction(void)
     Floppy144TestSetPosition(&sState, 80, 61);
 
     F144_CHECK(
-        Floppy144SiteAvailableActions(&sState) == 0U,
-        "pure waiting-chair scenery does not advertise an action"
+        Floppy144SiteAvailableActions(&sState) != 0U,
+        "waiting-chair physical context advertises Inspect"
+    );
+
+    F144_CHECK(
+        Floppy144SiteResolveInspectionTarget(
+            &sState,
+            &sTarget
+        ) &&
+        sTarget.pszParentId != NULL &&
+        strcmp(
+            sTarget.pszParentId,
+            "RECEPTION_CHAIR_13"
+        ) == 0 &&
+        sTarget.pszPhysicalItemId != NULL &&
+        strcmp(
+            sTarget.pszPhysicalItemId,
+            "P-518"
+        ) == 0 &&
+        sTarget.eInteraction == FLOPPY144_INTERACTION_COUNT &&
+        !sTarget.bInteractionAvailable,
+        "waiting-chair find remains contextual rather than gameplay evidence"
     );
 }
 
