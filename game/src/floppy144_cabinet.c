@@ -837,6 +837,61 @@ bool Floppy144CabinetSubmitCode(
     return true;
 }
 
+static bool Floppy144CabinetPhysicalItemRevealControlled(
+    const char *pszPhysicalItemId
+)
+{
+    uint32_t uRecordIndex;
+
+    if(pszPhysicalItemId == NULL)
+        return false;
+
+    for(
+        uRecordIndex = 0U;
+        uRecordIndex < Floppy144GameDataRecordCount();
+        ++uRecordIndex
+    )
+    {
+        const Floppy144DataRecord *pRecord =
+            Floppy144GameDataRecordAt(uRecordIndex);
+
+        if(
+            pRecord == NULL ||
+            (
+                pRecord->eKind != FLOPPY144_DATA_TRIGGER_EFFECT &&
+                pRecord->eKind != FLOPPY144_DATA_INTERACTION_EFFECT
+            )
+        )
+        {
+            continue;
+        }
+
+        if(
+            Floppy144CabinetStringEqual(
+                pRecord->pszA,
+                "REVEAL_PHYSICAL_ITEM"
+            ) &&
+            Floppy144CabinetStringEqual(
+                pRecord->pszB,
+                pszPhysicalItemId
+            )
+        )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/*
+ * Contents order is deliberately stable across recovery.
+ *
+ * Ordinary room clutter keeps its existing order. Items that are explicitly
+ * revealed by triggers/interactions are appended afterwards, so returning to
+ * furniture does not make an already-seen list appear to have been reshuffled
+ * just because a newly recovered piece of evidence became available.
+ */
 uint32_t Floppy144CabinetVisibleContentCount(
     const Floppy144CabinetState *pCabinet,
     const Floppy144RunState *pRunState
@@ -891,6 +946,7 @@ const Floppy144DataRecord *Floppy144CabinetVisibleContentAt(
     uint32_t uVisibleIndex
 )
 {
+    uint32_t uPass;
     uint32_t uRecordIndex;
     uint32_t uVisible = 0U;
 
@@ -903,35 +959,58 @@ const Floppy144DataRecord *Floppy144CabinetVisibleContentAt(
         return NULL;
     }
 
-    for(
-        uRecordIndex = 0U;
-        uRecordIndex < Floppy144GameDataRecordCount();
-        ++uRecordIndex
-    )
+    /*
+     * Pass 0: ordinary contextual contents.
+     * Pass 1: explicitly recovered/revealed physical items.
+     *
+     * The record order inside each pass remains canonical, while newly
+     * revealed evidence naturally appears after the furniture's existing
+     * contents instead of jumping to the first row.
+     */
+    for(uPass = 0U; uPass < 2U; ++uPass)
     {
-        const Floppy144DataRecord *pRecord =
-            Floppy144GameDataRecordAt(uRecordIndex);
+        bool bRecoveredPass = uPass != 0U;
 
-        if(
-            pRecord == NULL ||
-            pRecord->eKind != FLOPPY144_DATA_PHYSICAL_ITEM ||
-            !Floppy144CabinetStringEqual(
-                pRecord->pszC,
-                pCabinet->szCabinetId
-            ) ||
-            !Floppy144SitePhysicalItemVisible(
-                pRunState,
-                pRecord
-            )
+        for(
+            uRecordIndex = 0U;
+            uRecordIndex < Floppy144GameDataRecordCount();
+            ++uRecordIndex
         )
         {
-            continue;
+            const Floppy144DataRecord *pRecord =
+                Floppy144GameDataRecordAt(uRecordIndex);
+
+            bool bRevealControlled;
+
+            if(
+                pRecord == NULL ||
+                pRecord->eKind != FLOPPY144_DATA_PHYSICAL_ITEM ||
+                !Floppy144CabinetStringEqual(
+                    pRecord->pszC,
+                    pCabinet->szCabinetId
+                ) ||
+                !Floppy144SitePhysicalItemVisible(
+                    pRunState,
+                    pRecord
+                )
+            )
+            {
+                continue;
+            }
+
+            bRevealControlled =
+                Floppy144CabinetPhysicalItemRevealControlled(
+                    pRecord->pszId
+                );
+
+            if(bRevealControlled != bRecoveredPass)
+                continue;
+
+            if(uVisible == uVisibleIndex)
+                return pRecord;
+
+            ++uVisible;
         }
-
-        if(uVisible == uVisibleIndex)
-            return pRecord;
-
-        ++uVisible;
     }
 
     return NULL;
@@ -1307,10 +1386,33 @@ static void Floppy144CabinetDrawContainerBody(
         return;
     }
 
+    if(Floppy144CabinetTypeContains(pCabinet, "SHELVING_FULL"))
+    {
+        /*
+         * Open industrial shelving is not a cupboard. Draw uprights and shelf
+         * slabs only, leaving the bays visibly open and omitting door handles.
+         */
+        Floppy144DrawRect(pSurface, 42U, 80U, 250U, 224U, uEdge);
+        Floppy144DrawFillRect(pSurface, 42U, 80U, 8U, 224U, uBody);
+        Floppy144DrawFillRect(pSurface, 284U, 80U, 8U, 224U, uBody);
+        Floppy144DrawFillRect(pSurface, 42U, 80U, 250U, 8U, uBody);
+
+        for(uIndex = 0U; uIndex < 4U; ++uIndex)
+        {
+            uint32_t uY = 138U + uIndex * 54U;
+            if(uY > 300U)
+                uY = 300U;
+
+            Floppy144DrawFillRect(pSurface, 48U, uY, 238U, 6U, uBody);
+            Floppy144DrawRect(pSurface, 48U, uY, 238U, 6U, uEdge);
+        }
+
+        return;
+    }
+
     /*
-     * Cabinet/bookcase/shelving and unknown storage use the familiar cupboard
-     * silhouette. Secure cupboards therefore retain their existing visual
-     * language while sharing the same contents browser as every other parent.
+     * Cabinets/bookcases and unknown enclosed storage retain the familiar
+     * cupboard silhouette. Shelving is handled separately above.
      */
     Floppy144DrawFillRect(pSurface, 42U, 80U, 250U, 224U, uBody);
     Floppy144DrawRect(pSurface, 42U, 80U, 250U, 224U, uEdge);
@@ -1453,6 +1555,33 @@ static void Floppy144CabinetDrawContentMarkers(
         uVisible == 0U
     )
     {
+        return;
+    }
+
+    if(Floppy144CabinetTypeContains(pCabinet, "SHELVING_FULL"))
+    {
+        const uint32_t auShelfY[3] = { 128U, 182U, 236U };
+        const uint32_t auColumnX[3] = { 92U, 154U, 216U };
+
+        for(uIndex = 0U; uIndex < uVisible; ++uIndex)
+        {
+            uint32_t uRow = uIndex / 3U;
+            uint32_t uColumn = uIndex % 3U;
+            uint32_t uMarker =
+                uIndex == uSelected
+                    ? uBright
+                    : uEdge;
+
+            Floppy144DrawFillRect(
+                pSurface,
+                auColumnX[uColumn],
+                auShelfY[uRow],
+                uMarkerWidth,
+                uMarkerHeight,
+                uMarker
+            );
+        }
+
         return;
     }
 
