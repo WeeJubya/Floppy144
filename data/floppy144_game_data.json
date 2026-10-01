@@ -8020,7 +8020,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 2,
-      "description": "Temporary pass stub. Recovered in Reception."
+      "description": "A temporary pass stub marked VISITOR / ESCORT REQUIRED. The return box is stamped at 16:42; the issuer's initials are smudged."
     },
     {
       "id": "P-003",
@@ -8035,7 +8035,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 3,
-      "description": "Visitor badge. Recovered in Reception."
+      "description": "A white visitor badge numbered 037. A red strip across the bottom reads MUST BE RETURNED TO RECEPTION ON DEPARTURE."
     },
     {
       "id": "P-004",
@@ -8050,7 +8050,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 4,
-      "description": "Visitor log pencil. Recovered in Reception."
+      "description": "A local visitor log pencil records routine entries through the closure period. The final line is left open for handover."
     },
     {
       "id": "P-005",
@@ -8065,7 +8065,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 5,
-      "description": "Contractor badge clip. Recovered in Reception."
+      "description": "A contractor badge clip with a paper insert: FACILITIES CONTRACTOR / TEMPORARY ACCESS. The expiry date is the site's final week."
     },
     {
       "id": "P-006",
@@ -8080,7 +8080,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 6,
-      "description": "Visitor register carbon copy. Recovered in Reception."
+      "description": "The carbon copy lists three visitors and two contractors. Each departure time is completed except the final contractor entry."
     },
     {
       "id": "P-007",
@@ -8140,7 +8140,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 10,
-      "description": "HR hot desking note. Recovered in Main Office."
+      "description": "HR NOTICE: Desk 02 is available for temporary hot-desking during closure work. Personal papers must be removed at the end of each shift."
     },
     {
       "id": "P-011",
@@ -8155,7 +8155,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 11,
-      "description": "Corridor access notice. Recovered in Main Office."
+      "description": "NOTICE: Corridor access is restricted during closure works. Keep the route clear and return temporary access keys to Security."
     },
     {
       "id": "P-012",
@@ -8187,7 +8187,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 13,
-      "description": "Panel service label. Recovered in Main Office."
+      "description": "SERVICE LABEL: Suppression panel tested and left operational. Isolation requires Facilities and Security authorisation."
     },
     {
       "id": "P-014",
@@ -8205,7 +8205,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 14,
-      "description": "Site Closure Handover Folder. Recovered in Main Office."
+      "description": "A buff folder labelled SITE CLOSURE - HANDOVER. Tabs inside are marked Facilities, Records, Security and Final Sign-off."
     },
     {
       "id": "P-015",
@@ -8220,7 +8220,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 15,
-      "description": "Project Manager desk calendar. Recovered in Main Office."
+      "description": "The desk calendar has the final working week boxed in red. Friday is marked BUILDING HANDOVER / 16:00 in block capitals."
     },
     {
       "id": "P-016",
@@ -8235,7 +8235,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 16,
-      "description": "Final sign-off checklist. Recovered in Main Office."
+      "description": "FINAL SIGN-OFF: archive transfer, secure storage and terminal isolation are ticked. BUILDING RELEASE remains unsigned."
     },
     {
       "id": "P-017",
@@ -8284,7 +8284,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 19,
-      "description": "Local terminal diagnostic card. Recovered in Main Office."
+      "description": "A laminated diagnostic card lists LOOPBACK, NETWORK, ARCHIVE and PRINT checks. A pencil tick sits beside the first three."
     },
     {
       "id": "P-020",
@@ -8299,7 +8299,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 20,
-      "description": "Terminal status printout. Recovered in Main Office."
+      "description": "STATUS: LOCAL TERMINAL ONLINE / ARCHIVE LINK INTERMITTENT. The bottom line says RETEST AFTER FINAL TRANSFER."
     },
     {
       "id": "P-021",
@@ -8316,7 +8316,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 21,
-      "description": "Project Manager Exception Sheet. Recovered in Main Office."
+      "description": "EXCEPTION: final building release deferred pending unresolved records and technical checks. Review owner: Project Manager."
     },
     {
       "id": "P-022",
@@ -8331,7 +8331,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 22,
-      "description": "Closure suspension note. Recovered in Main Office."
+      "description": "CLOSURE SUSPENDED. Do not complete final handover until outstanding Records and IT exceptions are cleared."
     },
     {
       "id": "P-023",
@@ -8361,7 +8361,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 24,
-      "description": "Remaining-workstream release sheet. Recovered in Main Office."
+      "description": "Release sheet lists Records and IT as the remaining workstreams. Security sign-off is marked conditional on both."
     },
     {
       "id": "P-025",
@@ -8378,7 +8378,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 25,
-      "description": "Signed Attendance Sheet. Recovered in Main Office."
+      "description": "The attendance sheet is signed by the closure team. One late-afternoon departure column is left blank."
     },
     {
       "id": "P-026",
@@ -8395,7 +8395,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 26,
-      "description": "Duty Rota. Recovered in Main Office."
+      "description": "A final-week duty rota assigns Reception, Records, Facilities and Security cover. Friday afternoon has only skeleton staffing."
     },
     {
       "id": "P-027",
@@ -8410,7 +8410,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 27,
-      "description": "Leave status card. Recovered in Main Office."
+      "description": "LEAVE STATUS: all discretionary leave cancelled for closure week. Exceptions require Project Manager approval."
     },
     {
       "id": "P-028",
@@ -8425,7 +8425,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 28,
-      "description": "Overtime return. Recovered in Main Office."
+      "description": "An overtime return records evening work against archive transfer and terminal recovery. Totals are awaiting approval."
     },
     {
       "id": "P-029",
@@ -8440,7 +8440,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 29,
-      "description": "Attendance amendment note. Recovered in Main Office."
+      "description": "Attendance amendment: one Records shift was extended to cover an unplanned transfer discrepancy. Authorising initials follow."
     },
     {
       "id": "P-030",
@@ -8455,7 +8455,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 30,
-      "description": "Facilities room plate. Recovered in Corridor."
+      "description": "Facilities room plate: a short written record from Corridor, retained with Cor Fac during site close-out."
     },
     {
       "id": "P-031",
@@ -8470,7 +8470,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 31,
-      "description": "Maintenance calendar. Recovered in Facilities."
+      "description": "The maintenance calendar has routine checks crossed out after the handover date. Fire, power and security checks remain active."
     },
     {
       "id": "P-032",
@@ -8502,7 +8502,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 33,
-      "description": "Final Isolation Register. Recovered in Facilities."
+      "description": "FINAL ISOLATION REGISTER. Power and plant circuits are listed with isolate / retain boxes; several retain boxes are circled."
     },
     {
       "id": "P-034",
@@ -8517,7 +8517,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 34,
-      "description": "Decommissioning tag set. Recovered in Facilities."
+      "description": "A bundle of red tags numbered 041-056. Each reads OUT OF SERVICE - DO NOT RECONNECT WITHOUT FACILITIES AUTHORISATION."
     },
     {
       "id": "P-035",
@@ -8532,7 +8532,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 35,
-      "description": "Asset transfer labels. Recovered in Facilities."
+      "description": "Asset labels carry GDR transfer numbers with RETAIN / TRANSFER / DISPOSE boxes. Most are still attached to the backing sheet."
     },
     {
       "id": "P-036",
@@ -8547,7 +8547,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 36,
-      "description": "Contractor clipboard. Recovered in Facilities."
+      "description": "The clipboard holds a contractor close-out sheet: plant checked, keys returned, defects reported. Final supervisor signature is blank."
     },
     {
       "id": "P-037",
@@ -8565,7 +8565,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 37,
-      "description": "Printed Environmental Event Log. Recovered in Facilities."
+      "description": "ENVIRONMENTAL EVENT LOG. Temperature and ventilation entries are routine until a late note: AIRFLOW REDUCED - INVESTIGATE."
     },
     {
       "id": "P-038",
@@ -8580,7 +8580,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 38,
-      "description": "Ventilation isolation chart. Recovered in Facilities."
+      "description": "A ventilation isolation chart marks dampers and fan circuits. The Server Room route is highlighted and annotated KEEP LIVE."
     },
     {
       "id": "P-039",
@@ -8644,7 +8644,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 42,
-      "description": "Misfile slip. Recovered in Records Office."
+      "description": "MISFILE: return to Records Office trolley pending catalogue check. A handwritten shelf reference has been crossed out twice."
     },
     {
       "id": "P-043",
@@ -8674,7 +8674,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 44,
-      "description": "Catalogue discrepancy card. Recovered in Records Office."
+      "description": "CATALOGUE DISCREPANCY: box reference and index entry do not agree. The card instructs staff to hold the item for verification."
     },
     {
       "id": "P-045",
@@ -8689,7 +8689,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 45,
-      "description": "Refiling note. Recovered in Records Office."
+      "description": "REFILING NOTE: verified material to be returned after transfer reconciliation. Do not amend the catalogue until checked."
     },
     {
       "id": "P-046",
@@ -8706,7 +8706,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 46,
-      "description": "Labelled archive transfer box. Recovered in Records Office."
+      "description": "The archive box label gives a transfer batch, Records Office origin and HOLD FOR RECONCILIATION status in red pencil."
     },
     {
       "id": "P-047",
@@ -8738,7 +8738,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 48,
-      "description": "Transfer Box Manifest. Recovered in Records Office."
+      "description": "TRANSFER BOX MANIFEST. Box numbers and destinations are listed; one entry is marked CONTENTS DO NOT MATCH INDEX."
     },
     {
       "id": "P-049",
@@ -8753,7 +8753,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 49,
-      "description": "Custody tag. Recovered in Records Office."
+      "description": "A red custody tag numbered 29-14. The reverse has Released / Received / Witnessed boxes; the final Received box is empty."
     },
     {
       "id": "P-050",
@@ -8768,7 +8768,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 50,
-      "description": "Box seal strip. Recovered in Records Office."
+      "description": "A tamper-evident seal strip printed GDR RECORDS TRANSFER. Its serial matches the handwritten number on the manifest."
     },
     {
       "id": "P-051",
@@ -8783,7 +8783,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 51,
-      "description": "Transfer staging checklist. Recovered in Records Office."
+      "description": "TRANSFER STAGING: count, seal, manifest, witness and dispatch. Every box is ticked except FINAL RECEIPT."
     },
     {
       "id": "P-052",
@@ -8800,7 +8800,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 52,
-      "description": "Signed Custody Sheet. Recovered in Records Office."
+      "description": "The custody sheet records handover signatures for a transfer batch. The destination acknowledgement line is unsigned."
     },
     {
       "id": "P-053",
@@ -8815,7 +8815,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 53,
-      "description": "Final Transfer Exception Register. Recovered in Records Office."
+      "description": "FINAL TRANSFER EXCEPTIONS: mismatched catalogue entry, incomplete receipt, one retained box. Status remains OPEN."
     },
     {
       "id": "P-054",
@@ -8830,7 +8830,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 54,
-      "description": "Senior Archivist verification note. Recovered in Records Office."
+      "description": "A Senior Archivist note: Do not close the transfer until the manifest and physical box contents agree. Initials: P.P."
     },
     {
       "id": "P-055",
@@ -8845,7 +8845,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 55,
-      "description": "In-tray card. Recovered in Records Office."
+      "description": "An in-tray card reads PRIORITY: TRANSFER EXCEPTIONS. A second line says Return to Senior Archivist before sign-off."
     },
     {
       "id": "P-056",
@@ -8894,7 +8894,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 58,
-      "description": "Server-route label. Recovered in IT Support."
+      "description": "A route label maps PATCH 04 to SERVER ROOM / ARCHIVE LINK. A smaller note says DO NOT REPATCH DURING TRANSFER."
     },
     {
       "id": "P-059",
@@ -8939,7 +8939,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 61,
-      "description": "Retired port label. Recovered in IT Support."
+      "description": "A faded label reads RETIRED PORT - NO SERVICE. The old circuit reference is still legible beneath a newer sticker."
     },
     {
       "id": "P-062",
@@ -8999,7 +8999,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 65,
-      "description": "Legacy support sticker. Recovered in IT Support."
+      "description": "A yellow support sticker gives an internal extension and the handwritten warning LEGACY - DO NOT POWER CYCLE WITHOUT CHECK."
     },
     {
       "id": "P-066",
@@ -9063,7 +9063,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 69,
-      "description": "Checksum printout. Recovered in IT Support."
+      "description": "The checksum printout lists archive blocks with matching values until the final group, where one line is circled for recheck."
     },
     {
       "id": "P-070",
@@ -9078,7 +9078,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 70,
-      "description": "Archive-transfer label sheet. Recovered in IT Support."
+      "description": "A sheet of archive-transfer labels carries batch IDs, destination fields and checksum boxes. Several labels have already been removed."
     },
     {
       "id": "P-071",
@@ -9153,7 +9153,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 75,
-      "description": "Noticeboard social poster. Recovered in Staff Room."
+      "description": "A staff social poster advertises FINAL FRIDAY TEA - 15:30, STAFF ROOM. Someone has added Bring your own mug in pen."
     },
     {
       "id": "P-076",
@@ -9183,7 +9183,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 77,
-      "description": "Labelled milk bottle. Recovered in Staff Room."
+      "description": "A milk bottle label reads RECORDS - HANDS OFF. Underneath, in different handwriting: Too late."
     },
     {
       "id": "P-078",
@@ -9198,7 +9198,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 78,
-      "description": "Birthday card. Recovered in Staff Room."
+      "description": "A birthday card is signed by staff from across the site. One message jokes about escaping before the closure paperwork does."
     },
     {
       "id": "P-079",
@@ -9230,7 +9230,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 80,
-      "description": "Signed closure briefing. Recovered in Director Office."
+      "description": "The signed closure briefing confirms staged handover, retained security cover and unresolved exceptions to be carried forward."
     },
     {
       "id": "P-081",
@@ -9260,7 +9260,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 82,
-      "description": "Meeting notes card. Recovered in Director Office."
+      "description": "Meeting card: Records discrepancy, IT archive link, final release. The last line says No closure certificate until both resolved."
     },
     {
       "id": "P-083",
@@ -9275,7 +9275,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 83,
-      "description": "Briefing binder. Recovered in Director Office."
+      "description": "The cover is marked DIRECTOR OFFICE / CLOSE-OUT. Internal tabs separate routine material from handover exceptions."
     },
     {
       "id": "P-084",
@@ -9290,7 +9290,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 84,
-      "description": "Final-day diary card. Recovered in Director Office."
+      "description": "A diary card for the final day lists 09:00 briefing, 13:00 transfer review and 16:00 handover. Handover is crossed out."
     },
     {
       "id": "P-085",
@@ -9307,7 +9307,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 85,
-      "description": "Incident clipboard. Recovered in Security."
+      "description": "The incident clipboard heading reads SECURITY INCIDENT LOG - CLOSURE PERIOD. The current sheet is clipped open at the last entry."
     },
     {
       "id": "P-086",
@@ -9325,7 +9325,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 86,
-      "description": "Evacuation accountability sheet. Recovered in Security."
+      "description": "EVACUATION ACCOUNTABILITY. Staff zones and muster counts are listed; the final drill shows all persons accounted for."
     },
     {
       "id": "P-087",
@@ -9357,7 +9357,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 88,
-      "description": "Incident timing card. Recovered in Security."
+      "description": "An incident timing card records alarm, acknowledgement, patrol dispatch and reset times. One interval is underlined for review."
     },
     {
       "id": "P-089",
@@ -9417,7 +9417,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 92,
-      "description": "Master Secure Cabinet Access Register. Recovered in Security."
+      "description": "MASTER SECURE CABINET ACCESS REGISTER. Cabinet identifiers are paired with recovery-code references and authorised roles."
     },
     {
       "id": "P-093",
@@ -9447,7 +9447,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 94,
-      "description": "Secure Storage Access Procedure card. Recovered in Security."
+      "description": "SECURE STORAGE PROCEDURE: verify cabinet ID, obtain authorised code, record access, reseal and report discrepancies."
     },
     {
       "id": "P-095",
@@ -9462,7 +9462,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 95,
-      "description": "Key-control context sheet. Recovered in Security."
+      "description": "KEY CONTROL: issue and return against name, time and purpose. Unreturned keys must be reported before site handover."
     },
     {
       "id": "P-096",
@@ -9479,7 +9479,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 96,
-      "description": "CCTV coverage index binder. Recovered in Security."
+      "description": "A CCTV index binder maps camera numbers to corridors, entrances and secure rooms. Several pages are marked RETAIN."
     },
     {
       "id": "P-097",
@@ -9496,7 +9496,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 97,
-      "description": "IT Support entrance event printout. Recovered in Security."
+      "description": "ACCESS EVENT: IT SUPPORT ENTRANCE. A late entry is highlighted with badge ID, time and SECURITY REVIEW beside it."
     },
     {
       "id": "P-098",
@@ -9511,7 +9511,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 98,
-      "description": "CCTV camera map. Recovered in Security."
+      "description": "The camera map numbers each coverage zone. The IT Support entrance and Server Room approach are outlined in pencil."
     },
     {
       "id": "P-099",
@@ -9526,7 +9526,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 99,
-      "description": "Monitor-bank channel list. Recovered in Security."
+      "description": "A channel list pairs monitor-bank inputs with camera numbers. Two channels are marked INTERMITTENT - DO NOT RELY."
     },
     {
       "id": "P-100",
@@ -9541,7 +9541,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 100,
-      "description": "Retention label. Recovered in Security."
+      "description": "RETENTION: SECURITY MATERIAL. Hold pending final records review; destruction date left blank."
     },
     {
       "id": "P-101",
@@ -9604,7 +9604,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 104,
-      "description": "Service tag. Recovered in Server Room."
+      "description": "SERVICE TAG: rack equipment inspected and left in service for archive recovery. Removal authorisation is blank."
     },
     {
       "id": "P-105",
@@ -9619,7 +9619,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 105,
-      "description": "Ventilation status tag. Recovered in Server Room."
+      "description": "VENTILATION STATUS: reduced flow accepted temporarily. Maintain Server Room cooling until archive transfer is complete."
     },
     {
       "id": "P-106",
@@ -9653,7 +9653,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 107,
-      "description": "Backup rotation case. Recovered in Server Room."
+      "description": "The backup rotation case marks the site's final working week. The last handover-related entry has been amended in pen."
     },
     {
       "id": "P-108",
@@ -9668,7 +9668,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 108,
-      "description": "Rack labels. Recovered in Server Room."
+      "description": "Rack labels identify SERVER 01, ARCHIVE ARRAY and BACKUP UNIT. Handwritten arrows show the temporary transfer path."
     },
     {
       "id": "P-109",
@@ -9683,7 +9683,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 109,
-      "description": "Backup logbook. Recovered in Server Room."
+      "description": "The backup logbook records nightly rotations. The final entry says HOLD LAST VERIFIED SET - DO NOT OVERWRITE."
     },
     {
       "id": "P-110",
@@ -9713,7 +9713,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 111,
-      "description": "UPS status card. Recovered in Server Room."
+      "description": "UPS STATUS: batteries tested, bypass available, shutdown deferred. A note says Maintain supply through final transfer."
     },
     {
       "id": "P-112",
@@ -9814,7 +9814,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 117,
-      "description": "Maintenance isolation tag. Recovered in Server Room."
+      "description": "A red isolation tag numbered 117. It reads CABLE RISER - DO NOT ISOLATE WHILE ARCHIVE TRANSFER ACTIVE."
     },
     {
       "id": "P-118",
@@ -9844,7 +9844,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 119,
-      "description": "Halon cylinder service label. Recovered in Server Room."
+      "description": "SERVICE LABEL: HALON CYLINDER CHECKED / PRESSURE SERVICEABLE. Next scheduled service falls after site handover."
     },
     {
       "id": "P-120",
@@ -9859,7 +9859,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 120,
-      "description": "Server recovery checklist. Recovered in Server Room."
+      "description": "SERVER RECOVERY: verify power, archive array, network route, checksum and backup. Final transfer confirmation is not ticked."
     },
     {
       "id": "P-121",
@@ -9874,7 +9874,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 121,
-      "description": "Reception contractor sign-in card. Recovered in Reception."
+      "description": "CONTRACTOR SIGN-IN: Facilities attendance, escort and key issue are completed. The key-return box is initialled at close of shift."
     },
     {
       "id": "P-122",
@@ -9904,7 +9904,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 123,
-      "description": "Staff telephone list. Recovered in Main Office."
+      "description": "The telephone list gives internal extensions for Reception, Records, Facilities, IT and Security. Several personal lines are struck through."
     },
     {
       "id": "P-124",
@@ -9919,7 +9919,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 124,
-      "description": "Course feedback forms. Recovered in Main Office."
+      "description": "Course feedback forms are mostly blank. The top sheet has one comment: Clear enough, but the terminal examples need updating."
     },
     {
       "id": "P-125",
@@ -9964,7 +9964,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 127,
-      "description": "Closure milestone board card. Recovered in Main Office."
+      "description": "CLOSURE MILESTONES: records transfer, technical validation, security seal, handover. The final milestone is marked HELD."
     },
     {
       "id": "P-128",
@@ -9977,7 +9977,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 128,
-      "description": "Facilities ring of equipment labels. Recovered in Facilities."
+      "description": "Equipment labels list plant IDs and final disposition. A number of RETAIN tags have been separated from the ring."
     },
     {
       "id": "P-129",
@@ -10003,7 +10003,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 130,
-      "description": "Plant-room key tag. Recovered in Facilities."
+      "description": "A red key tag reads PLANT ROOM / KEY 04 / RETURN TO FACILITIES. The reverse carries a faded issue number."
     },
     {
       "id": "P-131",
@@ -10016,7 +10016,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 131,
-      "description": "Asset serial-number cards. Recovered in Facilities."
+      "description": "Asset cards pair serial numbers with rooms and transfer status. Several disposal fields are still blank."
     },
     {
       "id": "P-132",
@@ -10042,7 +10042,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 133,
-      "description": "Refiling divider cards. Recovered in Records Office."
+      "description": "Divider cards read TO VERIFY, TO REFILE, TRANSFER HOLD and COMPLETE. The HOLD section is visibly the thickest."
     },
     {
       "id": "P-134",
@@ -10117,7 +10117,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 138,
-      "description": "Seasonal staff-social notice. Recovered in Staff Room."
+      "description": "NOTICE: Final-week staff tea, Friday 15:30. Closure team welcome; bring remaining biscuits before Facilities bins them."
     },
     {
       "id": "P-139",
@@ -10158,7 +10158,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 141,
-      "description": "Director's appointment card stack. Recovered in Secretary Office."
+      "description": "Appointment cards list the Director's final-week meetings. Friday 16:00 HANDOVER is crossed through and replaced with REVIEW."
     },
     {
       "id": "P-142",
@@ -10236,7 +10236,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 147,
-      "description": "Accident-book envelope. Recovered in Security."
+      "description": "An accident-book envelope is sealed and marked CONFIDENTIAL. The outside records one enclosed form and a retention date."
     },
     {
       "id": "P-148",
@@ -10303,7 +10303,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 152,
-      "description": "Reception room plate. Recovered in Corridor."
+      "description": "Reception room plate: a short written record from Corridor, retained with Cor Rec during site close-out."
     },
     {
       "id": "P-153",
@@ -10318,7 +10318,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 153,
-      "description": "Main Office room plate. Recovered in Corridor."
+      "description": "Main Office room plate: a short written record from Corridor, retained with Cor Off during site close-out."
     },
     {
       "id": "P-154",
@@ -10333,7 +10333,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 154,
-      "description": "Facilities room plate - corridor side. Recovered in Corridor."
+      "description": "Facilities room plate - corridor side: a short written record from Corridor, retained with Cor Fac during site close-out."
     },
     {
       "id": "P-155",
@@ -10348,7 +10348,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 155,
-      "description": "IT Support room plate. Recovered in Corridor."
+      "description": "IT Support room plate: a short written record from Corridor, retained with Cor It during site close-out."
     },
     {
       "id": "P-156",
@@ -10363,7 +10363,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 156,
-      "description": "Security Office room plate. Recovered in Corridor."
+      "description": "Security Office room plate: a short written record from Corridor, retained with Cor Sec during site close-out."
     },
     {
       "id": "P-157",
@@ -10378,7 +10378,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 157,
-      "description": "Staff Room door plate. Recovered in Corridor."
+      "description": "The plate identifies Cor Staff. Its smaller line gives the room or post designation used during normal site operations."
     },
     {
       "id": "P-158",
@@ -10393,7 +10393,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 158,
-      "description": "Records Room door plate. Recovered in Corridor."
+      "description": "A metal door plate reads RECORDS OFFICE - AUTHORISED STAFF ONLY. A smaller strip below says KEEP CLOSED DURING TRANSFER."
     },
     {
       "id": "P-159",
@@ -10444,7 +10444,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 161,
-      "description": "Security Duty Communications Log Sheet. Recovered in Security."
+      "description": "SECURITY DUTY COMMUNICATIONS LOG. Calls to Facilities, IT and Records are timestamped through the closure period."
     },
     {
       "id": "P-162",
@@ -10616,7 +10616,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 173,
-      "description": "Meeting notepad left with this table in Reception."
+      "description": "Meeting notepad: a short written record from Reception, retained with Reception Visitor Book Table during site close-out."
     },
     {
       "id": "P-174",
@@ -10707,7 +10707,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 180,
-      "description": "Action-note sheet left with this table in Reception."
+      "description": "The action-note sheet contains closure-period entries and initials. Its final approval or receipt field is not completed."
     },
     {
       "id": "P-181",
@@ -10720,7 +10720,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 181,
-      "description": "Inspection sticker left with this panel in Corridor."
+      "description": "INSPECTED / SERVICEABLE. Sticker 181 has an initialled check box; the next inspection date is left blank."
     },
     {
       "id": "P-182",
@@ -10733,7 +10733,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 182,
-      "description": "Handwritten label left with this panel in Corridor."
+      "description": "A handwritten label reads KEEP WITH CORRIDOR SITE DIRECTORY. A second line says DO NOT REMOVE DURING CLOSE-OUT."
     },
     {
       "id": "P-183",
@@ -10746,7 +10746,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 183,
-      "description": "Service note left with this panel in Corridor."
+      "description": "SERVICE NOTE: checked and left operational for the closure period. Any further fault is to be reported to Facilities."
     },
     {
       "id": "P-184",
@@ -10759,7 +10759,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 184,
-      "description": "Serial-number card left with this panel in Corridor."
+      "description": "Asset card GDR/184. Location: Corridor. The transfer/disposal field is present but not completed."
     },
     {
       "id": "P-185",
@@ -10772,7 +10772,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 185,
-      "description": "Laminated instruction left with this panel in Corridor."
+      "description": "Laminated instruction: ISOLATE BEFORE OPENING. Report broken seals or unexpected faults to Facilities or Security."
     },
     {
       "id": "P-186",
@@ -10785,7 +10785,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 186,
-      "description": "Cable tag left with this panel in Corridor."
+      "description": "Cable tag 186: Corridor Site Directory. The reverse is stamped REMOVE ONLY ON AUTHORISED WORK."
     },
     {
       "id": "P-187",
@@ -10798,7 +10798,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 187,
-      "description": "Maintenance tick sheet left with this panel in Corridor."
+      "description": "Weekly maintenance boxes are initialled through the final full week. The next scheduled check is left blank."
     },
     {
       "id": "P-188",
@@ -10967,7 +10967,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 200,
-      "description": "Inspection sticker left with this panel in Main Office."
+      "description": "INSPECTED / SERVICEABLE. Sticker 200 has an initialled check box; the next inspection date is left blank."
     },
     {
       "id": "P-201",
@@ -10980,7 +10980,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 201,
-      "description": "Handwritten label left with this panel in Main Office."
+      "description": "A handwritten label reads KEEP WITH MAIN OFFICE SUPPRESSION PANEL. A second line says DO NOT REMOVE DURING CLOSE-OUT."
     },
     {
       "id": "P-202",
@@ -10993,7 +10993,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 202,
-      "description": "Service note left with this panel in Main Office."
+      "description": "SERVICE NOTE: checked and left operational for the closure period. Any further fault is to be reported to Facilities."
     },
     {
       "id": "P-203",
@@ -11006,7 +11006,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 203,
-      "description": "Serial-number card left with this panel in Main Office."
+      "description": "Asset card GDR/203. Location: Main Office. The transfer/disposal field is present but not completed."
     },
     {
       "id": "P-204",
@@ -11019,7 +11019,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 204,
-      "description": "Laminated instruction left with this panel in Main Office."
+      "description": "Laminated instruction: ISOLATE BEFORE OPENING. Report broken seals or unexpected faults to Facilities or Security."
     },
     {
       "id": "P-205",
@@ -11032,7 +11032,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 205,
-      "description": "Cable tag left with this panel in Main Office."
+      "description": "Cable tag 205: Main Office Suppression Panel. The reverse is stamped REMOVE ONLY ON AUTHORISED WORK."
     },
     {
       "id": "P-206",
@@ -11045,7 +11045,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 206,
-      "description": "Maintenance tick sheet left with this panel in Main Office."
+      "description": "Weekly maintenance boxes are initialled through the final full week. The next scheduled check is left blank."
     },
     {
       "id": "P-207",
@@ -11227,7 +11227,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 220,
-      "description": "Lever-arch file left with this storage in Main Office."
+      "description": "The spine reads MAIN OFFICE / CLOSE-OUT / 220. A pencilled RETAIN mark sits beside the review box."
     },
     {
       "id": "P-221",
@@ -11253,7 +11253,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 222,
-      "description": "Brown file wallet left with this storage in Main Office."
+      "description": "A brown wallet marked MAIN OFFICE / WORKING PAPERS. The cover says retain locally until final handover."
     },
     {
       "id": "P-223",
@@ -11266,7 +11266,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 223,
-      "description": "Spare binder left with this storage in Main Office."
+      "description": "The cover is marked MAIN OFFICE / CLOSE-OUT. Internal tabs separate routine material from handover exceptions."
     },
     {
       "id": "P-224",
@@ -11344,7 +11344,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 229,
-      "description": "Lever-arch file left with this storage in Facilities."
+      "description": "The spine reads FACILITIES / CLOSE-OUT / 229. A pencilled RETAIN mark sits beside the review box."
     },
     {
       "id": "P-230",
@@ -11370,7 +11370,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 231,
-      "description": "Brown file wallet left with this storage in Facilities."
+      "description": "A brown wallet marked FACILITIES / WORKING PAPERS. The cover says retain locally until final handover."
     },
     {
       "id": "P-232",
@@ -11383,7 +11383,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 232,
-      "description": "Spare binder left with this storage in Facilities."
+      "description": "The cover is marked FACILITIES / CLOSE-OUT. Internal tabs separate routine material from handover exceptions."
     },
     {
       "id": "P-233",
@@ -11396,7 +11396,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 233,
-      "description": "Forms packet left with this storage in Facilities."
+      "description": "A packet of blank close-out forms: transfer, exception and witness sheets. The top copy is stamped LOCAL COPY."
     },
     {
       "id": "P-234",
@@ -11409,7 +11409,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 234,
-      "description": "Label roll left with this storage in Facilities."
+      "description": "A part-used roll printed with GDR asset numbers and RETAIN / TRANSFER / DISPOSE boxes."
     },
     {
       "id": "P-235",
@@ -11422,7 +11422,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 235,
-      "description": "Index-card box left with this storage in Facilities."
+      "description": "Tabbed index cards list local assets and storage locations. Several final-status fields remain blank."
     },
     {
       "id": "P-236",
@@ -11448,7 +11448,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 237,
-      "description": "Lever-arch file left with this storage in Facilities."
+      "description": "The spine reads FACILITIES / CLOSE-OUT / 237. A pencilled RETAIN mark sits beside the review box."
     },
     {
       "id": "P-238",
@@ -11474,7 +11474,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 239,
-      "description": "Brown file wallet left with this storage in Facilities."
+      "description": "A brown wallet marked FACILITIES / WORKING PAPERS. The cover says retain locally until final handover."
     },
     {
       "id": "P-240",
@@ -11487,7 +11487,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 240,
-      "description": "Spare binder left with this storage in Facilities."
+      "description": "The cover is marked FACILITIES / CLOSE-OUT. Internal tabs separate routine material from handover exceptions."
     },
     {
       "id": "P-241",
@@ -11500,7 +11500,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 241,
-      "description": "Forms packet left with this storage in Facilities."
+      "description": "A packet of blank close-out forms: transfer, exception and witness sheets. The top copy is stamped LOCAL COPY."
     },
     {
       "id": "P-242",
@@ -11513,7 +11513,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 242,
-      "description": "Label roll left with this storage in Facilities."
+      "description": "A part-used roll printed with GDR asset numbers and RETAIN / TRANSFER / DISPOSE boxes."
     },
     {
       "id": "P-243",
@@ -11526,7 +11526,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 243,
-      "description": "Index-card box left with this storage in Facilities."
+      "description": "Tabbed index cards list local assets and storage locations. Several final-status fields remain blank."
     },
     {
       "id": "P-244",
@@ -11552,7 +11552,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 245,
-      "description": "Lever-arch file left with this storage in Facilities."
+      "description": "The spine reads FACILITIES / CLOSE-OUT / 245. A pencilled RETAIN mark sits beside the review box."
     },
     {
       "id": "P-246",
@@ -11578,7 +11578,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 247,
-      "description": "Brown file wallet left with this storage in Facilities."
+      "description": "A brown wallet marked FACILITIES / WORKING PAPERS. The cover says retain locally until final handover."
     },
     {
       "id": "P-248",
@@ -11591,7 +11591,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 248,
-      "description": "Spare binder left with this storage in Facilities."
+      "description": "The cover is marked FACILITIES / CLOSE-OUT. Internal tabs separate routine material from handover exceptions."
     },
     {
       "id": "P-249",
@@ -11604,7 +11604,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 249,
-      "description": "Forms packet left with this storage in Facilities."
+      "description": "A packet of blank close-out forms: transfer, exception and witness sheets. The top copy is stamped LOCAL COPY."
     },
     {
       "id": "P-250",
@@ -11617,7 +11617,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 250,
-      "description": "Label roll left with this storage in Facilities."
+      "description": "A part-used roll printed with GDR asset numbers and RETAIN / TRANSFER / DISPOSE boxes."
     },
     {
       "id": "P-251",
@@ -11630,7 +11630,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 251,
-      "description": "Index-card box left with this storage in Facilities."
+      "description": "Tabbed index cards list local assets and storage locations. Several final-status fields remain blank."
     },
     {
       "id": "P-252",
@@ -11656,7 +11656,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 253,
-      "description": "Lever-arch file left with this storage in Facilities."
+      "description": "The spine reads FACILITIES / CLOSE-OUT / 253. A pencilled RETAIN mark sits beside the review box."
     },
     {
       "id": "P-254",
@@ -11682,7 +11682,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 255,
-      "description": "Brown file wallet left with this storage in Facilities."
+      "description": "A brown wallet marked FACILITIES / WORKING PAPERS. The cover says retain locally until final handover."
     },
     {
       "id": "P-256",
@@ -11695,7 +11695,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 256,
-      "description": "Spare binder left with this storage in Facilities."
+      "description": "The cover is marked FACILITIES / CLOSE-OUT. Internal tabs separate routine material from handover exceptions."
     },
     {
       "id": "P-257",
@@ -11708,7 +11708,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 257,
-      "description": "Forms packet left with this storage in Facilities."
+      "description": "A packet of blank close-out forms: transfer, exception and witness sheets. The top copy is stamped LOCAL COPY."
     },
     {
       "id": "P-258",
@@ -11721,7 +11721,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 258,
-      "description": "Label roll left with this storage in Facilities."
+      "description": "A part-used roll printed with GDR asset numbers and RETAIN / TRANSFER / DISPOSE boxes."
     },
     {
       "id": "P-259",
@@ -11734,7 +11734,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 259,
-      "description": "Lever-arch file left with this storage in Records Office."
+      "description": "The spine reads RECORDS OFFICE / CLOSE-OUT / 259. A pencilled RETAIN mark sits beside the review box."
     },
     {
       "id": "P-260",
@@ -11760,7 +11760,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 261,
-      "description": "Brown file wallet left with this storage in Records Office."
+      "description": "A brown wallet marked RECORDS OFFICE / WORKING PAPERS. The cover says retain locally until final handover."
     },
     {
       "id": "P-262",
@@ -11773,7 +11773,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 262,
-      "description": "Spare binder left with this storage in Records Office."
+      "description": "The cover is marked RECORDS OFFICE / CLOSE-OUT. Internal tabs separate routine material from handover exceptions."
     },
     {
       "id": "P-263",
@@ -11786,7 +11786,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 263,
-      "description": "Forms packet left with this storage in Records Office."
+      "description": "A packet of blank close-out forms: transfer, exception and witness sheets. The top copy is stamped LOCAL COPY."
     },
     {
       "id": "P-264",
@@ -11799,7 +11799,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 264,
-      "description": "Label roll left with this storage in Records Office."
+      "description": "A part-used roll printed with GDR asset numbers and RETAIN / TRANSFER / DISPOSE boxes."
     },
     {
       "id": "P-265",
@@ -11812,7 +11812,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 265,
-      "description": "Index-card box left with this storage in Records Office."
+      "description": "Tabbed index cards list local assets and storage locations. Several final-status fields remain blank."
     },
     {
       "id": "P-266",
@@ -11877,7 +11877,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 270,
-      "description": "Lever-arch file left with this storage in Records Office."
+      "description": "The spine reads RECORDS OFFICE / CLOSE-OUT / 270. A pencilled RETAIN mark sits beside the review box."
     },
     {
       "id": "P-271",
@@ -11903,7 +11903,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 272,
-      "description": "Brown file wallet left with this storage in Records Office."
+      "description": "A brown wallet marked RECORDS OFFICE / WORKING PAPERS. The cover says retain locally until final handover."
     },
     {
       "id": "P-273",
@@ -11916,7 +11916,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 273,
-      "description": "Spare binder left with this storage in Records Office."
+      "description": "The cover is marked RECORDS OFFICE / CLOSE-OUT. Internal tabs separate routine material from handover exceptions."
     },
     {
       "id": "P-274",
@@ -11929,7 +11929,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 274,
-      "description": "Forms packet left with this storage in Records Office."
+      "description": "A packet of blank close-out forms: transfer, exception and witness sheets. The top copy is stamped LOCAL COPY."
     },
     {
       "id": "P-275",
@@ -11942,7 +11942,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 275,
-      "description": "Label roll left with this storage in Records Office."
+      "description": "A part-used roll printed with GDR asset numbers and RETAIN / TRANSFER / DISPOSE boxes."
     },
     {
       "id": "P-276",
@@ -11955,7 +11955,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 276,
-      "description": "Index-card box left with this storage in Records Office."
+      "description": "Tabbed index cards list local assets and storage locations. Several final-status fields remain blank."
     },
     {
       "id": "P-277",
@@ -11981,7 +11981,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 278,
-      "description": "Inspection sticker left with this panel in IT Support."
+      "description": "INSPECTED / SERVICEABLE. Sticker 278 has an initialled check box; the next inspection date is left blank."
     },
     {
       "id": "P-279",
@@ -11994,7 +11994,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 279,
-      "description": "Handwritten label left with this panel in IT Support."
+      "description": "A handwritten label reads KEEP WITH IT SUPPORT PATCH PANEL. A second line says DO NOT REMOVE DURING CLOSE-OUT."
     },
     {
       "id": "P-280",
@@ -12007,7 +12007,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 280,
-      "description": "Service note left with this panel in IT Support."
+      "description": "SERVICE NOTE: checked and left operational for the closure period. Any further fault is to be reported to Facilities."
     },
     {
       "id": "P-281",
@@ -12020,7 +12020,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 281,
-      "description": "Serial-number card left with this panel in IT Support."
+      "description": "Asset card GDR/281. Location: It Support. The transfer/disposal field is present but not completed."
     },
     {
       "id": "P-282",
@@ -12033,7 +12033,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 282,
-      "description": "Laminated instruction left with this panel in IT Support."
+      "description": "Laminated instruction: ISOLATE BEFORE OPENING. Report broken seals or unexpected faults to Facilities or Security."
     },
     {
       "id": "P-283",
@@ -12046,7 +12046,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 283,
-      "description": "Cable tag left with this panel in IT Support."
+      "description": "Cable tag 283: It Support Patch Panel. The reverse is stamped REMOVE ONLY ON AUTHORISED WORK."
     },
     {
       "id": "P-284",
@@ -12059,7 +12059,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 284,
-      "description": "Inspection sticker left with this panel in IT Support."
+      "description": "INSPECTED / SERVICEABLE. Sticker 284 has an initialled check box; the next inspection date is left blank."
     },
     {
       "id": "P-285",
@@ -12072,7 +12072,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 285,
-      "description": "Handwritten label left with this panel in IT Support."
+      "description": "A handwritten label reads KEEP WITH IT SUPPORT SHELVES. A second line says DO NOT REMOVE DURING CLOSE-OUT."
     },
     {
       "id": "P-286",
@@ -12085,7 +12085,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 286,
-      "description": "Service note left with this panel in IT Support."
+      "description": "SERVICE NOTE: checked and left operational for the closure period. Any further fault is to be reported to Facilities."
     },
     {
       "id": "P-287",
@@ -12137,7 +12137,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 290,
-      "description": "Lever-arch file left with this storage in IT Support."
+      "description": "The spine reads IT SUPPORT / CLOSE-OUT / 290. A pencilled RETAIN mark sits beside the review box."
     },
     {
       "id": "P-291",
@@ -12163,7 +12163,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 292,
-      "description": "Brown file wallet left with this storage in IT Support."
+      "description": "A brown wallet marked IT SUPPORT / WORKING PAPERS. The cover says retain locally until final handover."
     },
     {
       "id": "P-293",
@@ -12176,7 +12176,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 293,
-      "description": "Spare binder left with this storage in IT Support."
+      "description": "The cover is marked IT SUPPORT / CLOSE-OUT. Internal tabs separate routine material from handover exceptions."
     },
     {
       "id": "P-294",
@@ -12189,7 +12189,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 294,
-      "description": "Forms packet left with this storage in IT Support."
+      "description": "A packet of blank close-out forms: transfer, exception and witness sheets. The top copy is stamped LOCAL COPY."
     },
     {
       "id": "P-295",
@@ -12202,7 +12202,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 295,
-      "description": "Label roll left with this storage in IT Support."
+      "description": "A part-used roll printed with GDR asset numbers and RETAIN / TRANSFER / DISPOSE boxes."
     },
     {
       "id": "P-296",
@@ -12215,7 +12215,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 296,
-      "description": "Index-card box left with this storage in IT Support."
+      "description": "Tabbed index cards list local assets and storage locations. Several final-status fields remain blank."
     },
     {
       "id": "P-297",
@@ -12436,7 +12436,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 313,
-      "description": "Lever-arch file left with this storage in Staff Room."
+      "description": "The spine reads STAFF ROOM / CLOSE-OUT / 313. A pencilled RETAIN mark sits beside the review box."
     },
     {
       "id": "P-314",
@@ -12462,7 +12462,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 315,
-      "description": "Brown file wallet left with this storage in Staff Room."
+      "description": "A brown wallet marked STAFF ROOM / WORKING PAPERS. The cover says retain locally until final handover."
     },
     {
       "id": "P-316",
@@ -12475,7 +12475,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 316,
-      "description": "Spare binder left with this storage in Staff Room."
+      "description": "The cover is marked STAFF ROOM / CLOSE-OUT. Internal tabs separate routine material from handover exceptions."
     },
     {
       "id": "P-317",
@@ -12488,7 +12488,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 317,
-      "description": "Forms packet left with this storage in Staff Room."
+      "description": "A packet of blank close-out forms: transfer, exception and witness sheets. The top copy is stamped LOCAL COPY."
     },
     {
       "id": "P-318",
@@ -12501,7 +12501,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 318,
-      "description": "Label roll left with this storage in Staff Room."
+      "description": "A part-used roll printed with GDR asset numbers and RETAIN / TRANSFER / DISPOSE boxes."
     },
     {
       "id": "P-319",
@@ -12514,7 +12514,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 319,
-      "description": "Index-card box left with this storage in Staff Room."
+      "description": "Tabbed index cards list local assets and storage locations. Several final-status fields remain blank."
     },
     {
       "id": "P-320",
@@ -12540,7 +12540,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 321,
-      "description": "Meeting notepad left with this table in Staff Room."
+      "description": "Meeting notepad: a short written record from Staff Room, retained with Staff Room Coffee Table 01 during site close-out."
     },
     {
       "id": "P-322",
@@ -12631,7 +12631,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 328,
-      "description": "Action-note sheet left with this table in Staff Room."
+      "description": "The action-note sheet contains closure-period entries and initials. Its final approval or receipt field is not completed."
     },
     {
       "id": "P-329",
@@ -12683,7 +12683,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 332,
-      "description": "Calendar page left with this noticeboard in Staff Room."
+      "description": "The calendar page marks the site's final working week. The last handover-related entry has been amended in pen."
     },
     {
       "id": "P-333",
@@ -12696,7 +12696,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 333,
-      "description": "Fire drill card left with this noticeboard in Staff Room."
+      "description": "The fire drill card carries a short local instruction and reference number. A handwritten amendment has been added beneath it."
     },
     {
       "id": "P-334",
@@ -12709,7 +12709,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 334,
-      "description": "Social notice left with this noticeboard in Staff Room."
+      "description": "A posted notice for Staff Room: routine closure-period instructions, with one final reminder underlined by hand."
     },
     {
       "id": "P-335",
@@ -12722,7 +12722,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 335,
-      "description": "Lever-arch file left with this storage in Staff Room."
+      "description": "The spine reads STAFF ROOM / CLOSE-OUT / 335. A pencilled RETAIN mark sits beside the review box."
     },
     {
       "id": "P-336",
@@ -12748,7 +12748,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 337,
-      "description": "Brown file wallet left with this storage in Staff Room."
+      "description": "A brown wallet marked STAFF ROOM / WORKING PAPERS. The cover says retain locally until final handover."
     },
     {
       "id": "P-338",
@@ -12761,7 +12761,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 338,
-      "description": "Spare binder left with this storage in Staff Room."
+      "description": "The cover is marked STAFF ROOM / CLOSE-OUT. Internal tabs separate routine material from handover exceptions."
     },
     {
       "id": "P-339",
@@ -12774,7 +12774,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 339,
-      "description": "Forms packet left with this storage in Staff Room."
+      "description": "A packet of blank close-out forms: transfer, exception and witness sheets. The top copy is stamped LOCAL COPY."
     },
     {
       "id": "P-340",
@@ -12787,7 +12787,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 340,
-      "description": "Label roll left with this storage in Staff Room."
+      "description": "A part-used roll printed with GDR asset numbers and RETAIN / TRANSFER / DISPOSE boxes."
     },
     {
       "id": "P-341",
@@ -12800,7 +12800,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 341,
-      "description": "Index-card box left with this storage in Staff Room."
+      "description": "Tabbed index cards list local assets and storage locations. Several final-status fields remain blank."
     },
     {
       "id": "P-342",
@@ -12826,7 +12826,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 343,
-      "description": "Lever-arch file left with this storage in Director Office."
+      "description": "The spine reads DIRECTOR OFFICE / CLOSE-OUT / 343. A pencilled RETAIN mark sits beside the review box."
     },
     {
       "id": "P-344",
@@ -12852,7 +12852,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 345,
-      "description": "Brown file wallet left with this storage in Director Office."
+      "description": "A brown wallet marked DIRECTOR OFFICE / WORKING PAPERS. The cover says retain locally until final handover."
     },
     {
       "id": "P-346",
@@ -12865,7 +12865,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 346,
-      "description": "Spare binder left with this storage in Director Office."
+      "description": "The cover is marked DIRECTOR OFFICE / CLOSE-OUT. Internal tabs separate routine material from handover exceptions."
     },
     {
       "id": "P-347",
@@ -12878,7 +12878,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 347,
-      "description": "Forms packet left with this storage in Director Office."
+      "description": "A packet of blank close-out forms: transfer, exception and witness sheets. The top copy is stamped LOCAL COPY."
     },
     {
       "id": "P-348",
@@ -12891,7 +12891,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 348,
-      "description": "Label roll left with this storage in Director Office."
+      "description": "A part-used roll printed with GDR asset numbers and RETAIN / TRANSFER / DISPOSE boxes."
     },
     {
       "id": "P-349",
@@ -12904,7 +12904,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 349,
-      "description": "Index-card box left with this storage in Director Office."
+      "description": "Tabbed index cards list local assets and storage locations. Several final-status fields remain blank."
     },
     {
       "id": "P-350",
@@ -12995,7 +12995,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 356,
-      "description": "Lever-arch file left with this storage in Director Office."
+      "description": "The spine reads DIRECTOR OFFICE / CLOSE-OUT / 356. A pencilled RETAIN mark sits beside the review box."
     },
     {
       "id": "P-357",
@@ -13021,7 +13021,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 358,
-      "description": "Brown file wallet left with this storage in Director Office."
+      "description": "A brown wallet marked DIRECTOR OFFICE / WORKING PAPERS. The cover says retain locally until final handover."
     },
     {
       "id": "P-359",
@@ -13034,7 +13034,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 359,
-      "description": "Spare binder left with this storage in Director Office."
+      "description": "The cover is marked DIRECTOR OFFICE / CLOSE-OUT. Internal tabs separate routine material from handover exceptions."
     },
     {
       "id": "P-360",
@@ -13047,7 +13047,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 360,
-      "description": "Forms packet left with this storage in Director Office."
+      "description": "A packet of blank close-out forms: transfer, exception and witness sheets. The top copy is stamped LOCAL COPY."
     },
     {
       "id": "P-361",
@@ -13060,7 +13060,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 361,
-      "description": "Label roll left with this storage in Director Office."
+      "description": "A part-used roll printed with GDR asset numbers and RETAIN / TRANSFER / DISPOSE boxes."
     },
     {
       "id": "P-362",
@@ -13073,7 +13073,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 362,
-      "description": "Index-card box left with this storage in Director Office."
+      "description": "Tabbed index cards list local assets and storage locations. Several final-status fields remain blank."
     },
     {
       "id": "P-363",
@@ -13151,7 +13151,7 @@
       "drawing_definition_id": "DRAW_NONSECURE_CABINET",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 368,
-      "description": "Lever-arch file left with this storage in Security."
+      "description": "The spine reads SECURITY / CLOSE-OUT / 368. A pencilled RETAIN mark sits beside the review box."
     },
     {
       "id": "P-369",
@@ -13177,7 +13177,7 @@
       "drawing_definition_id": "DRAW_NONSECURE_CABINET",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 370,
-      "description": "Brown file wallet left with this storage in Security."
+      "description": "A brown wallet marked SECURITY / WORKING PAPERS. The cover says retain locally until final handover."
     },
     {
       "id": "P-371",
@@ -13190,7 +13190,7 @@
       "drawing_definition_id": "DRAW_NONSECURE_CABINET",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 371,
-      "description": "Spare binder left with this storage in Security."
+      "description": "The cover is marked SECURITY / CLOSE-OUT. Internal tabs separate routine material from handover exceptions."
     },
     {
       "id": "P-372",
@@ -13203,7 +13203,7 @@
       "drawing_definition_id": "DRAW_NONSECURE_CABINET",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 372,
-      "description": "Forms packet left with this storage in Security."
+      "description": "A packet of blank close-out forms: transfer, exception and witness sheets. The top copy is stamped LOCAL COPY."
     },
     {
       "id": "P-373",
@@ -13216,7 +13216,7 @@
       "drawing_definition_id": "DRAW_NONSECURE_CABINET",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 373,
-      "description": "Label roll left with this storage in Security."
+      "description": "A part-used roll printed with GDR asset numbers and RETAIN / TRANSFER / DISPOSE boxes."
     },
     {
       "id": "P-374",
@@ -13229,7 +13229,7 @@
       "drawing_definition_id": "DRAW_NONSECURE_CABINET",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 374,
-      "description": "Index-card box left with this storage in Security."
+      "description": "Tabbed index cards list local assets and storage locations. Several final-status fields remain blank."
     },
     {
       "id": "P-375",
@@ -13255,7 +13255,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 376,
-      "description": "Lever-arch file left with this storage in Security."
+      "description": "The spine reads SECURITY / CLOSE-OUT / 376. A pencilled RETAIN mark sits beside the review box."
     },
     {
       "id": "P-377",
@@ -13281,7 +13281,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 378,
-      "description": "Brown file wallet left with this storage in Security."
+      "description": "A brown wallet marked SECURITY / WORKING PAPERS. The cover says retain locally until final handover."
     },
     {
       "id": "P-379",
@@ -13294,7 +13294,7 @@
       "drawing_definition_id": "DRAW_SECURE_CABINET_HALF",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 379,
-      "description": "Spare binder left with this storage in Security."
+      "description": "The cover is marked SECURITY / CLOSE-OUT. Internal tabs separate routine material from handover exceptions."
     },
     {
       "id": "P-380",
@@ -13307,7 +13307,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 380,
-      "description": "Numbered key tag left with this key cabinet in Security."
+      "description": "A red key tag numbered 380. It is stamped SECURITY KEY CABINET / RETURN TO SECURITY."
     },
     {
       "id": "P-381",
@@ -13333,7 +13333,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 382,
-      "description": "Key issue card left with this key cabinet in Security."
+      "description": "The key issue card carries a short local instruction and reference number. A handwritten amendment has been added beneath it."
     },
     {
       "id": "P-383",
@@ -13359,7 +13359,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 384,
-      "description": "Hook label left with this key cabinet in Security."
+      "description": "A printed label identifies Security Key Cabinet. A smaller status field has been completed by hand for the closure period."
     },
     {
       "id": "P-385",
@@ -13385,7 +13385,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 386,
-      "description": "Return slip left with this key cabinet in Security."
+      "description": "The return slip contains closure-period entries and initials. Its final approval or receipt field is not completed."
     },
     {
       "id": "P-387",
@@ -13411,7 +13411,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 388,
-      "description": "Channel label left with this monitor bank in Security."
+      "description": "A printed label identifies Security Monitor Bank. A smaller status field has been completed by hand for the closure period."
     },
     {
       "id": "P-389",
@@ -13437,7 +13437,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 390,
-      "description": "Fault sticker left with this monitor bank in Security."
+      "description": "Fault sticker: a short written record from Security, retained with Security Monitor Bank during site close-out."
     },
     {
       "id": "P-391",
@@ -13450,7 +13450,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 391,
-      "description": "Camera reference card left with this monitor bank in Security."
+      "description": "The camera reference card carries a short local instruction and reference number. A handwritten amendment has been added beneath it."
     },
     {
       "id": "P-392",
@@ -13463,7 +13463,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 392,
-      "description": "Selector note left with this monitor bank in Security."
+      "description": "Selector note: a short written record from Security, retained with Security Monitor Bank during site close-out."
     },
     {
       "id": "P-393",
@@ -13489,7 +13489,7 @@
       "drawing_definition_id": "DRAW_SERVER",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 394,
-      "description": "Rack service card left with this server rack in Server Room."
+      "description": "The rack service card carries a short local instruction and reference number. A handwritten amendment has been added beneath it."
     },
     {
       "id": "P-395",
@@ -13515,7 +13515,7 @@
       "drawing_definition_id": "DRAW_SERVER",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 396,
-      "description": "Blanking plate left with this server rack in Server Room."
+      "description": "Blanking plate: a short written record from Server Room, retained with Server Room Server 01 during site close-out."
     },
     {
       "id": "P-397",
@@ -13554,7 +13554,7 @@
       "drawing_definition_id": "DRAW_SERVER",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 399,
-      "description": "Status label left with this server rack in Server Room."
+      "description": "A printed label identifies Server Room Server 01. A smaller status field has been completed by hand for the closure period."
     },
     {
       "id": "P-400",
@@ -13580,7 +13580,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 401,
-      "description": "Inspection sticker left with this panel in Server Room."
+      "description": "INSPECTED / SERVICEABLE. Sticker 401 has an initialled check box; the next inspection date is left blank."
     },
     {
       "id": "P-402",
@@ -13593,7 +13593,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 402,
-      "description": "Handwritten label left with this panel in Server Room."
+      "description": "A handwritten label reads KEEP WITH SERVER ROOM CABLE RISER. A second line says DO NOT REMOVE DURING CLOSE-OUT."
     },
     {
       "id": "P-403",
@@ -13606,7 +13606,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 403,
-      "description": "Service note left with this panel in Server Room."
+      "description": "SERVICE NOTE: checked and left operational for the closure period. Any further fault is to be reported to Facilities."
     },
     {
       "id": "P-404",
@@ -13879,7 +13879,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 424,
-      "description": "Lever-arch file left with this storage in Facilities."
+      "description": "The spine reads FACILITIES / CLOSE-OUT / 424. A pencilled RETAIN mark sits beside the review box."
     },
     {
       "id": "P-425",
@@ -13905,7 +13905,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 426,
-      "description": "Brown file wallet left with this storage in Facilities."
+      "description": "A brown wallet marked FACILITIES / WORKING PAPERS. The cover says retain locally until final handover."
     },
     {
       "id": "P-427",
@@ -13918,7 +13918,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 427,
-      "description": "Spare binder left with this storage in Facilities."
+      "description": "The cover is marked FACILITIES / CLOSE-OUT. Internal tabs separate routine material from handover exceptions."
     },
     {
       "id": "P-428",
@@ -13931,7 +13931,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 428,
-      "description": "Forms packet left with this storage in Facilities."
+      "description": "A packet of blank close-out forms: transfer, exception and witness sheets. The top copy is stamped LOCAL COPY."
     },
     {
       "id": "P-429",
@@ -13944,7 +13944,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 429,
-      "description": "Label roll left with this storage in Facilities."
+      "description": "A part-used roll printed with GDR asset numbers and RETAIN / TRANSFER / DISPOSE boxes."
     },
     {
       "id": "P-430",
@@ -13957,7 +13957,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 430,
-      "description": "Index-card box left with this storage in Facilities."
+      "description": "Tabbed index cards list local assets and storage locations. Several final-status fields remain blank."
     },
     {
       "id": "P-431",
@@ -13983,7 +13983,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 432,
-      "description": "Lever-arch file left with this storage in Facilities."
+      "description": "The spine reads FACILITIES / CLOSE-OUT / 432. A pencilled RETAIN mark sits beside the review box."
     },
     {
       "id": "P-433",
@@ -14009,7 +14009,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 434,
-      "description": "Brown file wallet left with this storage in Facilities."
+      "description": "A brown wallet marked FACILITIES / WORKING PAPERS. The cover says retain locally until final handover."
     },
     {
       "id": "P-435",
@@ -14022,7 +14022,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 435,
-      "description": "Spare binder left with this storage in Facilities."
+      "description": "The cover is marked FACILITIES / CLOSE-OUT. Internal tabs separate routine material from handover exceptions."
     },
     {
       "id": "P-436",
@@ -14035,7 +14035,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 436,
-      "description": "Forms packet left with this storage in Facilities."
+      "description": "A packet of blank close-out forms: transfer, exception and witness sheets. The top copy is stamped LOCAL COPY."
     },
     {
       "id": "P-437",
@@ -14048,7 +14048,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 437,
-      "description": "Label roll left with this storage in Facilities."
+      "description": "A part-used roll printed with GDR asset numbers and RETAIN / TRANSFER / DISPOSE boxes."
     },
     {
       "id": "P-438",
@@ -14061,7 +14061,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 438,
-      "description": "Index-card box left with this storage in Facilities."
+      "description": "Tabbed index cards list local assets and storage locations. Several final-status fields remain blank."
     },
     {
       "id": "P-439",
@@ -14087,7 +14087,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 440,
-      "description": "Lever-arch file left with this storage in Facilities."
+      "description": "The spine reads FACILITIES / CLOSE-OUT / 440. A pencilled RETAIN mark sits beside the review box."
     },
     {
       "id": "P-441",
@@ -14113,7 +14113,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 442,
-      "description": "Brown file wallet left with this storage in Facilities."
+      "description": "A brown wallet marked FACILITIES / WORKING PAPERS. The cover says retain locally until final handover."
     },
     {
       "id": "P-443",
@@ -14126,7 +14126,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 443,
-      "description": "Spare binder left with this storage in Facilities."
+      "description": "The cover is marked FACILITIES / CLOSE-OUT. Internal tabs separate routine material from handover exceptions."
     },
     {
       "id": "P-444",
@@ -14139,7 +14139,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 444,
-      "description": "Forms packet left with this storage in Facilities."
+      "description": "A packet of blank close-out forms: transfer, exception and witness sheets. The top copy is stamped LOCAL COPY."
     },
     {
       "id": "P-445",
@@ -14152,7 +14152,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 445,
-      "description": "Label roll left with this storage in Facilities."
+      "description": "A part-used roll printed with GDR asset numbers and RETAIN / TRANSFER / DISPOSE boxes."
     },
     {
       "id": "P-446",
@@ -14165,7 +14165,7 @@
       "drawing_definition_id": "DRAW_SHELVING_FULL",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 446,
-      "description": "Index-card box left with this storage in Facilities."
+      "description": "Tabbed index cards list local assets and storage locations. Several final-status fields remain blank."
     },
     {
       "id": "P-447",
@@ -14295,7 +14295,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 456,
-      "description": "Meeting notepad left with this table in Staff Room."
+      "description": "Meeting notepad: a short written record from Staff Room, retained with Staff Room Coffee Table 02 during site close-out."
     },
     {
       "id": "P-457",
@@ -14386,7 +14386,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 463,
-      "description": "Action-note sheet left with this table in Staff Room."
+      "description": "The action-note sheet contains closure-period entries and initials. Its final approval or receipt field is not completed."
     },
     {
       "id": "P-464",
@@ -14399,7 +14399,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 464,
-      "description": "Lever-arch file left with this storage in Staff Room."
+      "description": "The spine reads STAFF ROOM / CLOSE-OUT / 464. A pencilled RETAIN mark sits beside the review box."
     },
     {
       "id": "P-465",
@@ -14425,7 +14425,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 466,
-      "description": "Brown file wallet left with this storage in Staff Room."
+      "description": "A brown wallet marked STAFF ROOM / WORKING PAPERS. The cover says retain locally until final handover."
     },
     {
       "id": "P-467",
@@ -14438,7 +14438,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 467,
-      "description": "Spare binder left with this storage in Staff Room."
+      "description": "The cover is marked STAFF ROOM / CLOSE-OUT. Internal tabs separate routine material from handover exceptions."
     },
     {
       "id": "P-468",
@@ -14451,7 +14451,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 468,
-      "description": "Forms packet left with this storage in Staff Room."
+      "description": "A packet of blank close-out forms: transfer, exception and witness sheets. The top copy is stamped LOCAL COPY."
     },
     {
       "id": "P-469",
@@ -14464,7 +14464,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 469,
-      "description": "Label roll left with this storage in Staff Room."
+      "description": "A part-used roll printed with GDR asset numbers and RETAIN / TRANSFER / DISPOSE boxes."
     },
     {
       "id": "P-470",
@@ -14477,7 +14477,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 470,
-      "description": "Index-card box left with this storage in Staff Room."
+      "description": "Tabbed index cards list local assets and storage locations. Several final-status fields remain blank."
     },
     {
       "id": "P-471",
@@ -14594,7 +14594,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 479,
-      "description": "Lever-arch file left with this storage in Secretary Office."
+      "description": "The spine reads SECRETARY OFFICE / CLOSE-OUT / 479. A pencilled RETAIN mark sits beside the review box."
     },
     {
       "id": "P-480",
@@ -14620,7 +14620,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 481,
-      "description": "Brown file wallet left with this storage in Secretary Office."
+      "description": "A brown wallet marked SECRETARY OFFICE / WORKING PAPERS. The cover says retain locally until final handover."
     },
     {
       "id": "P-482",
@@ -14633,7 +14633,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 482,
-      "description": "Spare binder left with this storage in Secretary Office."
+      "description": "The cover is marked SECRETARY OFFICE / CLOSE-OUT. Internal tabs separate routine material from handover exceptions."
     },
     {
       "id": "P-483",
@@ -14646,7 +14646,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 483,
-      "description": "Forms packet left with this storage in Secretary Office."
+      "description": "A packet of blank close-out forms: transfer, exception and witness sheets. The top copy is stamped LOCAL COPY."
     },
     {
       "id": "P-484",
@@ -14659,7 +14659,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 484,
-      "description": "Label roll left with this storage in Secretary Office."
+      "description": "A part-used roll printed with GDR asset numbers and RETAIN / TRANSFER / DISPOSE boxes."
     },
     {
       "id": "P-485",
@@ -14672,7 +14672,7 @@
       "drawing_definition_id": "DRAW_BOOKCASE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 485,
-      "description": "Index-card box left with this storage in Secretary Office."
+      "description": "Tabbed index cards list local assets and storage locations. Several final-status fields remain blank."
     },
     {
       "id": "P-486",
@@ -14698,7 +14698,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 487,
-      "description": "Meeting notepad left with this table in Director Office."
+      "description": "Meeting notepad: a short written record from Director Office, retained with Director Office Boardroom Table during site close-out."
     },
     {
       "id": "P-488",
