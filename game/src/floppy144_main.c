@@ -94,6 +94,9 @@ static bool global_session_active;
 static bool global_catalogue_direct_document;
 static const char *global_main_menu_notice;
 static bool global_main_menu_notice_is_warning;
+static bool global_reinstate_confirmation_pending;
+static bool global_reinstate_continue_on_keyup;
+static WPARAM global_reinstate_continue_key;
 
 static Floppy144MainMenuOption
     global_main_menu_option;
@@ -193,7 +196,8 @@ static void Floppy144Redraw(
                 &global_recorded_run_state,
                 Floppy144PersistenceWarningText(),
                 global_main_menu_notice,
-                global_main_menu_notice_is_warning
+                global_main_menu_notice_is_warning,
+                global_reinstate_confirmation_pending
             );
 
             break;
@@ -476,6 +480,15 @@ static void Floppy144OpenMainMenu(
     global_main_menu_notice_is_warning =
         false;
 
+    global_reinstate_confirmation_pending =
+        false;
+
+    global_reinstate_continue_on_keyup =
+        false;
+
+    global_reinstate_continue_key =
+        0U;
+
     global_screen =
         FLOPPY144_SCREEN_MAIN_MENU;
 
@@ -749,8 +762,33 @@ static void Floppy144MainMenuActivate(
                 global_resume_screen =
                 FLOPPY144_SCREEN_TERMINAL;
 
+                /*
+                 * Do not jump directly into gameplay. Session Control first
+                 * confirms the reinstatement. The loaded reconstruction
+                 * percentage is hidden under that confirmation until the
+                 * player's next key-down, then the matching key-up enters the
+                 * restored terminal without leaking a character into it.
+                 */
+                global_main_menu_option =
+                FLOPPY144_MAIN_MENU_RETURN_TO_SITE;
+
+                global_main_menu_notice =
+                NULL;
+
+                global_main_menu_notice_is_warning =
+                false;
+
+                global_reinstate_confirmation_pending =
+                true;
+
+                global_reinstate_continue_on_keyup =
+                false;
+
+                global_reinstate_continue_key =
+                0U;
+
                 global_screen =
-                FLOPPY144_SCREEN_TERMINAL;
+                FLOPPY144_SCREEN_MAIN_MENU;
 
                 Floppy144Redraw(
                     window
@@ -769,6 +807,15 @@ static void Floppy144MainMenuActivate(
 
             global_recorded_session_is_autosave =
                 false;
+
+            global_reinstate_confirmation_pending =
+                false;
+
+            global_reinstate_continue_on_keyup =
+                false;
+
+            global_reinstate_continue_key =
+                0U;
 
             global_persistence_warnings |=
                 FLOPPY144_PERSISTENCE_WARNING_SAVE;
@@ -1485,8 +1532,72 @@ static LRESULT CALLBACK Floppy144WindowProc(
 
             break;
         }
+        case WM_KEYUP:
+        {
+            if(
+                global_screen == FLOPPY144_SCREEN_MAIN_MENU &&
+                global_reinstate_continue_on_keyup &&
+                w_param == global_reinstate_continue_key
+            )
+            {
+                global_reinstate_continue_on_keyup =
+                    false;
+
+                global_reinstate_continue_key =
+                    0U;
+
+                global_screen =
+                    global_resume_screen;
+
+                Floppy144Redraw(
+                    window
+                );
+
+                return 0;
+            }
+
+            break;
+        }
+
         case WM_KEYDOWN:
         {
+            /*
+             * A reinstated session owns the next complete key press.
+             *
+             * Key-down dismisses the confirmation box and exposes the loaded
+             * reconstruction percentage. Key-up then enters gameplay. Keeping
+             * the screen on Session Control between those messages also means
+             * TranslateMessage cannot feed the continue key into the terminal.
+             */
+            if(
+                global_screen == FLOPPY144_SCREEN_MAIN_MENU &&
+                global_reinstate_continue_on_keyup
+            )
+            {
+                return 0;
+            }
+
+            if(
+                global_screen == FLOPPY144_SCREEN_MAIN_MENU &&
+                global_reinstate_confirmation_pending
+            )
+            {
+                global_reinstate_confirmation_pending =
+                    false;
+
+                global_reinstate_continue_on_keyup =
+                    true;
+
+                global_reinstate_continue_key =
+                    w_param;
+
+                Floppy144Redraw(
+                    window
+                );
+
+                return 0;
+            }
+
             /*
              * The Site Directory is a transient overlay over exploration.
              * Its opening key must not also close it, so only a subsequent

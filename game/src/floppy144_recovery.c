@@ -723,7 +723,8 @@ void Floppy144MainMenuDraw(
     const Floppy144RunState *recorded_run_state,
     const char *persistence_warning,
     const char *menu_notice,
-    bool menu_notice_is_warning
+    bool menu_notice_is_warning,
+    bool reinstate_confirmation
 )
 {
     const uint32_t background =
@@ -753,11 +754,7 @@ void Floppy144MainMenuDraw(
         const Floppy144RunState *display_state =
         active_session
         ? run_state
-        : (
-            recorded_session_available
-            ? recorded_run_state
-            : NULL
-        );
+        : NULL;
 
         uint32_t reconstruction_percent =
         display_state != NULL
@@ -1156,4 +1153,46 @@ void Floppy144MainMenuDraw(
         1U,
         muted
     );
+
+    if(reinstate_confirmation)
+    {
+        /*
+         * This deliberately covers the status/capacity strip. The restored
+         * percentage exists underneath, but is not revealed until the player
+         * acknowledges the reinstatement.
+         */
+        Floppy144DrawFillRect(
+            &surface,
+            96U,
+            256U,
+            448U,
+            62U,
+            panel_dark
+        );
+
+        Floppy144DrawRect(
+            &surface,
+            96U,
+            256U,
+            448U,
+            62U,
+            green
+        );
+
+        Floppy144RecoveryTextCentred(
+            &surface,
+            270U,
+            "SESSION RESTORED",
+            2U,
+            green
+        );
+
+        Floppy144RecoveryTextCentred(
+            &surface,
+            298U,
+            "PRESS ANY KEY TO CONTINUE",
+            1U,
+            text
+        );
+    }
 }

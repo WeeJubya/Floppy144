@@ -356,6 +356,82 @@ Invoke-Stage3BStep -Label "MAIN MENU RECORD FEEDBACK AUDIT" -Action {
     Test-MainMenuRecordFeedback
 }
 
+function Test-MainMenuReinstateFlow {
+    Write-Host ""
+    Write-Host "=== MAIN MENU REINSTATE FLOW AUDIT ==="
+
+    $MainPath = Join-Path $SourceDir "floppy144_main.c"
+    $RecoveryPath = Join-Path $SourceDir "floppy144_recovery.c"
+
+    if(-not (Test-Path $MainPath) -or -not (Test-Path $RecoveryPath)) {
+        throw "Main-menu reinstate sources are missing."
+    }
+
+    $MainSource = Get-Content -Raw -Path $MainPath
+    $RecoverySource = Get-Content -Raw -Path $RecoveryPath
+
+    $ReinstateStart =
+        $MainSource.IndexOf(
+            "case FLOPPY144_MAIN_MENU_REINSTATE_SESSION:"
+        )
+
+    $ReinstateEnd =
+        $MainSource.IndexOf(
+            "case FLOPPY144_MAIN_MENU_TERMINATE:",
+            $ReinstateStart
+        )
+
+    if($ReinstateStart -lt 0 -or $ReinstateEnd -le $ReinstateStart) {
+        throw "Could not isolate the main-menu reinstate action."
+    }
+
+    $ReinstateSource =
+        $MainSource.Substring(
+            $ReinstateStart,
+            $ReinstateEnd - $ReinstateStart
+        )
+
+    if(
+        $ReinstateSource -notmatch
+            'global_reinstate_confirmation_pending\s*=\s*true' -or
+        $ReinstateSource -notmatch
+            'global_screen\s*=\s*FLOPPY144_SCREEN_MAIN_MENU'
+    ) {
+        throw "Successful reinstatement no longer pauses on Session Control for confirmation."
+    }
+
+    if(
+        $MainSource -notmatch 'case WM_KEYUP:' -or
+        $MainSource -notmatch
+            'global_reinstate_continue_on_keyup' -or
+        $MainSource -notmatch
+            'w_param == global_reinstate_continue_key'
+    ) {
+        throw "Reinstate confirmation no longer uses one complete key press before entering gameplay."
+    }
+
+    if(
+        $RecoverySource -notmatch
+            '(?s)const Floppy144RunState \*display_state\s*=\s*active_session\s*\?\s*run_state\s*:\s*NULL\s*;' 
+    ) {
+        throw "Session Control can expose recorded-save reconstruction progress before reinstatement."
+    }
+
+    if(
+        $RecoverySource -notmatch '"SESSION RESTORED"' -or
+        $RecoverySource -notmatch '"PRESS ANY KEY TO CONTINUE"' -or
+        $RecoverySource -notmatch 'if\(reinstate_confirmation\)'
+    ) {
+        throw "The reinstated-session confirmation box is missing."
+    }
+
+    Write-Host "MAIN MENU REINSTATE FLOW AUDIT: PASS"
+}
+
+Invoke-Stage3BStep -Label "MAIN MENU REINSTATE FLOW AUDIT" -Action {
+    Test-MainMenuReinstateFlow
+}
+
 $DoorAccessSources = @(
     (Join-Path $ScriptDir "stage3b_door_access_tests.c"),
     (Join-Path $SourceDir "floppy144_game_data.c"),
