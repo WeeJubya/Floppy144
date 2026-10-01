@@ -1604,6 +1604,86 @@ bool Floppy144SiteResolveInspectionTarget(
         }
     }
 
+    /*
+     * Empty non-secure storage is still an Inspect target. Physical children
+     * remain authoritative when present; this fallback runs only when no
+     * visible item was found, so it cannot steal focus from evidence or other
+     * contextual props.
+     */
+    if(!bFound)
+    {
+        for(
+            uRecordIndex = 0U;
+            uRecordIndex < Floppy144GameDataRecordCount();
+            ++uRecordIndex
+        )
+        {
+            const Floppy144DataRecord *pParent =
+                Floppy144GameDataRecordAt(uRecordIndex);
+
+            Floppy144RoomId eParentRoom;
+            uint32_t uDistance;
+
+            if(
+                pParent == NULL ||
+                pParent->eKind != FLOPPY144_DATA_FURNITURE ||
+                pParent->pszB == NULL ||
+                !(
+                    Floppy144SiteDataStringEqual(
+                        pParent->pszB,
+                        "BOOKCASE"
+                    ) ||
+                    Floppy144SiteDataStringEqual(
+                        pParent->pszB,
+                        "NONSECURE_CABINET"
+                    ) ||
+                    Floppy144SiteDataStringEqual(
+                        pParent->pszB,
+                        "SHELVING_FULL"
+                    )
+                ) ||
+                !Floppy144SiteParentInspectable(pParent)
+            )
+            {
+                continue;
+            }
+
+            eParentRoom =
+                Floppy144GameDataRoomId(
+                    pParent->pszA
+                );
+
+            if(eParentRoom != eCurrentRoom)
+            {
+                continue;
+            }
+
+            uDistance =
+                Floppy144SiteDataRecordDistanceSquared(
+                    pState,
+                    pParent
+                );
+
+            if(
+                uDistance > uRangeSquared ||
+                uDistance >= uBestDistance
+            )
+            {
+                continue;
+            }
+
+            pTarget->pszParentId = pParent->pszId;
+            pTarget->pszPhysicalItemId = NULL;
+            pTarget->pszPhysicalItemName = "Empty storage";
+            pTarget->eInteraction = FLOPPY144_INTERACTION_COUNT;
+            pTarget->bInteractionAvailable = false;
+            pTarget->bInteractionCompleted = false;
+
+            uBestDistance = uDistance;
+            bFound = true;
+        }
+    }
+
     return bFound;
 }
 
