@@ -573,8 +573,26 @@ bool Floppy144CabinetOpenParent(
         }
     }
 
-    if(!bHasVisibleContent)
+    /*
+     * Storage remains inspectable even when reconstruction has recovered no
+     * visible children yet. An empty cupboard/bookcase is still a real place
+     * the player can examine, and the Contents screen already has an explicit
+     * empty-state presentation.
+     */
+    if(
+        !bHasVisibleContent &&
+        !(
+            pParent->pszB != NULL &&
+            (
+                strcmp(pParent->pszB, "BOOKCASE") == 0 ||
+                strcmp(pParent->pszB, "NONSECURE_CABINET") == 0 ||
+                strcmp(pParent->pszB, "SHELVING_FULL") == 0
+            )
+        )
+    )
+    {
         return false;
+    }
 
     Floppy144CabinetReset(pCabinet);
 
@@ -611,7 +629,10 @@ bool Floppy144CabinetOpenParent(
     pCabinet->bInteriorOpen = true;
     pCabinet->bDetailOpen = false;
     pCabinet->uSelectedContent = 0U;
-    pCabinet->pszStatus = "RECOVERED CONTENTS";
+    pCabinet->pszStatus =
+        bHasVisibleContent
+            ? "RECOVERED CONTENTS"
+            : "EMPTY STORAGE";
 
     return true;
 }
