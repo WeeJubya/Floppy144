@@ -1217,32 +1217,32 @@
           },
           {
             "type": "CHAIR",
-            "x": 12,
-            "y": 39,
+            "x": 11,
+            "y": 38,
             "width": 2,
             "height": 2,
             "rotation": 135
           },
           {
             "type": "CHAIR",
-            "x": 6,
-            "y": 39,
+            "x": 7,
+            "y": 38,
             "width": 2,
             "height": 2,
             "rotation": 45
           },
           {
             "type": "CHAIR",
-            "x": 12,
-            "y": 33,
+            "x": 11,
+            "y": 34,
             "width": 2,
             "height": 2,
             "rotation": 225
           },
           {
             "type": "CHAIR",
-            "x": 6,
-            "y": 33,
+            "x": 7,
+            "y": 34,
             "width": 2,
             "height": 2,
             "rotation": 315
@@ -5738,8 +5738,8 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "x": 12,
-        "y": 39,
+        "x": 11,
+        "y": 38,
         "width": 2,
         "height": 2,
         "rotation": 135
@@ -5753,8 +5753,8 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "x": 6,
-        "y": 39,
+        "x": 7,
+        "y": 38,
         "width": 2,
         "height": 2,
         "rotation": 45
@@ -5768,8 +5768,8 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "x": 12,
-        "y": 33,
+        "x": 11,
+        "y": 34,
         "width": 2,
         "height": 2,
         "rotation": 225
@@ -5783,8 +5783,8 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "x": 6,
-        "y": 33,
+        "x": 7,
+        "y": 34,
         "width": 2,
         "height": 2,
         "rotation": 315
