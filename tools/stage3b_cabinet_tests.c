@@ -434,6 +434,127 @@ static void Floppy144TestGenericParentContents(void)
     );
 }
 
+static void Floppy144TestShelvingPresentationAndRecoveredOrder(void)
+{
+    Floppy144WorldState sWorld;
+    Floppy144RunState sState;
+    Floppy144CabinetState sCabinet;
+    const Floppy144DataRecord *pBeforeFirst;
+    const Floppy144DataRecord *pAfterFirst;
+    const Floppy144DataRecord *pAfterLast;
+    uint32_t uBeforeCount;
+    uint32_t uAfterCount;
+
+    Floppy144TestReset(&sWorld, &sState, &sCabinet);
+
+    F144_CHECK(
+        Floppy144RunStateReconstructRoom(
+            &sState,
+            FLOPPY144_ROOM_FACILITIES
+        ),
+        "shelving-order fixture reconstructs Facilities"
+    );
+
+    F144_CHECK(
+        Floppy144CabinetOpenParent(
+            &sCabinet,
+            &sState,
+            "FACILITIES_SHELVING_03"
+        ),
+        "Facilities Shelving 03 opens reusable Contents screen"
+    );
+
+    F144_CHECK(
+        strcmp(
+            sCabinet.szContainerType,
+            "SHELVING_FULL"
+        ) == 0,
+        "shelving retains a distinct SHELVING_FULL presentation type"
+    );
+
+    uBeforeCount =
+        Floppy144CabinetVisibleContentCount(
+            &sCabinet,
+            &sState
+        );
+
+    pBeforeFirst =
+        Floppy144CabinetVisibleContentAt(
+            &sCabinet,
+            &sState,
+            0U
+        );
+
+    F144_CHECK(
+        uBeforeCount >= 1U &&
+        pBeforeFirst != NULL &&
+        pBeforeFirst->pszId != NULL &&
+        strcmp(
+            pBeforeFirst->pszId,
+            "P-035"
+        ) != 0,
+        "unrecovered Facilities evidence is not already first in shelving contents"
+    );
+
+    F144_CHECK(
+        Floppy144TriggerTryFire(
+            &sWorld,
+            &sState,
+            Floppy144GameDataTriggerId("T-008")
+        ),
+        "T-008 reveals Facilities closure material"
+    );
+
+    uAfterCount =
+        Floppy144CabinetVisibleContentCount(
+            &sCabinet,
+            &sState
+        );
+
+    pAfterFirst =
+        Floppy144CabinetVisibleContentAt(
+            &sCabinet,
+            &sState,
+            0U
+        );
+
+    pAfterLast =
+        uAfterCount > 0U
+            ? Floppy144CabinetVisibleContentAt(
+                &sCabinet,
+                &sState,
+                uAfterCount - 1U
+            )
+            : NULL;
+
+    F144_CHECK(
+        uAfterCount == uBeforeCount + 1U,
+        "revealing P-035 adds one item to Shelving 03"
+    );
+
+    F144_CHECK(
+        pBeforeFirst != NULL &&
+        pAfterFirst != NULL &&
+        pBeforeFirst->pszId != NULL &&
+        pAfterFirst->pszId != NULL &&
+        strcmp(
+            pBeforeFirst->pszId,
+            pAfterFirst->pszId
+        ) == 0,
+        "existing shelving order stays stable after a recovered item appears"
+    );
+
+    F144_CHECK(
+        pAfterLast != NULL &&
+        pAfterLast->pszId != NULL &&
+        strcmp(
+            pAfterLast->pszId,
+            "P-035"
+        ) == 0,
+        "newly recovered shelving evidence is appended after existing clutter"
+    );
+}
+
 static void Floppy144TestDoorParentDisplayName(void)
 {
     Floppy144WorldState sWorld;
@@ -714,6 +835,7 @@ int main(void)
 {
     Floppy144TestGeneratedCabinetDiscovery();
     Floppy144TestGenericParentContents();
+    Floppy144TestShelvingPresentationAndRecoveredOrder();
     Floppy144TestDoorParentDisplayName();
     Floppy144TestRecoveredChildRevealsCabinetCode();
     Floppy144TestSecurityCabinetUnlockAndContents();
