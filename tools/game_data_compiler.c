@@ -321,7 +321,7 @@ int main(int argc,char**argv)
     ensure_dir(argv[2]);text=read_file(argv[1],&n);memset(&p,0,sizeof(p));p.s=text;p.n=n;p.line=1;p.col=1;root=parse_value(&p);skip_ws(&p);
     if(p.error||!root||root->type!=J_OBJECT||p.p!=p.n){fprintf(stderr,"ERROR: JSON parse failed line %d column %d: %s\n",p.line,p.col,p.error?p.error:"trailing input");return 1;}
     if(strcmp(strv(root,"game_id")?strv(root,"game_id"):"","FLOPPY144")!=0)die("wrong game_id");
-    if(count(get(root,"collections"))!=35||count(get(root,"triggers"))!=50||count(get(root,"interactions"))!=40||count(get(root,"evidence"))!=23||count(get(root,"physical_items"))!=500)die("stable ledger counts do not match Floppy//144 contract");
+    if(count(get(root,"collections"))!=35||count(get(root,"triggers"))!=50||count(get(root,"interactions"))!=40||count(get(root,"evidence"))!=23||count(get(root,"physical_items"))!=633)die("stable ledger counts do not match Floppy//144 contract");
     collections=get(root,"collections");
     for(i=0;i<count(collections);++i){JsonValue*c=at(collections,i);long kb=intv(c,"size_kb",0);if(kb<=0)die("every collection must define positive size_kb");total_kb+=(unsigned long)kb;if(boolv(c,"required_for_completion",false))required_kb+=(unsigned long)kb;}
     /* Stage 3C balance contract: the authored required route must fit, while the complete archive must not. */
@@ -331,6 +331,6 @@ int main(int argc,char**argv)
     for(i=0;i<count(furniture);++i){JsonValue*x=at(furniture,i);if(strv(x,"variant")&&strcmp(strv(x,"variant"),"SECURE_CABINET")==0){long d=intv(x,"code_digits",0);if(d!=6&&d!=8)die("secure cabinet code_digits must be 6 or 8");}}
     emit_collections(root,argv[2]);emit_documents(root,argv[2]);emit_simple_def(root,"triggers","FLOPPY144_TRIGGER","floppy144_triggers.generated.def",argv[2]);emit_simple_def(root,"interactions","FLOPPY144_INTERACTION","floppy144_interactions.generated.def",argv[2]);emit_simple_def(root,"evidence","FLOPPY144_EVIDENCE","floppy144_evidence.generated.def",argv[2]);emit_physical(root,argv[2]);emit_ambient(root,argv[2]);emit_runtime_ledger(root,argv[2]);emit_flat_runtime(root,argv[2]);
     site=get(root,"site_layout_source");if(!site)die("site_layout_source missing");f=openout(argv[2],"site_layout.generated.jsonc");fputs("/* Generated from floppy144_game_data.json by game_data_compiler. */\n",f);write_json2(f,site);fputc('\n',f);fclose(f);
-    printf("Floppy//144 game data compiled: 35 collections, 157 documents, 50 triggers, 40 interactions, 23 evidence, 500 physical items; %lu/%lu KB.\n",required_kb,total_kb);
+    printf("Floppy//144 game data compiled: 35 collections, 157 documents, 50 triggers, 40 interactions, 23 evidence, 633 physical items; %lu/%lu KB.\n",required_kb,total_kb);
     jfree(root);free(text);return 0;
 }
