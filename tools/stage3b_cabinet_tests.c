@@ -365,6 +365,63 @@ static void Floppy144TestSecurityCabinetUnlockAndContents(void)
     );
 }
 
+static void Floppy144TestChairContentsContract(void)
+{
+    Floppy144WorldState sWorld;
+    Floppy144RunState sState;
+    Floppy144CabinetState sCabinet;
+    uint32_t uCount;
+
+    Floppy144TestReset(&sWorld, &sState, &sCabinet);
+
+    F144_CHECK(
+        Floppy144RunStateReconstructRoom(
+            &sState,
+            FLOPPY144_ROOM_MAIN_OFFICE
+        ),
+        "chair contents fixture reconstructs Main Office"
+    );
+
+    F144_CHECK(
+        Floppy144CabinetOpenParent(
+            &sCabinet,
+            &sState,
+            "MAIN_OFFICE_CHAIR_01"
+        ),
+        "chair opens the reusable Contents screen"
+    );
+
+    F144_CHECK(
+        Floppy144CabinetInteriorOpen(&sCabinet) &&
+        strcmp(
+            sCabinet.szContainerType,
+            "CHAIR"
+        ) == 0,
+        "chair Contents state retains a dedicated chair presentation type"
+    );
+
+    uCount =
+        Floppy144CabinetVisibleContentCount(
+            &sCabinet,
+            &sState
+        );
+
+    F144_CHECK(
+        uCount >= 1U &&
+        uCount <= 2U,
+        "chair exposes only one or two plausible physical items"
+    );
+
+    F144_CHECK(
+        Floppy144CabinetVisibleContentAt(
+            &sCabinet,
+            &sState,
+            2U
+        ) == NULL,
+        "chair runtime contents are hard-capped at two items"
+    );
+}
+
 static void Floppy144TestGenericParentContents(void)
 {
     Floppy144WorldState sWorld;
@@ -834,6 +891,7 @@ static void Floppy144TestActLengthContract(void)
 int main(void)
 {
     Floppy144TestGeneratedCabinetDiscovery();
+    Floppy144TestChairContentsContract();
     Floppy144TestGenericParentContents();
     Floppy144TestShelvingPresentationAndRecoveredOrder();
     Floppy144TestDoorParentDisplayName();

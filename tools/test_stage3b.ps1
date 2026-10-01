@@ -667,6 +667,21 @@ function Test-PhysicalItemPlayerFacingContract {
         if($Children.Count -lt 1) {
             throw "Furniture $($Furniture.id) has no physical-item context."
         }
+
+        if(
+            $Furniture.element_type -eq 'CHAIR' -and
+            ($Children.Count -lt 1 -or $Children.Count -gt 2)
+        ) {
+            throw "Chair $($Furniture.id) has $($Children.Count) physical items; chairs must have one or two."
+        }
+    }
+
+    if(
+        $CabinetSource -notmatch 'Floppy144CabinetDrawChairBody' -or
+        $CabinetSource -notmatch 'Floppy144CabinetTypeContains\(pCabinet, "CHAIR"\)' -or
+        $CabinetSource -notmatch 'Floppy144CabinetVisibleContentLimit'
+    ) {
+        throw "Chair inspection has lost its dedicated chair silhouette or two-item runtime cap."
     }
 
     if(

@@ -892,6 +892,29 @@ static bool Floppy144CabinetPhysicalItemRevealControlled(
  * furniture does not make an already-seen list appear to have been reshuffled
  * just because a newly recovered piece of evidence became available.
  */
+static uint32_t Floppy144CabinetVisibleContentLimit(
+    const Floppy144CabinetState *pCabinet
+)
+{
+    /*
+     * Chairs can plausibly retain a dropped or wedged object or two, but they
+     * must never behave like miniature cupboards. The authored data is also
+     * regression-checked against this contract.
+     */
+    if(
+        pCabinet != NULL &&
+        strcmp(
+            pCabinet->szContainerType,
+            "CHAIR"
+        ) == 0
+    )
+    {
+        return 2U;
+    }
+
+    return UINT32_MAX;
+}
+
 uint32_t Floppy144CabinetVisibleContentCount(
     const Floppy144CabinetState *pCabinet,
     const Floppy144RunState *pRunState
@@ -899,6 +922,7 @@ uint32_t Floppy144CabinetVisibleContentCount(
 {
     uint32_t uRecordIndex;
     uint32_t uCount = 0U;
+    uint32_t uLimit;
 
     if(
         pCabinet == NULL ||
@@ -908,6 +932,11 @@ uint32_t Floppy144CabinetVisibleContentCount(
     {
         return 0U;
     }
+
+    uLimit =
+        Floppy144CabinetVisibleContentLimit(
+            pCabinet
+        );
 
     for(
         uRecordIndex = 0U;
@@ -935,6 +964,9 @@ uint32_t Floppy144CabinetVisibleContentCount(
         }
 
         ++uCount;
+
+        if(uCount >= uLimit)
+            break;
     }
 
     return uCount;
@@ -949,6 +981,7 @@ const Floppy144DataRecord *Floppy144CabinetVisibleContentAt(
     uint32_t uPass;
     uint32_t uRecordIndex;
     uint32_t uVisible = 0U;
+    uint32_t uLimit;
 
     if(
         pCabinet == NULL ||
@@ -958,6 +991,14 @@ const Floppy144DataRecord *Floppy144CabinetVisibleContentAt(
     {
         return NULL;
     }
+
+    uLimit =
+        Floppy144CabinetVisibleContentLimit(
+            pCabinet
+        );
+
+    if(uVisibleIndex >= uLimit)
+        return NULL;
 
     /*
      * Pass 0: ordinary contextual contents.
@@ -1010,6 +1051,9 @@ const Floppy144DataRecord *Floppy144CabinetVisibleContentAt(
                 return pRecord;
 
             ++uVisible;
+
+            if(uVisible >= uLimit)
+                return NULL;
         }
     }
 
@@ -1299,6 +1343,48 @@ static bool Floppy144CabinetTypeContains(
         ) != NULL;
 }
 
+static void Floppy144CabinetDrawChairBody(
+    Floppy144Surface *pSurface,
+    uint32_t uBody,
+    uint32_t uEdge
+)
+{
+    uint32_t uIndex;
+
+    if(pSurface == NULL)
+        return;
+
+    /*
+     * Open-backed office chair. The negative space between the back slats,
+     * broad seat and narrow legs makes it read as seating instead of storage.
+     */
+    Floppy144DrawFillRect(pSurface, 88U, 76U, 12U, 92U, uBody);
+    Floppy144DrawFillRect(pSurface, 234U, 76U, 12U, 92U, uBody);
+    Floppy144DrawFillRect(pSurface, 88U, 76U, 158U, 14U, uBody);
+    Floppy144DrawFillRect(pSurface, 88U, 154U, 158U, 14U, uBody);
+    Floppy144DrawRect(pSurface, 88U, 76U, 158U, 92U, uEdge);
+
+    for(uIndex = 0U; uIndex < 4U; ++uIndex)
+    {
+        uint32_t uX = 112U + uIndex * 30U;
+
+        Floppy144DrawFillRect(pSurface, uX, 96U, 10U, 52U, uBody);
+        Floppy144DrawRect(pSurface, uX, 96U, 10U, 52U, uEdge);
+    }
+
+    Floppy144DrawFillRect(pSurface, 78U, 172U, 178U, 38U, uBody);
+    Floppy144DrawRect(pSurface, 78U, 172U, 178U, 38U, uEdge);
+    Floppy144DrawFillRect(pSurface, 88U, 210U, 158U, 10U, uBody);
+    Floppy144DrawRect(pSurface, 88U, 210U, 158U, 10U, uEdge);
+
+    Floppy144DrawFillRect(pSurface, 94U, 220U, 14U, 78U, uBody);
+    Floppy144DrawFillRect(pSurface, 226U, 220U, 14U, 78U, uBody);
+    Floppy144DrawRect(pSurface, 94U, 220U, 14U, 78U, uEdge);
+    Floppy144DrawRect(pSurface, 226U, 220U, 14U, 78U, uEdge);
+    Floppy144DrawFillRect(pSurface, 118U, 220U, 10U, 64U, uBody);
+    Floppy144DrawFillRect(pSurface, 206U, 220U, 10U, 64U, uBody);
+}
+
 static void Floppy144CabinetDrawContainerBody(
     Floppy144Surface *pSurface,
     const Floppy144CabinetState *pCabinet,
@@ -1310,6 +1396,16 @@ static void Floppy144CabinetDrawContainerBody(
 
     if(pSurface == NULL || pCabinet == NULL)
         return;
+
+    if(Floppy144CabinetTypeContains(pCabinet, "CHAIR"))
+    {
+        Floppy144CabinetDrawChairBody(
+            pSurface,
+            uBody,
+            uEdge
+        );
+        return;
+    }
 
     if(
         Floppy144CabinetTypeContains(pCabinet, "DESK") ||
@@ -1449,7 +1545,15 @@ static void Floppy144CabinetContentMarkerRegion(
      * Regions sit inside the parent silhouette drawn immediately beforehand.
      * They describe the useful visual centre of each parent, not the screen.
      */
-    if(
+    if(Floppy144CabinetTypeContains(pCabinet, "CHAIR"))
+    {
+        *pX = 96U;
+        *pY = 176U;
+        *pWidth = 142U;
+        *pHeight = 28U;
+        *pMaximumColumns = 2U;
+    }
+    else if(
         Floppy144CabinetTypeContains(pCabinet, "DESK") ||
         Floppy144CabinetTypeContains(pCabinet, "TABLE") ||
         Floppy144CabinetTypeContains(pCabinet, "WORKTOP")
