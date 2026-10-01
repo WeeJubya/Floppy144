@@ -92,6 +92,8 @@ static char global_office_notice_buffer[FLOPPY144_OFFICE_NOTICE_CAPACITY];
 static const char *global_office_notice;
 static bool global_session_active;
 static bool global_catalogue_direct_document;
+static const char *global_main_menu_notice;
+static bool global_main_menu_notice_is_warning;
 
 static Floppy144MainMenuOption
     global_main_menu_option;
@@ -189,7 +191,9 @@ static void Floppy144Redraw(
                 global_recorded_session_available,
                 &global_run_state,
                 &global_recorded_run_state,
-                Floppy144PersistenceWarningText()
+                Floppy144PersistenceWarningText(),
+                global_main_menu_notice,
+                global_main_menu_notice_is_warning
             );
 
             break;
@@ -466,6 +470,12 @@ static void Floppy144OpenMainMenu(
             global_screen;
     }
 
+    global_main_menu_notice =
+        NULL;
+
+    global_main_menu_notice_is_warning =
+        false;
+
     global_screen =
         FLOPPY144_SCREEN_MAIN_MENU;
 
@@ -494,6 +504,12 @@ static void Floppy144MainMenuMoveSelection(
     {
         return;
     }
+
+    global_main_menu_notice =
+        NULL;
+
+    global_main_menu_notice_is_warning =
+        false;
 
     next_option =
         (int32_t)global_main_menu_option;
@@ -640,6 +656,12 @@ static void Floppy144MainMenuActivate(
         {
             Floppy144UpdateDiscoveryProfile();
 
+            global_main_menu_notice =
+                NULL;
+
+            global_main_menu_notice_is_warning =
+                false;
+
             if(
                 global_session_active &&
                 Floppy144PersistenceSaveRunState(
@@ -659,6 +681,17 @@ static void Floppy144MainMenuActivate(
 
                 global_persistence_warnings &=
                     (uint8_t)~FLOPPY144_PERSISTENCE_WARNING_SAVE;
+
+                global_main_menu_notice =
+                    "CURRENT SESSION RECORDED";
+            }
+            else
+            {
+                global_main_menu_notice =
+                    "CURRENT SESSION COULD NOT BE RECORDED";
+
+                global_main_menu_notice_is_warning =
+                    true;
             }
 
             Floppy144Redraw(

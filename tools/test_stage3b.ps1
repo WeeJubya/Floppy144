@@ -322,6 +322,40 @@ Invoke-Stage3BStep -Label "STAGE 3B.4 COORDINATOR WIRING AUDIT" -Action {
     Test-Stage3B4CoordinatorWiring
 }
 
+function Test-MainMenuRecordFeedback {
+    Write-Host ""
+    Write-Host "=== MAIN MENU RECORD FEEDBACK AUDIT ==="
+
+    $MainPath = Join-Path $SourceDir "floppy144_main.c"
+    $RecoveryPath = Join-Path $SourceDir "floppy144_recovery.c"
+
+    if(-not (Test-Path $MainPath) -or -not (Test-Path $RecoveryPath)) {
+        throw "Main-menu record feedback sources are missing."
+    }
+
+    $MainSource = Get-Content -Raw -Path $MainPath
+    $RecoverySource = Get-Content -Raw -Path $RecoveryPath
+
+    if($MainSource -notmatch 'global_main_menu_notice\s*=\s*"CURRENT SESSION RECORDED"') {
+        throw "Successful manual recording no longer produces player-visible confirmation."
+    }
+
+    if($MainSource -notmatch 'global_main_menu_notice\s*=\s*"CURRENT SESSION COULD NOT BE RECORDED"') {
+        throw "Failed manual recording no longer produces player-visible feedback."
+    }
+
+    if($RecoverySource -notmatch 'menu_notice\s*!=\s*NULL' -or
+       $RecoverySource -notmatch 'status_colour\s*=') {
+        throw "Session Control no longer renders the transient record feedback."
+    }
+
+    Write-Host "MAIN MENU RECORD FEEDBACK AUDIT: PASS"
+}
+
+Invoke-Stage3BStep -Label "MAIN MENU RECORD FEEDBACK AUDIT" -Action {
+    Test-MainMenuRecordFeedback
+}
+
 $DoorAccessSources = @(
     (Join-Path $ScriptDir "stage3b_door_access_tests.c"),
     (Join-Path $SourceDir "floppy144_game_data.c"),

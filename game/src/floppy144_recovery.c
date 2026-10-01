@@ -721,7 +721,9 @@ void Floppy144MainMenuDraw(
     bool recorded_session_available,
     const Floppy144RunState *run_state,
     const Floppy144RunState *recorded_run_state,
-    const char *persistence_warning
+    const char *persistence_warning,
+    const char *menu_notice,
+    bool menu_notice_is_warning
 )
 {
     const uint32_t background =
@@ -774,6 +776,8 @@ void Floppy144MainMenuDraw(
         char session_status[80];
         char reconstruction_text[64];
 
+    const char *status_text;
+    uint32_t status_colour;
     uint32_t option_index;
 
     Floppy144Surface surface =
@@ -827,6 +831,42 @@ void Floppy144MainMenuDraw(
         reconstruction_text,
         (uint32_t)sizeof(reconstruction_text)
     );
+
+    if(menu_notice != NULL)
+    {
+        status_text =
+            menu_notice;
+
+        status_colour =
+            menu_notice_is_warning
+                ? amber
+                : green;
+    }
+    else if(
+        !active_session &&
+        persistence_warning != NULL
+    )
+    {
+        status_text =
+            persistence_warning;
+
+        status_colour =
+            amber;
+    }
+    else
+    {
+        status_text =
+            session_status;
+
+        status_colour =
+            active_session
+                ? green
+                : (
+                    recorded_session_available
+                        ? amber
+                        : muted
+                );
+    }
 
     Floppy144DrawClear(
         &surface,
@@ -970,27 +1010,9 @@ void Floppy144MainMenuDraw(
         &surface,
         56U,
         264U,
-        (
-            !active_session &&
-            persistence_warning != NULL
-        )
-        ? persistence_warning
-        : session_status,
+        status_text,
         1U,
-        (
-            !active_session &&
-            persistence_warning != NULL
-        )
-        ? amber
-        : (
-            active_session
-            ? green
-            : (
-                recorded_session_available
-                ? amber
-                : muted
-            )
-        )
+        status_colour
     );
 
     Floppy144DrawText(

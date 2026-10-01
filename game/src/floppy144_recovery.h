@@ -65,5 +65,7 @@ void Floppy144MainMenuDraw(
     bool recorded_session_available,
     const Floppy144RunState *run_state,
     const Floppy144RunState *recorded_run_state,
-    const char *persistence_warning
+    const char *persistence_warning,
+    const char *menu_notice,
+    bool menu_notice_is_warning
 );
