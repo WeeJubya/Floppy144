@@ -441,6 +441,8 @@ static void Floppy144TestDoorParentDisplayName(void)
     Floppy144CabinetState sCabinet;
     Floppy144TriggerId eT003;
     Floppy144TriggerId eT005;
+    const Floppy144DataRecord *pNotice;
+    uint32_t uNoticeIndex;
 
     Floppy144TestReset(&sWorld, &sState, &sCabinet);
 
@@ -502,6 +504,36 @@ static void Floppy144TestDoorParentDisplayName(void)
             "COR_OFF"
         ) == NULL,
         "door Contents title never exposes internal connection ID"
+    );
+
+    uNoticeIndex =
+        Floppy144TestVisibleContentIndex(
+            &sCabinet,
+            &sState,
+            "P-011"
+        );
+
+    pNotice =
+        uNoticeIndex != UINT32_MAX
+            ? Floppy144CabinetVisibleContentAt(
+                &sCabinet,
+                &sState,
+                uNoticeIndex
+            )
+            : NULL;
+
+    F144_CHECK(
+        pNotice != NULL &&
+        pNotice->pszF != NULL &&
+        strstr(
+            pNotice->pszF,
+            "Corridor access"
+        ) != NULL &&
+        strstr(
+            pNotice->pszF,
+            "closure works"
+        ) != NULL,
+        "door notice exposes useful in-world text rather than a generic label"
     );
 }
 
