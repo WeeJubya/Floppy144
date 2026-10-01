@@ -1595,6 +1595,17 @@ static LRESULT CALLBACK Floppy144WindowProc(
                     window
                 );
 
+                /*
+                 * Force this one transitional frame to the window before the
+                 * matching key-up enters the restored session. Without this,
+                 * Windows may coalesce the invalidated menu frame with the
+                 * following terminal redraw and the restored percentage would
+                 * never actually be visible.
+                 */
+                UpdateWindow(
+                    window
+                );
+
                 return 0;
             }
 
