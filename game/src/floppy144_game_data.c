@@ -914,7 +914,219 @@ bool Floppy144GameDataTriggerDocumentAccessible(
 
     return true;
 }
-bool Floppy144GameDataTriggerTryFire(Floppy144WorldState*pWorld,Floppy144RunState*pState,Floppy144TriggerId eTrigger){const Floppy144DataRecord*pTrigger;uint32_t u;if(!Floppy144GameDataTriggerCanFire(pState,eTrigger))return false;pTrigger=Floppy144Nth(FLOPPY144_DATA_TRIGGER,(int32_t)eTrigger);if(!pTrigger||!Floppy144RunStateFireTrigger(pState,eTrigger))return false;for(u=0;u<F144_COUNT(g_asGameData);++u){const Floppy144DataRecord*p=&g_asGameData[u];if(p->eKind==FLOPPY144_DATA_TRIGGER_EFFECT&&Floppy144StringEqual(p->pszId,pTrigger->pszId))(void)Floppy144GameDataExecuteEffect(pWorld,pState,p->pszA,p->pszB);}Floppy144GameDataCaptureNewNotebookEntries(pState);return true;}
+/*
+ * Legacy-save recovery for a collection which is already restored but whose
+ * unique entry trigger was never persisted as fired.
+ *
+ * A trigger is eligible for this fallback only when:
+ *   - its owning collection is already restored;
+ *   - it is a root trigger (no trigger prerequisite of its own); and
+ *   - it is the only root trigger in that collection.
+ *
+ * The uniqueness rule is important for branch collections such as DR-04,
+ * which has two independent root triggers. Those must never be selected by
+ * compatibility code.
+ */
+static bool Floppy144TriggerIsUniqueRestoredCollectionRoot(
+    const Floppy144RunState *pState,
+    const Floppy144DataRecord *pTrigger
+)
+{
+    Floppy144CollectionId eCollection;
+    uint32_t uTriggerIndex;
+    uint32_t uRootCount = 0U;
+    bool bCandidateRoot = true;
+
+    if(
+        pState == NULL ||
+        pTrigger == NULL ||
+        pTrigger->pszId == NULL ||
+        pTrigger->pszA == NULL
+    )
+    {
+        return false;
+    }
+
+    eCollection =
+        Floppy144GameDataCollectionId(
+            pTrigger->pszA
+        );
+
+    if(
+        eCollection == FLOPPY144_COLLECTION_COUNT ||
+        !Floppy144RunStateCollectionRestored(
+            pState,
+            eCollection
+        )
+    )
+    {
+        return false;
+    }
+
+    for(
+        uTriggerIndex = 0U;
+        uTriggerIndex < F144_COUNT(g_asGameData);
+        ++uTriggerIndex
+    )
+    {
+        const Floppy144DataRecord *pOwner =
+            &g_asGameData[uTriggerIndex];
+
+        uint32_t uConditionIndex;
+        bool bHasTriggerPrerequisite = false;
+
+        if(
+            pOwner->eKind != FLOPPY144_DATA_TRIGGER ||
+            !Floppy144StringEqual(
+                pOwner->pszA,
+                pTrigger->pszA
+            )
+        )
+        {
+            continue;
+        }
+
+        for(
+            uConditionIndex = 0U;
+            uConditionIndex < F144_COUNT(g_asGameData);
+            ++uConditionIndex
+        )
+        {
+            const Floppy144DataRecord *pCondition =
+                &g_asGameData[uConditionIndex];
+
+            if(
+                pCondition->eKind ==
+                    FLOPPY144_DATA_TRIGGER_CONDITION &&
+                Floppy144StringEqual(
+                    pCondition->pszId,
+                    pOwner->pszId
+                ) &&
+                Floppy144StringEqual(
+                    pCondition->pszA,
+                    "trigger"
+                )
+            )
+            {
+                bHasTriggerPrerequisite = true;
+                break;
+            }
+        }
+
+        if(!bHasTriggerPrerequisite)
+        {
+            ++uRootCount;
+
+            if(
+                Floppy144StringEqual(
+                    pOwner->pszId,
+                    pTrigger->pszId
+                )
+            )
+            {
+                bCandidateRoot = true;
+            }
+        }
+        else if(
+            Floppy144StringEqual(
+                pOwner->pszId,
+                pTrigger->pszId
+            )
+        )
+        {
+            bCandidateRoot = false;
+        }
+    }
+
+    return
+        bCandidateRoot &&
+        uRootCount == 1U;
+}
+
+bool Floppy144GameDataTriggerTryFire(
+    Floppy144WorldState *pWorld,
+    Floppy144RunState *pState,
+    Floppy144TriggerId eTrigger
+)
+{
+    const Floppy144DataRecord *pTrigger;
+    uint32_t u;
+
+    if(
+        pState == NULL ||
+        (uint32_t)eTrigger >=
+            (uint32_t)FLOPPY144_TRIGGER_COUNT ||
+        Floppy144RunStateTriggerFired(
+            pState,
+            eTrigger
+        )
+    )
+    {
+        return false;
+    }
+
+    pTrigger =
+        Floppy144Nth(
+            FLOPPY144_DATA_TRIGGER,
+            (int32_t)eTrigger
+        );
+
+    if(pTrigger == NULL)
+        return false;
+
+    if(
+        !Floppy144GameDataTriggerCanFire(
+            pState,
+            eTrigger
+        ) &&
+        !Floppy144TriggerIsUniqueRestoredCollectionRoot(
+            pState,
+            pTrigger
+        )
+    )
+    {
+        return false;
+    }
+
+    if(
+        !Floppy144RunStateFireTrigger(
+            pState,
+            eTrigger
+        )
+    )
+    {
+        return false;
+    }
+
+    for(u = 0U; u < F144_COUNT(g_asGameData); ++u)
+    {
+        const Floppy144DataRecord *p =
+            &g_asGameData[u];
+
+        if(
+            p->eKind ==
+                FLOPPY144_DATA_TRIGGER_EFFECT &&
+            Floppy144StringEqual(
+                p->pszId,
+                pTrigger->pszId
+            )
+        )
+        {
+            (void)Floppy144GameDataExecuteEffect(
+                pWorld,
+                pState,
+                p->pszA,
+                p->pszB
+            );
+        }
+    }
+
+    Floppy144GameDataCaptureNewNotebookEntries(
+        pState
+    );
+
+    return true;
+}
 
 static bool Floppy144EvidenceOwnsInteraction(const char*pszEvidenceId,const char*pszInteractionId){const Floppy144DataRecord*pEvidence=Floppy144GameDataFind(FLOPPY144_DATA_EVIDENCE,pszEvidenceId);uint32_t u;if(!pEvidence||!pEvidence->b0)return false;for(u=0;u<F144_COUNT(g_asGameData);++u){const Floppy144DataRecord*p=&g_asGameData[u];if(p->eKind==FLOPPY144_DATA_EVIDENCE_REQUIREMENT&&Floppy144StringEqual(p->pszId,pszEvidenceId)&&Floppy144StringEqual(p->pszA,pszInteractionId))return true;}return false;}
 static bool Floppy144AnySecureCabinetUnlocked(const Floppy144RunState*pState){uint32_t u;int32_t n=0;if(!pState)return false;if(Floppy144RunStateHasCapability(pState,FLOPPY144_CAPABILITY_MASTER_SECURE_CABINET_CODES))return true;for(u=0;u<F144_COUNT(g_asGameData);++u){const Floppy144DataRecord*p=&g_asGameData[u];if(p->eKind!=FLOPPY144_DATA_INTERACTION)continue;if(p->pszB&&strstr(p->pszB,"SECURE_CABINET")&&Floppy144RunStateInteractionCompleted(pState,(Floppy144InteractionId)n))return true;++n;}return false;}

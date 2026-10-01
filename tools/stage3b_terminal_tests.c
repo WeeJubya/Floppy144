@@ -1632,21 +1632,26 @@ static void Floppy144TestBranchDocumentAccessGate(void)
 /*
  * Compatibility regression for saves created before evidence-gated Act II.
  *
- * Such a save may contain both interactions required for E-005 while the
- * evidence bit itself is absent. DR-31 may also already be restored. Reopening
- * its trigger documents must resynthesise E-005 first, then reveal the authored
- * desk contents instead of leaving the player in a permanent dead end.
+ * The most pathological reachable old state has DR-31 already restored after
+ * I-007 completed, while I-006/E-005 are still absent. The collection is real
+ * in the save, but its unique entry trigger T-017 is permanently blocked by the
+ * stale upstream evidence prerequisite.
+ *
+ * Reopening the entry record must heal that restored collection without
+ * fabricating E-005. The second trigger must then follow its ordinary internal
+ * dependency and reveal the Signed Custody Sheet.
  */
 static void Floppy144TestStaleEvidenceSaveRecovery(void)
 {
     Floppy144WorldState sWorld;
     Floppy144RunState sRunState;
 
-    Floppy144InteractionId eI006;
     Floppy144InteractionId eI007;
     Floppy144EvidenceId eE005;
+    Floppy144TriggerId eT010;
     Floppy144TriggerId eT017;
     Floppy144TriggerId eT018;
+    Floppy144CollectionId eDr04;
     Floppy144CollectionId eDr31;
     Floppy144CollectionId eCollection;
     uint32_t uRecordIndex;
@@ -1660,32 +1665,30 @@ static void Floppy144TestStaleEvidenceSaveRecovery(void)
         144U
     );
 
-    eI006 = Floppy144GameDataInteractionId("I-006");
     eI007 = Floppy144GameDataInteractionId("I-007");
     eE005 = Floppy144GameDataEvidenceId("E-005");
+    eT010 = Floppy144GameDataTriggerId("T-010");
     eT017 = Floppy144GameDataTriggerId("T-017");
     eT018 = Floppy144GameDataTriggerId("T-018");
+    eDr04 = Floppy144GameDataCollectionId("DR-04");
     eDr31 = Floppy144GameDataCollectionId("DR-31");
 
     F144_CHECK(
-        eI006 < FLOPPY144_INTERACTION_COUNT &&
         eI007 < FLOPPY144_INTERACTION_COUNT &&
         eE005 < FLOPPY144_EVIDENCE_COUNT &&
+        eT010 < FLOPPY144_TRIGGER_COUNT &&
         eT017 < FLOPPY144_TRIGGER_COUNT &&
         eT018 < FLOPPY144_TRIGGER_COUNT &&
+        eDr04 < FLOPPY144_COLLECTION_COUNT &&
         eDr31 < FLOPPY144_COLLECTION_COUNT,
         "stale-evidence compatibility fixture IDs resolve"
     );
 
     /*
-     * Reproduce an old persisted state directly: both required interactions
-     * were completed, DR-31 was already restored, but E-005 was never derived.
+     * Reproduce the old broken state: I-007 had enough latitude to complete and
+     * expose DR-31, despite the full E-005 synthesis never being established.
      */
     F144_CHECK(
-        Floppy144RunStateCompleteInteraction(
-            &sRunState,
-            eI006
-        ) &&
         Floppy144RunStateCompleteInteraction(
             &sRunState,
             eI007
@@ -1698,15 +1701,19 @@ static void Floppy144TestStaleEvidenceSaveRecovery(void)
             &sWorld,
             eDr31
         ),
-        "stale-evidence compatibility state is constructed"
+        "legacy DR-31 state is constructed"
     );
 
     F144_CHECK(
         !Floppy144RunStateEvidenceEstablished(
             &sRunState,
             eE005
+        ) &&
+        !Floppy144RunStateTriggerFired(
+            &sRunState,
+            eT017
         ),
-        "fixture begins with stale E-005 bit"
+        "fixture begins with missing E-005 and unfired T-017"
     );
 
     F144_CHECK(
@@ -1721,11 +1728,11 @@ static void Floppy144TestStaleEvidenceSaveRecovery(void)
             eCollection,
             uRecordIndex
         ),
-        "reopening DR-31 exception register applies compatibility reconciliation"
+        "reopening restored DR-31 entry record applies legacy recovery"
     );
 
     F144_CHECK(
-        Floppy144RunStateEvidenceEstablished(
+        !Floppy144RunStateEvidenceEstablished(
             &sRunState,
             eE005
         ) &&
@@ -1737,7 +1744,7 @@ static void Floppy144TestStaleEvidenceSaveRecovery(void)
             &sRunState,
             "P-053"
         ),
-        "reopening first DR-31 trigger repairs E-005 and reveals its contents"
+        "legacy recovery fires DR-31 root without inventing E-005"
     );
 
     F144_CHECK(
@@ -1752,7 +1759,7 @@ static void Floppy144TestStaleEvidenceSaveRecovery(void)
             eCollection,
             uRecordIndex
         ),
-        "reopening Senior Archivist assignment applies T-018"
+        "reopening Senior Archivist assignment applies ordinary T-018 dependency"
     );
 
     F144_CHECK(
@@ -1764,7 +1771,43 @@ static void Floppy144TestStaleEvidenceSaveRecovery(void)
             &sRunState,
             "P-052"
         ),
-        "recovered save reveals Signed Custody Sheet"
+        "legacy recovered save reveals Signed Custody Sheet"
+    );
+
+    /*
+     * The fallback must never choose a branch. DR-04 owns two root triggers,
+     * so restoring that collection alone is not authority to fire T-010.
+     */
+    Floppy144WorldReset(
+        &sWorld
+    );
+
+    Floppy144RunStateBegin(
+        &sRunState,
+        144U
+    );
+
+    F144_CHECK(
+        Floppy144RunStateBitSet(
+            sRunState.collections,
+            (uint32_t)eDr04
+        ) &&
+        Floppy144WorldRestoreCollection(
+            &sWorld,
+            eDr04
+        ),
+        "branch-safety fixture restores DR-04"
+    );
+
+    F144_CHECK(
+        !Floppy144GameDataTriggerTryFire(
+            &sWorld,
+            &sRunState,
+            eT010
+        ) &&
+        sRunState.branch ==
+            (uint8_t)FLOPPY144_RUN_BRANCH_NONE,
+        "legacy fallback never chooses one of multiple collection roots"
     );
 }
 
