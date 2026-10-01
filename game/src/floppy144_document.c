@@ -349,6 +349,23 @@ bool Floppy144DocumentApplyEffects(
     }
 
     /*
+     * Reconcile derived evidence before evaluating a trigger document.
+     *
+     * Older saves can legitimately contain completed interaction bits from an
+     * earlier progression implementation while the corresponding derived
+     * evidence bit is absent. Without this reconciliation, reopening the
+     * document still sees a stale prerequisite and silently refuses to fire.
+     *
+     * ResolveEvidence is conservative: it only establishes evidence whose
+     * required interactions and conditions are already satisfied, so this
+     * repairs persisted state without granting discoveries the player has not
+     * actually made.
+     */
+    Floppy144GameDataResolveEvidence(
+        run_state
+    );
+
+    /*
      * Authored trigger documents route through the persistent fire-once trigger
      * engine. Existing technical-slice direct effects remain supported separately
      * until their final authored replacements are registered.

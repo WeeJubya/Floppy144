@@ -1628,8 +1628,149 @@ static void Floppy144TestBranchDocumentAccessGate(void)
     );
 }
 
+
+/*
+ * Compatibility regression for saves created before evidence-gated Act II.
+ *
+ * Such a save may contain both interactions required for E-005 while the
+ * evidence bit itself is absent. DR-31 may also already be restored. Reopening
+ * its trigger documents must resynthesise E-005 first, then reveal the authored
+ * desk contents instead of leaving the player in a permanent dead end.
+ */
+static void Floppy144TestStaleEvidenceSaveRecovery(void)
+{
+    Floppy144WorldState sWorld;
+    Floppy144RunState sRunState;
+
+    Floppy144InteractionId eI006;
+    Floppy144InteractionId eI007;
+    Floppy144EvidenceId eE005;
+    Floppy144TriggerId eT017;
+    Floppy144TriggerId eT018;
+    Floppy144CollectionId eDr31;
+    Floppy144CollectionId eCollection;
+    uint32_t uRecordIndex;
+
+    Floppy144WorldReset(
+        &sWorld
+    );
+
+    Floppy144RunStateBegin(
+        &sRunState,
+        144U
+    );
+
+    eI006 = Floppy144GameDataInteractionId("I-006");
+    eI007 = Floppy144GameDataInteractionId("I-007");
+    eE005 = Floppy144GameDataEvidenceId("E-005");
+    eT017 = Floppy144GameDataTriggerId("T-017");
+    eT018 = Floppy144GameDataTriggerId("T-018");
+    eDr31 = Floppy144GameDataCollectionId("DR-31");
+
+    F144_CHECK(
+        eI006 < FLOPPY144_INTERACTION_COUNT &&
+        eI007 < FLOPPY144_INTERACTION_COUNT &&
+        eE005 < FLOPPY144_EVIDENCE_COUNT &&
+        eT017 < FLOPPY144_TRIGGER_COUNT &&
+        eT018 < FLOPPY144_TRIGGER_COUNT &&
+        eDr31 < FLOPPY144_COLLECTION_COUNT,
+        "stale-evidence compatibility fixture IDs resolve"
+    );
+
+    /*
+     * Reproduce an old persisted state directly: both required interactions
+     * were completed, DR-31 was already restored, but E-005 was never derived.
+     */
+    F144_CHECK(
+        Floppy144RunStateCompleteInteraction(
+            &sRunState,
+            eI006
+        ) &&
+        Floppy144RunStateCompleteInteraction(
+            &sRunState,
+            eI007
+        ) &&
+        Floppy144RunStateBitSet(
+            sRunState.collections,
+            (uint32_t)eDr31
+        ) &&
+        Floppy144WorldRestoreCollection(
+            &sWorld,
+            eDr31
+        ),
+        "stale-evidence compatibility state is constructed"
+    );
+
+    F144_CHECK(
+        !Floppy144RunStateEvidenceEstablished(
+            &sRunState,
+            eE005
+        ),
+        "fixture begins with stale E-005 bit"
+    );
+
+    F144_CHECK(
+        Floppy144DocumentFindRecordId(
+            "DR-31-RS-0031",
+            &eCollection,
+            &uRecordIndex
+        ) &&
+        Floppy144DocumentApplyEffects(
+            &sWorld,
+            &sRunState,
+            eCollection,
+            uRecordIndex
+        ),
+        "reopening DR-31 exception register applies compatibility reconciliation"
+    );
+
+    F144_CHECK(
+        Floppy144RunStateEvidenceEstablished(
+            &sRunState,
+            eE005
+        ) &&
+        Floppy144RunStateTriggerFired(
+            &sRunState,
+            eT017
+        ) &&
+        Floppy144GameDataPhysicalItemRevealed(
+            &sRunState,
+            "P-053"
+        ),
+        "reopening first DR-31 trigger repairs E-005 and reveals its contents"
+    );
+
+    F144_CHECK(
+        Floppy144DocumentFindRecordId(
+            "DR-31-RS-0068",
+            &eCollection,
+            &uRecordIndex
+        ) &&
+        Floppy144DocumentApplyEffects(
+            &sWorld,
+            &sRunState,
+            eCollection,
+            uRecordIndex
+        ),
+        "reopening Senior Archivist assignment applies T-018"
+    );
+
+    F144_CHECK(
+        Floppy144RunStateTriggerFired(
+            &sRunState,
+            eT018
+        ) &&
+        Floppy144GameDataPhysicalItemRevealed(
+            &sRunState,
+            "P-052"
+        ),
+        "recovered save reveals Signed Custody Sheet"
+    );
+}
+
 int main(void)
 {
+    Floppy144TestStaleEvidenceSaveRecovery();
     Floppy144TestRestoreProgress();
     Floppy144TestExtendedGlyphs();
     Floppy144TestCatalogueRecordResolution();
