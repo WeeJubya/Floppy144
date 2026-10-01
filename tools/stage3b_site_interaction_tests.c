@@ -1346,9 +1346,245 @@ static void Floppy144TestExteriorExitBehaviour(void)
     );
 }
 
+
+/*
+ * Order-independent evidence may be inspected in either order, but a synthesis
+ * interaction must not expose its follow-on collection until the evidence pair
+ * is actually complete. This reproduces the Records-route DR-31 dead-end where
+ * P-047 could previously unlock DR-31 before P-046/E-005 had been established.
+ *
+ * Act II must also wait for the final physical evidence item itself, rather
+ * than ending as soon as the trigger which reveals that item fires.
+ */
+static void Floppy144TestEvidenceGatedProgression(void)
+{
+    Floppy144WorldState sWorld;
+    Floppy144RunState sState;
+
+    Floppy144InteractionId eI006;
+    Floppy144InteractionId eI007;
+    Floppy144InteractionId eI008;
+    Floppy144InteractionId eI011;
+    Floppy144EvidenceId eE005;
+    Floppy144EvidenceId eE006;
+    Floppy144EvidenceId eE009;
+    Floppy144CollectionId eDr31;
+    Floppy144TriggerId eT015;
+    Floppy144TriggerId eT016;
+    Floppy144TriggerId eT018;
+    Floppy144TriggerId eT023;
+
+    Floppy144TestReset(
+        &sWorld,
+        &sState
+    );
+
+    eI006 = Floppy144GameDataInteractionId("I-006");
+    eI007 = Floppy144GameDataInteractionId("I-007");
+    eI008 = Floppy144GameDataInteractionId("I-008");
+    eI011 = Floppy144GameDataInteractionId("I-011");
+
+    eE005 = Floppy144GameDataEvidenceId("E-005");
+    eE006 = Floppy144GameDataEvidenceId("E-006");
+    eE009 = Floppy144GameDataEvidenceId("E-009");
+
+    eDr31 = Floppy144GameDataCollectionId("DR-31");
+
+    eT015 = Floppy144GameDataTriggerId("T-015");
+    eT016 = Floppy144GameDataTriggerId("T-016");
+    eT018 = Floppy144GameDataTriggerId("T-018");
+    eT023 = Floppy144GameDataTriggerId("T-023");
+
+    F144_CHECK(
+        eI006 < FLOPPY144_INTERACTION_COUNT &&
+        eI007 < FLOPPY144_INTERACTION_COUNT &&
+        eI008 < FLOPPY144_INTERACTION_COUNT &&
+        eI011 < FLOPPY144_INTERACTION_COUNT &&
+        eE005 < FLOPPY144_EVIDENCE_COUNT &&
+        eE006 < FLOPPY144_EVIDENCE_COUNT &&
+        eE009 < FLOPPY144_EVIDENCE_COUNT &&
+        eDr31 < FLOPPY144_COLLECTION_COUNT &&
+        eT015 < FLOPPY144_TRIGGER_COUNT &&
+        eT016 < FLOPPY144_TRIGGER_COUNT &&
+        eT018 < FLOPPY144_TRIGGER_COUNT &&
+        eT023 < FLOPPY144_TRIGGER_COUNT,
+        "evidence-gated progression fixture IDs resolve"
+    );
+
+    F144_CHECK(
+        Floppy144RunStateFireTrigger(
+            &sState,
+            eT015
+        ) &&
+        Floppy144RunStateFireTrigger(
+            &sState,
+            eT016
+        ),
+        "Records evidence fixture arms DR-29 interactions"
+    );
+
+    /*
+     * Inspect the synthesis half first. It is deliberately allowed to complete
+     * because E-005 is order-independent, but DR-31 must remain unavailable.
+     */
+    F144_CHECK(
+        Floppy144InteractionTryRun(
+            &sWorld,
+            &sState,
+            eI007
+        ),
+        "P-047 may be inspected before P-046"
+    );
+
+    F144_CHECK(
+        Floppy144RunStateInteractionCompleted(
+            &sState,
+            eI007
+        ) &&
+        !Floppy144RunStateEvidenceEstablished(
+            &sState,
+            eE005
+        ),
+        "early synthesis inspection does not fabricate E-005"
+    );
+
+    F144_CHECK(
+        !Floppy144RunStateCollectionAvailable(
+            &sState,
+            eDr31
+        ),
+        "DR-31 remains unavailable until E-005 is established"
+    );
+
+    F144_CHECK(
+        Floppy144InteractionTryRun(
+            &sWorld,
+            &sState,
+            eI006
+        ),
+        "P-046 completes the remaining half of E-005"
+    );
+
+    F144_CHECK(
+        Floppy144RunStateEvidenceEstablished(
+            &sState,
+            eE005
+        ) &&
+        Floppy144RunStateCollectionAvailable(
+            &sState,
+            eDr31
+        ),
+        "establishing E-005 automatically authorises DR-31"
+    );
+
+    /*
+     * Records-first Act II now terminates on E-006, not T-018 alone.
+     */
+    Floppy144TestReset(
+        &sWorld,
+        &sState
+    );
+
+    F144_CHECK(
+        Floppy144RunStateSetBranch(
+            &sState,
+            FLOPPY144_RUN_BRANCH_RECORDS_FIRST
+        ) &&
+        Floppy144RunStateFireTrigger(
+            &sState,
+            eT018
+        ),
+        "Records Act II fixture reaches the DR-31 reveal trigger"
+    );
+
+    F144_CHECK(
+        !Floppy144GameDataConditionSatisfied(
+            &sState,
+            "act_at_least",
+            "ACT_II_CORE_COMPLETE"
+        ),
+        "T-018 alone does not complete Records Act II"
+    );
+
+    F144_CHECK(
+        Floppy144InteractionTryRun(
+            &sWorld,
+            &sState,
+            eI008
+        ) &&
+        Floppy144RunStateEvidenceEstablished(
+            &sState,
+            eE006
+        ),
+        "Signed Custody Sheet inspection establishes E-006"
+    );
+
+    F144_CHECK(
+        Floppy144GameDataConditionSatisfied(
+            &sState,
+            "act_at_least",
+            "ACT_II_CORE_COMPLETE"
+        ),
+        "Records Act II completes only after E-006"
+    );
+
+    /*
+     * Mirror the contract on the Technology branch so the semantic rule is
+     * proven generic rather than Records-specific.
+     */
+    Floppy144TestReset(
+        &sWorld,
+        &sState
+    );
+
+    F144_CHECK(
+        Floppy144RunStateSetBranch(
+            &sState,
+            FLOPPY144_RUN_BRANCH_TECHNOLOGY_FIRST
+        ) &&
+        Floppy144RunStateFireTrigger(
+            &sState,
+            eT023
+        ),
+        "Technology Act II fixture reaches its final reveal trigger"
+    );
+
+    F144_CHECK(
+        !Floppy144GameDataConditionSatisfied(
+            &sState,
+            "act_at_least",
+            "ACT_II_CORE_COMPLETE"
+        ),
+        "T-023 alone does not complete Technology Act II"
+    );
+
+    F144_CHECK(
+        Floppy144InteractionTryRun(
+            &sWorld,
+            &sState,
+            eI011
+        ) &&
+        Floppy144RunStateEvidenceEstablished(
+            &sState,
+            eE009
+        ),
+        "Technology final evidence inspection establishes E-009"
+    );
+
+    F144_CHECK(
+        Floppy144GameDataConditionSatisfied(
+            &sState,
+            "act_at_least",
+            "ACT_II_CORE_COMPLETE"
+        ),
+        "Technology Act II completes only after E-009"
+    );
+}
+
 int main(void)
 {
     Floppy144TestPhysicalParentCoverage();
+    Floppy144TestEvidenceGatedProgression();
     Floppy144TestCentredGeometryMetadata();
     Floppy144TestMainOfficeDeskContent();
     Floppy144TestTerminalCoverage();
