@@ -935,7 +935,7 @@ static bool Floppy144TriggerIsUniqueRestoredCollectionRoot(
     Floppy144CollectionId eCollection;
     uint32_t uTriggerIndex;
     uint32_t uRootCount = 0U;
-    bool bCandidateRoot = true;
+    bool bCandidateRoot = false;
 
     if(
         pState == NULL ||
