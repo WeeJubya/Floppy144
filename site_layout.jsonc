@@ -380,7 +380,7 @@
                     "from": "CORRIDOR",
                     "to": "RECORDS_OFFICE",
                     "x": 46,
-                    "y": 37,
+                    "y": 36,
                     "width": 1,
                     "height": 5
                 },
@@ -913,12 +913,12 @@
                     "x": 1,
                     "y": 1,
                     "width": 32,
-                    "height": 32
+                    "height": 33
                 },
                 {
                     "type": "FLOOR_C",
                     "x": 1,
-                    "y": 33,
+                    "y": 34,
                     "width": 45,
                     "height": 10
                 },
@@ -958,7 +958,7 @@
                     "variant": "STANDARD_DESK",
                     "object": "RECORDS_OFFICE_DESK_04",
                     "x": 1,
-                    "y": 38,
+                    "y": 37,
                     "width": 4,
                     "height": 6
                 },
@@ -1078,7 +1078,7 @@
                     "variant": "SECURE_CABINET",
                     "object": "RECORDS_OFFICE_SECURE_CABINET_11",
                     "x": 33,
-                    "y": 34,
+                    "y": 33,
                     "width": 6,
                     "height": 2
                 },
@@ -1088,7 +1088,7 @@
                     "variant": "SECURE_CABINET",
                     "object": "RECORDS_OFFICE_SECURE_CABINET_12",
                     "x": 40,
-                    "y": 34,
+                    "y": 33,
                     "width": 6,
                     "height": 2
                 },
@@ -1098,7 +1098,7 @@
                     "variant": "SECURE_CABINET",
                     "object": "RECORDS_OFFICE_SECURE_CABINET_13",
                     "x": 12,
-                    "y": 42,
+                    "y": 41,
                     "width": 6,
                     "height": 2
                 },
@@ -1108,7 +1108,7 @@
                     "variant": "SECURE_CABINET",
                     "object": "RECORDS_OFFICE_SECURE_CABINET_14",
                     "x": 19,
-                    "y": 42,
+                    "y": 41,
                     "width": 6,
                     "height": 2
                 },
@@ -1118,7 +1118,7 @@
                     "variant": "SECURE_CABINET",
                     "object": "RECORDS_OFFICE_SECURE_CABINET_15",
                     "x": 26,
-                    "y": 42,
+                    "y": 41,
                     "width": 6,
                     "height": 2
                 },
@@ -1128,7 +1128,7 @@
                     "variant": "SECURE_CABINET",
                     "object": "RECORDS_OFFICE_SECURE_CABINET_16",
                     "x": 33,
-                    "y": 42,
+                    "y": 41,
                     "width": 6,
                     "height": 2
                 },
@@ -1138,7 +1138,7 @@
                     "variant": "SECURE_CABINET",
                     "object": "RECORDS_OFFICE_SECURE_CABINET_17",
                     "x": 40,
-                    "y": 42,
+                    "y": 41,
                     "width": 6,
                     "height": 2
                 },
@@ -1159,7 +1159,7 @@
                 {
                     "type": "CHAIR",
                     "x": 5,
-                    "y": 40,
+                    "y": 39,
                     "width": 2,
                     "height": 2
                 },
