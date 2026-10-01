@@ -1,7 +1,15 @@
 /*
- * Floppy//144 canonical Site layout.
+ * Floppy//144 legacy pre-transform Site design layout.
  *
- * Boundary geometry now lives inside an owning room's geometry array.
+ * Runtime-authoritative Site geometry lives in
+ * data/floppy144_game_data.json -> site_layout_source and is emitted as
+ * game/src/site_layout.generated.jsonc before compilation.
+ *
+ * This file is retained as the original design-space reference. Geometry
+ * corrections must be mirrored here when they affect the pre-transform plan,
+ * but tools/build_site.ps1 no longer uses it by default.
+ *
+ * Boundary geometry lives inside an owning room's geometry array.
  * DOOR and WINDOW entries carry explicit "from" and "to" endpoints.
  * There is no top-level shared_geometry section.
  */
