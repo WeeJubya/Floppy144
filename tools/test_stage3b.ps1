@@ -560,9 +560,11 @@ function Test-PhysicalItemPlayerFacingContract {
     $GameDataPath = Join-Path $Root "data\floppy144_game_data.json"
     $CabinetPath = Join-Path $SourceDir "floppy144_cabinet.c"
     $Site2DPath = Join-Path $SourceDir "floppy144_site_2d.c"
+    $BuildSitePath = Join-Path $Root "tools\build_site.ps1"
     $GameData = Get-Content -Raw -Path $GameDataPath | ConvertFrom-Json
     $CabinetSource = Get-Content -Raw -Path $CabinetPath
     $Site2DSource = Get-Content -Raw -Path $Site2DPath
+    $BuildSiteSource = Get-Content -Raw -Path $BuildSitePath
 
     if($GameData.physical_items.Count -ne 633) {
         throw "Physical-item ledger count is $($GameData.physical_items.Count); expected 633."
@@ -576,6 +578,47 @@ function Test-PhysicalItemPlayerFacingContract {
         if($Item.description.Length -gt 150) {
             throw "Physical item $($Item.id) description exceeds the 150-character three-line UI contract."
         }
+    }
+
+    $RecordsRoom =
+        $GameData.rooms |
+        Where-Object {
+            $_.id -eq 'RECORDS_OFFICE'
+        }
+
+    $RecordsFloors = @($RecordsRoom.floor_geometry)
+
+    if(
+        $RecordsFloors.Count -ne 2 -or
+        -not (
+            $RecordsFloors |
+            Where-Object {
+                $_.type -eq 'FLOOR_C' -and
+                $_.x -eq 66 -and
+                $_.y -eq 1 -and
+                $_.width -eq 33 -and
+                $_.height -eq 32
+            }
+        ) -or
+        -not (
+            $RecordsFloors |
+            Where-Object {
+                $_.type -eq 'FLOOR_C' -and
+                $_.x -eq 56 -and
+                $_.y -eq 1 -and
+                $_.width -eq 10 -and
+                $_.height -eq 45
+            }
+        )
+    ) {
+        throw "Records Office floor metadata has regressed from the corrected L-shaped footprint."
+    }
+
+    if(
+        $BuildSiteSource -notmatch
+            '\[string\]\$InputFile\s*=\s*"game\\src\\site_layout\.generated\.jsonc"'
+    ) {
+        throw "build_site.ps1 no longer defaults to the runtime-authoritative generated Site layout."
     }
 
     foreach($Furniture in $GameData.furniture) {
