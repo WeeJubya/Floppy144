@@ -1,5 +1,8 @@
 param(
-    [string]$InputFile = "site_layout.jsonc",
+    # The runtime-authoritative layout is emitted from canonical game data.
+    # The root site_layout.jsonc is retained as the pre-transform design source
+    # and must be passed explicitly if it is ever being validated in isolation.
+    [string]$InputFile = "game\src\site_layout.generated.jsonc",
     [string]$OutputFile = "game\src\floppy144_site_generated.def"
 )
 
