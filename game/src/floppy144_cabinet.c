@@ -1364,10 +1364,15 @@ static void Floppy144CabinetContentMarkerRegion(
     }
     else if(Floppy144CabinetTypeContains(pCabinet, "DOOR"))
     {
-        *pX = 104U;
-        *pY = 160U;
-        *pWidth = 112U;
-        *pHeight = 80U;
+        /*
+         * Door parents have a dedicated notice/contents panel in the upper
+         * half of the silhouette. Keep recovered-item markers inside that
+         * panel rather than centring them over the full door leaf.
+         */
+        *pX = 112U;
+        *pY = 108U;
+        *pWidth = 104U;
+        *pHeight = 42U;
         *pMaximumColumns = 3U;
     }
     else if(
@@ -1515,6 +1520,84 @@ static void Floppy144CabinetDrawContentMarkers(
     }
 }
 
+static void Floppy144CabinetDrawWrappedText(
+    Floppy144Surface *pSurface,
+    uint32_t uX,
+    uint32_t uY,
+    const char *pszText,
+    uint32_t uMaximumCharacters,
+    uint32_t uMaximumLines,
+    uint32_t uLineHeight,
+    uint32_t uColour
+)
+{
+    const char *pszRead = pszText;
+    uint32_t uLine;
+
+    if(
+        pSurface == NULL ||
+        pszRead == NULL ||
+        uMaximumCharacters == 0U ||
+        uMaximumLines == 0U
+    )
+    {
+        return;
+    }
+
+    for(uLine = 0U; uLine < uMaximumLines && *pszRead != '\0'; ++uLine)
+    {
+        char szLine[64];
+        uint32_t uLength = 0U;
+        uint32_t uBreak = 0U;
+
+        while(*pszRead == ' ')
+            ++pszRead;
+
+        while(
+            pszRead[uLength] != '\0' &&
+            pszRead[uLength] != '\n' &&
+            uLength < uMaximumCharacters &&
+            uLength + 1U < (uint32_t)sizeof(szLine)
+        )
+        {
+            if(pszRead[uLength] == ' ')
+                uBreak = uLength;
+
+            ++uLength;
+        }
+
+        if(
+            pszRead[uLength] != '\0' &&
+            pszRead[uLength] != '\n' &&
+            uLength == uMaximumCharacters &&
+            uBreak > 0U
+        )
+        {
+            uLength = uBreak;
+        }
+
+        memcpy(szLine, pszRead, uLength);
+        szLine[uLength] = '\0';
+
+        Floppy144DrawText(
+            pSurface,
+            uX,
+            uY + uLine * uLineHeight,
+            szLine,
+            1U,
+            uColour
+        );
+
+        pszRead += uLength;
+
+        if(*pszRead == '\n')
+            ++pszRead;
+
+        while(*pszRead == ' ')
+            ++pszRead;
+    }
+}
+
 static void Floppy144CabinetDrawInterior(
     Floppy144Surface *pSurface,
     const Floppy144CabinetState *pCabinet,
@@ -1655,7 +1738,10 @@ static void Floppy144CabinetDrawInterior(
         if(pItem != NULL)
         {
             char szName[48];
-            char szDetail[80];
+            const char *pszDetail =
+                pItem->pszF != NULL
+                    ? pItem->pszF
+                    : "A recovered physical item from the reconstructed site.";
 
             /*
              * The recovered item's authored name is the screen heading.
@@ -1669,17 +1755,23 @@ static void Floppy144CabinetDrawInterior(
                 38U
             );
 
-            snprintf(
-                szDetail,
-                sizeof(szDetail),
-                "%.68s",
-                pItem->pszF != NULL ?
-                    pItem->pszF :
-                    "A recovered physical item from the reconstructed site."
-            );
-
             Floppy144DrawText(pSurface, 94U, 94U, szName, 2U, uBright);
-            Floppy144DrawText(pSurface, 94U, 158U, szDetail, 1U, uText);
+
+            /*
+             * Physical-item descriptions are deliberately shorter than
+             * authored documents, but may contain enough transcription to
+             * make labels, notices, tags and checklists feel like real props.
+             */
+            Floppy144CabinetDrawWrappedText(
+                pSurface,
+                94U,
+                150U,
+                pszDetail,
+                54U,
+                3U,
+                20U,
+                uText
+            );
         }
 
         Floppy144DrawText(
