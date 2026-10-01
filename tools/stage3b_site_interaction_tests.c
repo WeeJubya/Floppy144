@@ -1371,6 +1371,7 @@ static void Floppy144TestEvidenceGatedProgression(void)
     Floppy144CollectionId eDr31;
     Floppy144TriggerId eT015;
     Floppy144TriggerId eT016;
+    Floppy144TriggerId eT017;
     Floppy144TriggerId eT018;
     Floppy144TriggerId eT023;
 
@@ -1392,6 +1393,7 @@ static void Floppy144TestEvidenceGatedProgression(void)
 
     eT015 = Floppy144GameDataTriggerId("T-015");
     eT016 = Floppy144GameDataTriggerId("T-016");
+    eT017 = Floppy144GameDataTriggerId("T-017");
     eT018 = Floppy144GameDataTriggerId("T-018");
     eT023 = Floppy144GameDataTriggerId("T-023");
 
@@ -1406,6 +1408,7 @@ static void Floppy144TestEvidenceGatedProgression(void)
         eDr31 < FLOPPY144_COLLECTION_COUNT &&
         eT015 < FLOPPY144_TRIGGER_COUNT &&
         eT016 < FLOPPY144_TRIGGER_COUNT &&
+        eT017 < FLOPPY144_TRIGGER_COUNT &&
         eT018 < FLOPPY144_TRIGGER_COUNT &&
         eT023 < FLOPPY144_TRIGGER_COUNT,
         "evidence-gated progression fixture IDs resolve"
@@ -1475,6 +1478,28 @@ static void Floppy144TestEvidenceGatedProgression(void)
             eDr31
         ),
         "establishing E-005 automatically authorises DR-31"
+    );
+
+    F144_CHECK(
+        Floppy144GameDataTriggerTryFire(
+            &sWorld,
+            &sState,
+            eT017
+        ) &&
+        Floppy144GameDataTriggerTryFire(
+            &sWorld,
+            &sState,
+            eT018
+        ),
+        "eligible DR-31 trigger records fire in sequence"
+    );
+
+    F144_CHECK(
+        Floppy144GameDataPhysicalItemRevealed(
+            &sState,
+            "P-052"
+        ),
+        "DR-31 reveals the Signed Custody Sheet on Records Office Desk 01"
     );
 
     /*
