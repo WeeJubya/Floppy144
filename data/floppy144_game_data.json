@@ -8050,7 +8050,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "setup-ledger",
       "source_order": 4,
-      "description": "A local visitor log pencil records routine entries through the closure period. The final line is left open for handover."
+      "description": "Visitor log pencil. Recovered in Reception."
     },
     {
       "id": "P-005",
@@ -8455,7 +8455,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 30,
-      "description": "Facilities room plate: a short written record from Corridor, retained with Cor Fac during site close-out."
+      "description": "A brass plate reads FACILITIES. Smaller text underneath says AUTHORISED STAFF / PLANT ACCESS."
     },
     {
       "id": "P-031",
@@ -9653,7 +9653,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 107,
-      "description": "The backup rotation case marks the site's final working week. The last handover-related entry has been amended in pen."
+      "description": "A hard plastic case labelled BACKUP ROTATION SET B / DO NOT OVERWRITE. A paper insert records the last verified date."
     },
     {
       "id": "P-108",
@@ -10303,7 +10303,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 152,
-      "description": "Reception room plate: a short written record from Corridor, retained with Cor Rec during site close-out."
+      "description": "A brass plate reads RECEPTION. A smaller line underneath says VISITORS REPORT TO DESK."
     },
     {
       "id": "P-153",
@@ -10318,7 +10318,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 153,
-      "description": "Main Office room plate: a short written record from Corridor, retained with Cor Off during site close-out."
+      "description": "A painted plate reads MAIN OFFICE. Below it: AUTHORISED STAFF AND ESCORTED VISITORS."
     },
     {
       "id": "P-154",
@@ -10333,7 +10333,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 154,
-      "description": "Facilities room plate - corridor side: a short written record from Corridor, retained with Cor Fac during site close-out."
+      "description": "A corridor-side plate reads FACILITIES / AUTHORISED STAFF. The lettering is worn around the fixing screws."
     },
     {
       "id": "P-155",
@@ -10348,7 +10348,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 155,
-      "description": "IT Support room plate: a short written record from Corridor, retained with Cor It during site close-out."
+      "description": "A door plate reads IT SUPPORT. A smaller strip says TECHNICAL STAFF / CONTROLLED ACCESS."
     },
     {
       "id": "P-156",
@@ -10363,7 +10363,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 156,
-      "description": "Security Office room plate: a short written record from Corridor, retained with Cor Sec during site close-out."
+      "description": "A dark plate reads SECURITY OFFICE. Beneath it: CONTROLLED AREA - REPORT TO DUTY OFFICER."
     },
     {
       "id": "P-157",
@@ -10378,7 +10378,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 157,
-      "description": "The plate identifies Cor Staff. Its smaller line gives the room or post designation used during normal site operations."
+      "description": "A simple plate reads STAFF ROOM. Someone has added KETTLE LAST! in tiny pencil beneath the lettering."
     },
     {
       "id": "P-158",
@@ -10616,7 +10616,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 173,
-      "description": "Meeting notepad: a short written record from Reception, retained with Reception Visitor Book Table during site close-out."
+      "description": "The top sheet is headed RECEPTION ACTIONS. Two visitor follow-ups are ticked; a third says return temporary pass."
     },
     {
       "id": "P-174",
@@ -12540,7 +12540,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 321,
-      "description": "Meeting notepad: a short written record from Staff Room, retained with Staff Room Coffee Table 01 during site close-out."
+      "description": "A staff-room notepad page lists tea, milk and biscuits for the final week. The last line reads use it or Facilities bins it."
     },
     {
       "id": "P-322",
@@ -13437,7 +13437,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 390,
-      "description": "Fault sticker: a short written record from Security, retained with Security Monitor Bank during site close-out."
+      "description": "FAULT 17 / CHANNEL 06 INTERMITTENT. Reported to Technical Support; monitor manually until cleared."
     },
     {
       "id": "P-391",
@@ -13463,7 +13463,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 392,
-      "description": "Selector note: a short written record from Security, retained with Security Monitor Bank during site close-out."
+      "description": "A taped selector note reads USE CH 4 FOR IT ENTRANCE DURING CLOSURE. CH 6 MAY DROP SIGNAL."
     },
     {
       "id": "P-393",
@@ -13515,7 +13515,7 @@
       "drawing_definition_id": "DRAW_SERVER",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 396,
-      "description": "Blanking plate: a short written record from Server Room, retained with Server Room Server 01 during site close-out."
+      "description": "Blanking plate. Recovered in Server Room."
     },
     {
       "id": "P-397",
@@ -14295,7 +14295,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 456,
-      "description": "Meeting notepad: a short written record from Staff Room, retained with Staff Room Coffee Table 02 during site close-out."
+      "description": "A notepad page titled FINAL WEEK SUPPLIES lists tea bags, milk, bin liners and one heavily underlined packet of biscuits."
     },
     {
       "id": "P-457",
@@ -14698,7 +14698,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "authored-stage3c-density-pass",
       "source_order": 487,
-      "description": "Meeting notepad: a short written record from Director Office, retained with Director Office Boardroom Table during site close-out."
+      "description": "The boardroom pad is headed CLOSURE REVIEW. Records, IT and Handover are listed; Handover has been circled but not ticked."
     },
     {
       "id": "P-488",
