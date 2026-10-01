@@ -575,12 +575,21 @@ static void Floppy144TestCanonicalRoomProgression(void)
     }
 
     F144_CHECK(
+        Floppy144TestRunInteraction(
+            &sWorld,
+            &sState,
+            "I-008"
+        ),
+        "completed Records branch establishes its final evidence"
+    );
+
+    F144_CHECK(
         Floppy144GameDataConditionSatisfied(
             &sState,
             "act_at_least",
             "ACT_II_CORE_COMPLETE"
         ),
-        "completed branch ledger satisfies late reconstruction gate"
+        "completed branch evidence satisfies late reconstruction gate"
     );
 
     F144_CHECK(

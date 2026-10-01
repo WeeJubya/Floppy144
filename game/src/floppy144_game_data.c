@@ -786,9 +786,9 @@ static bool Floppy144ActIiCoreComplete(
     }
 
     /*
-     * Act II ends on established evidence, not merely on the trigger which
-     * revealed that evidence's physical source. Choose the final Act II
-     * evidence node which statically depends on the selected branch.
+     * The middle recovery phase ends on established evidence, not merely on
+     * the trigger which revealed that evidence's physical source. Choose the
+     * final evidence node which statically depends on the selected branch.
      *
      * Records-first therefore terminates at E-006 (the Signed Custody Sheet),
      * while Technology-first terminates at E-009. This keeps the rule generic
@@ -804,10 +804,6 @@ static bool Floppy144ActIiCoreComplete(
 
         if(
             p->eKind != FLOPPY144_DATA_EVIDENCE ||
-            !Floppy144StringEqual(
-                p->pszF,
-                "Act II"
-            ) ||
             p->n2 <= nLastEvidence ||
             !Floppy144EvidenceDependsOnBranch(
                 p->pszId,
