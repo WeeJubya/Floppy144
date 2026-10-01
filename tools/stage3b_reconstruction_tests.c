@@ -1548,6 +1548,12 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
             );
         }
 
+        /*
+         * The 6x6 table and 2x2 chairs are rendered as diamonds inside their
+         * conservative bounds. A two-unit centre offset places each chair
+         * visually against the table edge; the former three-unit offset left
+         * a conspicuous ring of empty floor around the dining set.
+         */
         if(
             pRect->room ==
                 (uint8_t)FLOPPY144_ROOM_STAFF_ROOM &&
@@ -1555,7 +1561,7 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
                 (uint8_t)FLOPPY144_SITE_CHAIR
         )
         {
-            if(pRect->x == 12U && pRect->y == 39U)
+            if(pRect->x == 11U && pRect->y == 38U)
             {
                 bStaffChair135 = true;
                 F144_CHECK(
@@ -1563,7 +1569,7 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
                     "Staff dining 135-degree chair follows the table diagonal"
                 );
             }
-            else if(pRect->x == 6U && pRect->y == 39U)
+            else if(pRect->x == 7U && pRect->y == 38U)
             {
                 bStaffChair45 = true;
                 F144_CHECK(
@@ -1571,7 +1577,7 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
                     "Staff dining 45-degree chair follows the table diagonal"
                 );
             }
-            else if(pRect->x == 12U && pRect->y == 33U)
+            else if(pRect->x == 11U && pRect->y == 34U)
             {
                 bStaffChair225 = true;
                 F144_CHECK(
@@ -1579,7 +1585,7 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
                     "Staff dining 225-degree chair follows the table diagonal"
                 );
             }
-            else if(pRect->x == 6U && pRect->y == 33U)
+            else if(pRect->x == 7U && pRect->y == 34U)
             {
                 bStaffChair315 = true;
                 F144_CHECK(
@@ -1680,7 +1686,7 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
         bStaffChair45 &&
         bStaffChair225 &&
         bStaffChair315,
-        "Staff dining table and four chairs form one compact 45-degree cluster"
+        "Staff dining chairs sit immediately adjacent to the 45-degree table"
     );
 
     F144_CHECK(
