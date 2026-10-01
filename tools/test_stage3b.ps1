@@ -709,6 +709,19 @@ function Test-PhysicalItemPlayerFacingContract {
     }
 
     if(
+        $CabinetSource -notmatch
+            'Floppy144CabinetTypeContains\(pCabinet, "SHELVING_FULL"\)' -or
+        $CabinetSource -notmatch
+            'const uint32_t auShelfY\[3\]' -or
+        $CabinetSource -notmatch
+            'Open industrial shelving is not a cupboard' -or
+        $CabinetSource -notmatch
+            'Floppy144CabinetPhysicalItemRevealControlled'
+    ) {
+        throw "Shelving no longer has its own open-shelf marker/presentation and stable recovered-item ordering."
+    }
+
+    if(
         $Site2DSource -notmatch
             'const int32_t mount_pixels' -or
         $Site2DSource -notmatch
