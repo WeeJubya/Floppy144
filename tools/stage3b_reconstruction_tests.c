@@ -2000,6 +2000,8 @@ static void Floppy144TestRecordsOfficeLeftWallClear(void)
     bool bDesk04Found = false;
     bool bTopLeftChairCentred = false;
     bool bRecordsDoorCentred = false;
+    bool bRecordsMainFloorFound = false;
+    bool bRecordsNarrowFloorFound = false;
     uint32_t uLeftCabinetsFound = 0U;
     uint32_t uRightWallCabinetsFound = 0U;
 
@@ -2044,6 +2046,28 @@ static void Floppy144TestRecordsOfficeLeftWallClear(void)
         )
         {
             continue;
+        }
+
+        if(
+            pRect->type == (uint8_t)FLOPPY144_SITE_FLOOR_C &&
+            pRect->x == 66U &&
+            pRect->y == 1U &&
+            pRect->width == 33U &&
+            pRect->height == 32U
+        )
+        {
+            bRecordsMainFloorFound = true;
+        }
+
+        if(
+            pRect->type == (uint8_t)FLOPPY144_SITE_FLOOR_C &&
+            pRect->x == 56U &&
+            pRect->y == 1U &&
+            pRect->width == 10U &&
+            pRect->height == 45U
+        )
+        {
+            bRecordsNarrowFloorFound = true;
         }
 
         if(
@@ -2116,6 +2140,16 @@ static void Floppy144TestRecordsOfficeLeftWallClear(void)
             bTopLeftChairCentred = true;
         }
     }
+
+    F144_CHECK(
+        bRecordsMainFloorFound,
+        "Records Office main floor keeps corrected 33-column footprint"
+    );
+
+    F144_CHECK(
+        bRecordsNarrowFloorFound,
+        "Records Office narrow floor leg keeps corrected x=56 footprint"
+    );
 
     F144_CHECK(
         bDesk04Found,
