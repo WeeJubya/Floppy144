@@ -573,8 +573,8 @@ function Test-PhysicalItemPlayerFacingContract {
             throw "Physical item $($Item.id) has no player-facing description."
         }
 
-        if($Item.description.Length -gt 100) {
-            throw "Physical item $($Item.id) description exceeds the 100-character UI contract."
+        if($Item.description.Length -gt 150) {
+            throw "Physical item $($Item.id) description exceeds the 150-character three-line UI contract."
         }
     }
 
@@ -634,6 +634,13 @@ function Test-PhysicalItemPlayerFacingContract {
         $Fm13ContractRecord.body -notmatch 'Alderwick Fire & Safety Ltd'
     ) {
         throw "FM-13-RS-0076 no longer resolves to the named external contractor record."
+    }
+
+    if(
+        $CabinetSource -notmatch 'Floppy144CabinetDrawWrappedText' -or
+        $CabinetSource -notmatch '54U,\s*3U,\s*20U'
+    ) {
+        throw "Physical-item detail view no longer supports the three-line flavour-text contract."
     }
 
     if($CabinetSource -match '"ID: %s"' -or $CabinetSource -match '"ROLE:') {
