@@ -401,6 +401,13 @@ function Test-MainMenuReinstateFlow {
     }
 
     if(
+        $ReinstateSource -notmatch
+            'global_terminal\.suppress_next_character\s*=\s*false'
+    ) {
+        throw "Reinstated terminal will discard the first real command character."
+    }
+
+    if(
         $MainSource -notmatch 'case WM_KEYUP:' -or
         $MainSource -notmatch
             'global_reinstate_continue_on_keyup' -or
