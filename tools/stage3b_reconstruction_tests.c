@@ -1999,7 +1999,7 @@ static void Floppy144TestRecordsOfficeLeftWallClear(void)
     uint32_t uRectIndex;
     bool bDesk04Found = false;
     bool bTopLeftChairCentred = false;
-    bool bRecordsDoorCentred = false;
+    bool bRecordsDoorAligned = false;
     bool bRecordsMainFloorFound = false;
     bool bRecordsNarrowFloorFound = false;
     uint32_t uLeftCabinetsFound = 0U;
@@ -2019,9 +2019,13 @@ static void Floppy144TestRecordsOfficeLeftWallClear(void)
             continue;
         }
 
+        /*
+         * The corrected narrow floor spans x=56..65. COR_RECO therefore
+         * starts at x=58; x=59 was the stale pre-floor-shift position.
+         */
         if(
             pRect->type == (uint8_t)FLOPPY144_SITE_DOOR &&
-            pRect->x == 59U &&
+            pRect->x == 58U &&
             pRect->y == 46U &&
             pRect->width == 5U &&
             pRect->height == 1U &&
@@ -2037,7 +2041,7 @@ static void Floppy144TestRecordsOfficeLeftWallClear(void)
             )
         )
         {
-            bRecordsDoorCentred = true;
+            bRecordsDoorAligned = true;
         }
 
         if(
@@ -2070,23 +2074,15 @@ static void Floppy144TestRecordsOfficeLeftWallClear(void)
             bRecordsNarrowFloorFound = true;
         }
 
-        if(
-            pRect->type ==
-                (uint8_t)FLOPPY144_SITE_STANDARD_DESK ||
-            pRect->type ==
-                (uint8_t)FLOPPY144_SITE_SECURE_CABINET_FULL
-        )
-        {
-            F144_CHECK(
-                pRect->x != 56U,
-                "Records Office furniture does not occupy left wall cell x=56"
-            );
-        }
-
+        /*
+         * These placements are checked relative to the corrected floor,
+         * rather than preserving the stale coordinates that pre-dated the
+         * 27 September one-unit floor shift.
+         */
         if(
             pRect->type ==
                 (uint8_t)FLOPPY144_SITE_STANDARD_DESK &&
-            pRect->x == 57U &&
+            pRect->x == 56U &&
             pRect->y == 1U &&
             pRect->width == 6U &&
             pRect->height == 4U
@@ -2098,7 +2094,7 @@ static void Floppy144TestRecordsOfficeLeftWallClear(void)
         if(
             pRect->type ==
                 (uint8_t)FLOPPY144_SITE_SECURE_CABINET_FULL &&
-            pRect->x == 57U &&
+            pRect->x == 56U &&
             pRect->width == 2U &&
             pRect->height == 6U &&
             (
@@ -2116,7 +2112,7 @@ static void Floppy144TestRecordsOfficeLeftWallClear(void)
         if(
             pRect->type ==
                 (uint8_t)FLOPPY144_SITE_SECURE_CABINET_FULL &&
-            pRect->x == 65U &&
+            pRect->x == 64U &&
             pRect->width == 2U &&
             pRect->height == 6U &&
             (
@@ -2130,7 +2126,7 @@ static void Floppy144TestRecordsOfficeLeftWallClear(void)
 
         if(
             pRect->type == (uint8_t)FLOPPY144_SITE_CHAIR &&
-            pRect->x == 59U &&
+            pRect->x == 58U &&
             pRect->y == 5U &&
             pRect->width == 2U &&
             pRect->height == 2U &&
@@ -2153,27 +2149,27 @@ static void Floppy144TestRecordsOfficeLeftWallClear(void)
 
     F144_CHECK(
         bDesk04Found,
-        "Records Office Desk 04 is shifted one unit inside left wall"
+        "Records Office Desk 04 stays flush with corrected narrow-floor edge"
     );
 
     F144_CHECK(
         uLeftCabinetsFound == 5U,
-        "Records Office left cabinet bank is shifted one unit inside wall"
+        "Records Office left cabinet bank stays flush with corrected floor edge"
     );
 
     F144_CHECK(
         uRightWallCabinetsFound == 2U,
-        "Records Office door-side cabinets sit flush against right-hand wall"
+        "Records Office door-side cabinets stay inside the x=66 wall"
     );
 
     F144_CHECK(
         bTopLeftChairCentred,
-        "Records Office top-left desk chair is centred on Desk 04"
+        "Records Office top-left chair stays centred on relocated Desk 04"
     );
 
     F144_CHECK(
-        bRecordsDoorCentred,
-        "Records Office corridor door is centred on the narrow room leg"
+        bRecordsDoorAligned,
+        "Records Office corridor door follows corrected narrow-floor position"
     );
 }
 
