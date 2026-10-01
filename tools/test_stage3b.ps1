@@ -564,8 +564,8 @@ function Test-PhysicalItemPlayerFacingContract {
     $CabinetSource = Get-Content -Raw -Path $CabinetPath
     $Site2DSource = Get-Content -Raw -Path $Site2DPath
 
-    if($GameData.physical_items.Count -ne 500) {
-        throw "Physical-item ledger count is $($GameData.physical_items.Count); expected 500."
+    if($GameData.physical_items.Count -ne 633) {
+        throw "Physical-item ledger count is $($GameData.physical_items.Count); expected 633."
     }
 
     foreach($Item in $GameData.physical_items) {
@@ -576,6 +576,29 @@ function Test-PhysicalItemPlayerFacingContract {
         if($Item.description.Length -gt 150) {
             throw "Physical item $($Item.id) description exceeds the 150-character three-line UI contract."
         }
+    }
+
+    foreach($Furniture in $GameData.furniture) {
+        $Children =
+            @(
+                $GameData.physical_items |
+                Where-Object {
+                    $_.parent_id -eq $Furniture.id
+                }
+            )
+
+        if($Children.Count -lt 1) {
+            throw "Furniture $($Furniture.id) has no physical-item context."
+        }
+    }
+
+    if(
+        $CabinetSource -notmatch 'EMPTY STORAGE' -or
+        $CabinetSource -notmatch 'strcmp\(pParent->pszB, "BOOKCASE"\)' -or
+        $CabinetSource -notmatch 'strcmp\(pParent->pszB, "NONSECURE_CABINET"\)' -or
+        $CabinetSource -notmatch 'strcmp\(pParent->pszB, "SHELVING_FULL"\)'
+    ) {
+        throw "Cabinet Contents no longer preserves access to empty non-secure storage."
     }
 
     $RestoredPhysicalNames = @{
