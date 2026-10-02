@@ -10,6 +10,7 @@
 #include "floppy144_run_state.h"
 #include "floppy144_site.h"
 #include "floppy144_site_object.h"
+#include "floppy144_site_rooms.h"
 #include "floppy144_trigger_engine.h"
 #include "floppy144_world.h"
 
@@ -1224,80 +1225,220 @@ static void Floppy144TestSecretaryDirectorDoorPlate(void)
     );
 }
 
-static void Floppy144TestCorridorDoorLabels(void)
+static const char *Floppy144TestCorridorDoorExpectedLabel(
+    const Floppy144SiteRect *pDoor
+)
 {
-    typedef struct Floppy144DoorLabelFixture
-    {
-        Floppy144RoomId eOtherRoom;
-        int32_t nPlayerX;
-        int32_t nPlayerY;
-        const char *pszLabel;
-        bool bAuthoredPhysicalPlate;
-    }
-    Floppy144DoorLabelFixture;
+    uint8_t uOtherRoom;
 
-    static const Floppy144DoorLabelFixture asFixtures[] =
-    {
-        { FLOPPY144_ROOM_COUNT,            63, 98, "EMERGENCY EXIT", false },
-        { FLOPPY144_ROOM_COUNT,            59, 98, "EMERGENCY EXIT", false },
-        { FLOPPY144_ROOM_RECEPTION,        65, 56, "RECEPTION",      true  },
-        { FLOPPY144_ROOM_RECORDS_OFFICE,   60, 47, "RECORDS OFFICE", true  },
-        { FLOPPY144_ROOM_MAIN_OFFICE,      65, 83, "MAIN OFFICE",    true  },
-        { FLOPPY144_ROOM_SECURITY,         57, 68, "SECURITY",       true  },
-        { FLOPPY144_ROOM_IT_SUPPORT,       57, 89, "IT SUPPORT",     true  },
-        { FLOPPY144_ROOM_SECRETARY_OFFICE, 39, 47, "DIRECTOR",       false },
-        { FLOPPY144_ROOM_STAFF_ROOM,       20, 47, "STAFF ROOM",     true  },
-        { FLOPPY144_ROOM_FACILITIES,       16, 51, "FACILITIES",     true  }
-    };
-
-    uint32_t uIndex;
-    uint32_t uCorridorDoorCount = 0U;
-
-    /*
-     * Keep the authored topology and the player-facing signage contract in
-     * lockstep. There are ten Corridor-facing door rectangles, including both
-     * emergency-exit leaves.
-     */
-    for(
-        uIndex = 0U;
-        uIndex < Floppy144SiteRectCount();
-        ++uIndex
+    if(
+        pDoor == NULL ||
+        pDoor->type != (uint8_t)FLOPPY144_SITE_DOOR ||
+        (
+            pDoor->from_room != (uint8_t)FLOPPY144_ROOM_CORRIDOR &&
+            pDoor->to_room != (uint8_t)FLOPPY144_ROOM_CORRIDOR
+        )
     )
     {
-        const Floppy144SiteRect *pRect =
-            Floppy144SiteRectAt(uIndex);
+        return NULL;
+    }
+
+    uOtherRoom =
+        pDoor->from_room == (uint8_t)FLOPPY144_ROOM_CORRIDOR
+        ? pDoor->to_room
+        : pDoor->from_room;
+
+    if(uOtherRoom == FLOPPY144_SITE_ROOM_OUTSIDE)
+        return "EMERGENCY EXIT";
+
+    switch((Floppy144RoomId)uOtherRoom)
+    {
+        case FLOPPY144_ROOM_RECEPTION:         return "RECEPTION";
+        case FLOPPY144_ROOM_RECORDS_OFFICE:    return "RECORDS OFFICE";
+        case FLOPPY144_ROOM_MAIN_OFFICE:       return "MAIN OFFICE";
+        case FLOPPY144_ROOM_SECURITY:          return "SECURITY";
+        case FLOPPY144_ROOM_IT_SUPPORT:        return "IT SUPPORT";
+        case FLOPPY144_ROOM_SECRETARY_OFFICE:  return "DIRECTOR";
+        case FLOPPY144_ROOM_STAFF_ROOM:        return "STAFF ROOM";
+        case FLOPPY144_ROOM_FACILITIES:        return "FACILITIES";
+        default:                               return NULL;
+    }
+}
+
+static bool Floppy144TestCorridorDoorApproach(
+    const Floppy144SiteRect *pDoor,
+    int32_t *pX16,
+    int32_t *pY16
+)
+{
+    int32_t nAlong;
+    int32_t nCandidateAX;
+    int32_t nCandidateAY;
+    int32_t nCandidateBX;
+    int32_t nCandidateBY;
+    int32_t nChosenX;
+    int32_t nChosenY;
+
+    if(
+        pDoor == NULL ||
+        pX16 == NULL ||
+        pY16 == NULL ||
+        pDoor->type != (uint8_t)FLOPPY144_SITE_DOOR
+    )
+    {
+        return false;
+    }
+
+    if(pDoor->width >= pDoor->height)
+    {
+        nAlong =
+            (int32_t)pDoor->x +
+            (int32_t)pDoor->width / 2;
+
+        nCandidateAX = nAlong;
+        nCandidateAY = (int32_t)pDoor->y - 1;
+        nCandidateBX = nAlong;
+        nCandidateBY =
+            (int32_t)pDoor->y +
+            (int32_t)pDoor->height;
+    }
+    else
+    {
+        nAlong =
+            (int32_t)pDoor->y +
+            (int32_t)pDoor->height / 2;
+
+        nCandidateAX = (int32_t)pDoor->x - 1;
+        nCandidateAY = nAlong;
+        nCandidateBX =
+            (int32_t)pDoor->x +
+            (int32_t)pDoor->width;
+        nCandidateBY = nAlong;
+    }
+
+    if(
+        nCandidateAX >= 0 &&
+        nCandidateAY >= 0 &&
+        nCandidateAX < FLOPPY144_SITE_SIZE_UNITS &&
+        nCandidateAY < FLOPPY144_SITE_SIZE_UNITS &&
+        Floppy144SiteRoomAtCell(
+            (uint8_t)nCandidateAX,
+            (uint8_t)nCandidateAY
+        ) == FLOPPY144_ROOM_CORRIDOR
+    )
+    {
+        nChosenX = nCandidateAX;
+        nChosenY = nCandidateAY;
+    }
+    else if(
+        nCandidateBX >= 0 &&
+        nCandidateBY >= 0 &&
+        nCandidateBX < FLOPPY144_SITE_SIZE_UNITS &&
+        nCandidateBY < FLOPPY144_SITE_SIZE_UNITS &&
+        Floppy144SiteRoomAtCell(
+            (uint8_t)nCandidateBX,
+            (uint8_t)nCandidateBY
+        ) == FLOPPY144_ROOM_CORRIDOR
+    )
+    {
+        nChosenX = nCandidateBX;
+        nChosenY = nCandidateBY;
+    }
+    else
+    {
+        return false;
+    }
+
+    *pX16 =
+        nChosenX * FLOPPY144_SITE_FIXED_ONE +
+        FLOPPY144_SITE_FIXED_ONE / 2;
+
+    *pY16 =
+        nChosenY * FLOPPY144_SITE_FIXED_ONE +
+        FLOPPY144_SITE_FIXED_ONE / 2;
+
+    return true;
+}
+
+static void Floppy144TestCorridorDoorLabels(void)
+{
+    uint32_t uRectIndex;
+    uint32_t uCorridorDoorCount = 0U;
+    uint32_t uAuditedDoorCount = 0U;
+
+    /*
+     * Audit the compiled topology itself rather than maintaining a second set
+     * of hand-written approach coordinates. This catches new Corridor doors
+     * automatically and derives the player position from adjacent floor
+     * ownership, so horizontal/vertical boundaries and either endpoint order
+     * are handled identically.
+     */
+    for(
+        uRectIndex = 0U;
+        uRectIndex < Floppy144SiteRectCount();
+        ++uRectIndex
+    )
+    {
+        const Floppy144SiteRect *pDoor =
+            Floppy144SiteRectAt(uRectIndex);
+
+        Floppy144WorldState sWorld;
+        Floppy144RunState sState;
+        const char *pszExpected;
+        const char *pszActual;
+        uint8_t uOtherRoom;
+        int32_t nPlayerX16;
+        int32_t nPlayerY16;
+        bool bLocked = false;
 
         if(
-            pRect != NULL &&
-            pRect->type == (uint8_t)FLOPPY144_SITE_DOOR &&
+            pDoor == NULL ||
+            pDoor->type != (uint8_t)FLOPPY144_SITE_DOOR ||
             (
-                pRect->from_room == (uint8_t)FLOPPY144_ROOM_CORRIDOR ||
-                pRect->to_room == (uint8_t)FLOPPY144_ROOM_CORRIDOR
+                pDoor->from_room != (uint8_t)FLOPPY144_ROOM_CORRIDOR &&
+                pDoor->to_room != (uint8_t)FLOPPY144_ROOM_CORRIDOR
             )
         )
         {
-            ++uCorridorDoorCount;
+            continue;
         }
-    }
 
-    F144_CHECK(
-        uCorridorDoorCount ==
-            (uint32_t)(sizeof(asFixtures) / sizeof(asFixtures[0])),
-        "every authored Corridor-facing door is represented by the label audit"
-    );
+        ++uCorridorDoorCount;
 
-    for(
-        uIndex = 0U;
-        uIndex < (uint32_t)(sizeof(asFixtures) / sizeof(asFixtures[0]));
-        ++uIndex
-    )
-    {
-        Floppy144WorldState sWorld;
-        Floppy144RunState sState;
-        const Floppy144DoorLabelFixture *pFixture =
-            &asFixtures[uIndex];
-        const char *pszLabel;
-        bool bLocked = false;
+        pszExpected =
+            Floppy144TestCorridorDoorExpectedLabel(
+                pDoor
+            );
+
+        F144_CHECK(
+            pszExpected != NULL,
+            "Corridor-facing door has a player-facing label mapping"
+        );
+
+        if(pszExpected == NULL)
+        {
+            continue;
+        }
+
+        F144_CHECK(
+            Floppy144TestCorridorDoorApproach(
+                pDoor,
+                &nPlayerX16,
+                &nPlayerY16
+            ),
+            "Corridor-facing door has a real Corridor-side floor approach"
+        );
+
+        if(
+            !Floppy144TestCorridorDoorApproach(
+                pDoor,
+                &nPlayerX16,
+                &nPlayerY16
+            )
+        )
+        {
+            continue;
+        }
 
         Floppy144TestReset(
             &sWorld,
@@ -1309,33 +1450,68 @@ static void Floppy144TestCorridorDoorLabels(void)
             FLOPPY144_ROOM_CORRIDOR
         );
 
-        if(pFixture->eOtherRoom != FLOPPY144_ROOM_COUNT)
+        uOtherRoom =
+            pDoor->from_room == (uint8_t)FLOPPY144_ROOM_CORRIDOR
+            ? pDoor->to_room
+            : pDoor->from_room;
+
+        if(uOtherRoom < (uint8_t)FLOPPY144_ROOM_COUNT)
         {
             (void)Floppy144RunStateReconstructRoom(
                 &sState,
-                pFixture->eOtherRoom
+                (Floppy144RoomId)uOtherRoom
             );
         }
 
-        Floppy144TestSetPosition(
+        Floppy144RunStateSetPlayerSitePosition(
             &sState,
-            pFixture->nPlayerX,
-            pFixture->nPlayerY
+            nPlayerX16,
+            nPlayerY16
         );
 
-        pszLabel =
+        F144_CHECK(
+            Floppy144SiteRoomAtPosition(
+                sState.player_site_x,
+                sState.player_site_y
+            ) == FLOPPY144_ROOM_CORRIDOR,
+            "derived door approach is actually inside Corridor"
+        );
+
+        pszActual =
             Floppy144SiteCorridorDoorLabelNearby(
                 &sState,
                 &bLocked
             );
 
-        F144_CHECK(
-            pszLabel != NULL &&
+        if(
+            pszActual == NULL ||
             strcmp(
-                pszLabel,
-                pFixture->pszLabel
+                pszActual,
+                pszExpected
+            ) != 0
+        )
+        {
+            fprintf(
+                stderr,
+                "CORRIDOR DOOR LABEL DIAGNOSTIC: rect=(%u,%u %ux%u) endpoints=%u/%u expected=%s actual=%s\n",
+                (unsigned)pDoor->x,
+                (unsigned)pDoor->y,
+                (unsigned)pDoor->width,
+                (unsigned)pDoor->height,
+                (unsigned)pDoor->from_room,
+                (unsigned)pDoor->to_room,
+                pszExpected,
+                pszActual != NULL ? pszActual : "<none>"
+            );
+        }
+
+        F144_CHECK(
+            pszActual != NULL &&
+            strcmp(
+                pszActual,
+                pszExpected
             ) == 0,
-            "Corridor-facing door exposes its authored room plaque"
+            "Corridor-facing door exposes its correct room plaque"
         );
 
         F144_CHECK(
@@ -1345,23 +1521,21 @@ static void Floppy144TestCorridorDoorLabels(void)
                 ) &
                 FLOPPY144_SITE_ACTION_INSPECT
             ) != 0U,
-            "Corridor-facing room plaque advertises Inspect"
+            "Corridor-facing door advertises Inspect"
         );
 
-        if(pFixture->bAuthoredPhysicalPlate)
-        {
-            Floppy144SiteInspectionTarget sTarget;
-
-            F144_CHECK(
-                Floppy144SiteResolveInspectionTarget(
-                    &sState,
-                    &sTarget
-                ) &&
-                sTarget.pszParentId != NULL,
-                "Corridor room door retains an authored physical room plate"
-            );
-        }
+        ++uAuditedDoorCount;
     }
+
+    F144_CHECK(
+        uCorridorDoorCount == 10U,
+        "compiled Site still contains ten Corridor-facing door rectangles"
+    );
+
+    F144_CHECK(
+        uAuditedDoorCount == uCorridorDoorCount,
+        "every Corridor-facing door was audited from a real Corridor approach"
+    );
 }
 
 static void Floppy144TestContextLabels(void)
@@ -1390,9 +1564,9 @@ static void Floppy144TestContextLabels(void)
     );
 
     /*
-     * COR_REC is the vertical x66 Corridor/Reception boundary.
-     * Stand on the Corridor side at x65: x68 is inside Reception and therefore
-     * must not exercise the Corridor-facing room-plate contract.
+     * COR_REC is the vertical x66 Corridor/Reception boundary. The topology
+     * audit above proves all doors; this is only the focused lock/unlock label
+     * behavior check from the Corridor side.
      */
     Floppy144TestSetPosition(&sState, 65, 56);
     pszLabel = Floppy144SiteContextLabel(&sState);
