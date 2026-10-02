@@ -100,6 +100,13 @@ typedef struct Floppy144SiteScreenRect
 }
 Floppy144SiteScreenRect;
 
+typedef struct Floppy144SitePoint2D
+{
+    int32_t x;
+    int32_t y;
+}
+Floppy144SitePoint2D;
+
 static const Floppy144SiteStyle2D
 floppy144_site_styles[FLOPPY144_SITE_ELEMENT_COUNT] =
 {
@@ -910,6 +917,284 @@ static bool Floppy144Site2DRotationIsDiagonal(
         (rotation % 90U) != 0U;
 }
 
+/*
+ * Recover the two local axes of a diagonal authored rectangle inside its
+ * conservative screen-space AABB.
+ *
+ * The generated Site definition already carries the original unrotated width
+ * and height. Keeping those values lets a 6x4 desk remain a 6x4 rectangle when
+ * turned 45 degrees instead of becoming an 8x8 diamond.
+ */
+static bool Floppy144Site2DDiagonalAxes(
+    const Floppy144SiteRect *rect,
+    const Floppy144SiteScreenRect *screen_rect,
+    int32_t *centre_x,
+    int32_t *centre_y,
+    int32_t *u_x,
+    int32_t *u_y,
+    int32_t *v_x,
+    int32_t *v_y
+)
+{
+    int32_t radius_x;
+    int32_t radius_y;
+    int32_t width_part_x;
+    int32_t width_part_y;
+    int32_t height_part_x;
+    int32_t height_part_y;
+    uint32_t total;
+    uint16_t facing;
+
+    if(
+        rect == NULL ||
+        screen_rect == NULL ||
+        centre_x == NULL ||
+        centre_y == NULL ||
+        u_x == NULL ||
+        u_y == NULL ||
+        v_x == NULL ||
+        v_y == NULL ||
+        screen_rect->width <= 1 ||
+        screen_rect->height <= 1
+    )
+    {
+        return false;
+    }
+
+    total =
+        (uint32_t)rect->authored_width16 +
+        (uint32_t)rect->authored_height16;
+
+    if(total == 0U)
+    {
+        return false;
+    }
+
+    *centre_x =
+        screen_rect->x +
+        (screen_rect->width - 1) / 2;
+
+    *centre_y =
+        screen_rect->y +
+        (screen_rect->height - 1) / 2;
+
+    radius_x =
+        (screen_rect->width - 1) / 2;
+
+    radius_y =
+        (screen_rect->height - 1) / 2;
+
+    width_part_x =
+        (int32_t)(
+            ((int64_t)radius_x *
+            (int64_t)rect->authored_width16) /
+            (int64_t)total
+        );
+
+    width_part_y =
+        (int32_t)(
+            ((int64_t)radius_y *
+            (int64_t)rect->authored_width16) /
+            (int64_t)total
+        );
+
+    height_part_x =
+        radius_x - width_part_x;
+
+    height_part_y =
+        radius_y - width_part_y;
+
+    facing =
+        (uint16_t)(
+            (((rect->rotation % 360U) + 22U) / 45U) *
+            45U
+        ) % 360U;
+
+    switch(facing)
+    {
+        case 45U:
+            *u_x = width_part_x;
+            *u_y = width_part_y;
+            *v_x = -height_part_x;
+            *v_y = height_part_y;
+            break;
+
+        case 135U:
+            *u_x = -width_part_x;
+            *u_y = width_part_y;
+            *v_x = -height_part_x;
+            *v_y = -height_part_y;
+            break;
+
+        case 225U:
+            *u_x = -width_part_x;
+            *u_y = -width_part_y;
+            *v_x = height_part_x;
+            *v_y = -height_part_y;
+            break;
+
+        case 315U:
+            *u_x = width_part_x;
+            *u_y = -width_part_y;
+            *v_x = height_part_x;
+            *v_y = height_part_y;
+            break;
+
+        default:
+            return false;
+    }
+
+    return true;
+}
+
+static void Floppy144Site2DBuildQuad(
+    Floppy144SitePoint2D points[4],
+    int32_t centre_x,
+    int32_t centre_y,
+    int32_t u_x,
+    int32_t u_y,
+    int32_t v_x,
+    int32_t v_y
+)
+{
+    points[0].x = centre_x - u_x - v_x;
+    points[0].y = centre_y - u_y - v_y;
+
+    points[1].x = centre_x + u_x - v_x;
+    points[1].y = centre_y + u_y - v_y;
+
+    points[2].x = centre_x + u_x + v_x;
+    points[2].y = centre_y + u_y + v_y;
+
+    points[3].x = centre_x - u_x + v_x;
+    points[3].y = centre_y - u_y + v_y;
+}
+
+static void Floppy144Site2DFillQuad(
+    Floppy144Surface *surface,
+    const Floppy144SitePoint2D points[4],
+    uint32_t colour
+)
+{
+    int32_t minimum_y;
+    int32_t maximum_y;
+    int32_t y;
+    uint32_t point_index;
+
+    if(surface == NULL || points == NULL)
+    {
+        return;
+    }
+
+    minimum_y = points[0].y;
+    maximum_y = points[0].y;
+
+    for(point_index = 1U; point_index < 4U; ++point_index)
+    {
+        if(points[point_index].y < minimum_y)
+            minimum_y = points[point_index].y;
+
+        if(points[point_index].y > maximum_y)
+            maximum_y = points[point_index].y;
+    }
+
+    for(y = minimum_y; y <= maximum_y; ++y)
+    {
+        bool found = false;
+        int32_t minimum_x = 0;
+        int32_t maximum_x = 0;
+
+        for(point_index = 0U; point_index < 4U; ++point_index)
+        {
+            const Floppy144SitePoint2D *a =
+                &points[point_index];
+
+            const Floppy144SitePoint2D *b =
+                &points[(point_index + 1U) % 4U];
+
+            int32_t edge_min_y;
+            int32_t edge_max_y;
+            int32_t x;
+
+            if(a->y == b->y)
+                continue;
+
+            edge_min_y = a->y < b->y ? a->y : b->y;
+            edge_max_y = a->y > b->y ? a->y : b->y;
+
+            if(y < edge_min_y || y > edge_max_y)
+                continue;
+
+            x =
+                a->x +
+                (int32_t)(
+                    ((int64_t)(y - a->y) *
+                    (int64_t)(b->x - a->x)) /
+                    (int64_t)(b->y - a->y)
+                );
+
+            if(!found)
+            {
+                minimum_x = x;
+                maximum_x = x;
+                found = true;
+            }
+            else
+            {
+                if(x < minimum_x)
+                    minimum_x = x;
+
+                if(x > maximum_x)
+                    maximum_x = x;
+            }
+        }
+
+        if(found)
+        {
+            Floppy144Site2DFill(
+                surface,
+                minimum_x,
+                y,
+                maximum_x - minimum_x + 1,
+                1,
+                colour
+            );
+        }
+    }
+}
+
+static void Floppy144Site2DOutlineQuad(
+    Floppy144Surface *surface,
+    const Floppy144SitePoint2D points[4],
+    uint32_t colour
+)
+{
+    uint32_t point_index;
+
+    if(surface == NULL || points == NULL)
+    {
+        return;
+    }
+
+    for(point_index = 0U; point_index < 4U; ++point_index)
+    {
+        const Floppy144SitePoint2D *a =
+            &points[point_index];
+
+        const Floppy144SitePoint2D *b =
+            &points[(point_index + 1U) % 4U];
+
+        Floppy144Site2DLine(
+            surface,
+            a->x,
+            a->y,
+            b->x,
+            b->y,
+            colour
+        );
+    }
+}
+
 static bool Floppy144Site2DRoomOwnsCell(
     Floppy144RoomId room,
     int32_t x,
@@ -973,6 +1258,8 @@ static void Floppy144Site2DDrawWallCell(
     wall_rect.y = (uint8_t)world_y;
     wall_rect.width = 1U;
     wall_rect.height = 1U;
+    wall_rect.authored_width16 = FLOPPY144_SITE_FIXED_ONE;
+    wall_rect.authored_height16 = FLOPPY144_SITE_FIXED_ONE;
 
     if(
         !Floppy144Site2DProjectRect(
@@ -1262,6 +1549,7 @@ static void Floppy144Site2DDrawFurnitureBase(
 
 static void Floppy144Site2DDrawDiagonalFurnitureBase(
     Floppy144Surface *surface,
+    const Floppy144SiteRect *rect,
     const Floppy144SiteScreenRect *screen_rect,
     uint32_t body_colour,
     uint32_t edge_colour,
@@ -1269,80 +1557,109 @@ static void Floppy144Site2DDrawDiagonalFurnitureBase(
     uint32_t shadow_colour
 )
 {
-    int32_t left;
-    int32_t right;
-    int32_t top;
-    int32_t bottom;
+    Floppy144SitePoint2D points[4];
     int32_t centre_x;
     int32_t centre_y;
+    int32_t u_x;
+    int32_t u_y;
+    int32_t v_x;
+    int32_t v_y;
 
-    if(screen_rect == NULL)
+    if(
+        rect == NULL ||
+        screen_rect == NULL
+    )
     {
         return;
     }
 
-    Floppy144Site2DFillDiamond(
+    if(
+        !Floppy144Site2DDiagonalAxes(
+            rect,
+            screen_rect,
+            &centre_x,
+            &centre_y,
+            &u_x,
+            &u_y,
+            &v_x,
+            &v_y
+        )
+    )
+    {
+        Floppy144Site2DFillDiamond(
+            surface,
+            screen_rect,
+            body_colour
+        );
+
+        Floppy144Site2DOutlineDiamond(
+            surface,
+            screen_rect,
+            edge_colour
+        );
+
+        return;
+    }
+
+    Floppy144Site2DBuildQuad(
+        points,
+        centre_x,
+        centre_y,
+        u_x,
+        u_y,
+        v_x,
+        v_y
+    );
+
+    Floppy144Site2DFillQuad(
         surface,
-        screen_rect,
+        points,
         body_colour
     );
 
-    left = screen_rect->x;
-    right =
-        screen_rect->x +
-        screen_rect->width - 1;
-
-    top = screen_rect->y;
-    bottom =
-        screen_rect->y +
-        screen_rect->height - 1;
-
-    centre_x = (left + right) / 2;
-    centre_y = (top + bottom) / 2;
-
     /*
-     * Internal highlight/shadow edges give the same low-resolution depth cue
-     * as cardinal furniture without painting outside the authored bounds.
+     * Keep the same restrained top-left light / lower-right shadow language as
+     * the cardinal furniture, but follow the true rotated rectangle edges.
      */
     Floppy144Site2DLine(
         surface,
-        left + 2,
-        centre_y,
-        centre_x,
-        top + 2,
+        points[3].x,
+        points[3].y,
+        points[0].x,
+        points[0].y,
         highlight_colour
     );
 
     Floppy144Site2DLine(
         surface,
-        centre_x,
-        top + 2,
-        right - 2,
-        centre_y,
+        points[0].x,
+        points[0].y,
+        points[1].x,
+        points[1].y,
         highlight_colour
     );
 
     Floppy144Site2DLine(
         surface,
-        right - 2,
-        centre_y,
-        centre_x,
-        bottom - 2,
+        points[1].x,
+        points[1].y,
+        points[2].x,
+        points[2].y,
         shadow_colour
     );
 
     Floppy144Site2DLine(
         surface,
-        centre_x,
-        bottom - 2,
-        left + 2,
-        centre_y,
+        points[2].x,
+        points[2].y,
+        points[3].x,
+        points[3].y,
         shadow_colour
     );
 
-    Floppy144Site2DOutlineDiamond(
+    Floppy144Site2DOutlineQuad(
         surface,
-        screen_rect,
+        points,
         edge_colour
     );
 }
@@ -2283,6 +2600,7 @@ static void Floppy144Site2DDrawRecessedSink(
 static void Floppy144Site2DDrawFurnitureDetails(
     Floppy144Surface *surface,
     Floppy144SiteElement element,
+    const Floppy144SiteRect *rect,
     const Floppy144SiteScreenRect *screen_rect,
     uint16_t rotation,
     uint32_t edge_colour
@@ -2351,64 +2669,72 @@ static void Floppy144Site2DDrawFurnitureDetails(
              */
             if(Floppy144Site2DRotationIsDiagonal(rotation))
             {
-                Floppy144SiteScreenRect equipment_rect;
-                uint16_t diagonal_facing =
-                    (uint16_t)(
-                        (((rotation % 360U) + 22U) / 45U) * 45U
-                    ) % 360U;
+                Floppy144SitePoint2D equipment_points[4];
+                int32_t centre_x;
+                int32_t centre_y;
+                int32_t u_x;
+                int32_t u_y;
+                int32_t v_x;
+                int32_t v_y;
+                int32_t detail_centre_x;
+                int32_t detail_centre_y;
 
-                equipment_rect.width = equipment_w;
-                equipment_rect.height = equipment_h;
-
-                if(diagonal_facing == 45U || diagonal_facing == 225U)
+                if(
+                    rect != NULL &&
+                    Floppy144Site2DDiagonalAxes(
+                        rect,
+                        screen_rect,
+                        &centre_x,
+                        &centre_y,
+                        &u_x,
+                        &u_y,
+                        &v_x,
+                        &v_y
+                    )
+                )
                 {
-                    equipment_rect.x =
-                        screen_rect->x + screen_rect->width * 9 / 16 -
-                        equipment_w / 2;
-                    equipment_rect.y =
-                        screen_rect->y + screen_rect->height * 5 / 16 -
-                        equipment_h / 2;
-                }
-                else
-                {
-                    equipment_rect.x =
-                        screen_rect->x + screen_rect->width * 7 / 16 -
-                        equipment_w / 2;
-                    equipment_rect.y =
-                        screen_rect->y + screen_rect->height * 5 / 16 -
-                        equipment_h / 2;
-                }
+                    /*
+                     * Desktop equipment belongs to the desk's own local axes.
+                     * Position the dark blotter/tray toward the authored back
+                     * edge and keep the loose paper/pen stroke parallel to the
+                     * long edge of the desktop.
+                     */
+                    detail_centre_x =
+                        centre_x -
+                        v_x / 4;
 
-                Floppy144Site2DFillDiamond(
-                    surface,
-                    &equipment_rect,
-                    detail_colour
-                );
-                Floppy144Site2DOutlineDiamond(
-                    surface,
-                    &equipment_rect,
-                    edge_colour
-                );
+                    detail_centre_y =
+                        centre_y -
+                        v_y / 4;
 
-                if(diagonal_facing == 45U || diagonal_facing == 225U)
-                {
-                    Floppy144Site2DLine(
-                        surface,
-                        screen_rect->x + screen_rect->width * 7 / 16,
-                        screen_rect->y + screen_rect->height * 10 / 16,
-                        screen_rect->x + screen_rect->width * 11 / 16,
-                        screen_rect->y + screen_rect->height * 6 / 16,
-                        paper_colour
+                    Floppy144Site2DBuildQuad(
+                        equipment_points,
+                        detail_centre_x,
+                        detail_centre_y,
+                        u_x / 3,
+                        u_y / 3,
+                        v_x / 3,
+                        v_y / 3
                     );
-                }
-                else
-                {
+
+                    Floppy144Site2DFillQuad(
+                        surface,
+                        equipment_points,
+                        detail_colour
+                    );
+
+                    Floppy144Site2DOutlineQuad(
+                        surface,
+                        equipment_points,
+                        edge_colour
+                    );
+
                     Floppy144Site2DLine(
                         surface,
-                        screen_rect->x + screen_rect->width * 5 / 16,
-                        screen_rect->y + screen_rect->height * 6 / 16,
-                        screen_rect->x + screen_rect->width * 9 / 16,
-                        screen_rect->y + screen_rect->height * 10 / 16,
+                        centre_x - u_x / 3 + v_x / 3,
+                        centre_y - u_y / 3 + v_y / 3,
+                        centre_x + u_x / 3 + v_x / 3,
+                        centre_y + u_y / 3 + v_y / 3,
                         paper_colour
                     );
                 }
@@ -3242,6 +3568,7 @@ static void Floppy144Site2DDrawSiteRect(
     {
         Floppy144Site2DDrawDiagonalFurnitureBase(
             surface,
+            rect,
             &screen_rect,
             style->colour,
             edge_colour,
@@ -3264,6 +3591,7 @@ static void Floppy144Site2DDrawSiteRect(
     Floppy144Site2DDrawFurnitureDetails(
         surface,
         element,
+        rect,
         &screen_rect,
         rect->rotation,
         edge_colour

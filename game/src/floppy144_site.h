@@ -115,6 +115,17 @@ typedef struct Floppy144SiteRect
     uint8_t width;
     uint8_t height;
     uint16_t rotation;
+
+    /*
+     * Original unrotated authored footprint in x16 Site units.
+     *
+     * x/y/width/height remain the conservative axis-aligned bounds used by
+     * collision and culling. Diagonal renderers use these two values to retain
+     * the real aspect ratio instead of turning every rotated rectangle into a
+     * square diamond.
+     */
+    uint16_t authored_width16;
+    uint16_t authored_height16;
 }
 Floppy144SiteRect;
 

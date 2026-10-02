@@ -911,9 +911,15 @@ function Test-PhysicalItemPlayerFacingContract {
 
     if(
         $Site2DSource -notmatch
-        'Floppy144Site2DRotationIsDiagonal\(rotation\)'
+            'Floppy144Site2DRotationIsDiagonal\(rotation\)' -or
+        $Site2DSource -notmatch
+            'Floppy144Site2DDiagonalAxes' -or
+        $Site2DSource -notmatch
+            'authored_width16' -or
+        $Site2DSource -notmatch
+            'Floppy144Site2DFillQuad'
     ) {
-        throw "Diagonal desk details no longer inherit the desk orientation."
+        throw "Diagonal furniture no longer preserves authored aspect ratio and desktop orientation."
     }
 
     Write-Host "PHYSICAL ITEM PLAYER-FACING CONTRACT: PASS"

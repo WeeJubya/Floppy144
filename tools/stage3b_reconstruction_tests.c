@@ -1521,6 +1521,8 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
     bool bServerDesk = false;
     bool bSecurityDeskLeft = false;
     bool bSecurityDeskRight = false;
+    bool bSecretaryDesk = false;
+    bool bDirectorDesk = false;
 
     for(
         uRectIndex = 0U;
@@ -1602,6 +1604,48 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
                     "Staff dining 315-degree chair follows the table diagonal"
                 );
             }
+        }
+
+        if(
+            pRect->type ==
+                (uint8_t)FLOPPY144_SITE_STANDARD_DESK &&
+            pRect->room ==
+                (uint8_t)FLOPPY144_ROOM_SECRETARY_OFFICE &&
+            pRect->x == 45U &&
+            pRect->y == 36U &&
+            pRect->width == 8U &&
+            pRect->height == 8U &&
+            pRect->rotation == 45U
+        )
+        {
+            bSecretaryDesk = true;
+
+            F144_CHECK(
+                pRect->authored_width16 == 96U &&
+                pRect->authored_height16 == 64U,
+                "Secretary desk keeps authored 6x4 footprint inside diagonal bounds"
+            );
+        }
+
+        if(
+            pRect->type ==
+                (uint8_t)FLOPPY144_SITE_STANDARD_DESK &&
+            pRect->room ==
+                (uint8_t)FLOPPY144_ROOM_DIRECTOR_OFFICE &&
+            pRect->x == 43U &&
+            pRect->y == 4U &&
+            pRect->width == 10U &&
+            pRect->height == 10U &&
+            pRect->rotation == 315U
+        )
+        {
+            bDirectorDesk = true;
+
+            F144_CHECK(
+                pRect->authored_width16 == 128U &&
+                pRect->authored_height16 == 64U,
+                "Director desk keeps authored 8x4 footprint inside diagonal bounds"
+            );
         }
 
         if(
@@ -1696,6 +1740,12 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
         bStaffChair225 &&
         bStaffChair315,
         "Staff dining chairs sit immediately adjacent to the 45-degree table"
+    );
+
+    F144_CHECK(
+        bSecretaryDesk &&
+        bDirectorDesk,
+        "diagonal offices preserve authored desk aspect ratios at runtime"
     );
 
     F144_CHECK(
