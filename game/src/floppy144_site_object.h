@@ -108,8 +108,20 @@ bool Floppy144SiteRectRuntimeVisible(
 );
 
 /*
+ * Return the player-facing plaque on a nearby Corridor-facing door.
+ *
+ * This applies from the Corridor side only and is independent of lock state,
+ * so office signage remains inspectable after a connection opens. pLocked is
+ * optional and reports the current connection state for Inspect feedback.
+ */
+const char *Floppy144SiteCorridorDoorLabelNearby(
+    const Floppy144RunState *pState,
+    bool *pLocked
+);
+
+/*
  * Return true when a currently visible locked door is within normal Inspect
- * range. Locked doors are inspectable even though traversal remains blocked.
+ * range. This remains the fallback for non-Corridor locked doors.
  */
 bool Floppy144SiteLockedDoorNearby(
     const Floppy144RunState *pState
@@ -117,8 +129,9 @@ bool Floppy144SiteLockedDoorNearby(
 
 /*
  * Passive proximity label for ordinary Site geometry. Explicit interaction
- * notices always take precedence in the renderer. Locked doors identify
- * themselves; unlocked doors are deliberately silent.
+ * notices always take precedence in the renderer. Corridor-facing doors show
+ * their room plaque regardless of lock state; other doors identify themselves
+ * only while locked.
  */
 const char *Floppy144SiteContextLabel(
     const Floppy144RunState *pState

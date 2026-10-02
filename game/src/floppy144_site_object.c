@@ -1864,6 +1864,53 @@ static uint8_t Floppy144SiteConnectionEndpoint(
 }
 
 /*
+ * Player-facing signage on the Corridor side of authored doors.
+ *
+ * The Secretary's Office is the Director's anteroom, so its public Corridor
+ * plaque reads DIRECTOR. The internal Secretary/Director door remains a normal
+ * door and is not part of this Corridor-signage contract.
+ */
+static const char *Floppy144SiteCorridorDoorLabelForRect(
+    const Floppy144SiteRect *pRect
+)
+{
+    uint8_t uOtherRoom;
+
+    if(
+        pRect == NULL ||
+        pRect->type != (uint8_t)FLOPPY144_SITE_DOOR ||
+        (
+            pRect->from_room != (uint8_t)FLOPPY144_ROOM_CORRIDOR &&
+            pRect->to_room != (uint8_t)FLOPPY144_ROOM_CORRIDOR
+        )
+    )
+    {
+        return NULL;
+    }
+
+    uOtherRoom =
+        pRect->from_room == (uint8_t)FLOPPY144_ROOM_CORRIDOR
+        ? pRect->to_room
+        : pRect->from_room;
+
+    if(uOtherRoom == FLOPPY144_SITE_ROOM_OUTSIDE)
+        return "EMERGENCY EXIT";
+
+    switch((Floppy144RoomId)uOtherRoom)
+    {
+        case FLOPPY144_ROOM_RECEPTION:         return "RECEPTION";
+        case FLOPPY144_ROOM_RECORDS_OFFICE:    return "RECORDS OFFICE";
+        case FLOPPY144_ROOM_MAIN_OFFICE:       return "MAIN OFFICE";
+        case FLOPPY144_ROOM_SECURITY:          return "SECURITY";
+        case FLOPPY144_ROOM_IT_SUPPORT:        return "IT SUPPORT";
+        case FLOPPY144_ROOM_SECRETARY_OFFICE:  return "DIRECTOR";
+        case FLOPPY144_ROOM_STAFF_ROOM:        return "STAFF ROOM";
+        case FLOPPY144_ROOM_FACILITIES:        return "FACILITIES";
+        default:                               return NULL;
+    }
+}
+
+/*
  * Boundary rectangles do not carry connection IDs at runtime, but the pair of
  * endpoints uniquely determines current lock state in the authored Site. The
  * two parallel exterior entrance/emergency doors share the same state, so the
@@ -2039,6 +2086,106 @@ static const char *Floppy144SiteWallHangingLabel(
     return "WALL HANGING";
 }
 
+const char *Floppy144SiteCorridorDoorLabelNearby(
+    const Floppy144RunState *pState,
+    bool *pLocked
+)
+{
+    Floppy144RoomId eCurrentRoom;
+    uint32_t uRectIndex;
+    uint32_t uBestDistance = UINT32_MAX;
+    const char *pszBestLabel = NULL;
+    bool bBestLocked = false;
+
+    const uint32_t uRangeSquared =
+        FLOPPY144_SITE_DATA_INTERACTION_RANGE_X16 *
+        FLOPPY144_SITE_DATA_INTERACTION_RANGE_X16;
+
+    if(pLocked != NULL)
+    {
+        *pLocked = false;
+    }
+
+    if(pState == NULL)
+    {
+        return NULL;
+    }
+
+    eCurrentRoom =
+        Floppy144SiteRoomAtPosition(
+            pState->player_site_x,
+            pState->player_site_y
+        );
+
+    if(eCurrentRoom != FLOPPY144_ROOM_CORRIDOR)
+    {
+        return NULL;
+    }
+
+    for(
+        uRectIndex = 0U;
+        uRectIndex < Floppy144SiteRectCount();
+        ++uRectIndex
+    )
+    {
+        const Floppy144SiteRect *pRect =
+            Floppy144SiteRectAt(uRectIndex);
+
+        const char *pszLabel;
+        uint32_t uDistance;
+
+        if(
+            pRect == NULL ||
+            !Floppy144SiteRectRuntimeVisible(pState, pRect)
+        )
+        {
+            continue;
+        }
+
+        pszLabel =
+            Floppy144SiteCorridorDoorLabelForRect(
+                pRect
+            );
+
+        if(pszLabel == NULL)
+        {
+            continue;
+        }
+
+        uDistance =
+            Floppy144SiteRectDistanceSquared(
+                pState,
+                pRect
+            );
+
+        if(
+            uDistance > uRangeSquared ||
+            uDistance >= uBestDistance
+        )
+        {
+            continue;
+        }
+
+        uBestDistance = uDistance;
+        pszBestLabel = pszLabel;
+        bBestLocked =
+            Floppy144SiteDoorLocked(
+                pState,
+                pRect
+            );
+    }
+
+    if(
+        pszBestLabel != NULL &&
+        pLocked != NULL
+    )
+    {
+        *pLocked = bBestLocked;
+    }
+
+    return pszBestLabel;
+}
+
 bool Floppy144SiteLockedDoorNearby(
     const Floppy144RunState *pState
 )
@@ -2090,6 +2237,7 @@ const char *Floppy144SiteContextLabel(
     const Floppy144RunState *pState
 )
 {
+    Floppy144RoomId eCurrentRoom;
     uint32_t uRectIndex;
     uint32_t uBestDistance = UINT32_MAX;
     const char *pszBestLabel = NULL;
@@ -2101,6 +2249,12 @@ const char *Floppy144SiteContextLabel(
     {
         return NULL;
     }
+
+    eCurrentRoom =
+        Floppy144SiteRoomAtPosition(
+            pState->player_site_x,
+            pState->player_site_y
+        );
 
     for(
         uRectIndex = 0U;
@@ -2123,7 +2277,18 @@ const char *Floppy144SiteContextLabel(
 
         if(pRect->type == (uint8_t)FLOPPY144_SITE_DOOR)
         {
-            if(Floppy144SiteDoorLocked(pState, pRect))
+            if(eCurrentRoom == FLOPPY144_ROOM_CORRIDOR)
+            {
+                pszLabel =
+                    Floppy144SiteCorridorDoorLabelForRect(
+                        pRect
+                    );
+            }
+
+            if(
+                pszLabel == NULL &&
+                Floppy144SiteDoorLocked(pState, pRect)
+            )
             {
                 pszLabel = "LOCKED DOOR";
             }
@@ -2198,6 +2363,7 @@ uint32_t Floppy144SiteAvailableActions(
 
     if(
         Floppy144SiteDirectoryNearby(pState) ||
+        Floppy144SiteCorridorDoorLabelNearby(pState, NULL) != NULL ||
         Floppy144SiteLockedDoorNearby(pState) ||
         Floppy144SiteResolveInspectionTarget(
             pState,

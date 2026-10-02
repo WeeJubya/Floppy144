@@ -1032,6 +1032,29 @@ static void Floppy144InteractOffice(
             return;
         }
 
+        {
+            bool bDoorLocked = false;
+
+            const char *pszDoorLabel =
+                Floppy144SiteCorridorDoorLabelNearby(
+                    &global_run_state,
+                    &bDoorLocked
+                );
+
+            if(pszDoorLabel != NULL)
+            {
+                Floppy144OfficeSetItemNotice(
+                    pszDoorLabel,
+                    bDoorLocked
+                    ? " - LOCKED."
+                    : "."
+                );
+
+                Floppy144Redraw(window);
+                return;
+            }
+        }
+
         if(
             !Floppy144SiteResolveInspectionTarget(
                 &global_run_state,
@@ -1040,9 +1063,9 @@ static void Floppy144InteractOffice(
         )
         {
             /*
-             * Doors do not own cabinet contents, but a locked visible door is
-             * still a legitimate Inspect target. Keep the footer/action
-             * contract honest by giving the keypress a concrete response.
+             * Non-Corridor doors do not own cabinet contents, but a locked
+             * visible door is still a legitimate Inspect target. Corridor
+             * plaques were handled above so their signage survives unlocks.
              */
             if(
                 Floppy144SiteLockedDoorNearby(

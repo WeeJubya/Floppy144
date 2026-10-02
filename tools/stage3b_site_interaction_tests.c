@@ -1011,9 +1011,9 @@ static void Floppy144TestNotebookPopulation(void)
 
 /*
  * Passive labels are intentionally low priority. Furniture names appear only
- * when immediately adjacent; locked doors identify themselves; unlocked doors
- * remain silent. Any explicit inspection notice is supplied separately by the
- * renderer and therefore overwrites these labels.
+ * when immediately adjacent. Corridor-facing doors retain their room plaque
+ * through lock/unlock state, while non-Corridor locked doors keep the generic
+ * fallback. Explicit inspection notices still overwrite passive labels.
  */
 static void Floppy144TestRecordsTrolleyNotebookGuidance(void)
 {
@@ -1152,6 +1152,131 @@ static void Floppy144TestLockedDoorInspectActions(void)
     );
 }
 
+static void Floppy144TestCorridorDoorLabels(void)
+{
+    typedef struct Floppy144DoorLabelFixture
+    {
+        Floppy144RoomId eOtherRoom;
+        int32_t nPlayerX;
+        int32_t nPlayerY;
+        const char *pszLabel;
+    }
+    Floppy144DoorLabelFixture;
+
+    static const Floppy144DoorLabelFixture asFixtures[] =
+    {
+        { FLOPPY144_ROOM_COUNT,            63, 98, "EMERGENCY EXIT" },
+        { FLOPPY144_ROOM_COUNT,            59, 98, "EMERGENCY EXIT" },
+        { FLOPPY144_ROOM_RECEPTION,        65, 56, "RECEPTION" },
+        { FLOPPY144_ROOM_RECORDS_OFFICE,   60, 47, "RECORDS OFFICE" },
+        { FLOPPY144_ROOM_MAIN_OFFICE,      65, 83, "MAIN OFFICE" },
+        { FLOPPY144_ROOM_SECURITY,         57, 68, "SECURITY" },
+        { FLOPPY144_ROOM_IT_SUPPORT,       57, 89, "IT SUPPORT" },
+        { FLOPPY144_ROOM_SECRETARY_OFFICE, 39, 47, "DIRECTOR" },
+        { FLOPPY144_ROOM_STAFF_ROOM,       20, 47, "STAFF ROOM" },
+        { FLOPPY144_ROOM_FACILITIES,       16, 51, "FACILITIES" }
+    };
+
+    uint32_t uIndex;
+    uint32_t uCorridorDoorCount = 0U;
+
+    /*
+     * Keep the authored topology and the player-facing signage contract in
+     * lockstep. There are ten Corridor-facing door rectangles, including both
+     * emergency-exit leaves.
+     */
+    for(
+        uIndex = 0U;
+        uIndex < Floppy144SiteRectCount();
+        ++uIndex
+    )
+    {
+        const Floppy144SiteRect *pRect =
+            Floppy144SiteRectAt(uIndex);
+
+        if(
+            pRect != NULL &&
+            pRect->type == (uint8_t)FLOPPY144_SITE_DOOR &&
+            (
+                pRect->from_room == (uint8_t)FLOPPY144_ROOM_CORRIDOR ||
+                pRect->to_room == (uint8_t)FLOPPY144_ROOM_CORRIDOR
+            )
+        )
+        {
+            ++uCorridorDoorCount;
+        }
+    }
+
+    F144_CHECK(
+        uCorridorDoorCount ==
+            (uint32_t)(sizeof(asFixtures) / sizeof(asFixtures[0])),
+        "every authored Corridor-facing door is represented by the label audit"
+    );
+
+    for(
+        uIndex = 0U;
+        uIndex < (uint32_t)(sizeof(asFixtures) / sizeof(asFixtures[0]));
+        ++uIndex
+    )
+    {
+        Floppy144WorldState sWorld;
+        Floppy144RunState sState;
+        const Floppy144DoorLabelFixture *pFixture =
+            &asFixtures[uIndex];
+        const char *pszLabel;
+        bool bLocked = false;
+
+        Floppy144TestReset(
+            &sWorld,
+            &sState
+        );
+
+        (void)Floppy144RunStateReconstructRoom(
+            &sState,
+            FLOPPY144_ROOM_CORRIDOR
+        );
+
+        if(pFixture->eOtherRoom != FLOPPY144_ROOM_COUNT)
+        {
+            (void)Floppy144RunStateReconstructRoom(
+                &sState,
+                pFixture->eOtherRoom
+            );
+        }
+
+        Floppy144TestSetPosition(
+            &sState,
+            pFixture->nPlayerX,
+            pFixture->nPlayerY
+        );
+
+        pszLabel =
+            Floppy144SiteCorridorDoorLabelNearby(
+                &sState,
+                &bLocked
+            );
+
+        F144_CHECK(
+            pszLabel != NULL &&
+            strcmp(
+                pszLabel,
+                pFixture->pszLabel
+            ) == 0,
+            "Corridor-facing door exposes its authored room plaque"
+        );
+
+        F144_CHECK(
+            (
+                Floppy144SiteAvailableActions(
+                    &sState
+                ) &
+                FLOPPY144_SITE_ACTION_INSPECT
+            ) != 0U,
+            "Corridor-facing room plaque advertises Inspect"
+        );
+    }
+}
+
 static void Floppy144TestContextLabels(void)
 {
     Floppy144WorldState sWorld;
@@ -1181,8 +1306,8 @@ static void Floppy144TestContextLabels(void)
     Floppy144TestSetPosition(&sState, 68, 56);
     pszLabel = Floppy144SiteContextLabel(&sState);
     F144_CHECK(
-        pszLabel != NULL && strcmp(pszLabel, "LOCKED DOOR") == 0,
-        "locked reconstructed door exposes LOCKED DOOR label"
+        pszLabel != NULL && strcmp(pszLabel, "RECEPTION") == 0,
+        "locked Corridor door exposes its RECEPTION plaque"
     );
 
     (void)Floppy144RunStateReconstructRoom(
@@ -1210,8 +1335,20 @@ static void Floppy144TestContextLabels(void)
 
     pszLabel = Floppy144SiteContextLabel(&sState);
     F144_CHECK(
-        pszLabel == NULL || strcmp(pszLabel, "LOCKED DOOR") != 0,
-        "unlocked door no longer exposes a door label"
+        pszLabel != NULL && strcmp(pszLabel, "RECEPTION") == 0,
+        "unlocked Corridor door retains its RECEPTION plaque"
+    );
+
+    F144_CHECK(
+        Floppy144SiteCorridorDoorLabelNearby(
+            &sState,
+            NULL
+        ) != NULL &&
+        (
+            Floppy144SiteAvailableActions(&sState) &
+            FLOPPY144_SITE_ACTION_INSPECT
+        ) != 0U,
+        "unlocked Corridor door remains inspectable"
     );
 
     /*
@@ -1622,6 +1759,7 @@ int main(void)
     Floppy144TestNotebookPopulation();
     Floppy144TestRecordsTrolleyNotebookGuidance();
     Floppy144TestLockedDoorInspectActions();
+    Floppy144TestCorridorDoorLabels();
     Floppy144TestContextLabels();
     Floppy144TestExteriorExitBehaviour();
 
