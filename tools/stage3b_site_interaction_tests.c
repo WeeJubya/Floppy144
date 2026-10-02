@@ -1389,12 +1389,16 @@ static void Floppy144TestContextLabels(void)
         "adjacent furniture exposes generic CHAIR label"
     );
 
-    /* COR_REC is the vertical x66 Corridor/Reception boundary. */
-    Floppy144TestSetPosition(&sState, 68, 56);
+    /*
+     * COR_REC is the vertical x66 Corridor/Reception boundary.
+     * Stand on the Corridor side at x65: x68 is inside Reception and therefore
+     * must not exercise the Corridor-facing room-plate contract.
+     */
+    Floppy144TestSetPosition(&sState, 65, 56);
     pszLabel = Floppy144SiteContextLabel(&sState);
     F144_CHECK(
         pszLabel != NULL && strcmp(pszLabel, "RECEPTION") == 0,
-        "locked Corridor door exposes its RECEPTION plaque"
+        "locked Corridor side of COR_REC exposes its RECEPTION plaque"
     );
 
     (void)Floppy144RunStateReconstructRoom(
@@ -1423,7 +1427,7 @@ static void Floppy144TestContextLabels(void)
     pszLabel = Floppy144SiteContextLabel(&sState);
     F144_CHECK(
         pszLabel != NULL && strcmp(pszLabel, "RECEPTION") == 0,
-        "unlocked Corridor door retains its RECEPTION plaque"
+        "unlocked Corridor side of COR_REC retains its RECEPTION plaque"
     );
 
     F144_CHECK(
@@ -1436,6 +1440,20 @@ static void Floppy144TestContextLabels(void)
             FLOPPY144_SITE_ACTION_INSPECT
         ) != 0U,
         "unlocked Corridor door remains inspectable"
+    );
+
+    /*
+     * The same physical threshold viewed from Reception is not a Corridor
+     * plaque. This protects the side-specific behavior from accidentally
+     * becoming a generic label on every door face.
+     */
+    Floppy144TestSetPosition(&sState, 68, 56);
+    F144_CHECK(
+        Floppy144SiteCorridorDoorLabelNearby(
+            &sState,
+            NULL
+        ) == NULL,
+        "Reception side of COR_REC does not masquerade as Corridor signage"
     );
 
     /*
