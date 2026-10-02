@@ -460,6 +460,129 @@ static const char *Floppy144TerminalDisplayRecordId(
     return pszRecordId;
 }
 
+
+static bool Floppy144TerminalSiteHasReconstructedRoom(
+    const Floppy144RunState *pRunState
+)
+{
+    uint32_t uRoomIndex;
+
+    if(pRunState == NULL)
+    {
+        return false;
+    }
+
+    for(
+        uRoomIndex = 0U;
+        uRoomIndex < (uint32_t)FLOPPY144_ROOM_COUNT;
+        ++uRoomIndex
+    )
+    {
+        if(
+            Floppy144RunStateRoomReconstructed(
+                pRunState,
+                (Floppy144RoomId)uRoomIndex
+            )
+        )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static bool Floppy144TerminalRestoreAllowedAtLocation(
+    const Floppy144TerminalState *pTerminal,
+    Floppy144CollectionDomain eDomain
+)
+{
+    if(
+        pTerminal == NULL ||
+        !pTerminal->restoration_location_restrictions
+    )
+    {
+        return true;
+    }
+
+    /*
+     * The initial recovery environment is not a physical Site terminal.
+     * It may recover Disaster Recovery material only, which preserves the
+     * Prologue while preventing departmental collections being restored from
+     * the bootstrap screen.
+     */
+    if(!pTerminal->terminal_room_valid)
+    {
+        return eDomain == FLOPPY144_COLLECTION_DOMAIN_DR;
+    }
+
+    switch(pTerminal->terminal_room)
+    {
+        case FLOPPY144_ROOM_FACILITIES:
+            return eDomain == FLOPPY144_COLLECTION_DOMAIN_FM;
+
+        case FLOPPY144_ROOM_IT_SUPPORT:
+            return eDomain == FLOPPY144_COLLECTION_DOMAIN_TS;
+
+        case FLOPPY144_ROOM_SECURITY:
+            return eDomain == FLOPPY144_COLLECTION_DOMAIN_OS;
+
+        case FLOPPY144_ROOM_RECORDS_OFFICE:
+            return eDomain == FLOPPY144_COLLECTION_DOMAIN_DR;
+
+        case FLOPPY144_ROOM_MAIN_OFFICE:
+        case FLOPPY144_ROOM_RECEPTION:
+            return
+                eDomain == FLOPPY144_COLLECTION_DOMAIN_DR ||
+                eDomain == FLOPPY144_COLLECTION_DOMAIN_HR;
+
+        case FLOPPY144_ROOM_SECRETARY_OFFICE:
+        case FLOPPY144_ROOM_DIRECTOR_OFFICE:
+            return eDomain == FLOPPY144_COLLECTION_DOMAIN_HR;
+
+        default:
+            return false;
+    }
+}
+
+static const char *Floppy144TerminalRestoreLocationGuidance(
+    Floppy144CollectionDomain eDomain
+)
+{
+    switch(eDomain)
+    {
+        case FLOPPY144_COLLECTION_DOMAIN_FM:
+            return "USE THE FACILITIES TERMINAL FOR FM COLLECTIONS.";
+
+        case FLOPPY144_COLLECTION_DOMAIN_TS:
+            return "USE THE IT SUPPORT TERMINAL FOR TS COLLECTIONS.";
+
+        case FLOPPY144_COLLECTION_DOMAIN_OS:
+            return "USE THE SECURITY TERMINAL FOR OS COLLECTIONS.";
+
+        case FLOPPY144_COLLECTION_DOMAIN_HR:
+            return "USE DIRECTOR, MAIN, SECRETARY OR RECEPTION FOR HR.";
+
+        case FLOPPY144_COLLECTION_DOMAIN_DR:
+        default:
+            return "USE RECORDS, MAIN OR RECEPTION FOR DR COLLECTIONS.";
+    }
+}
+
+static bool Floppy144TerminalTutorialRecoveryCollection(
+    const Floppy144CollectionDefinition *pDefinition
+)
+{
+    if(pDefinition == NULL || pDefinition->code == NULL)
+    {
+        return false;
+    }
+
+    return
+        strcmp(pDefinition->code, "DR-02") == 0 ||
+        strcmp(pDefinition->code, "DR-03") == 0;
+}
+
 /*
  * Print the next useful recovery action from current persistent state.
  *
@@ -478,7 +601,7 @@ void Floppy144TerminalPrintNextAction(
 )
 {
     uint32_t uCollectionIndex;
-    uint32_t uRoomIndex;
+    bool bSiteAvailable;
     const char *pszAvailableCollectionCode = NULL;
     char szLine[FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
 
@@ -492,49 +615,62 @@ void Floppy144TerminalPrintNextAction(
         return;
     }
 
-    for(
-        uCollectionIndex = 0U;
-        uCollectionIndex < (uint32_t)FLOPPY144_COLLECTION_COUNT;
-        ++uCollectionIndex
-    )
+    bSiteAvailable =
+        Floppy144TerminalSiteHasReconstructedRoom(
+            pRunState
+        );
+
+    /*
+     * Before the Site exists, normal play still needs enough guidance to
+     * complete the bootstrap. After reconstruction begins, document-level
+     * breadcrumbs are diagnostic and therefore require -debug.
+     */
+    if(!bSiteAvailable || pTerminal->debug_guidance)
     {
-        Floppy144CollectionId eCollection =
-            (Floppy144CollectionId)uCollectionIndex;
-
-        const Floppy144DocumentDefinition *pDocument =
-            Floppy144DocumentFirstPendingTrigger(
-                pRunState,
-                eCollection
-            );
-
-        if(pDocument != NULL && pDocument->record_id_override != NULL)
+        for(
+            uCollectionIndex = 0U;
+            uCollectionIndex < (uint32_t)FLOPPY144_COLLECTION_COUNT;
+            ++uCollectionIndex
+        )
         {
-            const char *pszRecordId =
-                Floppy144TerminalDisplayRecordId(
-                    pTerminal,
-                    pDocument->record_id_override
+            Floppy144CollectionId eCollection =
+                (Floppy144CollectionId)uCollectionIndex;
+
+            const Floppy144DocumentDefinition *pDocument =
+                Floppy144DocumentFirstPendingTrigger(
+                    pRunState,
+                    eCollection
                 );
 
-            snprintf(
-                szLine,
-                sizeof(szLine),
-                "NEXT RECOVERY ACTION: OPEN %s",
-                pszRecordId
-            );
+            if(pDocument != NULL && pDocument->record_id_override != NULL)
+            {
+                const char *pszRecordId =
+                    Floppy144TerminalDisplayRecordId(
+                        pTerminal,
+                        pDocument->record_id_override
+                    );
 
-            Floppy144TerminalPushWrappedLine(
-                pTerminal,
-                szLine
-            );
+                snprintf(
+                    szLine,
+                    sizeof(szLine),
+                    "NEXT RECOVERY ACTION: OPEN %s",
+                    pszRecordId
+                );
 
-            return;
+                Floppy144TerminalPushWrappedLine(
+                    pTerminal,
+                    szLine
+                );
+
+                return;
+            }
         }
     }
 
     /*
-     * Remember the next restorable collection before considering the Site
-     * hand-off. Once rooms exist, both actions are useful: the player may
-     * explore immediately or continue archive restoration on a later visit.
+     * Choose only a collection that can actually be restored from this
+     * terminal. In normal play after Site reconstruction, the only automatic
+     * collection hint is the first-profile DR-02/DR-03 tutorial.
      */
     for(
         uCollectionIndex = 0U;
@@ -549,36 +685,63 @@ void Floppy144TerminalPrintNextAction(
             Floppy144CollectionGet(eCollection);
 
         if(
-            pDefinition != NULL &&
-            Floppy144RunStateCollectionAvailable(
+            pDefinition == NULL ||
+            !Floppy144RunStateCollectionAvailable(
                 pRunState,
                 eCollection
-            ) &&
-            !Floppy144RunStateCollectionRestored(
+            ) ||
+            Floppy144RunStateCollectionRestored(
                 pRunState,
                 eCollection
+            ) ||
+            !Floppy144TerminalRestoreAllowedAtLocation(
+                pTerminal,
+                pDefinition->domain
             )
         )
         {
-            pszAvailableCollectionCode = pDefinition->code;
-            break;
+            continue;
         }
+
+        if(
+            bSiteAvailable &&
+            !pTerminal->debug_guidance
+        )
+        {
+            if(
+                pTerminal->first_profile_recovery &&
+                Floppy144TerminalTutorialRecoveryCollection(
+                    pDefinition
+                )
+            )
+            {
+                pszAvailableCollectionCode =
+                    pDefinition->code;
+                break;
+            }
+
+            continue;
+        }
+
+        pszAvailableCollectionCode =
+            pDefinition->code;
+        break;
     }
 
-    for(
-        uRoomIndex = 0U;
-        uRoomIndex < (uint32_t)FLOPPY144_ROOM_COUNT;
-        ++uRoomIndex
-    )
+    if(bSiteAvailable && !pTerminal->debug_guidance)
     {
-        if(
-            Floppy144RunStateRoomReconstructed(
-                pRunState,
-                (Floppy144RoomId)uRoomIndex
-            )
-        )
+        if(pszAvailableCollectionCode != NULL)
         {
-            if(pszAvailableCollectionCode != NULL)
+            if(pTerminal->terminal_room_valid)
+            {
+                snprintf(
+                    szLine,
+                    sizeof(szLine),
+                    "NEXT RECOVERY ACTION: RESTORE %s",
+                    pszAvailableCollectionCode
+                );
+            }
+            else
             {
                 snprintf(
                     szLine,
@@ -586,22 +749,68 @@ void Floppy144TerminalPrintNextAction(
                     "NEXT: EXIT TO SITE / RESTORE %s",
                     pszAvailableCollectionCode
                 );
+            }
 
-                Floppy144TerminalPushLine(
-                    pTerminal,
-                    szLine
+            Floppy144TerminalPushLine(
+                pTerminal,
+                szLine
+            );
+        }
+        else if(!pTerminal->terminal_room_valid)
+        {
+            Floppy144TerminalPushLine(
+                pTerminal,
+                "NEXT RECOVERY ACTION: EXIT TO SITE"
+            );
+        }
+
+        return;
+    }
+
+    if(bSiteAvailable)
+    {
+        if(pszAvailableCollectionCode != NULL)
+        {
+            if(pTerminal->terminal_room_valid)
+            {
+                snprintf(
+                    szLine,
+                    sizeof(szLine),
+                    "NEXT RECOVERY ACTION: RESTORE %s",
+                    pszAvailableCollectionCode
                 );
             }
             else
             {
-                Floppy144TerminalPushLine(
-                    pTerminal,
-                    "NEXT RECOVERY ACTION: EXIT TO SITE"
+                snprintf(
+                    szLine,
+                    sizeof(szLine),
+                    "NEXT: EXIT TO SITE / RESTORE %s",
+                    pszAvailableCollectionCode
                 );
             }
 
-            return;
+            Floppy144TerminalPushLine(
+                pTerminal,
+                szLine
+            );
         }
+        else if(!pTerminal->terminal_room_valid)
+        {
+            Floppy144TerminalPushLine(
+                pTerminal,
+                "NEXT RECOVERY ACTION: EXIT TO SITE"
+            );
+        }
+        else
+        {
+            Floppy144TerminalPushLine(
+                pTerminal,
+                "NO DEBUG RECOVERY ACTION AVAILABLE AT THIS TERMINAL."
+            );
+        }
+
+        return;
     }
 
     if(pszAvailableCollectionCode != NULL)
@@ -652,6 +861,7 @@ void Floppy144TerminalPrintPostOpenAction(
         );
 
     if(
+        pTerminal->debug_guidance &&
         pOpenedDocument != NULL &&
         pOpenedDocument->offer_pending_trigger_choices
     )
@@ -2560,6 +2770,19 @@ static void Floppy144TerminalPrintCollectionRecords(
     Floppy144TerminalPrintRecordPage(
         terminal
     );
+
+    /*
+     * A one-page record index is a result, not a navigation mode. Leave the
+     * rows visible but return immediately to the command prompt so Space/Q
+     * are not captured by a pager which has nowhere to go.
+     */
+    if(page_count == 1U)
+    {
+        terminal->record_pager_active =
+            false;
+        terminal->collection_pager_state =
+            NULL;
+    }
 }
 
 /*
@@ -2794,6 +3017,12 @@ static bool Floppy144TerminalCompleteRestore(
                 run_state,
                 collection,
                 pEntryDocument->record_index
+            ) &&
+            (
+                !Floppy144TerminalSiteHasReconstructedRoom(
+                    run_state
+                ) ||
+                terminal->debug_guidance
             )
         )
         {
@@ -2899,6 +3128,24 @@ static void Floppy144TerminalRestoreCollection(
         Floppy144TerminalPushLine(
             terminal,
             line
+        );
+        return;
+    }
+
+    if(
+        !Floppy144TerminalRestoreAllowedAtLocation(
+            terminal,
+            definition->domain
+        )
+    )
+    {
+        Floppy144TerminalPushLine(terminal, "");
+        Floppy144TerminalPushLine(terminal, "RESTORE REFUSED.");
+        Floppy144TerminalPushLine(
+            terminal,
+            Floppy144TerminalRestoreLocationGuidance(
+                definition->domain
+            )
         );
         return;
     }
@@ -3619,6 +3866,22 @@ void Floppy144TerminalReset(
     terminal->cursor_visible =
         true;
 
+    /*
+     * Direct terminal-unit tests historically operate with full guidance and
+     * no physical-location gate. The application explicitly overrides these
+     * defaults for real player sessions immediately after every reset.
+     */
+    terminal->debug_guidance =
+        true;
+    terminal->first_profile_recovery =
+        true;
+    terminal->restoration_location_restrictions =
+        false;
+    terminal->terminal_room_valid =
+        false;
+    terminal->terminal_room =
+        FLOPPY144_ROOM_COUNT;
+
     terminal->restoration_in_progress =
         false;
     terminal->restoration_collection =
@@ -3793,6 +4056,11 @@ void Floppy144TerminalResetAtRoom(
         return;
     }
 
+    terminal->terminal_room =
+        room;
+    terminal->terminal_room_valid =
+        true;
+
     snprintf(
         environment_line,
         sizeof(environment_line),
@@ -3806,6 +4074,26 @@ void Floppy144TerminalResetAtRoom(
         "%s",
         environment_line
     );
+}
+
+void Floppy144TerminalConfigureSession(
+    Floppy144TerminalState *terminal,
+    bool debug_guidance,
+    bool first_profile_recovery,
+    bool restoration_location_restrictions
+)
+{
+    if(terminal == NULL)
+    {
+        return;
+    }
+
+    terminal->debug_guidance =
+        debug_guidance;
+    terminal->first_profile_recovery =
+        first_profile_recovery;
+    terminal->restoration_location_restrictions =
+        restoration_location_restrictions;
 }
 
 /*

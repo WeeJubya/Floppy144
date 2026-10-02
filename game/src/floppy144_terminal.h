@@ -45,6 +45,18 @@ typedef struct Floppy144TerminalState
     bool cursor_visible;
 
     /*
+     * Session guidance is configured by the application after reset.
+     *
+     * Headless terminal tests retain the historical guided/unrestricted
+     * defaults unless they explicitly opt into player-facing behaviour.
+     */
+    bool debug_guidance;
+    bool first_profile_recovery;
+    bool restoration_location_restrictions;
+    bool terminal_room_valid;
+    Floppy144RoomId terminal_room;
+
+    /*
      * Collection restoration is deliberately terminal-local until its progress
      * bar reaches 100%. Duration is derived from the collection's size_kb so a
      * larger archive visibly takes longer to reconstruct.
@@ -120,6 +132,19 @@ void Floppy144TerminalResetAtRoom(
     Floppy144TerminalState *terminal,
     const Floppy144WorldState *world,
     Floppy144RoomId room
+);
+
+/*
+ * Apply player-session policy after Reset/ResetAtRoom.
+ * Debug guidance exposes recovery breadcrumbs; first_profile_recovery enables
+ * the one-time DR-02/DR-03 onboarding hint; location restrictions bind RESTORE
+ * to the terminal's physical department.
+ */
+void Floppy144TerminalConfigureSession(
+    Floppy144TerminalState *terminal,
+    bool debug_guidance,
+    bool first_profile_recovery,
+    bool restoration_location_restrictions
 );
 
 void Floppy144TerminalMoveSelection(

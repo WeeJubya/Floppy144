@@ -887,6 +887,21 @@ static void Floppy144TestMultipleCollectionCommands(void)
         "most recently restored collection becomes short-ID context"
     );
 
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "LIST DR-02"
+    );
+    F144_CHECK(
+        !Floppy144TerminalRecordPagerActive(&sTerminal) &&
+        Floppy144TestTerminalContains(
+            &sTerminal,
+            "PAGE 1 OF 1"
+        ),
+        "single-page document LIST returns immediately to command mode"
+    );
+
     {
         char szFullId[24];
         char szShortId[16];
@@ -1148,6 +1163,185 @@ static void Floppy144TestMultipleCollectionCommands(void)
         "unknown collection is rejected generically"
     );
 }
+
+/*
+ * Player-facing recovery policy: normal runs receive only the first-profile
+ * DR tutorial, while departmental restoration is tied to physical terminals.
+ */
+static void Floppy144TestPlayerRecoveryPolicy(void)
+{
+    Floppy144WorldState sWorld;
+    Floppy144RunState sRunState;
+    Floppy144TerminalState sTerminal;
+    Floppy144CollectionId eDr02;
+    Floppy144CollectionId eHr01;
+
+    Floppy144TestReachOpeningCollections(
+        &sWorld,
+        &sRunState,
+        &sTerminal
+    );
+
+    eDr02 = Floppy144GameDataCollectionId("DR-02");
+    eHr01 = Floppy144GameDataCollectionId("HR-01");
+
+    Floppy144TerminalConfigureSession(
+        &sTerminal,
+        false,
+        false,
+        true
+    );
+    sTerminal.output_count = 0U;
+    Floppy144TerminalPrintNextAction(
+        &sTerminal,
+        &sRunState
+    );
+
+    F144_CHECK(
+        !Floppy144TestTerminalContains(
+            &sTerminal,
+            "RESTORE DR-02"
+        ) &&
+        Floppy144TestTerminalContains(
+            &sTerminal,
+            "EXIT TO SITE"
+        ),
+        "later profile runs suppress DR-02/DR-03 tutorial recommendation"
+    );
+
+    Floppy144TerminalConfigureSession(
+        &sTerminal,
+        false,
+        true,
+        true
+    );
+    sTerminal.output_count = 0U;
+    Floppy144TerminalPrintNextAction(
+        &sTerminal,
+        &sRunState
+    );
+
+    F144_CHECK(
+        Floppy144TestTerminalContains(
+            &sTerminal,
+            "RESTORE DR-02"
+        ),
+        "first profile run retains DR-02/DR-03 tutorial recommendation"
+    );
+
+    Floppy144TerminalResetAtRoom(
+        &sTerminal,
+        &sWorld,
+        FLOPPY144_ROOM_SECURITY
+    );
+    Floppy144TerminalConfigureSession(
+        &sTerminal,
+        false,
+        true,
+        true
+    );
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "RESTORE DR-02"
+    );
+
+    F144_CHECK(
+        !Floppy144RunStateCollectionRestored(
+            &sRunState,
+            eDr02
+        ) &&
+        Floppy144TestTerminalContains(
+            &sTerminal,
+            "RESTORE REFUSED"
+        ),
+        "Security terminal refuses DR collection restoration"
+    );
+
+    Floppy144TerminalResetAtRoom(
+        &sTerminal,
+        &sWorld,
+        FLOPPY144_ROOM_RECEPTION
+    );
+    Floppy144TerminalConfigureSession(
+        &sTerminal,
+        false,
+        true,
+        true
+    );
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "RESTORE DR-02"
+    );
+
+    F144_CHECK(
+        Floppy144RunStateCollectionRestored(
+            &sRunState,
+            eDr02
+        ),
+        "Reception terminal permits DR collection restoration"
+    );
+
+    Floppy144TerminalResetAtRoom(
+        &sTerminal,
+        &sWorld,
+        FLOPPY144_ROOM_IT_SUPPORT
+    );
+    Floppy144TerminalConfigureSession(
+        &sTerminal,
+        false,
+        true,
+        true
+    );
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "RESTORE HR-01"
+    );
+
+    F144_CHECK(
+        !Floppy144RunStateCollectionRestored(
+            &sRunState,
+            eHr01
+        ),
+        "IT Support terminal refuses HR collection restoration"
+    );
+
+    Floppy144TerminalResetAtRoom(
+        &sTerminal,
+        &sWorld,
+        FLOPPY144_ROOM_MAIN_OFFICE
+    );
+    Floppy144TerminalConfigureSession(
+        &sTerminal,
+        false,
+        true,
+        true
+    );
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "RESTORE HR-01"
+    );
+
+    F144_CHECK(
+        Floppy144RunStateCollectionRestored(
+            &sRunState,
+            eHr01
+        ),
+        "Main Office terminal permits HR collection restoration"
+    );
+}
+
 
 /*
  * History is deliberately UI-only. It remembers meaningful submissions in
@@ -1820,6 +2014,7 @@ int main(void)
     Floppy144TestDocumentBodyScrolling();
     Floppy144TestCollectionListPresentation();
     Floppy144TestMultipleCollectionCommands();
+    Floppy144TestPlayerRecoveryPolicy();
     Floppy144TestCommandHistory();
     Floppy144TestBranchDocumentAccessGate();
 
