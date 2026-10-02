@@ -1032,6 +1032,12 @@ static void Floppy144InteractOffice(
             return;
         }
 
+        if(
+            !Floppy144SiteResolveInspectionTarget(
+                &global_run_state,
+                &sTarget
+            )
+        )
         {
             bool bDoorLocked = false;
 
@@ -1041,6 +1047,12 @@ static void Floppy144InteractOffice(
                     &bDoorLocked
                 );
 
+            /*
+             * Authored room plates and notices are resolved above as physical
+             * contents. This is only the fallback for a Corridor-facing door
+             * which has no physical child of its own, such as the Secretary
+             * suite entrance and the emergency exits.
+             */
             if(pszDoorLabel != NULL)
             {
                 Floppy144OfficeSetItemNotice(
@@ -1053,19 +1065,10 @@ static void Floppy144InteractOffice(
                 Floppy144Redraw(window);
                 return;
             }
-        }
 
-        if(
-            !Floppy144SiteResolveInspectionTarget(
-                &global_run_state,
-                &sTarget
-            )
-        )
-        {
             /*
-             * Non-Corridor doors do not own cabinet contents, but a locked
-             * visible door is still a legitimate Inspect target. Corridor
-             * plaques were handled above so their signage survives unlocks.
+             * Non-Corridor doors without authored contents retain the generic
+             * locked-door response.
              */
             if(
                 Floppy144SiteLockedDoorNearby(

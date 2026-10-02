@@ -8444,9 +8444,9 @@
     },
     {
       "id": "P-030",
-      "name": "Facilities room plate",
-      "room_id": "CORRIDOR",
-      "parent_id": "COR_FAC",
+      "name": "Director door plate",
+      "room_id": "SECRETARY_OFFICE",
+      "parent_id": "SECR_DIR",
       "collection_ids": [
         "FM-04"
       ],
@@ -8455,7 +8455,7 @@
       "drawing_definition_id": "DRAW_TABLE",
       "source_status": "setup-ledger",
       "source_order": 30,
-      "description": "A brass plate reads FACILITIES. Smaller text underneath says AUTHORISED STAFF / PLANT ACCESS."
+      "description": "A brass plate reads DIRECTOR. Smaller text underneath says APPOINTMENTS VIA SECRETARY."
     },
     {
       "id": "P-031",
@@ -25395,12 +25395,12 @@
       "relation": "physical_parent"
     },
     {
-      "parent_id": "CORRIDOR",
+      "parent_id": "SECRETARY_OFFICE",
       "child_id": "P-030",
       "relation": "contains_physical_item"
     },
     {
-      "parent_id": "COR_FAC",
+      "parent_id": "SECR_DIR",
       "child_id": "P-030",
       "relation": "physical_parent"
     },

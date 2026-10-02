@@ -2256,6 +2256,26 @@ const char *Floppy144SiteContextLabel(
             pState->player_site_y
         );
 
+    if(eCurrentRoom == FLOPPY144_ROOM_SECRETARY_OFFICE)
+    {
+        Floppy144SiteInspectionTarget sInspectionTarget;
+
+        if(
+            Floppy144SiteResolveInspectionTarget(
+                pState,
+                &sInspectionTarget
+            ) &&
+            sInspectionTarget.pszParentId != NULL &&
+            strcmp(
+                sInspectionTarget.pszParentId,
+                "SECR_DIR"
+            ) == 0
+        )
+        {
+            return "DIRECTOR";
+        }
+    }
+
     for(
         uRectIndex = 0U;
         uRectIndex < Floppy144SiteRectCount();

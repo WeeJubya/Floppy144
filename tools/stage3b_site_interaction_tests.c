@@ -1152,6 +1152,78 @@ static void Floppy144TestLockedDoorInspectActions(void)
     );
 }
 
+static void Floppy144TestSecretaryDirectorDoorPlate(void)
+{
+    Floppy144WorldState sWorld;
+    Floppy144RunState sState;
+    Floppy144SiteInspectionTarget sTarget;
+    const char *pszLabel;
+
+    Floppy144TestReset(
+        &sWorld,
+        &sState
+    );
+
+    (void)Floppy144RunStateReconstructRoom(
+        &sState,
+        FLOPPY144_ROOM_SECRETARY_OFFICE
+    );
+
+    /*
+     * SECR_DIR sits on the north wall at x46..50 / y30. Stand immediately
+     * inside the Secretary's Office. Director Office is deliberately still
+     * unreconstructed: the plaque must advertise the destination before the
+     * threshold itself becomes a traversable reconstructed boundary.
+     */
+    Floppy144TestSetPosition(
+        &sState,
+        48,
+        32
+    );
+
+    F144_CHECK(
+        Floppy144SiteResolveInspectionTarget(
+            &sState,
+            &sTarget
+        ) &&
+        sTarget.pszParentId != NULL &&
+        strcmp(
+            sTarget.pszParentId,
+            "SECR_DIR"
+        ) == 0 &&
+        sTarget.pszPhysicalItemId != NULL &&
+        strcmp(
+            sTarget.pszPhysicalItemId,
+            "P-030"
+        ) == 0,
+        "Secretary-side Director door resolves its authored room plate"
+    );
+
+    F144_CHECK(
+        (
+            Floppy144SiteAvailableActions(
+                &sState
+            ) &
+            FLOPPY144_SITE_ACTION_INSPECT
+        ) != 0U,
+        "Secretary-side Director door advertises Inspect before Director reconstruction"
+    );
+
+    pszLabel =
+        Floppy144SiteContextLabel(
+            &sState
+        );
+
+    F144_CHECK(
+        pszLabel != NULL &&
+        strcmp(
+            pszLabel,
+            "DIRECTOR"
+        ) == 0,
+        "Secretary-side Director door exposes DIRECTOR proximity label"
+    );
+}
+
 static void Floppy144TestCorridorDoorLabels(void)
 {
     typedef struct Floppy144DoorLabelFixture
@@ -1160,21 +1232,22 @@ static void Floppy144TestCorridorDoorLabels(void)
         int32_t nPlayerX;
         int32_t nPlayerY;
         const char *pszLabel;
+        bool bAuthoredPhysicalPlate;
     }
     Floppy144DoorLabelFixture;
 
     static const Floppy144DoorLabelFixture asFixtures[] =
     {
-        { FLOPPY144_ROOM_COUNT,            63, 98, "EMERGENCY EXIT" },
-        { FLOPPY144_ROOM_COUNT,            59, 98, "EMERGENCY EXIT" },
-        { FLOPPY144_ROOM_RECEPTION,        65, 56, "RECEPTION" },
-        { FLOPPY144_ROOM_RECORDS_OFFICE,   60, 47, "RECORDS OFFICE" },
-        { FLOPPY144_ROOM_MAIN_OFFICE,      65, 83, "MAIN OFFICE" },
-        { FLOPPY144_ROOM_SECURITY,         57, 68, "SECURITY" },
-        { FLOPPY144_ROOM_IT_SUPPORT,       57, 89, "IT SUPPORT" },
-        { FLOPPY144_ROOM_SECRETARY_OFFICE, 39, 47, "DIRECTOR" },
-        { FLOPPY144_ROOM_STAFF_ROOM,       20, 47, "STAFF ROOM" },
-        { FLOPPY144_ROOM_FACILITIES,       16, 51, "FACILITIES" }
+        { FLOPPY144_ROOM_COUNT,            63, 98, "EMERGENCY EXIT", false },
+        { FLOPPY144_ROOM_COUNT,            59, 98, "EMERGENCY EXIT", false },
+        { FLOPPY144_ROOM_RECEPTION,        65, 56, "RECEPTION",      true  },
+        { FLOPPY144_ROOM_RECORDS_OFFICE,   60, 47, "RECORDS OFFICE", true  },
+        { FLOPPY144_ROOM_MAIN_OFFICE,      65, 83, "MAIN OFFICE",    true  },
+        { FLOPPY144_ROOM_SECURITY,         57, 68, "SECURITY",       true  },
+        { FLOPPY144_ROOM_IT_SUPPORT,       57, 89, "IT SUPPORT",     true  },
+        { FLOPPY144_ROOM_SECRETARY_OFFICE, 39, 47, "DIRECTOR",       false },
+        { FLOPPY144_ROOM_STAFF_ROOM,       20, 47, "STAFF ROOM",     true  },
+        { FLOPPY144_ROOM_FACILITIES,       16, 51, "FACILITIES",     true  }
     };
 
     uint32_t uIndex;
@@ -1274,6 +1347,20 @@ static void Floppy144TestCorridorDoorLabels(void)
             ) != 0U,
             "Corridor-facing room plaque advertises Inspect"
         );
+
+        if(pFixture->bAuthoredPhysicalPlate)
+        {
+            Floppy144SiteInspectionTarget sTarget;
+
+            F144_CHECK(
+                Floppy144SiteResolveInspectionTarget(
+                    &sState,
+                    &sTarget
+                ) &&
+                sTarget.pszParentId != NULL,
+                "Corridor room door retains an authored physical room plate"
+            );
+        }
     }
 }
 
@@ -1759,6 +1846,7 @@ int main(void)
     Floppy144TestNotebookPopulation();
     Floppy144TestRecordsTrolleyNotebookGuidance();
     Floppy144TestLockedDoorInspectActions();
+    Floppy144TestSecretaryDirectorDoorPlate();
     Floppy144TestCorridorDoorLabels();
     Floppy144TestContextLabels();
     Floppy144TestExteriorExitBehaviour();
