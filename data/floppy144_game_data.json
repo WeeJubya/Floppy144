@@ -15,7 +15,7 @@
   "schema_notes": [
     "Strict JSON; no comments required by the build tool.",
     "Stable collection/evidence/trigger/interaction IDs are persistence identifiers and must never be renumbered.",
-    "The 153 readable-document budget covers the 27 budgeted collections. Four additional trigger documents belong to unbudgeted collections, so the integrated authored document registry contains 157 readable records.",
+    "The 157 readable-document budget covers the 28 budgeted collections. Two additional trigger documents belong to unbudgeted collections, so the integrated authored document registry contains 159 readable records.",
     "Trigger effects are machine-readable operations; physical interactions are a separate effect source.",
     "Paired/synthesis evidence is order-independent.",
     "Ambient interactions never alter persistent investigation state.",
@@ -25,8 +25,8 @@
   ],
   "counts": {
     "collections": 35,
-    "documents": 157,
-    "budgeted_readable_documents": 153,
+    "documents": 159,
+    "budgeted_readable_documents": 157,
     "triggers": 50,
     "interactions": 40,
     "ambient_interactions": 16,
@@ -17313,10 +17313,17 @@
       "id": "OS-18",
       "name": "Access Control & Restricted Areas",
       "domain": "Operational Security",
-      "content_budget": null,
+      "content_budget": {
+        "act": "Act III",
+        "records": 10,
+        "readable_documents": 4,
+        "trigger_documents_budget": 2
+      },
       "document_ids": [
         "OS-18-RS-0001",
-        "OS-18-RS-0002"
+        "OS-18-RS-0002",
+        "OS-18-RS-0003",
+        "OS-18-RS-0004"
       ],
       "trigger_ids": [
         "T-032",
@@ -18919,6 +18926,18 @@
       "id": "OS-18-RS-0001",
       "collection_id": "OS-18",
       "record_index": 0,
+      "title": "Restricted Area Access Matrix",
+      "classification": "GDR INTERNAL / RECOVERED",
+      "document_type": "trigger_record",
+      "trigger_id": "T-032",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nRESTRICTED AREA ACCESS MATRIX\n\nSERVER ROOM\n\nIT Support ................. STANDING ACCESS\nSecurity Duty Officer ...... STANDING ACCESS\nFacilities engineer ........ CONTROLLED / MAINTENANCE\nSenior Archivist ........... TEMPORARY AUTHORISATION - FINAL WEEK\nRecords Officer ............ NO ROUTINE ACCESS\nGeneral closure staff ...... NO ACCESS\nVisitors/contractors ....... ESCORT + SPECIFIC AUTHORITY\n\nThe matrix records who may enter, not who did enter.\n\nFriday movement evidence must be read with duty logs, attendance records and the temporary-authorisation sheet.",
+      "source_status": "setup-authored-identity",
+      "parent_collection_id": "OS-18"
+    },
+    {
+      "id": "OS-18-RS-0002",
+      "collection_id": "OS-18",
+      "record_index": 1,
       "title": "Temporary Restricted Area Authorisation",
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
@@ -18928,15 +18947,27 @@
       "parent_collection_id": "OS-18"
     },
     {
-      "id": "OS-18-RS-0002",
+      "id": "OS-18-RS-0003",
       "collection_id": "OS-18",
-      "record_index": 1,
-      "title": "Restricted Area Access Matrix",
+      "record_index": 2,
+      "title": "Restricted Area Control Procedure",
       "classification": "GDR INTERNAL / RECOVERED",
-      "document_type": "trigger_record",
-      "trigger_id": "T-032",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nRESTRICTED AREA ACCESS MATRIX\n\nSERVER ROOM\n\nIT Support ................. STANDING ACCESS\nSecurity Duty Officer ...... STANDING ACCESS\nFacilities engineer ........ CONTROLLED / MAINTENANCE\nSenior Archivist ........... TEMPORARY AUTHORISATION - FINAL WEEK\nRecords Officer ............ NO ROUTINE ACCESS\nGeneral closure staff ...... NO ACCESS\nVisitors/contractors ....... ESCORT + SPECIFIC AUTHORITY\n\nThe matrix records who may enter, not who did enter.\n\nFriday movement evidence must be read with duty logs, attendance records and the temporary-authorisation sheet.",
-      "source_status": "setup-authored-identity",
+      "document_type": "readable_record",
+      "trigger_id": null,
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nRESTRICTED AREA CONTROL PROCEDURE\n\nRestricted areas are to be entered only by staff holding standing authority or a current temporary authorisation.\n\nSTANDING AUTHORITY\nStanding access is attached to a post where routine duties require entry. It is reviewed when duties, rooms or technical responsibilities change.\n\nTEMPORARY AUTHORITY\nTemporary access must name the holder, area, purpose and expiry point. It does not extend beyond the work described on the authorisation.\n\nESCORTED ACCESS\nVisitors and contractors require a named escort and specific authority for the area concerned. Escort responsibility remains with the sponsoring officer.\n\nCONTROL\nSecurity maintains the access matrix and records amendments. Expired temporary authorities are to be withdrawn during closure reconciliation.\n\nAuthorisation establishes who may enter a restricted area. It does not, by itself, establish that entry took place.",
+      "source_status": "authored-for-integration",
+      "parent_collection_id": "OS-18"
+    },
+    {
+      "id": "OS-18-RS-0004",
+      "collection_id": "OS-18",
+      "record_index": 3,
+      "title": "Final Closure Access Review",
+      "classification": "GDR INTERNAL / RECOVERED",
+      "document_type": "readable_record",
+      "trigger_id": null,
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nFINAL CLOSURE ACCESS REVIEW\n\nReview scope: restricted-area permissions retained during the final closure period.\n\nSERVER ROOM\nIT Support ................. standing authority retained for technical duties\nSecurity Duty Officer ...... standing authority retained for security response\nSenior Archivist ........... temporary authority retained for archive verification\nFacilities engineer ........ controlled maintenance access only\nOther closure staff ........ no routine access\nVisitors/contractors ....... escort and specific authority required\n\nTemporary authorities are to expire when the associated closure work is complete. Standing authorities cease with formal Site handover unless separately transferred.\n\nNo additional unrestricted Server Room permissions were approved for the closure period.\n\nSecurity review note: access permission should be considered alongside attendance, duty and movement records when reconstructing final-day activity.",
+      "source_status": "authored-for-integration",
       "parent_collection_id": "OS-18"
     },
     {
