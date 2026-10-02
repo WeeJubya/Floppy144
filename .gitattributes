@@ -1,0 +1,49 @@
+# Floppy//144 line-ending policy
+#
+# Keep text normalised in Git, then use an explicit checkout EOL where the
+# surrounding tools have a strong platform convention.
+
+* text=auto
+
+# Source, data and documentation: LF everywhere.
+*.c                 text eol=lf
+*.h                 text eol=lf
+*.inc               text eol=lf
+*.def               text eol=lf
+*.json              text eol=lf
+*.jsonc             text eol=lf
+*.md                text eol=lf
+*.txt               text eol=lf
+*.lua               text eol=lf
+*.yml               text eol=lf
+*.yaml              text eol=lf
+
+# Windows-native scripts and Visual Studio files: CRLF on checkout.
+*.ps1               text eol=crlf
+*.bat               text eol=crlf
+*.cmd               text eol=crlf
+*.sln               text eol=crlf
+*.vcxproj           text eol=crlf
+*.vcxproj.filters   text eol=crlf
+*.props             text eol=crlf
+*.targets           text eol=crlf
+
+# Binary assets and build products: never apply text conversion.
+*.png               binary
+*.jpg               binary
+*.jpeg              binary
+*.gif               binary
+*.bmp               binary
+*.ico               binary
+*.wav               binary
+*.mid               binary
+*.midi              binary
+*.mp3               binary
+*.ogg               binary
+*.zip               binary
+*.7z                binary
+*.exe               binary
+*.dll               binary
+*.pdb               binary
+*.obj               binary
+*.lib               binary
