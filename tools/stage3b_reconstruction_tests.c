@@ -1522,6 +1522,7 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
     bool bSecurityDeskLeft = false;
     bool bSecurityDeskRight = false;
     bool bSecretaryDesk = false;
+    bool bSecretaryDeskChair = false;
     bool bDirectorDesk = false;
 
     for(
@@ -1615,7 +1616,7 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
             pRect->y == 36U &&
             pRect->width == 8U &&
             pRect->height == 8U &&
-            pRect->rotation == 45U
+            pRect->rotation == 135
         )
         {
             bSecretaryDesk = true;
@@ -1623,8 +1624,23 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
             F144_CHECK(
                 pRect->authored_width16 == 96U &&
                 pRect->authored_height16 == 64U,
-                "Secretary desk keeps authored 6x4 footprint inside diagonal bounds"
+                "Secretary desk keeps authored 6x4 footprint at transformed 135-degree angle"
             );
+        }
+
+        if(
+            pRect->type ==
+                (uint8_t)FLOPPY144_SITE_CHAIR &&
+            pRect->room ==
+                (uint8_t)FLOPPY144_ROOM_SECRETARY_OFFICE &&
+            pRect->x == 49U &&
+            pRect->y == 40U &&
+            pRect->width == 4U &&
+            pRect->height == 4U &&
+            pRect->rotation == 135
+        )
+        {
+            bSecretaryDeskChair = true;
         }
 
         if(
@@ -1744,8 +1760,9 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
 
     F144_CHECK(
         bSecretaryDesk &&
+        bSecretaryDeskChair &&
         bDirectorDesk,
-        "diagonal offices preserve authored desk aspect ratios at runtime"
+        "diagonal offices preserve transformed desk/chair orientation and authored aspect ratios"
     );
 
     F144_CHECK(

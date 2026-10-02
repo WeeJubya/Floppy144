@@ -1707,7 +1707,7 @@
             "centre_y": 40,
             "width": 6,
             "height": 4,
-            "rotation": 45
+            "rotation": 135
           },
           {
             "id": "SECRETARY_OFFICE_TERMINAL_DESK",
@@ -1756,7 +1756,7 @@
             "centre_y": 42,
             "width": 2,
             "height": 2,
-            "rotation": 45
+            "rotation": 135
           },
           {
             "type": "CHAIR",
@@ -6050,7 +6050,7 @@
         "centre_y": 40,
         "width": 6,
         "height": 4,
-        "rotation": 45
+        "rotation": 135
       },
       "drawing_definition_id": "DRAW_STANDARD_DESK"
     },
@@ -6123,7 +6123,7 @@
         "centre_y": 42,
         "width": 2,
         "height": 2,
-        "rotation": 45
+        "rotation": 135
       },
       "drawing_definition_id": "DRAW_CHAIR"
     },
