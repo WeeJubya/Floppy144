@@ -8445,8 +8445,8 @@
     {
       "id": "P-030",
       "name": "Director door plate",
-      "room_id": "SECRETARY_OFFICE",
-      "parent_id": "SECR_DIR",
+      "room_id": "CORRIDOR",
+      "parent_id": "COR_SECR",
       "collection_ids": [
         "FM-04"
       ],
@@ -20350,6 +20350,10 @@
         },
         {
           "op": "REVEAL_PHYSICAL_ITEM",
+          "target": "P-030"
+        },
+        {
+          "op": "REVEAL_PHYSICAL_ITEM",
           "target": "P-152"
         },
         {
@@ -20377,7 +20381,7 @@
           "target": "P-158"
         }
       ],
-      "effect_summary": "UNLOCK_CONNECTION COR_REC; UNLOCK_CONNECTION COR_OFF; REVEAL_PHYSICAL_ITEM P-007; REVEAL_PHYSICAL_ITEM P-152; REVEAL_PHYSICAL_ITEM P-153; REVEAL_PHYSICAL_ITEM P-154; REVEAL_PHYSICAL_ITEM P-155; REVEAL_PHYSICAL_ITEM P-156; REVEAL_PHYSICAL_ITEM P-157; REVEAL_PHYSICAL_ITEM P-158",
+      "effect_summary": "UNLOCK_CONNECTION COR_REC; UNLOCK_CONNECTION COR_OFF; REVEAL_PHYSICAL_ITEM P-007; REVEAL_PHYSICAL_ITEM P-030; REVEAL_PHYSICAL_ITEM P-152; REVEAL_PHYSICAL_ITEM P-153; REVEAL_PHYSICAL_ITEM P-154; REVEAL_PHYSICAL_ITEM P-155; REVEAL_PHYSICAL_ITEM P-156; REVEAL_PHYSICAL_ITEM P-157; REVEAL_PHYSICAL_ITEM P-158",
       "persistent": true,
       "idempotent": true,
       "source_order": 5
@@ -25395,12 +25399,12 @@
       "relation": "physical_parent"
     },
     {
-      "parent_id": "SECRETARY_OFFICE",
+      "parent_id": "CORRIDOR",
       "child_id": "P-030",
       "relation": "contains_physical_item"
     },
     {
-      "parent_id": "SECR_DIR",
+      "parent_id": "COR_SECR",
       "child_id": "P-030",
       "relation": "physical_parent"
     },

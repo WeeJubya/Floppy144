@@ -612,6 +612,97 @@ static void Floppy144TestShelvingPresentationAndRecoveredOrder(void)
     );
 }
 
+static void Floppy144TestAllCorridorDoorContainers(void)
+{
+    typedef struct Floppy144DoorContainerFixture
+    {
+        const char *pszDoorId;
+        const char *pszPlateId;
+    }
+    Floppy144DoorContainerFixture;
+
+    static const Floppy144DoorContainerFixture asDoors[] =
+    {
+        { "COR_REC",   "P-152" },
+        { "COR_RECO",  "P-158" },
+        { "COR_OFF",   "P-153" },
+        { "COR_SEC",   "P-156" },
+        { "COR_IT",    "P-155" },
+        { "COR_SECR",  "P-030" },
+        { "COR_STAFF", "P-157" },
+        { "COR_FAC",   "P-154" }
+    };
+
+    Floppy144WorldState sWorld;
+    Floppy144RunState sState;
+    Floppy144CabinetState sCabinet;
+    uint32_t uDoorIndex;
+
+    Floppy144TestReset(
+        &sWorld,
+        &sState,
+        &sCabinet
+    );
+
+    (void)Floppy144RunStateReconstructRoom(
+        &sState,
+        FLOPPY144_ROOM_CORRIDOR
+    );
+
+    F144_CHECK(
+        Floppy144RunStateFireTrigger(
+            &sState,
+            Floppy144GameDataTriggerId("T-005")
+        ),
+        "corridor-door fixture reveals FM-04 room plates"
+    );
+
+    for(
+        uDoorIndex = 0U;
+        uDoorIndex < (uint32_t)(sizeof(asDoors) / sizeof(asDoors[0]));
+        ++uDoorIndex
+    )
+    {
+        const Floppy144DoorContainerFixture *pDoor =
+            &asDoors[uDoorIndex];
+
+        uint32_t uPlateIndex;
+
+        Floppy144CabinetReset(
+            &sCabinet
+        );
+
+        F144_CHECK(
+            Floppy144CabinetOpenParent(
+                &sCabinet,
+                &sState,
+                pDoor->pszDoorId
+            ),
+            "every internal Corridor door opens the reusable Door container"
+        );
+
+        F144_CHECK(
+            strcmp(
+                sCabinet.szContainerType,
+                "DOOR"
+            ) == 0,
+            "Corridor door container identifies itself as DOOR"
+        );
+
+        uPlateIndex =
+            Floppy144TestVisibleContentIndex(
+                &sCabinet,
+                &sState,
+                pDoor->pszPlateId
+            );
+
+        F144_CHECK(
+            uPlateIndex != UINT32_MAX,
+            "Corridor Door container contains its office room plate"
+        );
+    }
+}
+
 static void Floppy144TestDoorParentDisplayName(void)
 {
     Floppy144WorldState sWorld;
@@ -894,6 +985,7 @@ int main(void)
     Floppy144TestChairContentsContract();
     Floppy144TestGenericParentContents();
     Floppy144TestShelvingPresentationAndRecoveredOrder();
+    Floppy144TestAllCorridorDoorContainers();
     Floppy144TestDoorParentDisplayName();
     Floppy144TestRecoveredChildRevealsCabinetCode();
     Floppy144TestSecurityCabinetUnlockAndContents();

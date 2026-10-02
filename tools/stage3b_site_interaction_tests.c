@@ -1153,78 +1153,6 @@ static void Floppy144TestLockedDoorInspectActions(void)
     );
 }
 
-static void Floppy144TestSecretaryDirectorDoorPlate(void)
-{
-    Floppy144WorldState sWorld;
-    Floppy144RunState sState;
-    Floppy144SiteInspectionTarget sTarget;
-    const char *pszLabel;
-
-    Floppy144TestReset(
-        &sWorld,
-        &sState
-    );
-
-    (void)Floppy144RunStateReconstructRoom(
-        &sState,
-        FLOPPY144_ROOM_SECRETARY_OFFICE
-    );
-
-    /*
-     * SECR_DIR sits on the north wall at x46..50 / y30. Stand immediately
-     * inside the Secretary's Office. Director Office is deliberately still
-     * unreconstructed: the plaque must advertise the destination before the
-     * threshold itself becomes a traversable reconstructed boundary.
-     */
-    Floppy144TestSetPosition(
-        &sState,
-        48,
-        32
-    );
-
-    F144_CHECK(
-        Floppy144SiteResolveInspectionTarget(
-            &sState,
-            &sTarget
-        ) &&
-        sTarget.pszParentId != NULL &&
-        strcmp(
-            sTarget.pszParentId,
-            "SECR_DIR"
-        ) == 0 &&
-        sTarget.pszPhysicalItemId != NULL &&
-        strcmp(
-            sTarget.pszPhysicalItemId,
-            "P-030"
-        ) == 0,
-        "Secretary-side Director door resolves its authored room plate"
-    );
-
-    F144_CHECK(
-        (
-            Floppy144SiteAvailableActions(
-                &sState
-            ) &
-            FLOPPY144_SITE_ACTION_INSPECT
-        ) != 0U,
-        "Secretary-side Director door advertises Inspect before Director reconstruction"
-    );
-
-    pszLabel =
-        Floppy144SiteContextLabel(
-            &sState
-        );
-
-    F144_CHECK(
-        pszLabel != NULL &&
-        strcmp(
-            pszLabel,
-            "DIRECTOR"
-        ) == 0,
-        "Secretary-side Director door exposes DIRECTOR proximity label"
-    );
-}
-
 static const char *Floppy144TestCorridorDoorExpectedLabel(
     const Floppy144SiteRect *pDoor
 )
@@ -1261,6 +1189,43 @@ static const char *Floppy144TestCorridorDoorExpectedLabel(
         case FLOPPY144_ROOM_SECRETARY_OFFICE:  return "DIRECTOR";
         case FLOPPY144_ROOM_STAFF_ROOM:        return "STAFF ROOM";
         case FLOPPY144_ROOM_FACILITIES:        return "FACILITIES";
+        default:                               return NULL;
+    }
+}
+
+static const char *Floppy144TestCorridorDoorExpectedParent(
+    const Floppy144SiteRect *pDoor
+)
+{
+    uint8_t uOtherRoom;
+
+    if(
+        pDoor == NULL ||
+        pDoor->type != (uint8_t)FLOPPY144_SITE_DOOR ||
+        (
+            pDoor->from_room != (uint8_t)FLOPPY144_ROOM_CORRIDOR &&
+            pDoor->to_room != (uint8_t)FLOPPY144_ROOM_CORRIDOR
+        )
+    )
+    {
+        return NULL;
+    }
+
+    uOtherRoom =
+        pDoor->from_room == (uint8_t)FLOPPY144_ROOM_CORRIDOR
+        ? pDoor->to_room
+        : pDoor->from_room;
+
+    switch((Floppy144RoomId)uOtherRoom)
+    {
+        case FLOPPY144_ROOM_RECEPTION:         return "COR_REC";
+        case FLOPPY144_ROOM_RECORDS_OFFICE:    return "COR_RECO";
+        case FLOPPY144_ROOM_MAIN_OFFICE:       return "COR_OFF";
+        case FLOPPY144_ROOM_SECURITY:          return "COR_SEC";
+        case FLOPPY144_ROOM_IT_SUPPORT:        return "COR_IT";
+        case FLOPPY144_ROOM_SECRETARY_OFFICE:  return "COR_SECR";
+        case FLOPPY144_ROOM_STAFF_ROOM:        return "COR_STAFF";
+        case FLOPPY144_ROOM_FACILITIES:        return "COR_FAC";
         default:                               return NULL;
     }
 }
@@ -1461,6 +1426,16 @@ static void Floppy144TestCorridorDoorLabels(void)
                 &sState,
                 (Floppy144RoomId)uOtherRoom
             );
+
+            /*
+             * FM-04 restores the physical room plates. Once T-005 has fired,
+             * Inspect must resolve the door itself as the parent rather than
+             * falling back to a one-line proximity notice.
+             */
+            (void)Floppy144RunStateFireTrigger(
+                &sState,
+                Floppy144GameDataTriggerId("T-005")
+            );
         }
 
         Floppy144RunStateSetPlayerSitePosition(
@@ -1523,6 +1498,29 @@ static void Floppy144TestCorridorDoorLabels(void)
             ) != 0U,
             "Corridor-facing door advertises Inspect"
         );
+
+        if(uOtherRoom < (uint8_t)FLOPPY144_ROOM_COUNT)
+        {
+            Floppy144SiteInspectionTarget sTarget;
+            const char *pszExpectedParent =
+                Floppy144TestCorridorDoorExpectedParent(
+                    pDoor
+                );
+
+            F144_CHECK(
+                pszExpectedParent != NULL &&
+                Floppy144SiteResolveInspectionTarget(
+                    &sState,
+                    &sTarget
+                ) &&
+                sTarget.pszParentId != NULL &&
+                strcmp(
+                    sTarget.pszParentId,
+                    pszExpectedParent
+                ) == 0,
+                "Corridor office door Inspect resolves the DOOR parent"
+            );
+        }
 
         ++uAuditedDoorCount;
     }
@@ -2038,7 +2036,6 @@ int main(void)
     Floppy144TestNotebookPopulation();
     Floppy144TestRecordsTrolleyNotebookGuidance();
     Floppy144TestLockedDoorInspectActions();
-    Floppy144TestSecretaryDirectorDoorPlate();
     Floppy144TestCorridorDoorLabels();
     Floppy144TestContextLabels();
     Floppy144TestExteriorExitBehaviour();
