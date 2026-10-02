@@ -1636,7 +1636,7 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
             pRect->y == 4U &&
             pRect->width == 10U &&
             pRect->height == 10U &&
-            pRect->rotation == 315U
+            pRect->rotation == -45
         )
         {
             bDirectorDesk = true;
@@ -1644,7 +1644,7 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
             F144_CHECK(
                 pRect->authored_width16 == 128U &&
                 pRect->authored_height16 == 64U,
-                "Director desk keeps authored 8x4 footprint inside diagonal bounds"
+                "Director desk keeps authored 8x4 footprint and -45-degree facing"
             );
         }
 

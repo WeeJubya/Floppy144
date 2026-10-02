@@ -147,6 +147,7 @@ typedef struct Placement
     double rotation;
 
     int rotation_normalized;
+    int rotation_authored;
 
     /* Conservative whole-unit AABB used by the current Site runtime. */
     int bounds_x;
@@ -1625,6 +1626,7 @@ static bool NormalizePlacement(SiteData *site, Placement *placement, const char 
         }
 
         rotation = placement->has_rotation ? RoundToInt(placement->rotation) : 0;
+        placement->rotation_authored = rotation;
         rotation %= 360;
         if(rotation < 0) rotation += 360;
 
@@ -1690,6 +1692,7 @@ static bool NormalizePlacement(SiteData *site, Placement *placement, const char 
         }
 
         rotation = RoundToInt(placement->rotation);
+        placement->rotation_authored = rotation;
 
         if(rotation % 45 != 0)
         {
@@ -2665,7 +2668,7 @@ static bool WriteGeneratedFile(const SiteData *site, const char *input_path, con
                         placement->centre_y16,
                         placement->width16,
                         placement->height16,
-                        placement->rotation_normalized
+                        placement->rotation_authored
                     );
                 }
             }
@@ -2697,7 +2700,7 @@ static bool WriteGeneratedFile(const SiteData *site, const char *input_path, con
                     placement->centre_y16,
                     placement->width16,
                     placement->height16,
-                    placement->rotation_normalized
+                    placement->rotation_authored
                 );
             }
         }
@@ -2754,7 +2757,7 @@ static bool WriteGeneratedFile(const SiteData *site, const char *input_path, con
                     placement->centre_y16,
                     placement->width16,
                     placement->height16,
-                    placement->rotation_normalized
+                    placement->rotation_authored
                 );
             }
         }

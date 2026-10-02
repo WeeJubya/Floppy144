@@ -29,7 +29,7 @@ static const Floppy144SiteRect floppy144_site_rects[] =
 
     #define SITE_ROTATED_GEOMETRY(room, type, x, y, width, height, centre_x16, centre_y16, width16, height16, rotation) \
         { (uint8_t)(type), (uint8_t)(room), (uint8_t)(room), (uint8_t)(room), \
-          (uint8_t)(x), (uint8_t)(y), (uint8_t)(width), (uint8_t)(height), (uint16_t)(rotation), \
+          (uint8_t)(x), (uint8_t)(y), (uint8_t)(width), (uint8_t)(height), (int16_t)(rotation), \
           (uint16_t)(width16), (uint16_t)(height16) },
 
     #define SITE_BOUNDARY(room, type, from_room, to_room, x, y, width, height) \
@@ -40,7 +40,7 @@ static const Floppy144SiteRect floppy144_site_rects[] =
 
     #define SITE_ROTATED_BOUNDARY(room, type, from_room, to_room, x, y, width, height, centre_x16, centre_y16, width16, height16, rotation) \
         { (uint8_t)(type), (uint8_t)(room), (uint8_t)(from_room), (uint8_t)(to_room), \
-          (uint8_t)(x), (uint8_t)(y), (uint8_t)(width), (uint8_t)(height), (uint16_t)(rotation), \
+          (uint8_t)(x), (uint8_t)(y), (uint8_t)(width), (uint8_t)(height), (int16_t)(rotation), \
           (uint16_t)(width16), (uint16_t)(height16) },
 
     /* Legacy macros keep stale generated files buildable during migration. */
@@ -62,7 +62,7 @@ static const Floppy144SiteRect floppy144_site_rects[] =
     #define SITE_ROTATED_SHARED(type, x, y, width, height, centre_x16, centre_y16, width16, height16, rotation) \
         { (uint8_t)(type), (uint8_t)FLOPPY144_SITE_ROOM_SHARED, \
           (uint8_t)FLOPPY144_SITE_ROOM_SHARED, (uint8_t)FLOPPY144_SITE_ROOM_SHARED, \
-          (uint8_t)(x), (uint8_t)(y), (uint8_t)(width), (uint8_t)(height), (uint16_t)(rotation), \
+          (uint8_t)(x), (uint8_t)(y), (uint8_t)(width), (uint8_t)(height), (int16_t)(rotation), \
           (uint16_t)(width16), (uint16_t)(height16) },
 
     #include "floppy144_site_generated.def"

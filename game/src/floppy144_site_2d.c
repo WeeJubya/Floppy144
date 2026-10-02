@@ -909,12 +909,27 @@ static void Floppy144Site2DOutlineDiamond(
     );
 }
 
+static int32_t Floppy144Site2DNormalisedRotation(
+    int16_t rotation
+)
+{
+    int32_t normalised =
+        (int32_t)rotation % 360;
+
+    if(normalised < 0)
+    {
+        normalised += 360;
+    }
+
+    return normalised;
+}
+
 static bool Floppy144Site2DRotationIsDiagonal(
-    uint16_t rotation
+    int16_t rotation
 )
 {
     return
-        (rotation % 90U) != 0U;
+        (Floppy144Site2DNormalisedRotation(rotation) % 90) != 0;
 }
 
 /*
@@ -936,13 +951,10 @@ static bool Floppy144Site2DDiagonalAxes(
     int32_t *v_y
 )
 {
-    int32_t radius_x;
-    int32_t radius_y;
     int32_t width_part_x;
     int32_t width_part_y;
     int32_t height_part_x;
     int32_t height_part_y;
-    uint32_t total;
     uint16_t facing;
 
     if(
@@ -961,11 +973,10 @@ static bool Floppy144Site2DDiagonalAxes(
         return false;
     }
 
-    total =
-        (uint32_t)rect->authored_width16 +
-        (uint32_t)rect->authored_height16;
-
-    if(total == 0U)
+    if(
+        rect->authored_width16 == 0U ||
+        rect->authored_height16 == 0U
+    )
     {
         return false;
     }
@@ -978,37 +989,63 @@ static bool Floppy144Site2DDiagonalAxes(
         screen_rect->y +
         (screen_rect->height - 1) / 2;
 
-    radius_x =
-        (screen_rect->width - 1) / 2;
-
-    radius_y =
-        (screen_rect->height - 1) / 2;
-
+    /*
+     * screen_rect is the conservative collision/culling AABB and may be up to
+     * a whole Site unit larger on each axis than the actual rotated furniture.
+     * Render from the authored dimensions at the fixed Site scale instead.
+     *
+     * For a 45-degree local axis:
+     * component = half-length * 1/sqrt(2).
+     * 181/256 is a compact integer approximation of 1/sqrt(2).
+     */
     width_part_x =
         (int32_t)(
-            ((int64_t)radius_x *
-            (int64_t)rect->authored_width16) /
-            (int64_t)total
+            (
+                (int64_t)rect->authored_width16 *
+                FLOPPY144_SITE_2D_PIXELS_PER_UNIT *
+                181
+            ) /
+            (
+                (int64_t)FLOPPY144_SITE_FIXED_ONE *
+                512
+            )
         );
 
-    width_part_y =
-        (int32_t)(
-            ((int64_t)radius_y *
-            (int64_t)rect->authored_width16) /
-            (int64_t)total
-        );
+    width_part_y = width_part_x;
 
     height_part_x =
-        radius_x - width_part_x;
+        (int32_t)(
+            (
+                (int64_t)rect->authored_height16 *
+                FLOPPY144_SITE_2D_PIXELS_PER_UNIT *
+                181
+            ) /
+            (
+                (int64_t)FLOPPY144_SITE_FIXED_ONE *
+                512
+            )
+        );
 
-    height_part_y =
-        radius_y - width_part_y;
+    height_part_y = height_part_x;
+
+    if(
+        width_part_x <= 0 ||
+        height_part_x <= 0
+    )
+    {
+        return false;
+    }
 
     facing =
         (uint16_t)(
-            (((rect->rotation % 360U) + 22U) / 45U) *
-            45U
-        ) % 360U;
+            (
+                (
+                    Floppy144Site2DNormalisedRotation(
+                        rect->rotation
+                    ) + 22
+                ) / 45
+            ) * 45
+        ) % 360;
 
     switch(facing)
     {
@@ -2602,7 +2639,7 @@ static void Floppy144Site2DDrawFurnitureDetails(
     Floppy144SiteElement element,
     const Floppy144SiteRect *rect,
     const Floppy144SiteScreenRect *screen_rect,
-    uint16_t rotation,
+    int16_t rotation,
     uint32_t edge_colour
 )
 {
@@ -2644,7 +2681,15 @@ static void Floppy144Site2DDrawFurnitureDetails(
      * directional detail using the nearest cardinal edge.
      */
     facing =
-        (uint16_t)((((rotation % 360U) + 45U) / 90U) * 90U) % 360U;
+        (uint16_t)(
+            (
+                (
+                    Floppy144Site2DNormalisedRotation(
+                        rotation
+                    ) + 45
+                ) / 90
+            ) * 90
+        ) % 360;
 
     switch(element)
     {
@@ -2930,9 +2975,14 @@ static void Floppy144Site2DDrawFurnitureDetails(
                 int32_t centre_y;
                 uint16_t diagonal_facing =
                     (uint16_t)(
-                        (((rotation % 360U) + 22U) / 45U) *
-                        45U
-                    ) % 360U;
+                        (
+                            (
+                                Floppy144Site2DNormalisedRotation(
+                                    rotation
+                                ) + 22
+                            ) / 45
+                        ) * 45
+                    ) % 360;
 
                 detail_rect.x =
                     screen_rect->x + 5;

@@ -917,9 +917,24 @@ function Test-PhysicalItemPlayerFacingContract {
         $Site2DSource -notmatch
             'authored_width16' -or
         $Site2DSource -notmatch
-            'Floppy144Site2DFillQuad'
+            'Floppy144Site2DFillQuad' -or
+        $Site2DSource -notmatch
+            'FLOPPY144_SITE_2D_PIXELS_PER_UNIT \*' -or
+        $Site2DSource -notmatch
+            'Floppy144Site2DNormalisedRotation'
     ) {
-        throw "Diagonal furniture no longer preserves authored aspect ratio and desktop orientation."
+        throw "Diagonal furniture no longer preserves authored size, aspect ratio and signed orientation."
+    }
+
+    $SiteCompilerSource =
+        Get-Content -Raw -Path (Join-Path $Root "tools\site_compiler.c")
+
+    if(
+        $SiteCompilerSource -notmatch 'rotation_authored' -or
+        $SiteCompilerSource -notmatch
+            'placement->rotation_authored'
+    ) {
+        throw "Site compiler no longer preserves authored signed rotations."
     }
 
     Write-Host "PHYSICAL ITEM PLAYER-FACING CONTRACT: PASS"

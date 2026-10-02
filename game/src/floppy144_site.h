@@ -98,10 +98,10 @@ Floppy144SiteElement;
  * endpoints so renderers can decide whether that boundary belongs in the
  * current reconstruction without spatial guesswork or visibility halos.
  *
- * Coordinates and dimensions are expressed in whole Site units. rotation is
- * the authored clockwise rotation in degrees, normalised to 0..359. Rotated
- * placements still expose conservative generated bounds for collision, while
- * renderers may use rotation to orient directional furniture detail.
+ * Coordinates and dimensions are expressed in whole Site units. rotation
+ * preserves the authored signed clockwise angle. Rotated placements still
+ * expose conservative generated bounds for collision, while renderers may use
+ * the signed angle to retain directional furniture semantics.
  */
 
 typedef struct Floppy144SiteRect
@@ -114,7 +114,7 @@ typedef struct Floppy144SiteRect
     uint8_t y;
     uint8_t width;
     uint8_t height;
-    uint16_t rotation;
+    int16_t rotation;
 
     /*
      * Original unrotated authored footprint in x16 Site units.
