@@ -2006,6 +2006,121 @@ static void Floppy144TestStaleEvidenceSaveRecovery(void)
 }
 
 /*
+ * A fully-qualified OPEN becomes the namespace for subsequent short IDs.
+ *
+ * This mirrors normal play after several collections have been restored: the
+ * player may explicitly open a record from an older collection and then follow
+ * its RS-#### guidance. The second OPEN must stay in that collection rather
+ * than silently using the most recently restored one.
+ */
+static void Floppy144TestFullOpenUpdatesShortIdContext(void)
+{
+    Floppy144WorldState sWorld;
+    Floppy144RunState sRunState;
+    Floppy144TerminalState sTerminal;
+    Floppy144CollectionId eDr02 =
+        Floppy144GameDataCollectionId("DR-02");
+    Floppy144CollectionId eDr03 =
+        Floppy144GameDataCollectionId("DR-03");
+    char szFullId[24];
+    char szShortCommand[40];
+    char szFullCommand[48];
+    const char *pszShortId;
+
+    Floppy144TestReachOpeningCollections(
+        &sWorld,
+        &sRunState,
+        &sTerminal
+    );
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "RESTORE DR-02"
+    );
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "RESTORE DR-03"
+    );
+
+    F144_CHECK(
+        eDr02 < FLOPPY144_COLLECTION_COUNT &&
+        eDr03 < FLOPPY144_COLLECTION_COUNT &&
+        sTerminal.default_record_collection_valid &&
+        sTerminal.default_record_collection == eDr03,
+        "full-OPEN context fixture starts in the most recently restored collection"
+    );
+
+    F144_CHECK(
+        Floppy144TestCatalogueRecordId(
+            eDr02,
+            0U,
+            szFullId,
+            sizeof(szFullId),
+            NULL,
+            0U
+        ),
+        "full-OPEN context fixture resolves a DR-02 record"
+    );
+
+    snprintf(
+        szFullCommand,
+        sizeof(szFullCommand),
+        "OPEN %s",
+        szFullId
+    );
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        szFullCommand
+    );
+
+    F144_CHECK(
+        sTerminal.open_record_requested &&
+        sTerminal.requested_collection == eDr02 &&
+        sTerminal.default_record_collection_valid &&
+        sTerminal.default_record_collection == eDr02,
+        "successful full OPEN switches subsequent short IDs to that collection"
+    );
+
+    sTerminal.open_record_requested = false;
+
+    pszShortId =
+        strstr(
+            szFullId,
+            "RS-"
+        );
+
+    snprintf(
+        szShortCommand,
+        sizeof(szShortCommand),
+        "OPEN %s",
+        pszShortId != NULL ? pszShortId : ""
+    );
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        szShortCommand
+    );
+
+    F144_CHECK(
+        pszShortId != NULL &&
+        sTerminal.open_record_requested &&
+        sTerminal.requested_collection == eDr02 &&
+        sTerminal.requested_record_index == 0U,
+        "short OPEN follows the collection established by the preceding full OPEN"
+    );
+}
+
+/*
  * FM-18-RS-0074 is itself the authority to restore the Server Room
  * environmental panel. The reveal must persist when the record is viewed,
  * even if the Server Room has not yet been reconstructed; room reconstruction
@@ -2093,6 +2208,7 @@ static void Floppy144TestFm18SuppressionRecordRestoresServerPanel(void)
 
 int main(void)
 {
+    Floppy144TestFullOpenUpdatesShortIdContext();
     Floppy144TestFm18SuppressionRecordRestoresServerPanel();
     Floppy144TestStaleEvidenceSaveRecovery();
     Floppy144TestRestoreProgress();
