@@ -21,17 +21,18 @@
     "Ambient interactions never alter persistent investigation state.",
     "Site orientation is baked into canonical JSON geometry; runtime Site rendering must not apply the former 90-degree presentation transform.",
     "Furniture back-edge rotations are expressed in final player-facing Site axes. Full Site spreadsheet border directions are rotated into those axes before being stored.",
-    "Act II branch documents are mutually gated by workstream availability: both are initially selectable, the unchosen branch is deferred after selection, and T-028 releases the alternate workstream after Act II core completion."
+    "Act II branch documents are mutually gated by workstream availability: both are initially selectable, the unchosen branch is deferred after selection, and T-028 releases the alternate workstream after Act II core completion.",
+    "Physical-item and interaction totals are authored baselines rather than hard caps; new stable IDs may be appended when gameplay benefits, but existing IDs must never be renumbered."
   ],
   "counts": {
     "collections": 35,
     "documents": 165,
     "budgeted_readable_documents": 163,
     "triggers": 50,
-    "interactions": 40,
+    "interactions": 42,
     "ambient_interactions": 16,
     "evidence": 23,
-    "physical_items": 161,
+    "physical_items": 634,
     "rooms": 11,
     "furniture": 151,
     "fixtures": 91,
@@ -16598,6 +16599,21 @@
       "source_status": "authored-stage3c-furniture-coverage",
       "source_order": 633,
       "description": "A brass paper fastener lies under the seat, flattened from being stepped on more than once."
+    },
+    {
+      "id": "P-634",
+      "name": "Facilities recovery authorisation",
+      "room_id": "MAIN_OFFICE",
+      "parent_id": "MAIN_OFFICE_DESK_06",
+      "collection_ids": [
+        "FM-04"
+      ],
+      "evidence_ids": [],
+      "role": "Progression / capability",
+      "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
+      "source_status": "authored-stage3c-progression",
+      "source_order": 634,
+      "description": "PROJECT MANAGER AUTHORISATION: Main Office terminal may recover FM-04 to reconstruct Facilities. After that, all FM recovery moves to the Facilities terminal."
     }
   ],
   "collections": [
@@ -18571,7 +18587,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-004",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nFACILITIES ACCESS AUTHORISATION\n\nThe Facilities Office remains operational for the duration of the closure programme.\n\nAuthorised users:\n- Imran Shah;\n- approved maintenance contractors under escort;\n- Martin Webb;\n- Security staff where required.\n\nThe room contains current maintenance schedules, service labels, plant references and decommissioning paperwork.\n\nDo not clear shelving until the final retained-services check has been signed.\n\nFacilities note:\nAnyone seeking a key should state which door it opens. \"The one down the corridor\" is no longer an acceptable asset description.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nFACILITIES ACCESS AUTHORISATION\n\nThe Facilities Office remains operational for the duration of the closure programme.\n\nAuthorised users:\n- Imran Shah;\n- approved maintenance contractors under escort;\n- Martin Webb;\n- Security staff where required.\n\nRecovery routing:\nUntil the Facilities Office has been reconstructed, FM-04 may be recovered from the Main Office terminal under the Project Manager's temporary authorisation. Once Facilities is available, all subsequent Facilities Management collections are to be recovered from the Facilities terminal.\n\nThe room contains current maintenance schedules, service labels, plant references and decommissioning paperwork.\n\nDo not clear shelving until the final retained-services check has been signed.\n\nFacilities note:\nAnyone seeking a key should state which door it opens. \"The one down the corridor\" is no longer an acceptable asset description.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "FM-04"
     },
@@ -22807,6 +22823,30 @@
       "follow_on": "Server Room inner bay",
       "persistent": true,
       "source_order": 41
+    },
+    {
+      "id": "I-042",
+      "type": "Capability",
+      "physical_source": "P-634",
+      "location": "MAIN_OFFICE",
+      "prerequisites": [],
+      "player_action": "Inspect authorisation",
+      "effect_summary": "Authorises the Main Office terminal to recover FM-04 for the Facilities bootstrap",
+      "effects": [
+        {
+          "op": "COMPLETE_INTERACTION",
+          "target": "I-042"
+        },
+        {
+          "op": "GRANT_CAPABILITY",
+          "target": "MAIN_OFFICE_FACILITIES_TERMINAL"
+        }
+      ],
+      "evidence_id": null,
+      "notebook": "Project Manager authorised FM-04 recovery from the Main Office terminal to bootstrap Facilities.",
+      "follow_on": "Main Office terminal can restore FM-04",
+      "persistent": true,
+      "source_order": 42
     }
   ],
   "ambient_interactions": [
@@ -29255,6 +29295,21 @@
       "parent_id": "T-011",
       "child_id": "TS-27",
       "relation": "trigger_effect_target"
+    },
+    {
+      "parent_id": "MAIN_OFFICE",
+      "child_id": "P-634",
+      "relation": "contains_physical_item"
+    },
+    {
+      "parent_id": "MAIN_OFFICE_DESK_06",
+      "child_id": "P-634",
+      "relation": "physical_parent"
+    },
+    {
+      "parent_id": "I-042",
+      "child_id": "P-634",
+      "relation": "interaction_source"
     }
   ]
 }

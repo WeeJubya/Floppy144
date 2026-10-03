@@ -135,6 +135,16 @@ void Floppy144TerminalResetAtRoom(
 );
 
 /*
+ * Refresh the player-facing physical terminal identity from persistent
+ * capabilities. The Project Manager's authorisation upgrades Main Office to
+ * the combined MAIN OFFICE / FACILITIES bootstrap terminal.
+ */
+void Floppy144TerminalRefreshEnvironmentLine(
+    Floppy144TerminalState *terminal,
+    const Floppy144RunState *run_state
+);
+
+/*
  * Apply player-session policy after Reset/ResetAtRoom.
  * Debug guidance exposes recovery breadcrumbs; first_profile_recovery enables
  * the one-time DR-02/DR-03 onboarding hint; location restrictions bind RESTORE

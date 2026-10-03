@@ -1179,6 +1179,7 @@ static void Floppy144TestPlayerRecoveryPolicy(void)
     Floppy144CollectionId eFm07;
     Floppy144CollectionId eFm23;
     Floppy144CollectionId eTs10;
+    Floppy144InteractionId eI042;
 
     Floppy144TestReachOpeningCollections(
         &sWorld,
@@ -1192,6 +1193,7 @@ static void Floppy144TestPlayerRecoveryPolicy(void)
     eFm07 = Floppy144GameDataCollectionId("FM-07");
     eFm23 = Floppy144GameDataCollectionId("FM-23");
     eTs10 = Floppy144GameDataCollectionId("TS-10");
+    eI042 = Floppy144GameDataInteractionId("I-042");
 
     Floppy144TerminalConfigureSession(
         &sTerminal,
@@ -1353,7 +1355,8 @@ static void Floppy144TestPlayerRecoveryPolicy(void)
         eFm04 < FLOPPY144_COLLECTION_COUNT &&
         eFm07 < FLOPPY144_COLLECTION_COUNT &&
         eFm23 < FLOPPY144_COLLECTION_COUNT &&
-        eTs10 < FLOPPY144_COLLECTION_COUNT,
+        eTs10 < FLOPPY144_COLLECTION_COUNT &&
+        eI042 < FLOPPY144_INTERACTION_COUNT,
         "Facilities bootstrap regression IDs resolve"
     );
 
@@ -1376,6 +1379,70 @@ static void Floppy144TestPlayerRecoveryPolicy(void)
         true,
         true
     );
+    Floppy144TerminalRefreshEnvironmentLine(
+        &sTerminal,
+        &sRunState
+    );
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "RESTORE FM-04"
+    );
+
+    F144_CHECK(
+        !Floppy144RunStateCollectionRestored(
+            &sRunState,
+            eFm04
+        ) &&
+        Floppy144TestTerminalContains(
+            &sTerminal,
+            "PROJECT MANAGER'S DESK"
+        ),
+        "Main Office refuses FM-04 until Project Manager authorisation is inspected"
+    );
+
+    F144_CHECK(
+        Floppy144GameDataInteractionTryRun(
+            &sWorld,
+            &sRunState,
+            eI042
+        ) &&
+        Floppy144RunStateInteractionCompleted(
+            &sRunState,
+            eI042
+        ) &&
+        Floppy144RunStateHasCapability(
+            &sRunState,
+            FLOPPY144_CAPABILITY_MAIN_OFFICE_FACILITIES_TERMINAL
+        ),
+        "Project Manager authorisation upgrades Main Office terminal for FM-04"
+    );
+
+    Floppy144TerminalResetAtRoom(
+        &sTerminal,
+        &sWorld,
+        FLOPPY144_ROOM_MAIN_OFFICE
+    );
+    Floppy144TerminalConfigureSession(
+        &sTerminal,
+        false,
+        true,
+        true
+    );
+    Floppy144TerminalRefreshEnvironmentLine(
+        &sTerminal,
+        &sRunState
+    );
+
+    F144_CHECK(
+        Floppy144TestTerminalContains(
+            &sTerminal,
+            "MAIN OFFICE / FACILITIES TERMINAL"
+        ),
+        "authorised Main Office terminal advertises combined Facilities role"
+    );
 
     Floppy144TestSubmitCommand(
         &sTerminal,
@@ -1389,7 +1456,7 @@ static void Floppy144TestPlayerRecoveryPolicy(void)
             &sRunState,
             eFm04
         ),
-        "Main Office terminal permits FM-04 bootstrap restoration"
+        "authorised Main Office / Facilities terminal permits FM-04 bootstrap restoration"
     );
 
     F144_CHECK(

@@ -465,6 +465,11 @@ static void Floppy144ConfigureTerminalSession(
         global_profile.recovery_sessions_begun <= 1U,
         true
     );
+
+    Floppy144TerminalRefreshEnvironmentLine(
+        &global_terminal,
+        &global_run_state
+    );
 }
 
 /*

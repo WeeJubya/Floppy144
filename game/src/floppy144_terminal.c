@@ -494,6 +494,7 @@ static bool Floppy144TerminalSiteHasReconstructedRoom(
 
 static bool Floppy144TerminalRestoreAllowedAtLocation(
     const Floppy144TerminalState *pTerminal,
+    const Floppy144RunState *pRunState,
     Floppy144CollectionId eCollection
 )
 {
@@ -548,13 +549,21 @@ static bool Floppy144TerminalRestoreAllowedAtLocation(
 
         case FLOPPY144_ROOM_MAIN_OFFICE:
             /*
-             * FM-04 bootstraps Facilities. Requiring the Facilities terminal
-             * to restore it would make the room depend on itself.
+             * FM-04 bootstraps Facilities, but the exception is no longer
+             * implicit. The player must first recover the Project Manager's
+             * temporary routing authorisation from the Main Office.
              */
             return
                 eDomain == FLOPPY144_COLLECTION_DOMAIN_DR ||
                 eDomain == FLOPPY144_COLLECTION_DOMAIN_HR ||
-                eCollection == FLOPPY144_COLLECTION_FM04;
+                (
+                    eCollection == FLOPPY144_COLLECTION_FM04 &&
+                    pRunState != NULL &&
+                    Floppy144RunStateHasCapability(
+                        pRunState,
+                        FLOPPY144_CAPABILITY_MAIN_OFFICE_FACILITIES_TERMINAL
+                    )
+                );
 
         case FLOPPY144_ROOM_RECEPTION:
             return
@@ -571,9 +580,30 @@ static bool Floppy144TerminalRestoreAllowedAtLocation(
 }
 
 static const char *Floppy144TerminalRestoreLocationGuidance(
+    const Floppy144TerminalState *pTerminal,
+    const Floppy144RunState *pRunState,
+    Floppy144CollectionId eCollection,
     Floppy144CollectionDomain eDomain
 )
 {
+    if(
+        pTerminal != NULL &&
+        pTerminal->terminal_room_valid &&
+        pTerminal->terminal_room == FLOPPY144_ROOM_MAIN_OFFICE &&
+        eCollection == FLOPPY144_COLLECTION_FM04 &&
+        (
+            pRunState == NULL ||
+            !Floppy144RunStateHasCapability(
+                pRunState,
+                FLOPPY144_CAPABILITY_MAIN_OFFICE_FACILITIES_TERMINAL
+            )
+        )
+    )
+    {
+        return
+            "INSPECT THE PROJECT MANAGER'S DESK FOR FACILITIES AUTHORISATION.";
+    }
+
     switch(eDomain)
     {
         case FLOPPY144_COLLECTION_DOMAIN_FM:
@@ -721,6 +751,7 @@ void Floppy144TerminalPrintNextAction(
             ) ||
             !Floppy144TerminalRestoreAllowedAtLocation(
                 pTerminal,
+                pRunState,
                 eCollection
             )
         )
@@ -3198,6 +3229,7 @@ static void Floppy144TerminalRestoreCollection(
     if(
         !Floppy144TerminalRestoreAllowedAtLocation(
             terminal,
+            run_state,
             collection
         )
     )
@@ -3207,6 +3239,9 @@ static void Floppy144TerminalRestoreCollection(
         Floppy144TerminalPushLine(
             terminal,
             Floppy144TerminalRestoreLocationGuidance(
+                terminal,
+                run_state,
+                collection,
                 definition->domain
             )
         );
@@ -4130,6 +4165,66 @@ void Floppy144TerminalResetAtRoom(
         "GDR ARCHIVE RECOVERY ENVIRONMENT - %s TERMINAL",
         room_name
     );
+
+    snprintf(
+        terminal->output[0],
+        FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY,
+        "%s",
+        environment_line
+    );
+}
+
+void Floppy144TerminalRefreshEnvironmentLine(
+    Floppy144TerminalState *terminal,
+    const Floppy144RunState *run_state
+)
+{
+    const char *room_name;
+    char environment_line[FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
+
+    if(
+        terminal == NULL ||
+        terminal->output_count == 0U ||
+        !terminal->terminal_room_valid
+    )
+    {
+        return;
+    }
+
+    room_name =
+        Floppy144TerminalRoomName(
+            terminal->terminal_room
+        );
+
+    if(room_name == NULL)
+    {
+        return;
+    }
+
+    if(
+        terminal->terminal_room == FLOPPY144_ROOM_MAIN_OFFICE &&
+        run_state != NULL &&
+        Floppy144RunStateHasCapability(
+            run_state,
+            FLOPPY144_CAPABILITY_MAIN_OFFICE_FACILITIES_TERMINAL
+        )
+    )
+    {
+        snprintf(
+            environment_line,
+            sizeof(environment_line),
+            "GDR ARCHIVE RECOVERY ENVIRONMENT - MAIN OFFICE / FACILITIES TERMINAL"
+        );
+    }
+    else
+    {
+        snprintf(
+            environment_line,
+            sizeof(environment_line),
+            "GDR ARCHIVE RECOVERY ENVIRONMENT - %s TERMINAL",
+            room_name
+        );
+    }
 
     snprintf(
         terminal->output[0],
