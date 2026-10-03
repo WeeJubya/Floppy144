@@ -118,6 +118,7 @@ static void Floppy144TestPhysicalParentCoverage(void)
     uint32_t uRecordIndex;
     uint32_t uPhysicalCount = 0U;
     uint32_t uPhysicalInteractionCount = 0U;
+    uint32_t uExpectedPhysicalInteractionCount = 0U;
 
     for(
         uRecordIndex = 0U;
@@ -205,14 +206,48 @@ static void Floppy144TestPhysicalParentCoverage(void)
         }
     }
 
+    /*
+     * Count the canonical interactions whose source is itself a physical item.
+     * This keeps the audit exact without turning the current authored total
+     * into a ceiling for future progression/worldbuilding additions.
+     */
+    for(
+        uRecordIndex = 0U;
+        uRecordIndex < Floppy144GameDataRecordCount();
+        ++uRecordIndex
+    )
+    {
+        const Floppy144DataRecord *pRecord =
+            Floppy144GameDataRecordAt(uRecordIndex);
+
+        if(
+            pRecord == NULL ||
+            pRecord->eKind != FLOPPY144_DATA_INTERACTION ||
+            pRecord->pszB == NULL
+        )
+        {
+            continue;
+        }
+
+        if(
+            Floppy144GameDataFind(
+                FLOPPY144_DATA_PHYSICAL_ITEM,
+                pRecord->pszB
+            ) != NULL
+        )
+        {
+            ++uExpectedPhysicalInteractionCount;
+        }
+    }
+
     F144_CHECK(
-        uPhysicalCount == 633U,
-        "all 633 physical items participate in Site parent audit"
+        uPhysicalCount >= 633U,
+        "all physical items participate in Site parent audit"
     );
 
     F144_CHECK(
-        uPhysicalInteractionCount == 35U,
-        "35 physical items own canonical gameplay interactions"
+        uPhysicalInteractionCount == uExpectedPhysicalInteractionCount,
+        "all PI-backed gameplay interactions map through Site physical items"
     );
 }
 
