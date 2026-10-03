@@ -2005,8 +2005,95 @@ static void Floppy144TestStaleEvidenceSaveRecovery(void)
     );
 }
 
+/*
+ * FM-18-RS-0074 is itself the authority to restore the Server Room
+ * environmental panel. The reveal must persist when the record is viewed,
+ * even if the Server Room has not yet been reconstructed; room reconstruction
+ * still controls whether the physical item can be encountered on Site.
+ */
+static void Floppy144TestFm18SuppressionRecordRestoresServerPanel(void)
+{
+    Floppy144WorldState sWorld;
+    Floppy144RunState sRunState;
+    Floppy144CollectionId eFm18;
+    Floppy144CollectionId eCollection;
+    Floppy144TriggerId eT042;
+    uint32_t uRecordIndex;
+
+    Floppy144WorldReset(
+        &sWorld
+    );
+
+    Floppy144RunStateBegin(
+        &sRunState,
+        144U
+    );
+
+    eFm18 = Floppy144GameDataCollectionId("FM-18");
+    eT042 = Floppy144GameDataTriggerId("T-042");
+
+    F144_CHECK(
+        eFm18 < FLOPPY144_COLLECTION_COUNT &&
+        eT042 < FLOPPY144_TRIGGER_COUNT,
+        "FM-18 suppression-panel regression IDs resolve"
+    );
+
+    F144_CHECK(
+        Floppy144RunStateBitSet(
+            sRunState.collections,
+            (uint32_t)eFm18
+        ) &&
+        Floppy144WorldRestoreCollection(
+            &sWorld,
+            eFm18
+        ),
+        "FM-18 suppression-panel fixture restores collection"
+    );
+
+    F144_CHECK(
+        !Floppy144RunStateRoomReconstructed(
+            &sRunState,
+            FLOPPY144_ROOM_SERVER_ROOM
+        ),
+        "FM-18 suppression-panel fixture starts before Server Room reconstruction"
+    );
+
+    F144_CHECK(
+        Floppy144DocumentFindRecordId(
+            "FM-18-RS-0074",
+            &eCollection,
+            &uRecordIndex
+        ) &&
+        eCollection == eFm18,
+        "FM-18-RS-0074 resolves to the FM-18 suppression event record"
+    );
+
+    F144_CHECK(
+        Floppy144DocumentApplyEffects(
+            &sWorld,
+            &sRunState,
+            eCollection,
+            uRecordIndex
+        ),
+        "viewing FM-18-RS-0074 applies suppression event effects"
+    );
+
+    F144_CHECK(
+        Floppy144RunStateTriggerFired(
+            &sRunState,
+            eT042
+        ) &&
+        Floppy144GameDataPhysicalItemRevealed(
+            &sRunState,
+            "P-103"
+        ),
+        "FM-18-RS-0074 persistently restores P-103"
+    );
+}
+
 int main(void)
 {
+    Floppy144TestFm18SuppressionRecordRestoresServerPanel();
     Floppy144TestStaleEvidenceSaveRecovery();
     Floppy144TestRestoreProgress();
     Floppy144TestExtendedGlyphs();

@@ -21505,12 +21505,7 @@
       "id": "T-042",
       "collection_id": "FM-18",
       "trigger_document": "Fire Suppression Event Record",
-      "conditions": [
-        {
-          "kind": "room_reconstructed",
-          "target": "SERVER_ROOM"
-        }
-      ],
+      "conditions": [],
       "effects": [
         {
           "op": "REVEAL_PHYSICAL_ITEM",
