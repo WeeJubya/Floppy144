@@ -2142,6 +2142,7 @@ static void Floppy144TestFm18SuppressionRecordRestoresServerPanel(void)
     Floppy144WorldState sWorld;
     Floppy144RunState sRunState;
     Floppy144CollectionId eFm18;
+    Floppy144CollectionId eFm13;
     Floppy144CollectionId eCollection = FLOPPY144_COLLECTION_COUNT;
     Floppy144TriggerId eT042;
     uint32_t uRecordIndex = 0U;
@@ -2156,12 +2157,38 @@ static void Floppy144TestFm18SuppressionRecordRestoresServerPanel(void)
     );
 
     eFm18 = Floppy144GameDataCollectionId("FM-18");
+    eFm13 = Floppy144GameDataCollectionId("FM-13");
     eT042 = Floppy144GameDataTriggerId("T-042");
 
     F144_CHECK(
         eFm18 < FLOPPY144_COLLECTION_COUNT &&
+        eFm13 < FLOPPY144_COLLECTION_COUNT &&
         eT042 < FLOPPY144_TRIGGER_COUNT,
         "FM-18 suppression-panel regression IDs resolve"
+    );
+
+    F144_CHECK(
+        !Floppy144RunStateCollectionAvailable(
+            &sRunState,
+            eFm18
+        ),
+        "FM-18 remains unavailable before FM-13 restoration"
+    );
+
+    F144_CHECK(
+        Floppy144RunStateBitSet(
+            sRunState.collections,
+            (uint32_t)eFm13
+        ),
+        "FM-18 dependency fixture restores FM-13"
+    );
+
+    F144_CHECK(
+        Floppy144RunStateCollectionAvailable(
+            &sRunState,
+            eFm18
+        ),
+        "FM-18 becomes available after FM-13 restoration"
     );
 
     F144_CHECK(

@@ -21565,7 +21565,12 @@
       "id": "T-042",
       "collection_id": "FM-18",
       "trigger_document": "Fire Suppression Event Record",
-      "conditions": [],
+      "conditions": [
+        {
+          "kind": "collection_restored",
+          "target": "FM-13"
+        }
+      ],
       "effects": [
         {
           "op": "REVEAL_PHYSICAL_ITEM",
