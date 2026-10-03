@@ -3439,22 +3439,6 @@ static void Floppy144TerminalRequestOpenRecord(
         return;
     }
 
-    /*
-     * A successful OPEN also establishes the record's collection as the
-     * short-ID namespace. This keeps a sequence such as:
-     *
-     *   OPEN FM-18-RS-0037
-     *   OPEN RS-0074
-     *
-     * inside FM-18 even when another collection was restored more recently.
-     * Failed/deferred OPEN requests deliberately leave the previous namespace
-     * untouched.
-     */
-    terminal->default_record_collection =
-        collection;
-    terminal->default_record_collection_valid =
-        true;
-
     Floppy144CatalogueBuildRecord(
         collection,
         record_index,
