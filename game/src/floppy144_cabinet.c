@@ -117,39 +117,6 @@ static int32_t Floppy144CabinetOrdinalForId(
     return -1;
 }
 
-static uint32_t Floppy144CabinetDistanceSquared(
-    const Floppy144RunState *pRunState,
-    const Floppy144DataRecord *pCabinet
-)
-{
-    int32_t nX0;
-    int32_t nX1;
-    int32_t nY0;
-    int32_t nY1;
-    int32_t nDx = 0;
-    int32_t nDy = 0;
-
-    if(pRunState == NULL || pCabinet == NULL)
-        return UINT32_MAX;
-
-    nX0 = pCabinet->n0 * FLOPPY144_SITE_FIXED_ONE;
-    nX1 = (pCabinet->n0 + pCabinet->n2) * FLOPPY144_SITE_FIXED_ONE;
-    nY0 = pCabinet->n1 * FLOPPY144_SITE_FIXED_ONE;
-    nY1 = (pCabinet->n1 + pCabinet->n3) * FLOPPY144_SITE_FIXED_ONE;
-
-    if(pRunState->player_site_x < nX0)
-        nDx = nX0 - pRunState->player_site_x;
-    else if(pRunState->player_site_x > nX1)
-        nDx = pRunState->player_site_x - nX1;
-
-    if(pRunState->player_site_y < nY0)
-        nDy = nY0 - pRunState->player_site_y;
-    else if(pRunState->player_site_y > nY1)
-        nDy = pRunState->player_site_y - nY1;
-
-    return (uint32_t)(nDx * nDx + nDy * nDy);
-}
-
 static uint32_t Floppy144CabinetCodeHash(const char *pszId,uint32_t uSeed)
 {
     uint32_t h=2166136261U^uSeed;
