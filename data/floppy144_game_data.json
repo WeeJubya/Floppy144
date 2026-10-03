@@ -4156,7 +4156,6 @@
         "SERVER_ROOM_SERVER_20",
         "IT_SERV_01",
         "SERV_01_02",
-        "SERV_01_02",
         "SERVER_ROOM_CABLE_RISER"
       ],
       "floor_geometry": [
@@ -4378,7 +4377,9 @@
       "from_room": "SERVER_ROOM",
       "to_room": "SERVER_ROOM",
       "initial_state": "LOCKED",
-      "unlock_conditions": []
+      "unlock_conditions": [
+        "I-041"
+      ]
     },
     {
       "id": "SECR_DIR",
@@ -22715,6 +22716,33 @@
       "follow_on": "Cabinet child objects inspectable",
       "persistent": true,
       "source_order": 40
+    },
+    {
+      "id": "I-041",
+      "type": "Access",
+      "physical_source": "SERV_01_02",
+      "location": "SERVER_ROOM",
+      "prerequisites": [
+        "I-035",
+        "ROOM_SERVER_ROOM"
+      ],
+      "player_action": "Open door",
+      "effect_summary": "Permanently opens internal Server Room conventional lock",
+      "effects": [
+        {
+          "op": "COMPLETE_INTERACTION",
+          "target": "I-041"
+        },
+        {
+          "op": "UNLOCK_CONNECTION",
+          "target": "SERV_01_02"
+        }
+      ],
+      "evidence_id": null,
+      "notebook": null,
+      "follow_on": "Server Room inner bay",
+      "persistent": true,
+      "source_order": 41
     }
   ],
   "ambient_interactions": [
@@ -27786,11 +27814,6 @@
     },
     {
       "parent_id": "SERVER_ROOM",
-      "child_id": "SERV_01_02",
-      "relation": "contains_fixture"
-    },
-    {
-      "parent_id": "SERVER_ROOM",
       "child_id": "SERVER_ROOM_CABLE_RISER",
       "relation": "contains_fixture"
     },
@@ -29153,6 +29176,11 @@
       "parent_id": "AMB-STAFF-BIRTHDAY",
       "child_id": "P-078",
       "relation": "ambient_interaction_target"
+    },
+    {
+      "parent_id": "I-041",
+      "child_id": "SERV_01_02",
+      "relation": "interaction_source"
     }
   ]
 }

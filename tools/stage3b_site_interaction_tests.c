@@ -1548,6 +1548,7 @@ static void Floppy144TestConventionalDoorAccess(void)
     const Floppy144DataRecord *pDoor;
     Floppy144InteractionId eI035;
     Floppy144InteractionId eI037;
+    Floppy144InteractionId eI041;
     Floppy144InteractionId eResolved;
 
     Floppy144TestReset(&sWorld, &sState);
@@ -1577,6 +1578,7 @@ static void Floppy144TestConventionalDoorAccess(void)
 
     eI035 = Floppy144GameDataInteractionId("I-035");
     eI037 = Floppy144GameDataInteractionId("I-037");
+    eI041 = Floppy144GameDataInteractionId("I-041");
 
     F144_CHECK(
         Floppy144RunStateFireTrigger(
@@ -1589,6 +1591,7 @@ static void Floppy144TestConventionalDoorAccess(void)
     F144_CHECK(
         eI035 < FLOPPY144_INTERACTION_COUNT &&
         eI037 < FLOPPY144_INTERACTION_COUNT &&
+        eI041 < FLOPPY144_INTERACTION_COUNT &&
         Floppy144InteractionTryRun(
             &sWorld,
             &sState,
@@ -1665,6 +1668,55 @@ static void Floppy144TestConventionalDoorAccess(void)
             "IT_SERV_01"
         ),
         "Server Room Access unlocks the conventional door"
+    );
+
+    /*
+     * The internal partition door is another conventional keyed door. With
+     * SITE_KEYS already recovered it must expose Access, not generic Inspect.
+     */
+    Floppy144TestSetPosition(
+        &sState,
+        34,
+        70
+    );
+
+    F144_CHECK(
+        Floppy144SiteRoomAtPosition(
+            sState.player_site_x,
+            sState.player_site_y
+        ) == FLOPPY144_ROOM_SERVER_ROOM &&
+        Floppy144SiteFocusedParentId(&sState) != NULL &&
+        strcmp(
+            Floppy144SiteFocusedParentId(&sState),
+            "SERV_01_02"
+        ) == 0,
+        "internal Server Room door owns Site focus"
+    );
+
+    F144_CHECK(
+        Floppy144SiteAccessInteractionNearby(
+            &sState,
+            &eResolved
+        ) &&
+        eResolved == eI041 &&
+        (
+            Floppy144SiteAvailableActions(&sState) &
+            FLOPPY144_SITE_ACTION_ACCESS
+        ) != 0U,
+        "internal Server Room door advertises authored Access"
+    );
+
+    F144_CHECK(
+        Floppy144InteractionTryRun(
+            &sWorld,
+            &sState,
+            eResolved
+        ) &&
+        Floppy144GameDataConnectionUnlocked(
+            &sState,
+            "SERV_01_02"
+        ),
+        "internal Server Room Access unlocks SERV_01_02"
     );
 }
 
