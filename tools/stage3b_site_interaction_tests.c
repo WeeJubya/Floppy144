@@ -507,7 +507,12 @@ static void Floppy144TestPhysicalInteractionExecution(void)
         "T-006 reveals suppression-panel physical data"
     );
 
-    Floppy144TestSetPosition(&sState, 69, 92);
+    /*
+     * The suppression panel occupies the west wall cell x66..67. At x68 the
+     * player's 2U collision footprint is flush with its room-side edge, well
+     * inside the half-unit interaction contract.
+     */
+    Floppy144TestSetPosition(&sState, 68, 92);
 
     eInteraction =
         Floppy144GameDataInteractionId("I-001");
@@ -604,7 +609,16 @@ static void Floppy144TestFollowOnReveal(void)
         "T-009 reveals P-033"
     );
 
-    Floppy144TestSetPosition(&sState, 14, 54);
+    /*
+     * FACILITIES_SHELVING_01 begins at y55. Put the player's foot point at
+     * y54.5 so the 2U footprint is exactly half a unit from the shelf.
+     */
+    Floppy144RunStateSetPlayerSitePosition(
+        &sState,
+        14 * FLOPPY144_SITE_FIXED_ONE,
+        54 * FLOPPY144_SITE_FIXED_ONE +
+            FLOPPY144_SITE_FIXED_ONE / 2
+    );
 
     F144_CHECK(
         Floppy144SiteResolveInspectionTarget(
@@ -877,7 +891,7 @@ static void Floppy144TestHiddenGeometryDoesNotCollide(void)
         if(
             pRect != NULL &&
             pRect->type == (uint8_t)FLOPPY144_SITE_WALL_MOUNTED_ITEM &&
-            pRect->x == 67U &&
+            pRect->x == 66U &&
             pRect->y == 90U &&
             pRect->width == 1U &&
             pRect->height == 4U
@@ -1184,7 +1198,16 @@ static void Floppy144TestLockedDoorInspectActions(void)
         "fresh REC_OFF fixture remains locked"
     );
 
-    Floppy144TestSetPosition(&sState, 71, 65);
+    /*
+     * REC_OFF starts at y66. Keep the player on the Reception side, exactly
+     * half a unit from the door with the current 2U collision footprint.
+     */
+    Floppy144RunStateSetPlayerSitePosition(
+        &sState,
+        71 * FLOPPY144_SITE_FIXED_ONE,
+        65 * FLOPPY144_SITE_FIXED_ONE +
+            FLOPPY144_SITE_FIXED_ONE / 2
+    );
 
     F144_CHECK(
         Floppy144SiteLockedDoorNearby(&sState),
@@ -1934,7 +1957,7 @@ static void Floppy144TestContextLabels(void)
     /*
      * Stand on the authored fixture footprint so the assertion tests the
      * Directory's label rather than whichever nearby object wins proximity.
-     * RECEPTION_SITE_DIRECTORY: x77 y40 w1 h6.
+     * RECEPTION_SITE_DIRECTORY: x76 y40 w1 h6.
      */
     Floppy144TestSetPosition(&sState, 77, 43);
     pszLabel = Floppy144SiteContextLabel(&sState);
@@ -1950,10 +1973,15 @@ static void Floppy144TestContextLabels(void)
         FLOPPY144_ROOM_CORRIDOR
     );
     /*
-     * CORRIDOR_SITE_DIRECTORY: x35 y55 w6 h1. Use its centre line for an
-     * unambiguous zero-distance context-label lookup.
+     * CORRIDOR_SITE_DIRECTORY sits in the south wall at x35 y56 w6 h1.
+     * Keep the player's footprint on the Corridor floor, exactly 0.5U away.
      */
-    Floppy144TestSetPosition(&sState, 38, 55);
+    Floppy144RunStateSetPlayerSitePosition(
+        &sState,
+        38 * FLOPPY144_SITE_FIXED_ONE,
+        55 * FLOPPY144_SITE_FIXED_ONE +
+            FLOPPY144_SITE_FIXED_ONE / 2
+    );
     pszLabel = Floppy144SiteContextLabel(&sState);
     F144_CHECK(
         pszLabel != NULL &&
