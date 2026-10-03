@@ -95,10 +95,36 @@ function Invoke-Stage3BRegression {
 
     Write-Host ""
     Write-Host "=== RUN $Label ==="
-    & $ExePath
 
-    if($LASTEXITCODE -ne 0) {
-        throw "$Label failed with exit code $LASTEXITCODE."
+    $TestOutput = @(
+        & $ExePath 2>&1
+    )
+    $TestExitCode = $LASTEXITCODE
+
+    foreach($Line in $TestOutput) {
+        Write-Host $Line
+    }
+
+    if($TestExitCode -ne 0) {
+        $AssertionFailures = @(
+            $TestOutput |
+                Where-Object {
+                    $_ -match '^FAIL:'
+                } |
+                ForEach-Object {
+                    $_.ToString().Trim()
+                }
+        )
+
+        if($AssertionFailures.Count -gt 0) {
+            throw (
+                "$Label failed with exit code $TestExitCode. " +
+                "Assertions: " +
+                ($AssertionFailures -join " | ")
+            )
+        }
+
+        throw "$Label failed with exit code $TestExitCode."
     }
 }
 

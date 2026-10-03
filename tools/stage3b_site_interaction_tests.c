@@ -1616,13 +1616,23 @@ static void Floppy144TestConventionalDoorAccess(void)
         return;
     }
 
+    /*
+     * Approach IT_SERV_01 from the IT Support side. The door occupies x43,
+     * y87..91; x44/y92 is walkable IT Support floor and keeps the nearby patch
+     * panel outside the one-unit focus, so this tests the real player approach
+     * rather than standing inside boundary geometry.
+     */
     Floppy144TestSetPosition(
         &sState,
-        pDoor->n0 + pDoor->n2 / 2,
-        pDoor->n1 + pDoor->n3 / 2
+        44,
+        92
     );
 
     F144_CHECK(
+        Floppy144SiteRoomAtPosition(
+            sState.player_site_x,
+            sState.player_site_y
+        ) == FLOPPY144_ROOM_IT_SUPPORT &&
         Floppy144SiteFocusedParentId(&sState) != NULL &&
         strcmp(
             Floppy144SiteFocusedParentId(&sState),
