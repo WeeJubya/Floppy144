@@ -967,7 +967,24 @@ static void Floppy144TestSiteKeySetInteraction(void)
     Floppy144TestReset(&sWorld, &sState, &sCabinet);
     (void)Floppy144RunStateReconstructRoom(
         &sState,
+        FLOPPY144_ROOM_CORRIDOR
+    );
+    (void)Floppy144RunStateReconstructRoom(
+        &sState,
         FLOPPY144_ROOM_SECURITY
+    );
+
+    /*
+     * The real route reaches Security after T-027, which also unlocks COR_SEC.
+     * Mirror that persistent state so ROOM_SECURITY means accessible, not only
+     * reconstructed, when I-035 is evaluated from P-093.
+     */
+    F144_CHECK(
+        Floppy144RunStateFireTrigger(
+            &sState,
+            Floppy144GameDataTriggerId("T-027")
+        ),
+        "Site-key fixture makes reconstructed Security accessible"
     );
 
     F144_CHECK(
