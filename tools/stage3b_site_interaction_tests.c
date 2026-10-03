@@ -678,6 +678,11 @@ static void Floppy144TestRotatedParentTargeting(void)
     Floppy144TestSetPosition(&sState, 48, 9);
 
     F144_CHECK(
+        Floppy144SiteFocusedParentId(&sState) != NULL &&
+        strcmp(
+            Floppy144SiteFocusedParentId(&sState),
+            "DIRECTOR_OFFICE_DESK"
+        ) == 0 &&
         Floppy144SiteResolveInspectionTarget(
             &sState,
             &sTarget
@@ -687,7 +692,7 @@ static void Floppy144TestRotatedParentTargeting(void)
             sTarget.pszParentId,
             "DIRECTOR_OFFICE_DESK"
         ) == 0,
-        "centre-authored Director desk participates in generic targeting"
+        "centre-authored Director desk participates in canonical focused targeting"
     );
 }
 
@@ -1669,9 +1674,10 @@ static void Floppy144TestSingleFocusedParentActions(void)
     );
 
     /*
-     * At x85/y19 the player's collision footprint touches the Records trolley,
-     * while the former secure-cabinet point radius also reached Cabinet 06 at
-     * x79/y21 w6/h2. The trolley must own the complete contextual prompt.
+     * At x85/y19 the player's collision footprint is within the canonical
+     * one-unit reach of the Records trolley, while the former independent 2U
+     * cabinet halo also reached Cabinet 06. The trolley must own the complete
+     * contextual prompt.
      */
     Floppy144TestSetPosition(&sState, 85, 19);
 

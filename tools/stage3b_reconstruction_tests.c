@@ -1830,7 +1830,7 @@ static void Floppy144TestSiteDirectoryActions(void)
     sState.player_site_x =
         38 * FLOPPY144_SITE_FIXED_ONE;
     sState.player_site_y =
-        55 * FLOPPY144_SITE_FIXED_ONE;
+        54 * FLOPPY144_SITE_FIXED_ONE;
 
     F144_CHECK(
         Floppy144SiteDirectoryNearby(&sState) &&

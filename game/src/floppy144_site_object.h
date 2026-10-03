@@ -57,7 +57,7 @@ uint32_t Floppy144SiteAvailableActions(
 
 /*
  * Return the generated furniture/fixture parent which owns the current
- * proximity focus. The same half-unit focus drives the passive label and all
+ * proximity focus. The same one-unit focus drives the passive label and all
  * contextual actions, preventing neighbouring parents from contributing
  * different controls to one prompt.
  */

@@ -28,8 +28,13 @@
 #define FLOPPY144_SITE_DATA_INTERACTION_RANGE_X16 \
     FLOPPY144_SITE_FIXED_ONE
 
+/*
+ * Labels and contextual actions deliberately share one range and one winning
+ * parent. This preserves the established one-unit interaction reach while
+ * preventing neighbouring objects from contributing mixed controls.
+ */
 #define FLOPPY144_SITE_CONTEXT_LABEL_RANGE_X16 \
-    (FLOPPY144_SITE_FIXED_ONE / 2)
+    FLOPPY144_SITE_DATA_INTERACTION_RANGE_X16
 
 /*
  * Transitional Site-space location used only by the old technical-slice
@@ -2198,6 +2203,7 @@ static const Floppy144DataRecord *Floppy144SiteParentRecordForRect(
         const Floppy144DataRecord *pRecord =
             Floppy144GameDataRecordAt(uRecordIndex);
         Floppy144RoomId eRecordRoom;
+        bool bGeometryMatch;
 
         if(
             pRecord == NULL ||
@@ -2205,12 +2211,45 @@ static const Floppy144DataRecord *Floppy144SiteParentRecordForRect(
                 pRecord->eKind != FLOPPY144_DATA_FURNITURE &&
                 pRecord->eKind != FLOPPY144_DATA_FIXTURE
             ) ||
-            pRecord->pszId == NULL ||
-            pRecord->n0 != (int32_t)pRect->x ||
-            pRecord->n1 != (int32_t)pRect->y ||
-            pRecord->n2 != (int32_t)pRect->width ||
-            pRecord->n3 != (int32_t)pRect->height
+            pRecord->pszId == NULL
         )
+        {
+            continue;
+        }
+
+        /*
+         * Ordinary generated records store runtime x/y/width/height in n0..n3.
+         * Rotated centre-authored furniture stores its unrotated width/height
+         * in n2/n3, centre in n4/n5 and sets b0. Match both forms back to the
+         * same runtime Site rectangle.
+         */
+        if(pRecord->b0 != 0U)
+        {
+            int32_t nCentreX16 =
+                ((int32_t)pRect->x * FLOPPY144_SITE_FIXED_ONE) +
+                ((int32_t)pRect->width * FLOPPY144_SITE_FIXED_ONE) / 2;
+            int32_t nCentreY16 =
+                ((int32_t)pRect->y * FLOPPY144_SITE_FIXED_ONE) +
+                ((int32_t)pRect->height * FLOPPY144_SITE_FIXED_ONE) / 2;
+
+            bGeometryMatch =
+                pRecord->n4 * FLOPPY144_SITE_FIXED_ONE == nCentreX16 &&
+                pRecord->n5 * FLOPPY144_SITE_FIXED_ONE == nCentreY16 &&
+                pRecord->n2 * FLOPPY144_SITE_FIXED_ONE ==
+                    (int32_t)pRect->authored_width16 &&
+                pRecord->n3 * FLOPPY144_SITE_FIXED_ONE ==
+                    (int32_t)pRect->authored_height16;
+        }
+        else
+        {
+            bGeometryMatch =
+                pRecord->n0 == (int32_t)pRect->x &&
+                pRecord->n1 == (int32_t)pRect->y &&
+                pRecord->n2 == (int32_t)pRect->width &&
+                pRecord->n3 == (int32_t)pRect->height;
+        }
+
+        if(!bGeometryMatch)
         {
             continue;
         }
