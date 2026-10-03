@@ -1546,6 +1546,21 @@ static void Floppy144TestConventionalDoorAccess(void)
     Floppy144InteractionId eResolved;
 
     Floppy144TestReset(&sWorld, &sState);
+
+    /*
+     * Mirror the real late-game route closely enough that I-035 runs through
+     * its own prerequisites/effects rather than faking only its completion bit.
+     * Security is accessible after T-027; P-093 inspection then grants
+     * SITE_KEYS before the player approaches the Server Room door.
+     */
+    (void)Floppy144RunStateReconstructRoom(
+        &sState,
+        FLOPPY144_ROOM_CORRIDOR
+    );
+    (void)Floppy144RunStateReconstructRoom(
+        &sState,
+        FLOPPY144_ROOM_SECURITY
+    );
     (void)Floppy144RunStateReconstructRoom(
         &sState,
         FLOPPY144_ROOM_IT_SUPPORT
@@ -1559,10 +1574,26 @@ static void Floppy144TestConventionalDoorAccess(void)
     eI037 = Floppy144GameDataInteractionId("I-037");
 
     F144_CHECK(
+        Floppy144RunStateFireTrigger(
+            &sState,
+            Floppy144GameDataTriggerId("T-027")
+        ),
+        "Server Room access fixture makes Security reachable"
+    );
+
+    F144_CHECK(
         eI035 < FLOPPY144_INTERACTION_COUNT &&
         eI037 < FLOPPY144_INTERACTION_COUNT &&
-        Floppy144RunStateCompleteInteraction(&sState, eI035),
-        "Server Room access fixture records recovered Site keys"
+        Floppy144InteractionTryRun(
+            &sWorld,
+            &sState,
+            eI035
+        ) &&
+        Floppy144RunStateHasCapability(
+            &sState,
+            Floppy144GameDataCapabilityId("SITE_KEYS")
+        ),
+        "Server Room access fixture acquires the complete Site key set"
     );
 
     pDoor = Floppy144GameDataFind(
