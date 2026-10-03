@@ -16613,7 +16613,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-progression",
       "source_order": 634,
-      "description": "PROJECT MANAGER AUTHORISATION: Main Office terminal may recover FM-04 to reconstruct Facilities. After that, all FM recovery moves to the Facilities terminal."
+      "description": "PROJECT MANAGER AUTHORISATION: Main Office terminal may recover FM-04 to reconstruct Facilities. Further FM recovery uses the Facilities terminal."
     }
   ],
   "collections": [

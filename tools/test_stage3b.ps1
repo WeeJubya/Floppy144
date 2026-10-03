@@ -711,8 +711,12 @@ function Test-PhysicalItemPlayerFacingContract {
     $Site2DSource = Get-Content -Raw -Path $Site2DPath
     $BuildSiteSource = Get-Content -Raw -Path $BuildSitePath
 
-    if($GameData.physical_items.Count -ne 633) {
-        throw "Physical-item ledger count is $($GameData.physical_items.Count); expected 633."
+    if($GameData.physical_items.Count -lt 633) {
+        throw "Physical-item ledger count is $($GameData.physical_items.Count); Stage 3C baseline is 633."
+    }
+
+    if([int]$GameData.counts.physical_items -ne $GameData.physical_items.Count) {
+        throw "Physical-item metadata count is $($GameData.counts.physical_items); ledger contains $($GameData.physical_items.Count)."
     }
 
     foreach($Item in $GameData.physical_items) {
