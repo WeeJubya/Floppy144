@@ -997,9 +997,10 @@ static void Floppy144OfficeSetItemNotice(
 /*
  * Execute a projection-neutral Site action.
  *
- * Access is currently the GDR-terminal action. Inspect resolves canonical
- * physical material through generated furniture/fixture geometry, while
- * visible locked doors remain inspectable without becoming traversable.
+ * Access is data-driven for conventional locked doors and GDR terminals.
+ * Inspect resolves canonical physical material through generated
+ * furniture/fixture geometry, while locked doors remain inspectable until
+ * their authored Access interaction succeeds.
  */
 static void Floppy144InteractOffice(
     HWND window,
@@ -1008,7 +1009,33 @@ static void Floppy144InteractOffice(
 {
     if(eMode == FLOPPY144_OFFICE_INTERACTION_ACCESS)
     {
+        Floppy144InteractionId eAccessInteraction;
         Floppy144RoomId eTerminalRoom;
+
+        if(
+            Floppy144SiteAccessInteractionNearby(
+                &global_run_state,
+                &eAccessInteraction
+            )
+        )
+        {
+            if(
+                Floppy144InteractionTryRun(
+                    &global_world,
+                    &global_run_state,
+                    eAccessInteraction
+                )
+            )
+            {
+                Floppy144OfficeSetItemNotice(
+                    "DOOR",
+                    ": ACCESS GRANTED."
+                );
+            }
+
+            Floppy144Redraw(window);
+            return;
+        }
 
         if(
             !Floppy144SiteAccessTerminalRoom(

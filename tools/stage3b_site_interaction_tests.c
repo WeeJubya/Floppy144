@@ -211,8 +211,8 @@ static void Floppy144TestPhysicalParentCoverage(void)
     );
 
     F144_CHECK(
-        uPhysicalInteractionCount == 34U,
-        "34 physical items own canonical gameplay interactions"
+        uPhysicalInteractionCount == 35U,
+        "35 physical items own canonical gameplay interactions"
     );
 }
 
@@ -1536,6 +1536,92 @@ static void Floppy144TestCorridorDoorLabels(void)
     );
 }
 
+static void Floppy144TestConventionalDoorAccess(void)
+{
+    Floppy144WorldState sWorld;
+    Floppy144RunState sState;
+    const Floppy144DataRecord *pDoor;
+    Floppy144InteractionId eI035;
+    Floppy144InteractionId eI037;
+    Floppy144InteractionId eResolved;
+
+    Floppy144TestReset(&sWorld, &sState);
+    (void)Floppy144RunStateReconstructRoom(
+        &sState,
+        FLOPPY144_ROOM_IT_SUPPORT
+    );
+    (void)Floppy144RunStateReconstructRoom(
+        &sState,
+        FLOPPY144_ROOM_SERVER_ROOM
+    );
+
+    eI035 = Floppy144GameDataInteractionId("I-035");
+    eI037 = Floppy144GameDataInteractionId("I-037");
+
+    F144_CHECK(
+        eI035 < FLOPPY144_INTERACTION_COUNT &&
+        eI037 < FLOPPY144_INTERACTION_COUNT &&
+        Floppy144RunStateCompleteInteraction(&sState, eI035),
+        "Server Room access fixture records recovered Site keys"
+    );
+
+    pDoor = Floppy144GameDataFind(
+        FLOPPY144_DATA_FIXTURE,
+        "IT_SERV_01"
+    );
+
+    F144_CHECK(
+        pDoor != NULL,
+        "Server Room conventional door fixture resolves"
+    );
+
+    if(pDoor == NULL)
+    {
+        return;
+    }
+
+    Floppy144TestSetPosition(
+        &sState,
+        pDoor->n0 + pDoor->n2 / 2,
+        pDoor->n1 + pDoor->n3 / 2
+    );
+
+    F144_CHECK(
+        Floppy144SiteFocusedParentId(&sState) != NULL &&
+        strcmp(
+            Floppy144SiteFocusedParentId(&sState),
+            "IT_SERV_01"
+        ) == 0,
+        "Server Room door owns Site focus at its threshold"
+    );
+
+    F144_CHECK(
+        Floppy144SiteAccessInteractionNearby(
+            &sState,
+            &eResolved
+        ) &&
+        eResolved == eI037 &&
+        (
+            Floppy144SiteAvailableActions(&sState) &
+            FLOPPY144_SITE_ACTION_ACCESS
+        ) != 0U,
+        "Server Room door advertises its authored Access interaction"
+    );
+
+    F144_CHECK(
+        Floppy144InteractionTryRun(
+            &sWorld,
+            &sState,
+            eResolved
+        ) &&
+        Floppy144GameDataConnectionUnlocked(
+            &sState,
+            "IT_SERV_01"
+        ),
+        "Server Room Access unlocks the conventional door"
+    );
+}
+
 static void Floppy144TestSingleFocusedParentActions(void)
 {
     Floppy144WorldState sWorld;
@@ -2085,6 +2171,7 @@ int main(void)
     Floppy144TestRecordsTrolleyNotebookGuidance();
     Floppy144TestLockedDoorInspectActions();
     Floppy144TestCorridorDoorLabels();
+    Floppy144TestConventionalDoorAccess();
     Floppy144TestSingleFocusedParentActions();
     Floppy144TestContextLabels();
     Floppy144TestExteriorExitBehaviour();

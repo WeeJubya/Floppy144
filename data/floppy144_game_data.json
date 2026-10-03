@@ -22564,7 +22564,7 @@
     {
       "id": "I-035",
       "type": "Capability",
-      "physical_source": "SECURITY_KEY_CABINET",
+      "physical_source": "P-093",
       "location": "SECURITY",
       "prerequisites": [
         "ROOM_SECURITY"

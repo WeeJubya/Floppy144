@@ -2373,12 +2373,77 @@ const char *Floppy144SiteFocusedParentId(
     return pParent != NULL ? pParent->pszId : NULL;
 }
 
+bool Floppy144SiteAccessInteractionNearby(
+    const Floppy144RunState *pState,
+    Floppy144InteractionId *pInteraction
+)
+{
+    const char *pszFocusedParentId;
+    const Floppy144DataRecord *pParent;
+    const Floppy144DataRecord *pInteractionRecord;
+    Floppy144InteractionId eInteraction;
+
+    if(pState == NULL || pInteraction == NULL)
+    {
+        return false;
+    }
+
+    pszFocusedParentId = Floppy144SiteFocusedParentId(pState);
+    if(pszFocusedParentId == NULL)
+    {
+        return false;
+    }
+
+    pParent = Floppy144GameDataFind(
+        FLOPPY144_DATA_FIXTURE,
+        pszFocusedParentId
+    );
+
+    if(
+        pParent == NULL ||
+        !Floppy144SiteDataStringEqual(pParent->pszB, "DOOR")
+    )
+    {
+        return false;
+    }
+
+    eInteraction = Floppy144InteractionForPhysicalSource(
+        pszFocusedParentId
+    );
+
+    if(eInteraction == FLOPPY144_INTERACTION_COUNT)
+    {
+        return false;
+    }
+
+    pInteractionRecord = Floppy144InteractionRecord(eInteraction);
+
+    if(
+        pInteractionRecord == NULL ||
+        !Floppy144SiteDataStringEqual(
+            pInteractionRecord->pszA,
+            "Access"
+        ) ||
+        !Floppy144InteractionCanRun(
+            pState,
+            eInteraction
+        )
+    )
+    {
+        return false;
+    }
+
+    *pInteraction = eInteraction;
+    return true;
+}
+
 uint32_t Floppy144SiteAvailableActions(
     const Floppy144RunState *pState
 )
 {
     uint32_t uActions = 0U;
     Floppy144RoomId eRoom;
+    Floppy144InteractionId eAccessInteraction;
     Floppy144SiteInspectionTarget sTarget;
 
     if(pState == NULL)
@@ -2390,6 +2455,10 @@ uint32_t Floppy144SiteAvailableActions(
         Floppy144SiteAccessTerminalRoom(
             pState,
             &eRoom
+        ) ||
+        Floppy144SiteAccessInteractionNearby(
+            pState,
+            &eAccessInteraction
         )
     )
     {

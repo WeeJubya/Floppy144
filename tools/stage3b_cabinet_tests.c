@@ -955,6 +955,79 @@ static void Floppy144TestRecoveredChildRevealsCabinetCode(void)
     );
 }
 
+static void Floppy144TestSiteKeySetInteraction(void)
+{
+    Floppy144WorldState sWorld;
+    Floppy144RunState sState;
+    Floppy144CabinetState sCabinet;
+    Floppy144InteractionId eI035;
+    Floppy144CapabilityId eSiteKeys;
+    uint32_t uP093Index;
+
+    Floppy144TestReset(&sWorld, &sState, &sCabinet);
+    (void)Floppy144RunStateReconstructRoom(
+        &sState,
+        FLOPPY144_ROOM_SECURITY
+    );
+
+    F144_CHECK(
+        Floppy144CabinetOpenParent(
+            &sCabinet,
+            &sState,
+            "SECURITY_KEY_CABINET"
+        ),
+        "Security key cabinet opens reusable Contents view"
+    );
+
+    uP093Index = Floppy144TestVisibleContentIndex(
+        &sCabinet,
+        &sState,
+        "P-093"
+    );
+
+    F144_CHECK(
+        uP093Index != UINT32_MAX,
+        "Complete Site key set is visible in Security key cabinet"
+    );
+
+    if(uP093Index == UINT32_MAX)
+    {
+        return;
+    }
+
+    Floppy144CabinetMoveSelection(
+        &sCabinet,
+        &sState,
+        (int32_t)uP093Index
+    );
+
+    F144_CHECK(
+        Floppy144CabinetInspectSelected(
+            &sCabinet,
+            &sWorld,
+            &sState
+        ),
+        "inspecting Complete Site key set executes its interaction"
+    );
+
+    eI035 = Floppy144GameDataInteractionId("I-035");
+    eSiteKeys = Floppy144GameDataCapabilityId("SITE_KEYS");
+
+    F144_CHECK(
+        eI035 < FLOPPY144_INTERACTION_COUNT &&
+        Floppy144RunStateInteractionCompleted(
+            &sState,
+            eI035
+        ) &&
+        eSiteKeys < FLOPPY144_CAPABILITY_COUNT &&
+        Floppy144RunStateHasCapability(
+            &sState,
+            eSiteKeys
+        ),
+        "P-093 inspection completes I-035 and grants Site keys"
+    );
+}
+
 static void Floppy144TestFocusedCabinetAccess(void)
 {
     Floppy144WorldState sWorld;
@@ -1045,6 +1118,7 @@ int main(void)
     Floppy144TestRecoveredChildRevealsCabinetCode();
     Floppy144TestSecurityCabinetUnlockAndContents();
     Floppy144TestPerCabinetUnlockPersistence();
+    Floppy144TestSiteKeySetInteraction();
     Floppy144TestFocusedCabinetAccess();
     Floppy144TestActLengthContract();
 

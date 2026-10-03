@@ -66,6 +66,16 @@ const char *Floppy144SiteFocusedParentId(
 );
 
 /*
+ * Resolve an authored Access interaction owned by the currently focused
+ * conventional door. The interaction is returned only while its prerequisites
+ * are satisfied, so the footer and the A key expose the same player action.
+ */
+bool Floppy144SiteAccessInteractionNearby(
+    const Floppy144RunState *pState,
+    Floppy144InteractionId *pInteraction
+);
+
+/*
  * Return true when the player is standing beside any authored Site Directory
  * fixture in the current reconstructed room. Both Reception and Corridor use
  * the same generic path, so future directories gain the map action for free.
