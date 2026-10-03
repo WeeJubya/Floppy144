@@ -762,46 +762,88 @@ static void Floppy144TestInspectionRange(void)
     );
 
     /*
-     * In the JSON-oriented Site the player footprint is centred on X and
-     * extends upward from the foot point. Approach each desk from its left so
-     * the range test is independent of the neighbouring paired desk.
+     * Desk 05 starts at x72. With the player's 2U collision footprint, x70
+     * leaves a 1U gap and x70.5 leaves exactly the allowed 0.5U gap.
      */
-    Floppy144TestSetPosition(&sState, 69, 80);
+    Floppy144TestSetPosition(&sState, 70, 80);
     F144_CHECK(
         !Floppy144SiteResolveInspectionTarget(&sState, &sTarget) ||
         sTarget.pszParentId == NULL ||
-        strcmp(
-            sTarget.pszParentId,
-            "MAIN_OFFICE_DESK_05"
-        ) != 0,
-        "Desk 05 does not trigger inspection from outside one-unit reach"
+        strcmp(sTarget.pszParentId, "MAIN_OFFICE_DESK_05") != 0,
+        "Desk 05 does not trigger outside half-unit reach"
     );
 
-    Floppy144TestSetPosition(&sState, 70, 80);
+    Floppy144RunStateSetPlayerSitePosition(
+        &sState,
+        70 * FLOPPY144_SITE_FIXED_ONE +
+            FLOPPY144_SITE_FIXED_ONE / 2,
+        80 * FLOPPY144_SITE_FIXED_ONE
+    );
     F144_CHECK(
         Floppy144SiteResolveInspectionTarget(&sState, &sTarget) &&
         sTarget.pszParentId != NULL &&
         strcmp(sTarget.pszParentId, "MAIN_OFFICE_DESK_05") == 0,
-        "Desk 05 becomes inspectable only when adjacent"
-    );
-
-    Floppy144TestSetPosition(&sState, 69, 86);
-    F144_CHECK(
-        !Floppy144SiteResolveInspectionTarget(&sState, &sTarget) ||
-        sTarget.pszParentId == NULL ||
-        strcmp(
-            sTarget.pszParentId,
-            "MAIN_OFFICE_DESK_06"
-        ) != 0,
-        "Desk 06 does not trigger inspection from outside one-unit reach"
+        "Desk 05 becomes inspectable at the half-unit threshold"
     );
 
     Floppy144TestSetPosition(&sState, 70, 86);
     F144_CHECK(
+        !Floppy144SiteResolveInspectionTarget(&sState, &sTarget) ||
+        sTarget.pszParentId == NULL ||
+        strcmp(sTarget.pszParentId, "MAIN_OFFICE_DESK_06") != 0,
+        "Desk 06 does not trigger outside half-unit reach"
+    );
+
+    Floppy144RunStateSetPlayerSitePosition(
+        &sState,
+        70 * FLOPPY144_SITE_FIXED_ONE +
+            FLOPPY144_SITE_FIXED_ONE / 2,
+        86 * FLOPPY144_SITE_FIXED_ONE
+    );
+    F144_CHECK(
         Floppy144SiteResolveInspectionTarget(&sState, &sTarget) &&
         sTarget.pszParentId != NULL &&
         strcmp(sTarget.pszParentId, "MAIN_OFFICE_DESK_06") == 0,
-        "Desk 06 becomes inspectable only when adjacent"
+        "Desk 06 becomes inspectable at the half-unit threshold"
+    );
+
+    /*
+     * Rack 01 carries the Server Room physical contents. Approach from below:
+     * y64 leaves 1U beyond the collision footprint; y63.5 leaves exactly 0.5U.
+     */
+    Floppy144TestReset(&sWorld, &sState);
+    (void)Floppy144RunStateReconstructRoom(
+        &sState,
+        FLOPPY144_ROOM_SERVER_ROOM
+    );
+
+    Floppy144TestSetPosition(&sState, 30, 64);
+    F144_CHECK(
+        Floppy144SiteFocusedParentId(&sState) == NULL ||
+        strcmp(
+            Floppy144SiteFocusedParentId(&sState),
+            "SERVER_ROOM_SERVER_01"
+        ) != 0,
+        "Server rack does not trigger menu focus from a 1U gap"
+    );
+
+    Floppy144RunStateSetPlayerSitePosition(
+        &sState,
+        30 * FLOPPY144_SITE_FIXED_ONE,
+        63 * FLOPPY144_SITE_FIXED_ONE +
+            FLOPPY144_SITE_FIXED_ONE / 2
+    );
+    F144_CHECK(
+        Floppy144SiteFocusedParentId(&sState) != NULL &&
+        strcmp(
+            Floppy144SiteFocusedParentId(&sState),
+            "SERVER_ROOM_SERVER_01"
+        ) == 0 &&
+        (
+            Floppy144SiteAvailableActions(&sState) &
+            FLOPPY144_SITE_ACTION_INSPECT
+        ) != 0U,
+        "Server rack gains its menu only at the half-unit threshold"
     );
 }
 

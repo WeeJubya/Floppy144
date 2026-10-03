@@ -689,7 +689,7 @@ static void Floppy144TestWallHangingCollisionContract(void)
         !Floppy144SiteElementBlocksMovement(
             FLOPPY144_SITE_WALL_MOUNTED_ITEM
         ),
-        "wall-mounted items do not create a 1U floor collision box"
+        "wall-mounted items do not create a floor collision box"
     );
 
     F144_CHECK(
@@ -704,6 +704,19 @@ static void Floppy144TestWallHangingCollisionContract(void)
             FLOPPY144_SITE_PARTITION_WALL
         ),
         "partition walls remain structural collision"
+    );
+
+    /*
+     * SECURITY_KEY_CABINET is sunk into the west wall at x43. A player centre
+     * at x45 puts the 2U-wide collision footprint flush with the floor/wall
+     * boundary at x44 and must remain a legal walking position.
+     */
+    F144_CHECK(
+        !Floppy144SitePositionBlocked(
+            45 * FLOPPY144_SITE_FIXED_ONE,
+            74 * FLOPPY144_SITE_FIXED_ONE
+        ),
+        "player can walk flush along a wall-mounted fixture"
     );
 }
 
@@ -1090,7 +1103,7 @@ static void Floppy144TestRuntimeGeometryVisibility(void)
             pSuppressionPanel == NULL &&
             pRect->room == (uint8_t)FLOPPY144_ROOM_MAIN_OFFICE &&
             pRect->type == (uint8_t)FLOPPY144_SITE_WALL_MOUNTED_ITEM &&
-            pRect->x == 67U &&
+            pRect->x == 66U &&
             pRect->y == 90U
         )
         {
@@ -1518,7 +1531,10 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
     bool bItDesk = false;
     bool bItBookcase = false;
     bool bItPatchPanel = false;
+    bool bItShelves = false;
     bool bServerDesk = false;
+    bool bServerShelves = false;
+    bool bSecurityMonitorBank = false;
     bool bSecurityDeskLeft = false;
     bool bSecurityDeskRight = false;
     bool bSecretaryDesk = false;
@@ -1703,13 +1719,27 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
                 (uint8_t)FLOPPY144_ROOM_IT_SUPPORT &&
             pRect->type ==
                 (uint8_t)FLOPPY144_SITE_WALL_MOUNTED_ITEM &&
-            pRect->x == 44U &&
+            pRect->x == 43U &&
             pRect->y == 79U &&
             pRect->width == 1U &&
             pRect->height == 8U
         )
         {
             bItPatchPanel = true;
+        }
+
+        if(
+            pRect->room ==
+                (uint8_t)FLOPPY144_ROOM_IT_SUPPORT &&
+            pRect->type ==
+                (uint8_t)FLOPPY144_SITE_WALL_MOUNTED_ITEM &&
+            pRect->x == 44U &&
+            pRect->y == 99U &&
+            pRect->width == 12U &&
+            pRect->height == 1U
+        )
+        {
+            bItShelves = true;
         }
 
         if(
@@ -1720,11 +1750,39 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
             pRect->x == 35U &&
             pRect->y == 59U &&
             pRect->width == 6U &&
-            pRect->height == 2U &&
+            pRect->height == 4U &&
             pRect->rotation == 90U
         )
         {
             bServerDesk = true;
+        }
+
+        if(
+            pRect->room ==
+                (uint8_t)FLOPPY144_ROOM_SERVER_ROOM &&
+            pRect->type ==
+                (uint8_t)FLOPPY144_SITE_WALL_MOUNTED_ITEM &&
+            pRect->x == 33U &&
+            pRect->y == 56U &&
+            pRect->width == 10U &&
+            pRect->height == 1U
+        )
+        {
+            bServerShelves = true;
+        }
+
+        if(
+            pRect->room ==
+                (uint8_t)FLOPPY144_ROOM_SECURITY &&
+            pRect->type ==
+                (uint8_t)FLOPPY144_SITE_WALL_MOUNTED_ITEM &&
+            pRect->x == 44U &&
+            pRect->y == 56U &&
+            pRect->width == 12U &&
+            pRect->height == 1U
+        )
+        {
+            bSecurityMonitorBank = true;
         }
 
         if(
@@ -1772,13 +1830,20 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
 
     F144_CHECK(
         bItBookcase &&
-        bItPatchPanel,
-        "IT Support furniture and wall-hanging share the wall plane on separate Z-levels"
+        bItPatchPanel &&
+        bItShelves,
+        "IT Support wall fixtures sit in the wall plane without consuming floor depth"
     );
 
     F144_CHECK(
         bServerDesk,
-        "Server Room standard desk uses Full Site 6x2 footprint"
+        "Server Room standard desk matches the IT Support 6x4 footprint"
+    );
+
+    F144_CHECK(
+        bServerShelves &&
+        bSecurityMonitorBank,
+        "Server shelving and Security monitors use 1U wall-plane depth"
     );
 
     F144_CHECK(
@@ -1807,7 +1872,7 @@ static void Floppy144TestSiteDirectoryActions(void)
     );
 
     sState.player_site_x =
-        79 * FLOPPY144_SITE_FIXED_ONE;
+        78 * FLOPPY144_SITE_FIXED_ONE;
     sState.player_site_y =
         43 * FLOPPY144_SITE_FIXED_ONE;
 
@@ -1830,7 +1895,8 @@ static void Floppy144TestSiteDirectoryActions(void)
     sState.player_site_x =
         38 * FLOPPY144_SITE_FIXED_ONE;
     sState.player_site_y =
-        54 * FLOPPY144_SITE_FIXED_ONE;
+        55 * FLOPPY144_SITE_FIXED_ONE +
+        FLOPPY144_SITE_FIXED_ONE / 2;
 
     F144_CHECK(
         Floppy144SiteDirectoryNearby(&sState) &&
@@ -1939,7 +2005,7 @@ static void Floppy144TestStaffRoomSpreadsheetGeometry(void)
         else if(
             pRect->type == (uint8_t)FLOPPY144_SITE_WALL_MOUNTED_ITEM &&
             pRect->x == 4U &&
-            pRect->y == 45U &&
+            pRect->y == 46U &&
             pRect->width == 10U &&
             pRect->height == 1U
         )

@@ -75,7 +75,7 @@
             "type": "WALL_MOUNTED_ITEM",
             "variant": "SITE_DIRECTORY",
             "object": "SITE_DIRECTORY_RECEPTION",
-            "x": 77,
+            "x": 76,
             "y": 40,
             "width": 1,
             "height": 6
@@ -347,7 +347,7 @@
             "variant": "SITE_DIRECTORY",
             "object": "SITE_DIRECTORY_CORRIDOR",
             "x": 35,
-            "y": 55,
+            "y": 56,
             "width": 6,
             "height": 1
           }
@@ -376,7 +376,7 @@
             "type": "WALL_MOUNTED_ITEM",
             "variant": "SUPPRESSION_PANEL",
             "object": "SUPPRESSION_CONTROL_PANEL",
-            "x": 67,
+            "x": 66,
             "y": 90,
             "width": 1,
             "height": 4
@@ -1063,7 +1063,7 @@
             "type": "WALL_MOUNTED_ITEM",
             "variant": "PATCH_PANEL",
             "object": "IT_SUPPORT_PATCH_PANEL",
-            "x": 44,
+            "x": 43,
             "y": 79,
             "width": 1,
             "height": 8
@@ -1074,9 +1074,9 @@
             "variant": "SHELVING",
             "object": "IT_SUPPORT_SHELVES",
             "x": 44,
-            "y": 97,
+            "y": 99,
             "width": 12,
-            "height": 2
+            "height": 1
           },
           {
             "type": "CHAIR",
@@ -1203,7 +1203,7 @@
             "variant": "NOTICEBOARD",
             "object": "STAFF_ROOM_NOTICEBOARD",
             "x": 4,
-            "y": 45,
+            "y": 46,
             "width": 10,
             "height": 1
           },
@@ -1393,7 +1393,7 @@
             "type": "WALL_MOUNTED_ITEM",
             "variant": "KEY_CABINET",
             "object": "SECURITY_KEY_CABINET",
-            "x": 44,
+            "x": 43,
             "y": 72,
             "width": 1,
             "height": 3
@@ -1403,7 +1403,7 @@
             "type": "WALL_MOUNTED_ITEM",
             "variant": "FIRST_AID_KIT",
             "object": "SECURITY_FIRST_AID_KIT",
-            "x": 55,
+            "x": 56,
             "y": 75,
             "width": 1,
             "height": 3
@@ -1414,9 +1414,9 @@
             "variant": "MONITOR_BANK",
             "object": "SECURITY_MONITOR_BANK",
             "x": 44,
-            "y": 57,
+            "y": 56,
             "width": 12,
-            "height": 2
+            "height": 1
           },
           {
             "type": "CHAIR",
@@ -1462,7 +1462,7 @@
             "x": 35,
             "y": 59,
             "width": 6,
-            "height": 2,
+            "height": 4,
             "rotation": 90
           },
           {
@@ -1512,9 +1512,9 @@
             "variant": "SHELVING",
             "object": "SERVER_ROOM_SHELVES",
             "x": 33,
-            "y": 57,
+            "y": 56,
             "width": 10,
-            "height": 2
+            "height": 1
           },
           {
             "type": "CHAIR",
@@ -6624,7 +6624,7 @@
       "variant": "SITE_DIRECTORY",
       "object_id": "SITE_DIRECTORY_RECEPTION",
       "geometry": {
-        "x": 77,
+        "x": 76,
         "y": 40,
         "width": 1,
         "height": 6
@@ -6667,7 +6667,7 @@
       "object_id": "SITE_DIRECTORY_CORRIDOR",
       "geometry": {
         "x": 35,
-        "y": 55,
+        "y": 56,
         "width": 6,
         "height": 1
       },
@@ -6680,7 +6680,7 @@
       "variant": "SUPPRESSION_PANEL",
       "object_id": "SUPPRESSION_CONTROL_PANEL",
       "geometry": {
-        "x": 67,
+        "x": 66,
         "y": 90,
         "width": 1,
         "height": 4
@@ -6694,7 +6694,7 @@
       "variant": "PATCH_PANEL",
       "object_id": "IT_SUPPORT_PATCH_PANEL",
       "geometry": {
-        "x": 44,
+        "x": 43,
         "y": 79,
         "width": 1,
         "height": 8
@@ -6709,9 +6709,9 @@
       "object_id": "IT_SUPPORT_SHELVES",
       "geometry": {
         "x": 44,
-        "y": 97,
+        "y": 99,
         "width": 12,
-        "height": 2
+        "height": 1
       },
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM"
     },
@@ -6723,7 +6723,7 @@
       "object_id": "STAFF_ROOM_NOTICEBOARD",
       "geometry": {
         "x": 4,
-        "y": 45,
+        "y": 46,
         "width": 10,
         "height": 1
       },
@@ -6792,7 +6792,7 @@
       "variant": "KEY_CABINET",
       "object_id": "SECURITY_KEY_CABINET",
       "geometry": {
-        "x": 44,
+        "x": 43,
         "y": 72,
         "width": 1,
         "height": 3
@@ -6806,7 +6806,7 @@
       "variant": "FIRST_AID_KIT",
       "object_id": "SECURITY_FIRST_AID_KIT",
       "geometry": {
-        "x": 55,
+        "x": 56,
         "y": 75,
         "width": 1,
         "height": 3
@@ -6821,9 +6821,9 @@
       "object_id": "SECURITY_MONITOR_BANK",
       "geometry": {
         "x": 44,
-        "y": 57,
+        "y": 56,
         "width": 12,
-        "height": 2
+        "height": 1
       },
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM"
     },
@@ -6835,9 +6835,9 @@
       "object_id": "SERVER_ROOM_SHELVES",
       "geometry": {
         "x": 33,
-        "y": 57,
+        "y": 56,
         "width": 10,
-        "height": 2
+        "height": 1
       },
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM"
     },

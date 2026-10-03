@@ -21,17 +21,16 @@
 #define FLOPPY144_SITE_TERMINAL_INTERACTION_RANGE 2U
 
 /*
- * Stage 3B.2 interaction reach is measured from the player's collision
- * footprint rather than from the sprite foot point. One Site unit keeps
- * Inspect/Access adjacent to furniture without requiring pixel-perfect contact.
+ * Player-facing Site menus are deliberately local. Inspect/Access becomes
+ * available only within half a Site unit of the player's collision footprint.
+ * Labels and actions share that exact range and the same winning parent.
  */
 #define FLOPPY144_SITE_DATA_INTERACTION_RANGE_X16 \
-    FLOPPY144_SITE_FIXED_ONE
+    (FLOPPY144_SITE_FIXED_ONE / 2)
 
 /*
  * Labels and contextual actions deliberately share one range and one winning
- * parent. This preserves the established one-unit interaction reach while
- * preventing neighbouring objects from contributing mixed controls.
+ * parent, preventing neighbouring objects from contributing mixed controls.
  */
 #define FLOPPY144_SITE_CONTEXT_LABEL_RANGE_X16 \
     FLOPPY144_SITE_DATA_INTERACTION_RANGE_X16
@@ -75,7 +74,7 @@ floppy144_site_object_locations[] =
 {
     {
         FLOPPY144_OBJECT_SUPPRESSION_CONTROL_PANEL,
-        67U,
+        66U,
         90U,
         1U,
         4U,
@@ -2322,6 +2321,32 @@ static const Floppy144SiteRect *Floppy144SiteFocusedRect(
         if(
             pRect == NULL ||
             !Floppy144SiteRectRuntimeVisible(pState, pRect)
+        )
+        {
+            continue;
+        }
+
+        /*
+         * Wall-mounted fixtures may now occupy the wall cell itself. Ordinary
+         * furniture/fixtures can only own focus from their authored room side;
+         * boundary doors remain focusable from either endpoint room.
+         */
+        if(pRect->type == (uint8_t)FLOPPY144_SITE_DOOR)
+        {
+            if(
+                eCurrentRoom >= FLOPPY144_ROOM_COUNT ||
+                (
+                    pRect->from_room != (uint8_t)eCurrentRoom &&
+                    pRect->to_room != (uint8_t)eCurrentRoom
+                )
+            )
+            {
+                continue;
+            }
+        }
+        else if(
+            eCurrentRoom >= FLOPPY144_ROOM_COUNT ||
+            pRect->room != (uint8_t)eCurrentRoom
         )
         {
             continue;
