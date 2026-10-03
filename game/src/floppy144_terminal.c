@@ -494,9 +494,12 @@ static bool Floppy144TerminalSiteHasReconstructedRoom(
 
 static bool Floppy144TerminalRestoreAllowedAtLocation(
     const Floppy144TerminalState *pTerminal,
-    Floppy144CollectionDomain eDomain
+    Floppy144CollectionId eCollection
 )
 {
+    const Floppy144CollectionDefinition *pDefinition;
+    Floppy144CollectionDomain eDomain;
+
     if(
         pTerminal == NULL ||
         !pTerminal->restoration_location_restrictions
@@ -504,6 +507,19 @@ static bool Floppy144TerminalRestoreAllowedAtLocation(
     {
         return true;
     }
+
+    pDefinition =
+        Floppy144CollectionGet(
+            eCollection
+        );
+
+    if(pDefinition == NULL)
+    {
+        return false;
+    }
+
+    eDomain =
+        pDefinition->domain;
 
     /*
      * The initial recovery environment is not a physical Site terminal.
@@ -531,6 +547,15 @@ static bool Floppy144TerminalRestoreAllowedAtLocation(
             return eDomain == FLOPPY144_COLLECTION_DOMAIN_DR;
 
         case FLOPPY144_ROOM_MAIN_OFFICE:
+            /*
+             * FM-04 bootstraps Facilities. Requiring the Facilities terminal
+             * to restore it would make the room depend on itself.
+             */
+            return
+                eDomain == FLOPPY144_COLLECTION_DOMAIN_DR ||
+                eDomain == FLOPPY144_COLLECTION_DOMAIN_HR ||
+                eCollection == FLOPPY144_COLLECTION_FM04;
+
         case FLOPPY144_ROOM_RECEPTION:
             return
                 eDomain == FLOPPY144_COLLECTION_DOMAIN_DR ||
@@ -696,7 +721,7 @@ void Floppy144TerminalPrintNextAction(
             ) ||
             !Floppy144TerminalRestoreAllowedAtLocation(
                 pTerminal,
-                pDefinition->domain
+                eCollection
             )
         )
         {
@@ -3135,7 +3160,7 @@ static void Floppy144TerminalRestoreCollection(
     if(
         !Floppy144TerminalRestoreAllowedAtLocation(
             terminal,
-            definition->domain
+            collection
         )
     )
     {

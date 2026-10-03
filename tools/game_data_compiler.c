@@ -331,6 +331,6 @@ int main(int argc,char**argv)
     for(i=0;i<count(furniture);++i){JsonValue*x=at(furniture,i);if(strv(x,"variant")&&strcmp(strv(x,"variant"),"SECURE_CABINET")==0){long d=intv(x,"code_digits",0);if(d!=6&&d!=8)die("secure cabinet code_digits must be 6 or 8");}}
     emit_collections(root,argv[2]);emit_documents(root,argv[2]);emit_simple_def(root,"triggers","FLOPPY144_TRIGGER","floppy144_triggers.generated.def",argv[2]);emit_simple_def(root,"interactions","FLOPPY144_INTERACTION","floppy144_interactions.generated.def",argv[2]);emit_simple_def(root,"evidence","FLOPPY144_EVIDENCE","floppy144_evidence.generated.def",argv[2]);emit_physical(root,argv[2]);emit_ambient(root,argv[2]);emit_runtime_ledger(root,argv[2]);emit_flat_runtime(root,argv[2]);
     site=get(root,"site_layout_source");if(!site)die("site_layout_source missing");f=openout(argv[2],"site_layout.generated.jsonc");fputs("/* Generated from floppy144_game_data.json by game_data_compiler. */\n",f);write_json2(f,site);fputc('\n',f);fclose(f);
-    printf("Floppy//144 game data compiled: 35 collections, 157 documents, 50 triggers, 41 interactions, 23 evidence, 633 physical items; %lu/%lu KB.\n",required_kb,total_kb);
+    printf("Floppy//144 game data compiled: 35 collections, 163 documents, 50 triggers, 41 interactions, 23 evidence, 633 physical items; %lu/%lu KB.\n",required_kb,total_kb);
     jfree(root);free(text);return 0;
 }

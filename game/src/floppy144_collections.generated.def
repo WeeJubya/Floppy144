@@ -239,8 +239,8 @@ FLOPPY144_COLLECTION(
 
 FLOPPY144_COLLECTION(
     TS27, "TS-27", "Telephony & Internal Communications",
-    FLOPPY144_COLLECTION_DOMAIN_TS, 14U, true,
-    "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 0U, "Telephony & Internal Communications", "TS-27-RS",
+    FLOPPY144_COLLECTION_DOMAIN_TS, 14U, false,
+    "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 6U, "Telephony & Internal Communications", "TS-27-RS",
     floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 589U
 )
 

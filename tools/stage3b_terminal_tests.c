@@ -1175,6 +1175,10 @@ static void Floppy144TestPlayerRecoveryPolicy(void)
     Floppy144TerminalState sTerminal;
     Floppy144CollectionId eDr02;
     Floppy144CollectionId eHr01;
+    Floppy144CollectionId eFm04;
+    Floppy144CollectionId eFm07;
+    Floppy144CollectionId eFm23;
+    Floppy144CollectionId eTs10;
 
     Floppy144TestReachOpeningCollections(
         &sWorld,
@@ -1184,6 +1188,10 @@ static void Floppy144TestPlayerRecoveryPolicy(void)
 
     eDr02 = Floppy144GameDataCollectionId("DR-02");
     eHr01 = Floppy144GameDataCollectionId("HR-01");
+    eFm04 = Floppy144GameDataCollectionId("FM-04");
+    eFm07 = Floppy144GameDataCollectionId("FM-07");
+    eFm23 = Floppy144GameDataCollectionId("FM-23");
+    eTs10 = Floppy144GameDataCollectionId("TS-10");
 
     Floppy144TerminalConfigureSession(
         &sTerminal,
@@ -1339,6 +1347,92 @@ static void Floppy144TestPlayerRecoveryPolicy(void)
             eHr01
         ),
         "Main Office terminal permits HR collection restoration"
+    );
+
+    F144_CHECK(
+        eFm04 < FLOPPY144_COLLECTION_COUNT &&
+        eFm07 < FLOPPY144_COLLECTION_COUNT &&
+        eFm23 < FLOPPY144_COLLECTION_COUNT &&
+        eTs10 < FLOPPY144_COLLECTION_COUNT,
+        "Facilities bootstrap regression IDs resolve"
+    );
+
+    F144_CHECK(
+        Floppy144RunStateReconstructRoom(
+            &sRunState,
+            FLOPPY144_ROOM_MAIN_OFFICE
+        ),
+        "FM-04 bootstrap fixture reconstructs Main Office"
+    );
+
+    Floppy144TerminalResetAtRoom(
+        &sTerminal,
+        &sWorld,
+        FLOPPY144_ROOM_MAIN_OFFICE
+    );
+    Floppy144TerminalConfigureSession(
+        &sTerminal,
+        false,
+        true,
+        true
+    );
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "RESTORE FM-04"
+    );
+
+    F144_CHECK(
+        Floppy144RunStateCollectionRestored(
+            &sRunState,
+            eFm04
+        ),
+        "Main Office terminal permits FM-04 bootstrap restoration"
+    );
+
+    F144_CHECK(
+        Floppy144RunStateReconstructRoom(
+            &sRunState,
+            FLOPPY144_ROOM_FACILITIES
+        ),
+        "FM location fixture reconstructs Facilities"
+    );
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "RESTORE FM-07"
+    );
+
+    F144_CHECK(
+        !Floppy144RunStateCollectionRestored(
+            &sRunState,
+            eFm07
+        ) &&
+        Floppy144TestTerminalContains(
+            &sTerminal,
+            "RESTORE REFUSED"
+        ),
+        "Main Office FM exception remains limited to FM-04"
+    );
+
+    F144_CHECK(
+        Floppy144RunStateBitSet(
+            sRunState.collections,
+            (uint32_t)eTs10
+        ),
+        "FM-23 prerequisite fixture restores TS-10"
+    );
+
+    F144_CHECK(
+        Floppy144RunStateCollectionAvailable(
+            &sRunState,
+            eFm23
+        ),
+        "FM-23 becomes available after TS-10 without self-dependency"
     );
 }
 
@@ -1700,6 +1794,26 @@ static void Floppy144TestBranchDocumentAccessGate(void)
         "opening first workstream commits Records branch"
     );
 
+    F144_CHECK(
+        Floppy144GameDataCollectionEnabled(
+            &sRunState,
+            "DR-23"
+        ),
+        "Records Office reconstruction unlocks optional DR-23 context"
+    );
+
+    F144_CHECK(
+        !Floppy144GameDataCollectionEnabled(
+            &sRunState,
+            "TS-08"
+        ) &&
+        !Floppy144GameDataCollectionEnabled(
+            &sRunState,
+            "TS-27"
+        ),
+        "Technology context stays locked until IT Support is reconstructed"
+    );
+
     /*
      * Reopening the neutral summary after one workstream has fired must still
      * describe both authored workstreams. This reproduces the player case where
@@ -1801,6 +1915,18 @@ static void Floppy144TestBranchDocumentAccessGate(void)
             "alternate branch document applies effects after release"
         );
     }
+
+    F144_CHECK(
+        Floppy144GameDataCollectionEnabled(
+            &sRunState,
+            "TS-08"
+        ) &&
+        Floppy144GameDataCollectionEnabled(
+            &sRunState,
+            "TS-27"
+        ),
+        "IT Support reconstruction unlocks optional TS-08 and TS-27 context"
+    );
 
     sTerminal.output_count = 0U;
 
