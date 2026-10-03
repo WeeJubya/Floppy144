@@ -17888,7 +17888,6 @@
       "body": "GOVERNMENT DEPARTMENT OF RECORDS\nSITE CLOSURE PROJECT\nOUTSTANDING WORKSTREAM SUMMARY\n\nAt close of business Thursday, two operational workstreams remained capable of delaying handover.\n\nRECORDS\nCabinet holdings and transfer staging require final reconciliation in the Records Office.\n\nTECHNOLOGY\nThe Main Office terminal route must be restored before digital holdings verification can be completed.\n\nThe workstreams may proceed independently, but both feed the same final handover decision. Neither is to be marked complete on the strength of verbal assurance.\n\nFacilities and Security are to support access as required.\n\nDistribution: Martin Webb, Project Manager, Priya Patel, Senior Archivist, Claire Hughes, IT Manager, Rachel Morgan, Security Manager.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-04",
-      "recovery_entry_point": true,
       "offer_pending_trigger_choices": true
     },
     {
@@ -17925,7 +17924,8 @@
       "trigger_id": null,
       "body": "GOVERNMENT DEPARTMENT OF RECORDS\nSITE CLOSURE PROJECT\nHANDOVER READINESS CHECKLIST\n\n[OK] Staff posting notices issued.\n[OK] Furniture and general assets marked for transfer or disposal.\n[OK] Visitor arrangements reduced to closure staffing.\n[OK] Routine utilities decommissioning scheduled.\n[  ] Physical archive reconciliation complete.\n[  ] Digital holdings verification complete.\n[  ] Final security review complete.\n[  ] Director's handover certificate signed.\n\nTwo incomplete lines have been carried forward from Thursday.\n\nProject Manager annotation:\n\"Friday is still achievable provided nobody discovers a third workstream.\"",
       "source_status": "authored-for-integration",
-      "parent_collection_id": "DR-04"
+      "parent_collection_id": "DR-04",
+      "recovery_entry_point": true
     },
     {
       "id": "DR-04-RS-0005",
@@ -21567,8 +21567,8 @@
       "trigger_document": "Fire Suppression Event Record",
       "conditions": [
         {
-          "kind": "collection_restored",
-          "target": "FM-13"
+          "kind": "room_reconstructed",
+          "target": "SERVER_ROOM"
         }
       ],
       "effects": [

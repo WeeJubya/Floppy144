@@ -1594,6 +1594,7 @@ static void Floppy144TestBranchDocumentAccessGate(void)
     Floppy144TriggerId eT026;
     Floppy144TriggerId eT028;
     const Floppy144DocumentDefinition *pEntryDocument;
+    const Floppy144DocumentDefinition *pChoiceBriefing;
     const Floppy144DocumentDefinition *pRecordsBranchDocument;
     const Floppy144DocumentDefinition *pTechnologyBranchDocument;
     char szBranchCommand[48];
@@ -1650,6 +1651,11 @@ static void Floppy144TestBranchDocumentAccessGate(void)
             eDr04
         );
 
+    pChoiceBriefing =
+        Floppy144DocumentChoiceBriefing(
+            eDr04
+        );
+
     pRecordsBranchDocument =
         Floppy144TestDocumentForTrigger(
             eDr04,
@@ -1667,9 +1673,19 @@ static void Floppy144TestBranchDocumentAccessGate(void)
         pEntryDocument->record_id_override != NULL &&
         strcmp(
             pEntryDocument->record_id_override,
+            "DR-04-RS-0111"
+        ) == 0,
+        "DR-04 handover checklist is the first player-facing recovery document"
+    );
+
+    F144_CHECK(
+        pChoiceBriefing != NULL &&
+        pChoiceBriefing->record_id_override != NULL &&
+        strcmp(
+            pChoiceBriefing->record_id_override,
             "DR-04-RS-0037"
         ) == 0,
-        "DR-04 briefing is the first player-facing recovery document"
+        "DR-04 neutral workstream summary follows the handover checklist"
     );
 
     F144_CHECK(
@@ -1725,8 +1741,11 @@ static void Floppy144TestBranchDocumentAccessGate(void)
 
     /*
      * Simulate the collection-local shorthand established by RESTORE DR-04.
-     * Opening the neutral briefing must offer both eligible workstreams rather
-     * than selecting Records merely because its trigger appears first.
+     * The canonical neutral breadcrumb is:
+     *
+     *   RS-0111 Handover Readiness Checklist
+     *       -> RS-0037 Outstanding Workstream Summary
+     *       -> RS-0063 or RS-0087 branch choice.
      */
     sTerminal.default_record_collection =
         eDr04;
@@ -1734,12 +1753,33 @@ static void Floppy144TestBranchDocumentAccessGate(void)
     sTerminal.default_record_collection_valid =
         true;
 
+    sTerminal.output_count = 0U;
+
     Floppy144TerminalPrintPostOpenAction(
         &sTerminal,
         &sRunState,
         eDr04,
         pEntryDocument != NULL
             ? pEntryDocument->record_index
+            : 0U
+    );
+
+    F144_CHECK(
+        Floppy144TestTerminalContains(
+            &sTerminal,
+            "NEXT RECOVERY ACTION: OPEN RS-0037"
+        ),
+        "DR-04 handover checklist points to the neutral workstream summary"
+    );
+
+    sTerminal.output_count = 0U;
+
+    Floppy144TerminalPrintPostOpenAction(
+        &sTerminal,
+        &sRunState,
+        eDr04,
+        pChoiceBriefing != NULL
+            ? pChoiceBriefing->record_index
             : 0U
     );
 
@@ -1825,8 +1865,8 @@ static void Floppy144TestBranchDocumentAccessGate(void)
         &sTerminal,
         &sRunState,
         eDr04,
-        pEntryDocument != NULL
-            ? pEntryDocument->record_index
+        pChoiceBriefing != NULL
+            ? pChoiceBriefing->record_index
             : 0U
     );
 
@@ -1934,8 +1974,8 @@ static void Floppy144TestBranchDocumentAccessGate(void)
         &sTerminal,
         &sRunState,
         eDr04,
-        pEntryDocument != NULL
-            ? pEntryDocument->record_index
+        pChoiceBriefing != NULL
+            ? pChoiceBriefing->record_index
             : 0U
     );
 
@@ -2144,8 +2184,10 @@ static void Floppy144TestFm18SuppressionRecordRestoresServerPanel(void)
     Floppy144CollectionId eFm18;
     Floppy144CollectionId eFm13;
     Floppy144CollectionId eCollection = FLOPPY144_COLLECTION_COUNT;
+    Floppy144TriggerId eT041;
     Floppy144TriggerId eT042;
-    uint32_t uRecordIndex = 0U;
+    uint32_t uEnvironmentalRecordIndex = 0U;
+    uint32_t uSuppressionRecordIndex = 0U;
 
     Floppy144WorldReset(
         &sWorld
@@ -2158,13 +2200,23 @@ static void Floppy144TestFm18SuppressionRecordRestoresServerPanel(void)
 
     eFm18 = Floppy144GameDataCollectionId("FM-18");
     eFm13 = Floppy144GameDataCollectionId("FM-13");
+    eT041 = Floppy144GameDataTriggerId("T-041");
     eT042 = Floppy144GameDataTriggerId("T-042");
 
     F144_CHECK(
         eFm18 < FLOPPY144_COLLECTION_COUNT &&
         eFm13 < FLOPPY144_COLLECTION_COUNT &&
+        eT041 < FLOPPY144_TRIGGER_COUNT &&
         eT042 < FLOPPY144_TRIGGER_COUNT,
-        "FM-18 suppression-panel regression IDs resolve"
+        "FM-18 progression regression IDs resolve"
+    );
+
+    F144_CHECK(
+        Floppy144RunStateSetAct(
+            &sRunState,
+            FLOPPY144_RUN_ACT_III
+        ),
+        "FM-18 progression fixture enters Act III"
     );
 
     F144_CHECK(
@@ -2172,7 +2224,7 @@ static void Floppy144TestFm18SuppressionRecordRestoresServerPanel(void)
             &sRunState,
             eFm18
         ),
-        "FM-18 remains unavailable before FM-13 restoration"
+        "FM-18 remains unavailable in Act III before FM-13 restoration"
     );
 
     F144_CHECK(
@@ -2188,7 +2240,7 @@ static void Floppy144TestFm18SuppressionRecordRestoresServerPanel(void)
             &sRunState,
             eFm18
         ),
-        "FM-18 becomes available after FM-13 restoration"
+        "FM-18 becomes available in Act III after FM-13 restoration"
     );
 
     F144_CHECK(
@@ -2200,38 +2252,76 @@ static void Floppy144TestFm18SuppressionRecordRestoresServerPanel(void)
             &sWorld,
             eFm18
         ),
-        "FM-18 suppression-panel fixture restores collection"
-    );
-
-    F144_CHECK(
-        !Floppy144RunStateRoomReconstructed(
-            &sRunState,
-            FLOPPY144_ROOM_SERVER_ROOM
-        ),
-        "FM-18 suppression-panel fixture starts before Server Room reconstruction"
+        "FM-18 progression fixture restores collection"
     );
 
     F144_CHECK(
         Floppy144DocumentFindRecordId(
+            "FM-18-RS-0037",
+            &eCollection,
+            &uEnvironmentalRecordIndex
+        ) &&
+        eCollection == eFm18 &&
+        Floppy144DocumentFindRecordId(
             "FM-18-RS-0074",
             &eCollection,
-            &uRecordIndex
+            &uSuppressionRecordIndex
         ) &&
         eCollection == eFm18,
-        "FM-18-RS-0074 resolves to the FM-18 suppression event record"
+        "FM-18 player-facing progression records resolve"
     );
 
     F144_CHECK(
         Floppy144DocumentApplyEffects(
             &sWorld,
             &sRunState,
-            eCollection,
-            uRecordIndex
+            eFm18,
+            uEnvironmentalRecordIndex
+        ) &&
+        Floppy144RunStateTriggerFired(
+            &sRunState,
+            eT041
+        ) &&
+        Floppy144GameDataPhysicalItemRevealed(
+            &sRunState,
+            "P-037"
         ),
-        "viewing FM-18-RS-0074 applies suppression event effects"
+        "FM-18-RS-0037 restores the Facilities environmental event log"
     );
 
     F144_CHECK(
+        Floppy144DocumentApplyEffects(
+            &sWorld,
+            &sRunState,
+            eFm18,
+            uSuppressionRecordIndex
+        ) &&
+        !Floppy144RunStateTriggerFired(
+            &sRunState,
+            eT042
+        ) &&
+        !Floppy144GameDataPhysicalItemRevealed(
+            &sRunState,
+            "P-103"
+        ),
+        "FM-18-RS-0074 cannot restore the Server Room panel before Server Room reconstruction"
+    );
+
+    F144_CHECK(
+        Floppy144RunStateReconstructRoom(
+            &sRunState,
+            FLOPPY144_ROOM_SERVER_ROOM
+        ),
+        "FM-18 progression fixture reconstructs Server Room"
+    );
+
+    F144_CHECK(
+        Floppy144DocumentApplyEffects(
+            &sWorld,
+            &sRunState,
+            eFm18,
+            uSuppressionRecordIndex
+        ) &&
         Floppy144RunStateTriggerFired(
             &sRunState,
             eT042
@@ -2240,7 +2330,7 @@ static void Floppy144TestFm18SuppressionRecordRestoresServerPanel(void)
             &sRunState,
             "P-103"
         ),
-        "FM-18-RS-0074 persistently restores P-103"
+        "FM-18-RS-0074 restores P-103 once Server Room is reconstructed"
     );
 }
 

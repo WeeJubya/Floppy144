@@ -265,6 +265,41 @@ const Floppy144DocumentDefinition *Floppy144DocumentRecoveryEntryPoint(
     return NULL;
 }
 
+const Floppy144DocumentDefinition *Floppy144DocumentChoiceBriefing(
+    Floppy144CollectionId eCollection
+)
+{
+    uint32_t uDocumentIndex;
+
+    if(
+        (uint32_t)eCollection >=
+            (uint32_t)FLOPPY144_COLLECTION_COUNT
+    )
+    {
+        return NULL;
+    }
+
+    for(
+        uDocumentIndex = 0U;
+        uDocumentIndex < FLOPPY144_DOCUMENT_COUNT;
+        ++uDocumentIndex
+    )
+    {
+        const Floppy144DocumentDefinition *pDocument =
+            &floppy144_documents[uDocumentIndex];
+
+        if(
+            pDocument->collection == eCollection &&
+            pDocument->offer_pending_trigger_choices
+        )
+        {
+            return pDocument;
+        }
+    }
+
+    return NULL;
+}
+
 /*
  * Query whether one recovered document is currently readable.
  *

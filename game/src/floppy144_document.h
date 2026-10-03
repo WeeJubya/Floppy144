@@ -123,6 +123,14 @@ const Floppy144DocumentDefinition *Floppy144DocumentRecoveryEntryPoint(
 );
 
 /*
+ * Locate the neutral authored briefing which offers this collection's
+ * pending trigger choices, if one exists.
+ */
+const Floppy144DocumentDefinition *Floppy144DocumentChoiceBriefing(
+    Floppy144CollectionId eCollection
+);
+
+/*
  * Locate the Nth currently eligible trigger document in authored order.
  * Ordinal zero is equivalent to Floppy144DocumentFirstPendingTrigger().
  */

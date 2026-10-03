@@ -870,6 +870,7 @@ void Floppy144TerminalPrintPostOpenAction(
 )
 {
     const Floppy144DocumentDefinition *pOpenedDocument;
+    const Floppy144DocumentDefinition *pChoiceBriefing;
     const Floppy144DocumentDefinition *pFirstChoice;
     const Floppy144DocumentDefinition *pSecondChoice;
     char szLine[FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
@@ -884,6 +885,43 @@ void Floppy144TerminalPrintPostOpenAction(
             eCollection,
             uRecordIndex
         );
+
+    if(
+        pTerminal->debug_guidance &&
+        pOpenedDocument != NULL &&
+        pOpenedDocument->recovery_entry_point &&
+        !pOpenedDocument->offer_pending_trigger_choices
+    )
+    {
+        pChoiceBriefing =
+            Floppy144DocumentChoiceBriefing(
+                eCollection
+            );
+
+        if(
+            pChoiceBriefing != NULL &&
+            pChoiceBriefing != pOpenedDocument &&
+            pChoiceBriefing->record_id_override != NULL
+        )
+        {
+            snprintf(
+                szLine,
+                sizeof(szLine),
+                "NEXT RECOVERY ACTION: OPEN %s",
+                Floppy144TerminalDisplayRecordId(
+                    pTerminal,
+                    pChoiceBriefing->record_id_override
+                )
+            );
+
+            Floppy144TerminalPushWrappedLine(
+                pTerminal,
+                szLine
+            );
+
+            return;
+        }
+    }
 
     if(
         pTerminal->debug_guidance &&
