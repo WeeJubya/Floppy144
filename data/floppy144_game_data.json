@@ -21567,6 +21567,10 @@
       "trigger_document": "Fire Suppression Event Record",
       "conditions": [
         {
+          "kind": "collection_restored",
+          "target": "FM-13"
+        },
+        {
           "kind": "room_reconstructed",
           "target": "SERVER_ROOM"
         }

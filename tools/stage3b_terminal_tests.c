@@ -2172,15 +2172,16 @@ static void Floppy144TestStaleEvidenceSaveRecovery(void)
 }
 
 /*
- * FM-18-RS-0074 is itself the authority to restore the Server Room
- * environmental panel. The reveal must persist when the record is viewed,
- * even if the Server Room has not yet been reconstructed; room reconstruction
- * still controls whether the physical item can be encountered on Site.
+ * FM-18 has an absolute dependency on FM-13. The Server Room requirement on
+ * FM-18-RS-0074 is an additional document gate, not an alternate route into
+ * the collection. Reconstructing the Server Room alone must therefore never
+ * make FM-18 recoverable.
  */
 static void Floppy144TestFm18SuppressionRecordRestoresServerPanel(void)
 {
     Floppy144WorldState sWorld;
     Floppy144RunState sRunState;
+    Floppy144RunState sBypassState;
     Floppy144CollectionId eFm18;
     Floppy144CollectionId eFm13;
     Floppy144CollectionId eCollection = FLOPPY144_COLLECTION_COUNT;
@@ -2196,6 +2197,11 @@ static void Floppy144TestFm18SuppressionRecordRestoresServerPanel(void)
     Floppy144RunStateBegin(
         &sRunState,
         144U
+    );
+
+    Floppy144RunStateBegin(
+        &sBypassState,
+        145U
     );
 
     eFm18 = Floppy144GameDataCollectionId("FM-18");
@@ -2225,6 +2231,26 @@ static void Floppy144TestFm18SuppressionRecordRestoresServerPanel(void)
             eFm18
         ),
         "FM-18 remains unavailable in Act III before FM-13 restoration"
+    );
+
+    F144_CHECK(
+        Floppy144RunStateSetAct(
+            &sBypassState,
+            FLOPPY144_RUN_ACT_III
+        ) &&
+        Floppy144RunStateReconstructRoom(
+            &sBypassState,
+            FLOPPY144_ROOM_SERVER_ROOM
+        ),
+        "FM-18 bypass fixture reconstructs Server Room in Act III"
+    );
+
+    F144_CHECK(
+        !Floppy144RunStateCollectionAvailable(
+            &sBypassState,
+            eFm18
+        ),
+        "Server Room reconstruction cannot bypass FM-18 dependency on FM-13"
     );
 
     F144_CHECK(
