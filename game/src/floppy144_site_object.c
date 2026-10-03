@@ -814,6 +814,10 @@ Floppy144ObjectId Floppy144SiteInteractionTarget(
  * from the generated furniture/fixture/physical-item/interaction records.
  ******************************************************************************/
 
+static const Floppy144DataRecord *Floppy144SiteParentRecordForRect(
+    const Floppy144SiteRect *pRect
+);
+
 static bool Floppy144SiteDataStringEqual(
     const char *pszA,
     const char *pszB
@@ -1262,163 +1266,96 @@ bool Floppy144SiteDirectoryNearby(
     const Floppy144RunState *pState
 )
 {
+    const char *pszFocusedParentId;
+    const Floppy144DataRecord *pRecord;
     Floppy144RoomId eCurrentRoom;
-    uint32_t uRecordIndex;
-    const uint32_t uRangeSquared =
-        FLOPPY144_SITE_DATA_INTERACTION_RANGE_X16 *
-        FLOPPY144_SITE_DATA_INTERACTION_RANGE_X16;
 
     if(pState == NULL)
     {
         return false;
     }
 
-    eCurrentRoom =
-        Floppy144SiteRoomAtPosition(
-            pState->player_site_x,
-            pState->player_site_y
-        );
+    pszFocusedParentId = Floppy144SiteFocusedParentId(pState);
+    if(pszFocusedParentId == NULL)
+    {
+        return false;
+    }
+
+    pRecord = Floppy144GameDataFind(
+        FLOPPY144_DATA_FIXTURE,
+        pszFocusedParentId
+    );
 
     if(
-        (uint32_t)eCurrentRoom >= (uint32_t)FLOPPY144_ROOM_COUNT ||
-        !Floppy144RunStateRoomReconstructed(
-            pState,
-            eCurrentRoom
-        )
+        pRecord == NULL ||
+        pRecord->pszA == NULL ||
+        pRecord->pszC == NULL ||
+        strcmp(pRecord->pszC, "SITE_DIRECTORY") != 0
     )
     {
         return false;
     }
 
-    for(
-        uRecordIndex = 0U;
-        uRecordIndex < Floppy144GameDataRecordCount();
-        ++uRecordIndex
-    )
-    {
-        const Floppy144DataRecord *pRecord =
-            Floppy144GameDataRecordAt(uRecordIndex);
+    eCurrentRoom = Floppy144SiteRoomAtPosition(
+        pState->player_site_x,
+        pState->player_site_y
+    );
 
-        if(
-            pRecord == NULL ||
-            pRecord->eKind != FLOPPY144_DATA_FIXTURE ||
-            pRecord->pszA == NULL ||
-            pRecord->pszC == NULL ||
-            strcmp(pRecord->pszC, "SITE_DIRECTORY") != 0 ||
-            Floppy144GameDataRoomId(pRecord->pszA) != eCurrentRoom
-        )
-        {
-            continue;
-        }
-
-        if(
-            Floppy144SiteDataRecordDistanceSquared(
-                pState,
-                pRecord
-            ) <= uRangeSquared
-        )
-        {
-            return true;
-        }
-    }
-
-    return false;
+    return
+        eCurrentRoom < FLOPPY144_ROOM_COUNT &&
+        Floppy144GameDataRoomId(pRecord->pszA) == eCurrentRoom;
 }
+
 
 bool Floppy144SiteAccessTerminalRoom(
     const Floppy144RunState *pState,
     Floppy144RoomId *pRoom
 )
 {
+    const char *pszFocusedParentId;
+    const Floppy144DataRecord *pRecord;
     Floppy144RoomId eCurrentRoom;
-    uint32_t uRecordIndex;
-    uint32_t uBestDistance = UINT32_MAX;
-    bool bFound = false;
-
-    const uint32_t uRangeX16 =
-        FLOPPY144_SITE_DATA_INTERACTION_RANGE_X16;
-
-    const uint32_t uRangeSquared =
-        uRangeX16 * uRangeX16;
 
     if(pState == NULL || pRoom == NULL)
     {
         return false;
     }
 
-    eCurrentRoom =
-        Floppy144SiteRoomAtPosition(
-            pState->player_site_x,
-            pState->player_site_y
-        );
+    pszFocusedParentId = Floppy144SiteFocusedParentId(pState);
+    if(pszFocusedParentId == NULL)
+    {
+        return false;
+    }
+
+    pRecord = Floppy144GameDataFind(
+        FLOPPY144_DATA_FURNITURE,
+        pszFocusedParentId
+    );
 
     if(
-        (uint32_t)eCurrentRoom >=
-            (uint32_t)FLOPPY144_ROOM_COUNT ||
-        !Floppy144RunStateRoomReconstructed(
-            pState,
-            eCurrentRoom
-        )
+        pRecord == NULL ||
+        !Floppy144SiteDataStringEqual(pRecord->pszB, "TERMINAL_DESK")
     )
     {
         return false;
     }
 
-    for(
-        uRecordIndex = 0U;
-        uRecordIndex < Floppy144GameDataRecordCount();
-        ++uRecordIndex
+    eCurrentRoom = Floppy144SiteRoomAtPosition(
+        pState->player_site_x,
+        pState->player_site_y
+    );
+
+    if(
+        eCurrentRoom >= FLOPPY144_ROOM_COUNT ||
+        !Floppy144RunStateRoomReconstructed(pState, eCurrentRoom) ||
+        Floppy144GameDataRoomId(pRecord->pszA) != eCurrentRoom
     )
     {
-        const Floppy144DataRecord *pRecord =
-            Floppy144GameDataRecordAt(uRecordIndex);
-
-        Floppy144RoomId eRecordRoom;
-        uint32_t uDistance;
-
-        if(
-            pRecord == NULL ||
-            pRecord->eKind !=
-                FLOPPY144_DATA_FURNITURE ||
-            !Floppy144SiteDataStringEqual(
-                pRecord->pszB,
-                "TERMINAL_DESK"
-            )
-        )
-        {
-            continue;
-        }
-
-        eRecordRoom =
-            Floppy144GameDataRoomId(
-                pRecord->pszA
-            );
-
-        if(eRecordRoom != eCurrentRoom)
-        {
-            continue;
-        }
-
-        uDistance =
-            Floppy144SiteDataRecordDistanceSquared(
-                pState,
-                pRecord
-            );
-
-        if(
-            uDistance > uRangeSquared ||
-            uDistance >= uBestDistance
-        )
-        {
-            continue;
-        }
-
-        uBestDistance = uDistance;
-        *pRoom = eCurrentRoom;
-        bFound = true;
+        return false;
     }
 
-    return bFound;
+    *pRoom = eCurrentRoom;
+    return true;
 }
 
 bool Floppy144SiteResolveInspectionTarget(
@@ -1427,6 +1364,7 @@ bool Floppy144SiteResolveInspectionTarget(
 )
 {
     Floppy144RoomId eCurrentRoom;
+    const char *pszFocusedParentId;
     uint32_t uRecordIndex;
     uint32_t uBestDistance = UINT32_MAX;
     uint32_t uBestPriority = 0U;
@@ -1469,6 +1407,12 @@ bool Floppy144SiteResolveInspectionTarget(
         return false;
     }
 
+    pszFocusedParentId = Floppy144SiteFocusedParentId(pState);
+    if(pszFocusedParentId == NULL)
+    {
+        return false;
+    }
+
     /*
      * Iterate canonical physical items rather than a hand-authored Site table.
      * Each item already names its furniture/fixture parent in generated data.
@@ -1497,7 +1441,11 @@ bool Floppy144SiteResolveInspectionTarget(
             pPhysicalItem == NULL ||
             pPhysicalItem->eKind !=
                 FLOPPY144_DATA_PHYSICAL_ITEM ||
-            pPhysicalItem->pszC == NULL
+            pPhysicalItem->pszC == NULL ||
+            !Floppy144SiteDataStringEqual(
+                pPhysicalItem->pszC,
+                pszFocusedParentId
+            )
         )
         {
             continue;
@@ -1627,6 +1575,11 @@ bool Floppy144SiteResolveInspectionTarget(
             if(
                 pParent == NULL ||
                 pParent->eKind != FLOPPY144_DATA_FURNITURE ||
+                pParent->pszId == NULL ||
+                !Floppy144SiteDataStringEqual(
+                    pParent->pszId,
+                    pszFocusedParentId
+                ) ||
                 pParent->pszB == NULL ||
                 !(
                     Floppy144SiteDataStringEqual(
@@ -2091,33 +2044,41 @@ const char *Floppy144SiteCorridorDoorLabelNearby(
     bool *pLocked
 )
 {
-    Floppy144RoomId eCurrentRoom;
+    const char *pszFocusedParentId;
+    const Floppy144DataRecord *pFixture;
     uint32_t uRectIndex;
-    uint32_t uBestDistance = UINT32_MAX;
-    const char *pszBestLabel = NULL;
-    bool bBestLocked = false;
-
-    const uint32_t uRangeSquared =
-        FLOPPY144_SITE_DATA_INTERACTION_RANGE_X16 *
-        FLOPPY144_SITE_DATA_INTERACTION_RANGE_X16;
 
     if(pLocked != NULL)
     {
         *pLocked = false;
     }
 
-    if(pState == NULL)
+    if(
+        pState == NULL ||
+        Floppy144SiteRoomAtPosition(
+            pState->player_site_x,
+            pState->player_site_y
+        ) != FLOPPY144_ROOM_CORRIDOR
+    )
     {
         return NULL;
     }
 
-    eCurrentRoom =
-        Floppy144SiteRoomAtPosition(
-            pState->player_site_x,
-            pState->player_site_y
-        );
+    pszFocusedParentId = Floppy144SiteFocusedParentId(pState);
+    if(pszFocusedParentId == NULL)
+    {
+        return NULL;
+    }
 
-    if(eCurrentRoom != FLOPPY144_ROOM_CORRIDOR)
+    pFixture = Floppy144GameDataFind(
+        FLOPPY144_DATA_FIXTURE,
+        pszFocusedParentId
+    );
+
+    if(
+        pFixture == NULL ||
+        !Floppy144SiteDataStringEqual(pFixture->pszB, "DOOR")
+    )
     {
         return NULL;
     }
@@ -2130,72 +2091,52 @@ const char *Floppy144SiteCorridorDoorLabelNearby(
     {
         const Floppy144SiteRect *pRect =
             Floppy144SiteRectAt(uRectIndex);
-
-        const char *pszLabel;
-        uint32_t uDistance;
+        const Floppy144DataRecord *pParent;
 
         if(
             pRect == NULL ||
-            !Floppy144SiteRectRuntimeVisible(pState, pRect)
+            pRect->type != (uint8_t)FLOPPY144_SITE_DOOR
         )
         {
             continue;
         }
 
-        pszLabel =
-            Floppy144SiteCorridorDoorLabelForRect(
-                pRect
-            );
-
-        if(pszLabel == NULL)
-        {
-            continue;
-        }
-
-        uDistance =
-            Floppy144SiteRectDistanceSquared(
-                pState,
-                pRect
-            );
+        pParent = Floppy144SiteParentRecordForRect(pRect);
 
         if(
-            uDistance > uRangeSquared ||
-            uDistance >= uBestDistance
+            pParent == NULL ||
+            pParent->pszId == NULL ||
+            strcmp(pParent->pszId, pszFocusedParentId) != 0
         )
         {
             continue;
         }
 
-        uBestDistance = uDistance;
-        pszBestLabel = pszLabel;
-        bBestLocked =
-            Floppy144SiteDoorLocked(
-                pState,
-                pRect
-            );
+        if(pLocked != NULL)
+        {
+            *pLocked = Floppy144SiteDoorLocked(pState, pRect);
+        }
+
+        return Floppy144SiteCorridorDoorLabelForRect(pRect);
     }
 
-    if(
-        pszBestLabel != NULL &&
-        pLocked != NULL
-    )
-    {
-        *pLocked = bBestLocked;
-    }
-
-    return pszBestLabel;
+    return NULL;
 }
 
 bool Floppy144SiteLockedDoorNearby(
     const Floppy144RunState *pState
 )
 {
+    const char *pszFocusedParentId;
     uint32_t uRectIndex;
-    const uint32_t uRangeSquared =
-        FLOPPY144_SITE_DATA_INTERACTION_RANGE_X16 *
-        FLOPPY144_SITE_DATA_INTERACTION_RANGE_X16;
 
     if(pState == NULL)
+    {
+        return false;
+    }
+
+    pszFocusedParentId = Floppy144SiteFocusedParentId(pState);
+    if(pszFocusedParentId == NULL)
     {
         return false;
     }
@@ -2208,53 +2149,125 @@ bool Floppy144SiteLockedDoorNearby(
     {
         const Floppy144SiteRect *pRect =
             Floppy144SiteRectAt(uRectIndex);
+        const Floppy144DataRecord *pParent;
 
         if(
             pRect == NULL ||
             pRect->type != (uint8_t)FLOPPY144_SITE_DOOR ||
-            !Floppy144SiteRectRuntimeVisible(pState, pRect) ||
-            !Floppy144SiteDoorLocked(pState, pRect)
+            !Floppy144SiteRectRuntimeVisible(pState, pRect)
         )
         {
             continue;
         }
 
+        pParent = Floppy144SiteParentRecordForRect(pRect);
+
         if(
-            Floppy144SiteRectDistanceSquared(
-                pState,
-                pRect
-            ) <= uRangeSquared
+            pParent == NULL ||
+            pParent->pszId == NULL ||
+            strcmp(pParent->pszId, pszFocusedParentId) != 0
         )
         {
-            return true;
+            continue;
         }
+
+        return Floppy144SiteDoorLocked(pState, pRect);
     }
 
     return false;
 }
 
-const char *Floppy144SiteContextLabel(
-    const Floppy144RunState *pState
+
+static const Floppy144DataRecord *Floppy144SiteParentRecordForRect(
+    const Floppy144SiteRect *pRect
+)
+{
+    uint32_t uRecordIndex;
+
+    if(pRect == NULL)
+    {
+        return NULL;
+    }
+
+    for(
+        uRecordIndex = 0U;
+        uRecordIndex < Floppy144GameDataRecordCount();
+        ++uRecordIndex
+    )
+    {
+        const Floppy144DataRecord *pRecord =
+            Floppy144GameDataRecordAt(uRecordIndex);
+        Floppy144RoomId eRecordRoom;
+
+        if(
+            pRecord == NULL ||
+            (
+                pRecord->eKind != FLOPPY144_DATA_FURNITURE &&
+                pRecord->eKind != FLOPPY144_DATA_FIXTURE
+            ) ||
+            pRecord->pszId == NULL ||
+            pRecord->n0 != (int32_t)pRect->x ||
+            pRecord->n1 != (int32_t)pRect->y ||
+            pRecord->n2 != (int32_t)pRect->width ||
+            pRecord->n3 != (int32_t)pRect->height
+        )
+        {
+            continue;
+        }
+
+        if(pRect->type != (uint8_t)FLOPPY144_SITE_DOOR)
+        {
+            eRecordRoom = Floppy144GameDataRoomId(pRecord->pszA);
+            if(
+                eRecordRoom >= FLOPPY144_ROOM_COUNT ||
+                (uint8_t)eRecordRoom != pRect->room
+            )
+            {
+                continue;
+            }
+        }
+        else if(
+            pRecord->eKind != FLOPPY144_DATA_FIXTURE ||
+            !Floppy144SiteDataStringEqual(pRecord->pszB, "DOOR")
+        )
+        {
+            continue;
+        }
+
+        return pRecord;
+    }
+
+    return NULL;
+}
+
+static const Floppy144SiteRect *Floppy144SiteFocusedRect(
+    const Floppy144RunState *pState,
+    const char **ppszLabel
 )
 {
     Floppy144RoomId eCurrentRoom;
     uint32_t uRectIndex;
     uint32_t uBestDistance = UINT32_MAX;
+    const Floppy144SiteRect *pBestRect = NULL;
     const char *pszBestLabel = NULL;
     const uint32_t uRangeSquared =
         FLOPPY144_SITE_CONTEXT_LABEL_RANGE_X16 *
         FLOPPY144_SITE_CONTEXT_LABEL_RANGE_X16;
+
+    if(ppszLabel != NULL)
+    {
+        *ppszLabel = NULL;
+    }
 
     if(pState == NULL)
     {
         return NULL;
     }
 
-    eCurrentRoom =
-        Floppy144SiteRoomAtPosition(
-            pState->player_site_x,
-            pState->player_site_y
-        );
+    eCurrentRoom = Floppy144SiteRoomAtPosition(
+        pState->player_site_x,
+        pState->player_site_y
+    );
 
     for(
         uRectIndex = 0U;
@@ -2279,10 +2292,7 @@ const char *Floppy144SiteContextLabel(
         {
             if(eCurrentRoom == FLOPPY144_ROOM_CORRIDOR)
             {
-                pszLabel =
-                    Floppy144SiteCorridorDoorLabelForRect(
-                        pRect
-                    );
+                pszLabel = Floppy144SiteCorridorDoorLabelForRect(pRect);
             }
 
             if(
@@ -2298,17 +2308,13 @@ const char *Floppy144SiteContextLabel(
                 (uint8_t)FLOPPY144_SITE_WALL_MOUNTED_ITEM
         )
         {
-            pszLabel =
-                Floppy144SiteWallHangingLabel(
-                    pRect
-                );
+            pszLabel = Floppy144SiteWallHangingLabel(pRect);
         }
         else
         {
-            pszLabel =
-                Floppy144SiteFurnitureLabel(
-                    (Floppy144SiteElement)pRect->type
-                );
+            pszLabel = Floppy144SiteFurnitureLabel(
+                (Floppy144SiteElement)pRect->type
+            );
         }
 
         if(pszLabel == NULL)
@@ -2316,11 +2322,7 @@ const char *Floppy144SiteContextLabel(
             continue;
         }
 
-        uDistance =
-            Floppy144SiteRectDistanceSquared(
-                pState,
-                pRect
-            );
+        uDistance = Floppy144SiteRectDistanceSquared(pState, pRect);
 
         if(
             uDistance > uRangeSquared ||
@@ -2331,10 +2333,44 @@ const char *Floppy144SiteContextLabel(
         }
 
         uBestDistance = uDistance;
+        pBestRect = pRect;
         pszBestLabel = pszLabel;
     }
 
-    return pszBestLabel;
+    if(ppszLabel != NULL)
+    {
+        *ppszLabel = pszBestLabel;
+    }
+
+    return pBestRect;
+}
+
+const char *Floppy144SiteContextLabel(
+    const Floppy144RunState *pState
+)
+{
+    const char *pszLabel = NULL;
+
+    (void)Floppy144SiteFocusedRect(pState, &pszLabel);
+    return pszLabel;
+}
+
+const char *Floppy144SiteFocusedParentId(
+    const Floppy144RunState *pState
+)
+{
+    const Floppy144SiteRect *pRect;
+    const Floppy144DataRecord *pParent;
+
+    pRect = Floppy144SiteFocusedRect(pState, NULL);
+    if(pRect == NULL)
+    {
+        return NULL;
+    }
+
+    pParent = Floppy144SiteParentRecordForRect(pRect);
+
+    return pParent != NULL ? pParent->pszId : NULL;
 }
 
 uint32_t Floppy144SiteAvailableActions(

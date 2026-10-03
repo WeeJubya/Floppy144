@@ -21,7 +21,10 @@
 #define FLOPPY144_CABINET_DISPLAY_CAPACITY  72U
 #define FLOPPY144_CABINET_TYPE_CAPACITY     40U
 #define FLOPPY144_CABINET_CODE_CAPACITY      8U
-#define FLOPPY144_CABINET_INTERACTION_RANGE  2U
+/*
+ * Site proximity is owned by Floppy144SiteFocusedParentId(). Secure cabinets
+ * deliberately have no independent interaction halo.
+ */
 
 typedef struct Floppy144CabinetState
 {
@@ -50,8 +53,9 @@ void Floppy144CabinetReset(
 );
 
 /*
- * Resolve the nearest generated secure cabinet in the player's current room.
- * Opening an already-unlocked cabinet goes directly to Cabinet Interior.
+ * Resolve a generated secure cabinet only when that cabinet owns the current
+ * Site proximity focus. Opening an already-unlocked cabinet goes directly to
+ * Cabinet Interior.
  */
 bool Floppy144CabinetOpenNearby(
     Floppy144CabinetState *pCabinet,

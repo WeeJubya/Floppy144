@@ -11,6 +11,7 @@
 #include "floppy144_persistence.h"
 #include "floppy144_run_state.h"
 #include "floppy144_site.h"
+#include "floppy144_site_object.h"
 #include "floppy144_world.h"
 
 #include <stdbool.h>
@@ -954,6 +955,60 @@ static void Floppy144TestRecoveredChildRevealsCabinetCode(void)
     );
 }
 
+static void Floppy144TestFocusedCabinetAccess(void)
+{
+    Floppy144WorldState sWorld;
+    Floppy144RunState sState;
+    Floppy144CabinetState sCabinet;
+    const char *pszFocusedParentId;
+
+    Floppy144TestReset(&sWorld, &sState, &sCabinet);
+    (void)Floppy144RunStateReconstructRoom(
+        &sState,
+        FLOPPY144_ROOM_RECORDS_OFFICE
+    );
+
+    /*
+     * Reproduce the reported crossover: trolley focus while Cabinet 06 was
+     * still inside the former two-unit secure-cabinet Access radius.
+     */
+    Floppy144RunStateSetPlayerSitePosition(
+        &sState,
+        85 * FLOPPY144_SITE_FIXED_ONE,
+        19 * FLOPPY144_SITE_FIXED_ONE
+    );
+
+    pszFocusedParentId = Floppy144SiteFocusedParentId(&sState);
+
+    F144_CHECK(
+        pszFocusedParentId != NULL &&
+        strcmp(pszFocusedParentId, "RECORDS_OFFICE_TROLLEY") == 0 &&
+        !Floppy144CabinetOpenNearby(&sCabinet, &sState),
+        "Cabinet 06 cannot leak Access while trolley owns Site focus"
+    );
+
+    Floppy144TestPlaceAtCabinet(
+        &sState,
+        "RECORDS_OFFICE_SECURE_CABINET_06"
+    );
+
+    pszFocusedParentId = Floppy144SiteFocusedParentId(&sState);
+
+    F144_CHECK(
+        pszFocusedParentId != NULL &&
+        strcmp(
+            pszFocusedParentId,
+            "RECORDS_OFFICE_SECURE_CABINET_06"
+        ) == 0 &&
+        Floppy144CabinetOpenNearby(&sCabinet, &sState) &&
+        strcmp(
+            Floppy144CabinetId(&sCabinet),
+            "RECORDS_OFFICE_SECURE_CABINET_06"
+        ) == 0,
+        "Cabinet 06 Access returns when Cabinet 06 owns Site focus"
+    );
+}
+
 static void Floppy144TestActLengthContract(void)
 {
     Floppy144WorldState sWorld;
@@ -990,6 +1045,7 @@ int main(void)
     Floppy144TestRecoveredChildRevealsCabinetCode();
     Floppy144TestSecurityCabinetUnlockAndContents();
     Floppy144TestPerCabinetUnlockPersistence();
+    Floppy144TestFocusedCabinetAccess();
     Floppy144TestActLengthContract();
 
     if(g_nFailures != 0)

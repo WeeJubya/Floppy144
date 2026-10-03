@@ -410,11 +410,8 @@ bool Floppy144CabinetOpenNearby(
 )
 {
     Floppy144RoomId eRoom;
-    const Floppy144DataRecord *pBest = NULL;
-    uint32_t uBestDistance = UINT32_MAX;
-    uint32_t uRecordIndex;
-    uint32_t uRangeX16;
-    uint32_t uRangeSquared;
+    const char *pszFocusedParentId;
+    const Floppy144DataRecord *pBest;
     int32_t nOrdinal;
 
     if(pCabinet == NULL || pRunState == NULL)
@@ -433,48 +430,31 @@ bool Floppy144CabinetOpenNearby(
         return false;
     }
 
-    uRangeX16 =
-        FLOPPY144_CABINET_INTERACTION_RANGE *
-        FLOPPY144_SITE_FIXED_ONE;
-
-    uRangeSquared = uRangeX16 * uRangeX16;
-
-    for(
-        uRecordIndex = 0U;
-        uRecordIndex < Floppy144GameDataRecordCount();
-        ++uRecordIndex
-    )
-    {
-        const Floppy144DataRecord *pRecord =
-            Floppy144GameDataRecordAt(uRecordIndex);
-
-        uint32_t uDistance;
-
-        if(
-            !Floppy144CabinetRecordIsSecure(pRecord) ||
-            Floppy144GameDataRoomId(pRecord->pszA) != eRoom
-        )
-        {
-            continue;
-        }
-
-        uDistance = Floppy144CabinetDistanceSquared(pRunState, pRecord);
-
-        if(uDistance > uRangeSquared)
-            continue;
-
-        if(pBest == NULL || uDistance < uBestDistance)
-        {
-            pBest = pRecord;
-            uBestDistance = uDistance;
-        }
-    }
-
-    if(pBest == NULL || pBest->pszId == NULL)
+    /*
+     * Secure storage no longer owns an independent 2U proximity halo.
+     * It can be accessed only when the same half-unit parent currently owns
+     * the Site label/focus, so a nearby trolley, desk or other parent cannot
+     * leak Cabinet Access into its action prompt.
+     */
+    pszFocusedParentId = Floppy144SiteFocusedParentId(pRunState);
+    if(pszFocusedParentId == NULL)
         return false;
 
-    nOrdinal = Floppy144CabinetOrdinalForId(pBest->pszId);
+    pBest = Floppy144GameDataFind(
+        FLOPPY144_DATA_FURNITURE,
+        pszFocusedParentId
+    );
 
+    if(
+        !Floppy144CabinetRecordIsSecure(pBest) ||
+        Floppy144GameDataRoomId(pBest->pszA) != eRoom ||
+        pBest->pszId == NULL
+    )
+    {
+        return false;
+    }
+
+    nOrdinal = Floppy144CabinetOrdinalForId(pBest->pszId);
     if(nOrdinal < 0 || nOrdinal >= (int32_t)FLOPPY144_SECURE_CABINET_MAX)
         return false;
 
@@ -502,17 +482,11 @@ bool Floppy144CabinetOpenNearby(
         );
 
     if(pCabinet->bInteriorOpen)
-    {
         pCabinet->pszStatus = "CABINET ACCESS GRANTED";
-    }
     else if(Floppy144CabinetCodeKnown(pCabinet, pRunState))
-    {
         pCabinet->pszStatus = "RECOVERED CODE AVAILABLE";
-    }
     else
-    {
         pCabinet->pszStatus = "ACCESS CODE NOT RECOVERED";
-    }
 
     return true;
 }

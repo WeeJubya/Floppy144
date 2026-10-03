@@ -1536,6 +1536,54 @@ static void Floppy144TestCorridorDoorLabels(void)
     );
 }
 
+static void Floppy144TestSingleFocusedParentActions(void)
+{
+    Floppy144WorldState sWorld;
+    Floppy144RunState sState;
+    Floppy144SiteInspectionTarget sTarget;
+    const char *pszLabel;
+    const char *pszParentId;
+    uint32_t uActions;
+
+    Floppy144TestReset(&sWorld, &sState);
+    (void)Floppy144RunStateReconstructRoom(
+        &sState,
+        FLOPPY144_ROOM_RECORDS_OFFICE
+    );
+
+    /*
+     * At x85/y19 the player's collision footprint touches the Records trolley,
+     * while the former secure-cabinet point radius also reached Cabinet 06 at
+     * x79/y21 w6/h2. The trolley must own the complete contextual prompt.
+     */
+    Floppy144TestSetPosition(&sState, 85, 19);
+
+    pszLabel = Floppy144SiteContextLabel(&sState);
+    pszParentId = Floppy144SiteFocusedParentId(&sState);
+    uActions = Floppy144SiteAvailableActions(&sState);
+
+    F144_CHECK(
+        pszLabel != NULL &&
+        strcmp(pszLabel, "TROLLEY") == 0 &&
+        pszParentId != NULL &&
+        strcmp(pszParentId, "RECORDS_OFFICE_TROLLEY") == 0,
+        "Records trolley owns the canonical proximity focus"
+    );
+
+    F144_CHECK(
+        (uActions & FLOPPY144_SITE_ACTION_INSPECT) != 0U &&
+        (uActions & FLOPPY144_SITE_ACTION_ACCESS) == 0U,
+        "trolley focus advertises Inspect but not neighbouring Access"
+    );
+
+    F144_CHECK(
+        Floppy144SiteResolveInspectionTarget(&sState, &sTarget) &&
+        sTarget.pszParentId != NULL &&
+        strcmp(sTarget.pszParentId, "RECORDS_OFFICE_TROLLEY") == 0,
+        "Inspect resolves the same parent named by the Site focus"
+    );
+}
+
 static void Floppy144TestContextLabels(void)
 {
     Floppy144WorldState sWorld;
@@ -2037,6 +2085,7 @@ int main(void)
     Floppy144TestRecordsTrolleyNotebookGuidance();
     Floppy144TestLockedDoorInspectActions();
     Floppy144TestCorridorDoorLabels();
+    Floppy144TestSingleFocusedParentActions();
     Floppy144TestContextLabels();
     Floppy144TestExteriorExitBehaviour();
 

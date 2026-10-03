@@ -56,6 +56,16 @@ uint32_t Floppy144SiteAvailableActions(
 );
 
 /*
+ * Return the generated furniture/fixture parent which owns the current
+ * proximity focus. The same half-unit focus drives the passive label and all
+ * contextual actions, preventing neighbouring parents from contributing
+ * different controls to one prompt.
+ */
+const char *Floppy144SiteFocusedParentId(
+    const Floppy144RunState *pState
+);
+
+/*
  * Return true when the player is standing beside any authored Site Directory
  * fixture in the current reconstructed room. Both Reception and Corridor use
  * the same generic path, so future directories gain the map action for free.
