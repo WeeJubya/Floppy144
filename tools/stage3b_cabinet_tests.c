@@ -650,12 +650,16 @@ static void Floppy144TestAllCorridorDoorContainers(void)
         FLOPPY144_ROOM_CORRIDOR
     );
 
+    /*
+     * Room plates are permanent door furniture, not recovery effects. They
+     * must already be present before T-005 unlocks COR_REC/COR_OFF.
+     */
     F144_CHECK(
-        Floppy144RunStateFireTrigger(
+        !Floppy144RunStateTriggerFired(
             &sState,
             Floppy144GameDataTriggerId("T-005")
         ),
-        "corridor-door fixture reveals FM-04 room plates"
+        "Corridor Door container fixture starts before T-005"
     );
 
     for(

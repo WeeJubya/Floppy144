@@ -1641,6 +1641,39 @@ bool Floppy144SiteResolveInspectionTarget(
         }
     }
 
+    /*
+     * Boundary doors are inspectable containers in their own right. A room
+     * plate is authored on the Corridor side, so a player standing on the
+     * opposite side of a locked door will not find that child in the
+     * same-room item pass above. Keep the focused Door parent as the target so
+     * Inspect opens the reusable Door container from either side.
+     */
+    if(!bFound)
+    {
+        const Floppy144DataRecord *pDoor =
+            Floppy144GameDataFind(
+                FLOPPY144_DATA_FIXTURE,
+                pszFocusedParentId
+            );
+
+        if(
+            pDoor != NULL &&
+            Floppy144SiteDataStringEqual(
+                pDoor->pszB,
+                "DOOR"
+            )
+        )
+        {
+            pTarget->pszParentId = pDoor->pszId;
+            pTarget->pszPhysicalItemId = NULL;
+            pTarget->pszPhysicalItemName = "Door";
+            pTarget->eInteraction = FLOPPY144_INTERACTION_COUNT;
+            pTarget->bInteractionAvailable = false;
+            pTarget->bInteractionCompleted = false;
+            bFound = true;
+        }
+    }
+
     return bFound;
 }
 

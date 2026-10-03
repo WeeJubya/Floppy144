@@ -1174,6 +1174,20 @@ static void Floppy144TestLockedDoorInspectActions(void)
         "locked COR_REC advertises Inspect"
     );
 
+    {
+        Floppy144SiteInspectionTarget sTarget;
+
+        F144_CHECK(
+            Floppy144SiteResolveInspectionTarget(
+                &sState,
+                &sTarget
+            ) &&
+            sTarget.pszParentId != NULL &&
+            strcmp(sTarget.pszParentId, "COR_REC") == 0,
+            "Reception-side locked COR_REC Inspect resolves the Door container"
+        );
+    }
+
     /*
      * REC_OFF uses the same rule. Reconstructing Main Office makes the shared
      * boundary visible, but must not silently remove Inspect while the

@@ -20463,41 +20463,9 @@
         {
           "op": "REVEAL_PHYSICAL_ITEM",
           "target": "P-007"
-        },
-        {
-          "op": "REVEAL_PHYSICAL_ITEM",
-          "target": "P-030"
-        },
-        {
-          "op": "REVEAL_PHYSICAL_ITEM",
-          "target": "P-152"
-        },
-        {
-          "op": "REVEAL_PHYSICAL_ITEM",
-          "target": "P-153"
-        },
-        {
-          "op": "REVEAL_PHYSICAL_ITEM",
-          "target": "P-154"
-        },
-        {
-          "op": "REVEAL_PHYSICAL_ITEM",
-          "target": "P-155"
-        },
-        {
-          "op": "REVEAL_PHYSICAL_ITEM",
-          "target": "P-156"
-        },
-        {
-          "op": "REVEAL_PHYSICAL_ITEM",
-          "target": "P-157"
-        },
-        {
-          "op": "REVEAL_PHYSICAL_ITEM",
-          "target": "P-158"
         }
       ],
-      "effect_summary": "UNLOCK_CONNECTION COR_REC; UNLOCK_CONNECTION COR_OFF; REVEAL_PHYSICAL_ITEM P-007; REVEAL_PHYSICAL_ITEM P-030; REVEAL_PHYSICAL_ITEM P-152; REVEAL_PHYSICAL_ITEM P-153; REVEAL_PHYSICAL_ITEM P-154; REVEAL_PHYSICAL_ITEM P-155; REVEAL_PHYSICAL_ITEM P-156; REVEAL_PHYSICAL_ITEM P-157; REVEAL_PHYSICAL_ITEM P-158",
+      "effect_summary": "UNLOCK_CONNECTION COR_REC; UNLOCK_CONNECTION COR_OFF; REVEAL_PHYSICAL_ITEM P-007",
       "persistent": true,
       "idempotent": true,
       "source_order": 5
@@ -28157,41 +28125,6 @@
     {
       "parent_id": "T-005",
       "child_id": "P-007",
-      "relation": "trigger_effect_target"
-    },
-    {
-      "parent_id": "T-005",
-      "child_id": "P-152",
-      "relation": "trigger_effect_target"
-    },
-    {
-      "parent_id": "T-005",
-      "child_id": "P-153",
-      "relation": "trigger_effect_target"
-    },
-    {
-      "parent_id": "T-005",
-      "child_id": "P-154",
-      "relation": "trigger_effect_target"
-    },
-    {
-      "parent_id": "T-005",
-      "child_id": "P-155",
-      "relation": "trigger_effect_target"
-    },
-    {
-      "parent_id": "T-005",
-      "child_id": "P-156",
-      "relation": "trigger_effect_target"
-    },
-    {
-      "parent_id": "T-005",
-      "child_id": "P-157",
-      "relation": "trigger_effect_target"
-    },
-    {
-      "parent_id": "T-005",
-      "child_id": "P-158",
       "relation": "trigger_effect_target"
     },
     {
