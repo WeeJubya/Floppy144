@@ -2016,9 +2016,9 @@ static void Floppy144TestFm18SuppressionRecordRestoresServerPanel(void)
     Floppy144WorldState sWorld;
     Floppy144RunState sRunState;
     Floppy144CollectionId eFm18;
-    Floppy144CollectionId eCollection;
+    Floppy144CollectionId eCollection = FLOPPY144_COLLECTION_COUNT;
     Floppy144TriggerId eT042;
-    uint32_t uRecordIndex;
+    uint32_t uRecordIndex = 0U;
 
     Floppy144WorldReset(
         &sWorld
