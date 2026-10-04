@@ -1168,6 +1168,46 @@ static void Floppy144TestMultipleCollectionCommands(void)
  * Player-facing recovery policy: normal runs receive only the first-profile
  * DR tutorial, while departmental restoration is tied to physical terminals.
  */
+static bool Floppy144TestNotebookContains(
+    const Floppy144RunState *pRunState,
+    const char *pszId,
+    const char *pszText
+)
+{
+    uint32_t uIndex;
+
+    for(
+        uIndex = 0U;
+        uIndex < Floppy144GameDataNotebookEntryCount(pRunState);
+        ++uIndex
+    )
+    {
+        const Floppy144DataRecord *pEntry =
+            Floppy144GameDataNotebookEntryAt(
+                pRunState,
+                uIndex
+            );
+
+        if(
+            pEntry != NULL &&
+            pEntry->pszId != NULL &&
+            strcmp(pEntry->pszId, pszId) == 0 &&
+            (
+                pszText == NULL ||
+                (
+                    pEntry->pszA != NULL &&
+                    strstr(pEntry->pszA, pszText) != NULL
+                )
+            )
+        )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 static void Floppy144TestPlayerRecoveryPolicy(void)
 {
     Floppy144WorldState sWorld;
@@ -1420,6 +1460,42 @@ static void Floppy144TestPlayerRecoveryPolicy(void)
         "Project Manager authorisation upgrades Main Office terminal for FM-04"
     );
 
+    F144_CHECK(
+        Floppy144TestNotebookContains(
+            &sRunState,
+            "I-042",
+            "Temporary access to Facilities"
+        ),
+        "Project Manager authorisation writes the temporary Facilities access note"
+    );
+
+    /*
+     * Acquisition is permanent. Temporarily remove the source completion bit
+     * to prove the viewer does not re-evaluate old notes against live state.
+     */
+    (void)Floppy144RunStateBitClear(
+        sRunState.interactions,
+        (uint32_t)eI042
+    );
+
+    F144_CHECK(
+        !Floppy144RunStateInteractionCompleted(
+            &sRunState,
+            eI042
+        ) &&
+        Floppy144TestNotebookContains(
+            &sRunState,
+            "I-042",
+            "Temporary access to Facilities"
+        ),
+        "written Notebook entries remain visible after their source predicate changes"
+    );
+
+    (void)Floppy144RunStateBitSet(
+        sRunState.interactions,
+        (uint32_t)eI042
+    );
+
     Floppy144TerminalResetAtRoom(
         &sTerminal,
         &sWorld,
@@ -1503,6 +1579,86 @@ static void Floppy144TestPlayerRecoveryPolicy(void)
     );
 }
 
+
+static void Floppy144TestServerRoomItTerminal(void)
+{
+    Floppy144WorldState sWorld;
+    Floppy144RunState sRunState;
+    Floppy144TerminalState sTerminal;
+    Floppy144CollectionId eTs14;
+
+    Floppy144TestReachOpeningCollections(
+        &sWorld,
+        &sRunState,
+        &sTerminal
+    );
+
+    eTs14 = Floppy144GameDataCollectionId("TS-14");
+
+    F144_CHECK(
+        eTs14 < FLOPPY144_COLLECTION_COUNT &&
+        Floppy144RunStateSetBranch(
+            &sRunState,
+            FLOPPY144_RUN_BRANCH_TECHNOLOGY_FIRST
+        ) &&
+        Floppy144RunStateSetAct(
+            &sRunState,
+            FLOPPY144_RUN_ACT_III
+        ) &&
+        Floppy144RunStateReconstructRoom(
+            &sRunState,
+            FLOPPY144_ROOM_SERVER_ROOM
+        ),
+        "Server Room IT-terminal fixture reaches Technology Act III"
+    );
+
+    F144_CHECK(
+        Floppy144RunStateCollectionAvailable(
+            &sRunState,
+            eTs14
+        ),
+        "TS-14 is recoverable for the Server Room IT-terminal fixture"
+    );
+
+    Floppy144TerminalResetAtRoom(
+        &sTerminal,
+        &sWorld,
+        FLOPPY144_ROOM_SERVER_ROOM
+    );
+    Floppy144TerminalConfigureSession(
+        &sTerminal,
+        false,
+        false,
+        true
+    );
+    Floppy144TerminalRefreshEnvironmentLine(
+        &sTerminal,
+        &sRunState
+    );
+
+    F144_CHECK(
+        Floppy144TestTerminalContains(
+            &sTerminal,
+            "SERVER ROOM IT TERMINAL"
+        ),
+        "Server Room terminal identifies itself as an IT terminal"
+    );
+
+    Floppy144TestSubmitCommand(
+        &sTerminal,
+        &sWorld,
+        &sRunState,
+        "RESTORE TS-14"
+    );
+
+    F144_CHECK(
+        Floppy144RunStateCollectionRestored(
+            &sRunState,
+            eTs14
+        ),
+        "Server Room IT terminal permits Technology Services restoration"
+    );
+}
 
 /*
  * History is deliberately UI-only. It remembers meaningful submissions in
@@ -2438,6 +2594,7 @@ int main(void)
     Floppy144TestCollectionListPresentation();
     Floppy144TestMultipleCollectionCommands();
     Floppy144TestPlayerRecoveryPolicy();
+    Floppy144TestServerRoomItTerminal();
     Floppy144TestCommandHistory();
     Floppy144TestBranchDocumentAccessGate();
 

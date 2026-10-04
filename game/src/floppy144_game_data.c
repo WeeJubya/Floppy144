@@ -610,32 +610,15 @@ void Floppy144GameDataCaptureNewNotebookEntries(Floppy144RunState *pState)
 
 uint32_t Floppy144GameDataNotebookOrderedCount(const Floppy144RunState *pState)
 {
-    uint32_t uOrderIndex;
-    uint32_t uVisibleCount = 0U;
-
-    if(pState == NULL)
-    {
-        return 0U;
-    }
-
-    for(
-        uOrderIndex = 0U;
-        uOrderIndex < (uint32_t)pState->notebook_order_count;
-        ++uOrderIndex
-    )
-    {
-        const Floppy144DataRecord *pRecord =
-            Floppy144GameDataNotebookRecordAtOrdinal(
-                (uint32_t)pState->notebook_order[uOrderIndex]
-            );
-
-        if(Floppy144GameDataNotebookRecordVisible(pState, pRecord))
-        {
-            ++uVisibleCount;
-        }
-    }
-
-    return uVisibleCount;
+    /*
+     * notebook_order is persisted acquisition history. Visibility predicates
+     * decide when prose is first written, never whether an existing note may
+     * later disappear.
+     */
+    return
+        pState != NULL
+            ? (uint32_t)pState->notebook_order_count
+            : 0U;
 }
 
 const Floppy144DataRecord *Floppy144GameDataNotebookOrderedEntryAt(
@@ -643,39 +626,18 @@ const Floppy144DataRecord *Floppy144GameDataNotebookOrderedEntryAt(
     uint32_t uIndex
 )
 {
-    uint32_t uOrderIndex;
-    uint32_t uVisibleIndex = 0U;
-
-    if(pState == NULL)
+    if(
+        pState == NULL ||
+        uIndex >= (uint32_t)pState->notebook_order_count
+    )
     {
         return NULL;
     }
 
-    for(
-        uOrderIndex = 0U;
-        uOrderIndex < (uint32_t)pState->notebook_order_count;
-        ++uOrderIndex
-    )
-    {
-        const Floppy144DataRecord *pRecord =
-            Floppy144GameDataNotebookRecordAtOrdinal(
-                (uint32_t)pState->notebook_order[uOrderIndex]
-            );
-
-        if(!Floppy144GameDataNotebookRecordVisible(pState, pRecord))
-        {
-            continue;
-        }
-
-        if(uVisibleIndex == uIndex)
-        {
-            return pRecord;
-        }
-
-        ++uVisibleIndex;
-    }
-
-    return NULL;
+    return
+        Floppy144GameDataNotebookRecordAtOrdinal(
+            (uint32_t)pState->notebook_order[uIndex]
+        );
 }
 
 /* Compatibility wrappers now present the same chronological order. */

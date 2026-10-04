@@ -539,6 +539,7 @@ static bool Floppy144TerminalRestoreAllowedAtLocation(
             return eDomain == FLOPPY144_COLLECTION_DOMAIN_FM;
 
         case FLOPPY144_ROOM_IT_SUPPORT:
+        case FLOPPY144_ROOM_SERVER_ROOM:
             return eDomain == FLOPPY144_COLLECTION_DOMAIN_TS;
 
         case FLOPPY144_ROOM_SECURITY:
@@ -610,7 +611,7 @@ static const char *Floppy144TerminalRestoreLocationGuidance(
             return "USE THE FACILITIES TERMINAL FOR FM COLLECTIONS.";
 
         case FLOPPY144_COLLECTION_DOMAIN_TS:
-            return "USE THE IT SUPPORT TERMINAL FOR TS COLLECTIONS.";
+            return "USE AN IT TERMINAL IN IT SUPPORT OR THE SERVER ROOM FOR TS COLLECTIONS.";
 
         case FLOPPY144_COLLECTION_DOMAIN_OS:
             return "USE THE SECURITY TERMINAL FOR OS COLLECTIONS.";
@@ -4159,12 +4160,23 @@ void Floppy144TerminalResetAtRoom(
     terminal->terminal_room_valid =
         true;
 
-    snprintf(
-        environment_line,
-        sizeof(environment_line),
-        "GDR ARCHIVE RECOVERY ENVIRONMENT - %s TERMINAL",
-        room_name
-    );
+    if(room == FLOPPY144_ROOM_SERVER_ROOM)
+    {
+        snprintf(
+            environment_line,
+            sizeof(environment_line),
+            "GDR ARCHIVE RECOVERY ENVIRONMENT - SERVER ROOM IT TERMINAL"
+        );
+    }
+    else
+    {
+        snprintf(
+            environment_line,
+            sizeof(environment_line),
+            "GDR ARCHIVE RECOVERY ENVIRONMENT - %s TERMINAL",
+            room_name
+        );
+    }
 
     snprintf(
         terminal->output[0],
@@ -4214,6 +4226,14 @@ void Floppy144TerminalRefreshEnvironmentLine(
             environment_line,
             sizeof(environment_line),
             "GDR ARCHIVE RECOVERY ENVIRONMENT - MAIN OFFICE / FACILITIES TERMINAL"
+        );
+    }
+    else if(terminal->terminal_room == FLOPPY144_ROOM_SERVER_ROOM)
+    {
+        snprintf(
+            environment_line,
+            sizeof(environment_line),
+            "GDR ARCHIVE RECOVERY ENVIRONMENT - SERVER ROOM IT TERMINAL"
         );
     }
     else

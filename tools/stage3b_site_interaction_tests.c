@@ -2372,6 +2372,89 @@ static void Floppy144TestEvidenceGatedProgression(void)
     );
 }
 
+static void Floppy144TestServerRoomCableRiserRestoration(void)
+{
+    Floppy144WorldState sWorld;
+    Floppy144RunState sState;
+    Floppy144SiteInspectionTarget sTarget;
+    const Floppy144SiteRect *pRiser = NULL;
+    const char *pszParentId;
+    const char *pszLabel;
+    uint32_t uRectIndex;
+
+    Floppy144TestReset(&sWorld, &sState);
+    (void)Floppy144RunStateReconstructRoom(
+        &sState,
+        FLOPPY144_ROOM_SERVER_ROOM
+    );
+
+    for(
+        uRectIndex = 0U;
+        uRectIndex < Floppy144SiteRectCount();
+        ++uRectIndex
+    )
+    {
+        const Floppy144SiteRect *pRect =
+            Floppy144SiteRectAt(uRectIndex);
+
+        if(
+            pRect != NULL &&
+            pRect->room == (uint8_t)FLOPPY144_ROOM_SERVER_ROOM &&
+            pRect->type == (uint8_t)FLOPPY144_SITE_WALL_MOUNTED_ITEM &&
+            pRect->x == 33U &&
+            pRect->y == 74U &&
+            pRect->width == 1U &&
+            pRect->height == 8U
+        )
+        {
+            pRiser = pRect;
+            break;
+        }
+    }
+
+    F144_CHECK(
+        pRiser != NULL,
+        "Server Room cable riser is restored as physical Site geometry"
+    );
+
+    Floppy144TestSetPosition(
+        &sState,
+        34,
+        78
+    );
+
+    pszParentId = Floppy144SiteFocusedParentId(&sState);
+    pszLabel = Floppy144SiteContextLabel(&sState);
+
+    F144_CHECK(
+        pszParentId != NULL &&
+        strcmp(
+            pszParentId,
+            "SERVER_ROOM_CABLE_RISER"
+        ) == 0 &&
+        pszLabel != NULL &&
+        strcmp(pszLabel, "CABLE RISER") == 0,
+        "restored cable riser owns Site focus and its authored label"
+    );
+
+    F144_CHECK(
+        (
+            Floppy144SiteAvailableActions(&sState) &
+            FLOPPY144_SITE_ACTION_INSPECT
+        ) != 0U &&
+        Floppy144SiteResolveInspectionTarget(
+            &sState,
+            &sTarget
+        ) &&
+        sTarget.pszParentId != NULL &&
+        strcmp(
+            sTarget.pszParentId,
+            "SERVER_ROOM_CABLE_RISER"
+        ) == 0,
+        "restored cable riser exposes its physical contents through Inspect"
+    );
+}
+
 int main(void)
 {
     Floppy144TestPhysicalParentCoverage();
@@ -2384,6 +2467,7 @@ int main(void)
     Floppy144TestRotatedParentTargeting();
     Floppy144TestSceneryDoesNotBecomeInteraction();
     Floppy144TestInspectionRange();
+    Floppy144TestServerRoomCableRiserRestoration();
     Floppy144TestHiddenGeometryDoesNotCollide();
     Floppy144TestNotebookPopulation();
     Floppy144TestRecordsTrolleyNotebookGuidance();
