@@ -22847,11 +22847,10 @@
         }
       ],
       "evidence_id": null,
-      "notebook": "Project Manager authorised FM-04 recovery from the Main Office terminal to bootstrap Facilities.",
+      "notebook": "Temporary access to Facilities: Project Manager authorised FM-04 recovery from the Main Office terminal.",
       "follow_on": "Main Office terminal can restore FM-04",
       "persistent": true,
-      "source_order": 42,
-      "notebook_entry": "Temporary access to Facilities: Project Manager authorised FM-04 recovery from the Main Office terminal."
+      "source_order": 42
     }
   ],
   "ambient_interactions": [
