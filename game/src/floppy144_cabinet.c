@@ -1415,6 +1415,17 @@ static void Floppy144CabinetDrawChairBody(
     Floppy144DrawFillRect(pSurface, 206U, 220U, 10U, 64U, uBody);
 }
 
+static bool Floppy144CabinetTypeIs(
+    const Floppy144CabinetState *pCabinet,
+    const char *pszType
+)
+{
+    return
+        pCabinet!=NULL &&
+        pszType!=NULL &&
+        strcmp(pCabinet->szContainerType,pszType)==0;
+}
+
 static void Floppy144CabinetDrawContainerBody(
     Floppy144Surface *pSurface,
     const Floppy144CabinetState *pCabinet,
@@ -1424,131 +1435,284 @@ static void Floppy144CabinetDrawContainerBody(
 {
     uint32_t uIndex;
 
-    if(pSurface == NULL || pCabinet == NULL)
-        return;
+    if(pSurface==NULL||pCabinet==NULL)return;
 
-    if(Floppy144CabinetTypeContains(pCabinet, "CHAIR"))
+    if(Floppy144CabinetTypeIs(pCabinet,"CHAIR"))
     {
-        Floppy144CabinetDrawChairBody(
-            pSurface,
-            uBody,
-            uEdge
-        );
+        Floppy144CabinetDrawChairBody(pSurface,uBody,uEdge);
+        return;
+    }
+
+    if(Floppy144CabinetTypeIs(pCabinet,"STANDARD_DESK"))
+    {
+        /* Top-down desk with drawer blocks and a generous working surface. */
+        Floppy144DrawFillRect(pSurface,42U,104U,250U,118U,uBody);
+        Floppy144DrawRect(pSurface,42U,104U,250U,118U,uEdge);
+        Floppy144DrawRect(pSurface,54U,116U,54U,94U,uEdge);
+        Floppy144DrawRect(pSurface,226U,116U,54U,94U,uEdge);
+        Floppy144DrawFillRect(pSurface,116U,210U,102U,10U,uEdge);
         return;
     }
 
     if(
-        Floppy144CabinetTypeContains(pCabinet, "DESK") ||
-        Floppy144CabinetTypeContains(pCabinet, "TABLE") ||
-        Floppy144CabinetTypeContains(pCabinet, "WORKTOP")
+        Floppy144CabinetTypeIs(pCabinet,"GDR_TERMINAL") ||
+        Floppy144CabinetTypeIs(pCabinet,"IT_TERMINAL")
     )
     {
-        /* Front-on desk/table: broad top with two supporting pedestals. */
-        Floppy144DrawFillRect(pSurface, 42U, 118U, 250U, 24U, uBody);
-        Floppy144DrawRect(pSurface, 42U, 118U, 250U, 24U, uEdge);
-        Floppy144DrawFillRect(pSurface, 54U, 142U, 54U, 144U, uBody);
-        Floppy144DrawRect(pSurface, 54U, 142U, 54U, 144U, uEdge);
-        Floppy144DrawFillRect(pSurface, 226U, 142U, 54U, 144U, uBody);
-        Floppy144DrawRect(pSurface, 226U, 142U, 54U, 144U, uEdge);
-        for(uIndex = 0U; uIndex < 3U; ++uIndex)
+        /* Terminal desk: monitor at rear, keyboard shelf and side work area. */
+        Floppy144DrawFillRect(pSurface,42U,102U,250U,124U,uBody);
+        Floppy144DrawRect(pSurface,42U,102U,250U,124U,uEdge);
+        Floppy144DrawRect(pSurface,76U,114U,118U,66U,uEdge);
+        Floppy144DrawFillRect(pSurface,92U,124U,86U,42U,uEdge);
+        Floppy144DrawRect(pSurface,92U,188U,86U,22U,uEdge);
+        Floppy144DrawRect(pSurface,210U,118U,62U,92U,uEdge);
+        return;
+    }
+
+    if(Floppy144CabinetTypeIs(pCabinet,"WORKBENCH"))
+    {
+        Floppy144DrawFillRect(pSurface,36U,106U,264U,106U,uBody);
+        Floppy144DrawRect(pSurface,36U,106U,264U,106U,uEdge);
+        Floppy144DrawRect(pSurface,48U,118U,240U,38U,uEdge);
+        for(uIndex=0U;uIndex<4U;++uIndex)
+            Floppy144DrawRect(pSurface,52U+uIndex*60U,166U,48U,34U,uEdge);
+        return;
+    }
+
+    if(
+        Floppy144CabinetTypeIs(pCabinet,"BOARDROOM_TABLE") ||
+        Floppy144CabinetTypeIs(pCabinet,"DINING_TABLE")
+    )
+    {
+        Floppy144DrawFillRect(pSurface,52U,108U,230U,112U,uBody);
+        Floppy144DrawRect(pSurface,52U,108U,230U,112U,uEdge);
+        Floppy144DrawFillRect(pSurface,66U,120U,202U,88U,uBody);
+        Floppy144DrawRect(pSurface,66U,120U,202U,88U,uEdge);
+        return;
+    }
+
+    if(
+        Floppy144CabinetTypeIs(pCabinet,"COFFEE_TABLE") ||
+        Floppy144CabinetTypeIs(pCabinet,"RECEPTION_TABLE")
+    )
+    {
+        Floppy144DrawFillRect(pSurface,74U,126U,186U,80U,uBody);
+        Floppy144DrawRect(pSurface,74U,126U,186U,80U,uEdge);
+        Floppy144DrawRect(pSurface,88U,140U,158U,52U,uEdge);
+        return;
+    }
+
+    if(Floppy144CabinetTypeIs(pCabinet,"WORKTOP"))
+    {
+        Floppy144DrawFillRect(pSurface,36U,118U,264U,70U,uBody);
+        Floppy144DrawRect(pSurface,36U,118U,264U,70U,uEdge);
+        for(uIndex=0U;uIndex<4U;++uIndex)
+            Floppy144DrawRect(pSurface,42U+uIndex*64U,194U,54U,76U,uEdge);
+        return;
+    }
+
+    if(Floppy144CabinetTypeIs(pCabinet,"SINK"))
+    {
+        Floppy144DrawFillRect(pSurface,70U,110U,194U,116U,uBody);
+        Floppy144DrawRect(pSurface,70U,110U,194U,116U,uEdge);
+        Floppy144DrawRect(pSurface,94U,132U,146U,70U,uEdge);
+        Floppy144DrawFillRect(pSurface,158U,100U,18U,28U,uEdge);
+        Floppy144DrawFillRect(pSurface,170U,98U,34U,8U,uEdge);
+        return;
+    }
+
+    if(Floppy144CabinetTypeIs(pCabinet,"COFFEE_MAKER"))
+    {
+        Floppy144DrawFillRect(pSurface,102U,92U,130U,176U,uBody);
+        Floppy144DrawRect(pSurface,102U,92U,130U,176U,uEdge);
+        Floppy144DrawRect(pSurface,122U,112U,90U,48U,uEdge);
+        Floppy144DrawRect(pSurface,132U,174U,70U,64U,uEdge);
+        Floppy144DrawFillRect(pSurface,116U,246U,102U,10U,uEdge);
+        return;
+    }
+
+    if(Floppy144CabinetTypeIs(pCabinet,"SOFA"))
+    {
+        Floppy144DrawFillRect(pSurface,50U,118U,234U,118U,uBody);
+        Floppy144DrawRect(pSurface,50U,118U,234U,118U,uEdge);
+        Floppy144DrawRect(pSurface,64U,132U,206U,48U,uEdge);
+        Floppy144DrawRect(pSurface,64U,184U,98U,38U,uEdge);
+        Floppy144DrawRect(pSurface,172U,184U,98U,38U,uEdge);
+        return;
+    }
+
+    if(Floppy144CabinetTypeIs(pCabinet,"FRIDGE"))
+    {
+        Floppy144DrawFillRect(pSurface,76U,82U,172U,216U,uBody);
+        Floppy144DrawRect(pSurface,76U,82U,172U,216U,uEdge);
+        Floppy144DrawFillRect(pSurface,82U,152U,160U,2U,uEdge);
+        Floppy144DrawRect(pSurface,94U,96U,134U,44U,uEdge);
+        Floppy144DrawRect(pSurface,94U,166U,134U,116U,uEdge);
+        Floppy144DrawFillRect(pSurface,222U,112U,8U,28U,uEdge);
+        Floppy144DrawFillRect(pSurface,222U,174U,8U,54U,uEdge);
+        return;
+    }
+
+    if(Floppy144CabinetTypeIs(pCabinet,"TROLLEY"))
+    {
+        Floppy144DrawRect(pSurface,54U,98U,226U,164U,uEdge);
+        for(uIndex=0U;uIndex<3U;++uIndex)
         {
-            uint32_t uY = 160U + uIndex * 38U;
-            Floppy144DrawRect(pSurface, 62U, uY, 38U, 24U, uEdge);
-            Floppy144DrawRect(pSurface, 234U, uY, 38U, 24U, uEdge);
+            uint32_t y=108U+uIndex*52U;
+            Floppy144DrawFillRect(pSurface,62U,y,210U,34U,uBody);
+            Floppy144DrawRect(pSurface,62U,y,210U,34U,uEdge);
+        }
+        Floppy144DrawFillRect(pSurface,74U,270U,28U,10U,uEdge);
+        Floppy144DrawFillRect(pSurface,232U,270U,28U,10U,uEdge);
+        return;
+    }
+
+    if(Floppy144CabinetTypeIs(pCabinet,"SERVER"))
+    {
+        Floppy144DrawFillRect(pSurface,78U,80U,168U,224U,uBody);
+        Floppy144DrawRect(pSurface,78U,80U,168U,224U,uEdge);
+        for(uIndex=0U;uIndex<8U;++uIndex)
+        {
+            uint32_t y=92U+uIndex*25U;
+            Floppy144DrawRect(pSurface,92U,y,140U,15U,uEdge);
         }
         return;
     }
 
-    if(Floppy144CabinetTypeContains(pCabinet, "FRIDGE"))
+    if(
+        Floppy144CabinetTypeIs(pCabinet,"SHELVING") ||
+        Floppy144CabinetTypeIs(pCabinet,"SHELVING_FULL") ||
+        Floppy144CabinetTypeIs(pCabinet,"BOOKCASE")
+    )
     {
-        Floppy144DrawFillRect(pSurface, 76U, 82U, 172U, 216U, uBody);
-        Floppy144DrawRect(pSurface, 76U, 82U, 172U, 216U, uEdge);
-        Floppy144DrawFillRect(pSurface, 82U, 152U, 160U, 2U, uEdge);
-        Floppy144DrawFillRect(pSurface, 222U, 112U, 8U, 28U, uEdge);
-        Floppy144DrawFillRect(pSurface, 222U, 174U, 8U, 54U, uEdge);
-        return;
-    }
-
-    if(Floppy144CabinetTypeContains(pCabinet, "TROLLEY"))
-    {
-        Floppy144DrawFillRect(pSurface, 54U, 102U, 226U, 154U, uBody);
-        Floppy144DrawRect(pSurface, 54U, 102U, 226U, 154U, uEdge);
-        for(uIndex = 1U; uIndex < 3U; ++uIndex)
+        Floppy144DrawRect(pSurface,42U,80U,250U,224U,uEdge);
+        Floppy144DrawFillRect(pSurface,42U,80U,8U,224U,uBody);
+        Floppy144DrawFillRect(pSurface,284U,80U,8U,224U,uBody);
+        for(uIndex=0U;uIndex<4U;++uIndex)
         {
-            uint32_t uY = 102U + uIndex * 48U;
-            Floppy144DrawFillRect(pSurface, 60U, uY, 214U, 2U, uEdge);
-        }
-        Floppy144DrawFillRect(pSurface, 74U, 264U, 28U, 10U, uEdge);
-        Floppy144DrawFillRect(pSurface, 232U, 264U, 28U, 10U, uEdge);
-        return;
-    }
-
-    if(Floppy144CabinetTypeContains(pCabinet, "SERVER"))
-    {
-        Floppy144DrawFillRect(pSurface, 78U, 80U, 168U, 224U, uBody);
-        Floppy144DrawRect(pSurface, 78U, 80U, 168U, 224U, uEdge);
-        for(uIndex = 0U; uIndex < 7U; ++uIndex)
-        {
-            uint32_t uY = 94U + uIndex * 28U;
-            Floppy144DrawRect(pSurface, 92U, uY, 140U, 16U, uEdge);
+            uint32_t y=92U+uIndex*54U;
+            Floppy144DrawFillRect(pSurface,50U,y+38U,234U,6U,uBody);
+            Floppy144DrawRect(pSurface,50U,y+38U,234U,6U,uEdge);
         }
         return;
     }
 
-    if(Floppy144CabinetTypeContains(pCabinet, "DOOR"))
+    if(
+        Floppy144CabinetTypeIs(pCabinet,"NONSECURE_CABINET") ||
+        Floppy144CabinetTypeIs(pCabinet,"SECURE_CABINET")
+    )
     {
-        Floppy144DrawFillRect(pSurface, 82U, 76U, 164U, 232U, uBody);
-        Floppy144DrawRect(pSurface, 82U, 76U, 164U, 232U, uEdge);
-        Floppy144DrawRect(pSurface, 112U, 108U, 104U, 42U, uEdge);
-        Floppy144DrawFillRect(pSurface, 214U, 194U, 10U, 10U, uEdge);
-        return;
-    }
-
-    if(Floppy144CabinetTypeContains(pCabinet, "WALL_MOUNTED_ITEM"))
-    {
-        Floppy144DrawFillRect(pSurface, 62U, 104U, 210U, 142U, uBody);
-        Floppy144DrawRect(pSurface, 62U, 104U, 210U, 142U, uEdge);
-        Floppy144DrawRect(pSurface, 82U, 126U, 170U, 96U, uEdge);
-        return;
-    }
-
-    if(Floppy144CabinetTypeContains(pCabinet, "SHELVING_FULL"))
-    {
-        /*
-         * Open industrial shelving is not a cupboard. Draw uprights and shelf
-         * slabs only, leaving the bays visibly open and omitting door handles.
-         */
-        Floppy144DrawRect(pSurface, 42U, 80U, 250U, 224U, uEdge);
-        Floppy144DrawFillRect(pSurface, 42U, 80U, 8U, 224U, uBody);
-        Floppy144DrawFillRect(pSurface, 284U, 80U, 8U, 224U, uBody);
-        Floppy144DrawFillRect(pSurface, 42U, 80U, 250U, 8U, uBody);
-
-        for(uIndex = 0U; uIndex < 4U; ++uIndex)
+        Floppy144DrawFillRect(pSurface,54U,80U,226U,224U,uBody);
+        Floppy144DrawRect(pSurface,54U,80U,226U,224U,uEdge);
+        Floppy144DrawFillRect(pSurface,166U,84U,2U,216U,uEdge);
+        for(uIndex=1U;uIndex<4U;++uIndex)
         {
-            uint32_t uY = 138U + uIndex * 54U;
-            if(uY > 300U)
-                uY = 300U;
-
-            Floppy144DrawFillRect(pSurface, 48U, uY, 238U, 6U, uBody);
-            Floppy144DrawRect(pSurface, 48U, uY, 238U, 6U, uEdge);
+            uint32_t y=80U+(224U*uIndex)/4U;
+            Floppy144DrawFillRect(pSurface,60U,y,214U,2U,uEdge);
         }
+        Floppy144DrawFillRect(pSurface,150U,180U,10U,5U,uEdge);
+        Floppy144DrawFillRect(pSurface,174U,180U,10U,5U,uEdge);
+        return;
+    }
 
+    if(Floppy144CabinetTypeIs(pCabinet,"PATCH_PANEL"))
+    {
+        Floppy144DrawFillRect(pSurface,52U,118U,230U,96U,uBody);
+        Floppy144DrawRect(pSurface,52U,118U,230U,96U,uEdge);
+        for(uIndex=0U;uIndex<8U;++uIndex)
+            Floppy144DrawRect(pSurface,68U+uIndex*25U,142U,16U,22U,uEdge);
+        return;
+    }
+
+    if(Floppy144CabinetTypeIs(pCabinet,"MONITOR_BANK"))
+    {
+        Floppy144DrawFillRect(pSurface,42U,96U,250U,148U,uBody);
+        Floppy144DrawRect(pSurface,42U,96U,250U,148U,uEdge);
+        for(uIndex=0U;uIndex<3U;++uIndex)
+            Floppy144DrawRect(pSurface,56U+uIndex*78U,116U,66U,92U,uEdge);
+        return;
+    }
+
+    if(Floppy144CabinetTypeIs(pCabinet,"CABLE_RISER"))
+    {
+        Floppy144DrawFillRect(pSurface,78U,74U,178U,232U,uBody);
+        Floppy144DrawRect(pSurface,78U,74U,178U,232U,uEdge);
+        for(uIndex=0U;uIndex<5U;++uIndex)
+            Floppy144DrawFillRect(pSurface,98U+uIndex*28U,90U,8U,194U,uEdge);
+        return;
+    }
+
+    if(Floppy144CabinetTypeIs(pCabinet,"DOOR"))
+    {
+        Floppy144DrawFillRect(pSurface,82U,76U,164U,232U,uBody);
+        Floppy144DrawRect(pSurface,82U,76U,164U,232U,uEdge);
+        Floppy144DrawRect(pSurface,112U,108U,104U,42U,uEdge);
+        Floppy144DrawFillRect(pSurface,214U,194U,10U,10U,uEdge);
+        return;
+    }
+
+    if(Floppy144CabinetTypeIs(pCabinet,"WINDOW"))
+    {
+        Floppy144DrawRect(pSurface,54U,92U,226U,164U,uEdge);
+        Floppy144DrawFillRect(pSurface,164U,96U,6U,156U,uBody);
+        Floppy144DrawFillRect(pSurface,58U,170U,218U,6U,uBody);
+        return;
+    }
+
+    if(Floppy144CabinetTypeIs(pCabinet,"PARTITION_WALL"))
+    {
+        Floppy144DrawFillRect(pSurface,54U,92U,226U,176U,uBody);
+        Floppy144DrawRect(pSurface,54U,92U,226U,176U,uEdge);
+        for(uIndex=1U;uIndex<3U;++uIndex)
+            Floppy144DrawFillRect(pSurface,54U+uIndex*75U,96U,2U,168U,uEdge);
+        return;
+    }
+
+    if(
+        Floppy144CabinetTypeIs(pCabinet,"NOTICEBOARD") ||
+        Floppy144CabinetTypeIs(pCabinet,"SITE_DIRECTORY")
+    )
+    {
+        Floppy144DrawFillRect(pSurface,52U,94U,230U,164U,uBody);
+        Floppy144DrawRect(pSurface,52U,94U,230U,164U,uEdge);
+        Floppy144DrawRect(pSurface,70U,112U,194U,128U,uEdge);
+        return;
+    }
+
+    if(Floppy144CabinetTypeIs(pCabinet,"SUPPRESSION_PANEL"))
+    {
+        Floppy144DrawFillRect(pSurface,84U,94U,166U,176U,uBody);
+        Floppy144DrawRect(pSurface,84U,94U,166U,176U,uEdge);
+        Floppy144DrawRect(pSurface,104U,116U,126U,54U,uEdge);
+        for(uIndex=0U;uIndex<4U;++uIndex)
+            Floppy144DrawRect(pSurface,106U+uIndex*30U,192U,18U,18U,uEdge);
+        return;
+    }
+
+    if(Floppy144CabinetTypeIs(pCabinet,"FIRST_AID_KIT"))
+    {
+        Floppy144DrawFillRect(pSurface,92U,104U,150U,150U,uBody);
+        Floppy144DrawRect(pSurface,92U,104U,150U,150U,uEdge);
+        Floppy144DrawFillRect(pSurface,155U,130U,24U,96U,uEdge);
+        Floppy144DrawFillRect(pSurface,119U,166U,96U,24U,uEdge);
+        return;
+    }
+
+    if(Floppy144CabinetTypeIs(pCabinet,"KEY_CABINET"))
+    {
+        Floppy144DrawFillRect(pSurface,78U,90U,178U,184U,uBody);
+        Floppy144DrawRect(pSurface,78U,90U,178U,184U,uEdge);
+        for(uIndex=0U;uIndex<4U;++uIndex)
+            Floppy144DrawFillRect(pSurface,104U+uIndex*38U,126U,4U,92U,uEdge);
         return;
     }
 
     /*
-     * Cabinets/bookcases and unknown enclosed storage retain the familiar
-     * cupboard silhouette. Shelving is handled separately above.
+     * Fallback for a future generated parent type: still a distinct, bounded
+     * inspection object rather than an unframed marker cloud.
      */
-    Floppy144DrawFillRect(pSurface, 42U, 80U, 250U, 224U, uBody);
-    Floppy144DrawRect(pSurface, 42U, 80U, 250U, 224U, uEdge);
-
-    for(uIndex = 1U; uIndex < 4U; ++uIndex)
-    {
-        uint32_t uY = 80U + (224U * uIndex) / 4U;
-        Floppy144DrawFillRect(pSurface, 48U, uY, 238U, 2U, uEdge);
-        Floppy144DrawFillRect(pSurface, 150U, uY - 9U, 34U, 4U, uEdge);
-    }
+    Floppy144DrawFillRect(pSurface,54U,92U,226U,176U,uBody);
+    Floppy144DrawRect(pSurface,54U,92U,226U,176U,uEdge);
 }
 
 static void Floppy144CabinetContentMarkerRegion(
@@ -1560,99 +1724,60 @@ static void Floppy144CabinetContentMarkerRegion(
     uint32_t *pMaximumColumns
 )
 {
-    if(
-        pX == NULL ||
-        pY == NULL ||
-        pWidth == NULL ||
-        pHeight == NULL ||
-        pMaximumColumns == NULL
-    )
-    {
-        return;
-    }
+    if(pX==NULL||pY==NULL||pWidth==NULL||pHeight==NULL||pMaximumColumns==NULL)return;
 
-    /*
-     * Regions sit inside the parent silhouette drawn immediately beforehand.
-     * They describe the useful visual centre of each parent, not the screen.
-     */
-    if(Floppy144CabinetTypeContains(pCabinet, "CHAIR"))
-    {
-        *pX = 96U;
-        *pY = 176U;
-        *pWidth = 142U;
-        *pHeight = 28U;
-        *pMaximumColumns = 2U;
-    }
-    else if(
-        Floppy144CabinetTypeContains(pCabinet, "DESK") ||
-        Floppy144CabinetTypeContains(pCabinet, "TABLE") ||
-        Floppy144CabinetTypeContains(pCabinet, "WORKTOP")
-    )
-    {
-        *pX = 48U;
-        *pY = 120U;
-        *pWidth = 238U;
-        *pHeight = 20U;
-        *pMaximumColumns = 9U;
-    }
-    else if(Floppy144CabinetTypeContains(pCabinet, "FRIDGE"))
-    {
-        *pX = 94U;
-        *pY = 166U;
-        *pWidth = 124U;
-        *pHeight = 106U;
-        *pMaximumColumns = 3U;
-    }
-    else if(Floppy144CabinetTypeContains(pCabinet, "TROLLEY"))
-    {
-        *pX = 72U;
-        *pY = 120U;
-        *pWidth = 190U;
-        *pHeight = 116U;
-        *pMaximumColumns = 3U;
-    }
-    else if(Floppy144CabinetTypeContains(pCabinet, "SERVER"))
-    {
-        *pX = 100U;
-        *pY = 102U;
-        *pWidth = 124U;
-        *pHeight = 180U;
-        *pMaximumColumns = 3U;
-    }
-    else if(Floppy144CabinetTypeContains(pCabinet, "DOOR"))
-    {
-        /*
-         * Door parents have a dedicated notice/contents panel in the upper
-         * half of the silhouette. Keep recovered-item markers inside that
-         * panel rather than centring them over the full door leaf.
-         */
-        *pX = 112U;
-        *pY = 108U;
-        *pWidth = 104U;
-        *pHeight = 42U;
-        *pMaximumColumns = 3U;
-    }
-    else if(
-        Floppy144CabinetTypeContains(
-            pCabinet,
-            "WALL_MOUNTED_ITEM"
-        )
-    )
-    {
-        *pX = 82U;
-        *pY = 126U;
-        *pWidth = 170U;
-        *pHeight = 96U;
-        *pMaximumColumns = 3U;
-    }
-    else
-    {
-        *pX = 62U;
-        *pY = 96U;
-        *pWidth = 210U;
-        *pHeight = 192U;
-        *pMaximumColumns = 3U;
-    }
+    *pX=70U;*pY=110U;*pWidth=194U;*pHeight=132U;*pMaximumColumns=5U;
+
+    if(Floppy144CabinetTypeIs(pCabinet,"CHAIR"))
+    { *pX=96U;*pY=176U;*pWidth=142U;*pHeight=28U;*pMaximumColumns=2U; }
+    else if(Floppy144CabinetTypeIs(pCabinet,"STANDARD_DESK"))
+    { *pX=116U;*pY=116U;*pWidth=102U;*pHeight=84U;*pMaximumColumns=5U; }
+    else if(Floppy144CabinetTypeIs(pCabinet,"GDR_TERMINAL")||Floppy144CabinetTypeIs(pCabinet,"IT_TERMINAL"))
+    { *pX=204U;*pY=118U;*pWidth=70U;*pHeight=92U;*pMaximumColumns=3U; }
+    else if(Floppy144CabinetTypeIs(pCabinet,"WORKBENCH"))
+    { *pX=48U;*pY=118U;*pWidth=240U;*pHeight=82U;*pMaximumColumns=7U; }
+    else if(Floppy144CabinetTypeIs(pCabinet,"BOARDROOM_TABLE")||Floppy144CabinetTypeIs(pCabinet,"DINING_TABLE"))
+    { *pX=72U;*pY=126U;*pWidth=190U;*pHeight=76U;*pMaximumColumns=6U; }
+    else if(Floppy144CabinetTypeIs(pCabinet,"COFFEE_TABLE")||Floppy144CabinetTypeIs(pCabinet,"RECEPTION_TABLE"))
+    { *pX=88U;*pY=140U;*pWidth=158U;*pHeight=52U;*pMaximumColumns=5U; }
+    else if(Floppy144CabinetTypeIs(pCabinet,"WORKTOP"))
+    { *pX=46U;*pY=128U;*pWidth=244U;*pHeight=48U;*pMaximumColumns=7U; }
+    else if(Floppy144CabinetTypeIs(pCabinet,"SINK"))
+    { *pX=102U;*pY=140U;*pWidth=130U;*pHeight=54U;*pMaximumColumns=4U; }
+    else if(Floppy144CabinetTypeIs(pCabinet,"COFFEE_MAKER"))
+    { *pX=122U;*pY=176U;*pWidth=90U;*pHeight=54U;*pMaximumColumns=3U; }
+    else if(Floppy144CabinetTypeIs(pCabinet,"SOFA"))
+    { *pX=70U;*pY=188U;*pWidth=194U;*pHeight=30U;*pMaximumColumns=6U; }
+    else if(Floppy144CabinetTypeIs(pCabinet,"FRIDGE"))
+    { *pX=98U;*pY=170U;*pWidth=126U;*pHeight=104U;*pMaximumColumns=4U; }
+    else if(Floppy144CabinetTypeIs(pCabinet,"TROLLEY"))
+    { *pX=68U;*pY=112U;*pWidth=198U;*pHeight=136U;*pMaximumColumns=6U; }
+    else if(Floppy144CabinetTypeIs(pCabinet,"SERVER"))
+    { *pX=100U;*pY=96U;*pWidth=124U;*pHeight=190U;*pMaximumColumns=4U; }
+    else if(Floppy144CabinetTypeIs(pCabinet,"SHELVING")||Floppy144CabinetTypeIs(pCabinet,"SHELVING_FULL")||Floppy144CabinetTypeIs(pCabinet,"BOOKCASE"))
+    { *pX=58U;*pY=102U;*pWidth=218U;*pHeight=180U;*pMaximumColumns=6U; }
+    else if(Floppy144CabinetTypeIs(pCabinet,"NONSECURE_CABINET")||Floppy144CabinetTypeIs(pCabinet,"SECURE_CABINET"))
+    { *pX=68U;*pY=96U;*pWidth=198U;*pHeight=190U;*pMaximumColumns=5U; }
+    else if(Floppy144CabinetTypeIs(pCabinet,"PATCH_PANEL"))
+    { *pX=64U;*pY=168U;*pWidth=206U;*pHeight=34U;*pMaximumColumns=8U; }
+    else if(Floppy144CabinetTypeIs(pCabinet,"MONITOR_BANK"))
+    { *pX=58U;*pY=214U;*pWidth=218U;*pHeight=22U;*pMaximumColumns=8U; }
+    else if(Floppy144CabinetTypeIs(pCabinet,"CABLE_RISER"))
+    { *pX=112U;*pY=94U;*pWidth=110U;*pHeight=184U;*pMaximumColumns=4U; }
+    else if(Floppy144CabinetTypeIs(pCabinet,"DOOR"))
+    { *pX=112U;*pY=108U;*pWidth=104U;*pHeight=42U;*pMaximumColumns=3U; }
+    else if(Floppy144CabinetTypeIs(pCabinet,"WINDOW"))
+    { *pX=68U;*pY=110U;*pWidth=198U;*pHeight=124U;*pMaximumColumns=6U; }
+    else if(Floppy144CabinetTypeIs(pCabinet,"PARTITION_WALL"))
+    { *pX=70U;*pY=112U;*pWidth=194U;*pHeight=136U;*pMaximumColumns=6U; }
+    else if(Floppy144CabinetTypeIs(pCabinet,"NOTICEBOARD")||Floppy144CabinetTypeIs(pCabinet,"SITE_DIRECTORY"))
+    { *pX=76U;*pY=118U;*pWidth=182U;*pHeight=116U;*pMaximumColumns=5U; }
+    else if(Floppy144CabinetTypeIs(pCabinet,"SUPPRESSION_PANEL"))
+    { *pX=104U;*pY=116U;*pWidth=126U;*pHeight=132U;*pMaximumColumns=4U; }
+    else if(Floppy144CabinetTypeIs(pCabinet,"FIRST_AID_KIT"))
+    { *pX=108U;*pY=118U;*pWidth=118U;*pHeight=120U;*pMaximumColumns=4U; }
+    else if(Floppy144CabinetTypeIs(pCabinet,"KEY_CABINET"))
+    { *pX=94U;*pY=108U;*pWidth=146U;*pHeight=144U;*pMaximumColumns=4U; }
 }
 
 static void Floppy144CabinetDrawContentMarkers(
@@ -1664,60 +1789,12 @@ static void Floppy144CabinetDrawContentMarkers(
     uint32_t uBright
 )
 {
-    const uint32_t uMarkerWidth = 14U;
-    const uint32_t uMarkerHeight = 10U;
-    const uint32_t uGapX = 20U;
-    const uint32_t uGapY = 20U;
+    uint32_t uRegionX=0U,uRegionY=0U,uRegionWidth=0U,uRegionHeight=0U;
+    uint32_t uMaximumColumns=3U;
+    uint32_t uColumns,uRows,uMarkerWidth,uMarkerHeight,uGapX,uGapY;
+    uint32_t uGridWidth,uGridHeight,uBaseX,uBaseY,uIndex;
 
-    uint32_t uVisible =
-        uCount < 9U ? uCount : 9U;
-
-    uint32_t uRegionX = 0U;
-    uint32_t uRegionY = 0U;
-    uint32_t uRegionWidth = 0U;
-    uint32_t uRegionHeight = 0U;
-    uint32_t uMaximumColumns = 3U;
-    uint32_t uColumns;
-    uint32_t uRows;
-    uint32_t uGroupHeight;
-    uint32_t uBaseY;
-    uint32_t uIndex;
-
-    if(
-        pSurface == NULL ||
-        pCabinet == NULL ||
-        uVisible == 0U
-    )
-    {
-        return;
-    }
-
-    if(Floppy144CabinetTypeContains(pCabinet, "SHELVING_FULL"))
-    {
-        const uint32_t auShelfY[3] = { 128U, 182U, 236U };
-        const uint32_t auColumnX[3] = { 92U, 154U, 216U };
-
-        for(uIndex = 0U; uIndex < uVisible; ++uIndex)
-        {
-            uint32_t uRow = uIndex / 3U;
-            uint32_t uColumn = uIndex % 3U;
-            uint32_t uMarker =
-                uIndex == uSelected
-                    ? uBright
-                    : uEdge;
-
-            Floppy144DrawFillRect(
-                pSurface,
-                auColumnX[uColumn],
-                auShelfY[uRow],
-                uMarkerWidth,
-                uMarkerHeight,
-                uMarker
-            );
-        }
-
-        return;
-    }
+    if(pSurface==NULL||pCabinet==NULL||uCount==0U)return;
 
     Floppy144CabinetContentMarkerRegion(
         pCabinet,
@@ -1728,70 +1805,52 @@ static void Floppy144CabinetDrawContentMarkers(
         &uMaximumColumns
     );
 
-    uColumns =
-        uVisible < uMaximumColumns
-            ? uVisible
-            : uMaximumColumns;
+    /*
+     * Fit every visible PI into the authored silhouette. Marker dimensions
+     * shrink only when necessary; this avoids the old nine-item ceiling and
+     * keeps dense desks/cupboards readable without drawing outside furniture.
+     */
+    uColumns=uCount<uMaximumColumns?uCount:uMaximumColumns;
+    if(uColumns==0U)uColumns=1U;
+    uRows=(uCount+uColumns-1U)/uColumns;
 
-    uRows =
-        (uVisible + uColumns - 1U) /
-        uColumns;
+    uGapX=uCount>15U?3U:6U;
+    uGapY=uCount>15U?3U:6U;
 
-    uGroupHeight =
-        uRows * uMarkerHeight +
-        (uRows - 1U) * uGapY;
+    uMarkerWidth=14U;
+    uMarkerHeight=10U;
 
-    uBaseY =
-        uRegionY +
-        (
-            uRegionHeight > uGroupHeight
-                ? (uRegionHeight - uGroupHeight) / 2U
-                : 0U
-        );
-
-    for(uIndex = 0U; uIndex < uVisible; ++uIndex)
+    if(
+        uColumns*uMarkerWidth+(uColumns-1U)*uGapX>uRegionWidth
+    )
     {
-        uint32_t uRow =
-            uIndex / uColumns;
+        uMarkerWidth=
+            (uRegionWidth-(uColumns-1U)*uGapX)/uColumns;
+    }
 
-        uint32_t uRowStart =
-            uRow * uColumns;
+    if(
+        uRows*uMarkerHeight+(uRows-1U)*uGapY>uRegionHeight
+    )
+    {
+        uMarkerHeight=
+            (uRegionHeight-(uRows-1U)*uGapY)/uRows;
+    }
 
-        uint32_t uRemaining =
-            uVisible - uRowStart;
+    if(uMarkerWidth<4U)uMarkerWidth=4U;
+    if(uMarkerHeight<4U)uMarkerHeight=4U;
 
-        uint32_t uRowCount =
-            uRemaining < uColumns
-                ? uRemaining
-                : uColumns;
+    uGridWidth=uColumns*uMarkerWidth+(uColumns-1U)*uGapX;
+    uGridHeight=uRows*uMarkerHeight+(uRows-1U)*uGapY;
+    uBaseX=uRegionX+(uRegionWidth>uGridWidth?(uRegionWidth-uGridWidth)/2U:0U);
+    uBaseY=uRegionY+(uRegionHeight>uGridHeight?(uRegionHeight-uGridHeight)/2U:0U);
 
-        uint32_t uRowWidth =
-            uRowCount * uMarkerWidth +
-            (uRowCount - 1U) * uGapX;
-
-        uint32_t uBaseX =
-            uRegionX +
-            (
-                uRegionWidth > uRowWidth
-                    ? (uRegionWidth - uRowWidth) / 2U
-                    : 0U
-            );
-
-        uint32_t uColumn =
-            uIndex - uRowStart;
-
-        uint32_t uX =
-            uBaseX +
-            uColumn * (uMarkerWidth + uGapX);
-
-        uint32_t uY =
-            uBaseY +
-            uRow * (uMarkerHeight + uGapY);
-
-        uint32_t uMarker =
-            uIndex == uSelected
-                ? uBright
-                : uEdge;
+    for(uIndex=0U;uIndex<uCount;++uIndex)
+    {
+        uint32_t uRow=uIndex/uColumns;
+        uint32_t uColumn=uIndex%uColumns;
+        uint32_t uX=uBaseX+uColumn*(uMarkerWidth+uGapX);
+        uint32_t uY=uBaseY+uRow*(uMarkerHeight+uGapY);
+        uint32_t uMarker=uIndex==uSelected?uBright:uEdge;
 
         Floppy144DrawFillRect(
             pSurface,
