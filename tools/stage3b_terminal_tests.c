@@ -2593,15 +2593,35 @@ static void Floppy144TestFm18SuppressionRecordRestoresServerPanel(void)
 static void Floppy144TestAvailableRecoveryAndAutomaticCompletion(void)
 {
     Floppy144RunState sRunState;
-    Floppy144CollectionId eDr01;
+    Floppy144CollectionId eFm18;
     Floppy144EvidenceId eE020,eE021,eE022,eE023;
     Floppy144InteractionId eI034;
+    uint32_t uCollection;
 
+    /*
+     * Isolate the exhaustion rule from normal progression. Mark every
+     * collection restored except FM-18, which remains dependency-locked in
+     * the default Prologue state because it requires Act III. If the recovery
+     * scan accidentally ignores availability, FM-18 will make this report
+     * that more usable disk data remains.
+     */
     Floppy144RunStateBegin(&sRunState,144U);
-    eDr01=Floppy144GameDataCollectionId("DR-01");
+    eFm18=Floppy144GameDataCollectionId("FM-18");
+
+    for(uCollection=0U;uCollection<(uint32_t)FLOPPY144_COLLECTION_COUNT;++uCollection)
+    {
+        if(uCollection!=(uint32_t)eFm18)
+        {
+            (void)Floppy144RunStateBitSet(
+                sRunState.collections,
+                uCollection
+            );
+        }
+    }
+
     F144_CHECK(
-        eDr01<FLOPPY144_COLLECTION_COUNT &&
-        Floppy144RunStateBitSet(sRunState.collections,(uint32_t)eDr01) &&
+        eFm18<FLOPPY144_COLLECTION_COUNT &&
+        !Floppy144RunStateCollectionAvailable(&sRunState,eFm18) &&
         !Floppy144RunStateAnyUnrestoredCollectionFits(&sRunState),
         "locked dependency collections do not count as currently restorable disk data"
     );
