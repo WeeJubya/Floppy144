@@ -379,6 +379,7 @@ static void Floppy144IsometricDrawPrismX16(
     uint32_t uColour
 )
 {
+    const uint32_t uEdge=FLOPPY144_RGB(43,51,50);
     int32_t ax, ay, bx, by, cx, cy, dx, dy;
     int32_t atx, aty, btx, bty, ctx, cty, dtx, dty;
 
@@ -440,20 +441,40 @@ static void Floppy144IsometricDrawPrismX16(
         &dty
     );
 
-    Floppy144IsometricLine(pSurface, ax, ay, bx, by, uColour);
-    Floppy144IsometricLine(pSurface, bx, by, cx, cy, uColour);
-    Floppy144IsometricLine(pSurface, cx, cy, dx, dy, uColour);
-    Floppy144IsometricLine(pSurface, dx, dy, ax, ay, uColour);
+    if(nTopHeight16<=nBaseHeight16)
+    {
+        Floppy144IsometricFillQuad(
+            pSurface,ax,ay,bx,by,cx,cy,dx,dy,uColour
+        );
+    }
+    else
+    {
+        /* Top plus the two faces visible from the cutaway camera. */
+        Floppy144IsometricFillQuad(
+            pSurface,atx,aty,btx,bty,ctx,cty,dtx,dty,uColour
+        );
+        Floppy144IsometricFillQuad(
+            pSurface,bx,by,cx,cy,ctx,cty,btx,bty,uColour
+        );
+        Floppy144IsometricFillQuad(
+            pSurface,cx,cy,dx,dy,dtx,dty,ctx,cty,uColour
+        );
+    }
 
-    Floppy144IsometricLine(pSurface, atx, aty, btx, bty, uColour);
-    Floppy144IsometricLine(pSurface, btx, bty, ctx, cty, uColour);
-    Floppy144IsometricLine(pSurface, ctx, cty, dtx, dty, uColour);
-    Floppy144IsometricLine(pSurface, dtx, dty, atx, aty, uColour);
+    Floppy144IsometricLine(pSurface, ax, ay, bx, by, uEdge);
+    Floppy144IsometricLine(pSurface, bx, by, cx, cy, uEdge);
+    Floppy144IsometricLine(pSurface, cx, cy, dx, dy, uEdge);
+    Floppy144IsometricLine(pSurface, dx, dy, ax, ay, uEdge);
 
-    Floppy144IsometricLine(pSurface, ax, ay, atx, aty, uColour);
-    Floppy144IsometricLine(pSurface, bx, by, btx, bty, uColour);
-    Floppy144IsometricLine(pSurface, cx, cy, ctx, cty, uColour);
-    Floppy144IsometricLine(pSurface, dx, dy, dtx, dty, uColour);
+    Floppy144IsometricLine(pSurface, atx, aty, btx, bty, uEdge);
+    Floppy144IsometricLine(pSurface, btx, bty, ctx, cty, uEdge);
+    Floppy144IsometricLine(pSurface, ctx, cty, dtx, dty, uEdge);
+    Floppy144IsometricLine(pSurface, dtx, dty, atx, aty, uEdge);
+
+    Floppy144IsometricLine(pSurface, ax, ay, atx, aty, uEdge);
+    Floppy144IsometricLine(pSurface, bx, by, btx, bty, uEdge);
+    Floppy144IsometricLine(pSurface, cx, cy, ctx, cty, uEdge);
+    Floppy144IsometricLine(pSurface, dx, dy, dtx, dty, uEdge);
 }
 
 static void Floppy144IsometricDrawWallFixture(
