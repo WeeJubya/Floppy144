@@ -53,8 +53,10 @@ static void Floppy144IsometricPixel(
     if(
         pSurface == NULL ||
         pSurface->pixels == NULL ||
-        nX < 0 ||
-        nY < 0 ||
+        nX < FLOPPY144_ISO_VIEWPORT_X ||
+        nY < FLOPPY144_ISO_VIEWPORT_Y ||
+        nX >= FLOPPY144_ISO_VIEWPORT_X+FLOPPY144_ISO_VIEWPORT_WIDTH ||
+        nY >= FLOPPY144_ISO_VIEWPORT_Y+FLOPPY144_ISO_VIEWPORT_HEIGHT ||
         (uint32_t)nX >= pSurface->width ||
         (uint32_t)nY >= pSurface->height
     )
@@ -107,6 +109,85 @@ static void Floppy144IsometricLine(
             nY0 += nSy;
         }
     }
+}
+
+static int64_t Floppy144IsometricEdge(
+    int32_t ax,
+    int32_t ay,
+    int32_t bx,
+    int32_t by,
+    int32_t px,
+    int32_t py
+)
+{
+    return
+        (int64_t)(px-ax)*(int64_t)(by-ay)-
+        (int64_t)(py-ay)*(int64_t)(bx-ax);
+}
+
+static void Floppy144IsometricFillTriangle(
+    Floppy144Surface *pSurface,
+    int32_t ax,
+    int32_t ay,
+    int32_t bx,
+    int32_t by,
+    int32_t cx,
+    int32_t cy,
+    uint32_t uColour
+)
+{
+    int32_t x0=ax,x1=ax,y0=ay,y1=ay,x,y;
+
+    if(bx<x0)x0=bx;if(cx<x0)x0=cx;
+    if(bx>x1)x1=bx;if(cx>x1)x1=cx;
+    if(by<y0)y0=by;if(cy<y0)y0=cy;
+    if(by>y1)y1=by;if(cy>y1)y1=cy;
+
+    if(x0<FLOPPY144_ISO_VIEWPORT_X)x0=FLOPPY144_ISO_VIEWPORT_X;
+    if(y0<FLOPPY144_ISO_VIEWPORT_Y)y0=FLOPPY144_ISO_VIEWPORT_Y;
+    if(x1>=FLOPPY144_ISO_VIEWPORT_X+FLOPPY144_ISO_VIEWPORT_WIDTH)
+        x1=FLOPPY144_ISO_VIEWPORT_X+FLOPPY144_ISO_VIEWPORT_WIDTH-1;
+    if(y1>=FLOPPY144_ISO_VIEWPORT_Y+FLOPPY144_ISO_VIEWPORT_HEIGHT)
+        y1=FLOPPY144_ISO_VIEWPORT_Y+FLOPPY144_ISO_VIEWPORT_HEIGHT-1;
+
+    for(y=y0;y<=y1;++y)
+    {
+        for(x=x0;x<=x1;++x)
+        {
+            int64_t e0=Floppy144IsometricEdge(ax,ay,bx,by,x,y);
+            int64_t e1=Floppy144IsometricEdge(bx,by,cx,cy,x,y);
+            int64_t e2=Floppy144IsometricEdge(cx,cy,ax,ay,x,y);
+
+            if(
+                (e0>=0&&e1>=0&&e2>=0) ||
+                (e0<=0&&e1<=0&&e2<=0)
+            )
+            {
+                Floppy144IsometricPixel(pSurface,x,y,uColour);
+            }
+        }
+    }
+}
+
+static void Floppy144IsometricFillQuad(
+    Floppy144Surface *pSurface,
+    int32_t ax,
+    int32_t ay,
+    int32_t bx,
+    int32_t by,
+    int32_t cx,
+    int32_t cy,
+    int32_t dx,
+    int32_t dy,
+    uint32_t uColour
+)
+{
+    Floppy144IsometricFillTriangle(
+        pSurface,ax,ay,bx,by,cx,cy,uColour
+    );
+    Floppy144IsometricFillTriangle(
+        pSurface,ax,ay,cx,cy,dx,dy,uColour
+    );
 }
 
 /* Convert whole-unit Site coordinates into the compact isometric viewport. */
