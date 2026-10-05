@@ -1095,7 +1095,80 @@ static bool Floppy144AnySecureCabinetUnlocked(const Floppy144RunState*pState){ui
 static bool Floppy144InteractionPrerequisiteSatisfied(const Floppy144RunState*pState,const Floppy144DataRecord*pInteraction,const char*psz){if(!psz||!*psz)return true;if(psz[0]=='T'&&psz[1]=='-'){Floppy144TriggerId e=Floppy144GameDataTriggerId(psz);return e!=FLOPPY144_TRIGGER_COUNT&&Floppy144RunStateTriggerFired(pState,e);}if(psz[0]=='E'&&psz[1]=='-'){Floppy144EvidenceId e=Floppy144GameDataEvidenceId(psz);return e!=FLOPPY144_EVIDENCE_COUNT&&Floppy144RunStateEvidenceEstablished(pState,e);}if(psz[0]=='I'&&psz[1]=='-'){Floppy144InteractionId e=Floppy144GameDataInteractionId(psz);if(pInteraction&&pInteraction->pszE&&Floppy144EvidenceOwnsInteraction(pInteraction->pszE,psz))return true;return e!=FLOPPY144_INTERACTION_COUNT&&Floppy144RunStateInteractionCompleted(pState,e);}if(Floppy144StringEqual(psz,"ROOM_SECURITY"))return Floppy144GameDataRoomAccessible(pState,"SECURITY");if(Floppy144StringEqual(psz,"ROOM_SERVER_ROOM"))return Floppy144RunStateRoomReconstructed(pState,FLOPPY144_ROOM_SERVER_ROOM);if(Floppy144StringEqual(psz,"CABINET_UNLOCKED"))return Floppy144AnySecureCabinetUnlocked(pState);if(Floppy144StringEqual(psz,"SECURITY_CODE_KNOWN")||Floppy144StringEqual(psz,"CODE_KNOWN"))return Floppy144GameDataFactRecorded(pState,"SECURITY_CABINET_CODE")||Floppy144RunStateHasCapability(pState,FLOPPY144_CAPABILITY_MASTER_SECURE_CABINET_CODES);if(Floppy144StringEqual(psz,"CABINET_CONSTRUCTED"))return true;{Floppy144CapabilityId e=Floppy144GameDataCapabilityId(psz);return e!=FLOPPY144_CAPABILITY_COUNT&&Floppy144RunStateHasCapability(pState,e);}}
 bool Floppy144GameDataInteractionCanRun(const Floppy144RunState*pState,Floppy144InteractionId eInteraction){const Floppy144DataRecord*pInteraction;uint32_t u;if(!pState||(uint32_t)eInteraction>=(uint32_t)FLOPPY144_INTERACTION_COUNT||Floppy144RunStateInteractionCompleted(pState,eInteraction))return false;pInteraction=Floppy144Nth(FLOPPY144_DATA_INTERACTION,(int32_t)eInteraction);if(!pInteraction)return false;for(u=0;u<F144_COUNT(g_asGameData);++u){const Floppy144DataRecord*p=&g_asGameData[u];if(p->eKind==FLOPPY144_DATA_INTERACTION_PREREQUISITE&&Floppy144StringEqual(p->pszId,pInteraction->pszId)&&!Floppy144InteractionPrerequisiteSatisfied(pState,pInteraction,p->pszA))return false;}return true;}
 bool Floppy144GameDataInteractionTryRun(Floppy144WorldState*pWorld,Floppy144RunState*pState,Floppy144InteractionId eInteraction){const Floppy144DataRecord*pInteraction;uint32_t u;if(!Floppy144GameDataInteractionCanRun(pState,eInteraction))return false;pInteraction=Floppy144Nth(FLOPPY144_DATA_INTERACTION,(int32_t)eInteraction);if(!pInteraction)return false;(void)Floppy144RunStateCompleteInteraction(pState,eInteraction);for(u=0;u<F144_COUNT(g_asGameData);++u){const Floppy144DataRecord*p=&g_asGameData[u];if(p->eKind==FLOPPY144_DATA_INTERACTION_EFFECT&&Floppy144StringEqual(p->pszId,pInteraction->pszId))(void)Floppy144GameDataExecuteEffect(pWorld,pState,p->pszA,p->pszB);}Floppy144GameDataResolveEvidence(pState);Floppy144GameDataCaptureNewNotebookEntries(pState);return true;}
-void Floppy144GameDataResolveEvidence(Floppy144RunState*pState){uint32_t uPass;if(!pState)return;for(uPass=0;uPass<(uint32_t)FLOPPY144_EVIDENCE_COUNT;++uPass){uint32_t u;bool bChanged=false;for(u=0;u<F144_COUNT(g_asGameData);++u){const Floppy144DataRecord*pE=&g_asGameData[u];Floppy144EvidenceId e;uint32_t k;bool ok=true;if(pE->eKind!=FLOPPY144_DATA_EVIDENCE)continue;e=Floppy144GameDataEvidenceId(pE->pszId);if(e==FLOPPY144_EVIDENCE_COUNT||Floppy144RunStateEvidenceEstablished(pState,e))continue;for(k=0;k<F144_COUNT(g_asGameData);++k){const Floppy144DataRecord*p=&g_asGameData[k];if(p->eKind==FLOPPY144_DATA_EVIDENCE_REQUIREMENT&&Floppy144StringEqual(p->pszId,pE->pszId)){Floppy144InteractionId r=Floppy144GameDataInteractionId(p->pszA);if(r==FLOPPY144_INTERACTION_COUNT||!Floppy144RunStateInteractionCompleted(pState,r)){ok=false;break;}}}if(!ok)continue;for(k=0;k<F144_COUNT(g_asGameData);++k){const Floppy144DataRecord*p=&g_asGameData[k];if(p->eKind==FLOPPY144_DATA_EVIDENCE_CONDITION&&Floppy144StringEqual(p->pszId,pE->pszId)&&!Floppy144GameDataConditionSatisfied(pState,p->pszA,p->pszB)){ok=false;break;}}if(ok&&Floppy144RunStateEstablishEvidence(pState,e))bChanged=true;}if(!bChanged)break;}Floppy144GameDataCaptureNewNotebookEntries(pState);}
+void Floppy144GameDataResolveEvidence(Floppy144RunState*pState)
+{
+    uint32_t uPass;
+    if(!pState)return;
+
+    for(uPass=0;uPass<(uint32_t)FLOPPY144_EVIDENCE_COUNT;++uPass)
+    {
+        uint32_t u;
+        bool bChanged=false;
+
+        for(u=0;u<F144_COUNT(g_asGameData);++u)
+        {
+            const Floppy144DataRecord*pE=&g_asGameData[u];
+            Floppy144EvidenceId e;
+            uint32_t k;
+            bool ok=true;
+
+            if(pE->eKind!=FLOPPY144_DATA_EVIDENCE)continue;
+            e=Floppy144GameDataEvidenceId(pE->pszId);
+            if(e==FLOPPY144_EVIDENCE_COUNT||Floppy144RunStateEvidenceEstablished(pState,e))continue;
+
+            for(k=0;k<F144_COUNT(g_asGameData);++k)
+            {
+                const Floppy144DataRecord*p=&g_asGameData[k];
+                if(p->eKind==FLOPPY144_DATA_EVIDENCE_REQUIREMENT&&Floppy144StringEqual(p->pszId,pE->pszId))
+                {
+                    Floppy144InteractionId r=Floppy144GameDataInteractionId(p->pszA);
+                    if(r==FLOPPY144_INTERACTION_COUNT||!Floppy144RunStateInteractionCompleted(pState,r))
+                    {
+                        ok=false;
+                        break;
+                    }
+                }
+            }
+
+            if(!ok)continue;
+
+            for(k=0;k<F144_COUNT(g_asGameData);++k)
+            {
+                const Floppy144DataRecord*p=&g_asGameData[k];
+                if(p->eKind==FLOPPY144_DATA_EVIDENCE_CONDITION&&Floppy144StringEqual(p->pszId,pE->pszId)&&!Floppy144GameDataConditionSatisfied(pState,p->pszA,p->pszB))
+                {
+                    ok=false;
+                    break;
+                }
+            }
+
+            if(ok&&Floppy144RunStateEstablishEvidence(pState,e))bChanged=true;
+        }
+
+        if(!bChanged)break;
+    }
+
+    for(uPass=0;uPass<(uint32_t)FLOPPY144_INTERACTION_COUNT;++uPass)
+    {
+        const Floppy144DataRecord *pInteraction=
+            Floppy144Nth(FLOPPY144_DATA_INTERACTION,(int32_t)uPass);
+
+        if(
+            pInteraction!=NULL &&
+            Floppy144StringEqual(pInteraction->pszD,"Automatic") &&
+            Floppy144GameDataInteractionCanRun(pState,(Floppy144InteractionId)uPass)
+        )
+        {
+            (void)Floppy144GameDataInteractionTryRun(
+                NULL,
+                pState,
+                (Floppy144InteractionId)uPass
+            );
+        }
+    }
+
+    Floppy144GameDataCaptureNewNotebookEntries(pState);
+}
 
 static uint32_t Floppy144MonthDay(uint32_t m,uint32_t d){return m*100U+d;}
 static uint32_t Floppy144ParseMonthDay(const char*s){if(!s||strlen(s)!=5U||s[2]!='-')return 0U;return(uint32_t)(s[0]-'0')*1000U+(uint32_t)(s[1]-'0')*100U+(uint32_t)(s[3]-'0')*10U+(uint32_t)(s[4]-'0');}
