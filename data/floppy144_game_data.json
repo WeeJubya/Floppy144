@@ -1469,7 +1469,7 @@
           {
             "id": "SERVER_ROOM_TERMINAL_DESK",
             "type": "TERMINAL_DESK",
-            "variant": "GDR_TERMINAL",
+            "variant": "IT_TERMINAL",
             "object": "SERVER_ROOM_TERMINAL",
             "x": 39,
             "y": 72,
@@ -1516,6 +1516,15 @@
             "y": 56,
             "width": 10,
             "height": 1
+          },
+          {
+            "id": "SERVER_ROOM_CABLE_RISER",
+            "type": "WALL_MOUNTED_ITEM",
+            "variant": "CABLE_RISER",
+            "x": 33,
+            "y": 74,
+            "width": 1,
+            "height": 8
           },
           {
             "type": "CHAIR",

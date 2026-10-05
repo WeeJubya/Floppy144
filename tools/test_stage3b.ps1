@@ -711,6 +711,36 @@ function Test-PhysicalItemPlayerFacingContract {
     $Site2DSource = Get-Content -Raw -Path $Site2DPath
     $BuildSiteSource = Get-Content -Raw -Path $BuildSitePath
 
+    $ServerRoomSource =
+        $GameData.site_layout_source.rooms |
+        Where-Object { $_.id -eq 'SERVER_ROOM' }
+
+    $ServerTerminalSource =
+        $ServerRoomSource.geometry |
+        Where-Object { $_.id -eq 'SERVER_ROOM_TERMINAL_DESK' }
+
+    $ServerCableRiserSource =
+        $ServerRoomSource.geometry |
+        Where-Object { $_.id -eq 'SERVER_ROOM_CABLE_RISER' }
+
+    if(
+        $null -eq $ServerTerminalSource -or
+        $ServerTerminalSource.variant -ne 'IT_TERMINAL'
+    ) {
+        throw "Canonical Server Room terminal is no longer classified as IT_TERMINAL."
+    }
+
+    if(
+        $null -eq $ServerCableRiserSource -or
+        $ServerCableRiserSource.variant -ne 'CABLE_RISER' -or
+        $ServerCableRiserSource.x -ne 33 -or
+        $ServerCableRiserSource.y -ne 74 -or
+        $ServerCableRiserSource.width -ne 1 -or
+        $ServerCableRiserSource.height -ne 8
+    ) {
+        throw "Canonical Server Room cable-riser geometry is missing or has drifted."
+    }
+
     if($GameData.physical_items.Count -lt 633) {
         throw "Physical-item ledger count is $($GameData.physical_items.Count); Stage 3C baseline is 633."
     }

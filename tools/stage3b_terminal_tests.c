@@ -1536,6 +1536,15 @@ static void Floppy144TestPlayerRecoveryPolicy(void)
     );
 
     F144_CHECK(
+        Floppy144TestNotebookContains(
+            &sRunState,
+            "I-042",
+            "Temporary access to Facilities"
+        ),
+        "temporary Facilities access note remains permanently in the Notebook after FM-04 restoration"
+    );
+
+    F144_CHECK(
         Floppy144RunStateReconstructRoom(
             &sRunState,
             FLOPPY144_ROOM_FACILITIES

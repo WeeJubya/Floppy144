@@ -2518,6 +2518,66 @@ static void Floppy144Site2DDrawWallFixture(
             }
         }
     }
+    else if(Floppy144Site2DVariantIs(placement, "CABLE_RISER"))
+    {
+        /*
+         * The riser is a tall, shallow service route mounted beside the
+         * Server Room partition wall. Give it a dedicated conduit pattern so
+         * it remains visibly distinct from both the wall and generic panels.
+         */
+        if(visual.height >= visual.width)
+        {
+            for(index = 1; index <= 2; ++index)
+            {
+                Floppy144Site2DFill(
+                    surface,
+                    visual.x + visual.width * index / 3,
+                    visual.y + 3,
+                    1,
+                    visual.height - 6,
+                    detail_colour
+                );
+            }
+
+            for(index = 1; index < 5; ++index)
+            {
+                Floppy144Site2DFill(
+                    surface,
+                    visual.x + 2,
+                    visual.y + visual.height * index / 5,
+                    visual.width - 4,
+                    2,
+                    index == 2 ? amber_colour : edge_colour
+                );
+            }
+        }
+        else
+        {
+            for(index = 1; index <= 2; ++index)
+            {
+                Floppy144Site2DFill(
+                    surface,
+                    visual.x + 3,
+                    visual.y + visual.height * index / 3,
+                    visual.width - 6,
+                    1,
+                    detail_colour
+                );
+            }
+
+            for(index = 1; index < 5; ++index)
+            {
+                Floppy144Site2DFill(
+                    surface,
+                    visual.x + visual.width * index / 5,
+                    visual.y + 2,
+                    2,
+                    visual.height - 4,
+                    index == 2 ? amber_colour : edge_colour
+                );
+            }
+        }
+    }
     else if(Floppy144Site2DVariantIs(placement, "SHELVING"))
     {
         for(index = 1; index < 4; ++index)
