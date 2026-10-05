@@ -14,6 +14,7 @@
 #include "floppy144_run_state.h"
 #include "floppy144_site.h"
 #include "floppy144_site_object.h"
+#include "floppy144_site_rooms.h"
 #include "floppy144_trigger_engine.h"
 #include "floppy144_world.h"
 
@@ -2390,7 +2391,7 @@ static void Floppy144TestCompletedRecoveryProfileSnapshot(void)
 {
     Floppy144RunState sRunState;
     Floppy144DiscoveryProfile sProfile;
-    Floppy144DiscoveryProfile sDecoded;
+    Floppy144DiscoveryProfile sDecoded = { 0 };
     uint8_t auPayload[FLOPPY144_PROFILE_PAYLOAD_V1_SIZE];
     Floppy144EvidenceId eEvidence1=
         Floppy144GameDataEvidenceId("E-001");
