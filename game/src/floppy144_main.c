@@ -351,9 +351,14 @@ static void Floppy144EvidenceCompleteDraw(F144Runtime *pRuntime)
     top=global_completion_top_line>maxTop?maxTop:global_completion_top_line;
 
     pszOutcome=
-        global_completion_evidence_resolved
-        ? "EVIDENCE RESOLVED"
-        : "RECOVERY CAPACITY EXHAUSTED";
+        global_completion_evidence_resolved &&
+        global_completion_capacity_exhausted
+        ? "EVIDENCE RESOLVED / CAPACITY EXHAUSTED"
+        : (
+            global_completion_evidence_resolved
+            ? "EVIDENCE RESOLVED"
+            : "RECOVERY CAPACITY EXHAUSTED"
+        );
 
     Floppy144DrawClear(&s,bg);
     Floppy144DrawFillRect(&s,32U,24U,576U,310U,panel);
@@ -392,14 +397,14 @@ static void Floppy144EvidenceCompleteDraw(F144Runtime *pRuntime)
         Floppy144DrawFillRect(&s,uTrackX+1U,uThumbY,2U,uThumbHeight,amber);
     }
 
-    if(global_completion_evidence_resolved&&global_completion_capacity_exhausted)
-    {
-        Floppy144DrawText(&s,50U,306U,"EVIDENCE RESOLVED / NO FURTHER RECOVERY FITS",1U,muted);
-    }
-    else
-    {
-        Floppy144DrawText(&s,50U,306U,"UP/DOWN SCROLL   ENTER/BACKSPACE RETURN TO SITE",1U,muted);
-    }
+    Floppy144DrawText(
+        &s,
+        50U,
+        306U,
+        "UP/DOWN SCROLL   ENTER/BACKSPACE RETURN TO SITE",
+        1U,
+        muted
+    );
 }
 
 
