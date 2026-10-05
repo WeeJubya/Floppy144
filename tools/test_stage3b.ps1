@@ -604,6 +604,31 @@ function Test-Stage3B5CoordinatorWiring {
         }
     }
 
+    foreach($RequiredWallMountToken in @(
+        'Floppy144IsometricWallFixtureAttachment',
+        'Floppy144IsometricWallAttachmentIsNear',
+        'RECEPTION_SITE_DIRECTORY',
+        'bPartitionMounted',
+        'nWallPlane16',
+        'FLOPPY144_ISO_WALL_LEFT',
+        'FLOPPY144_ISO_WALL_RIGHT',
+        'FLOPPY144_ISO_WALL_TOP',
+        'FLOPPY144_ISO_WALL_BOTTOM'
+    )) {
+        if($SiteIsoSource -notmatch [regex]::Escape($RequiredWallMountToken)) {
+            throw "FM-23 wall-mounted-item plane resolution is missing: $RequiredWallMountToken"
+        }
+    }
+
+    if(
+        $SiteIsoSource -notmatch
+            'pRect->type==\s*\(uint8_t\)FLOPPY144_SITE_PARTITION_WALL[\s\S]*?64U' -or
+        $SiteIsoSource -notmatch
+            '!bPartitionMounted\s*&&\s*Floppy144IsometricWallAttachmentIsNear'
+    ) {
+        throw "FM-23 no longer renders partition walls at 25 percent or keeps near-wall fixtures in the foreground wall layer."
+    }
+
     if(
         $SiteIsoSource -notmatch
             'nX < FLOPPY144_ISO_VIEWPORT_X' -or
