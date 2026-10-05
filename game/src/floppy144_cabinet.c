@@ -1836,7 +1836,7 @@ static void Floppy144CabinetDrawContentMarkers(
                     : 0U;
             uint32_t uShelfMarkerWidth=14U;
             uint32_t uGroupWidth;
-            uint32_t uBaseX;
+            uint32_t uShelfBaseX;
             uint32_t uX;
             uint32_t uY;
             uint32_t uMarker=uIndex==uSelected?uBright:uEdge;
@@ -1861,7 +1861,7 @@ static void Floppy144CabinetDrawContentMarkers(
                 uItemsOnShelf*uShelfMarkerWidth+
                 (uItemsOnShelf-1U)*uShelfGap;
 
-            uBaseX=
+            uShelfBaseX=
                 uShelfLeft+
                 (
                     uShelfWidth>uGroupWidth
@@ -1870,7 +1870,7 @@ static void Floppy144CabinetDrawContentMarkers(
                 );
 
             uX=
-                uBaseX+
+                uShelfBaseX+
                 uSlot*(uShelfMarkerWidth+uShelfGap);
 
             uY=
