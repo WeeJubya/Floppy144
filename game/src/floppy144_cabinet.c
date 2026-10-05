@@ -826,12 +826,10 @@ static bool Floppy144CabinetPhysicalItemRevealControlled(
 }
 
 /*
- * Contents order is deliberately stable across recovery.
- *
- * Ordinary room clutter keeps its existing order. Items that are explicitly
- * revealed by triggers/interactions are appended afterwards, so returning to
- * furniture does not make an already-seen list appear to have been reshuffled
- * just because a newly recovered piece of evidence became available.
+ * Contents order is deterministic for one recovery seed but varies between
+ * playthroughs. Ordinary contextual items and explicitly revealed evidence
+ * remain in separate bands, so newly revealed evidence is appended after the
+ * ordinary clutter instead of reordering everything the player already saw.
  */
 static uint32_t Floppy144CabinetVisibleContentLimit(
     const Floppy144CabinetState *pCabinet
@@ -913,6 +911,54 @@ uint32_t Floppy144CabinetVisibleContentCount(
     return uCount;
 }
 
+static uint32_t Floppy144CabinetContentShuffleKey(
+    const Floppy144CabinetState *pCabinet,
+    const Floppy144RunState *pRunState,
+    const Floppy144DataRecord *pRecord
+)
+{
+    uint32_t h;
+
+    if(pCabinet==NULL||pRunState==NULL||pRecord==NULL)return 0U;
+
+    h=Floppy144CabinetCodeHash(
+        pCabinet->szCabinetId,
+        pRunState->recovery_seed^0x9e3779b9U
+    );
+
+    return
+        Floppy144CabinetCodeHash(
+            pRecord->pszId,
+            h
+        );
+}
+
+static bool Floppy144CabinetContentComesBefore(
+    const Floppy144CabinetState *pCabinet,
+    const Floppy144RunState *pRunState,
+    const Floppy144DataRecord *pA,
+    const Floppy144DataRecord *pB
+)
+{
+    uint32_t a,b;
+    int n;
+
+    if(pA==NULL)return false;
+    if(pB==NULL)return true;
+
+    a=Floppy144CabinetContentShuffleKey(pCabinet,pRunState,pA);
+    b=Floppy144CabinetContentShuffleKey(pCabinet,pRunState,pB);
+
+    if(a!=b)return a<b;
+
+    n=strcmp(
+        pA->pszId!=NULL?pA->pszId:"",
+        pB->pszId!=NULL?pB->pszId:""
+    );
+
+    return n<0;
+}
+
 const Floppy144DataRecord *Floppy144CabinetVisibleContentAt(
     const Floppy144CabinetState *pCabinet,
     const Floppy144RunState *pRunState,
@@ -920,9 +966,8 @@ const Floppy144DataRecord *Floppy144CabinetVisibleContentAt(
 )
 {
     uint32_t uPass;
-    uint32_t uRecordIndex;
-    uint32_t uVisible = 0U;
     uint32_t uLimit;
+    uint32_t uBandOffset=0U;
 
     if(
         pCabinet == NULL ||
@@ -933,40 +978,25 @@ const Floppy144DataRecord *Floppy144CabinetVisibleContentAt(
         return NULL;
     }
 
-    uLimit =
-        Floppy144CabinetVisibleContentLimit(
-            pCabinet
-        );
+    uLimit=Floppy144CabinetVisibleContentLimit(pCabinet);
+    if(uVisibleIndex>=uLimit)return NULL;
 
-    if(uVisibleIndex >= uLimit)
-        return NULL;
-
-    /*
-     * Pass 0: ordinary contextual contents.
-     * Pass 1: explicitly recovered/revealed physical items.
-     *
-     * The record order inside each pass remains canonical, while newly
-     * revealed evidence naturally appears after the furniture's existing
-     * contents instead of jumping to the first row.
-     */
-    for(uPass = 0U; uPass < 2U; ++uPass)
+    for(uPass=0U;uPass<2U;++uPass)
     {
-        bool bRecoveredPass = uPass != 0U;
+        bool bRecoveredPass=uPass!=0U;
+        uint32_t uBandCount=0U;
+        uint32_t uRankWanted;
+        uint32_t uRecordIndex;
+        const Floppy144DataRecord *pWinner=NULL;
 
-        for(
-            uRecordIndex = 0U;
-            uRecordIndex < Floppy144GameDataRecordCount();
-            ++uRecordIndex
-        )
+        for(uRecordIndex=0U;uRecordIndex<Floppy144GameDataRecordCount();++uRecordIndex)
         {
-            const Floppy144DataRecord *pRecord =
+            const Floppy144DataRecord *pRecord=
                 Floppy144GameDataRecordAt(uRecordIndex);
 
-            bool bRevealControlled;
-
             if(
-                pRecord == NULL ||
-                pRecord->eKind != FLOPPY144_DATA_PHYSICAL_ITEM ||
+                pRecord==NULL ||
+                pRecord->eKind!=FLOPPY144_DATA_PHYSICAL_ITEM ||
                 !Floppy144CabinetStringEqual(
                     pRecord->pszC,
                     pCabinet->szCabinetId
@@ -974,27 +1004,86 @@ const Floppy144DataRecord *Floppy144CabinetVisibleContentAt(
                 !Floppy144SitePhysicalItemVisible(
                     pRunState,
                     pRecord
-                )
+                ) ||
+                Floppy144CabinetPhysicalItemRevealControlled(
+                    pRecord->pszId
+                )!=bRecoveredPass
             )
             {
                 continue;
             }
 
-            bRevealControlled =
-                Floppy144CabinetPhysicalItemRevealControlled(
-                    pRecord->pszId
-                );
+            ++uBandCount;
+        }
 
-            if(bRevealControlled != bRecoveredPass)
-                continue;
+        if(uVisibleIndex>=uBandOffset+uBandCount)
+        {
+            uBandOffset+=uBandCount;
+            continue;
+        }
 
-            if(uVisible == uVisibleIndex)
-                return pRecord;
+        uRankWanted=uVisibleIndex-uBandOffset;
 
-            ++uVisible;
+        while(true)
+        {
+            const Floppy144DataRecord *pNext=NULL;
 
-            if(uVisible >= uLimit)
-                return NULL;
+            for(uRecordIndex=0U;uRecordIndex<Floppy144GameDataRecordCount();++uRecordIndex)
+            {
+                const Floppy144DataRecord *pRecord=
+                    Floppy144GameDataRecordAt(uRecordIndex);
+
+                if(
+                    pRecord==NULL ||
+                    pRecord->eKind!=FLOPPY144_DATA_PHYSICAL_ITEM ||
+                    !Floppy144CabinetStringEqual(
+                        pRecord->pszC,
+                        pCabinet->szCabinetId
+                    ) ||
+                    !Floppy144SitePhysicalItemVisible(
+                        pRunState,
+                        pRecord
+                    ) ||
+                    Floppy144CabinetPhysicalItemRevealControlled(
+                        pRecord->pszId
+                    )!=bRecoveredPass
+                )
+                {
+                    continue;
+                }
+
+                if(
+                    pWinner!=NULL &&
+                    !Floppy144CabinetContentComesBefore(
+                        pCabinet,
+                        pRunState,
+                        pWinner,
+                        pRecord
+                    )
+                )
+                {
+                    continue;
+                }
+
+                if(
+                    pNext==NULL ||
+                    Floppy144CabinetContentComesBefore(
+                        pCabinet,
+                        pRunState,
+                        pRecord,
+                        pNext
+                    )
+                )
+                {
+                    pNext=pRecord;
+                }
+            }
+
+            if(pNext==NULL)return NULL;
+            pWinner=pNext;
+
+            if(uRankWanted==0U)return pWinner;
+            --uRankWanted;
         }
     }
 
