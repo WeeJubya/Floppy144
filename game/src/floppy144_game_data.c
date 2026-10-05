@@ -1170,6 +1170,39 @@ void Floppy144GameDataResolveEvidence(Floppy144RunState*pState)
     Floppy144GameDataCaptureNewNotebookEntries(pState);
 }
 
+bool Floppy144GameDataEvidenceResolved(const Floppy144RunState *pState)
+{
+    uint32_t u;
+
+    if(pState==NULL)return false;
+
+    for(u=0U;u<F144_COUNT(g_asGameData);++u)
+    {
+        const Floppy144DataRecord *p=&g_asGameData[u];
+        Floppy144EvidenceId eEvidence;
+
+        if(
+            p->eKind!=FLOPPY144_DATA_EVIDENCE ||
+            !Floppy144StringEqual(p->pszD,"Core resolution")
+        )
+        {
+            continue;
+        }
+
+        eEvidence=Floppy144GameDataEvidenceId(p->pszId);
+
+        if(
+            eEvidence!=FLOPPY144_EVIDENCE_COUNT &&
+            Floppy144RunStateEvidenceEstablished(pState,eEvidence)
+        )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 static uint32_t Floppy144MonthDay(uint32_t m,uint32_t d){return m*100U+d;}
 static uint32_t Floppy144ParseMonthDay(const char*s){if(!s||strlen(s)!=5U||s[2]!='-')return 0U;return(uint32_t)(s[0]-'0')*1000U+(uint32_t)(s[1]-'0')*100U+(uint32_t)(s[3]-'0')*10U+(uint32_t)(s[4]-'0');}
 const Floppy144DataRecord *Floppy144GameDataAmbientForDate(const char*pszTargetId,uint32_t uMonth,uint32_t uDay){const Floppy144DataRecord*pBest=NULL;uint32_t uBest=0,uDate=Floppy144MonthDay(uMonth,uDay),u;for(u=0;u<F144_COUNT(g_asGameData);++u){const Floppy144DataRecord*pA=&g_asGameData[u];uint32_t r;bool match=false,has=false;if(pA->eKind!=FLOPPY144_DATA_AMBIENT||!Floppy144StringEqual(pA->pszB,pszTargetId))continue;for(r=0;r<F144_COUNT(g_asGameData);++r){const Floppy144DataRecord*pR=&g_asGameData[r];uint32_t a,b;if(pR->eKind!=FLOPPY144_DATA_AMBIENT_RANGE||!Floppy144StringEqual(pR->pszId,pA->pszId))continue;has=true;a=Floppy144ParseMonthDay(pR->pszA);b=Floppy144ParseMonthDay(pR->pszB);if((a<=b&&uDate>=a&&uDate<=b)||(a>b&&(uDate>=a||uDate<=b))){match=true;break;}}if(!has)match=true;if(match&&(!pBest||(uint32_t)pA->n0>uBest)){pBest=pA;uBest=(uint32_t)pA->n0;}}return pBest;}
