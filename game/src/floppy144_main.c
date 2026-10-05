@@ -469,7 +469,7 @@ static void Floppy144EvidenceCompleteDraw(F144Runtime *pRuntime)
         Floppy144DrawText(
             &s,
             320U-Floppy144DrawTextWidth(pszReturn,1U)/2U,
-            306U,
+            321U,
             pszReturn,
             1U,
             muted
