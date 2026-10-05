@@ -16774,7 +16774,7 @@
       ],
       "notebook_entry": "Archive Holdings & Reconciliation: recovered collection material is available to the current reconstruction.",
       "source_order": 5,
-      "size_kb": 86,
+      "size_kb": 101,
       "required_for_completion": false
     },
     {
@@ -16836,7 +16836,7 @@
       ],
       "notebook_entry": "Archive Transfer & Custody: recovered collection material is available to the current reconstruction.",
       "source_order": 7,
-      "size_kb": 86,
+      "size_kb": 101,
       "required_for_completion": false
     },
     {
@@ -16873,7 +16873,7 @@
       ],
       "notebook_entry": "Archive Transfer Authorisation & Exceptions: recovered collection material is available to the current reconstruction.",
       "source_order": 8,
-      "size_kb": 86,
+      "size_kb": 101,
       "required_for_completion": false
     },
     {
@@ -16992,7 +16992,7 @@
       "evidence_ids": [],
       "notebook_entry": "Site Establishment: recovered collection material is available to the current reconstruction.",
       "source_order": 11,
-      "size_kb": 86,
+      "size_kb": 101,
       "required_for_completion": false
     },
     {
@@ -17190,7 +17190,7 @@
       ],
       "notebook_entry": "Asset Management & Decommissioning: recovered collection material is available to the current reconstruction.",
       "source_order": 18,
-      "size_kb": 86,
+      "size_kb": 101,
       "required_for_completion": false
     },
     {
@@ -17225,7 +17225,7 @@
       ],
       "notebook_entry": "Site Safety & Suppression Systems: recovered collection material is available to the current reconstruction.",
       "source_order": 19,
-      "size_kb": 86,
+      "size_kb": 101,
       "required_for_completion": false
     },
     {
@@ -17264,7 +17264,7 @@
       ],
       "notebook_entry": "Environmental Monitoring & Plant Logs: recovered collection material is available to the current reconstruction.",
       "source_order": 20,
-      "size_kb": 86,
+      "size_kb": 115,
       "required_for_completion": false
     },
     {
@@ -21108,8 +21108,8 @@
       "trigger_document": "Request for Preparation of Isometric Accommodation Plans",
       "conditions": [
         {
-          "kind": "collection_restored",
-          "target": "TS-10"
+          "kind": "act_at_least",
+          "target": "ACT_II"
         }
       ],
       "effects": [
