@@ -14,6 +14,7 @@
 #include "floppy144_catalogue.h"
 #include "floppy144_cabinet.h"
 #include "floppy144_document.h"
+#include "floppy144_draw.h"
 #include "floppy144_interaction_engine.h"
 #include "floppy144_notebook_view.h"
 #include "floppy144_recovery.h"
@@ -47,6 +48,7 @@ typedef enum Floppy144Screen
     FLOPPY144_SCREEN_SITE_DIRECTORY,
     FLOPPY144_SCREEN_CABINET,
     FLOPPY144_SCREEN_NOTEBOOK,
+    FLOPPY144_SCREEN_EVIDENCE_COMPLETE,
     FLOPPY144_SCREEN_TERMINAL,
     FLOPPY144_SCREEN_CATALOGUE
 } Floppy144Screen;
@@ -167,6 +169,24 @@ static void Floppy144BindStaticRenderer(
  * InvalidateRect then asks Windows to present that frame through WM_PAINT.
  */
 
+static void Floppy144EvidenceCompleteDraw(F144Runtime *pRuntime)
+{
+    const uint32_t bg=FLOPPY144_RGB(11,16,18),panel=FLOPPY144_RGB(22,31,33),border=FLOPPY144_RGB(86,103,107),text=FLOPPY144_RGB(202,211,205),muted=FLOPPY144_RGB(118,133,132),amber=FLOPPY144_RGB(194,153,76),green=FLOPPY144_RGB(100,156,111);
+    Floppy144Surface s;
+    if(pRuntime==NULL||pRuntime->backbuffer.data==NULL)return;
+    s.pixels=(uint32_t*)pRuntime->backbuffer.data;s.width=pRuntime->backbuffer.width;s.height=pRuntime->backbuffer.height;
+    Floppy144DrawClear(&s,bg);
+    Floppy144DrawFillRect(&s,42U,34U,556U,278U,panel);Floppy144DrawRect(&s,42U,34U,556U,278U,border);
+    Floppy144DrawText(&s,64U,58U,"EVIDENCE COMPLETE",2U,green);
+    Floppy144DrawText(&s,64U,98U,"E-020 + E-021 + E-022 CORRELATED",1U,amber);
+    Floppy144DrawText(&s,64U,124U,"E-023 ESTABLISHED",1U,text);
+    Floppy144DrawText(&s,64U,164U,"Recovered evidence supports accidental activation",1U,text);
+    Floppy144DrawText(&s,64U,181U,"of the still-connected manual-release circuit",1U,text);
+    Floppy144DrawText(&s,64U,198U,"during cable remediation.",1U,text);
+    Floppy144DrawText(&s,64U,224U,"Individual responsibility is not established.",1U,amber);
+    Floppy144DrawText(&s,64U,278U,"PRESS ANY KEY TO RETURN TO SITE",1U,muted);
+}
+
 static void Floppy144Redraw(
     HWND window
 )
@@ -260,6 +280,12 @@ static void Floppy144Redraw(
                 &global_run_state
             );
 
+            break;
+        }
+
+        case FLOPPY144_SCREEN_EVIDENCE_COMPLETE:
+        {
+            Floppy144EvidenceCompleteDraw(global_runtime);
             break;
         }
 
@@ -2004,11 +2030,17 @@ static LRESULT CALLBACK Floppy144WindowProc(
                         {
                             if(Floppy144CabinetInteriorOpen(&global_cabinet))
                             {
+                                bool bWasComplete=Floppy144RunStateAct(&global_run_state)==FLOPPY144_RUN_ACT_COMPLETE;
                                 (void)Floppy144CabinetInspectSelected(
                                     &global_cabinet,
                                     &global_world,
                                     &global_run_state
                                 );
+                                if(!bWasComplete&&Floppy144RunStateAct(&global_run_state)==FLOPPY144_RUN_ACT_COMPLETE)
+                                {
+                                    global_resume_screen=FLOPPY144_SCREEN_OFFICE;
+                                    global_screen=FLOPPY144_SCREEN_EVIDENCE_COMPLETE;
+                                }
                             }
                             else
                             {
@@ -2027,11 +2059,17 @@ static LRESULT CALLBACK Floppy144WindowProc(
                         {
                             if(Floppy144CabinetInteriorOpen(&global_cabinet))
                             {
+                                bool bWasComplete=Floppy144RunStateAct(&global_run_state)==FLOPPY144_RUN_ACT_COMPLETE;
                                 (void)Floppy144CabinetInspectSelected(
                                     &global_cabinet,
                                     &global_world,
                                     &global_run_state
                                 );
+                                if(!bWasComplete&&Floppy144RunStateAct(&global_run_state)==FLOPPY144_RUN_ACT_COMPLETE)
+                                {
+                                    global_resume_screen=FLOPPY144_SCREEN_OFFICE;
+                                    global_screen=FLOPPY144_SCREEN_EVIDENCE_COMPLETE;
+                                }
                                 Floppy144Redraw(window);
                             }
                             return 0;
@@ -2051,6 +2089,14 @@ static LRESULT CALLBACK Floppy144WindowProc(
                     }
 
                     break;
+                }
+
+                case FLOPPY144_SCREEN_EVIDENCE_COMPLETE:
+                {
+                    global_screen=FLOPPY144_SCREEN_OFFICE;
+                    global_office_notice=NULL;
+                    Floppy144Redraw(window);
+                    return 0;
                 }
 
                 case FLOPPY144_SCREEN_NOTEBOOK:
