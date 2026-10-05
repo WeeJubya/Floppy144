@@ -592,11 +592,29 @@ function Test-Stage3B5CoordinatorWiring {
         'Floppy144IsometricDrawChair',
         'Floppy144IsometricDrawNearRoomWalls',
         'uAlpha=38U',
-        'Painter-facing solid'
+        'Painter-facing solid',
+        'g_nIsoHalfTileX=10',
+        'g_nIsoHalfTileY=4',
+        'g_nIsoHeightScale=6',
+        'g_nIsoCentreX16=pRunState->player_site_x',
+        'g_nIsoCentreY16=pRunState->player_site_y'
     )) {
         if($SiteIsoSource -notmatch [regex]::Escape($RequiredIsoPresentationToken)) {
             throw "FM-23 solid-room presentation contract is missing: $RequiredIsoPresentationToken"
         }
+    }
+
+    if(
+        $SiteIsoSource -notmatch
+            'nX < FLOPPY144_ISO_VIEWPORT_X' -or
+        $SiteIsoSource -notmatch
+            'nY < FLOPPY144_ISO_VIEWPORT_Y' -or
+        $SiteIsoSource -notmatch
+            'FLOPPY144_ISO_VIEWPORT_WIDTH' -or
+        $SiteIsoSource -notmatch
+            'FLOPPY144_ISO_VIEWPORT_HEIGHT'
+    ) {
+        throw "FM-23 zoomed camera is no longer clipped to the fixed Site viewport."
     }
 
     if(
