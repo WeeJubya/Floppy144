@@ -1417,153 +1417,78 @@ void Floppy144SiteIsometricDraw(
     const char *pszNotice
 )
 {
+    const uint32_t uBackground=FLOPPY144_RGB(12,17,21);
+    const uint32_t uViewport=FLOPPY144_RGB(18,24,27);
+    const uint32_t uFrame=FLOPPY144_RGB(74,82,81);
+    const uint32_t uFrameEdge=FLOPPY144_RGB(113,124,120);
+    const uint32_t uText=FLOPPY144_RGB(201,210,203);
+    const uint32_t uMuted=FLOPPY144_RGB(116,132,130);
+    const uint32_t uGreen=FLOPPY144_RGB(100,156,111);
+    const uint32_t uAmber=FLOPPY144_RGB(194,153,76);
+
     Floppy144Surface sSurface;
     Floppy144RoomId eActiveRoom;
-    uint32_t uRectIndex;
-    uint32_t uRectCount;
-    int32_t nPlayerX;
-    int32_t nPlayerY;
     const char *pszRoomLabel;
-    const char *pszContextLabel = NULL;
+    const char *pszContextLabel=NULL;
+    const char *pszPrompt;
     char szStatus[64];
+    uint16_t auDepthRects[FLOPPY144_ISO_SORT_MAX];
+    uint32_t uDepthCount=0U;
+    uint32_t uRectCount;
+    uint32_t uIndex;
+    bool bRoomReconstructed;
+    bool bPlayerDrawn=false;
+    int32_t nPlayerDepth;
 
     if(
-        pRuntime == NULL ||
-        pRunState == NULL ||
-        pRuntime->backbuffer.data == NULL
+        pRuntime==NULL ||
+        pRunState==NULL ||
+        pRuntime->backbuffer.data==NULL
     )
     {
         return;
     }
 
-    sSurface.pixels = (uint32_t *)pRuntime->backbuffer.data;
-    sSurface.width = pRuntime->backbuffer.width;
-    sSurface.height = pRuntime->backbuffer.height;
+    sSurface.pixels=(uint32_t *)pRuntime->backbuffer.data;
+    sSurface.width=pRuntime->backbuffer.width;
+    sSurface.height=pRuntime->backbuffer.height;
 
-    eActiveRoom = Floppy144SiteRoomAtPosition(
+    eActiveRoom=Floppy144SiteRoomAtPosition(
         pRunState->player_site_x,
         pRunState->player_site_y
     );
 
-    pszRoomLabel =
-        Floppy144IsometricRoomLabel(eActiveRoom);
-
-    if(pszNotice != NULL)
+    if(eActiveRoom==FLOPPY144_ROOM_COUNT)
     {
-        pszRoomLabel = pszNotice;
-    }
-    else
-    {
-        pszContextLabel =
-            Floppy144SiteContextLabel(pRunState);
-
-        if(pszContextLabel != NULL)
-        {
-            pszRoomLabel = pszContextLabel;
-        }
+        eActiveRoom=FLOPPY144_ROOM_RECEPTION;
     }
 
-    Floppy144DrawClear(&sSurface, FLOPPY144_RGB(12, 17, 21));
-    Floppy144DrawText(
-        &sSurface,
-        10,
-        6,
-        "GDR SITE RECONSTRUCTION // ISOMETRIC 2.5D",
-        1,
-        FLOPPY144_RGB(118, 133, 132)
-    );
+    bRoomReconstructed=
+        Floppy144RunStateRoomReconstructed(
+            pRunState,
+            eActiveRoom
+        );
 
-    uRectCount = Floppy144SiteRectCount();
+    pszRoomLabel=
+        bRoomReconstructed
+            ? Floppy144IsometricRoomLabel(eActiveRoom)
+            : "ROOM DATA NOT RECONSTRUCTED";
 
-    /* Pass 1: flat reconstructed room floors. */
-    for(uRectIndex = 0U; uRectIndex < uRectCount; ++uRectIndex)
+    if(pszNotice!=NULL)
     {
-        const Floppy144SiteRect *pRect = Floppy144SiteRectAt(uRectIndex);
-        Floppy144SiteElement eElement;
+        pszRoomLabel=pszNotice;
+    }
+    else if(bRoomReconstructed)
+    {
+        pszContextLabel=Floppy144SiteContextLabel(pRunState);
 
-        if(pRect == NULL)
+        if(pszContextLabel!=NULL)
         {
-            continue;
+            pszRoomLabel=pszContextLabel;
         }
-
-        eElement = (Floppy144SiteElement)pRect->type;
-
-        if(
-            eElement < FLOPPY144_SITE_FLOOR_A ||
-            eElement > FLOPPY144_SITE_FLOOR_D ||
-            pRect->room >= (uint8_t)FLOPPY144_ROOM_COUNT ||
-            !Floppy144SiteRectRuntimeVisible(
-                pRunState,
-                pRect
-            )
-        )
-        {
-            continue;
-        }
-
-        Floppy144IsometricDrawRect(&sSurface, pRect);
     }
 
-    /* Pass 2: visible structure and furniture above those reconstructed floors. */
-    for(uRectIndex = 0U; uRectIndex < uRectCount; ++uRectIndex)
-    {
-        const Floppy144SiteRect *pRect = Floppy144SiteRectAt(uRectIndex);
-        Floppy144SiteElement eElement;
-        bool bRoomVisible;
-
-        if(pRect == NULL)
-        {
-            continue;
-        }
-
-        eElement = (Floppy144SiteElement)pRect->type;
-
-        if(eElement >= FLOPPY144_SITE_FLOOR_A && eElement <= FLOPPY144_SITE_FLOOR_D)
-        {
-            continue;
-        }
-
-        bRoomVisible =
-            Floppy144IsometricRectVisible(
-                pRunState,
-                pRect
-            );
-
-        if(
-            !bRoomVisible
-        )
-        {
-            continue;
-        }
-
-        Floppy144IsometricDrawRect(&sSurface, pRect);
-    }
-
-    /* Player marker uses the persistent canonical foot point. */
-    Floppy144IsometricProject(
-        pRunState->player_site_x / FLOPPY144_SITE_FIXED_ONE,
-        pRunState->player_site_y / FLOPPY144_SITE_FIXED_ONE,
-        2,
-        &nPlayerX,
-        &nPlayerY
-    );
-
-    Floppy144IsometricLine(
-        &sSurface,
-        nPlayerX,
-        nPlayerY - 8,
-        nPlayerX,
-        nPlayerY,
-        FLOPPY144_RGB(100, 156, 111)
-    );
-    Floppy144IsometricLine(
-        &sSurface,
-        nPlayerX - 2,
-        nPlayerY - 8,
-        nPlayerX + 2,
-        nPlayerY - 8,
-        FLOPPY144_RGB(100, 156, 111)
-    );
+    pszPrompt=Floppy144IsometricInteractionPrompt(pRunState);
 
     Floppy144RunStateFormatCapacity(
         pRunState,
@@ -1571,28 +1496,289 @@ void Floppy144SiteIsometricDraw(
         (uint32_t)sizeof(szStatus)
     );
 
+    Floppy144DrawClear(&sSurface,uBackground);
+
     Floppy144DrawText(
         &sSurface,
-        20,
-        312,
-        pszRoomLabel,
-        1,
-        FLOPPY144_RGB(202, 211, 205)
+        10U,
+        5U,
+        "GDR SITE RECONSTRUCTION // ISOMETRIC 2.5D",
+        1U,
+        uMuted
     );
+
     Floppy144DrawText(
         &sSurface,
-        20,
-        328,
-        Floppy144IsometricInteractionPrompt(pRunState),
-        1,
-        FLOPPY144_RGB(194, 153, 76)
-    );
-    Floppy144DrawText(
-        &sSurface,
-        20,
-        344,
+        630U-Floppy144DrawTextWidth(szStatus,1U),
+        5U,
         szStatus,
-        1,
-        FLOPPY144_RGB(118, 133, 132)
+        1U,
+        uGreen
+    );
+
+    Floppy144DrawFillRect(
+        &sSurface,
+        20U,
+        20U,
+        600U,
+        276U,
+        uFrame
+    );
+
+    Floppy144DrawRect(
+        &sSurface,
+        20U,
+        20U,
+        600U,
+        276U,
+        uFrameEdge
+    );
+
+    Floppy144DrawFillRect(
+        &sSurface,
+        FLOPPY144_ISO_VIEWPORT_X,
+        FLOPPY144_ISO_VIEWPORT_Y,
+        FLOPPY144_ISO_VIEWPORT_WIDTH,
+        FLOPPY144_ISO_VIEWPORT_HEIGHT,
+        uViewport
+    );
+
+    if(bRoomReconstructed)
+    {
+        Floppy144IsometricConfigureRoomProjection(eActiveRoom);
+        uRectCount=Floppy144SiteRectCount();
+
+        /*
+         * Z0: active-room floor only. FM-23 no longer reveals the reconstructed
+         * Site as a whole; it mirrors the 2D room-selection contract.
+         */
+        for(uIndex=0U;uIndex<uRectCount;++uIndex)
+        {
+            const Floppy144SiteRect *pRect=
+                Floppy144SiteRectAt(uIndex);
+
+            if(
+                pRect!=NULL &&
+                Floppy144IsometricRectVisibleInRoom(
+                    pRunState,
+                    eActiveRoom,
+                    pRect
+                ) &&
+                Floppy144IsometricIsFloor(
+                    (Floppy144SiteElement)pRect->type
+                )
+            )
+            {
+                Floppy144IsometricDrawRect(
+                    &sSurface,
+                    pRect
+                );
+            }
+        }
+
+        /*
+         * Z1: far room shell. Right/bottom walls are the camera-side cutaway
+         * and intentionally absent.
+         */
+        Floppy144IsometricDrawFarRoomWalls(
+            &sSurface,
+            eActiveRoom
+        );
+
+        /*
+         * Z2: boundary furniture and wall-mounted fittings. Door/window
+         * rectangles replace the far wall beneath them. A fitting remains on
+         * its wall plane and is therefore never a walk-behind object.
+         */
+        for(uIndex=0U;uIndex<uRectCount;++uIndex)
+        {
+            const Floppy144SiteRect *pRect=
+                Floppy144SiteRectAt(uIndex);
+            Floppy144SiteElement eElement;
+
+            if(
+                pRect==NULL ||
+                !Floppy144IsometricRectVisibleInRoom(
+                    pRunState,
+                    eActiveRoom,
+                    pRect
+                )
+            )
+            {
+                continue;
+            }
+
+            eElement=(Floppy144SiteElement)pRect->type;
+
+            if(eElement==FLOPPY144_SITE_WALL_MOUNTED_ITEM)
+            {
+                Floppy144IsometricDrawRect(
+                    &sSurface,
+                    pRect
+                );
+                continue;
+            }
+
+            if(
+                eElement==FLOPPY144_SITE_DOOR ||
+                eElement==FLOPPY144_SITE_WINDOW
+            )
+            {
+                if(
+                    !Floppy144IsometricBoundaryIsNearCutaway(
+                        eActiveRoom,
+                        pRect
+                    )
+                )
+                {
+                    Floppy144IsometricDrawRect(
+                        &sSurface,
+                        pRect
+                    );
+                }
+                continue;
+            }
+
+            if(
+                Floppy144IsometricIsFloor(eElement) ||
+                uDepthCount>=FLOPPY144_ISO_SORT_MAX
+            )
+            {
+                continue;
+            }
+
+            auDepthRects[uDepthCount++]=(uint16_t)uIndex;
+        }
+
+        /*
+         * Sort freestanding furniture/partitions by floor depth. This is the
+         * visual Z-space which lets the same canonical player position pass
+         * behind or in front of an object without changing collision geometry.
+         */
+        for(uIndex=1U;uIndex<uDepthCount;++uIndex)
+        {
+            uint16_t uValue=auDepthRects[uIndex];
+            int32_t nValueDepth=
+                Floppy144IsometricRectDepth(
+                    Floppy144SiteRectAt((uint32_t)uValue)
+                );
+            uint32_t uInsert=uIndex;
+
+            while(uInsert>0U)
+            {
+                uint16_t uPrevious=auDepthRects[uInsert-1U];
+                int32_t nPreviousDepth=
+                    Floppy144IsometricRectDepth(
+                        Floppy144SiteRectAt(
+                            (uint32_t)uPrevious
+                        )
+                    );
+
+                if(nPreviousDepth<=nValueDepth)
+                {
+                    break;
+                }
+
+                auDepthRects[uInsert]=uPrevious;
+                --uInsert;
+            }
+
+            auDepthRects[uInsert]=uValue;
+        }
+
+        nPlayerDepth=
+            pRunState->player_site_x+
+            pRunState->player_site_y;
+
+        for(uIndex=0U;uIndex<uDepthCount;++uIndex)
+        {
+            const Floppy144SiteRect *pRect=
+                Floppy144SiteRectAt(
+                    (uint32_t)auDepthRects[uIndex]
+                );
+            int32_t nRectDepth=
+                Floppy144IsometricRectDepth(pRect);
+
+            if(!bPlayerDrawn&&nPlayerDepth<nRectDepth)
+            {
+                Floppy144IsometricDrawPlayer(
+                    &sSurface,
+                    pRunState
+                );
+                bPlayerDrawn=true;
+            }
+
+            Floppy144IsometricDrawRect(
+                &sSurface,
+                pRect
+            );
+        }
+
+        if(!bPlayerDrawn)
+        {
+            Floppy144IsometricDrawPlayer(
+                &sSurface,
+                pRunState
+            );
+        }
+    }
+
+    /* Mask and reassert the same camera/frame shell used by normal Site play. */
+    Floppy144DrawRect(
+        &sSurface,
+        FLOPPY144_ISO_VIEWPORT_X-1U,
+        FLOPPY144_ISO_VIEWPORT_Y-1U,
+        FLOPPY144_ISO_VIEWPORT_WIDTH+2U,
+        FLOPPY144_ISO_VIEWPORT_HEIGHT+2U,
+        uFrameEdge
+    );
+
+    Floppy144DrawText(
+        &sSurface,
+        36U,
+        300U,
+        pszRoomLabel,
+        1U,
+        pszNotice!=NULL ||
+        pszContextLabel!=NULL ||
+        !bRoomReconstructed
+            ? uAmber
+            : uMuted
+    );
+
+    Floppy144DrawFillRect(
+        &sSurface,
+        20U,
+        312U,
+        600U,
+        28U,
+        uBackground
+    );
+
+    Floppy144DrawRect(
+        &sSurface,
+        20U,
+        312U,
+        600U,
+        28U,
+        uFrameEdge
+    );
+
+    Floppy144DrawText(
+        &sSurface,
+        32U,
+        322U,
+        pszPrompt,
+        1U,
+        uText
+    );
+
+    Floppy144DrawText(
+        &sSurface,
+        526U,
+        322U,
+        "ESC RECOVERY",
+        1U,
+        uMuted
     );
 }
