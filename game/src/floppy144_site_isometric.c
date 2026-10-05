@@ -583,6 +583,291 @@ static void Floppy144IsometricDrawPrismAlphaX16(
     );
 }
 
+typedef enum Floppy144IsometricWallAttachment
+{
+    FLOPPY144_ISO_WALL_NONE=0,
+    FLOPPY144_ISO_WALL_LEFT,
+    FLOPPY144_ISO_WALL_RIGHT,
+    FLOPPY144_ISO_WALL_TOP,
+    FLOPPY144_ISO_WALL_BOTTOM
+}
+Floppy144IsometricWallAttachment;
+
+static bool Floppy144IsometricRangesOverlap(
+    int32_t a0,
+    int32_t a1,
+    int32_t b0,
+    int32_t b1
+)
+{
+    return a0<b1&&b0<a1;
+}
+
+/*
+ * Resolve the actual wall plane occupied by a wall-mounted item.
+ *
+ * The authored rectangle is the interaction/collision footprint. Presentation
+ * must instead anchor the shallow visual to the room-facing side of either an
+ * explicit partition or the room perimeter.
+ */
+static Floppy144IsometricWallAttachment
+Floppy144IsometricWallFixtureAttachment(
+    const Floppy144SiteRect *pRect,
+    const Floppy144DataRecord *pPlacement,
+    bool *pbPartitionMounted,
+    int32_t *pnWallPlane16
+)
+{
+    uint32_t uIndex;
+    uint32_t uCount;
+    bool bVertical;
+
+    if(pbPartitionMounted!=NULL)*pbPartitionMounted=false;
+    if(pnWallPlane16!=NULL)*pnWallPlane16=0;
+
+    if(pRect==NULL)return FLOPPY144_ISO_WALL_NONE;
+
+    bVertical=pRect->width<=pRect->height;
+    uCount=Floppy144SiteRectCount();
+
+    /* Explicit internal partitions take precedence over perimeter inference. */
+    for(uIndex=0U;uIndex<uCount;++uIndex)
+    {
+        const Floppy144SiteRect *pOther=
+            Floppy144SiteRectAt(uIndex);
+
+        if(
+            pOther==NULL ||
+            pOther==pRect ||
+            pOther->room!=pRect->room ||
+            pOther->type!=(uint8_t)FLOPPY144_SITE_PARTITION_WALL
+        )
+        {
+            continue;
+        }
+
+        if(
+            bVertical &&
+            pOther->width<=pOther->height &&
+            Floppy144IsometricRangesOverlap(
+                (int32_t)pRect->y,
+                (int32_t)pRect->y+(int32_t)pRect->height,
+                (int32_t)pOther->y,
+                (int32_t)pOther->y+(int32_t)pOther->height
+            )
+        )
+        {
+            if(
+                (int32_t)pOther->x+(int32_t)pOther->width==
+                (int32_t)pRect->x
+            )
+            {
+                if(pbPartitionMounted!=NULL)*pbPartitionMounted=true;
+                if(pnWallPlane16!=NULL)
+                    *pnWallPlane16=
+                        (
+                            (int32_t)pOther->x+
+                            (int32_t)pOther->width
+                        )*
+                        FLOPPY144_SITE_FIXED_ONE;
+                return FLOPPY144_ISO_WALL_LEFT;
+            }
+
+            if(
+                (int32_t)pRect->x+(int32_t)pRect->width==
+                (int32_t)pOther->x
+            )
+            {
+                if(pbPartitionMounted!=NULL)*pbPartitionMounted=true;
+                if(pnWallPlane16!=NULL)
+                    *pnWallPlane16=
+                        (int32_t)pOther->x*
+                        FLOPPY144_SITE_FIXED_ONE;
+                return FLOPPY144_ISO_WALL_RIGHT;
+            }
+
+            /*
+             * Reception's directory is authored inside the same 1U strip as
+             * its partition for targeting. It belongs on the east/right-facing
+             * side of that partition, so its visual starts at the partition's
+             * east plane and projects into Reception.
+             */
+            if(
+                pRect->x==pOther->x &&
+                pRect->width==pOther->width &&
+                pPlacement!=NULL &&
+                pPlacement->pszId!=NULL &&
+                strcmp(
+                    pPlacement->pszId,
+                    "RECEPTION_SITE_DIRECTORY"
+                )==0
+            )
+            {
+                if(pbPartitionMounted!=NULL)*pbPartitionMounted=true;
+                if(pnWallPlane16!=NULL)
+                    *pnWallPlane16=
+                        (
+                            (int32_t)pOther->x+
+                            (int32_t)pOther->width
+                        )*
+                        FLOPPY144_SITE_FIXED_ONE;
+                return FLOPPY144_ISO_WALL_LEFT;
+            }
+        }
+        else if(
+            !bVertical &&
+            pOther->width>pOther->height &&
+            Floppy144IsometricRangesOverlap(
+                (int32_t)pRect->x,
+                (int32_t)pRect->x+(int32_t)pRect->width,
+                (int32_t)pOther->x,
+                (int32_t)pOther->x+(int32_t)pOther->width
+            )
+        )
+        {
+            if(
+                (int32_t)pOther->y+(int32_t)pOther->height==
+                (int32_t)pRect->y
+            )
+            {
+                if(pbPartitionMounted!=NULL)*pbPartitionMounted=true;
+                if(pnWallPlane16!=NULL)
+                    *pnWallPlane16=
+                        (
+                            (int32_t)pOther->y+
+                            (int32_t)pOther->height
+                        )*
+                        FLOPPY144_SITE_FIXED_ONE;
+                return FLOPPY144_ISO_WALL_TOP;
+            }
+
+            if(
+                (int32_t)pRect->y+(int32_t)pRect->height==
+                (int32_t)pOther->y
+            )
+            {
+                if(pbPartitionMounted!=NULL)*pbPartitionMounted=true;
+                if(pnWallPlane16!=NULL)
+                    *pnWallPlane16=
+                        (int32_t)pOther->y*
+                        FLOPPY144_SITE_FIXED_ONE;
+                return FLOPPY144_ISO_WALL_BOTTOM;
+            }
+        }
+    }
+
+    /* Fall back to the active room's floor perimeter. */
+    for(uIndex=0U;uIndex<uCount;++uIndex)
+    {
+        const Floppy144SiteRect *pFloor=
+            Floppy144SiteRectAt(uIndex);
+        int32_t nFloorRight;
+        int32_t nFloorBottom;
+
+        if(
+            pFloor==NULL ||
+            pFloor->room!=pRect->room ||
+            !Floppy144IsometricIsFloor(
+                (Floppy144SiteElement)pFloor->type
+            )
+        )
+        {
+            continue;
+        }
+
+        nFloorRight=
+            (int32_t)pFloor->x+
+            (int32_t)pFloor->width;
+        nFloorBottom=
+            (int32_t)pFloor->y+
+            (int32_t)pFloor->height;
+
+        if(
+            bVertical &&
+            Floppy144IsometricRangesOverlap(
+                (int32_t)pRect->y,
+                (int32_t)pRect->y+(int32_t)pRect->height,
+                (int32_t)pFloor->y,
+                nFloorBottom
+            )
+        )
+        {
+            if(
+                (int32_t)pRect->x+(int32_t)pRect->width==
+                    (int32_t)pFloor->x ||
+                pRect->x==pFloor->x
+            )
+            {
+                if(pnWallPlane16!=NULL)
+                    *pnWallPlane16=
+                        (int32_t)pFloor->x*
+                        FLOPPY144_SITE_FIXED_ONE;
+                return FLOPPY144_ISO_WALL_LEFT;
+            }
+
+            if(
+                (int32_t)pRect->x==nFloorRight ||
+                (int32_t)pRect->x+(int32_t)pRect->width==
+                    nFloorRight
+            )
+            {
+                if(pnWallPlane16!=NULL)
+                    *pnWallPlane16=
+                        nFloorRight*
+                        FLOPPY144_SITE_FIXED_ONE;
+                return FLOPPY144_ISO_WALL_RIGHT;
+            }
+        }
+        else if(
+            !bVertical &&
+            Floppy144IsometricRangesOverlap(
+                (int32_t)pRect->x,
+                (int32_t)pRect->x+(int32_t)pRect->width,
+                (int32_t)pFloor->x,
+                nFloorRight
+            )
+        )
+        {
+            if(
+                (int32_t)pRect->y+(int32_t)pRect->height==
+                    (int32_t)pFloor->y ||
+                pRect->y==pFloor->y
+            )
+            {
+                if(pnWallPlane16!=NULL)
+                    *pnWallPlane16=
+                        (int32_t)pFloor->y*
+                        FLOPPY144_SITE_FIXED_ONE;
+                return FLOPPY144_ISO_WALL_TOP;
+            }
+
+            if(
+                (int32_t)pRect->y==nFloorBottom ||
+                (int32_t)pRect->y+(int32_t)pRect->height==
+                    nFloorBottom
+            )
+            {
+                if(pnWallPlane16!=NULL)
+                    *pnWallPlane16=
+                        nFloorBottom*
+                        FLOPPY144_SITE_FIXED_ONE;
+                return FLOPPY144_ISO_WALL_BOTTOM;
+            }
+        }
+    }
+
+    return FLOPPY144_ISO_WALL_NONE;
+}
+
+static bool Floppy144IsometricWallAttachmentIsNear(
+    Floppy144IsometricWallAttachment eAttachment
+)
+{
+    return
+        eAttachment==FLOPPY144_ISO_WALL_RIGHT ||
+        eAttachment==FLOPPY144_ISO_WALL_BOTTOM;
+}
+
 static void Floppy144IsometricDrawWallFixture(
     Floppy144Surface *pSurface,
     const Floppy144SiteRect *pRect,
