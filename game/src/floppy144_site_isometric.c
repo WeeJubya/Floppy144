@@ -1151,23 +1151,265 @@ static const char *Floppy144IsometricInteractionPrompt(
     return "ARROWS TO MOVE   N NOTEBOOK";
 }
 
-/*
- * Isometric view may show several reconstructed rooms at once, but boundary
- * geometry is still gated by its explicit endpoints. Internal doors/windows
- * appear only after both rooms exist in the reconstruction. Exterior
- * boundaries require only their interior room.
- */
-static bool Floppy144IsometricRectVisible(
-    const Floppy144RunState *pRunState,
-    const Floppy144SiteRect *pRect
+static bool Floppy144IsometricIsFloor(
+    Floppy144SiteElement eElement
 )
 {
     return
-        Floppy144SiteRectRuntimeVisible(
-            pRunState,
-            pRect
+        eElement>=FLOPPY144_SITE_FLOOR_A &&
+        eElement<=FLOPPY144_SITE_FLOOR_D;
+}
+
+static bool Floppy144IsometricRectVisibleInRoom(
+    const Floppy144RunState *pRunState,
+    Floppy144RoomId eRoom,
+    const Floppy144SiteRect *pRect
+)
+{
+    if(
+        pRect==NULL ||
+        !Floppy144SiteRectRuntimeVisible(pRunState,pRect)
+    )
+    {
+        return false;
+    }
+
+    if(pRect->from_room==pRect->to_room)
+    {
+        return pRect->room==(uint8_t)eRoom;
+    }
+
+    return
+        pRect->from_room==(uint8_t)eRoom ||
+        pRect->to_room==(uint8_t)eRoom;
+}
+
+static void Floppy144IsometricConfigureRoomProjection(
+    Floppy144RoomId eRoom
+)
+{
+    Floppy144SiteRegion sBounds;
+
+    g_nIsoOriginX=320;
+    g_nIsoOriginY=170;
+    g_nIsoHalfTileX=5;
+    g_nIsoHalfTileY=2;
+    g_nIsoHeightScale=3;
+
+    if(!Floppy144SiteRoomBounds(eRoom,&sBounds))
+    {
+        return;
+    }
+
+    g_nIsoCentreX16=
+        (
+            (int32_t)sBounds.x*FLOPPY144_SITE_FIXED_ONE+
+            (
+                (int32_t)sBounds.width*
+                FLOPPY144_SITE_FIXED_ONE
+            )/2
+        );
+
+    g_nIsoCentreY16=
+        (
+            (int32_t)sBounds.y*FLOPPY144_SITE_FIXED_ONE+
+            (
+                (int32_t)sBounds.height*
+                FLOPPY144_SITE_FIXED_ONE
+            )/2
         );
 }
+
+static bool Floppy144IsometricBoundaryIsNearCutaway(
+    Floppy144RoomId eRoom,
+    const Floppy144SiteRect *pRect
+)
+{
+    Floppy144SiteRegion sBounds;
+    int32_t nRoomRight;
+    int32_t nRoomBottom;
+    int32_t nRectRight;
+    int32_t nRectBottom;
+
+    if(pRect==NULL||!Floppy144SiteRoomBounds(eRoom,&sBounds))
+    {
+        return false;
+    }
+
+    nRoomRight=(int32_t)sBounds.x+(int32_t)sBounds.width;
+    nRoomBottom=(int32_t)sBounds.y+(int32_t)sBounds.height;
+    nRectRight=(int32_t)pRect->x+(int32_t)pRect->width;
+    nRectBottom=(int32_t)pRect->y+(int32_t)pRect->height;
+
+    /*
+     * With this projection, increasing X/Y moves toward the camera. Right and
+     * bottom perimeter planes are therefore the two cutaway walls.
+     */
+    return
+        nRectRight>=nRoomRight ||
+        nRectBottom>=nRoomBottom;
+}
+
+static bool Floppy144IsometricRoomOwnsCell(
+    Floppy144RoomId eRoom,
+    int32_t nX,
+    int32_t nY
+)
+{
+    return
+        nX>=0 &&
+        nY>=0 &&
+        nX<FLOPPY144_SITE_SIZE_UNITS &&
+        nY<FLOPPY144_SITE_SIZE_UNITS &&
+        Floppy144SiteRoomContainsCell(
+            eRoom,
+            (uint8_t)nX,
+            (uint8_t)nY
+        );
+}
+
+static void Floppy144IsometricDrawWallCell(
+    Floppy144Surface *pSurface,
+    int32_t nX,
+    int32_t nY
+)
+{
+    if(
+        pSurface==NULL ||
+        nX<0 ||
+        nY<0 ||
+        nX>=FLOPPY144_SITE_SIZE_UNITS ||
+        nY>=FLOPPY144_SITE_SIZE_UNITS
+    )
+    {
+        return;
+    }
+
+    Floppy144IsometricDrawPrismX16(
+        pSurface,
+        nX*FLOPPY144_SITE_FIXED_ONE,
+        nY*FLOPPY144_SITE_FIXED_ONE,
+        FLOPPY144_SITE_FIXED_ONE,
+        FLOPPY144_SITE_FIXED_ONE,
+        0,
+        FLOPPY144_SITE_WALL_HEIGHT_UNITS*
+            FLOPPY144_SITE_FIXED_ONE,
+        FLOPPY144_RGB(74,82,81)
+    );
+}
+
+/*
+ * Draw only the two perimeter planes furthest from the camera. The opposite
+ * pair is deliberately absent so the active room reads as a playable cutaway
+ * rather than a closed box.
+ */
+static void Floppy144IsometricDrawFarRoomWalls(
+    Floppy144Surface *pSurface,
+    Floppy144RoomId eRoom
+)
+{
+    uint32_t uIndex;
+    uint32_t uCount=Floppy144SiteRectCount();
+
+    for(uIndex=0U;uIndex<uCount;++uIndex)
+    {
+        const Floppy144SiteRect *pRect=Floppy144SiteRectAt(uIndex);
+        int32_t x,y,x0,y0,x1,y1;
+
+        if(
+            pRect==NULL ||
+            pRect->room!=(uint8_t)eRoom ||
+            !Floppy144IsometricIsFloor(
+                (Floppy144SiteElement)pRect->type
+            )
+        )
+        {
+            continue;
+        }
+
+        x0=(int32_t)pRect->x;
+        y0=(int32_t)pRect->y;
+        x1=x0+(int32_t)pRect->width;
+        y1=y0+(int32_t)pRect->height;
+
+        for(x=x0;x<x1;++x)
+        {
+            if(!Floppy144IsometricRoomOwnsCell(eRoom,x,y0-1))
+            {
+                Floppy144IsometricDrawWallCell(
+                    pSurface,
+                    x,
+                    y0-1
+                );
+            }
+        }
+
+        for(y=y0;y<y1;++y)
+        {
+            if(!Floppy144IsometricRoomOwnsCell(eRoom,x0-1,y))
+            {
+                Floppy144IsometricDrawWallCell(
+                    pSurface,
+                    x0-1,
+                    y
+                );
+            }
+        }
+
+        if(
+            !Floppy144IsometricRoomOwnsCell(eRoom,x0-1,y0) &&
+            !Floppy144IsometricRoomOwnsCell(eRoom,x0,y0-1) &&
+            !Floppy144IsometricRoomOwnsCell(eRoom,x0-1,y0-1)
+        )
+        {
+            Floppy144IsometricDrawWallCell(
+                pSurface,
+                x0-1,
+                y0-1
+            );
+        }
+    }
+}
+
+static int32_t Floppy144IsometricRectDepth(
+    const Floppy144SiteRect *pRect
+)
+{
+    if(pRect==NULL)return 0;
+
+    return
+        (
+            (
+                (int32_t)pRect->x*2+
+                (int32_t)pRect->width+
+                (int32_t)pRect->y*2+
+                (int32_t)pRect->height
+            )*
+            FLOPPY144_SITE_FIXED_ONE
+        )/2;
+}
+
+static void Floppy144IsometricDrawPlayer(
+    Floppy144Surface *pSurface,
+    const Floppy144RunState *pRunState
+)
+{
+    const int32_t nHalf=FLOPPY144_SITE_FIXED_ONE/2;
+
+    if(pSurface==NULL||pRunState==NULL)return;
+
+    Floppy144IsometricDrawPrismX16(
+        pSurface,
+        pRunState->player_site_x-nHalf,
+        pRunState->player_site_y-nHalf,
+        FLOPPY144_SITE_FIXED_ONE,
+        FLOPPY144_SITE_FIXED_ONE,
+        0,
+        5*FLOPPY144_SITE_FIXED_ONE,
+        FLOPPY144_RGB(100,156,111)
+    );
+}
+
 
 void Floppy144SiteIsometricDraw(
     F144Runtime *pRuntime,
