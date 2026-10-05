@@ -823,7 +823,7 @@ function Test-PhysicalItemPlayerFacingContract {
 
     if(
         $CabinetSource -notmatch 'Floppy144CabinetDrawChairBody' -or
-        $CabinetSource -notmatch 'Floppy144CabinetTypeContains\(pCabinet, "CHAIR"\)' -or
+        $CabinetSource -notmatch 'Floppy144CabinetTypeIs\(pCabinet,"CHAIR"\)' -or
         $CabinetSource -notmatch 'Floppy144CabinetVisibleContentLimit'
     ) {
         throw "Chair inspection has lost its dedicated chair silhouette or two-item runtime cap."
@@ -947,15 +947,15 @@ function Test-PhysicalItemPlayerFacingContract {
 
     if(
         $CabinetSource -notmatch
-            'Floppy144CabinetTypeContains\(pCabinet, "SHELVING_FULL"\)' -or
+            'Floppy144CabinetTypeIs\(pCabinet,"SHELVING_FULL"\)' -or
         $CabinetSource -notmatch
-            'const uint32_t auShelfY\[3\]' -or
+            'Floppy144CabinetContentMarkerRegion' -or
         $CabinetSource -notmatch
-            'Open industrial shelving is not a cupboard' -or
+            'Floppy144CabinetPhysicalItemRevealControlled' -or
         $CabinetSource -notmatch
-            'Floppy144CabinetPhysicalItemRevealControlled'
+            'Floppy144CabinetContentShuffleKey'
     ) {
-        throw "Shelving no longer has its own open-shelf marker/presentation and stable recovered-item ordering."
+        throw "Shelving no longer has its own open-shelf presentation, adaptive marker region, or seeded recovered-item ordering."
     }
 
     if(
