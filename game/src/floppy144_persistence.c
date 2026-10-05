@@ -691,11 +691,30 @@ bool Floppy144PersistenceEncodeProfile
     }
 
     /*
-     * The remaining V1 bytes stay zero and are reserved for future
-     * cumulative discovery fields.
+     * The final 12 V1 bytes were reserved from the outset. Stage 3C now uses
+     * them for the latest completed-recovery snapshot while preserving the
+     * same profile version and file size.
      */
+    Floppy144PersistenceWriteU32(
+        &payload[offset],
+        profile->latest_completion_evidence[0]
+    );
+    offset += 4U;
+
+    Floppy144PersistenceWriteU32(
+        &payload[offset],
+        profile->completed_recoveries
+    );
+    offset += 4U;
+
+    payload[offset++]=profile->latest_completion_evidence_percent;
+    payload[offset++]=profile->latest_completion_flags;
+
+    payload[offset++]=(uint8_t)(profile->latest_completion_recovered_kb&0xffU);
+    payload[offset++]=(uint8_t)((profile->latest_completion_recovered_kb>>8U)&0xffU);
+
     return
-    offset <=
+    offset ==
     FLOPPY144_PROFILE_PAYLOAD_V1_SIZE;
 }
 
@@ -1042,19 +1061,44 @@ bool Floppy144PersistenceDecodeProfile
     }
 
     /*
-     * The remainder of the V1 payload is reserved and must remain zero.
+     * Legacy V1 profiles contain zeroes in this formerly-reserved tail, which
+     * naturally decode as "no completed recovery yet".
      */
-    for(
-        ;
-    offset <
-    FLOPPY144_PROFILE_PAYLOAD_V1_SIZE;
-    ++offset
+    decoded.latest_completion_evidence[0]=
+        Floppy144PersistenceReadU32(&payload[offset]);
+    offset+=4U;
+
+    decoded.completed_recoveries=
+        Floppy144PersistenceReadU32(&payload[offset]);
+    offset+=4U;
+
+    decoded.latest_completion_evidence_percent=payload[offset++];
+    decoded.latest_completion_flags=payload[offset++];
+
+    decoded.latest_completion_recovered_kb=
+        (uint16_t)payload[offset] |
+        (uint16_t)((uint16_t)payload[offset+1U]<<8U);
+    offset+=2U;
+
+    if(
+        offset!=FLOPPY144_PROFILE_PAYLOAD_V1_SIZE ||
+        decoded.latest_completion_evidence_percent>100U ||
+        (decoded.latest_completion_flags &
+            (uint8_t)~(
+                FLOPPY144_PROFILE_COMPLETION_EVIDENCE_RESOLVED |
+                FLOPPY144_PROFILE_COMPLETION_CAPACITY_EXHAUSTED
+            ))!=0U ||
+        !Floppy144PersistenceWordArrayValid(
+            decoded.latest_completion_evidence,
+            (uint32_t)(
+                sizeof(decoded.latest_completion_evidence)/
+                sizeof(decoded.latest_completion_evidence[0])
+            ),
+            (uint32_t)FLOPPY144_EVIDENCE_COUNT
+        )
     )
     {
-        if(payload[offset] != 0U)
-        {
-            return false;
-        }
+        return false;
     }
 
     if(
