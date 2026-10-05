@@ -1614,19 +1614,81 @@ static void Floppy144IsometricDrawPlayer(
     const Floppy144RunState *pRunState
 )
 {
-    const int32_t nHalf=FLOPPY144_SITE_FIXED_ONE/2;
+    const uint32_t uBody=FLOPPY144_RGB(100,156,111);
+    const uint32_t uHead=FLOPPY144_RGB(176,170,148);
+    const int32_t q=FLOPPY144_SITE_FIXED_ONE/4;
+    const int32_t h=FLOPPY144_SITE_FIXED_ONE/2;
+    int32_t x,y;
 
     if(pSurface==NULL||pRunState==NULL)return;
 
+    x=pRunState->player_site_x;
+    y=pRunState->player_site_y;
+
+    /* Feet and separate legs establish a readable stance. */
+    Floppy144IsometricDrawPrismX16(
+        pSurface,x-h,y-h,q,h,0,q,uBody
+    );
+    Floppy144IsometricDrawPrismX16(
+        pSurface,x+q,y-h,q,h,0,q,uBody
+    );
+    Floppy144IsometricDrawPrismX16(
+        pSurface,x-h,y-q,q,q,
+        q,
+        2*FLOPPY144_SITE_FIXED_ONE,
+        uBody
+    );
+    Floppy144IsometricDrawPrismX16(
+        pSurface,x+q,y-q,q,q,
+        q,
+        2*FLOPPY144_SITE_FIXED_ONE,
+        uBody
+    );
+
+    /* Torso. */
     Floppy144IsometricDrawPrismX16(
         pSurface,
-        pRunState->player_site_x-nHalf,
-        pRunState->player_site_y-nHalf,
+        x-h,
+        y-h,
         FLOPPY144_SITE_FIXED_ONE,
         FLOPPY144_SITE_FIXED_ONE,
-        0,
+        2*FLOPPY144_SITE_FIXED_ONE,
+        4*FLOPPY144_SITE_FIXED_ONE,
+        uBody
+    );
+
+    /* Arms sit slightly proud of the torso. */
+    Floppy144IsometricDrawPrismX16(
+        pSurface,
+        x-h-q,
+        y-q,
+        q,
+        h,
+        2*FLOPPY144_SITE_FIXED_ONE,
+        4*FLOPPY144_SITE_FIXED_ONE,
+        uBody
+    );
+    Floppy144IsometricDrawPrismX16(
+        pSurface,
+        x+h,
+        y-q,
+        q,
+        h,
+        2*FLOPPY144_SITE_FIXED_ONE,
+        4*FLOPPY144_SITE_FIXED_ONE,
+        uBody
+    );
+
+    /* Head. */
+    Floppy144IsometricDrawPrismX16(
+        pSurface,
+        x-q,
+        y-q,
+        h,
+        h,
+        4*FLOPPY144_SITE_FIXED_ONE,
         5*FLOPPY144_SITE_FIXED_ONE,
-        FLOPPY144_RGB(100,156,111)
+        uHead
     );
 }
 
