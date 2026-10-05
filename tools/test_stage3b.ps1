@@ -927,13 +927,15 @@ function Test-PhysicalItemPlayerFacingContract {
         $CabinetSource -notmatch
             'Floppy144CabinetContentMarkerRegion' -or
         $CabinetSource -notmatch
-            'uRegionWidth > uRowWidth' -or
+            'uGridWidth=uColumns\*uMarkerWidth' -or
         $CabinetSource -notmatch
-            '\(uRegionWidth - uRowWidth\) / 2U' -or
+            'uGridHeight=uRows\*uMarkerHeight' -or
         $CabinetSource -notmatch
-            '\(uRegionHeight - uGroupHeight\) / 2U'
+            'uBaseX=uRegionX\+\(uRegionWidth>uGridWidth\?\(uRegionWidth-uGridWidth\)/2U:0U\)' -or
+        $CabinetSource -notmatch
+            'uBaseY=uRegionY\+\(uRegionHeight>uGridHeight\?\(uRegionHeight-uGridHeight\)/2U:0U\)'
     ) {
-        throw "Contents markers are no longer centred as a group inside the parent silhouette."
+        throw "Contents markers are no longer centred as an adaptive grid inside the parent silhouette."
     }
 
     if(
