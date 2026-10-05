@@ -167,6 +167,7 @@ uint32_t Floppy144RunStateRequiredTotalKb(void);
 uint32_t Floppy144RunStateRequiredRecoveredKb(const Floppy144RunState *pState);
 uint32_t Floppy144RunStateRequiredCoveragePercent(const Floppy144RunState *pState);
 bool Floppy144RunStateAnyUnrestoredCollectionFits(const Floppy144RunState *pState);
+bool Floppy144RunStateAvailableRecoveryCapacityExhausted(const Floppy144RunState *pState);
 bool Floppy144RunStateRecoveryExhausted(const Floppy144RunState *pState);
 
 /* Legacy display-name compatibility: now derived from KB. */
