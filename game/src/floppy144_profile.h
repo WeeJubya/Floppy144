@@ -48,6 +48,22 @@ typedef struct Floppy144DiscoveryProfile
             FLOPPY144_PROFILE_EVIDENCE_CAPACITY
         )
     ];
+
+    /*
+     * Most recent completed recovery, retained separately from cumulative
+     * discovery so future runs can compare one achieved version of the truth
+     * with another.
+     */
+    uint32_t latest_completion_evidence[
+        FLOPPY144_PROFILE_WORD_COUNT(
+            FLOPPY144_PROFILE_EVIDENCE_CAPACITY
+        )
+    ];
+
+    uint32_t completed_recoveries;
+    uint8_t latest_completion_evidence_percent;
+    uint8_t latest_completion_flags;
+    uint16_t latest_completion_recovered_kb;
 }
 Floppy144DiscoveryProfile;
 
@@ -101,4 +117,15 @@ bool Floppy144DiscoveryProfileRecordEvidence
 (
     Floppy144DiscoveryProfile *profile,
  Floppy144EvidenceId evidence
+);
+
+
+#define FLOPPY144_PROFILE_COMPLETION_EVIDENCE_RESOLVED 0x01U
+#define FLOPPY144_PROFILE_COMPLETION_CAPACITY_EXHAUSTED 0x02U
+
+bool Floppy144DiscoveryProfileRecordCompletion(
+    Floppy144DiscoveryProfile *profile,
+    const Floppy144RunState *run_state,
+    bool evidence_resolved,
+    bool capacity_exhausted
 );
