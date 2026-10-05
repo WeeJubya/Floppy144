@@ -191,6 +191,154 @@ static void Floppy144IsometricFillQuad(
 }
 
 /*
+ * FM-23 lighting model.
+ *
+ * The light source is above and to the north-west of the room. Top faces are
+ * therefore brightest, the +X face is mid-tone and the +Y face is darkest.
+ * Keeping this directional rule fixed makes furniture orientation readable
+ * without textures.
+ */
+static uint32_t Floppy144IsometricShadeColour(
+    uint32_t uColour,
+    uint32_t uPercent
+)
+{
+    uint32_t r=(uColour>>16)&0xffU;
+    uint32_t g=(uColour>>8)&0xffU;
+    uint32_t b=uColour&0xffU;
+
+    r=(r*uPercent)/100U;
+    g=(g*uPercent)/100U;
+    b=(b*uPercent)/100U;
+
+    if(r>255U)r=255U;
+    if(g>255U)g=255U;
+    if(b>255U)b=255U;
+
+    return FLOPPY144_RGB(r,g,b);
+}
+
+static void Floppy144IsometricBlendPixel(
+    Floppy144Surface *pSurface,
+    int32_t nX,
+    int32_t nY,
+    uint32_t uColour,
+    uint32_t uAlpha
+)
+{
+    uint32_t uDestination;
+    uint32_t sr,sg,sb,dr,dg,db;
+
+    if(
+        pSurface==NULL ||
+        pSurface->pixels==NULL ||
+        nX<FLOPPY144_ISO_VIEWPORT_X ||
+        nY<FLOPPY144_ISO_VIEWPORT_Y ||
+        nX>=FLOPPY144_ISO_VIEWPORT_X+FLOPPY144_ISO_VIEWPORT_WIDTH ||
+        nY>=FLOPPY144_ISO_VIEWPORT_Y+FLOPPY144_ISO_VIEWPORT_HEIGHT ||
+        (uint32_t)nX>=pSurface->width ||
+        (uint32_t)nY>=pSurface->height
+    )
+    {
+        return;
+    }
+
+    if(uAlpha>255U)uAlpha=255U;
+
+    uDestination=
+        pSurface->pixels[
+            (uint32_t)nY*pSurface->width+
+            (uint32_t)nX
+        ];
+
+    sr=(uColour>>16)&0xffU;
+    sg=(uColour>>8)&0xffU;
+    sb=uColour&0xffU;
+    dr=(uDestination>>16)&0xffU;
+    dg=(uDestination>>8)&0xffU;
+    db=uDestination&0xffU;
+
+    pSurface->pixels[
+        (uint32_t)nY*pSurface->width+
+        (uint32_t)nX
+    ]=
+        FLOPPY144_RGB(
+            (sr*uAlpha+dr*(255U-uAlpha))/255U,
+            (sg*uAlpha+dg*(255U-uAlpha))/255U,
+            (sb*uAlpha+db*(255U-uAlpha))/255U
+        );
+}
+
+static void Floppy144IsometricFillTriangleAlpha(
+    Floppy144Surface *pSurface,
+    int32_t ax,
+    int32_t ay,
+    int32_t bx,
+    int32_t by,
+    int32_t cx,
+    int32_t cy,
+    uint32_t uColour,
+    uint32_t uAlpha
+)
+{
+    int32_t x0=ax,x1=ax,y0=ay,y1=ay,x,y;
+
+    if(bx<x0)x0=bx;if(cx<x0)x0=cx;
+    if(bx>x1)x1=bx;if(cx>x1)x1=cx;
+    if(by<y0)y0=by;if(cy<y0)y0=cy;
+    if(by>y1)y1=by;if(cy>y1)y1=cy;
+
+    if(x0<FLOPPY144_ISO_VIEWPORT_X)x0=FLOPPY144_ISO_VIEWPORT_X;
+    if(y0<FLOPPY144_ISO_VIEWPORT_Y)y0=FLOPPY144_ISO_VIEWPORT_Y;
+    if(x1>=FLOPPY144_ISO_VIEWPORT_X+FLOPPY144_ISO_VIEWPORT_WIDTH)
+        x1=FLOPPY144_ISO_VIEWPORT_X+FLOPPY144_ISO_VIEWPORT_WIDTH-1;
+    if(y1>=FLOPPY144_ISO_VIEWPORT_Y+FLOPPY144_ISO_VIEWPORT_HEIGHT)
+        y1=FLOPPY144_ISO_VIEWPORT_Y+FLOPPY144_ISO_VIEWPORT_HEIGHT-1;
+
+    for(y=y0;y<=y1;++y)
+    {
+        for(x=x0;x<=x1;++x)
+        {
+            int64_t e0=Floppy144IsometricEdge(ax,ay,bx,by,x,y);
+            int64_t e1=Floppy144IsometricEdge(bx,by,cx,cy,x,y);
+            int64_t e2=Floppy144IsometricEdge(cx,cy,ax,ay,x,y);
+
+            if(
+                (e0>=0&&e1>=0&&e2>=0) ||
+                (e0<=0&&e1<=0&&e2<=0)
+            )
+            {
+                Floppy144IsometricBlendPixel(
+                    pSurface,x,y,uColour,uAlpha
+                );
+            }
+        }
+    }
+}
+
+static void Floppy144IsometricFillQuadAlpha(
+    Floppy144Surface *pSurface,
+    int32_t ax,
+    int32_t ay,
+    int32_t bx,
+    int32_t by,
+    int32_t cx,
+    int32_t cy,
+    int32_t dx,
+    int32_t dy,
+    uint32_t uColour,
+    uint32_t uAlpha
+)
+{
+    Floppy144IsometricFillTriangleAlpha(
+        pSurface,ax,ay,bx,by,cx,cy,uColour,uAlpha
+    );
+    Floppy144IsometricFillTriangleAlpha(
+        pSurface,ax,ay,cx,cy,dx,dy,uColour,uAlpha
+    );
+}
+
+/*
  * Stage 3C Task 12 presentation helpers.
  *
  * Half-unit fixture depth is represented in x16 fixed-point space. This keeps
