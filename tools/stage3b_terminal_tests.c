@@ -2622,8 +2622,35 @@ static void Floppy144TestAvailableRecoveryAndAutomaticCompletion(void)
     F144_CHECK(
         eFm18<FLOPPY144_COLLECTION_COUNT &&
         !Floppy144RunStateCollectionAvailable(&sRunState,eFm18) &&
-        !Floppy144RunStateAnyUnrestoredCollectionFits(&sRunState),
-        "locked dependency collections do not count as currently restorable disk data"
+        !Floppy144RunStateAnyUnrestoredCollectionFits(&sRunState) &&
+        !Floppy144RunStateAvailableRecoveryCapacityExhausted(&sRunState),
+        "locked dependency collections do not count as exhausted available recovery capacity"
+    );
+
+    /*
+     * Conversely, an actually available collection which cannot fit must
+     * trip the terminal-exit completion condition.
+     */
+    Floppy144RunStateBegin(&sRunState,144U);
+    for(uCollection=1U;uCollection<(uint32_t)FLOPPY144_COLLECTION_COUNT;++uCollection)
+    {
+        (void)Floppy144RunStateBitSet(
+            sRunState.collections,
+            uCollection
+        );
+    }
+
+    F144_CHECK(
+        Floppy144RunStateCollectionAvailable(
+            &sRunState,
+            FLOPPY144_COLLECTION_DR01
+        ) &&
+        !Floppy144RunStateCanRestoreCollection(
+            &sRunState,
+            FLOPPY144_COLLECTION_DR01
+        ) &&
+        Floppy144RunStateAvailableRecoveryCapacityExhausted(&sRunState),
+        "available collection larger than remaining capacity triggers exhaustion"
     );
 
     Floppy144RunStateBegin(&sRunState,144U);
@@ -2639,8 +2666,9 @@ static void Floppy144TestAvailableRecoveryAndAutomaticCompletion(void)
     F144_CHECK(
         Floppy144RunStateInteractionCompleted(&sRunState,eI034) &&
         Floppy144RunStateEvidenceEstablished(&sRunState,eE023) &&
+        Floppy144GameDataEvidenceResolved(&sRunState) &&
         Floppy144RunStateAct(&sRunState)==FLOPPY144_RUN_ACT_COMPLETE,
-        "E-020/E-021/E-022 automatically synthesise E-023 and complete the recovery"
+        "E-020/E-021/E-022 automatically synthesise resolved E-023 and complete the recovery"
     );
 }
 
