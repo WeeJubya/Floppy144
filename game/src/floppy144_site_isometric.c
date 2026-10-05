@@ -35,9 +35,9 @@ static int32_t g_nIsoOriginX=320;
 static int32_t g_nIsoOriginY=170;
 static int32_t g_nIsoCentreX16=0;
 static int32_t g_nIsoCentreY16=0;
-static int32_t g_nIsoHalfTileX=5;
-static int32_t g_nIsoHalfTileY=2;
-static int32_t g_nIsoHeightScale=3;
+static int32_t g_nIsoHalfTileX=10;
+static int32_t g_nIsoHalfTileY=4;
+static int32_t g_nIsoHeightScale=6;
 
 /*
  * Write one clipped pixel. A private line primitive keeps this projection
@@ -1405,16 +1405,38 @@ static bool Floppy144IsometricRectVisibleInRoom(
 }
 
 static void Floppy144IsometricConfigureRoomProjection(
-    Floppy144RoomId eRoom
+    Floppy144RoomId eRoom,
+    const Floppy144RunState *pRunState
 )
 {
     Floppy144SiteRegion sBounds;
 
-    g_nIsoOriginX=320;
-    g_nIsoOriginY=170;
-    g_nIsoHalfTileX=5;
-    g_nIsoHalfTileY=2;
-    g_nIsoHeightScale=3;
+    /*
+     * FM-23 now uses the same camera philosophy as normal Site exploration:
+     * zoom into the active room and follow the player's canonical foot point.
+     * Pixel writes remain clipped to the fixed 576x252 camera window.
+     */
+    g_nIsoOriginX=
+        FLOPPY144_ISO_VIEWPORT_X+
+        FLOPPY144_ISO_VIEWPORT_WIDTH/2;
+    g_nIsoOriginY=
+        FLOPPY144_ISO_VIEWPORT_Y+
+        FLOPPY144_ISO_VIEWPORT_HEIGHT/2+
+        12;
+
+    g_nIsoHalfTileX=10;
+    g_nIsoHalfTileY=4;
+    g_nIsoHeightScale=6;
+
+    if(
+        pRunState!=NULL &&
+        Floppy144SiteRoomBounds(eRoom,&sBounds)
+    )
+    {
+        g_nIsoCentreX16=pRunState->player_site_x;
+        g_nIsoCentreY16=pRunState->player_site_y;
+        return;
+    }
 
     if(!Floppy144SiteRoomBounds(eRoom,&sBounds))
     {
@@ -1422,22 +1444,18 @@ static void Floppy144IsometricConfigureRoomProjection(
     }
 
     g_nIsoCentreX16=
+        (int32_t)sBounds.x*FLOPPY144_SITE_FIXED_ONE+
         (
-            (int32_t)sBounds.x*FLOPPY144_SITE_FIXED_ONE+
-            (
-                (int32_t)sBounds.width*
-                FLOPPY144_SITE_FIXED_ONE
-            )/2
-        );
+            (int32_t)sBounds.width*
+            FLOPPY144_SITE_FIXED_ONE
+        )/2;
 
     g_nIsoCentreY16=
+        (int32_t)sBounds.y*FLOPPY144_SITE_FIXED_ONE+
         (
-            (int32_t)sBounds.y*FLOPPY144_SITE_FIXED_ONE+
-            (
-                (int32_t)sBounds.height*
-                FLOPPY144_SITE_FIXED_ONE
-            )/2
-        );
+            (int32_t)sBounds.height*
+            FLOPPY144_SITE_FIXED_ONE
+        )/2;
 }
 
 static bool Floppy144IsometricBoundaryIsNearCutaway(
@@ -1963,7 +1981,10 @@ void Floppy144SiteIsometricDraw(
 
     if(bRoomReconstructed)
     {
-        Floppy144IsometricConfigureRoomProjection(eActiveRoom);
+        Floppy144IsometricConfigureRoomProjection(
+            eActiveRoom,
+            pRunState
+        );
         uRectCount=Floppy144SiteRectCount();
 
         /*
