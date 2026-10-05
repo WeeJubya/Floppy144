@@ -29,7 +29,7 @@ FLOPPY144_COLLECTION(
 
 FLOPPY144_COLLECTION(
     DR07, "DR-07", "Archive Holdings & Reconciliation",
-    FLOPPY144_COLLECTION_DOMAIN_DR, 86U, false,
+    FLOPPY144_COLLECTION_DOMAIN_DR, 101U, false,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 24U, "Archive Holdings & Reconciliation", "DR-07-RS",
     floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 79U
 )
@@ -43,14 +43,14 @@ FLOPPY144_COLLECTION(
 
 FLOPPY144_COLLECTION(
     DR29, "DR-29", "Archive Transfer & Custody",
-    FLOPPY144_COLLECTION_DOMAIN_DR, 86U, false,
+    FLOPPY144_COLLECTION_DOMAIN_DR, 101U, false,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 20U, "Archive Transfer & Custody", "DR-29-RS",
     floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 113U
 )
 
 FLOPPY144_COLLECTION(
     DR31, "DR-31", "Archive Transfer Authorisation & Exceptions",
-    FLOPPY144_COLLECTION_DOMAIN_DR, 86U, false,
+    FLOPPY144_COLLECTION_DOMAIN_DR, 101U, false,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 18U, "Archive Transfer Authorisation & Exceptions", "DR-31-RS",
     floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 130U
 )
@@ -71,7 +71,7 @@ FLOPPY144_COLLECTION(
 
 FLOPPY144_COLLECTION(
     HR01, "HR-01", "Site Establishment",
-    FLOPPY144_COLLECTION_DOMAIN_HR, 86U, false,
+    FLOPPY144_COLLECTION_DOMAIN_HR, 101U, false,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 18U, "Site Establishment", "HR-01-RS",
     floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 181U
 )
@@ -120,21 +120,21 @@ FLOPPY144_COLLECTION(
 
 FLOPPY144_COLLECTION(
     FM07, "FM-07", "Asset Management & Decommissioning",
-    FLOPPY144_COLLECTION_DOMAIN_FM, 86U, false,
+    FLOPPY144_COLLECTION_DOMAIN_FM, 101U, false,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 20U, "Asset Management & Decommissioning", "FM-07-RS",
     floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 300U
 )
 
 FLOPPY144_COLLECTION(
     FM13, "FM-13", "Site Safety & Suppression Systems",
-    FLOPPY144_COLLECTION_DOMAIN_FM, 86U, false,
+    FLOPPY144_COLLECTION_DOMAIN_FM, 101U, false,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 22U, "Site Safety & Suppression Systems", "FM-13-RS",
     floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 317U
 )
 
 FLOPPY144_COLLECTION(
     FM18, "FM-18", "Environmental Monitoring & Plant Logs",
-    FLOPPY144_COLLECTION_DOMAIN_FM, 86U, false,
+    FLOPPY144_COLLECTION_DOMAIN_FM, 115U, false,
     "DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.", NULL, 18U, "Environmental Monitoring & Plant Logs", "FM-18-RS",
     floppy144_generated_generic_subjects, 12U, false, 0U, 37U, 334U
 )
