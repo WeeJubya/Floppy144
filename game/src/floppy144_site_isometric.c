@@ -2342,10 +2342,39 @@ void Floppy144SiteIsometricDraw(
 
             if(eElement==FLOPPY144_SITE_WALL_MOUNTED_ITEM)
             {
-                Floppy144IsometricDrawRect(
-                    &sSurface,
-                    pRect
-                );
+                const Floppy144DataRecord *pPlacement=
+                    Floppy144IsometricPlacementForRect(pRect);
+                bool bPartitionMounted=false;
+                int32_t nWallPlane16=0;
+                Floppy144IsometricWallAttachment eAttachment=
+                    Floppy144IsometricWallFixtureAttachment(
+                        pRect,
+                        pPlacement,
+                        &bPartitionMounted,
+                        &nWallPlane16
+                    );
+
+                (void)nWallPlane16;
+
+                if(bPartitionMounted)
+                {
+                    if(uDepthCount<FLOPPY144_ISO_SORT_MAX)
+                    {
+                        auDepthRects[uDepthCount++]=(uint16_t)uIndex;
+                    }
+                }
+                else if(
+                    !Floppy144IsometricWallAttachmentIsNear(
+                        eAttachment
+                    )
+                )
+                {
+                    Floppy144IsometricDrawRect(
+                        &sSurface,
+                        pRect
+                    );
+                }
+
                 continue;
             }
 
@@ -2438,10 +2467,25 @@ void Floppy144SiteIsometricDraw(
                 bPlayerDrawn=true;
             }
 
-            Floppy144IsometricDrawRect(
-                &sSurface,
-                pRect
-            );
+            if(
+                pRect!=NULL &&
+                pRect->type==
+                    (uint8_t)FLOPPY144_SITE_PARTITION_WALL
+            )
+            {
+                Floppy144IsometricDrawBoundaryAlpha(
+                    &sSurface,
+                    pRect,
+                    64U
+                );
+            }
+            else
+            {
+                Floppy144IsometricDrawRect(
+                    &sSurface,
+                    pRect
+                );
+            }
         }
 
         if(!bPlayerDrawn)
@@ -2498,6 +2542,37 @@ void Floppy144SiteIsometricDraw(
                     pRect,
                     38U
                 );
+            }
+            else if(
+                eElement==FLOPPY144_SITE_WALL_MOUNTED_ITEM
+            )
+            {
+                const Floppy144DataRecord *pPlacement=
+                    Floppy144IsometricPlacementForRect(pRect);
+                bool bPartitionMounted=false;
+                int32_t nWallPlane16=0;
+                Floppy144IsometricWallAttachment eAttachment=
+                    Floppy144IsometricWallFixtureAttachment(
+                        pRect,
+                        pPlacement,
+                        &bPartitionMounted,
+                        &nWallPlane16
+                    );
+
+                (void)nWallPlane16;
+
+                if(
+                    !bPartitionMounted &&
+                    Floppy144IsometricWallAttachmentIsNear(
+                        eAttachment
+                    )
+                )
+                {
+                    Floppy144IsometricDrawRect(
+                        &sSurface,
+                        pRect
+                    );
+                }
             }
         }
     }
