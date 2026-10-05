@@ -561,6 +561,31 @@ function Test-Stage3B5CoordinatorWiring {
         }
     }
 
+    foreach($RequiredIsoToken in @(
+        'Floppy144IsometricRectVisibleInRoom',
+        'Floppy144IsometricConfigureRoomProjection',
+        'Floppy144IsometricDrawFarRoomWalls',
+        'Floppy144IsometricBoundaryIsNearCutaway',
+        'Floppy144IsometricRectDepth',
+        'nPlayerDepth',
+        'Floppy144IsometricFillQuad'
+    )) {
+        if($SiteIsoSource -notmatch [regex]::Escape($RequiredIsoToken)) {
+            throw "FM-23 isometric room-play contract is missing: $RequiredIsoToken"
+        }
+    }
+
+    if(
+        $SiteIsoSource -notmatch
+            'Right and\s*bottom perimeter planes are therefore the two cutaway walls' -or
+        $SiteIsoSource -notmatch
+            'pRect->room==\(uint8_t\)eRoom' -or
+        $SiteIsoSource -notmatch
+            'nPlayerDepth<nRectDepth'
+    ) {
+        throw "FM-23 no longer preserves active-room visibility, cutaway walls, and player/furniture depth ordering."
+    }
+
     if(
         $MainSource -notmatch 'FLOPPY144_SITE_ACTION_INSPECT' -or
         $MainSource -notmatch 'Floppy144SiteAvailableActions'
