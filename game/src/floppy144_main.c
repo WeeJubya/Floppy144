@@ -372,12 +372,9 @@ static void Floppy144EvidenceCompleteDraw(F144Runtime *pRuntime)
         }
     }
 
-    if(FLOPPY144_EVIDENCE_COUNT>0)
-    {
-        uEvidencePercent=
-            (uRecoveredEvidence*100U)/
-            (uint32_t)FLOPPY144_EVIDENCE_COUNT;
-    }
+    uEvidencePercent=
+        (uRecoveredEvidence*100U)/
+        (uint32_t)FLOPPY144_EVIDENCE_COUNT;
 
     (void)snprintf(
         szEvidencePercent,
