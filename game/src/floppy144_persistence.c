@@ -1084,10 +1084,10 @@ bool Floppy144PersistenceDecodeProfile
         offset!=FLOPPY144_PROFILE_PAYLOAD_V1_SIZE ||
         decoded.latest_completion_evidence_percent>100U ||
         (decoded.latest_completion_flags &
-            (uint8_t)~(
+            (uint8_t)(
                 FLOPPY144_PROFILE_COMPLETION_EVIDENCE_RESOLVED |
                 FLOPPY144_PROFILE_COMPLETION_CAPACITY_EXHAUSTED
-            ))!=0U ||
+            ))!=decoded.latest_completion_flags ||
         !Floppy144PersistenceWordArrayValid(
             decoded.latest_completion_evidence,
             (uint32_t)(
