@@ -955,9 +955,13 @@ function Test-PhysicalItemPlayerFacingContract {
         $CabinetSource -notmatch
             'Floppy144CabinetPhysicalItemRevealControlled' -or
         $CabinetSource -notmatch
-            'Floppy144CabinetContentShuffleKey'
+            'Floppy144CabinetContentShuffleKey' -or
+        $CabinetSource -notmatch
+            'auShelfY\[4\]=\{130U,184U,238U,292U\}' -or
+        $CabinetSource -notmatch
+            'uY=\s*auShelfY\[uShelf\]-\s*uShelfMarkerHeight'
     ) {
-        throw "Shelving no longer has its own open-shelf presentation, adaptive marker region, or seeded recovered-item ordering."
+        throw "Shelving no longer has its own open-shelf presentation, seeded ordering, or PI markers resting on authored shelf surfaces."
     }
 
     if(
