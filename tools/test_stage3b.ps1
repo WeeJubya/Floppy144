@@ -577,7 +577,7 @@ function Test-Stage3B5CoordinatorWiring {
 
     if(
         $SiteIsoSource -notmatch
-            'Right and\s*bottom perimeter planes are therefore the two cutaway walls' -or
+            'nRectRight>=nRoomRight\s*\|\|\s*nRectBottom>=nRoomBottom' -or
         $SiteIsoSource -notmatch
             'pRect->room==\(uint8_t\)eRoom' -or
         $SiteIsoSource -notmatch
