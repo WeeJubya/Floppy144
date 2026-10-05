@@ -1995,8 +1995,8 @@ void Floppy144SiteIsometricDraw(
         }
 
         /*
-         * Z1: far room shell. Right/bottom walls are the camera-side cutaway
-         * and intentionally absent.
+         * Z1: opaque far room shell. Right/bottom walls are the camera-side
+         * cutaway and are composited later at 15% opacity.
          */
         Floppy144IsometricDrawFarRoomWalls(
             &sSurface,
@@ -2138,6 +2138,55 @@ void Floppy144SiteIsometricDraw(
                 &sSurface,
                 pRunState
             );
+        }
+
+        /*
+         * Z3: translucent near enclosure. The wall itself is 15% opaque and
+         * near-side doors/windows use the same alpha so they remain legible
+         * without hiding the playable room behind them.
+         */
+        Floppy144IsometricDrawNearRoomWalls(
+            &sSurface,
+            eActiveRoom
+        );
+
+        for(uIndex=0U;uIndex<uRectCount;++uIndex)
+        {
+            const Floppy144SiteRect *pRect=
+                Floppy144SiteRectAt(uIndex);
+            Floppy144SiteElement eElement;
+
+            if(
+                pRect==NULL ||
+                !Floppy144IsometricRectVisibleInRoom(
+                    pRunState,
+                    eActiveRoom,
+                    pRect
+                )
+            )
+            {
+                continue;
+            }
+
+            eElement=(Floppy144SiteElement)pRect->type;
+
+            if(
+                (
+                    eElement==FLOPPY144_SITE_DOOR ||
+                    eElement==FLOPPY144_SITE_WINDOW
+                ) &&
+                Floppy144IsometricBoundaryIsNearCutaway(
+                    eActiveRoom,
+                    pRect
+                )
+            )
+            {
+                Floppy144IsometricDrawBoundaryAlpha(
+                    &sSurface,
+                    pRect,
+                    38U
+                );
+            }
         }
     }
 
