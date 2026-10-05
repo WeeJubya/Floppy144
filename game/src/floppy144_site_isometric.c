@@ -1021,96 +1021,64 @@ static void Floppy144IsometricDrawRect(
 )
 {
     const Floppy144DataRecord *pPlacement;
-
-    int32_t nX0;
-    int32_t nY0;
-    int32_t nX1;
-    int32_t nY1;
-    int32_t nX2;
-    int32_t nY2;
-    int32_t nX3;
-    int32_t nY3;
-    int32_t nTopX0;
-    int32_t nTopY0;
-    int32_t nTopX1;
-    int32_t nTopY1;
-    int32_t nTopX2;
-    int32_t nTopY2;
-    int32_t nTopX3;
-    int32_t nTopY3;
+    Floppy144SiteElement eElement;
     int32_t nHeight;
     uint32_t uColour;
-    Floppy144SiteElement eElement;
 
-    if(pSurface == NULL || pRect == NULL)
-    {
-        return;
-    }
+    if(pSurface==NULL||pRect==NULL)return;
 
-    eElement = (Floppy144SiteElement)pRect->type;
-    nHeight = Floppy144IsometricElementHeight(eElement);
-    uColour = Floppy144IsometricElementColour(eElement);
+    eElement=(Floppy144SiteElement)pRect->type;
+    nHeight=Floppy144IsometricElementHeight(eElement);
+    uColour=Floppy144IsometricElementColour(eElement);
+    pPlacement=Floppy144IsometricPlacementForRect(pRect);
 
-    pPlacement =
-        Floppy144IsometricPlacementForRect(pRect);
-
-    if(eElement == FLOPPY144_SITE_WALL_MOUNTED_ITEM)
+    if(eElement==FLOPPY144_SITE_WALL_MOUNTED_ITEM)
     {
         Floppy144IsometricDrawWallFixture(
             pSurface,
             pRect,
             pPlacement
         );
-
         return;
     }
 
     if(
-        eElement == FLOPPY144_SITE_SINK &&
-        pRect->room == (uint8_t)FLOPPY144_ROOM_STAFF_ROOM
+        eElement==FLOPPY144_SITE_SINK &&
+        pRect->room==(uint8_t)FLOPPY144_ROOM_STAFF_ROOM
     )
     {
-        Floppy144IsometricDrawSink(
+        /*
+         * The sink owns its worktop-sized base, then adds the recessed bowl
+         * and tap detail over the filled body.
+         */
+        Floppy144IsometricDrawPrismX16(
             pSurface,
-            pRect
+            (int32_t)pRect->x*FLOPPY144_SITE_FIXED_ONE,
+            (int32_t)pRect->y*FLOPPY144_SITE_FIXED_ONE,
+            (int32_t)pRect->width*FLOPPY144_SITE_FIXED_ONE,
+            (int32_t)pRect->height*FLOPPY144_SITE_FIXED_ONE,
+            0,
+            4*FLOPPY144_SITE_FIXED_ONE,
+            uColour
         );
-
+        Floppy144IsometricDrawSink(pSurface,pRect);
         return;
     }
 
-    Floppy144IsometricProject(pRect->x, pRect->y, 0, &nX0, &nY0);
-    Floppy144IsometricProject(pRect->x + pRect->width, pRect->y, 0, &nX1, &nY1);
-    Floppy144IsometricProject(pRect->x + pRect->width, pRect->y + pRect->height, 0, &nX2, &nY2);
-    Floppy144IsometricProject(pRect->x, pRect->y + pRect->height, 0, &nX3, &nY3);
-
-    Floppy144IsometricLine(pSurface, nX0, nY0, nX1, nY1, uColour);
-    Floppy144IsometricLine(pSurface, nX1, nY1, nX2, nY2, uColour);
-    Floppy144IsometricLine(pSurface, nX2, nY2, nX3, nY3, uColour);
-    Floppy144IsometricLine(pSurface, nX3, nY3, nX0, nY0, uColour);
-
-    if(nHeight <= 0)
-    {
-        return;
-    }
-
-    Floppy144IsometricProject(pRect->x, pRect->y, nHeight, &nTopX0, &nTopY0);
-    Floppy144IsometricProject(pRect->x + pRect->width, pRect->y, nHeight, &nTopX1, &nTopY1);
-    Floppy144IsometricProject(pRect->x + pRect->width, pRect->y + pRect->height, nHeight, &nTopX2, &nTopY2);
-    Floppy144IsometricProject(pRect->x, pRect->y + pRect->height, nHeight, &nTopX3, &nTopY3);
-
-    Floppy144IsometricLine(pSurface, nTopX0, nTopY0, nTopX1, nTopY1, uColour);
-    Floppy144IsometricLine(pSurface, nTopX1, nTopY1, nTopX2, nTopY2, uColour);
-    Floppy144IsometricLine(pSurface, nTopX2, nTopY2, nTopX3, nTopY3, uColour);
-    Floppy144IsometricLine(pSurface, nTopX3, nTopY3, nTopX0, nTopY0, uColour);
-
-    Floppy144IsometricLine(pSurface, nX0, nY0, nTopX0, nTopY0, uColour);
-    Floppy144IsometricLine(pSurface, nX1, nY1, nTopX1, nTopY1, uColour);
-    Floppy144IsometricLine(pSurface, nX2, nY2, nTopX2, nTopY2, uColour);
-    Floppy144IsometricLine(pSurface, nX3, nY3, nTopX3, nTopY3, uColour);
+    Floppy144IsometricDrawPrismX16(
+        pSurface,
+        (int32_t)pRect->x*FLOPPY144_SITE_FIXED_ONE,
+        (int32_t)pRect->y*FLOPPY144_SITE_FIXED_ONE,
+        (int32_t)pRect->width*FLOPPY144_SITE_FIXED_ONE,
+        (int32_t)pRect->height*FLOPPY144_SITE_FIXED_ONE,
+        0,
+        nHeight*FLOPPY144_SITE_FIXED_ONE,
+        uColour
+    );
 
     if(
-        eElement == FLOPPY144_SITE_BOOKCASE ||
-        eElement == FLOPPY144_SITE_SHELVING_FULL
+        eElement==FLOPPY144_SITE_BOOKCASE ||
+        eElement==FLOPPY144_SITE_SHELVING_FULL
     )
     {
         Floppy144IsometricDrawShelfClutter(
