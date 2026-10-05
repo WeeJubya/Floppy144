@@ -39,7 +39,7 @@
     "drawing_definitions": 24,
     "colours": 44,
     "budgeted_reconstruction_pool_percent": 150,
-    "registered_reconstruction_weight_percent": 165
+    "registered_reconstruction_weight_percent": 173
   },
   "site_layout_source": {
     "schema_version": 1,
