@@ -463,7 +463,11 @@ bool Floppy144RunStateAnyUnrestoredCollectionFits(const Floppy144RunState *pStat
     for(uIndex=0U;uIndex<(uint32_t)FLOPPY144_COLLECTION_COUNT;++uIndex)
     {
         Floppy144CollectionId e=(Floppy144CollectionId)uIndex;
-        if(!Floppy144RunStateCollectionRestored(pState,e)&&Floppy144RunStateCanRestoreCollection(pState,e))return true;
+        if(
+            !Floppy144RunStateCollectionRestored(pState,e) &&
+            Floppy144RunStateCollectionAvailable(pState,e) &&
+            Floppy144RunStateCanRestoreCollection(pState,e)
+        )return true;
     }
     return false;
 }
