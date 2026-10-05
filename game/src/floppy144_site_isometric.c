@@ -583,6 +583,10 @@ static void Floppy144IsometricDrawPrismAlphaX16(
     );
 }
 
+static bool Floppy144IsometricIsFloor(
+    Floppy144SiteElement eElement
+);
+
 typedef enum Floppy144IsometricWallAttachment
 {
     FLOPPY144_ISO_WALL_NONE=0,
