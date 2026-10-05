@@ -479,102 +479,108 @@ static void Floppy144IsometricDrawPrismX16(
     uint32_t uColour
 )
 {
-    const uint32_t uEdge=FLOPPY144_RGB(43,51,50);
+    const uint32_t uTop=
+        Floppy144IsometricShadeColour(uColour,118U);
+    const uint32_t uFaceX=
+        Floppy144IsometricShadeColour(uColour,92U);
+    const uint32_t uFaceY=
+        Floppy144IsometricShadeColour(uColour,72U);
+    const uint32_t uEdge=
+        Floppy144IsometricShadeColour(uColour,42U);
     int32_t ax, ay, bx, by, cx, cy, dx, dy;
     int32_t atx, aty, btx, bty, ctx, cty, dtx, dty;
 
-    Floppy144IsometricProjectX16(
-        nX16,
-        nY16,
-        nBaseHeight16,
-        &ax,
-        &ay
-    );
-    Floppy144IsometricProjectX16(
-        nX16 + nWidth16,
-        nY16,
-        nBaseHeight16,
-        &bx,
-        &by
-    );
-    Floppy144IsometricProjectX16(
-        nX16 + nWidth16,
-        nY16 + nDepth16,
-        nBaseHeight16,
-        &cx,
-        &cy
-    );
-    Floppy144IsometricProjectX16(
-        nX16,
-        nY16 + nDepth16,
-        nBaseHeight16,
-        &dx,
-        &dy
-    );
+    Floppy144IsometricProjectX16(nX16,nY16,nBaseHeight16,&ax,&ay);
+    Floppy144IsometricProjectX16(nX16+nWidth16,nY16,nBaseHeight16,&bx,&by);
+    Floppy144IsometricProjectX16(nX16+nWidth16,nY16+nDepth16,nBaseHeight16,&cx,&cy);
+    Floppy144IsometricProjectX16(nX16,nY16+nDepth16,nBaseHeight16,&dx,&dy);
 
-    Floppy144IsometricProjectX16(
-        nX16,
-        nY16,
-        nTopHeight16,
-        &atx,
-        &aty
-    );
-    Floppy144IsometricProjectX16(
-        nX16 + nWidth16,
-        nY16,
-        nTopHeight16,
-        &btx,
-        &bty
-    );
-    Floppy144IsometricProjectX16(
-        nX16 + nWidth16,
-        nY16 + nDepth16,
-        nTopHeight16,
-        &ctx,
-        &cty
-    );
-    Floppy144IsometricProjectX16(
-        nX16,
-        nY16 + nDepth16,
-        nTopHeight16,
-        &dtx,
-        &dty
-    );
+    Floppy144IsometricProjectX16(nX16,nY16,nTopHeight16,&atx,&aty);
+    Floppy144IsometricProjectX16(nX16+nWidth16,nY16,nTopHeight16,&btx,&bty);
+    Floppy144IsometricProjectX16(nX16+nWidth16,nY16+nDepth16,nTopHeight16,&ctx,&cty);
+    Floppy144IsometricProjectX16(nX16,nY16+nDepth16,nTopHeight16,&dtx,&dty);
 
     if(nTopHeight16<=nBaseHeight16)
     {
         Floppy144IsometricFillQuad(
-            pSurface,ax,ay,bx,by,cx,cy,dx,dy,uColour
+            pSurface,ax,ay,bx,by,cx,cy,dx,dy,uTop
         );
-    }
-    else
-    {
-        /* Top plus the two faces visible from the cutaway camera. */
-        Floppy144IsometricFillQuad(
-            pSurface,atx,aty,btx,bty,ctx,cty,dtx,dty,uColour
-        );
-        Floppy144IsometricFillQuad(
-            pSurface,bx,by,cx,cy,ctx,cty,btx,bty,uColour
-        );
-        Floppy144IsometricFillQuad(
-            pSurface,cx,cy,dx,dy,dtx,dty,ctx,cty,uColour
-        );
+        Floppy144IsometricLine(pSurface,ax,ay,bx,by,uEdge);
+        Floppy144IsometricLine(pSurface,bx,by,cx,cy,uEdge);
+        Floppy144IsometricLine(pSurface,cx,cy,dx,dy,uEdge);
+        Floppy144IsometricLine(pSurface,dx,dy,ax,ay,uEdge);
+        return;
     }
 
-    Floppy144IsometricLine(pSurface, ax, ay, bx, by, uEdge);
-    Floppy144IsometricLine(pSurface, bx, by, cx, cy, uEdge);
-    Floppy144IsometricLine(pSurface, cx, cy, dx, dy, uEdge);
-    Floppy144IsometricLine(pSurface, dx, dy, ax, ay, uEdge);
+    /*
+     * Painter-facing solid: top plus the +X and +Y faces. Back/base edges are
+     * deliberately not redrawn after filling, so hidden geometry cannot shine
+     * through the object as wireframe.
+     */
+    Floppy144IsometricFillQuad(
+        pSurface,atx,aty,btx,bty,ctx,cty,dtx,dty,uTop
+    );
+    Floppy144IsometricFillQuad(
+        pSurface,bx,by,cx,cy,ctx,cty,btx,bty,uFaceX
+    );
+    Floppy144IsometricFillQuad(
+        pSurface,cx,cy,dx,dy,dtx,dty,ctx,cty,uFaceY
+    );
 
-    Floppy144IsometricLine(pSurface, atx, aty, btx, bty, uEdge);
-    Floppy144IsometricLine(pSurface, btx, bty, ctx, cty, uEdge);
-    Floppy144IsometricLine(pSurface, ctx, cty, dtx, dty, uEdge);
-    Floppy144IsometricLine(pSurface, dtx, dty, atx, aty, uEdge);
+    /* Top silhouette. */
+    Floppy144IsometricLine(pSurface,atx,aty,btx,bty,uEdge);
+    Floppy144IsometricLine(pSurface,btx,bty,ctx,cty,uEdge);
+    Floppy144IsometricLine(pSurface,ctx,cty,dtx,dty,uEdge);
+    Floppy144IsometricLine(pSurface,dtx,dty,atx,aty,uEdge);
 
-    Floppy144IsometricLine(pSurface, ax, ay, atx, aty, uEdge);
-    Floppy144IsometricLine(pSurface, bx, by, btx, bty, uEdge);
-    Floppy144IsometricLine(pSurface, cx, cy, ctx, cty, uEdge);
-    Floppy144IsometricLine(pSurface, dx, dy, dtx, dty, uEdge);
+    /* Only the camera-facing lower/vertical edges remain visible. */
+    Floppy144IsometricLine(pSurface,bx,by,cx,cy,uEdge);
+    Floppy144IsometricLine(pSurface,cx,cy,dx,dy,uEdge);
+    Floppy144IsometricLine(pSurface,bx,by,btx,bty,uEdge);
+    Floppy144IsometricLine(pSurface,cx,cy,ctx,cty,uEdge);
+    Floppy144IsometricLine(pSurface,dx,dy,dtx,dty,uEdge);
+}
+
+static void Floppy144IsometricDrawPrismAlphaX16(
+    Floppy144Surface *pSurface,
+    int32_t nX16,
+    int32_t nY16,
+    int32_t nWidth16,
+    int32_t nDepth16,
+    int32_t nBaseHeight16,
+    int32_t nTopHeight16,
+    uint32_t uColour,
+    uint32_t uAlpha
+)
+{
+    const uint32_t uTop=
+        Floppy144IsometricShadeColour(uColour,118U);
+    const uint32_t uFaceX=
+        Floppy144IsometricShadeColour(uColour,92U);
+    const uint32_t uFaceY=
+        Floppy144IsometricShadeColour(uColour,72U);
+    int32_t ax,ay,bx,by,cx,cy,dx,dy;
+    int32_t atx,aty,btx,bty,ctx,cty,dtx,dty;
+
+    Floppy144IsometricProjectX16(nX16,nY16,nBaseHeight16,&ax,&ay);
+    Floppy144IsometricProjectX16(nX16+nWidth16,nY16,nBaseHeight16,&bx,&by);
+    Floppy144IsometricProjectX16(nX16+nWidth16,nY16+nDepth16,nBaseHeight16,&cx,&cy);
+    Floppy144IsometricProjectX16(nX16,nY16+nDepth16,nBaseHeight16,&dx,&dy);
+
+    Floppy144IsometricProjectX16(nX16,nY16,nTopHeight16,&atx,&aty);
+    Floppy144IsometricProjectX16(nX16+nWidth16,nY16,nTopHeight16,&btx,&bty);
+    Floppy144IsometricProjectX16(nX16+nWidth16,nY16+nDepth16,nTopHeight16,&ctx,&cty);
+    Floppy144IsometricProjectX16(nX16,nY16+nDepth16,nTopHeight16,&dtx,&dty);
+
+    Floppy144IsometricFillQuadAlpha(
+        pSurface,atx,aty,btx,bty,ctx,cty,dtx,dty,uTop,uAlpha
+    );
+    Floppy144IsometricFillQuadAlpha(
+        pSurface,bx,by,cx,cy,ctx,cty,btx,bty,uFaceX,uAlpha
+    );
+    Floppy144IsometricFillQuadAlpha(
+        pSurface,cx,cy,dx,dy,dtx,dty,ctx,cty,uFaceY,uAlpha
+    );
 }
 
 static void Floppy144IsometricDrawWallFixture(
