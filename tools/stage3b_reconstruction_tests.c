@@ -2386,6 +2386,79 @@ static void Floppy144TestReconstructionPersistence(void)
     }
 }
 
+static void Floppy144TestCompletedRecoveryProfileSnapshot(void)
+{
+    Floppy144RunState sRunState;
+    Floppy144DiscoveryProfile sProfile;
+    Floppy144DiscoveryProfile sDecoded;
+    uint8_t auPayload[FLOPPY144_PROFILE_PAYLOAD_V1_SIZE];
+    Floppy144EvidenceId eEvidence1=
+        Floppy144GameDataEvidenceId("E-001");
+    Floppy144EvidenceId eEvidence3=
+        Floppy144GameDataEvidenceId("E-003");
+
+    Floppy144RunStateBegin(&sRunState,144U);
+    Floppy144DiscoveryProfileReset(&sProfile);
+
+    (void)Floppy144RunStateBitSet(
+        sRunState.collections,
+        (uint32_t)FLOPPY144_COLLECTION_DR01
+    );
+    (void)Floppy144RunStateEstablishEvidence(&sRunState,eEvidence1);
+    (void)Floppy144RunStateEstablishEvidence(&sRunState,eEvidence3);
+
+    F144_CHECK(
+        Floppy144DiscoveryProfileRecordCompletion(
+            &sProfile,
+            &sRunState,
+            true,
+            false
+        ),
+        "completed recovery snapshot is accepted by discovery profile"
+    );
+
+    F144_CHECK(
+        sProfile.completed_recoveries==1U &&
+        sProfile.latest_completion_evidence_percent==
+            (uint8_t)((2U*100U)/(uint32_t)FLOPPY144_EVIDENCE_COUNT) &&
+        (sProfile.latest_completion_flags&
+            FLOPPY144_PROFILE_COMPLETION_EVIDENCE_RESOLVED)!=0U &&
+        (sProfile.latest_completion_flags&
+            FLOPPY144_PROFILE_COMPLETION_CAPACITY_EXHAUSTED)==0U &&
+        sProfile.latest_completion_recovered_kb==58U &&
+        (sProfile.latest_completion_evidence[0]&(1U<<(uint32_t)eEvidence1))!=0U &&
+        (sProfile.latest_completion_evidence[0]&(1U<<(uint32_t)eEvidence3))!=0U,
+        "profile stores the exact latest completed evidence version"
+    );
+
+    F144_CHECK(
+        Floppy144PersistenceEncodeProfile(
+            &sProfile,
+            auPayload,
+            FLOPPY144_PROFILE_PAYLOAD_V1_SIZE
+        ) &&
+        Floppy144PersistenceDecodeProfile(
+            &sDecoded,
+            auPayload,
+            FLOPPY144_PROFILE_PAYLOAD_V1_SIZE
+        ),
+        "completed recovery snapshot survives profile persistence"
+    );
+
+    F144_CHECK(
+        sDecoded.completed_recoveries==sProfile.completed_recoveries &&
+        sDecoded.latest_completion_evidence[0]==
+            sProfile.latest_completion_evidence[0] &&
+        sDecoded.latest_completion_evidence_percent==
+            sProfile.latest_completion_evidence_percent &&
+        sDecoded.latest_completion_flags==
+            sProfile.latest_completion_flags &&
+        sDecoded.latest_completion_recovered_kb==
+            sProfile.latest_completion_recovered_kb,
+        "decoded profile preserves latest completed recovery comparison data"
+    );
+}
+
 int main(void)
 {
     Floppy144TestReconstructionSourceCoverage();
@@ -2403,6 +2476,7 @@ int main(void)
     Floppy144TestStaffRoomSpreadsheetGeometry();
     Floppy144TestRecordsOfficeLeftWallClear();
     Floppy144TestReconstructionPersistence();
+    Floppy144TestCompletedRecoveryProfileSnapshot();
 
     if(g_nFailures != 0)
     {
