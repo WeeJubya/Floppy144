@@ -1518,6 +1518,142 @@ static void Floppy144IsometricDrawWallCell(
     );
 }
 
+static void Floppy144IsometricDrawWallCellAlpha(
+    Floppy144Surface *pSurface,
+    int32_t nX,
+    int32_t nY,
+    uint32_t uAlpha
+)
+{
+    if(
+        pSurface==NULL ||
+        nX<0 ||
+        nY<0 ||
+        nX>=FLOPPY144_SITE_SIZE_UNITS ||
+        nY>=FLOPPY144_SITE_SIZE_UNITS
+    )
+    {
+        return;
+    }
+
+    Floppy144IsometricDrawPrismAlphaX16(
+        pSurface,
+        nX*FLOPPY144_SITE_FIXED_ONE,
+        nY*FLOPPY144_SITE_FIXED_ONE,
+        FLOPPY144_SITE_FIXED_ONE,
+        FLOPPY144_SITE_FIXED_ONE,
+        0,
+        FLOPPY144_SITE_WALL_HEIGHT_UNITS*
+            FLOPPY144_SITE_FIXED_ONE,
+        FLOPPY144_RGB(74,82,81),
+        uAlpha
+    );
+}
+
+/*
+ * Camera-side perimeter planes remain present as ghost walls. 38/255 is
+ * approximately 15% opacity: enough to communicate enclosure while preserving
+ * the player, furniture and interactions behind them.
+ */
+static void Floppy144IsometricDrawNearRoomWalls(
+    Floppy144Surface *pSurface,
+    Floppy144RoomId eRoom
+)
+{
+    const uint32_t uAlpha=38U;
+    uint32_t uIndex;
+    uint32_t uCount=Floppy144SiteRectCount();
+
+    for(uIndex=0U;uIndex<uCount;++uIndex)
+    {
+        const Floppy144SiteRect *pRect=Floppy144SiteRectAt(uIndex);
+        int32_t x,y,x0,y0,x1,y1;
+
+        if(
+            pRect==NULL ||
+            pRect->room!=(uint8_t)eRoom ||
+            !Floppy144IsometricIsFloor(
+                (Floppy144SiteElement)pRect->type
+            )
+        )
+        {
+            continue;
+        }
+
+        x0=(int32_t)pRect->x;
+        y0=(int32_t)pRect->y;
+        x1=x0+(int32_t)pRect->width;
+        y1=y0+(int32_t)pRect->height;
+
+        for(x=x0;x<x1;++x)
+        {
+            if(!Floppy144IsometricRoomOwnsCell(eRoom,x,y1))
+            {
+                Floppy144IsometricDrawWallCellAlpha(
+                    pSurface,
+                    x,
+                    y1,
+                    uAlpha
+                );
+            }
+        }
+
+        for(y=y0;y<y1;++y)
+        {
+            if(!Floppy144IsometricRoomOwnsCell(eRoom,x1,y))
+            {
+                Floppy144IsometricDrawWallCellAlpha(
+                    pSurface,
+                    x1,
+                    y,
+                    uAlpha
+                );
+            }
+        }
+
+        if(
+            !Floppy144IsometricRoomOwnsCell(eRoom,x1,y1-1) &&
+            !Floppy144IsometricRoomOwnsCell(eRoom,x1-1,y1) &&
+            !Floppy144IsometricRoomOwnsCell(eRoom,x1,y1)
+        )
+        {
+            Floppy144IsometricDrawWallCellAlpha(
+                pSurface,
+                x1,
+                y1,
+                uAlpha
+            );
+        }
+    }
+}
+
+static void Floppy144IsometricDrawBoundaryAlpha(
+    Floppy144Surface *pSurface,
+    const Floppy144SiteRect *pRect,
+    uint32_t uAlpha
+)
+{
+    Floppy144SiteElement eElement;
+    int32_t nHeight;
+
+    if(pSurface==NULL||pRect==NULL)return;
+
+    eElement=(Floppy144SiteElement)pRect->type;
+    nHeight=Floppy144IsometricElementHeight(eElement);
+
+    Floppy144IsometricDrawPrismAlphaX16(
+        pSurface,
+        (int32_t)pRect->x*FLOPPY144_SITE_FIXED_ONE,
+        (int32_t)pRect->y*FLOPPY144_SITE_FIXED_ONE,
+        (int32_t)pRect->width*FLOPPY144_SITE_FIXED_ONE,
+        (int32_t)pRect->height*FLOPPY144_SITE_FIXED_ONE,
+        0,
+        nHeight*FLOPPY144_SITE_FIXED_ONE,
+        Floppy144IsometricElementColour(eElement),
+        uAlpha
+    );
+}
+
 /*
  * Draw only the two perimeter planes furthest from the camera. The opposite
  * pair is deliberately absent so the active room reads as a playable cutaway
