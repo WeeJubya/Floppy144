@@ -1117,6 +1117,110 @@ static uint32_t Floppy144IsometricElementColour(Floppy144SiteElement eElement)
     return FLOPPY144_RGB(118, 133, 132);
 }
 
+static void Floppy144IsometricDrawChair(
+    Floppy144Surface *pSurface,
+    const Floppy144SiteRect *pRect,
+    uint32_t uColour
+)
+{
+    int32_t x,y,w,d;
+    int32_t sx,sy,sw,sd;
+    int32_t leg;
+    int32_t backThickness;
+    int32_t backX,backY,backW,backD;
+    uint32_t uRotation;
+
+    if(pSurface==NULL||pRect==NULL)return;
+
+    x=(int32_t)pRect->x*FLOPPY144_SITE_FIXED_ONE;
+    y=(int32_t)pRect->y*FLOPPY144_SITE_FIXED_ONE;
+    w=(int32_t)pRect->width*FLOPPY144_SITE_FIXED_ONE;
+    d=(int32_t)pRect->height*FLOPPY144_SITE_FIXED_ONE;
+
+    sx=x+w/8;
+    sy=y+d/8;
+    sw=w*3/4;
+    sd=d*3/4;
+
+    leg=FLOPPY144_SITE_FIXED_ONE/4;
+    backThickness=FLOPPY144_SITE_FIXED_ONE/4;
+
+    /* Four slim legs. */
+    Floppy144IsometricDrawPrismX16(
+        pSurface,sx,sy,leg,leg,0,
+        2*FLOPPY144_SITE_FIXED_ONE,uColour
+    );
+    Floppy144IsometricDrawPrismX16(
+        pSurface,sx+sw-leg,sy,leg,leg,0,
+        2*FLOPPY144_SITE_FIXED_ONE,uColour
+    );
+    Floppy144IsometricDrawPrismX16(
+        pSurface,sx,sy+sd-leg,leg,leg,0,
+        2*FLOPPY144_SITE_FIXED_ONE,uColour
+    );
+    Floppy144IsometricDrawPrismX16(
+        pSurface,sx+sw-leg,sy+sd-leg,leg,leg,0,
+        2*FLOPPY144_SITE_FIXED_ONE,uColour
+    );
+
+    /* Seat slab. */
+    Floppy144IsometricDrawPrismX16(
+        pSurface,
+        sx,
+        sy,
+        sw,
+        sd,
+        2*FLOPPY144_SITE_FIXED_ONE,
+        3*FLOPPY144_SITE_FIXED_ONE,
+        uColour
+    );
+
+    /*
+     * Backrest follows the authored chair rotation. Diagonal authored chairs
+     * snap to their nearest cardinal back edge for this compact 2.5D recipe.
+     */
+    uRotation=((uint32_t)pRect->rotation+45U)/90U;
+    uRotation=(uRotation%4U)*90U;
+
+    backX=sx;
+    backY=sy;
+    backW=sw;
+    backD=backThickness;
+
+    if(uRotation==90U)
+    {
+        backX=sx+sw-backThickness;
+        backY=sy;
+        backW=backThickness;
+        backD=sd;
+    }
+    else if(uRotation==180U)
+    {
+        backX=sx;
+        backY=sy+sd-backThickness;
+        backW=sw;
+        backD=backThickness;
+    }
+    else if(uRotation==270U)
+    {
+        backX=sx;
+        backY=sy;
+        backW=backThickness;
+        backD=sd;
+    }
+
+    Floppy144IsometricDrawPrismX16(
+        pSurface,
+        backX,
+        backY,
+        backW,
+        backD,
+        3*FLOPPY144_SITE_FIXED_ONE,
+        6*FLOPPY144_SITE_FIXED_ONE,
+        uColour
+    );
+}
+
 /*
  * Draw a rectangle as an isometric footprint and, when non-zero height is
  * requested, lift its top face and connect the visible corners vertically.
@@ -1144,6 +1248,16 @@ static void Floppy144IsometricDrawRect(
             pSurface,
             pRect,
             pPlacement
+        );
+        return;
+    }
+
+    if(eElement==FLOPPY144_SITE_CHAIR)
+    {
+        Floppy144IsometricDrawChair(
+            pSurface,
+            pRect,
+            uColour
         );
         return;
     }
