@@ -190,54 +190,6 @@ static void Floppy144IsometricFillQuad(
     );
 }
 
-/* Convert whole-unit Site coordinates into the compact isometric viewport. */
-static void Floppy144IsometricProject(
-    int32_t nWorldX,
-    int32_t nWorldY,
-    int32_t nHeight,
-    int32_t *pnScreenX,
-    int32_t *pnScreenY
-)
-{
-    if(pnScreenX != NULL)
-    {
-        *pnScreenX=
-            g_nIsoOriginX+
-            (
-                (
-                    nWorldX*FLOPPY144_SITE_FIXED_ONE-
-                    g_nIsoCentreX16
-                )-
-                (
-                    nWorldY*FLOPPY144_SITE_FIXED_ONE-
-                    g_nIsoCentreY16
-                )
-            )*
-            g_nIsoHalfTileX/
-            FLOPPY144_SITE_FIXED_ONE;
-    }
-
-    if(pnScreenY != NULL)
-    {
-        *pnScreenY=
-            g_nIsoOriginY+
-            (
-                (
-                    nWorldX*FLOPPY144_SITE_FIXED_ONE-
-                    g_nIsoCentreX16
-                )+
-                (
-                    nWorldY*FLOPPY144_SITE_FIXED_ONE-
-                    g_nIsoCentreY16
-                )
-            )*
-            g_nIsoHalfTileY/
-            FLOPPY144_SITE_FIXED_ONE-
-            nHeight*g_nIsoHeightScale;
-    }
-}
-
-
 /*
  * Stage 3C Task 12 presentation helpers.
  *
