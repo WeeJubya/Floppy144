@@ -86,6 +86,7 @@ bool Floppy144GameDataTriggerTryFire(Floppy144WorldState *pWorld,Floppy144RunSta
 bool Floppy144GameDataInteractionCanRun(const Floppy144RunState *pState,Floppy144InteractionId eInteraction);
 bool Floppy144GameDataInteractionTryRun(Floppy144WorldState *pWorld,Floppy144RunState *pState,Floppy144InteractionId eInteraction);
 void Floppy144GameDataResolveEvidence(Floppy144RunState *pState);
+bool Floppy144GameDataEvidenceResolved(const Floppy144RunState *pState);
 const Floppy144DataRecord *Floppy144GameDataAmbientForDate(const char *pszTargetId,uint32_t uMonth,uint32_t uDay);
 
 /* Data-driven Notebook view over persistent recovered knowledge. */
