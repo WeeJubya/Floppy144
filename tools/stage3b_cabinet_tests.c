@@ -12,6 +12,7 @@
 #include "floppy144_run_state.h"
 #include "floppy144_site.h"
 #include "floppy144_site_object.h"
+#include "floppy144_trigger_engine.h"
 #include "floppy144_world.h"
 
 #include <stdbool.h>
