@@ -713,15 +713,15 @@ function Test-PhysicalItemPlayerFacingContract {
 
     $ServerRoomSource =
         $GameData.site_layout_source.rooms |
-        Where-Object { $_.id -eq 'SERVER_ROOM' }
+        Where-Object { $_.PSObject.Properties['id'] -and $_.id -eq 'SERVER_ROOM' }
 
     $ServerTerminalSource =
         $ServerRoomSource.geometry |
-        Where-Object { $_.id -eq 'SERVER_ROOM_TERMINAL_DESK' }
+        Where-Object { $_.PSObject.Properties['id'] -and $_.id -eq 'SERVER_ROOM_TERMINAL_DESK' }
 
     $ServerCableRiserSource =
         $ServerRoomSource.geometry |
-        Where-Object { $_.id -eq 'SERVER_ROOM_CABLE_RISER' }
+        Where-Object { $_.PSObject.Properties['id'] -and $_.id -eq 'SERVER_ROOM_CABLE_RISER' }
 
     if(
         $null -eq $ServerTerminalSource -or
