@@ -20,11 +20,24 @@
 #include <stdio.h>
 #include <string.h>
 
-#define FLOPPY144_ISO_ORIGIN_X              320
-#define FLOPPY144_ISO_ORIGIN_Y               45
-#define FLOPPY144_ISO_HALF_TILE_X             3
-#define FLOPPY144_ISO_HALF_TILE_Y             1
-#define FLOPPY144_ISO_HEIGHT_SCALE            2
+#define FLOPPY144_ISO_VIEWPORT_X             32
+#define FLOPPY144_ISO_VIEWPORT_Y             32
+#define FLOPPY144_ISO_VIEWPORT_WIDTH        576
+#define FLOPPY144_ISO_VIEWPORT_HEIGHT       252
+#define FLOPPY144_ISO_SORT_MAX              768U
+
+/*
+ * FM-23 is a presentation change, not a second world model. Projection is
+ * configured around the player's current room each frame while all gameplay
+ * continues to use canonical Site coordinates.
+ */
+static int32_t g_nIsoOriginX=320;
+static int32_t g_nIsoOriginY=170;
+static int32_t g_nIsoCentreX16=0;
+static int32_t g_nIsoCentreY16=0;
+static int32_t g_nIsoHalfTileX=5;
+static int32_t g_nIsoHalfTileY=2;
+static int32_t g_nIsoHeightScale=3;
 
 /*
  * Write one clipped pixel. A private line primitive keeps this projection
@@ -107,17 +120,39 @@ static void Floppy144IsometricProject(
 {
     if(pnScreenX != NULL)
     {
-        *pnScreenX =
-            FLOPPY144_ISO_ORIGIN_X +
-            (nWorldX - nWorldY) * FLOPPY144_ISO_HALF_TILE_X;
+        *pnScreenX=
+            g_nIsoOriginX+
+            (
+                (
+                    nWorldX*FLOPPY144_SITE_FIXED_ONE-
+                    g_nIsoCentreX16
+                )-
+                (
+                    nWorldY*FLOPPY144_SITE_FIXED_ONE-
+                    g_nIsoCentreY16
+                )
+            )*
+            g_nIsoHalfTileX/
+            FLOPPY144_SITE_FIXED_ONE;
     }
 
     if(pnScreenY != NULL)
     {
-        *pnScreenY =
-            FLOPPY144_ISO_ORIGIN_Y +
-            (nWorldX + nWorldY) * FLOPPY144_ISO_HALF_TILE_Y -
-            nHeight * FLOPPY144_ISO_HEIGHT_SCALE;
+        *pnScreenY=
+            g_nIsoOriginY+
+            (
+                (
+                    nWorldX*FLOPPY144_SITE_FIXED_ONE-
+                    g_nIsoCentreX16
+                )+
+                (
+                    nWorldY*FLOPPY144_SITE_FIXED_ONE-
+                    g_nIsoCentreY16
+                )
+            )*
+            g_nIsoHalfTileY/
+            FLOPPY144_SITE_FIXED_ONE-
+            nHeight*g_nIsoHeightScale;
     }
 }
 
@@ -139,26 +174,35 @@ static void Floppy144IsometricProjectX16(
 {
     if(pnScreenX != NULL)
     {
-        *pnScreenX =
-            FLOPPY144_ISO_ORIGIN_X +
+        *pnScreenX=
+            g_nIsoOriginX+
             (
-                (nWorldX16 - nWorldY16) *
-                FLOPPY144_ISO_HALF_TILE_X
-            ) / FLOPPY144_SITE_FIXED_ONE;
+                (
+                    (nWorldX16-g_nIsoCentreX16)-
+                    (nWorldY16-g_nIsoCentreY16)
+                )*
+                g_nIsoHalfTileX
+            )/
+            FLOPPY144_SITE_FIXED_ONE;
     }
 
     if(pnScreenY != NULL)
     {
-        *pnScreenY =
-            FLOPPY144_ISO_ORIGIN_Y +
+        *pnScreenY=
+            g_nIsoOriginY+
             (
-                (nWorldX16 + nWorldY16) *
-                FLOPPY144_ISO_HALF_TILE_Y
-            ) / FLOPPY144_SITE_FIXED_ONE -
+                (
+                    (nWorldX16-g_nIsoCentreX16)+
+                    (nWorldY16-g_nIsoCentreY16)
+                )*
+                g_nIsoHalfTileY
+            )/
+            FLOPPY144_SITE_FIXED_ONE-
             (
-                nHeight16 *
-                FLOPPY144_ISO_HEIGHT_SCALE
-            ) / FLOPPY144_SITE_FIXED_ONE;
+                nHeight16*
+                g_nIsoHeightScale
+            )/
+            FLOPPY144_SITE_FIXED_ONE;
     }
 }
 
