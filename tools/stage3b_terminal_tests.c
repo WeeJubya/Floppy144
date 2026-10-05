@@ -1572,11 +1572,9 @@ static void Floppy144TestPlayerRecoveryPolicy(void)
     );
 
     F144_CHECK(
-        Floppy144RunStateBitSet(
-            sRunState.collections,
-            (uint32_t)eTs10
-        ),
-        "FM-23 prerequisite fixture restores TS-10"
+        !Floppy144RunStateCollectionRestored(&sRunState,eTs10) &&
+        Floppy144RunStateSetAct(&sRunState,FLOPPY144_RUN_ACT_II),
+        "FM-23 timing fixture reaches Act II before TS-10"
     );
 
     F144_CHECK(
@@ -1584,7 +1582,7 @@ static void Floppy144TestPlayerRecoveryPolicy(void)
             &sRunState,
             eFm23
         ),
-        "FM-23 becomes available after TS-10 without self-dependency"
+        "FM-23 becomes available during Act II without waiting for TS-10"
     );
 }
 
@@ -2592,9 +2590,44 @@ static void Floppy144TestFm18SuppressionRecordRestoresServerPanel(void)
     );
 }
 
+static void Floppy144TestAvailableRecoveryAndAutomaticCompletion(void)
+{
+    Floppy144RunState sRunState;
+    Floppy144CollectionId eDr01;
+    Floppy144EvidenceId eE020,eE021,eE022,eE023;
+    Floppy144InteractionId eI034;
+
+    Floppy144RunStateBegin(&sRunState,144U);
+    eDr01=Floppy144GameDataCollectionId("DR-01");
+    F144_CHECK(
+        eDr01<FLOPPY144_COLLECTION_COUNT &&
+        Floppy144RunStateBitSet(sRunState.collections,(uint32_t)eDr01) &&
+        !Floppy144RunStateAnyUnrestoredCollectionFits(&sRunState),
+        "locked dependency collections do not count as currently restorable disk data"
+    );
+
+    Floppy144RunStateBegin(&sRunState,144U);
+    eE020=Floppy144GameDataEvidenceId("E-020");
+    eE021=Floppy144GameDataEvidenceId("E-021");
+    eE022=Floppy144GameDataEvidenceId("E-022");
+    eE023=Floppy144GameDataEvidenceId("E-023");
+    eI034=Floppy144GameDataInteractionId("I-034");
+    (void)Floppy144RunStateEstablishEvidence(&sRunState,eE020);
+    (void)Floppy144RunStateEstablishEvidence(&sRunState,eE021);
+    (void)Floppy144RunStateEstablishEvidence(&sRunState,eE022);
+    Floppy144GameDataResolveEvidence(&sRunState);
+    F144_CHECK(
+        Floppy144RunStateInteractionCompleted(&sRunState,eI034) &&
+        Floppy144RunStateEvidenceEstablished(&sRunState,eE023) &&
+        Floppy144RunStateAct(&sRunState)==FLOPPY144_RUN_ACT_COMPLETE,
+        "E-020/E-021/E-022 automatically synthesise E-023 and complete the recovery"
+    );
+}
+
 int main(void)
 {
     Floppy144TestFm18SuppressionRecordRestoresServerPanel();
+    Floppy144TestAvailableRecoveryAndAutomaticCompletion();
     Floppy144TestStaleEvidenceSaveRecovery();
     Floppy144TestRestoreProgress();
     Floppy144TestExtendedGlyphs();
