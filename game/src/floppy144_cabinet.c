@@ -1806,6 +1806,91 @@ static void Floppy144CabinetDrawContentMarkers(
     );
 
     /*
+     * Shelving and bookcases use physical shelf slots rather than the generic
+     * centred grid. The bottom edge of every marker rests on one of the four
+     * drawn shelf slabs, while each shelf's contents are centred independently.
+     *
+     * Round-robin shelf assignment spreads dense containers through the whole
+     * unit instead of filling one floating row in the middle.
+     */
+    if(
+        Floppy144CabinetTypeIs(pCabinet,"SHELVING") ||
+        Floppy144CabinetTypeIs(pCabinet,"SHELVING_FULL") ||
+        Floppy144CabinetTypeIs(pCabinet,"BOOKCASE")
+    )
+    {
+        static const uint32_t auShelfY[4]={130U,184U,238U,292U};
+        const uint32_t uShelfCount=4U;
+        const uint32_t uShelfLeft=58U;
+        const uint32_t uShelfWidth=218U;
+        const uint32_t uShelfGap=8U;
+        const uint32_t uShelfMarkerHeight=10U;
+
+        for(uIndex=0U;uIndex<uCount;++uIndex)
+        {
+            uint32_t uShelf=uIndex%uShelfCount;
+            uint32_t uSlot=uIndex/uShelfCount;
+            uint32_t uItemsOnShelf=
+                uCount>uShelf
+                    ? 1U+(uCount-1U-uShelf)/uShelfCount
+                    : 0U;
+            uint32_t uShelfMarkerWidth=14U;
+            uint32_t uGroupWidth;
+            uint32_t uBaseX;
+            uint32_t uX;
+            uint32_t uY;
+            uint32_t uMarker=uIndex==uSelected?uBright:uEdge;
+
+            if(
+                uItemsOnShelf*uShelfMarkerWidth+
+                (uItemsOnShelf-1U)*uShelfGap>
+                uShelfWidth
+            )
+            {
+                uShelfMarkerWidth=
+                    (
+                        uShelfWidth-
+                        (uItemsOnShelf-1U)*uShelfGap
+                    )/
+                    uItemsOnShelf;
+            }
+
+            if(uShelfMarkerWidth<4U)uShelfMarkerWidth=4U;
+
+            uGroupWidth=
+                uItemsOnShelf*uShelfMarkerWidth+
+                (uItemsOnShelf-1U)*uShelfGap;
+
+            uBaseX=
+                uShelfLeft+
+                (
+                    uShelfWidth>uGroupWidth
+                        ? (uShelfWidth-uGroupWidth)/2U
+                        : 0U
+                );
+
+            uX=
+                uBaseX+
+                uSlot*(uShelfMarkerWidth+uShelfGap);
+
+            uY=
+                auShelfY[uShelf]-
+                uShelfMarkerHeight;
+
+            Floppy144DrawFillRect(
+                pSurface,
+                uX,
+                uY,
+                uShelfMarkerWidth,
+                uShelfMarkerHeight,
+                uMarker
+            );
+        }
+
+        return;
+    }
+
+    /*
      * Fit every visible PI into the authored silhouette. Marker dimensions
      * shrink only when necessary; this avoids the old nine-item ceiling and
      * keeps dense desks/cupboards readable without drawing outside furniture.
