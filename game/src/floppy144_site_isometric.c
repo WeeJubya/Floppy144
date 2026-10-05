@@ -886,7 +886,11 @@ static void Floppy144IsometricDrawWallFixture(
     int32_t nDepth16;
     int32_t nMountBase16;
     int32_t nMountTop16;
+    int32_t nWallPlane16;
+    int32_t nFixtureDepth16;
     bool bThinX;
+    bool bPartitionMounted;
+    Floppy144IsometricWallAttachment eAttachment;
     int32_t nLineIndex;
     int32_t x0, y0, x1, y1;
 
@@ -895,84 +899,86 @@ static void Floppy144IsometricDrawWallFixture(
         return;
     }
 
-    nX16 = (int32_t)pRect->x * FLOPPY144_SITE_FIXED_ONE;
-    nY16 = (int32_t)pRect->y * FLOPPY144_SITE_FIXED_ONE;
-    nWidth16 = (int32_t)pRect->width * FLOPPY144_SITE_FIXED_ONE;
-    nDepth16 = (int32_t)pRect->height * FLOPPY144_SITE_FIXED_ONE;
-    bThinX = pRect->width <= pRect->height;
+    nX16=(int32_t)pRect->x*FLOPPY144_SITE_FIXED_ONE;
+    nY16=(int32_t)pRect->y*FLOPPY144_SITE_FIXED_ONE;
+    nWidth16=(int32_t)pRect->width*FLOPPY144_SITE_FIXED_ONE;
+    nDepth16=(int32_t)pRect->height*FLOPPY144_SITE_FIXED_ONE;
+    bThinX=pRect->width<=pRect->height;
+
+    eAttachment=
+        Floppy144IsometricWallFixtureAttachment(
+            pRect,
+            pPlacement,
+            &bPartitionMounted,
+            &nWallPlane16
+        );
+
+    (void)bPartitionMounted;
 
     /*
-     * Centre the shallow projection inside the authored collision footprint.
-     * MONITOR_BANK remains 1U deep; IT shelving retains its 2U authored depth.
+     * Ordinary wall furniture is only half a Site unit deep. Monitor banks and
+     * wall shelving retain a full unit so they still read as substantial
+     * equipment, but their room-facing edge is anchored to the same wall plane.
      */
-    if(Floppy144IsometricVariantIs(pPlacement, "MONITOR_BANK"))
-    {
-        if(bThinX)
-        {
-            nWidth16 = FLOPPY144_SITE_FIXED_ONE;
-            nX16 +=
-                (
-                    (int32_t)pRect->width *
-                    FLOPPY144_SITE_FIXED_ONE -
-                    nWidth16
-                ) / 2;
-        }
-        else
-        {
-            nDepth16 = FLOPPY144_SITE_FIXED_ONE;
-            nY16 +=
-                (
-                    (int32_t)pRect->height *
-                    FLOPPY144_SITE_FIXED_ONE -
-                    nDepth16
-                ) / 2;
-        }
-    }
-    else if(
-        pRect->room == (uint8_t)FLOPPY144_ROOM_IT_SUPPORT &&
-        Floppy144IsometricVariantIs(pPlacement, "SHELVING")
+    nFixtureDepth16=FLOPPY144_SITE_FIXED_ONE/2;
+
+    if(
+        Floppy144IsometricVariantIs(pPlacement,"MONITOR_BANK") ||
+        Floppy144IsometricVariantIs(pPlacement,"SHELVING")
     )
     {
-        /* authored 2U depth is the deliberate exception */
+        nFixtureDepth16=FLOPPY144_SITE_FIXED_ONE;
     }
-    else
-    {
-        if(bThinX)
-        {
-            nWidth16 = FLOPPY144_SITE_FIXED_ONE / 2;
 
-            if(
-                pRect->room != (uint8_t)FLOPPY144_ROOM_RECEPTION ||
-                !Floppy144IsometricVariantIs(
-                    pPlacement,
-                    "SITE_DIRECTORY"
-                )
-            )
-            {
-                nX16 +=
-                    (
-                        (int32_t)pRect->width *
-                        FLOPPY144_SITE_FIXED_ONE -
-                        nWidth16
-                    ) / 2;
-            }
+    switch(eAttachment)
+    {
+        case FLOPPY144_ISO_WALL_LEFT:
+            nX16=nWallPlane16;
+            nWidth16=nFixtureDepth16;
+            break;
+
+        case FLOPPY144_ISO_WALL_RIGHT:
+            nX16=nWallPlane16-nFixtureDepth16;
+            nWidth16=nFixtureDepth16;
+            break;
+
+        case FLOPPY144_ISO_WALL_TOP:
+            nY16=nWallPlane16;
+            nDepth16=nFixtureDepth16;
+            break;
+
+        case FLOPPY144_ISO_WALL_BOTTOM:
+            nY16=nWallPlane16-nFixtureDepth16;
+            nDepth16=nFixtureDepth16;
+            break;
+
+        default:
             /*
-             * The Reception directory sits immediately on the east face of
-             * the x=76 partition wall. Keeping the authored x edge here makes
-             * the 0.5U projection start flush at that face instead of floating
-             * a quarter-unit into the room.
+             * Future authored fixtures without a resolvable wall keep a safe
+             * centred shallow fallback rather than inheriting full furniture
+             * depth.
              */
-        }
-        else
-        {
-            nDepth16 = FLOPPY144_SITE_FIXED_ONE / 2;
-            nY16 +=
-                (
-                    (int32_t)pRect->height *
-                    FLOPPY144_SITE_FIXED_ONE -
-                    nDepth16
-                ) / 2;
-        }
+            if(bThinX)
+            {
+                nWidth16=nFixtureDepth16;
+                nX16+=
+                    (
+                        (int32_t)pRect->width*
+                        FLOPPY144_SITE_FIXED_ONE-
+                        nWidth16
+                    )/2;
+            }
+            else
+            {
+                nDepth16=nFixtureDepth16;
+                nY16+=
+                    (
+                        (int32_t)pRect->height*
+                        FLOPPY144_SITE_FIXED_ONE-
+                        nDepth16
+                    )/2;
+            }
+            break;
     }
 
     nMountBase16 = 6 * FLOPPY144_SITE_FIXED_ONE;
