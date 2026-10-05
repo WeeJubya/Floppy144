@@ -586,6 +586,30 @@ function Test-Stage3B5CoordinatorWiring {
         throw "FM-23 no longer preserves active-room visibility, cutaway walls, and player/furniture depth ordering."
     }
 
+    foreach($RequiredIsoPresentationToken in @(
+        'Floppy144IsometricShadeColour',
+        'Floppy144IsometricDrawPrismAlphaX16',
+        'Floppy144IsometricDrawChair',
+        'Floppy144IsometricDrawNearRoomWalls',
+        'uAlpha=38U',
+        'Painter-facing solid'
+    )) {
+        if($SiteIsoSource -notmatch [regex]::Escape($RequiredIsoPresentationToken)) {
+            throw "FM-23 solid-room presentation contract is missing: $RequiredIsoPresentationToken"
+        }
+    }
+
+    if(
+        $SiteIsoSource -match
+            'Floppy144IsometricLine\(pSurface,\s*ax,\s*ay,\s*atx,\s*aty' -or
+        $SiteIsoSource -notmatch
+            'eElement==FLOPPY144_SITE_CHAIR' -or
+        $SiteIsoSource -notmatch
+            'Floppy144IsometricDrawBoundaryAlpha\([\s\S]*?38U'
+    ) {
+        throw "FM-23 has regressed hidden-edge suppression, composite chairs, or 15-percent near-boundary alpha."
+    }
+
     if(
         $MainSource -notmatch 'FLOPPY144_SITE_ACTION_INSPECT' -or
         $MainSource -notmatch 'Floppy144SiteAvailableActions'
