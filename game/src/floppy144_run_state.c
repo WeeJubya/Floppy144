@@ -472,6 +472,36 @@ bool Floppy144RunStateAnyUnrestoredCollectionFits(const Floppy144RunState *pStat
     return false;
 }
 
+bool Floppy144RunStateAvailableRecoveryCapacityExhausted(const Floppy144RunState *pState)
+{
+    uint32_t uIndex;
+    bool bAvailable=false;
+
+    if(pState==NULL)return false;
+
+    for(uIndex=0U;uIndex<(uint32_t)FLOPPY144_COLLECTION_COUNT;++uIndex)
+    {
+        Floppy144CollectionId e=(Floppy144CollectionId)uIndex;
+
+        if(
+            Floppy144RunStateCollectionRestored(pState,e) ||
+            !Floppy144RunStateCollectionAvailable(pState,e)
+        )
+        {
+            continue;
+        }
+
+        bAvailable=true;
+
+        if(Floppy144RunStateCanRestoreCollection(pState,e))
+        {
+            return false;
+        }
+    }
+
+    return bAvailable;
+}
+
 bool Floppy144RunStateRecoveryExhausted(const Floppy144RunState *pState)
 {
     return pState!=NULL&&!Floppy144RunStateAnyUnrestoredCollectionFits(pState);
