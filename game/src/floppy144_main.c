@@ -100,6 +100,9 @@ static bool global_main_menu_notice_is_warning;
 static bool global_reinstate_confirmation_pending;
 static bool global_reinstate_continue_on_keyup;
 static WPARAM global_reinstate_continue_key;
+static uint32_t global_completion_top_line;
+static bool global_completion_evidence_resolved;
+static bool global_completion_capacity_exhausted;
 
 static Floppy144MainMenuOption
     global_main_menu_option;
@@ -169,23 +172,236 @@ static void Floppy144BindStaticRenderer(
  * InvalidateRect then asks Windows to present that frame through WM_PAINT.
  */
 
+#define FLOPPY144_COMPLETION_RENDER_LINES 256U
+#define FLOPPY144_COMPLETION_LINE_CAPACITY 128U
+#define FLOPPY144_COMPLETION_VISIBLE_LINES 13U
+#define FLOPPY144_COMPLETION_BODY_WIDTH 520U
+
+typedef struct Floppy144CompletionRenderBuffer
+{
+    char lines[FLOPPY144_COMPLETION_RENDER_LINES][FLOPPY144_COMPLETION_LINE_CAPACITY];
+    uint32_t count;
+} Floppy144CompletionRenderBuffer;
+
+static void Floppy144CompletionAppendWrapped(
+    Floppy144CompletionRenderBuffer *pBuffer,
+    const char *pszPrefix,
+    const char *pszText
+)
+{
+    const char *p=pszText;
+    char line[FLOPPY144_COMPLETION_LINE_CAPACITY];
+    uint32_t len=0U;
+    bool bFirst=true;
+
+    if(pBuffer==NULL||pszText==NULL||pBuffer->count>=FLOPPY144_COMPLETION_RENDER_LINES)return;
+
+    if(pszPrefix!=NULL)
+    {
+        len=(uint32_t)snprintf(line,sizeof(line),"%s",pszPrefix);
+        if(len>=sizeof(line))len=(uint32_t)sizeof(line)-1U;
+    }
+    else
+    {
+        line[0]='\0';
+    }
+
+    while(*p!='\0'&&pBuffer->count<FLOPPY144_COMPLETION_RENDER_LINES)
+    {
+        const char *word;
+        uint32_t wordLen=0U,candidateLen;
+        char candidate[FLOPPY144_COMPLETION_LINE_CAPACITY];
+
+        while(*p==' '||*p=='\t'||*p=='\n'||*p=='\r')++p;
+        if(*p=='\0')break;
+
+        word=p;
+        while(
+            p[wordLen]!='\0'&&
+            p[wordLen]!=' '&&
+            p[wordLen]!='\t'&&
+            p[wordLen]!='\n'&&
+            p[wordLen]!='\r'
+        )++wordLen;
+
+        candidateLen=len;
+        if(candidateLen>0U&&candidateLen+1U<sizeof(candidate))candidate[candidateLen++]=' ';
+        if(candidateLen+wordLen>=sizeof(candidate))wordLen=(uint32_t)sizeof(candidate)-candidateLen-1U;
+
+        memcpy(candidate,line,len);
+        memcpy(candidate+candidateLen,word,wordLen);
+        candidateLen+=wordLen;
+        candidate[candidateLen]='\0';
+
+        if(len>0U&&Floppy144DrawTextWidth(candidate,1U)>FLOPPY144_COMPLETION_BODY_WIDTH)
+        {
+            line[len]='\0';
+            (void)snprintf(
+                pBuffer->lines[pBuffer->count++],
+                FLOPPY144_COMPLETION_LINE_CAPACITY,
+                "%s",
+                line
+            );
+            (void)snprintf(line,sizeof(line),"       ");
+            len=7U;
+            bFirst=false;
+            continue;
+        }
+
+        memcpy(line,candidate,candidateLen+1U);
+        len=candidateLen;
+        p+=wordLen;
+    }
+
+    if(len>0U&&pBuffer->count<FLOPPY144_COMPLETION_RENDER_LINES)
+    {
+        line[len]='\0';
+        (void)snprintf(
+            pBuffer->lines[pBuffer->count++],
+            FLOPPY144_COMPLETION_LINE_CAPACITY,
+            "%s",
+            line
+        );
+    }
+
+    (void)bFirst;
+}
+
+static void Floppy144CompletionBuild(
+    const Floppy144RunState *pRunState,
+    Floppy144CompletionRenderBuffer *pBuffer
+)
+{
+    uint32_t uRecord;
+
+    if(pBuffer==NULL)return;
+    pBuffer->count=0U;
+    if(pRunState==NULL)return;
+
+    for(uRecord=0U;uRecord<Floppy144GameDataRecordCount();++uRecord)
+    {
+        const Floppy144DataRecord *pEvidence=
+            Floppy144GameDataRecordAt(uRecord);
+        Floppy144EvidenceId eEvidence;
+        char szPrefix[24];
+
+        if(
+            pEvidence==NULL ||
+            pEvidence->eKind!=FLOPPY144_DATA_EVIDENCE ||
+            pEvidence->pszId==NULL
+        )
+        {
+            continue;
+        }
+
+        eEvidence=Floppy144GameDataEvidenceId(pEvidence->pszId);
+
+        (void)snprintf(
+            szPrefix,
+            sizeof(szPrefix),
+            "%s",
+            pEvidence->pszId
+        );
+
+        if(
+            eEvidence!=FLOPPY144_EVIDENCE_COUNT &&
+            Floppy144RunStateEvidenceEstablished(pRunState,eEvidence)
+        )
+        {
+            const char *pszNotebook=
+                pEvidence->pszE!=NULL&&pEvidence->pszE[0]!='\0'
+                ? pEvidence->pszE
+                : pEvidence->pszA;
+
+            Floppy144CompletionAppendWrapped(
+                pBuffer,
+                szPrefix,
+                pszNotebook
+            );
+        }
+        else
+        {
+            Floppy144CompletionAppendWrapped(
+                pBuffer,
+                szPrefix,
+                "[ DATA OBSCURED - EVIDENCE NOT RECOVERED ]"
+            );
+        }
+    }
+}
+
 static void Floppy144EvidenceCompleteDraw(F144Runtime *pRuntime)
 {
     const uint32_t bg=FLOPPY144_RGB(11,16,18),panel=FLOPPY144_RGB(22,31,33),border=FLOPPY144_RGB(86,103,107),text=FLOPPY144_RGB(202,211,205),muted=FLOPPY144_RGB(118,133,132),amber=FLOPPY144_RGB(194,153,76),green=FLOPPY144_RGB(100,156,111);
     Floppy144Surface s;
+    Floppy144CompletionRenderBuffer b;
+    uint32_t u,top,maxTop;
+    const char *pszOutcome;
+
     if(pRuntime==NULL||pRuntime->backbuffer.data==NULL)return;
-    s.pixels=(uint32_t*)pRuntime->backbuffer.data;s.width=pRuntime->backbuffer.width;s.height=pRuntime->backbuffer.height;
+
+    s.pixels=(uint32_t*)pRuntime->backbuffer.data;
+    s.width=pRuntime->backbuffer.width;
+    s.height=pRuntime->backbuffer.height;
+
+    Floppy144CompletionBuild(&global_run_state,&b);
+    maxTop=b.count>FLOPPY144_COMPLETION_VISIBLE_LINES
+        ? b.count-FLOPPY144_COMPLETION_VISIBLE_LINES
+        : 0U;
+    top=global_completion_top_line>maxTop?maxTop:global_completion_top_line;
+
+    pszOutcome=
+        global_completion_evidence_resolved
+        ? "EVIDENCE RESOLVED"
+        : "RECOVERY CAPACITY EXHAUSTED";
+
     Floppy144DrawClear(&s,bg);
-    Floppy144DrawFillRect(&s,42U,34U,556U,278U,panel);Floppy144DrawRect(&s,42U,34U,556U,278U,border);
-    Floppy144DrawText(&s,64U,58U,"EVIDENCE COMPLETE",2U,green);
-    Floppy144DrawText(&s,64U,98U,"E-020 + E-021 + E-022 CORRELATED",1U,amber);
-    Floppy144DrawText(&s,64U,124U,"E-023 ESTABLISHED",1U,text);
-    Floppy144DrawText(&s,64U,164U,"Recovered evidence supports accidental activation",1U,text);
-    Floppy144DrawText(&s,64U,181U,"of the still-connected manual-release circuit",1U,text);
-    Floppy144DrawText(&s,64U,198U,"during cable remediation.",1U,text);
-    Floppy144DrawText(&s,64U,224U,"Individual responsibility is not established.",1U,amber);
-    Floppy144DrawText(&s,64U,278U,"PRESS ANY KEY TO RETURN TO SITE",1U,muted);
+    Floppy144DrawFillRect(&s,32U,24U,576U,310U,panel);
+    Floppy144DrawRect(&s,32U,24U,576U,310U,border);
+
+    Floppy144DrawText(&s,50U,42U,"RECOVERY COMPLETE",2U,green);
+    Floppy144DrawText(&s,50U,68U,pszOutcome,1U,amber);
+    Floppy144DrawText(&s,50U,84U,"VERSION OF THE TRUTH RECOVERED:",1U,muted);
+
+    for(u=0U;u<FLOPPY144_COMPLETION_VISIBLE_LINES&&top+u<b.count;++u)
+    {
+        Floppy144DrawText(
+            &s,
+            50U,
+            104U+u*15U,
+            b.lines[top+u],
+            1U,
+            text
+        );
+    }
+
+    if(maxTop>0U)
+    {
+        const uint32_t uTrackX=588U,uTrackY=104U,uTrackHeight=195U;
+        uint32_t uThumbHeight=(uTrackHeight*FLOPPY144_COMPLETION_VISIBLE_LINES)/b.count;
+        uint32_t uTravel,uThumbY;
+
+        if(uThumbHeight<18U)uThumbHeight=18U;
+        if(uThumbHeight>uTrackHeight)uThumbHeight=uTrackHeight;
+
+        uTravel=uTrackHeight-uThumbHeight;
+        uThumbY=uTrackY+(uTravel*top)/maxTop;
+
+        Floppy144DrawFillRect(&s,uTrackX,uTrackY,4U,uTrackHeight,bg);
+        Floppy144DrawRect(&s,uTrackX,uTrackY,4U,uTrackHeight,border);
+        Floppy144DrawFillRect(&s,uTrackX+1U,uThumbY,2U,uThumbHeight,amber);
+    }
+
+    if(global_completion_evidence_resolved&&global_completion_capacity_exhausted)
+    {
+        Floppy144DrawText(&s,50U,306U,"EVIDENCE RESOLVED / NO FURTHER RECOVERY FITS",1U,muted);
+    }
+    else
+    {
+        Floppy144DrawText(&s,50U,306U,"UP/DOWN SCROLL   ENTER/BACKSPACE RETURN TO SITE",1U,muted);
+    }
 }
+
 
 static void Floppy144Redraw(
     HWND window
@@ -1472,7 +1688,26 @@ static LRESULT CALLBACK Floppy144WindowProc(
                         global_terminal.exit_requested =
                         false;
 
+                        global_completion_evidence_resolved=
+                            Floppy144GameDataEvidenceResolved(
+                                &global_run_state
+                            );
+
+                        global_completion_capacity_exhausted=
+                            Floppy144RunStateAvailableRecoveryCapacityExhausted(
+                                &global_run_state
+                            );
+
                         if(
+                            global_completion_evidence_resolved ||
+                            global_completion_capacity_exhausted
+                        )
+                        {
+                            global_completion_top_line=0U;
+                            global_resume_screen=FLOPPY144_SCREEN_OFFICE;
+                            global_screen=FLOPPY144_SCREEN_EVIDENCE_COMPLETE;
+                        }
+                        else if(
                             Floppy144RunStateRoomReconstructed(
                                 &global_run_state,
                                 FLOPPY144_ROOM_RECEPTION
@@ -2030,17 +2265,11 @@ static LRESULT CALLBACK Floppy144WindowProc(
                         {
                             if(Floppy144CabinetInteriorOpen(&global_cabinet))
                             {
-                                bool bWasComplete=Floppy144RunStateAct(&global_run_state)==FLOPPY144_RUN_ACT_COMPLETE;
                                 (void)Floppy144CabinetInspectSelected(
                                     &global_cabinet,
                                     &global_world,
                                     &global_run_state
                                 );
-                                if(!bWasComplete&&Floppy144RunStateAct(&global_run_state)==FLOPPY144_RUN_ACT_COMPLETE)
-                                {
-                                    global_resume_screen=FLOPPY144_SCREEN_OFFICE;
-                                    global_screen=FLOPPY144_SCREEN_EVIDENCE_COMPLETE;
-                                }
                             }
                             else
                             {
@@ -2059,17 +2288,11 @@ static LRESULT CALLBACK Floppy144WindowProc(
                         {
                             if(Floppy144CabinetInteriorOpen(&global_cabinet))
                             {
-                                bool bWasComplete=Floppy144RunStateAct(&global_run_state)==FLOPPY144_RUN_ACT_COMPLETE;
                                 (void)Floppy144CabinetInspectSelected(
                                     &global_cabinet,
                                     &global_world,
                                     &global_run_state
                                 );
-                                if(!bWasComplete&&Floppy144RunStateAct(&global_run_state)==FLOPPY144_RUN_ACT_COMPLETE)
-                                {
-                                    global_resume_screen=FLOPPY144_SCREEN_OFFICE;
-                                    global_screen=FLOPPY144_SCREEN_EVIDENCE_COMPLETE;
-                                }
                                 Floppy144Redraw(window);
                             }
                             return 0;
@@ -2093,8 +2316,46 @@ static LRESULT CALLBACK Floppy144WindowProc(
 
                 case FLOPPY144_SCREEN_EVIDENCE_COMPLETE:
                 {
-                    global_screen=FLOPPY144_SCREEN_OFFICE;
-                    global_office_notice=NULL;
+                    Floppy144CompletionRenderBuffer b;
+                    uint32_t uMaxTop;
+
+                    Floppy144CompletionBuild(&global_run_state,&b);
+                    uMaxTop=b.count>FLOPPY144_COMPLETION_VISIBLE_LINES
+                        ? b.count-FLOPPY144_COMPLETION_VISIBLE_LINES
+                        : 0U;
+
+                    switch(w_param)
+                    {
+                        case VK_UP:
+                            if(global_completion_top_line>0U)--global_completion_top_line;
+                            break;
+
+                        case VK_DOWN:
+                            if(global_completion_top_line<uMaxTop)++global_completion_top_line;
+                            break;
+
+                        case VK_PRIOR:
+                            if(global_completion_top_line>12U)global_completion_top_line-=12U;
+                            else global_completion_top_line=0U;
+                            break;
+
+                        case VK_NEXT:
+                            global_completion_top_line=
+                                global_completion_top_line+12U<uMaxTop
+                                ? global_completion_top_line+12U
+                                : uMaxTop;
+                            break;
+
+                        case VK_RETURN:
+                        case VK_BACK:
+                            global_screen=FLOPPY144_SCREEN_OFFICE;
+                            global_office_notice=NULL;
+                            break;
+
+                        default:
+                            return 0;
+                    }
+
                     Floppy144Redraw(window);
                     return 0;
                 }
