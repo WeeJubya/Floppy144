@@ -492,6 +492,74 @@ static void Floppy144TestGenericParentContents(void)
     );
 }
 
+static void Floppy144TestSeededContainerOrdering(void)
+{
+    Floppy144WorldState sWorldA,sWorldB,sWorldC;
+    Floppy144RunState sStateA,sStateB,sStateC;
+    Floppy144CabinetState sCabinetA,sCabinetB,sCabinetC;
+    uint32_t uCount,uIndex;
+    bool bDifferent=false;
+
+    Floppy144WorldReset(&sWorldA);
+    Floppy144WorldReset(&sWorldB);
+    Floppy144WorldReset(&sWorldC);
+    Floppy144RunStateBegin(&sStateA,144U);
+    Floppy144RunStateBegin(&sStateB,144U);
+    Floppy144RunStateBegin(&sStateC,145U);
+    Floppy144CabinetReset(&sCabinetA);
+    Floppy144CabinetReset(&sCabinetB);
+    Floppy144CabinetReset(&sCabinetC);
+
+    (void)Floppy144RunStateReconstructRoom(&sStateA,FLOPPY144_ROOM_MAIN_OFFICE);
+    (void)Floppy144RunStateReconstructRoom(&sStateB,FLOPPY144_ROOM_MAIN_OFFICE);
+    (void)Floppy144RunStateReconstructRoom(&sStateC,FLOPPY144_ROOM_MAIN_OFFICE);
+
+    F144_CHECK(
+        Floppy144CabinetOpenParent(&sCabinetA,&sStateA,"MAIN_OFFICE_DESK_01") &&
+        Floppy144CabinetOpenParent(&sCabinetB,&sStateB,"MAIN_OFFICE_DESK_01") &&
+        Floppy144CabinetOpenParent(&sCabinetC,&sStateC,"MAIN_OFFICE_DESK_01"),
+        "seeded-order fixture opens the same multi-item desk in three runs"
+    );
+
+    uCount=Floppy144CabinetVisibleContentCount(&sCabinetA,&sStateA);
+
+    F144_CHECK(
+        uCount>=2U &&
+        Floppy144CabinetVisibleContentCount(&sCabinetB,&sStateB)==uCount &&
+        Floppy144CabinetVisibleContentCount(&sCabinetC,&sStateC)==uCount,
+        "seeded-order fixture has matching visible content sets"
+    );
+
+    for(uIndex=0U;uIndex<uCount;++uIndex)
+    {
+        const Floppy144DataRecord *pA=
+            Floppy144CabinetVisibleContentAt(&sCabinetA,&sStateA,uIndex);
+        const Floppy144DataRecord *pB=
+            Floppy144CabinetVisibleContentAt(&sCabinetB,&sStateB,uIndex);
+        const Floppy144DataRecord *pC=
+            Floppy144CabinetVisibleContentAt(&sCabinetC,&sStateC,uIndex);
+
+        F144_CHECK(
+            pA!=NULL&&pB!=NULL&&pA->pszId!=NULL&&pB->pszId!=NULL&&
+            strcmp(pA->pszId,pB->pszId)==0,
+            "identical recovery seeds preserve identical container ordering"
+        );
+
+        if(
+            pA!=NULL&&pC!=NULL&&pA->pszId!=NULL&&pC->pszId!=NULL&&
+            strcmp(pA->pszId,pC->pszId)!=0
+        )
+        {
+            bDifferent=true;
+        }
+    }
+
+    F144_CHECK(
+        uCount<2U || bDifferent,
+        "different recovery seeds vary the order of a multi-item container"
+    );
+}
+
 static void Floppy144TestShelvingPresentationAndRecoveredOrder(void)
 {
     Floppy144WorldState sWorld;
@@ -1133,6 +1201,7 @@ int main(void)
     Floppy144TestGeneratedCabinetDiscovery();
     Floppy144TestChairContentsContract();
     Floppy144TestGenericParentContents();
+    Floppy144TestSeededContainerOrdering();
     Floppy144TestShelvingPresentationAndRecoveredOrder();
     Floppy144TestAllCorridorDoorContainers();
     Floppy144TestDoorParentDisplayName();
