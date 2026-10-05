@@ -273,6 +273,7 @@ static void Floppy144CompletionBuild(
 )
 {
     uint32_t uRecord;
+    uint32_t uEvidenceNumber=0U;
 
     if(pBuffer==NULL)return;
     pBuffer->count=0U;
@@ -295,12 +296,13 @@ static void Floppy144CompletionBuild(
         }
 
         eEvidence=Floppy144GameDataEvidenceId(pEvidence->pszId);
+        ++uEvidenceNumber;
 
         (void)snprintf(
             szPrefix,
             sizeof(szPrefix),
-            "%s",
-            pEvidence->pszId
+            "%u.",
+            (unsigned)uEvidenceNumber
         );
 
         if(
@@ -344,11 +346,47 @@ static void Floppy144EvidenceCompleteDraw(F144Runtime *pRuntime)
     s.width=pRuntime->backbuffer.width;
     s.height=pRuntime->backbuffer.height;
 
+    uint32_t uEvidence;
+    uint32_t uRecoveredEvidence=0U;
+    uint32_t uEvidencePercent=0U;
+    char szEvidencePercent[48];
+    const char *pszTitle="RECOVERY COMPLETE";
+    const char *pszTruth="VERSION OF THE TRUTH RECOVERED";
+
     Floppy144CompletionBuild(&global_run_state,&b);
     maxTop=b.count>FLOPPY144_COMPLETION_VISIBLE_LINES
         ? b.count-FLOPPY144_COMPLETION_VISIBLE_LINES
         : 0U;
     top=global_completion_top_line>maxTop?maxTop:global_completion_top_line;
+
+    for(uEvidence=0U;uEvidence<(uint32_t)FLOPPY144_EVIDENCE_COUNT;++uEvidence)
+    {
+        if(
+            Floppy144RunStateEvidenceEstablished(
+                &global_run_state,
+                (Floppy144EvidenceId)uEvidence
+            )
+        )
+        {
+            ++uRecoveredEvidence;
+        }
+    }
+
+    if(FLOPPY144_EVIDENCE_COUNT>0)
+    {
+        uEvidencePercent=
+            (uRecoveredEvidence*100U)/
+            (uint32_t)FLOPPY144_EVIDENCE_COUNT;
+    }
+
+    (void)snprintf(
+        szEvidencePercent,
+        sizeof(szEvidencePercent),
+        "EVIDENCE RECOVERED: %u%% (%u/%u)",
+        (unsigned)uEvidencePercent,
+        (unsigned)uRecoveredEvidence,
+        (unsigned)FLOPPY144_EVIDENCE_COUNT
+    );
 
     pszOutcome=
         global_completion_evidence_resolved &&
@@ -364,16 +402,45 @@ static void Floppy144EvidenceCompleteDraw(F144Runtime *pRuntime)
     Floppy144DrawFillRect(&s,32U,24U,576U,310U,panel);
     Floppy144DrawRect(&s,32U,24U,576U,310U,border);
 
-    Floppy144DrawText(&s,50U,42U,"RECOVERY COMPLETE",2U,green);
-    Floppy144DrawText(&s,50U,68U,pszOutcome,1U,amber);
-    Floppy144DrawText(&s,50U,84U,"VERSION OF THE TRUTH RECOVERED:",1U,muted);
+    Floppy144DrawText(
+        &s,
+        320U-Floppy144DrawTextWidth(pszTitle,2U)/2U,
+        38U,
+        pszTitle,
+        2U,
+        green
+    );
+    Floppy144DrawText(
+        &s,
+        320U-Floppy144DrawTextWidth(pszOutcome,1U)/2U,
+        66U,
+        pszOutcome,
+        1U,
+        amber
+    );
+    Floppy144DrawText(
+        &s,
+        320U-Floppy144DrawTextWidth(szEvidencePercent,1U)/2U,
+        82U,
+        szEvidencePercent,
+        1U,
+        text
+    );
+    Floppy144DrawText(
+        &s,
+        320U-Floppy144DrawTextWidth(pszTruth,1U)/2U,
+        98U,
+        pszTruth,
+        1U,
+        muted
+    );
 
     for(u=0U;u<FLOPPY144_COMPLETION_VISIBLE_LINES&&top+u<b.count;++u)
     {
         Floppy144DrawText(
             &s,
             50U,
-            104U+u*15U,
+            116U+u*15U,
             b.lines[top+u],
             1U,
             text
@@ -382,7 +449,7 @@ static void Floppy144EvidenceCompleteDraw(F144Runtime *pRuntime)
 
     if(maxTop>0U)
     {
-        const uint32_t uTrackX=588U,uTrackY=104U,uTrackHeight=195U;
+        const uint32_t uTrackX=588U,uTrackY=116U,uTrackHeight=180U;
         uint32_t uThumbHeight=(uTrackHeight*FLOPPY144_COMPLETION_VISIBLE_LINES)/b.count;
         uint32_t uTravel,uThumbY;
 
@@ -397,14 +464,17 @@ static void Floppy144EvidenceCompleteDraw(F144Runtime *pRuntime)
         Floppy144DrawFillRect(&s,uTrackX+1U,uThumbY,2U,uThumbHeight,amber);
     }
 
-    Floppy144DrawText(
-        &s,
-        50U,
-        306U,
-        "UP/DOWN SCROLL   ENTER/BACKSPACE RETURN TO SITE",
-        1U,
-        muted
-    );
+    {
+        const char *pszReturn="PRESS ENTER TO RETURN";
+        Floppy144DrawText(
+            &s,
+            320U-Floppy144DrawTextWidth(pszReturn,1U)/2U,
+            306U,
+            pszReturn,
+            1U,
+            muted
+        );
+    }
 }
 
 
@@ -1708,8 +1778,32 @@ static LRESULT CALLBACK Floppy144WindowProc(
                             global_completion_capacity_exhausted
                         )
                         {
+                            /*
+                             * Freeze this achieved version of the truth before
+                             * presenting it. The profile keeps the final evidence
+                             * mask for comparison with future recoveries, while
+                             * the run itself becomes deliberately unsaveable.
+                             */
+                            (void)Floppy144DiscoveryProfileMergeRunState(
+                                &global_profile,
+                                &global_run_state
+                            );
+                            (void)Floppy144DiscoveryProfileRecordCompletion(
+                                &global_profile,
+                                &global_run_state,
+                                global_completion_evidence_resolved,
+                                global_completion_capacity_exhausted
+                            );
+                            (void)Floppy144PersistenceSaveProfile(
+                                floppy144_profile_path,
+                                &global_profile
+                            );
+
+                            global_run_state.dirty=0U;
+                            global_session_active=false;
                             global_completion_top_line=0U;
-                            global_resume_screen=FLOPPY144_SCREEN_OFFICE;
+                            global_main_menu_option=
+                                FLOPPY144_MAIN_MENU_INITIATE_SESSION;
                             global_screen=FLOPPY144_SCREEN_EVIDENCE_COMPLETE;
                         }
                         else if(
@@ -2352,8 +2446,9 @@ static LRESULT CALLBACK Floppy144WindowProc(
                             break;
 
                         case VK_RETURN:
-                        case VK_BACK:
-                            global_screen=FLOPPY144_SCREEN_OFFICE;
+                            global_main_menu_notice=NULL;
+                            global_main_menu_notice_is_warning=false;
+                            global_screen=FLOPPY144_SCREEN_MAIN_MENU;
                             global_office_notice=NULL;
                             break;
 
