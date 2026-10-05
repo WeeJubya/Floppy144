@@ -304,6 +304,70 @@ bool Floppy144DiscoveryProfileRecordEvidence
     return true;
 }
 
+bool Floppy144DiscoveryProfileRecordCompletion(
+    Floppy144DiscoveryProfile *profile,
+    const Floppy144RunState *run_state,
+    bool evidence_resolved,
+    bool capacity_exhausted
+)
+{
+    uint32_t uEvidence;
+    uint32_t uRecoveredEvidence=0U;
+
+    if(profile==NULL||run_state==NULL)return false;
+
+    memset(
+        profile->latest_completion_evidence,
+        0,
+        sizeof(profile->latest_completion_evidence)
+    );
+
+    for(uEvidence=0U;uEvidence<(uint32_t)FLOPPY144_EVIDENCE_COUNT;++uEvidence)
+    {
+        if(
+            Floppy144RunStateEvidenceEstablished(
+                run_state,
+                (Floppy144EvidenceId)uEvidence
+            )
+        )
+        {
+            (void)Floppy144DiscoveryProfileBitSet(
+                profile->latest_completion_evidence,
+                uEvidence
+            );
+            ++uRecoveredEvidence;
+        }
+    }
+
+    if(profile->completed_recoveries!=UINT32_MAX)
+    {
+        ++profile->completed_recoveries;
+    }
+
+    profile->latest_completion_evidence_percent=
+        (uint8_t)(
+            FLOPPY144_EVIDENCE_COUNT==0
+            ? 0U
+            : (uRecoveredEvidence*100U)/(uint32_t)FLOPPY144_EVIDENCE_COUNT
+        );
+
+    profile->latest_completion_flags=
+        (uint8_t)(
+            (evidence_resolved
+                ? FLOPPY144_PROFILE_COMPLETION_EVIDENCE_RESOLVED
+                : 0U) |
+            (capacity_exhausted
+                ? FLOPPY144_PROFILE_COMPLETION_CAPACITY_EXHAUSTED
+                : 0U)
+        );
+
+    profile->latest_completion_recovered_kb=
+        (uint16_t)Floppy144RunStateRecoveredKb(run_state);
+
+    profile->dirty=1U;
+    return true;
+}
+
 bool Floppy144DiscoveryProfileMergeRunState
 (
     Floppy144DiscoveryProfile *profile,
