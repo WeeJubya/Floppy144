@@ -176,3 +176,34 @@ new presentation capability.
 
 See `STAGE2_REFACTOR_NOTES.md` and `data/DATA_SCHEMA_README.md` for additional
 technical notes.
+
+## Windows user data - Stage 4
+
+Stage 4 no longer stores writable player data relative to the executable or
+process working directory. The Windows platform implementation resolves the
+roaming AppData folder with the Windows shell API and stores all production
+persistence beneath:
+
+```text
+%APPDATA%\Floppy144\
+    floppy144_manual.sav
+    floppy144_auto.sav
+    floppy144_profile.dat
+    floppy144_settings.dat
+```
+
+The discovery profile also contains the most recent completion/profile-history
+snapshot; there is no separate completion-history file.
+
+On first use of a Stage 4 path, FLOPPY//144 performs conservative Stage 3
+migration. If the AppData file already exists it always wins and is never
+overwritten by an older copy. If it does not exist, the Windows layer supplies
+the old Stage 3 working-directory path first and the executable directory as a
+second compatibility probe. A legacy file is accepted only when the existing
+Stage 3 codec can load and validate it. It is then re-saved atomically to the
+AppData path and reloaded to verify the new copy. The legacy source is left in
+place.
+
+The platform-neutral game code requests conceptual manual-save, autosave,
+profile and settings paths through `F144Platform`; it contains no
+`%APPDATA%` or Windows user-name assumptions.

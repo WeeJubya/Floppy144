@@ -25,6 +25,7 @@
 #include "floppy144_world.h"
 #include "floppy144_run_state.h"
 #include "floppy144_persistence.h"
+#include "floppy144_storage.h"
 #include "floppy144_site_2d.h"
 #include "floppy144_site_directory.h"
 #include "floppy144_site_isometric.h"
@@ -78,10 +79,7 @@ static Floppy144WorldState global_world;
 static Floppy144RunState global_run_state;
 static Floppy144RunState global_recorded_run_state;
 
-static const char floppy144_manual_save_path[] = "floppy144_manual.sav";
-static const char floppy144_autosave_path[] = "floppy144_auto.sav";
-static const char floppy144_profile_path[] = "floppy144_profile.dat";
-static const char floppy144_settings_path[] = "floppy144_settings.dat";
+static Floppy144StoragePaths global_storage_paths;
 
 static bool global_recorded_session_available;
 static bool global_recorded_session_is_autosave;
@@ -607,25 +605,6 @@ static void Floppy144Redraw(
     );
 }
 
-static bool Floppy144PersistenceFileExists(
-    const char *path
-)
-{
-    DWORD attributes;
-
-    if(path == NULL)
-    {
-        return false;
-    }
-
-    attributes =
-    GetFileAttributesA(path);
-
-    return
-    attributes != INVALID_FILE_ATTRIBUTES &&
-    !(attributes & FILE_ATTRIBUTE_DIRECTORY);
-}
-
 static const char *Floppy144PersistenceWarningText(
     void
 )
@@ -678,12 +657,12 @@ static bool Floppy144RecordedSessionAvailable(
 
     manual_exists =
     Floppy144PersistenceFileExists(
-        floppy144_manual_save_path
+        Floppy144StoragePath(&global_storage_paths,F144_PERSISTENCE_MANUAL_SAVE)
     );
 
     autosave_exists =
     Floppy144PersistenceFileExists(
-        floppy144_autosave_path
+        Floppy144StoragePath(&global_storage_paths,F144_PERSISTENCE_AUTOSAVE)
     );
 
     /*
@@ -708,7 +687,7 @@ static bool Floppy144RecordedSessionAvailable(
      */
     if(
         Floppy144PersistenceLoadRunState(
-            floppy144_manual_save_path,
+            Floppy144StoragePath(&global_storage_paths,F144_PERSISTENCE_MANUAL_SAVE),
             &global_recorded_run_state
         )
     )
@@ -725,7 +704,7 @@ static bool Floppy144RecordedSessionAvailable(
 
     if(
         Floppy144PersistenceLoadRunState(
-            floppy144_autosave_path,
+            Floppy144StoragePath(&global_storage_paths,F144_PERSISTENCE_AUTOSAVE),
             &global_recorded_run_state
         )
     )
@@ -764,7 +743,7 @@ static void Floppy144UpdateDiscoveryProfile(
     if(global_profile.dirty != 0U)
     {
         Floppy144PersistenceSaveProfile(
-            floppy144_profile_path,
+            Floppy144StoragePath(&global_storage_paths,F144_PERSISTENCE_PROFILE),
             &global_profile
         );
     }
@@ -942,7 +921,7 @@ static void Floppy144MainMenuActivate(
                 );
 
                 Floppy144PersistenceSaveProfile(
-                    floppy144_profile_path,
+                    Floppy144StoragePath(&global_storage_paths,F144_PERSISTENCE_PROFILE),
                     &global_profile
                 );
             }
@@ -1013,7 +992,7 @@ static void Floppy144MainMenuActivate(
             if(
                 global_session_active &&
                 Floppy144PersistenceSaveRunState(
-                    floppy144_manual_save_path,
+                    Floppy144StoragePath(&global_storage_paths,F144_PERSISTENCE_MANUAL_SAVE),
                     &global_run_state
                 )
             )
@@ -1055,8 +1034,8 @@ static void Floppy144MainMenuActivate(
                 global_recorded_session_available &&
                 Floppy144PersistenceLoadRunState(
                     global_recorded_session_is_autosave
-                    ? floppy144_autosave_path
-                    : floppy144_manual_save_path,
+                    ? Floppy144StoragePath(&global_storage_paths,F144_PERSISTENCE_AUTOSAVE)
+                    : Floppy144StoragePath(&global_storage_paths,F144_PERSISTENCE_MANUAL_SAVE),
                     &global_run_state
                 )
             )
@@ -1740,7 +1719,7 @@ static bool Floppy144HandleTextInput(
                                 global_completion_capacity_exhausted
                             );
                             (void)Floppy144PersistenceSaveProfile(
-                                floppy144_profile_path,
+                                Floppy144StoragePath(&global_storage_paths,F144_PERSISTENCE_PROFILE),
                                 &global_profile
                             );
 
@@ -2851,7 +2830,7 @@ static LRESULT CALLBACK Floppy144WindowProc(
 
                     if(
                         Floppy144PersistenceSaveRunState(
-                            floppy144_autosave_path,
+                            Floppy144StoragePath(&global_storage_paths,F144_PERSISTENCE_AUTOSAVE),
                             &global_run_state
                         )
                     )
@@ -3174,8 +3153,72 @@ int CALLBACK WinMain(
     global_persistence_warnings =
         FLOPPY144_PERSISTENCE_WARNING_NONE;
 
-    global_recorded_session_available =
-        Floppy144RecordedSessionAvailable();
+    {
+        uint32_t migration_failures;
+
+        if(
+            Floppy144StorageResolve(
+                &global_platform,
+                &global_storage_paths
+            )
+        )
+        {
+            migration_failures =
+                Floppy144StorageMigrateLegacy(
+                    &global_platform,
+                    &global_storage_paths
+                );
+        }
+        else
+        {
+            migration_failures =
+                (1U << (uint32_t)F144_PERSISTENCE_FILE_COUNT) - 1U;
+        }
+
+        global_recorded_session_available =
+            Floppy144RecordedSessionAvailable();
+
+        /*
+         * Recorded-session availability clears its own load warning while it
+         * probes the new paths, so migration/path failures are applied after
+         * that check. Profile/settings failures remain independent warnings.
+         */
+        if(
+            (
+                migration_failures &
+                (
+                    (1U << (uint32_t)F144_PERSISTENCE_MANUAL_SAVE) |
+                    (1U << (uint32_t)F144_PERSISTENCE_AUTOSAVE)
+                )
+            ) != 0U
+        )
+        {
+            global_persistence_warnings |=
+                FLOPPY144_PERSISTENCE_WARNING_SAVE;
+        }
+
+        if(
+            (
+                migration_failures &
+                (1U << (uint32_t)F144_PERSISTENCE_PROFILE)
+            ) != 0U
+        )
+        {
+            global_persistence_warnings |=
+                FLOPPY144_PERSISTENCE_WARNING_PROFILE;
+        }
+
+        if(
+            (
+                migration_failures &
+                (1U << (uint32_t)F144_PERSISTENCE_SETTINGS)
+            ) != 0U
+        )
+        {
+            global_persistence_warnings |=
+                FLOPPY144_PERSISTENCE_WARNING_SETTINGS;
+        }
+    }
 
     global_main_menu_option =
         FLOPPY144_MAIN_MENU_INITIATE_SESSION;
@@ -3198,12 +3241,12 @@ int CALLBACK WinMain(
     {
         bool profile_file_exists =
         Floppy144PersistenceFileExists(
-            floppy144_profile_path
+            Floppy144StoragePath(&global_storage_paths,F144_PERSISTENCE_PROFILE)
         );
 
         if(
             !Floppy144PersistenceLoadProfile(
-                floppy144_profile_path,
+                Floppy144StoragePath(&global_storage_paths,F144_PERSISTENCE_PROFILE),
                 &global_profile
             )
         )
@@ -3223,12 +3266,12 @@ int CALLBACK WinMain(
     {
         bool settings_file_exists =
         Floppy144PersistenceFileExists(
-            floppy144_settings_path
+            Floppy144StoragePath(&global_storage_paths,F144_PERSISTENCE_SETTINGS)
         );
 
         if(
             !Floppy144PersistenceLoadSettings(
-                floppy144_settings_path,
+                Floppy144StoragePath(&global_storage_paths,F144_PERSISTENCE_SETTINGS),
                 &global_settings
             )
         )
@@ -3244,7 +3287,7 @@ int CALLBACK WinMain(
             }
 
             Floppy144PersistenceSaveSettings(
-                floppy144_settings_path,
+                Floppy144StoragePath(&global_storage_paths,F144_PERSISTENCE_SETTINGS),
                 &global_settings
             );
         }

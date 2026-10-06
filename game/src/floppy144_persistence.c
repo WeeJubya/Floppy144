@@ -527,6 +527,25 @@ bool Floppy144PersistenceHeaderValid
     return false;
 }
 
+bool Floppy144PersistenceFileExists(
+    const char *path
+)
+{
+    DWORD attributes;
+
+    if(path == NULL || path[0] == '\0')
+    {
+        return false;
+    }
+
+    attributes =
+        GetFileAttributesA(path);
+
+    return
+        attributes != INVALID_FILE_ATTRIBUTES &&
+        (attributes & FILE_ATTRIBUTE_DIRECTORY) == 0U;
+}
+
 bool Floppy144PersistenceSaveRunState
 (
     const char *path,

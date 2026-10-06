@@ -62,6 +62,19 @@ Room rules:
 
 The player has no separate prototype Office-player object. Canonical position lives in `Floppy144RunState.player_site_x` / `player_site_y` using Site fixed-point coordinates.
 
+## Persistence ownership
+
+`floppy144_persistence.c` owns the existing versioned bytes, checksums and
+save/profile/settings compatibility rules. `floppy144_storage.c` owns the
+platform-neutral set of conceptual persistence locations and conservative
+legacy migration.
+
+The game asks `F144Platform` for manual-save, autosave, profile and settings
+paths. On Windows, `src/f144_win32_storage.c` resolves those locations under
+`%APPDATA%\Floppy144`, creates the data directory when required, and exposes
+the old Stage 3 working-directory / executable-directory paths only for
+migration. Game code must not construct Windows user-data paths directly.
+
 ## Site Exploration flow
 
 ```text

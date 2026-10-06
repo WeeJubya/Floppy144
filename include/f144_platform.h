@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -73,6 +74,17 @@ typedef struct F144TextInputEvent
     uint32_t codepoint;
 } F144TextInputEvent;
 
+#define F144_PLATFORM_PATH_CAPACITY 512U
+
+typedef enum F144PersistenceFile
+{
+    F144_PERSISTENCE_MANUAL_SAVE = 0,
+    F144_PERSISTENCE_AUTOSAVE,
+    F144_PERSISTENCE_PROFILE,
+    F144_PERSISTENCE_SETTINGS,
+    F144_PERSISTENCE_FILE_COUNT
+} F144PersistenceFile;
+
 typedef struct Floppy144Surface
 {
     uint32_t *pixels;
@@ -86,6 +98,21 @@ typedef struct F144PlatformApi
 {
     Floppy144Surface *(*framebuffer)(F144Platform *platform);
     void (*present)(F144Platform *platform);
+
+    bool (*persistence_path)(
+        F144Platform *platform,
+        F144PersistenceFile file,
+        char *path,
+        uint32_t path_capacity
+    );
+
+    bool (*legacy_persistence_path)(
+        F144Platform *platform,
+        F144PersistenceFile file,
+        uint32_t candidate,
+        char *path,
+        uint32_t path_capacity
+    );
 } F144PlatformApi;
 
 struct F144Platform
@@ -101,4 +128,19 @@ Floppy144Surface *f144PlatformFramebuffer(
 
 void f144PlatformPresent(
     F144Platform *platform
+);
+
+bool f144PlatformPersistencePath(
+    F144Platform *platform,
+    F144PersistenceFile file,
+    char *path,
+    uint32_t path_capacity
+);
+
+bool f144PlatformLegacyPersistencePath(
+    F144Platform *platform,
+    F144PersistenceFile file,
+    uint32_t candidate,
+    char *path,
+    uint32_t path_capacity
 );

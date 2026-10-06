@@ -95,12 +95,52 @@ static void TestPresent(F144Platform *platform)
     (void)platform;
 }
 
+static bool TestPersistencePath(
+    F144Platform *platform,
+    F144PersistenceFile file,
+    char *path,
+    uint32_t path_capacity
+)
+{
+    (void)platform;
+    (void)file;
+
+    if(path == NULL || path_capacity < 2U)
+    {
+        return false;
+    }
+
+    path[0] = 'x';
+    path[1] = '\0';
+    return true;
+}
+
+static bool TestLegacyPersistencePath(
+    F144Platform *platform,
+    F144PersistenceFile file,
+    uint32_t candidate,
+    char *path,
+    uint32_t path_capacity
+)
+{
+    (void)candidate;
+
+    return TestPersistencePath(
+        platform,
+        file,
+        path,
+        path_capacity
+    );
+}
+
 int Floppy144Stage4PlatformHeaderCompileTest(void)
 {
     F144PlatformApi api =
     {
         TestFramebuffer,
-        TestPresent
+        TestPresent,
+        TestPersistencePath,
+        TestLegacyPersistencePath
     };
     F144Platform platform = {0};
 
@@ -109,6 +149,37 @@ int Floppy144Stage4PlatformHeaderCompileTest(void)
     if(f144PlatformFramebuffer(&platform) != &platform.surface)
     {
         return 1;
+    }
+
+    {
+        char path[F144_PLATFORM_PATH_CAPACITY];
+
+        if(
+            !f144PlatformPersistencePath(
+                &platform,
+                F144_PERSISTENCE_MANUAL_SAVE,
+                path,
+                (uint32_t)sizeof(path)
+            ) ||
+            path[0] != 'x'
+        )
+        {
+            return 2;
+        }
+
+        if(
+            !f144PlatformLegacyPersistencePath(
+                &platform,
+                F144_PERSISTENCE_PROFILE,
+                0U,
+                path,
+                (uint32_t)sizeof(path)
+            ) ||
+            path[0] != 'x'
+        )
+        {
+            return 3;
+        }
     }
 
     f144PlatformPresent(&platform);

@@ -84,9 +84,11 @@ files({
     "./src/f144_platform.c",
     "./src/f144_win32_input.c",
     "./src/f144_win32_platform.c",
+    "./src/f144_win32_storage.c",
     "./include/f144_platform.h",
     "./include/f144_win32_input.h",
-    "./include/f144_win32_platform.h"
+    "./include/f144_win32_platform.h",
+    "./include/f144_win32_storage.h"
 })
 
 includedirs({
@@ -107,7 +109,8 @@ defines({
 links({
     "F144 Runtime",
     "user32",
-    "gdi32"
+    "gdi32",
+    "shell32"
 })
 
 buildoptions({

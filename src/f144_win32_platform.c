@@ -1,6 +1,7 @@
 #include "f144_runtime.h"
 
 #include "f144_win32_platform.h"
+#include "f144_win32_storage.h"
 
 #include <stdio.h>
 
@@ -483,7 +484,9 @@ static void f144Win32PlatformPresent(
 static const F144PlatformApi f144_win32_platform_api =
 {
     f144Win32PlatformFramebuffer,
-    f144Win32PlatformPresent
+    f144Win32PlatformPresent,
+    f144Win32PlatformPersistencePath,
+    f144Win32PlatformLegacyPersistencePath
 };
 
 void f144Win32PlatformBind(

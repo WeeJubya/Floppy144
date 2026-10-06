@@ -114,6 +114,10 @@ bool Floppy144PersistenceHeaderValid
  uint32_t expected_payload_size
 );
 
+bool Floppy144PersistenceFileExists(
+    const char *path
+);
+
 bool Floppy144PersistenceSaveRunState
 (
     const char *path,
