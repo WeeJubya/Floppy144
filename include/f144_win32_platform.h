@@ -1,5 +1,6 @@
 #pragma once
 
+#include "f144_platform.h"
 #include "f144_runtime.h"
 
 #include <stdint.h>
@@ -48,3 +49,9 @@ EXPORT void f144Win32LoadText
     uint32_t   offsetY
 );
 
+
+EXPORT void f144Win32PlatformBind
+(
+    F144Platform *platform,
+    F144Runtime *runtime
+);

@@ -3959,7 +3959,7 @@ static const char *Floppy144Site2DRoomLabel(
 }
 
 void Floppy144Site2DDraw(
-    F144Runtime *runtime,
+    Floppy144Surface *pSurface,
     const Floppy144RunState *run_state,
     const char *notice
 )
@@ -4002,22 +4002,15 @@ void Floppy144Site2DDraw(
     bool room_reconstructed;
 
     if(
-        runtime == NULL ||
+        pSurface == NULL ||
         run_state == NULL ||
-        runtime->backbuffer.data == NULL
+        pSurface->pixels == NULL
     )
     {
         return;
     }
 
-    surface.pixels =
-        (uint32_t *)runtime->backbuffer.data;
-
-    surface.width =
-        runtime->backbuffer.width;
-
-    surface.height =
-        runtime->backbuffer.height;
+    surface = *pSurface;
 
     active_room =
         Floppy144SiteRoomAtPosition(

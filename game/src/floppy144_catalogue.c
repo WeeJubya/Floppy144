@@ -1798,16 +1798,22 @@ bool Floppy144CatalogueDocumentOpen(
  */
 
 void Floppy144CatalogueDraw(
-    F144Runtime *engine,
+    Floppy144Surface *pSurface,
     const Floppy144CatalogueState *catalogue
 )
 {
-    Floppy144Surface surface =
+    Floppy144Surface surface;
+
+    if(
+        pSurface == NULL ||
+        pSurface->pixels == NULL ||
+        catalogue == NULL
+    )
     {
-        (uint32_t *)engine->backbuffer.data,
-        engine->backbuffer.width,
-        engine->backbuffer.height
-    };
+        return;
+    }
+
+    surface = *pSurface;
 
     switch(catalogue->document_open)
     {

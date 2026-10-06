@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - development/stage-3c-complete
+      - Stage4
   workflow_dispatch:
 
 jobs:
@@ -34,6 +35,10 @@ jobs:
       - name: Stage 3B regression
         shell: pwsh
         run: .\tools\test_stage3b.ps1
+
+      - name: Stage 4 platform boundary
+        shell: pwsh
+        run: .\tools\test_stage4_platform.ps1
 
       - name: Install Premake
         shell: pwsh

@@ -2225,7 +2225,7 @@ static void Floppy144CabinetDrawInterior(
 }
 
 void Floppy144CabinetDraw(
-    F144Runtime *pRuntime,
+    Floppy144Surface *pSurface,
     const Floppy144CabinetState *pCabinet,
     const Floppy144RunState *pRunState
 )
@@ -2234,18 +2234,16 @@ void Floppy144CabinetDraw(
     const uint32_t uBackground = FLOPPY144_RGB(8, 13, 11);
 
     if(
-        pRuntime == NULL ||
+        pSurface == NULL ||
         pCabinet == NULL ||
         pRunState == NULL ||
-        pRuntime->backbuffer.data == NULL
+        pSurface->pixels == NULL
     )
     {
         return;
     }
 
-    sSurface.pixels = (uint32_t *)pRuntime->backbuffer.data;
-    sSurface.width = pRuntime->backbuffer.width;
-    sSurface.height = pRuntime->backbuffer.height;
+    sSurface = *pSurface;
 
     Floppy144DrawClear(&sSurface, uBackground);
 

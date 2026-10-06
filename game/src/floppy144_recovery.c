@@ -56,7 +56,7 @@ static void Floppy144RecoveryTextCentred(
  */
 
 void Floppy144SplashDraw(
-    F144Runtime *engine,
+    Floppy144Surface *pSurface,
     uint32_t elapsed_milliseconds
 )
 {
@@ -149,12 +149,17 @@ void Floppy144SplashDraw(
     uint32_t question_target_x;
     uint32_t question_width;
 
-    Floppy144Surface surface =
+    Floppy144Surface surface;
+
+    if(
+        pSurface == NULL ||
+        pSurface->pixels == NULL
+    )
     {
-        (uint32_t *)engine->backbuffer.data,
-        engine->backbuffer.width,
-        engine->backbuffer.height
-    };
+        return;
+    }
+
+    surface = *pSurface;
 
     /*
      * Smoothstep disk flight.
@@ -715,7 +720,7 @@ bool Floppy144MainMenuOptionEnabled(
  */
 
 void Floppy144MainMenuDraw(
-    F144Runtime *engine,
+    Floppy144Surface *pSurface,
     Floppy144MainMenuOption selected_option,
     bool active_session,
     bool recorded_session_available,
@@ -777,12 +782,17 @@ void Floppy144MainMenuDraw(
     uint32_t status_colour;
     uint32_t option_index;
 
-    Floppy144Surface surface =
+    Floppy144Surface surface;
+
+    if(
+        pSurface == NULL ||
+        pSurface->pixels == NULL
+    )
     {
-        (uint32_t *)engine->backbuffer.data,
-        engine->backbuffer.width,
-        engine->backbuffer.height
-    };
+        return;
+    }
+
+    surface = *pSurface;
 
     if(
         selected_option < 0 ||

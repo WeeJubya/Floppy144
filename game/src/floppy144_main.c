@@ -8,6 +8,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
+#include "f144_platform.h"
 #include "f144_runtime.h"
 #include "f144_win32_platform.h"
 
@@ -61,6 +62,7 @@ typedef enum Floppy144Screen
  */
 
 static F144Runtime *global_runtime;
+static F144Platform global_platform;
 
 static Floppy144Screen global_screen;
 static Floppy144TerminalState global_terminal;
@@ -332,7 +334,7 @@ static void Floppy144CompletionBuild(
     }
 }
 
-static void Floppy144EvidenceCompleteDraw(F144Runtime *pRuntime)
+static void Floppy144EvidenceCompleteDraw(Floppy144Surface *pSurface)
 {
     const uint32_t bg=FLOPPY144_RGB(11,16,18),panel=FLOPPY144_RGB(22,31,33),border=FLOPPY144_RGB(86,103,107),text=FLOPPY144_RGB(202,211,205),muted=FLOPPY144_RGB(118,133,132),amber=FLOPPY144_RGB(194,153,76),green=FLOPPY144_RGB(100,156,111);
     Floppy144Surface s;
@@ -340,11 +342,9 @@ static void Floppy144EvidenceCompleteDraw(F144Runtime *pRuntime)
     uint32_t u,top,maxTop;
     const char *pszOutcome;
 
-    if(pRuntime==NULL||pRuntime->backbuffer.data==NULL)return;
+    if(pSurface==NULL||pSurface->pixels==NULL)return;
 
-    s.pixels=(uint32_t*)pRuntime->backbuffer.data;
-    s.width=pRuntime->backbuffer.width;
-    s.height=pRuntime->backbuffer.height;
+    s=*pSurface;
 
     uint32_t uEvidence;
     uint32_t uRecoveredEvidence=0U;
@@ -479,6 +479,14 @@ static void Floppy144Redraw(
     HWND window
 )
 {
+    Floppy144Surface *pSurface =
+        f144PlatformFramebuffer(&global_platform);
+
+    if(pSurface == NULL)
+    {
+        return;
+    }
+
     switch(global_screen)
     {
         case FLOPPY144_SCREEN_SPLASH:
@@ -488,7 +496,7 @@ static void Floppy144Redraw(
                 global_splash_started_ticks;
 
             Floppy144SplashDraw(
-                global_runtime,
+                pSurface,
                 (uint32_t)elapsed_milliseconds
             );
 
@@ -497,7 +505,7 @@ static void Floppy144Redraw(
         case FLOPPY144_SCREEN_MAIN_MENU:
         {
             Floppy144MainMenuDraw(
-                global_runtime,
+                pSurface,
                 global_main_menu_option,
                 global_session_active,
                 global_recorded_session_available,
@@ -520,7 +528,7 @@ static void Floppy144Redraw(
              * is retained in source for a later release.
              */
             Floppy144Site2DDraw(
-                global_runtime,
+                pSurface,
                 &global_run_state,
                 global_office_notice
             );
@@ -531,7 +539,7 @@ static void Floppy144Redraw(
         case FLOPPY144_SCREEN_SITE_DIRECTORY:
         {
             Floppy144SiteDirectoryDraw(
-                global_runtime,
+                pSurface,
                 &global_run_state
             );
 
@@ -542,7 +550,7 @@ static void Floppy144Redraw(
         case FLOPPY144_SCREEN_CABINET:
         {
             Floppy144CabinetDraw(
-                global_runtime,
+                pSurface,
                 &global_cabinet,
                 &global_run_state
             );
@@ -553,7 +561,7 @@ static void Floppy144Redraw(
         case FLOPPY144_SCREEN_NOTEBOOK:
         {
             Floppy144NotebookViewDraw(
-                global_runtime,
+                pSurface,
                 &global_notebook,
                 &global_run_state
             );
@@ -563,14 +571,14 @@ static void Floppy144Redraw(
 
         case FLOPPY144_SCREEN_EVIDENCE_COMPLETE:
         {
-            Floppy144EvidenceCompleteDraw(global_runtime);
+            Floppy144EvidenceCompleteDraw(pSurface);
             break;
         }
 
         case FLOPPY144_SCREEN_TERMINAL:
         {
             Floppy144TerminalDraw(
-                global_runtime,
+                pSurface,
                 &global_terminal,
                 &global_run_state
             );
@@ -581,7 +589,7 @@ static void Floppy144Redraw(
         case FLOPPY144_SCREEN_CATALOGUE:
         {
             Floppy144CatalogueDraw(
-                global_runtime,
+                pSurface,
                 &global_catalogue
             );
 
@@ -2826,15 +2834,14 @@ static LRESULT CALLBACK Floppy144WindowProc(
 
             if(
                 global_runtime &&
-                global_runtime->bltBuffer &&
                 global_runtime->backbuffer.data
             )
             {
                 global_runtime->context =
                     device_context;
 
-                global_runtime->bltBuffer(
-                    global_runtime
+                f144PlatformPresent(
+                    &global_platform
                 );
             }
 
@@ -2980,6 +2987,11 @@ int CALLBACK WinMain(
     runtime.config.canvas_height = 360;
 
     Floppy144BindStaticRenderer(
+        &runtime
+    );
+
+    f144Win32PlatformBind(
+        &global_platform,
         &runtime
     );
 
@@ -3169,7 +3181,7 @@ int CALLBACK WinMain(
     }
 
     Floppy144SplashDraw(
-        &runtime,
+        f144PlatformFramebuffer(&global_platform),
         0U
     );
 
@@ -3182,7 +3194,7 @@ int CALLBACK WinMain(
         GetTickCount();
 
     Floppy144SplashDraw(
-        &runtime,
+        f144PlatformFramebuffer(&global_platform),
         0U
     );
 

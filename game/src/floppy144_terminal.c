@@ -4514,7 +4514,7 @@ bool Floppy144TerminalCanOpenCatalogue(
 }
 
 void Floppy144TerminalDraw(
-    F144Runtime *runtime,
+    Floppy144Surface *pSurface,
     const Floppy144TerminalState *terminal,
     const Floppy144RunState *run_state
 )
@@ -4525,17 +4525,25 @@ void Floppy144TerminalDraw(
     const uint32_t text = FLOPPY144_RGB(127, 196, 146);
     const uint32_t muted = FLOPPY144_RGB(76, 119, 91);
     const uint32_t bright = FLOPPY144_RGB(172, 231, 183);
-    Floppy144Surface surface =
-    {
-        (uint32_t *)runtime->backbuffer.data,
-        runtime->backbuffer.width,
-        runtime->backbuffer.height
-    };
+    Floppy144Surface surface;
     char site_status[64];
     char prompt[FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
     uint32_t line_index;
     uint32_t output_y = 84U;
-    bool pager_active =
+    bool pager_active;
+
+    if(
+        pSurface == NULL ||
+        terminal == NULL ||
+        run_state == NULL ||
+        pSurface->pixels == NULL
+    )
+    {
+        return;
+    }
+
+    surface = *pSurface;
+    pager_active =
         terminal->record_pager_active ||
         terminal->help_pager_active;
 

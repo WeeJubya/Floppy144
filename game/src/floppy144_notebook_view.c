@@ -85,15 +85,15 @@ void Floppy144NotebookViewMove(
 }
 
 void Floppy144NotebookViewDraw(
-    F144Runtime *pRuntime,
+    Floppy144Surface *pSurface,
     const Floppy144NotebookViewState *pNotebook,
     const Floppy144RunState *pRunState
 )
 {
     const uint32_t bg=FLOPPY144_RGB(16,15,13),panel=FLOPPY144_RGB(42,39,32),page=FLOPPY144_RGB(61,57,46),border=FLOPPY144_RGB(112,103,80),text=FLOPPY144_RGB(218,211,184),muted=FLOPPY144_RGB(143,135,111),amber=FLOPPY144_RGB(194,153,76);
     Floppy144Surface s;Floppy144NotebookRenderBuffer b;uint32_t top,u,count;char status[64];
-    if(pRuntime==NULL||pNotebook==NULL||pRunState==NULL||pRuntime->backbuffer.data==NULL)return;
-    s.pixels=(uint32_t*)pRuntime->backbuffer.data;s.width=pRuntime->backbuffer.width;s.height=pRuntime->backbuffer.height;
+    if(pSurface==NULL||pNotebook==NULL||pRunState==NULL||pSurface->pixels==NULL)return;
+    s=*pSurface;
     Floppy144NotebookBuild(pRunState,&b);count=Floppy144GameDataNotebookOrderedCount(pRunState);top=pNotebook->top_line;
     if(b.count<=FLOPPY144_NOTEBOOK_VISIBLE_LINES)top=0U;else if(top>b.count-FLOPPY144_NOTEBOOK_VISIBLE_LINES)top=b.count-FLOPPY144_NOTEBOOK_VISIBLE_LINES;
     (void)snprintf(status,sizeof(status),"%u NOTES  LINE %u/%u",(unsigned)count,(unsigned)(b.count?top+1U:0U),(unsigned)b.count);

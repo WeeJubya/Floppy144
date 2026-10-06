@@ -2324,7 +2324,7 @@ static void Floppy144IsometricDirectoryDrawRoomLabels(
 }
 
 void Floppy144SiteIsometricDirectoryDraw(
-    F144Runtime *pRuntime,
+    Floppy144Surface *pSurface,
     const Floppy144RunState *pRunState
 )
 {
@@ -2340,17 +2340,15 @@ void Floppy144SiteIsometricDirectoryDraw(
     uint32_t uCount;
 
     if(
-        pRuntime==NULL ||
+        pSurface==NULL ||
         pRunState==NULL ||
-        pRuntime->backbuffer.data==NULL
+        pSurface->pixels==NULL
     )
     {
         return;
     }
 
-    sSurface.pixels=(uint32_t*)pRuntime->backbuffer.data;
-    sSurface.width=pRuntime->backbuffer.width;
-    sSurface.height=pRuntime->backbuffer.height;
+    sSurface=*pSurface;
 
     Floppy144DrawClear(&sSurface,uBackground);
     Floppy144IsometricConfigureDirectoryProjection();
@@ -2451,7 +2449,7 @@ void Floppy144SiteIsometricDirectoryDraw(
 }
 
 void Floppy144SiteIsometricDraw(
-    F144Runtime *pRuntime,
+    Floppy144Surface *pSurface,
     const Floppy144RunState *pRunState,
     const char *pszNotice
 )
@@ -2480,17 +2478,15 @@ void Floppy144SiteIsometricDraw(
     int32_t nPlayerDepth;
 
     if(
-        pRuntime==NULL ||
+        pSurface==NULL ||
         pRunState==NULL ||
-        pRuntime->backbuffer.data==NULL
+        pSurface->pixels==NULL
     )
     {
         return;
     }
 
-    sSurface.pixels=(uint32_t *)pRuntime->backbuffer.data;
-    sSurface.width=pRuntime->backbuffer.width;
-    sSurface.height=pRuntime->backbuffer.height;
+    sSurface=*pSurface;
 
     eActiveRoom=Floppy144SiteRoomAtPosition(
         pRunState->player_site_x,

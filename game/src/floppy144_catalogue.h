@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "f144_runtime.h"
+#include "floppy144_draw.h"
 
 #include "floppy144_collection.h"
 
@@ -109,6 +109,6 @@ bool Floppy144CatalogueDocumentOpen(
 );
 
 void Floppy144CatalogueDraw(
-    F144Runtime *engine,
+    Floppy144Surface *engine,
     const Floppy144CatalogueState *catalogue
 );

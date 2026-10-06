@@ -414,3 +414,96 @@ void f144Win32LoadText
         }
     }
 }
+
+/*
+ * Stage 4 platform boundary adapter
+ *
+ * The existing Win32 runtime remains the native implementation for S4B-01.
+ * FLOPPY//144 game screens now see only the platform-neutral framebuffer
+ * surface, while presentation is dispatched through F144PlatformApi.
+ */
+static Floppy144Surface *f144Win32PlatformFramebuffer(
+    F144Platform *platform
+)
+{
+    F144Runtime *runtime;
+
+    if(platform == NULL)
+    {
+        return NULL;
+    }
+
+    runtime =
+        (F144Runtime *)platform->state;
+
+    if(
+        runtime == NULL ||
+        runtime->backbuffer.data == NULL
+    )
+    {
+        return NULL;
+    }
+
+    platform->surface.pixels =
+        (uint32_t *)runtime->backbuffer.data;
+    platform->surface.width =
+        runtime->backbuffer.width;
+    platform->surface.height =
+        runtime->backbuffer.height;
+
+    return &platform->surface;
+}
+
+static void f144Win32PlatformPresent(
+    F144Platform *platform
+)
+{
+    F144Runtime *runtime;
+
+    if(platform == NULL)
+    {
+        return;
+    }
+
+    runtime =
+        (F144Runtime *)platform->state;
+
+    if(
+        runtime == NULL ||
+        runtime->bltBuffer == NULL ||
+        runtime->backbuffer.data == NULL
+    )
+    {
+        return;
+    }
+
+    runtime->bltBuffer(runtime);
+}
+
+static const F144PlatformApi f144_win32_platform_api =
+{
+    f144Win32PlatformFramebuffer,
+    f144Win32PlatformPresent
+};
+
+void f144Win32PlatformBind(
+    F144Platform *platform,
+    F144Runtime *runtime
+)
+{
+    if(platform == NULL)
+    {
+        return;
+    }
+
+    platform->api =
+        &f144_win32_platform_api;
+    platform->state =
+        runtime;
+    platform->surface.pixels =
+        NULL;
+    platform->surface.width =
+        0U;
+    platform->surface.height =
+        0U;
+}

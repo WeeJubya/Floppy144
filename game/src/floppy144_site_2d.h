@@ -9,11 +9,11 @@
 
 #pragma once
 
-#include "f144_runtime.h"
+#include "floppy144_draw.h"
 #include "floppy144_run_state.h"
 
 void Floppy144Site2DDraw(
-    F144Runtime *runtime,
+    Floppy144Surface *runtime,
     const Floppy144RunState *run_state,
     const char *notice
 );

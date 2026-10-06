@@ -7,10 +7,10 @@
 
 #pragma once
 
-#include "f144_runtime.h"
+#include "floppy144_draw.h"
 #include "floppy144_run_state.h"
 
 void Floppy144SiteDirectoryDraw(
-    F144Runtime *pRuntime,
+    Floppy144Surface *pRuntime,
     const Floppy144RunState *pRunState
 );

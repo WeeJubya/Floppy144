@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include "f144_platform.h"
+
 #include <stdint.h>
 
 /*
@@ -16,12 +18,7 @@
  * memory; these routines only write colours into it.
  */
 
-typedef struct Floppy144Surface
-{
-    uint32_t *pixels;
-    uint32_t width;
-    uint32_t height;
-} Floppy144Surface;
+/* Floppy144Surface is defined by the platform-neutral F144 contract. */
 
 /*
  * Colour packing

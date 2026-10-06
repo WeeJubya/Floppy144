@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "f144_runtime.h"
+#include "floppy144_draw.h"
 #include "floppy144_run_state.h"
 #include "floppy144_world.h"
 
@@ -45,7 +45,7 @@ bool Floppy144MainMenuOptionEnabled(
  */
 
 void Floppy144SplashDraw(
-    F144Runtime *runtime,
+    Floppy144Surface *runtime,
     uint32_t elapsed_milliseconds
 );
 
@@ -59,7 +59,7 @@ void Floppy144RecoveryFormatCapacity(
 );
 
 void Floppy144MainMenuDraw(
-    F144Runtime *runtime,
+    Floppy144Surface *runtime,
     Floppy144MainMenuOption selected_option,
     bool active_session,
     bool recorded_session_available,

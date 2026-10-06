@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "f144_runtime.h"
+#include "floppy144_draw.h"
 
 #include "floppy144_game_data.h"
 #include "floppy144_run_state.h"
@@ -163,7 +163,7 @@ bool Floppy144CabinetBackspace(
 );
 
 void Floppy144CabinetDraw(
-    F144Runtime *pRuntime,
+    Floppy144Surface *pRuntime,
     const Floppy144CabinetState *pCabinet,
     const Floppy144RunState *pRunState
 );

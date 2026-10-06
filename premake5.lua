@@ -81,7 +81,9 @@ objdir("obj/Floppy144/%{cfg.buildcfg}/%{cfg.platform}")
 files({
     "./game/src/**.c",
     "./game/src/**.h",
+    "./src/f144_platform.c",
     "./src/f144_win32_platform.c",
+    "./include/f144_platform.h",
     "./include/f144_win32_platform.h"
 })
 

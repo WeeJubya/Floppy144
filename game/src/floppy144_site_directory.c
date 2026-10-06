@@ -247,7 +247,7 @@ static void Floppy144SiteDirectoryDrawRoomLabel(
 }
 
 void Floppy144SiteDirectoryDraw(
-    F144Runtime *pRuntime,
+    Floppy144Surface *pSurface,
     const Floppy144RunState *pRunState
 )
 {
@@ -267,20 +267,15 @@ void Floppy144SiteDirectoryDraw(
     uint32_t uTitleWidth;
 
     if(
-        pRuntime == NULL ||
+        pSurface == NULL ||
         pRunState == NULL ||
-        pRuntime->backbuffer.data == NULL
+        pSurface->pixels == NULL
     )
     {
         return;
     }
 
-    sSurface.pixels =
-        (uint32_t *)pRuntime->backbuffer.data;
-    sSurface.width =
-        pRuntime->backbuffer.width;
-    sSurface.height =
-        pRuntime->backbuffer.height;
+    sSurface = *pSurface;
 
     if(
         Floppy144GameDataFactRecorded(
@@ -290,7 +285,7 @@ void Floppy144SiteDirectoryDraw(
     )
     {
         Floppy144SiteIsometricDirectoryDraw(
-            pRuntime,
+            pSurface,
             pRunState
         );
         return;
