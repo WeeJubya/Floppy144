@@ -12,7 +12,9 @@
 #include "floppy144_site_directory.h"
 
 #include "floppy144_draw.h"
+#include "floppy144_game_data.h"
 #include "floppy144_room.h"
+#include "floppy144_site_isometric.h"
 #include "floppy144_site.h"
 
 #include <stdbool.h>
@@ -279,6 +281,20 @@ void Floppy144SiteDirectoryDraw(
         pRuntime->backbuffer.width;
     sSurface.height =
         pRuntime->backbuffer.height;
+
+    if(
+        Floppy144GameDataFactRecorded(
+            pRunState,
+            "FM-23_ISOMETRIC_DIRECTORY"
+        )
+    )
+    {
+        Floppy144SiteIsometricDirectoryDraw(
+            pRuntime,
+            pRunState
+        );
+        return;
+    }
 
     Floppy144DrawClear(
         &sSurface,
