@@ -1584,6 +1584,53 @@ static void Floppy144TestPlayerRecoveryPolicy(void)
         ),
         "FM-23 becomes available during Act II without waiting for TS-10"
     );
+
+    {
+        const Floppy144CollectionDefinition *pFm23=
+            Floppy144CollectionGet(eFm23);
+        uint32_t uRecord;
+        uint32_t uAuthored=0U;
+
+        for(
+            uRecord=0U;
+            pFm23!=NULL &&
+            uRecord<pFm23->catalogue.record_count;
+            ++uRecord
+        )
+        {
+            if(Floppy144DocumentGet(eFm23,uRecord)!=NULL)
+            {
+                ++uAuthored;
+            }
+        }
+
+        F144_CHECK(
+            pFm23!=NULL &&
+            pFm23->size_kb==101U &&
+            pFm23->catalogue.record_count==20U &&
+            uAuthored==6U,
+            "FM-23 is a full optional collection with 20 records and six authored documents"
+        );
+
+        F144_CHECK(
+            Floppy144RunStateBitSet(
+                sRunState.collections,
+                (uint32_t)eFm23
+            ) &&
+            Floppy144DocumentApplyEffects(
+                &sWorld,
+                &sRunState,
+                eFm23,
+                2U
+            ) &&
+            Floppy144GameDataFactRecorded(
+                &sRunState,
+                "FM-23_ISOMETRIC_DIRECTORY"
+            ) &&
+            !Floppy144RunStateIsIsometric(&sRunState),
+            "FM-23 trigger upgrades only the Site Directory and leaves live Site projection 2D"
+        );
+    }
 }
 
 
