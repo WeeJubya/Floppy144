@@ -1,9 +1,9 @@
 /*
- * Floppy//144 - lightweight Stage 2 isometric Site projection
+ * Floppy//144 - isometric presentation helpers
  *
- * The canonical Site remains a 100 x 100 fixed-point model. This module is
- * presentation only. FM-23 can switch the persisted projection enum to this
- * renderer without changing collision, room classification or interactions.
+ * The playable room projection is retained for future work, but Stage 3 uses
+ * the isometric renderer only for FM-23's recovered Site Directory overview.
+ * Canonical Site coordinates remain authoritative.
  */
 #pragma once
 
@@ -14,4 +14,10 @@ void Floppy144SiteIsometricDraw(
     F144Runtime *pRuntime,
     const Floppy144RunState *pRunState,
     const char *pszNotice
+);
+
+
+void Floppy144SiteIsometricDirectoryDraw(
+    F144Runtime *pRuntime,
+    const Floppy144RunState *pRunState
 );
