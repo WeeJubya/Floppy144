@@ -2,9 +2,9 @@
  * F144 platform contract
  *
  * This is the platform-neutral boundary seen by FLOPPY//144 game code.
- * Stage 4B starts with display/presentation because that is the first service
- * being migrated. Timing, storage, input/text events, lifecycle, quit
- * handling and audio are added only when their owning migration reaches them.
+ * Stage 4B starts with display/presentation and logical actions. Timing,
+ * storage, lifecycle, quit handling and audio are added only when their owning
+ * migration reaches them. Text input remains a separate native-to-core stream.
  *
  * Single-instance acquisition and raw command-line parsing are launcher-only
  * concerns and intentionally do not belong in this game-facing contract.
@@ -14,6 +14,64 @@
 
 #include <stddef.h>
 #include <stdint.h>
+
+/*
+ * Logical input
+ *
+ * Native backends translate physical keys into these player-facing actions.
+ * Text entry is intentionally not represented as gameplay actions.
+ */
+typedef enum F144Action
+{
+    F144_ACTION_NONE = 0,
+
+    F144_ACTION_MOVE_UP,
+    F144_ACTION_MOVE_DOWN,
+    F144_ACTION_MOVE_LEFT,
+    F144_ACTION_MOVE_RIGHT,
+
+    F144_ACTION_NAV_UP,
+    F144_ACTION_NAV_DOWN,
+    F144_ACTION_ACCESS,
+    F144_ACTION_INSPECT,
+    F144_ACTION_CONFIRM,
+    F144_ACTION_BACK,
+    F144_ACTION_PAGE_UP,
+    F144_ACTION_PAGE_DOWN,
+    F144_ACTION_NOTEBOOK,
+    F144_ACTION_MENU,
+
+    F144_ACTION_COUNT
+} F144Action;
+
+typedef enum F144ActionEventType
+{
+    F144_ACTION_EVENT_DOWN = 0,
+    F144_ACTION_EVENT_UP
+} F144ActionEventType;
+
+typedef struct F144ActionEvent
+{
+    F144Action action;
+    F144ActionEventType type;
+
+    /*
+     * Opaque native identity used only to match one down/up pair. Core code
+     * must never interpret this as a platform-specific key code.
+     */
+    uint32_t physical_token;
+} F144ActionEvent;
+
+/*
+ * Text input remains distinct from logical gameplay actions. The current game
+ * consumes ASCII/control characters, while the codepoint shape leaves room
+ * for a later UTF-32-capable platform implementation without changing input
+ * semantics again.
+ */
+typedef struct F144TextInputEvent
+{
+    uint32_t codepoint;
+} F144TextInputEvent;
 
 typedef struct Floppy144Surface
 {

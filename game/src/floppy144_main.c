@@ -10,6 +10,7 @@
 
 #include "f144_platform.h"
 #include "f144_runtime.h"
+#include "f144_win32_input.h"
 #include "f144_win32_platform.h"
 
 #include "floppy144_catalogue.h"
@@ -17,6 +18,7 @@
 #include "floppy144_document.h"
 #include "floppy144_draw.h"
 #include "floppy144_interaction_engine.h"
+#include "floppy144_input.h"
 #include "floppy144_notebook_view.h"
 #include "floppy144_recovery.h"
 #include "floppy144_terminal.h"
@@ -63,6 +65,7 @@ typedef enum Floppy144Screen
 
 static F144Runtime *global_runtime;
 static F144Platform global_platform;
+static Floppy144MovementInput global_movement_input;
 
 static Floppy144Screen global_screen;
 static Floppy144TerminalState global_terminal;
@@ -101,7 +104,7 @@ static const char *global_main_menu_notice;
 static bool global_main_menu_notice_is_warning;
 static bool global_reinstate_confirmation_pending;
 static bool global_reinstate_continue_on_keyup;
-static WPARAM global_reinstate_continue_key;
+static uint32_t global_reinstate_continue_key;
 static uint32_t global_completion_top_line;
 static bool global_completion_evidence_resolved;
 static bool global_completion_capacity_exhausted;
@@ -1510,94 +1513,41 @@ static void Floppy144InteractOffice(
  * is routed first by active game screen, then by the key pressed.
  */
 
-static LRESULT CALLBACK Floppy144WindowProc(
+/*
+ * Text-input coordinator
+ *
+ * Text entry is deliberately separate from F144Action. Win32 currently feeds
+ * this from WM_CHAR; future platforms can deliver their native text event
+ * without manufacturing gameplay actions for printable characters.
+ */
+static bool Floppy144HandleTextInput(
     HWND window,
-    UINT message,
-    WPARAM w_param,
-    LPARAM l_param
+    const F144TextInputEvent *pEvent
 )
 {
-    (void)l_param;
+    uint32_t uCodepoint;
 
-    switch(message)
+    if(pEvent == NULL)
     {
-        /* Window lifetime: stop the runtime loop and post the process quit message. */
-        case WM_CLOSE:
-        {
-            if(global_runtime)
-            {
-                global_runtime->running = false;
-            }
+        return false;
+    }
 
-            Floppy144UpdateDiscoveryProfile();
+    uCodepoint =
+        pEvent->codepoint;
 
-            KillTimer(
-                window,
-                FLOPPY144_AUTOSAVE_TIMER_ID
-            );
-
-            KillTimer(
-                window,
-                FLOPPY144_TERMINAL_CURSOR_TIMER_ID
-            );
-
-            KillTimer(
-                window,
-                FLOPPY144_TERMINAL_RESTORE_TIMER_ID
-            );
-
-            PostQuitMessage(0);
-            return 0;
-        }
-
-        case WM_DESTROY:
-        {
-            if(global_runtime)
-            {
-                global_runtime->running = false;
-            }
-
-            KillTimer(
-                window,
-                FLOPPY144_AUTOSAVE_TIMER_ID
-            );
-
-            KillTimer(
-                window,
-                FLOPPY144_TERMINAL_CURSOR_TIMER_ID
-            );
-
-            KillTimer(
-                window,
-                FLOPPY144_TERMINAL_RESTORE_TIMER_ID
-            );
-
-            PostQuitMessage(0);
-            return 0;
-        }
-
-        /*
-         * Keyboard input
-         *
-         * The same key can mean different things on different screens, so each screen
-         * owns a nested key switch.
-         */
-
-        case WM_CHAR:
-        {
             /* STAGE 3B.5 CABINET CHARACTER INPUT */
             if(global_screen == FLOPPY144_SCREEN_CABINET)
             {
-                if(w_param >= '0' && w_param <= '9')
+                if(uCodepoint >= '0' && uCodepoint <= '9')
                 {
                     (void)Floppy144CabinetInputDigit(
                         &global_cabinet,
-                        (char)w_param
+                        (char)uCodepoint
                     );
                 }
 
                 Floppy144Redraw(window);
-                return 0;
+                return true;
             }
 
             if(
@@ -1605,7 +1555,7 @@ static LRESULT CALLBACK Floppy144WindowProc(
                 FLOPPY144_SCREEN_TERMINAL
             )
             {
-                break;
+                return false;
             }
 
             /*
@@ -1619,7 +1569,7 @@ static LRESULT CALLBACK Floppy144WindowProc(
                 global_terminal.suppress_next_character =
                     false;
 
-                return 0;
+                return true;
             }
 
             /*
@@ -1631,7 +1581,7 @@ static LRESULT CALLBACK Floppy144WindowProc(
                 )
             )
             {
-                switch(w_param)
+                switch(uCodepoint)
                 {
                     case ' ':
                     case '\r':
@@ -1674,12 +1624,12 @@ static LRESULT CALLBACK Floppy144WindowProc(
                     window
                 );
 
-                return 0;
+                return true;
             }
 
             /*
              * The record pager temporarily owns terminal character input.
-             * Escape remains handled by WM_KEYDOWN and opens session control.
+             * The separate Menu action remains responsible for session control.
              */
 
             if(
@@ -1688,7 +1638,7 @@ static LRESULT CALLBACK Floppy144WindowProc(
                 )
             )
             {
-                switch(w_param)
+                switch(uCodepoint)
                 {
                     case ' ':
                     case '\r':
@@ -1731,10 +1681,10 @@ static LRESULT CALLBACK Floppy144WindowProc(
                     window
                 );
 
-                return 0;
+                return true;
             }
 
-            switch(w_param)
+            switch(uCodepoint)
             {
                 case '\b':
                 {
@@ -1820,7 +1770,7 @@ static LRESULT CALLBACK Floppy144WindowProc(
                                 window
                             );
 
-                            return 0;
+                            return true;
                         }
                     }
                     else if(global_terminal.open_record_requested)
@@ -1869,13 +1819,13 @@ static LRESULT CALLBACK Floppy144WindowProc(
                 default:
                 {
                     if(
-                        w_param >= 32U &&
-                        w_param <= 126U
+                        uCodepoint >= 32U &&
+                        uCodepoint <= 126U
                     )
                     {
                         Floppy144TerminalInputCharacter(
                             &global_terminal,
-                            (char)w_param
+                            (char)uCodepoint
                         );
                     }
 
@@ -1887,7 +1837,935 @@ static LRESULT CALLBACK Floppy144WindowProc(
                 window
             );
 
+            return true;
+}
+
+/*
+ * Logical action coordinator
+ *
+ * Native backends supply F144ActionEvent values. The coordinator owns
+ * screen-specific meaning; it never interprets the opaque physical token.
+ * HWND remains a temporary redraw carrier until the later lifecycle/build
+ * separation tasks remove the remaining Win32 launcher shell.
+ */
+static bool Floppy144HandleActionEvent(
+    HWND window,
+    const F144ActionEvent *pEvent
+)
+{
+    F144Action eAction;
+
+    if(pEvent == NULL)
+    {
+        return false;
+    }
+
+    if(pEvent->type == F144_ACTION_EVENT_UP)
+    {
+        (void)Floppy144MovementInputSetAction(
+            &global_movement_input,
+            pEvent->action,
+            false
+        );
+
+            if(
+                global_screen == FLOPPY144_SCREEN_MAIN_MENU &&
+                global_reinstate_continue_on_keyup &&
+                pEvent->physical_token == global_reinstate_continue_key
+            )
+            {
+                global_reinstate_continue_on_keyup =
+                    false;
+
+                global_reinstate_continue_key =
+                    0U;
+
+                global_screen =
+                    global_resume_screen;
+
+                Floppy144Redraw(
+                    window
+                );
+
+                return true;
+            }
+
+
+        return false;
+    }
+
+    if(pEvent->type != F144_ACTION_EVENT_DOWN)
+    {
+        return false;
+    }
+
+    eAction =
+        pEvent->action;
+
+    if(global_screen != FLOPPY144_SCREEN_OFFICE)
+    {
+        Floppy144MovementInputReset(
+            &global_movement_input
+        );
+    }
+
+            /*
+             * A reinstated session owns the next complete key press.
+             *
+             * Key-down dismisses the confirmation box and exposes the loaded
+             * reconstruction percentage. Key-up then enters gameplay. Keeping
+             * the screen on Session Control between those messages also means
+             * TranslateMessage cannot feed the continue key into the terminal.
+             */
+            if(
+                global_screen == FLOPPY144_SCREEN_MAIN_MENU &&
+                global_reinstate_continue_on_keyup
+            )
+            {
+                return true;
+            }
+
+            if(
+                global_screen == FLOPPY144_SCREEN_MAIN_MENU &&
+                global_reinstate_confirmation_pending
+            )
+            {
+                global_reinstate_confirmation_pending =
+                    false;
+
+                global_reinstate_continue_on_keyup =
+                    true;
+
+                global_reinstate_continue_key =
+                    pEvent->physical_token;
+
+                Floppy144Redraw(
+                    window
+                );
+
+                /*
+                 * Force this one transitional frame to the window before the
+                 * matching key-up enters the restored session. Without this,
+                 * Windows may coalesce the invalidated menu frame with the
+                 * following terminal redraw and the restored percentage would
+                 * never actually be visible.
+                 */
+                UpdateWindow(
+                    window
+                );
+
+                return true;
+            }
+
+            /*
+             * The Site Directory is a transient overlay over exploration.
+             * Its opening key must not also close it, so only a subsequent
+             * key-down is handled here. Escape is included and returns to the
+             * player rather than opening Session Control.
+             */
+            if(global_screen == FLOPPY144_SCREEN_SITE_DIRECTORY)
+            {
+                global_resume_screen = FLOPPY144_SCREEN_OFFICE;
+                global_screen = FLOPPY144_SCREEN_OFFICE;
+                Floppy144Redraw(window);
+                return true;
+            }
+
+            /*
+             * Escape never terminates the application.
+             *
+             * From every non-menu screen it suspends the current view and
+             * returns to GDR session control. On the menu it has no effect.
+             */
+
+            if(eAction == F144_ACTION_MENU)
+            {
+                if(
+                    global_screen == FLOPPY144_SCREEN_TERMINAL &&
+                    Floppy144TerminalRestoreInProgress(
+                        &global_terminal
+                    )
+                )
+                {
+                    return true;
+                }
+
+                if(global_screen == FLOPPY144_SCREEN_SPLASH)
+                {
+                    KillTimer(
+                        window,
+                        FLOPPY144_SPLASH_TIMER_ID
+                    );
+                }
+
+                if(global_screen != FLOPPY144_SCREEN_MAIN_MENU)
+                {
+                    Floppy144OpenMainMenu(
+                        window
+                    );
+                }
+
+                return true;
+            }
+
+            switch(global_screen)
+            {
+                /*
+                 * Splash: Enter advances to session control.
+                 * Escape is handled by the universal menu route.
+                 */
+
+                case FLOPPY144_SCREEN_SPLASH:
+                {
+                    if(eAction == F144_ACTION_CONFIRM)
+                    {
+                        KillTimer(
+                            window,
+                            FLOPPY144_SPLASH_TIMER_ID
+                        );
+
+                        Floppy144OpenMainMenu(
+                            window
+                        );
+
+                        return true;
+                    }
+
+                    break;
+                }
+                /*
+                 * GDR main menu: move through available options and execute
+                 * the highlighted administrative action.
+                 */
+
+                case FLOPPY144_SCREEN_MAIN_MENU:
+                {
+                    switch(eAction)
+                    {
+                        case F144_ACTION_MOVE_UP:
+                        case F144_ACTION_NAV_UP:
+                        {
+                            Floppy144MainMenuMoveSelection(
+                                -1
+                            );
+
+                            Floppy144Redraw(
+                                window
+                            );
+
+                            return true;
+                        }
+
+                        case F144_ACTION_MOVE_DOWN:
+                        case F144_ACTION_NAV_DOWN:
+                        {
+                            Floppy144MainMenuMoveSelection(
+                                1
+                            );
+
+                            Floppy144Redraw(
+                                window
+                            );
+
+                            return true;
+                        }
+
+                        case F144_ACTION_CONFIRM:
+                        {
+                            Floppy144MainMenuActivate(
+                                window
+                            );
+
+                            return true;
+                        }
+                    }
+
+                    break;
+                }
+
+                /*
+                 * Site: arrow keys move in 0.5-unit fixed-point steps.
+                 *
+                 * A is reserved for access actions such as terminals. I is
+                 * reserved for inspecting physical objects and evidence. The
+                 * previous WASD aliases are intentionally removed so A has one
+                 * unambiguous meaning while the player is in the Site.
+                 */
+                case FLOPPY144_SCREEN_OFFICE:
+                {
+                    switch(eAction)
+                    {
+                        case F144_ACTION_MOVE_LEFT:
+                        case F144_ACTION_MOVE_RIGHT:
+                        case F144_ACTION_MOVE_UP:
+                        case F144_ACTION_MOVE_DOWN:
+                        {
+                            int32_t movement_x;
+                            int32_t movement_y;
+
+                            (void)Floppy144MovementInputSetAction(
+                                &global_movement_input,
+                                eAction,
+                                true
+                            );
+
+                            Floppy144MovementInputVector(
+                                &global_movement_input,
+                                8,
+                                &movement_x,
+                                &movement_y
+                            );
+
+                            if(
+                                movement_x != 0 ||
+                                movement_y != 0
+                            )
+                            {
+                                Floppy144MovePlayer(
+                                    window,
+                                    movement_x,
+                                    movement_y
+                                );
+                            }
+
+                            return true;
+                        }
+
+                        case F144_ACTION_ACCESS:
+                        {
+                            /* STAGE 3B.5 CABINET ACCESS KEY */
+                            {
+                                if(
+                                    (
+                                        Floppy144SiteAvailableActions(&global_run_state) &
+                                        FLOPPY144_SITE_ACTION_ACCESS
+                                    ) == 0U &&
+                                    Floppy144CabinetOpenNearby(
+                                        &global_cabinet,
+                                        &global_run_state
+                                    )
+                                )
+                                {
+                                    global_office_notice = NULL;
+                                    global_resume_screen = FLOPPY144_SCREEN_CABINET;
+                                    global_screen = FLOPPY144_SCREEN_CABINET;
+                                    Floppy144Redraw(window);
+                                    return true;
+                                }
+                            }
+
+                            Floppy144InteractOffice(
+                                window,
+                                FLOPPY144_OFFICE_INTERACTION_ACCESS
+                            );
+
+                            return true;
+                        }
+
+                        case F144_ACTION_INSPECT:
+                        {
+                            Floppy144InteractOffice(
+                                window,
+                                FLOPPY144_OFFICE_INTERACTION_INSPECT
+                            );
+
+                            return true;
+                        }
+
+                        case F144_ACTION_NOTEBOOK:
+                        {
+                            global_screen =
+                                FLOPPY144_SCREEN_NOTEBOOK;
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_MENU:
+                        {
+                            global_screen =
+                                FLOPPY144_SCREEN_MAIN_MENU;
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+                    }
+
+                    break;
+                }
+
+                /*
+                 * Notebook: browse recovered persistent knowledge. Up/Down
+                 * moves one entry, Page Up/Page Down jumps five entries, and
+                 * N or Backspace returns to Site exploration.
+                 */
+                /* STAGE 3B.5 CABINET KEY ROUTING
+                 *
+                 * Keypad and Interior share one reusable screen state.
+                 * Escape remains the universal Session Control route.
+                 */
+                case FLOPPY144_SCREEN_CABINET:
+                {
+                    switch(eAction)
+                    {
+                        case F144_ACTION_MOVE_UP:
+                        {
+                            Floppy144CabinetMoveSelection(
+                                &global_cabinet,
+                                &global_run_state,
+                                -1
+                            );
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_MOVE_DOWN:
+                        {
+                            Floppy144CabinetMoveSelection(
+                                &global_cabinet,
+                                &global_run_state,
+                                1
+                            );
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_CONFIRM:
+                        {
+                            if(Floppy144CabinetInteriorOpen(&global_cabinet))
+                            {
+                                (void)Floppy144CabinetInspectSelected(
+                                    &global_cabinet,
+                                    &global_world,
+                                    &global_run_state
+                                );
+                            }
+                            else
+                            {
+                                (void)Floppy144CabinetSubmitCode(
+                                    &global_cabinet,
+                                    &global_world,
+                                    &global_run_state
+                                );
+                            }
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_INSPECT:
+                        {
+                            if(Floppy144CabinetInteriorOpen(&global_cabinet))
+                            {
+                                (void)Floppy144CabinetInspectSelected(
+                                    &global_cabinet,
+                                    &global_world,
+                                    &global_run_state
+                                );
+                                Floppy144Redraw(window);
+                            }
+                            return true;
+                        }
+
+                        case F144_ACTION_BACK:
+                        {
+                            if(!Floppy144CabinetBackspace(&global_cabinet))
+                            {
+                                global_resume_screen = FLOPPY144_SCREEN_OFFICE;
+                                global_screen = FLOPPY144_SCREEN_OFFICE;
+                            }
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+                    }
+
+                    break;
+                }
+
+                case FLOPPY144_SCREEN_EVIDENCE_COMPLETE:
+                {
+                    Floppy144CompletionRenderBuffer b;
+                    uint32_t uMaxTop;
+
+                    Floppy144CompletionBuild(&global_run_state,&b);
+                    uMaxTop=b.count>FLOPPY144_COMPLETION_VISIBLE_LINES
+                        ? b.count-FLOPPY144_COMPLETION_VISIBLE_LINES
+                        : 0U;
+
+                    switch(eAction)
+                    {
+                        case F144_ACTION_MOVE_UP:
+                            if(global_completion_top_line>0U)--global_completion_top_line;
+                            break;
+
+                        case F144_ACTION_MOVE_DOWN:
+                            if(global_completion_top_line<uMaxTop)++global_completion_top_line;
+                            break;
+
+                        case F144_ACTION_PAGE_UP:
+                            if(global_completion_top_line>12U)global_completion_top_line-=12U;
+                            else global_completion_top_line=0U;
+                            break;
+
+                        case F144_ACTION_PAGE_DOWN:
+                            global_completion_top_line=
+                                global_completion_top_line+12U<uMaxTop
+                                ? global_completion_top_line+12U
+                                : uMaxTop;
+                            break;
+
+                        case F144_ACTION_CONFIRM:
+                            global_main_menu_notice=NULL;
+                            global_main_menu_notice_is_warning=false;
+                            global_screen=FLOPPY144_SCREEN_MAIN_MENU;
+                            global_office_notice=NULL;
+                            break;
+
+                        default:
+                            return true;
+                    }
+
+                    Floppy144Redraw(window);
+                    return true;
+                }
+
+                case FLOPPY144_SCREEN_NOTEBOOK:
+                {
+                    switch(eAction)
+                    {
+                        case F144_ACTION_MOVE_UP:
+                        {
+                            Floppy144NotebookViewMove(
+                                &global_notebook,
+                                &global_run_state,
+                                -1
+                            );
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_MOVE_DOWN:
+                        {
+                            Floppy144NotebookViewMove(
+                                &global_notebook,
+                                &global_run_state,
+                                1
+                            );
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_PAGE_UP:
+                        {
+                            Floppy144NotebookViewMove(
+                                &global_notebook,
+                                &global_run_state,
+                                -12
+                            );
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_PAGE_DOWN:
+                        {
+                            Floppy144NotebookViewMove(
+                                &global_notebook,
+                                &global_run_state,
+                                12
+                            );
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_NOTEBOOK:
+                        case F144_ACTION_BACK:
+                        {
+                            global_screen =
+                                FLOPPY144_SCREEN_OFFICE;
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+                    }
+
+                    break;
+                }
+
+                /*
+                 * Terminal: printable input arrives through WM_CHAR. Arrow
+                 * keys are reserved for session-local command history while
+                 * the help/record pagers are not active.
+                 */
+                case FLOPPY144_SCREEN_TERMINAL:
+                {
+                    if(eAction == F144_ACTION_MENU)
+                    {
+                        global_screen =
+                            FLOPPY144_SCREEN_OFFICE;
+
+                        Floppy144Redraw(
+                            window
+                        );
+
+                        return true;
+                    }
+
+                    if(
+                        !Floppy144TerminalHelpPagerActive(
+                            &global_terminal
+                        ) &&
+                        !Floppy144TerminalRecordPagerActive(
+                            &global_terminal
+                        )
+                    )
+                    {
+                        switch(eAction)
+                        {
+                            case F144_ACTION_MOVE_UP:
+                            {
+                                Floppy144TerminalMoveHistory(
+                                    &global_terminal,
+                                    -1
+                                );
+
+                                Floppy144Redraw(window);
+                                return true;
+                            }
+
+                            case F144_ACTION_MOVE_DOWN:
+                            {
+                                Floppy144TerminalMoveHistory(
+                                    &global_terminal,
+                                    1
+                                );
+
+                                Floppy144Redraw(window);
+                                return true;
+                            }
+                        }
+                    }
+
+                    break;
+                }
+                /* Catalogue: move or page through records, open a document, or back out. */
+                case FLOPPY144_SCREEN_CATALOGUE:
+                {
+                    switch(eAction)
+                    {
+                        case F144_ACTION_MOVE_UP:
+                        {
+                            if(
+                                Floppy144CatalogueDocumentOpen(
+                                    &global_catalogue
+                                )
+                            )
+                            {
+                                Floppy144CatalogueScrollDocument(
+                                    &global_catalogue,
+                                    -1
+                                );
+                            }
+                            else
+                            {
+                                Floppy144CatalogueMove(
+                                    &global_catalogue,
+                                    -1
+                                );
+                            }
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_NAV_UP:
+                        {
+                            Floppy144CatalogueMove(
+                                &global_catalogue,
+                                -1
+                            );
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_MOVE_DOWN:
+                        {
+                            if(
+                                Floppy144CatalogueDocumentOpen(
+                                    &global_catalogue
+                                )
+                            )
+                            {
+                                Floppy144CatalogueScrollDocument(
+                                    &global_catalogue,
+                                    1
+                                );
+                            }
+                            else
+                            {
+                                Floppy144CatalogueMove(
+                                    &global_catalogue,
+                                    1
+                                );
+                            }
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_NAV_DOWN:
+                        {
+                            Floppy144CatalogueMove(
+                                &global_catalogue,
+                                1
+                            );
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_PAGE_UP:
+                        {
+                            Floppy144CataloguePage(
+                                &global_catalogue,
+                                -1
+                            );
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_PAGE_DOWN:
+                        {
+                            Floppy144CataloguePage(
+                                &global_catalogue,
+                                1
+                            );
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_CONFIRM:
+                        {
+                            /*
+                             * Enter opens a record only from catalogue-list view.
+                             *
+                             * Once a document is already open, further Enter
+                             * presses must not re-apply its effects or append the
+                             * same data-derived next-action guidance again.
+                             */
+                            if(
+                                !Floppy144CatalogueDocumentOpen(
+                                    &global_catalogue
+                                )
+                            )
+                            {
+                                /*
+                                 * Do not let the graphical catalogue bypass a
+                                 * trigger gate which would defer the same record
+                                 * through terminal OPEN.
+                                 */
+                                if(
+                                    !Floppy144DocumentAccessible(
+                                        &global_run_state,
+                                        global_catalogue.collection,
+                                        global_catalogue.selected_index
+                                    )
+                                )
+                                {
+                                    Floppy144Redraw(window);
+                                    return true;
+                                }
+
+                                Floppy144CatalogueOpenDocument(
+                                    &global_catalogue
+                                );
+
+                                /*
+                                 * Authored records declare their own effects.
+                                 * Index-only records have no registered effects.
+                                 */
+                                Floppy144DocumentApplyEffects(
+                                    &global_world,
+                                    &global_run_state,
+                                    global_catalogue.collection,
+                                    global_catalogue.selected_index
+                                );
+
+                                Floppy144TerminalPrintPostOpenAction(
+                                    &global_terminal,
+                                    &global_run_state,
+                                    global_catalogue.collection,
+                                    global_catalogue.selected_index
+                                );
+                            }
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        /*
+                         * Backspace returns through the archive-view hierarchy.
+                         *
+                         * Direct OPEN commands return straight to the terminal.
+                         * Catalogue documents return to their record list first.
+                         */
+
+                        case F144_ACTION_BACK:
+                        {
+                            if(global_catalogue_direct_document)
+                            {
+                                if(
+                                    Floppy144CatalogueDocumentOpen(
+                                        &global_catalogue
+                                    )
+                                )
+                                {
+                                    Floppy144CatalogueCloseDocument(
+                                        &global_catalogue
+                                    );
+                                }
+
+                                global_catalogue_direct_document =
+                                    false;
+
+                                global_screen =
+                                    FLOPPY144_SCREEN_TERMINAL;
+                            }
+                            else
+                            {
+                                switch(
+                                    Floppy144CatalogueDocumentOpen(
+                                        &global_catalogue
+                                    )
+                                )
+                                {
+                                    case true:
+                                    {
+                                        Floppy144CatalogueCloseDocument(
+                                            &global_catalogue
+                                        );
+
+                                        break;
+                                    }
+
+                                    case false:
+                                    {
+                                        global_screen =
+                                            FLOPPY144_SCREEN_TERMINAL;
+
+                                        break;
+                                    }
+                                }
+                            }
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+                    }
+
+                    break;
+                }
+            }
+
+
+    return true;
+}
+
+static LRESULT CALLBACK Floppy144WindowProc(
+    HWND window,
+    UINT message,
+    WPARAM w_param,
+    LPARAM l_param
+)
+{
+    (void)l_param;
+
+    switch(message)
+    {
+        /* Window lifetime: stop the runtime loop and post the process quit message. */
+        case WM_CLOSE:
+        {
+            if(global_runtime)
+            {
+                global_runtime->running = false;
+            }
+
+            Floppy144UpdateDiscoveryProfile();
+
+            KillTimer(
+                window,
+                FLOPPY144_AUTOSAVE_TIMER_ID
+            );
+
+            KillTimer(
+                window,
+                FLOPPY144_TERMINAL_CURSOR_TIMER_ID
+            );
+
+            KillTimer(
+                window,
+                FLOPPY144_TERMINAL_RESTORE_TIMER_ID
+            );
+
+            PostQuitMessage(0);
             return 0;
+        }
+
+        case WM_DESTROY:
+        {
+            if(global_runtime)
+            {
+                global_runtime->running = false;
+            }
+
+            KillTimer(
+                window,
+                FLOPPY144_AUTOSAVE_TIMER_ID
+            );
+
+            KillTimer(
+                window,
+                FLOPPY144_TERMINAL_CURSOR_TIMER_ID
+            );
+
+            KillTimer(
+                window,
+                FLOPPY144_TERMINAL_RESTORE_TIMER_ID
+            );
+
+            PostQuitMessage(0);
+            return 0;
+        }
+
+        /*
+         * Native input adapter
+         *
+         * Win32 messages end here. Physical keys become logical action events;
+         * WM_CHAR becomes a separate text event before game policy sees either.
+         */
+
+        case WM_CHAR:
+        {
+            F144TextInputEvent sTextEvent;
+
+            f144Win32TranslateTextEvent(
+                (uint32_t)w_param,
+                &sTextEvent
+            );
+
+            if(Floppy144HandleTextInput(window,&sTextEvent))
+            {
+                return 0;
+            }
+
+            break;
         }
         /*
          * Splash animation timer
@@ -1999,25 +2877,16 @@ static LRESULT CALLBACK Floppy144WindowProc(
         }
         case WM_KEYUP:
         {
-            if(
-                global_screen == FLOPPY144_SCREEN_MAIN_MENU &&
-                global_reinstate_continue_on_keyup &&
-                w_param == global_reinstate_continue_key
-            )
+            F144ActionEvent sEvent;
+
+            f144Win32TranslateKeyEvent(
+                (uint32_t)w_param,
+                F144_ACTION_EVENT_UP,
+                &sEvent
+            );
+
+            if(Floppy144HandleActionEvent(window,&sEvent))
             {
-                global_reinstate_continue_on_keyup =
-                    false;
-
-                global_reinstate_continue_key =
-                    0U;
-
-                global_screen =
-                    global_resume_screen;
-
-                Floppy144Redraw(
-                    window
-                );
-
                 return 0;
             }
 
@@ -2026,778 +2895,18 @@ static LRESULT CALLBACK Floppy144WindowProc(
 
         case WM_KEYDOWN:
         {
-            /*
-             * A reinstated session owns the next complete key press.
-             *
-             * Key-down dismisses the confirmation box and exposes the loaded
-             * reconstruction percentage. Key-up then enters gameplay. Keeping
-             * the screen on Session Control between those messages also means
-             * TranslateMessage cannot feed the continue key into the terminal.
-             */
-            if(
-                global_screen == FLOPPY144_SCREEN_MAIN_MENU &&
-                global_reinstate_continue_on_keyup
-            )
-            {
-                return 0;
-            }
-
-            if(
-                global_screen == FLOPPY144_SCREEN_MAIN_MENU &&
-                global_reinstate_confirmation_pending
-            )
-            {
-                global_reinstate_confirmation_pending =
-                    false;
-
-                global_reinstate_continue_on_keyup =
-                    true;
-
-                global_reinstate_continue_key =
-                    w_param;
-
-                Floppy144Redraw(
-                    window
-                );
-
-                /*
-                 * Force this one transitional frame to the window before the
-                 * matching key-up enters the restored session. Without this,
-                 * Windows may coalesce the invalidated menu frame with the
-                 * following terminal redraw and the restored percentage would
-                 * never actually be visible.
-                 */
-                UpdateWindow(
-                    window
-                );
-
-                return 0;
-            }
-
-            /*
-             * The Site Directory is a transient overlay over exploration.
-             * Its opening key must not also close it, so only a subsequent
-             * key-down is handled here. Escape is included and returns to the
-             * player rather than opening Session Control.
-             */
-            if(global_screen == FLOPPY144_SCREEN_SITE_DIRECTORY)
-            {
-                global_resume_screen = FLOPPY144_SCREEN_OFFICE;
-                global_screen = FLOPPY144_SCREEN_OFFICE;
-                Floppy144Redraw(window);
-                return 0;
-            }
-
-            /*
-             * Escape never terminates the application.
-             *
-             * From every non-menu screen it suspends the current view and
-             * returns to GDR session control. On the menu it has no effect.
-             */
-
-            if(w_param == VK_ESCAPE)
-            {
-                if(
-                    global_screen == FLOPPY144_SCREEN_TERMINAL &&
-                    Floppy144TerminalRestoreInProgress(
-                        &global_terminal
-                    )
-                )
-                {
-                    return 0;
-                }
-
-                if(global_screen == FLOPPY144_SCREEN_SPLASH)
-                {
-                    KillTimer(
-                        window,
-                        FLOPPY144_SPLASH_TIMER_ID
-                    );
-                }
-
-                if(global_screen != FLOPPY144_SCREEN_MAIN_MENU)
-                {
-                    Floppy144OpenMainMenu(
-                        window
-                    );
-                }
-
-                return 0;
-            }
-
-            switch(global_screen)
-            {
-                /*
-                 * Splash: Enter advances to session control.
-                 * Escape is handled by the universal menu route.
-                 */
-
-                case FLOPPY144_SCREEN_SPLASH:
-                {
-                    if(w_param == VK_RETURN)
-                    {
-                        KillTimer(
-                            window,
-                            FLOPPY144_SPLASH_TIMER_ID
-                        );
-
-                        Floppy144OpenMainMenu(
-                            window
-                        );
-
-                        return 0;
-                    }
-
-                    break;
-                }
-                /*
-                 * GDR main menu: move through available options and execute
-                 * the highlighted administrative action.
-                 */
-
-                case FLOPPY144_SCREEN_MAIN_MENU:
-                {
-                    switch(w_param)
-                    {
-                        case VK_UP:
-                        case 'W':
-                        {
-                            Floppy144MainMenuMoveSelection(
-                                -1
-                            );
-
-                            Floppy144Redraw(
-                                window
-                            );
-
-                            return 0;
-                        }
-
-                        case VK_DOWN:
-                        case 'S':
-                        {
-                            Floppy144MainMenuMoveSelection(
-                                1
-                            );
-
-                            Floppy144Redraw(
-                                window
-                            );
-
-                            return 0;
-                        }
-
-                        case VK_RETURN:
-                        {
-                            Floppy144MainMenuActivate(
-                                window
-                            );
-
-                            return 0;
-                        }
-                    }
-
-                    break;
-                }
-
-                /*
-                 * Site: arrow keys move in 0.5-unit fixed-point steps.
-                 *
-                 * A is reserved for access actions such as terminals. I is
-                 * reserved for inspecting physical objects and evidence. The
-                 * previous WASD aliases are intentionally removed so A has one
-                 * unambiguous meaning while the player is in the Site.
-                 */
-                case FLOPPY144_SCREEN_OFFICE:
-                {
-                    switch(w_param)
-                    {
-                        case VK_LEFT:
-                        {
-                            Floppy144MovePlayer(
-                                window,
-                                -8,
-                                0
-                            );
-
-                            return 0;
-                        }
-
-                        case VK_RIGHT:
-                        {
-                            Floppy144MovePlayer(
-                                window,
-                                8,
-                                0
-                            );
-
-                            return 0;
-                        }
-
-                        case VK_UP:
-                        {
-                            Floppy144MovePlayer(
-                                window,
-                                0,
-                                -8
-                            );
-
-                            return 0;
-                        }
-
-                        case VK_DOWN:
-                        {
-                            Floppy144MovePlayer(
-                                window,
-                                0,
-                                8
-                            );
-
-                            return 0;
-                        }
-
-                        case 'A':
-                        {
-                            /* STAGE 3B.5 CABINET ACCESS KEY */
-                            {
-                                if(
-                                    (
-                                        Floppy144SiteAvailableActions(&global_run_state) &
-                                        FLOPPY144_SITE_ACTION_ACCESS
-                                    ) == 0U &&
-                                    Floppy144CabinetOpenNearby(
-                                        &global_cabinet,
-                                        &global_run_state
-                                    )
-                                )
-                                {
-                                    global_office_notice = NULL;
-                                    global_resume_screen = FLOPPY144_SCREEN_CABINET;
-                                    global_screen = FLOPPY144_SCREEN_CABINET;
-                                    Floppy144Redraw(window);
-                                    return 0;
-                                }
-                            }
-
-                            Floppy144InteractOffice(
-                                window,
-                                FLOPPY144_OFFICE_INTERACTION_ACCESS
-                            );
-
-                            return 0;
-                        }
-
-                        case 'I':
-                        {
-                            Floppy144InteractOffice(
-                                window,
-                                FLOPPY144_OFFICE_INTERACTION_INSPECT
-                            );
-
-                            return 0;
-                        }
-
-                        case 'N':
-                        {
-                            global_screen =
-                                FLOPPY144_SCREEN_NOTEBOOK;
-
-                            Floppy144Redraw(window);
-                            return 0;
-                        }
-
-                        case VK_ESCAPE:
-                        {
-                            global_screen =
-                                FLOPPY144_SCREEN_MAIN_MENU;
-
-                            Floppy144Redraw(window);
-                            return 0;
-                        }
-                    }
-
-                    break;
-                }
-
-                /*
-                 * Notebook: browse recovered persistent knowledge. Up/Down
-                 * moves one entry, Page Up/Page Down jumps five entries, and
-                 * N or Backspace returns to Site exploration.
-                 */
-                /* STAGE 3B.5 CABINET KEY ROUTING
-                 *
-                 * Keypad and Interior share one reusable screen state.
-                 * Escape remains the universal Session Control route.
-                 */
-                case FLOPPY144_SCREEN_CABINET:
-                {
-                    switch(w_param)
-                    {
-                        case VK_UP:
-                        {
-                            Floppy144CabinetMoveSelection(
-                                &global_cabinet,
-                                &global_run_state,
-                                -1
-                            );
-                            Floppy144Redraw(window);
-                            return 0;
-                        }
-
-                        case VK_DOWN:
-                        {
-                            Floppy144CabinetMoveSelection(
-                                &global_cabinet,
-                                &global_run_state,
-                                1
-                            );
-                            Floppy144Redraw(window);
-                            return 0;
-                        }
-
-                        case VK_RETURN:
-                        {
-                            if(Floppy144CabinetInteriorOpen(&global_cabinet))
-                            {
-                                (void)Floppy144CabinetInspectSelected(
-                                    &global_cabinet,
-                                    &global_world,
-                                    &global_run_state
-                                );
-                            }
-                            else
-                            {
-                                (void)Floppy144CabinetSubmitCode(
-                                    &global_cabinet,
-                                    &global_world,
-                                    &global_run_state
-                                );
-                            }
-
-                            Floppy144Redraw(window);
-                            return 0;
-                        }
-
-                        case 'I':
-                        {
-                            if(Floppy144CabinetInteriorOpen(&global_cabinet))
-                            {
-                                (void)Floppy144CabinetInspectSelected(
-                                    &global_cabinet,
-                                    &global_world,
-                                    &global_run_state
-                                );
-                                Floppy144Redraw(window);
-                            }
-                            return 0;
-                        }
-
-                        case VK_BACK:
-                        {
-                            if(!Floppy144CabinetBackspace(&global_cabinet))
-                            {
-                                global_resume_screen = FLOPPY144_SCREEN_OFFICE;
-                                global_screen = FLOPPY144_SCREEN_OFFICE;
-                            }
-
-                            Floppy144Redraw(window);
-                            return 0;
-                        }
-                    }
-
-                    break;
-                }
-
-                case FLOPPY144_SCREEN_EVIDENCE_COMPLETE:
-                {
-                    Floppy144CompletionRenderBuffer b;
-                    uint32_t uMaxTop;
-
-                    Floppy144CompletionBuild(&global_run_state,&b);
-                    uMaxTop=b.count>FLOPPY144_COMPLETION_VISIBLE_LINES
-                        ? b.count-FLOPPY144_COMPLETION_VISIBLE_LINES
-                        : 0U;
-
-                    switch(w_param)
-                    {
-                        case VK_UP:
-                            if(global_completion_top_line>0U)--global_completion_top_line;
-                            break;
-
-                        case VK_DOWN:
-                            if(global_completion_top_line<uMaxTop)++global_completion_top_line;
-                            break;
-
-                        case VK_PRIOR:
-                            if(global_completion_top_line>12U)global_completion_top_line-=12U;
-                            else global_completion_top_line=0U;
-                            break;
-
-                        case VK_NEXT:
-                            global_completion_top_line=
-                                global_completion_top_line+12U<uMaxTop
-                                ? global_completion_top_line+12U
-                                : uMaxTop;
-                            break;
-
-                        case VK_RETURN:
-                            global_main_menu_notice=NULL;
-                            global_main_menu_notice_is_warning=false;
-                            global_screen=FLOPPY144_SCREEN_MAIN_MENU;
-                            global_office_notice=NULL;
-                            break;
-
-                        default:
-                            return 0;
-                    }
-
-                    Floppy144Redraw(window);
-                    return 0;
-                }
-
-                case FLOPPY144_SCREEN_NOTEBOOK:
-                {
-                    switch(w_param)
-                    {
-                        case VK_UP:
-                        {
-                            Floppy144NotebookViewMove(
-                                &global_notebook,
-                                &global_run_state,
-                                -1
-                            );
-
-                            Floppy144Redraw(window);
-                            return 0;
-                        }
-
-                        case VK_DOWN:
-                        {
-                            Floppy144NotebookViewMove(
-                                &global_notebook,
-                                &global_run_state,
-                                1
-                            );
-
-                            Floppy144Redraw(window);
-                            return 0;
-                        }
-
-                        case VK_PRIOR:
-                        {
-                            Floppy144NotebookViewMove(
-                                &global_notebook,
-                                &global_run_state,
-                                -12
-                            );
-
-                            Floppy144Redraw(window);
-                            return 0;
-                        }
-
-                        case VK_NEXT:
-                        {
-                            Floppy144NotebookViewMove(
-                                &global_notebook,
-                                &global_run_state,
-                                12
-                            );
-
-                            Floppy144Redraw(window);
-                            return 0;
-                        }
-
-                        case 'N':
-                        case VK_BACK:
-                        {
-                            global_screen =
-                                FLOPPY144_SCREEN_OFFICE;
-
-                            Floppy144Redraw(window);
-                            return 0;
-                        }
-                    }
-
-                    break;
-                }
-
-                /*
-                 * Terminal: printable input arrives through WM_CHAR. Arrow
-                 * keys are reserved for session-local command history while
-                 * the help/record pagers are not active.
-                 */
-                case FLOPPY144_SCREEN_TERMINAL:
-                {
-                    if(w_param == VK_ESCAPE)
-                    {
-                        global_screen =
-                            FLOPPY144_SCREEN_OFFICE;
-
-                        Floppy144Redraw(
-                            window
-                        );
-
-                        return 0;
-                    }
-
-                    if(
-                        !Floppy144TerminalHelpPagerActive(
-                            &global_terminal
-                        ) &&
-                        !Floppy144TerminalRecordPagerActive(
-                            &global_terminal
-                        )
-                    )
-                    {
-                        switch(w_param)
-                        {
-                            case VK_UP:
-                            {
-                                Floppy144TerminalMoveHistory(
-                                    &global_terminal,
-                                    -1
-                                );
-
-                                Floppy144Redraw(window);
-                                return 0;
-                            }
-
-                            case VK_DOWN:
-                            {
-                                Floppy144TerminalMoveHistory(
-                                    &global_terminal,
-                                    1
-                                );
-
-                                Floppy144Redraw(window);
-                                return 0;
-                            }
-                        }
-                    }
-
-                    break;
-                }
-                /* Catalogue: move or page through records, open a document, or back out. */
-                case FLOPPY144_SCREEN_CATALOGUE:
-                {
-                    switch(w_param)
-                    {
-                        case VK_UP:
-                        {
-                            if(
-                                Floppy144CatalogueDocumentOpen(
-                                    &global_catalogue
-                                )
-                            )
-                            {
-                                Floppy144CatalogueScrollDocument(
-                                    &global_catalogue,
-                                    -1
-                                );
-                            }
-                            else
-                            {
-                                Floppy144CatalogueMove(
-                                    &global_catalogue,
-                                    -1
-                                );
-                            }
-
-                            Floppy144Redraw(window);
-                            return 0;
-                        }
-
-                        case 'W':
-                        {
-                            Floppy144CatalogueMove(
-                                &global_catalogue,
-                                -1
-                            );
-
-                            Floppy144Redraw(window);
-                            return 0;
-                        }
-
-                        case VK_DOWN:
-                        {
-                            if(
-                                Floppy144CatalogueDocumentOpen(
-                                    &global_catalogue
-                                )
-                            )
-                            {
-                                Floppy144CatalogueScrollDocument(
-                                    &global_catalogue,
-                                    1
-                                );
-                            }
-                            else
-                            {
-                                Floppy144CatalogueMove(
-                                    &global_catalogue,
-                                    1
-                                );
-                            }
-
-                            Floppy144Redraw(window);
-                            return 0;
-                        }
-
-                        case 'S':
-                        {
-                            Floppy144CatalogueMove(
-                                &global_catalogue,
-                                1
-                            );
-
-                            Floppy144Redraw(window);
-                            return 0;
-                        }
-
-                        case VK_PRIOR:
-                        {
-                            Floppy144CataloguePage(
-                                &global_catalogue,
-                                -1
-                            );
-
-                            Floppy144Redraw(window);
-                            return 0;
-                        }
-
-                        case VK_NEXT:
-                        {
-                            Floppy144CataloguePage(
-                                &global_catalogue,
-                                1
-                            );
-
-                            Floppy144Redraw(window);
-                            return 0;
-                        }
-
-                        case VK_RETURN:
-                        {
-                            /*
-                             * Enter opens a record only from catalogue-list view.
-                             *
-                             * Once a document is already open, further Enter
-                             * presses must not re-apply its effects or append the
-                             * same data-derived next-action guidance again.
-                             */
-                            if(
-                                !Floppy144CatalogueDocumentOpen(
-                                    &global_catalogue
-                                )
-                            )
-                            {
-                                /*
-                                 * Do not let the graphical catalogue bypass a
-                                 * trigger gate which would defer the same record
-                                 * through terminal OPEN.
-                                 */
-                                if(
-                                    !Floppy144DocumentAccessible(
-                                        &global_run_state,
-                                        global_catalogue.collection,
-                                        global_catalogue.selected_index
-                                    )
-                                )
-                                {
-                                    Floppy144Redraw(window);
-                                    return 0;
-                                }
-
-                                Floppy144CatalogueOpenDocument(
-                                    &global_catalogue
-                                );
-
-                                /*
-                                 * Authored records declare their own effects.
-                                 * Index-only records have no registered effects.
-                                 */
-                                Floppy144DocumentApplyEffects(
-                                    &global_world,
-                                    &global_run_state,
-                                    global_catalogue.collection,
-                                    global_catalogue.selected_index
-                                );
-
-                                Floppy144TerminalPrintPostOpenAction(
-                                    &global_terminal,
-                                    &global_run_state,
-                                    global_catalogue.collection,
-                                    global_catalogue.selected_index
-                                );
-                            }
-
-                            Floppy144Redraw(window);
-                            return 0;
-                        }
-
-                        /*
-                         * Backspace returns through the archive-view hierarchy.
-                         *
-                         * Direct OPEN commands return straight to the terminal.
-                         * Catalogue documents return to their record list first.
-                         */
-
-                        case VK_BACK:
-                        {
-                            if(global_catalogue_direct_document)
-                            {
-                                if(
-                                    Floppy144CatalogueDocumentOpen(
-                                        &global_catalogue
-                                    )
-                                )
-                                {
-                                    Floppy144CatalogueCloseDocument(
-                                        &global_catalogue
-                                    );
-                                }
-
-                                global_catalogue_direct_document =
-                                    false;
-
-                                global_screen =
-                                    FLOPPY144_SCREEN_TERMINAL;
-                            }
-                            else
-                            {
-                                switch(
-                                    Floppy144CatalogueDocumentOpen(
-                                        &global_catalogue
-                                    )
-                                )
-                                {
-                                    case true:
-                                    {
-                                        Floppy144CatalogueCloseDocument(
-                                            &global_catalogue
-                                        );
-
-                                        break;
-                                    }
-
-                                    case false:
-                                    {
-                                        global_screen =
-                                            FLOPPY144_SCREEN_TERMINAL;
-
-                                        break;
-                                    }
-                                }
-                            }
-
-                            Floppy144Redraw(window);
-                            return 0;
-                        }
-                    }
-
-                    break;
-                }
-            }
+            F144ActionEvent sEvent;
+
+            f144Win32TranslateKeyEvent(
+                (uint32_t)w_param,
+                F144_ACTION_EVENT_DOWN,
+                &sEvent
+            );
+
+            (void)Floppy144HandleActionEvent(
+                window,
+                &sEvent
+            );
 
             return 0;
         }
@@ -3080,6 +3189,10 @@ int CALLBACK WinMain(
 
     Floppy144RunStateReset(
         &global_run_state
+    );
+
+    Floppy144MovementInputReset(
+        &global_movement_input
     );
 
     {

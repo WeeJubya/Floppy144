@@ -438,7 +438,9 @@ function Test-MainMenuReinstateFlow {
         $MainSource -notmatch
             'global_reinstate_continue_on_keyup' -or
         $MainSource -notmatch
-            'w_param == global_reinstate_continue_key' -or
+            'pEvent->physical_token == global_reinstate_continue_key' -or
+        $MainSource -notmatch
+            'f144Win32TranslateKeyEvent' -or
         $MainSource -notmatch
             'UpdateWindow\s*\(\s*window\s*\)'
     ) {
