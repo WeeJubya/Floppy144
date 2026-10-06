@@ -515,25 +515,15 @@ static void Floppy144Redraw(
         case FLOPPY144_SCREEN_OFFICE:
         {
             /*
-             * Projection is persistent run state. FM-23 changes it through the
-             * same JSON SET_PROJECTION effect interpreter used by every trigger.
+             * Stage 3 ships the proven 2D exploration renderer. FM-23 now
+             * enhances the Site Directory only; playable ISO room projection
+             * is retained in source for a later release.
              */
-            if(Floppy144RunStateIsIsometric(&global_run_state))
-            {
-                Floppy144SiteIsometricDraw(
-                    global_runtime,
-                    &global_run_state,
-                    global_office_notice
-                );
-            }
-            else
-            {
-                Floppy144Site2DDraw(
-                    global_runtime,
-                    &global_run_state,
-                    global_office_notice
-                );
-            }
+            Floppy144Site2DDraw(
+                global_runtime,
+                &global_run_state,
+                global_office_notice
+            );
 
             break;
         }
