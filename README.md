@@ -207,3 +207,20 @@ place.
 The platform-neutral game code requests conceptual manual-save, autosave,
 profile and settings paths through `F144Platform`; it contains no
 `%APPDATA%` or Windows user-name assumptions.
+
+## Audio platform boundary - Stage 4
+
+The verified Stage 4 baseline contains persisted music/SFX volume settings but
+no shipping playback backend, WinMIDI/WinMM calls, external audio library, or
+embedded production music/SFX data. S4B-04 therefore introduces the semantic
+audio boundary without changing the current silent runtime.
+
+Game-facing code can now initialise/shut down audio, play or replace a semantic
+music cue, stop music, trigger an SFX cue, and set independent music/SFX volume
+through `F144Platform`. Cue IDs remain platform-neutral. Future compact
+runtime music/SFX composition must remain game/core-owned; only native playback
+and device handling belong in the Win32 backend.
+
+The current Win32 audio adapter is intentionally silent. This preserves the
+audited behaviour exactly while leaving the platform seam ready for the
+separately approved generated-audio feature and Stage 4C persisted volume UI.

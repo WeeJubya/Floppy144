@@ -3336,6 +3336,28 @@ int CALLBACK WinMain(
         return 3;
     }
 
+    /*
+     * Audio is a platform service. Failure is deliberately non-fatal: the
+     * verified Stage 4 baseline is silent and the game remains fully playable
+     * when no audio backend/device is available.
+     */
+    if(
+        f144PlatformAudioInit(
+            &global_platform
+        )
+    )
+    {
+        (void)f144PlatformSetMusicVolume(
+            &global_platform,
+            global_settings.music_volume
+        );
+
+        (void)f144PlatformSetSfxVolume(
+            &global_platform,
+            global_settings.sfx_volume
+        );
+    }
+
     Floppy144SplashDraw(
         f144PlatformFramebuffer(&global_platform),
         0U
@@ -3426,6 +3448,10 @@ int CALLBACK WinMain(
      *
      * Clear the callback-visible pointer, then let the renderer release its resources.
      */
+
+    f144PlatformAudioShutdown(
+        &global_platform
+    );
 
     global_runtime = 0;
 

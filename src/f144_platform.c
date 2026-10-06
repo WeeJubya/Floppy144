@@ -95,3 +95,179 @@ bool f144PlatformLegacyPersistencePath(
         path_capacity
     );
 }
+
+bool f144PlatformAudioInit(
+    F144Platform *platform
+)
+{
+    if(
+        platform == NULL ||
+        platform->api == NULL ||
+        platform->api->audio_init == NULL
+    )
+    {
+        return false;
+    }
+
+    if(platform->audio_initialized != 0U)
+    {
+        return true;
+    }
+
+    if(!platform->api->audio_init(platform))
+    {
+        return false;
+    }
+
+    platform->audio_initialized =
+        1U;
+    platform->music_volume =
+        F144_AUDIO_VOLUME_MAX;
+    platform->sfx_volume =
+        F144_AUDIO_VOLUME_MAX;
+
+    return true;
+}
+
+void f144PlatformAudioShutdown(
+    F144Platform *platform
+)
+{
+    if(
+        platform == NULL ||
+        platform->audio_initialized == 0U
+    )
+    {
+        return;
+    }
+
+    if(
+        platform->api != NULL &&
+        platform->api->audio_shutdown != NULL
+    )
+    {
+        platform->api->audio_shutdown(platform);
+    }
+
+    platform->audio_initialized =
+        0U;
+}
+
+bool f144PlatformPlayMusic(
+    F144Platform *platform,
+    F144MusicCueId cue
+)
+{
+    if(
+        platform == NULL ||
+        platform->audio_initialized == 0U ||
+        platform->api == NULL ||
+        platform->api->music_play == NULL
+    )
+    {
+        return false;
+    }
+
+    platform->api->music_play(
+        platform,
+        cue
+    );
+
+    return true;
+}
+
+bool f144PlatformStopMusic(
+    F144Platform *platform
+)
+{
+    if(
+        platform == NULL ||
+        platform->audio_initialized == 0U ||
+        platform->api == NULL ||
+        platform->api->music_stop == NULL
+    )
+    {
+        return false;
+    }
+
+    platform->api->music_stop(platform);
+
+    return true;
+}
+
+bool f144PlatformPlaySfx(
+    F144Platform *platform,
+    F144SfxCueId cue
+)
+{
+    if(
+        platform == NULL ||
+        platform->audio_initialized == 0U ||
+        platform->api == NULL ||
+        platform->api->sfx_play == NULL
+    )
+    {
+        return false;
+    }
+
+    platform->api->sfx_play(
+        platform,
+        cue
+    );
+
+    return true;
+}
+
+bool f144PlatformSetMusicVolume(
+    F144Platform *platform,
+    uint8_t volume
+)
+{
+    if(
+        platform == NULL ||
+        platform->audio_initialized == 0U ||
+        volume > F144_AUDIO_VOLUME_MAX ||
+        platform->api == NULL ||
+        platform->api->music_volume == NULL
+    )
+    {
+        return false;
+    }
+
+    platform->api->music_volume(
+        platform,
+        volume
+    );
+
+    platform->music_volume =
+        volume;
+
+    return true;
+}
+
+bool f144PlatformSetSfxVolume(
+    F144Platform *platform,
+    uint8_t volume
+)
+{
+    if(
+        platform == NULL ||
+        platform->audio_initialized == 0U ||
+        volume > F144_AUDIO_VOLUME_MAX ||
+        platform->api == NULL ||
+        platform->api->sfx_volume == NULL
+    )
+    {
+        return false;
+    }
+
+    platform->api->sfx_volume(
+        platform,
+        volume
+    );
+
+    platform->sfx_volume =
+        volume;
+
+    return true;
+}

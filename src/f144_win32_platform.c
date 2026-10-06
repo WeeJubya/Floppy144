@@ -1,6 +1,7 @@
 #include "f144_runtime.h"
 
 #include "f144_win32_platform.h"
+#include "f144_win32_audio.h"
 #include "f144_win32_storage.h"
 
 #include <stdio.h>
@@ -486,7 +487,14 @@ static const F144PlatformApi f144_win32_platform_api =
     f144Win32PlatformFramebuffer,
     f144Win32PlatformPresent,
     f144Win32PlatformPersistencePath,
-    f144Win32PlatformLegacyPersistencePath
+    f144Win32PlatformLegacyPersistencePath,
+    f144Win32AudioInit,
+    f144Win32AudioShutdown,
+    f144Win32AudioPlayMusic,
+    f144Win32AudioStopMusic,
+    f144Win32AudioPlaySfx,
+    f144Win32AudioSetMusicVolume,
+    f144Win32AudioSetSfxVolume
 };
 
 void f144Win32PlatformBind(
@@ -509,4 +517,10 @@ void f144Win32PlatformBind(
         0U;
     platform->surface.height =
         0U;
+    platform->audio_initialized =
+        0U;
+    platform->music_volume =
+        F144_AUDIO_VOLUME_MAX;
+    platform->sfx_volume =
+        F144_AUDIO_VOLUME_MAX;
 }

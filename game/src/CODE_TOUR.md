@@ -62,6 +62,19 @@ Room rules:
 
 The player has no separate prototype Office-player object. Canonical position lives in `Floppy144RunState.player_site_x` / `player_site_y` using Site fixed-point coordinates.
 
+## Audio ownership
+
+`F144Platform` owns the semantic playback boundary: audio lifecycle, music
+play/replace/stop, SFX triggering, and independent music/SFX volume. Core/game
+code must not include Windows multimedia headers or know about MIDI devices,
+WinMM handles, wave buffers or platform callbacks.
+
+The current audited Stage 4 branch has no production audio generator or
+playback backend, so `src/f144_win32_audio.c` intentionally remains silent.
+When compact runtime-generated music/SFX is introduced, composition/event
+generation stays portable and outside the Win32 layer; only native playback
+belongs behind that adapter.
+
 ## Persistence ownership
 
 `floppy144_persistence.c` owns the existing versioned bytes, checksums and

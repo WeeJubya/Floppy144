@@ -82,10 +82,12 @@ files({
     "./game/src/**.c",
     "./game/src/**.h",
     "./src/f144_platform.c",
+    "./src/f144_win32_audio.c",
     "./src/f144_win32_input.c",
     "./src/f144_win32_platform.c",
     "./src/f144_win32_storage.c",
     "./include/f144_platform.h",
+    "./include/f144_win32_audio.h",
     "./include/f144_win32_input.h",
     "./include/f144_win32_platform.h",
     "./include/f144_win32_storage.h"

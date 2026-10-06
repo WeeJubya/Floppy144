@@ -2,9 +2,10 @@
  * F144 platform contract
  *
  * This is the platform-neutral boundary seen by FLOPPY//144 game code.
- * Stage 4B starts with display/presentation and logical actions. Timing,
- * storage, lifecycle, quit handling and audio are added only when their owning
- * migration reaches them. Text input remains a separate native-to-core stream.
+ * Stage 4B now covers display/presentation, logical input, persistent-storage
+ * paths and semantic audio requests. Timing, lifecycle and quit handling are
+ * added only when their owning migration reaches them. Text input remains a
+ * separate native-to-core stream.
  *
  * Single-instance acquisition and raw command-line parsing are launcher-only
  * concerns and intentionally do not belong in this game-facing contract.
@@ -85,6 +86,18 @@ typedef enum F144PersistenceFile
     F144_PERSISTENCE_FILE_COUNT
 } F144PersistenceFile;
 
+/*
+ * Semantic audio
+ *
+ * Cue IDs describe game-owned/generated audio content. The platform owns only
+ * playback. S4B-04 deliberately defines no shipping cues because the verified
+ * Stage 4 baseline contains no music/SFX generator or playback backend yet.
+ */
+#define F144_AUDIO_VOLUME_MAX 10U
+
+typedef uint16_t F144MusicCueId;
+typedef uint16_t F144SfxCueId;
+
 typedef struct Floppy144Surface
 {
     uint32_t *pixels;
@@ -113,6 +126,26 @@ typedef struct F144PlatformApi
         char *path,
         uint32_t path_capacity
     );
+
+    bool (*audio_init)(F144Platform *platform);
+    void (*audio_shutdown)(F144Platform *platform);
+    void (*music_play)(
+        F144Platform *platform,
+        F144MusicCueId cue
+    );
+    void (*music_stop)(F144Platform *platform);
+    void (*sfx_play)(
+        F144Platform *platform,
+        F144SfxCueId cue
+    );
+    void (*music_volume)(
+        F144Platform *platform,
+        uint8_t volume
+    );
+    void (*sfx_volume)(
+        F144Platform *platform,
+        uint8_t volume
+    );
 } F144PlatformApi;
 
 struct F144Platform
@@ -120,6 +153,10 @@ struct F144Platform
     const F144PlatformApi *api;
     void *state;
     Floppy144Surface surface;
+
+    uint8_t audio_initialized;
+    uint8_t music_volume;
+    uint8_t sfx_volume;
 };
 
 Floppy144Surface *f144PlatformFramebuffer(
@@ -143,4 +180,36 @@ bool f144PlatformLegacyPersistencePath(
     uint32_t candidate,
     char *path,
     uint32_t path_capacity
+);
+
+bool f144PlatformAudioInit(
+    F144Platform *platform
+);
+
+void f144PlatformAudioShutdown(
+    F144Platform *platform
+);
+
+bool f144PlatformPlayMusic(
+    F144Platform *platform,
+    F144MusicCueId cue
+);
+
+bool f144PlatformStopMusic(
+    F144Platform *platform
+);
+
+bool f144PlatformPlaySfx(
+    F144Platform *platform,
+    F144SfxCueId cue
+);
+
+bool f144PlatformSetMusicVolume(
+    F144Platform *platform,
+    uint8_t volume
+);
+
+bool f144PlatformSetSfxVolume(
+    F144Platform *platform,
+    uint8_t volume
 );
