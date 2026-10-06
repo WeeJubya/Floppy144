@@ -2142,6 +2142,314 @@ static void Floppy144IsometricDrawPlayer(
 }
 
 
+static void Floppy144IsometricConfigureDirectoryProjection(void)
+{
+    /*
+     * Match the compact full-Site overview used by the original FM-23
+     * prototype: entire 100x100 Site visible at once, centred horizontally.
+     */
+    g_nIsoOriginX=320;
+    g_nIsoOriginY=44;
+    g_nIsoCentreX16=0;
+    g_nIsoCentreY16=0;
+    g_nIsoHalfTileX=3;
+    g_nIsoHalfTileY=1;
+    g_nIsoHeightScale=2;
+}
+
+static void Floppy144IsometricDrawPrismWireX16(
+    Floppy144Surface *pSurface,
+    int32_t nX16,
+    int32_t nY16,
+    int32_t nWidth16,
+    int32_t nDepth16,
+    int32_t nBaseHeight16,
+    int32_t nTopHeight16,
+    uint32_t uColour
+)
+{
+    int32_t ax,ay,bx,by,cx,cy,dx,dy;
+    int32_t atx,aty,btx,bty,ctx,cty,dtx,dty;
+
+    Floppy144IsometricProjectX16(nX16,nY16,nBaseHeight16,&ax,&ay);
+    Floppy144IsometricProjectX16(nX16+nWidth16,nY16,nBaseHeight16,&bx,&by);
+    Floppy144IsometricProjectX16(nX16+nWidth16,nY16+nDepth16,nBaseHeight16,&cx,&cy);
+    Floppy144IsometricProjectX16(nX16,nY16+nDepth16,nBaseHeight16,&dx,&dy);
+
+    Floppy144IsometricLine(pSurface,ax,ay,bx,by,uColour);
+    Floppy144IsometricLine(pSurface,bx,by,cx,cy,uColour);
+    Floppy144IsometricLine(pSurface,cx,cy,dx,dy,uColour);
+    Floppy144IsometricLine(pSurface,dx,dy,ax,ay,uColour);
+
+    if(nTopHeight16<=nBaseHeight16)return;
+
+    Floppy144IsometricProjectX16(nX16,nY16,nTopHeight16,&atx,&aty);
+    Floppy144IsometricProjectX16(nX16+nWidth16,nY16,nTopHeight16,&btx,&bty);
+    Floppy144IsometricProjectX16(nX16+nWidth16,nY16+nDepth16,nTopHeight16,&ctx,&cty);
+    Floppy144IsometricProjectX16(nX16,nY16+nDepth16,nTopHeight16,&dtx,&dty);
+
+    Floppy144IsometricLine(pSurface,atx,aty,btx,bty,uColour);
+    Floppy144IsometricLine(pSurface,btx,bty,ctx,cty,uColour);
+    Floppy144IsometricLine(pSurface,ctx,cty,dtx,dty,uColour);
+    Floppy144IsometricLine(pSurface,dtx,dty,atx,aty,uColour);
+
+    Floppy144IsometricLine(pSurface,ax,ay,atx,aty,uColour);
+    Floppy144IsometricLine(pSurface,bx,by,btx,bty,uColour);
+    Floppy144IsometricLine(pSurface,cx,cy,ctx,cty,uColour);
+    Floppy144IsometricLine(pSurface,dx,dy,dtx,dty,uColour);
+}
+
+static bool Floppy144IsometricDirectoryRectVisible(
+    const Floppy144RunState *pRunState,
+    const Floppy144SiteRect *pRect
+)
+{
+    if(
+        pRunState==NULL ||
+        pRect==NULL ||
+        pRect->room>=(uint8_t)FLOPPY144_ROOM_COUNT ||
+        !Floppy144RunStateRoomReconstructed(
+            pRunState,
+            (Floppy144RoomId)pRect->room
+        )
+    )
+    {
+        return false;
+    }
+
+    return Floppy144SiteRectRuntimeVisible(
+        pRunState,
+        pRect
+    );
+}
+
+static void Floppy144IsometricDirectoryDrawRoomLabels(
+    Floppy144Surface *pSurface,
+    const Floppy144RunState *pRunState
+)
+{
+    uint32_t uRoom;
+
+    if(pSurface==NULL||pRunState==NULL)return;
+
+    for(uRoom=0U;uRoom<(uint32_t)FLOPPY144_ROOM_COUNT;++uRoom)
+    {
+        const Floppy144SiteRect *pLargest=NULL;
+        uint32_t uLargestArea=0U;
+        uint32_t uIndex;
+        uint32_t uCount=Floppy144SiteRectCount();
+
+        if(
+            !Floppy144RunStateRoomReconstructed(
+                pRunState,
+                (Floppy144RoomId)uRoom
+            )
+        )
+        {
+            continue;
+        }
+
+        for(uIndex=0U;uIndex<uCount;++uIndex)
+        {
+            const Floppy144SiteRect *pRect=Floppy144SiteRectAt(uIndex);
+            uint32_t uArea;
+
+            if(
+                pRect==NULL ||
+                pRect->room!=(uint8_t)uRoom ||
+                !Floppy144IsometricIsFloor(
+                    (Floppy144SiteElement)pRect->type
+                )
+            )
+            {
+                continue;
+            }
+
+            uArea=(uint32_t)pRect->width*(uint32_t)pRect->height;
+
+            if(uArea>uLargestArea)
+            {
+                uLargestArea=uArea;
+                pLargest=pRect;
+            }
+        }
+
+        if(pLargest!=NULL)
+        {
+            int32_t sx,sy;
+            const char *pszName=
+                Floppy144IsometricRoomLabel(
+                    (Floppy144RoomId)uRoom
+                );
+            uint32_t uWidth=Floppy144DrawTextWidth(pszName,1U);
+
+            Floppy144IsometricProjectX16(
+                (
+                    (int32_t)pLargest->x*
+                    FLOPPY144_SITE_FIXED_ONE
+                )+
+                (
+                    (int32_t)pLargest->width*
+                    FLOPPY144_SITE_FIXED_ONE
+                )/2,
+                (
+                    (int32_t)pLargest->y*
+                    FLOPPY144_SITE_FIXED_ONE
+                )+
+                (
+                    (int32_t)pLargest->height*
+                    FLOPPY144_SITE_FIXED_ONE
+                )/2,
+                FLOPPY144_SITE_FIXED_ONE/2,
+                &sx,
+                &sy
+            );
+
+            if(
+                sx>=(int32_t)(uWidth/2U) &&
+                sy>=0
+            )
+            {
+                Floppy144DrawText(
+                    pSurface,
+                    (uint32_t)sx-uWidth/2U,
+                    (uint32_t)sy,
+                    pszName,
+                    1U,
+                    FLOPPY144_RGB(183,194,188)
+                );
+            }
+        }
+    }
+}
+
+void Floppy144SiteIsometricDirectoryDraw(
+    F144Runtime *pRuntime,
+    const Floppy144RunState *pRunState
+)
+{
+    const uint32_t uBackground=FLOPPY144_RGB(10,15,18);
+    const uint32_t uFloor=FLOPPY144_RGB(62,72,72);
+    const uint32_t uFurniture=FLOPPY144_RGB(118,133,132);
+    const uint32_t uDoor=FLOPPY144_RGB(194,153,76);
+    const uint32_t uWindow=FLOPPY144_RGB(100,151,166);
+    const uint32_t uMuted=FLOPPY144_RGB(118,133,132);
+    const uint32_t uText=FLOPPY144_RGB(202,211,205);
+    Floppy144Surface sSurface;
+    uint32_t uIndex;
+    uint32_t uCount;
+
+    if(
+        pRuntime==NULL ||
+        pRunState==NULL ||
+        pRuntime->backbuffer.data==NULL
+    )
+    {
+        return;
+    }
+
+    sSurface.pixels=(uint32_t*)pRuntime->backbuffer.data;
+    sSurface.width=pRuntime->backbuffer.width;
+    sSurface.height=pRuntime->backbuffer.height;
+
+    Floppy144DrawClear(&sSurface,uBackground);
+    Floppy144IsometricConfigureDirectoryProjection();
+
+    Floppy144DrawText(
+        &sSurface,
+        10U,
+        5U,
+        "GDR SITE DIRECTORY // ISOMETRIC ACCOMMODATION PLAN",
+        1U,
+        uMuted
+    );
+
+    uCount=Floppy144SiteRectCount();
+
+    /* Recovered floors establish the Site footprint. */
+    for(uIndex=0U;uIndex<uCount;++uIndex)
+    {
+        const Floppy144SiteRect *pRect=Floppy144SiteRectAt(uIndex);
+
+        if(
+            !Floppy144IsometricDirectoryRectVisible(
+                pRunState,
+                pRect
+            ) ||
+            !Floppy144IsometricIsFloor(
+                (Floppy144SiteElement)pRect->type
+            )
+        )
+        {
+            continue;
+        }
+
+        Floppy144IsometricDrawPrismWireX16(
+            &sSurface,
+            (int32_t)pRect->x*FLOPPY144_SITE_FIXED_ONE,
+            (int32_t)pRect->y*FLOPPY144_SITE_FIXED_ONE,
+            (int32_t)pRect->width*FLOPPY144_SITE_FIXED_ONE,
+            (int32_t)pRect->height*FLOPPY144_SITE_FIXED_ONE,
+            0,
+            0,
+            uFloor
+        );
+    }
+
+    /* Major furniture, fixtures, partitions, doors and windows. */
+    for(uIndex=0U;uIndex<uCount;++uIndex)
+    {
+        const Floppy144SiteRect *pRect=Floppy144SiteRectAt(uIndex);
+        Floppy144SiteElement eElement;
+        int32_t nHeight;
+        uint32_t uColour=uFurniture;
+
+        if(
+            !Floppy144IsometricDirectoryRectVisible(
+                pRunState,
+                pRect
+            )
+        )
+        {
+            continue;
+        }
+
+        eElement=(Floppy144SiteElement)pRect->type;
+
+        if(Floppy144IsometricIsFloor(eElement))continue;
+
+        if(eElement==FLOPPY144_SITE_DOOR)uColour=uDoor;
+        else if(eElement==FLOPPY144_SITE_WINDOW)uColour=uWindow;
+
+        nHeight=Floppy144IsometricElementHeight(eElement);
+
+        Floppy144IsometricDrawPrismWireX16(
+            &sSurface,
+            (int32_t)pRect->x*FLOPPY144_SITE_FIXED_ONE,
+            (int32_t)pRect->y*FLOPPY144_SITE_FIXED_ONE,
+            (int32_t)pRect->width*FLOPPY144_SITE_FIXED_ONE,
+            (int32_t)pRect->height*FLOPPY144_SITE_FIXED_ONE,
+            0,
+            nHeight*FLOPPY144_SITE_FIXED_ONE,
+            uColour
+        );
+    }
+
+    Floppy144IsometricDirectoryDrawRoomLabels(
+        &sSurface,
+        pRunState
+    );
+
+    Floppy144DrawText(
+        &sSurface,
+        20U,
+        340U,
+        "FM-23 RECOVERED DRAWING OFFICE ACCOMMODATION PLAN",
+        1U,
+        uText
+    );
+}
+
 void Floppy144SiteIsometricDraw(
     F144Runtime *pRuntime,
     const Floppy144RunState *pRunState,
