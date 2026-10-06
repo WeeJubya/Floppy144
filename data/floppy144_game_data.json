@@ -15,7 +15,7 @@
   "schema_notes": [
     "Strict JSON; no comments required by the build tool.",
     "Stable collection/evidence/trigger/interaction IDs are persistence identifiers and must never be renumbered.",
-    "The 163 readable-document budget covers the 29 budgeted collections. Two additional trigger documents belong to unbudgeted collections, so the integrated authored document registry contains 165 readable records.",
+    "The 169 readable-document budget covers the 30 budgeted collections. One additional trigger document belongs to an unbudgeted collection, so the integrated authored document registry contains 170 readable records.",
     "Trigger effects are machine-readable operations; physical interactions are a separate effect source.",
     "Paired/synthesis evidence is order-independent.",
     "Ambient interactions never alter persistent investigation state.",
@@ -26,8 +26,8 @@
   ],
   "counts": {
     "collections": 35,
-    "documents": 165,
-    "budgeted_readable_documents": 163,
+    "documents": 170,
+    "budgeted_readable_documents": 169,
     "triggers": 50,
     "interactions": 42,
     "ambient_interactions": 16,
@@ -39,7 +39,7 @@
     "drawing_definitions": 24,
     "colours": 44,
     "budgeted_reconstruction_pool_percent": 150,
-    "registered_reconstruction_weight_percent": 173
+    "registered_reconstruction_weight_percent": 175
   },
   "site_layout_source": {
     "schema_version": 1,
@@ -17271,18 +17271,28 @@
       "id": "FM-23",
       "name": "Site Maps & Room Organisation",
       "domain": "Facilities Management",
-      "content_budget": null,
+      "content_budget": {
+        "act": "Act II",
+        "records": 20,
+        "readable_documents": 6,
+        "trigger_documents_budget": 1
+      },
       "document_ids": [
-        "FM-23-RS-0001"
+        "FM-23-RS-0001",
+        "FM-23-RS-0002",
+        "FM-23-RS-0003",
+        "FM-23-RS-0004",
+        "FM-23-RS-0005",
+        "FM-23-RS-0006"
       ],
       "trigger_ids": [
         "T-025"
       ],
       "physical_item_ids": [],
       "evidence_ids": [],
-      "notebook_entry": "Site Maps & Room Organisation: recovered collection material is available to the current reconstruction.",
+      "notebook_entry": "Site Maps & Room Organisation: recovered drawing-office material is available. The Site Directory can be upgraded by reviewing the accommodation-plan request.",
       "source_order": 21,
-      "size_kb": 72,
+      "size_kb": 101,
       "required_for_completion": false
     },
     {
@@ -18888,8 +18898,68 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-025",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nREQUEST FOR PREPARATION OF ISOMETRIC ACCOMMODATION PLANS\n\nTo: Drawing Office\nSubject: Closure-period Site plan\n\nPlease prepare an isometric accommodation plan from the current room schedule and corridor survey.\n\nPurpose:\nThe existing flat plan is adequate for floor area but poor at showing door relationships, furniture clearances and the relative position of service features during the handover walk-round.\n\nInclude only confirmed room boundaries and fixed or recorded major items. Do not infer concealed service routes.\n\nOne copy to Project Manager.\nOne copy to Facilities file.\n\nPencil perspective sketches are not to be filed as measured drawings, irrespective of confidence.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nREQUEST FOR PREPARATION OF ISOMETRIC ACCOMMODATION PLANS\n\nTo: Drawing Office\nSubject: Closure-period Site plan\n\nPlease prepare an isometric accommodation plan from the current room schedule and corridor survey.\n\nPurpose:\nThe existing flat plan is adequate for floor area but poor at showing door relationships, furniture clearances and the relative position of service features during the handover walk-round.\n\nInclude only confirmed room boundaries and fixed or recorded major items. Do not infer concealed service routes.\n\nThe recovered plan is to be filed with the Site Directory material so the directory can be consulted in either flat-plan or accommodation-plan form.\n\nOne copy to Project Manager.\nOne copy to Facilities file.\n\nPencil perspective sketches are not to be filed as measured drawings, irrespective of confidence.",
       "source_status": "setup-authored-identity",
+      "parent_collection_id": "FM-23"
+    },
+    {
+      "id": "FM-23-RS-0002",
+      "collection_id": "FM-23",
+      "record_index": 1,
+      "title": "Closure-Period Room Schedule",
+      "classification": "GDR INTERNAL / RECOVERED",
+      "document_type": "readable_record",
+      "trigger_id": null,
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nCLOSURE-PERIOD ROOM SCHEDULE\n\nRooms remaining in operational use during final closure:\n- Reception;\n- Main Office;\n- Facilities;\n- Records Office;\n- IT Support;\n- Security Office;\n- Staff Room;\n- Server Room;\n- Director and Secretary accommodation.\n\nRoom names on the Site Directory are to follow the operational schedule, not historical tenancy labels.\n\nVacated areas may remain physically accessible but are not to be reinstated on closure drawings unless a surviving function is confirmed.\n\nFacilities note:\nA room is not 'gone' merely because somebody has removed its brass sign.",
+      "source_status": "authored-for-integration",
+      "parent_collection_id": "FM-23"
+    },
+    {
+      "id": "FM-23-RS-0003",
+      "collection_id": "FM-23",
+      "record_index": 2,
+      "title": "Door and Circulation Survey",
+      "classification": "GDR INTERNAL / RECOVERED",
+      "document_type": "readable_record",
+      "trigger_id": null,
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nDOOR AND CIRCULATION SURVEY\n\nDrawing Office survey notes for closure handover.\n\nRecord:\n- each corridor-facing door;\n- direction of access between operational rooms;\n- restricted doors and controlled areas;\n- clear walking routes around retained furniture;\n- wall-mounted equipment that projects into circulation space.\n\nDo not move furniture merely to improve the drawing. The plan is to describe the Site as handed over, including inconvenient desks, late-added shelving and partitions that nobody remembers approving.\n\nAny mismatch between opposing door measurements is to be returned to Facilities for physical verification.",
+      "source_status": "authored-for-integration",
+      "parent_collection_id": "FM-23"
+    },
+    {
+      "id": "FM-23-RS-0004",
+      "collection_id": "FM-23",
+      "record_index": 3,
+      "title": "Furniture Clearance Verification Sheet",
+      "classification": "GDR INTERNAL / RECOVERED",
+      "document_type": "readable_record",
+      "trigger_id": null,
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nFURNITURE CLEARANCE VERIFICATION SHEET\n\nThe accommodation plan is to show retained major furniture in its recorded position.\n\nVerify clear passage in front of:\n- desks and terminal stations;\n- filing cabinets;\n- shelving and bookcases;\n- Server Room equipment;\n- Security monitoring furniture;\n- Staff Room fixed fittings.\n\nWall-mounted items are to be shown against the wall face to which they are fixed. They must not be drawn as freestanding obstacles or imply usable space between the fitting and the wall.\n\nWhere clearances are tight, record the condition. Do not improve reality with draughtsmanship.",
+      "source_status": "authored-for-integration",
+      "parent_collection_id": "FM-23"
+    },
+    {
+      "id": "FM-23-RS-0005",
+      "collection_id": "FM-23",
+      "record_index": 4,
+      "title": "Site Directory Amendment Schedule",
+      "classification": "GDR INTERNAL / RECOVERED",
+      "document_type": "readable_record",
+      "trigger_id": null,
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nSITE DIRECTORY AMENDMENT SCHEDULE\n\nThe Reception and Corridor Site Directories are to be amended from the same closure-period room schedule.\n\nAmendments:\n1. remove obsolete office names;\n2. retain operational room names;\n3. retain restricted-area labels where required for authorised staff;\n4. cross-reference the Drawing Office accommodation plan;\n5. mark any unresolved room boundary as provisional.\n\nThe two directories are not independent records. A correction made to one is to be reflected in the other before handover.\n\nHandwritten arrows are not an approved revision system, even when drawn neatly.",
+      "source_status": "authored-for-integration",
+      "parent_collection_id": "FM-23"
+    },
+    {
+      "id": "FM-23-RS-0006",
+      "collection_id": "FM-23",
+      "record_index": 5,
+      "title": "Drawing Office Handover Note",
+      "classification": "GDR INTERNAL / RECOVERED",
+      "document_type": "readable_record",
+      "trigger_id": null,
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nDRAWING OFFICE HANDOVER NOTE\n\nAccommodation-plan package prepared from the final room schedule, corridor survey and retained-furniture check.\n\nStatus:\nRoom boundaries ........ verified where accessible\nDoor relationships ..... transferred from Site survey\nMajor furniture ........ included\nWall fittings .......... shown on mounting face\nConcealed services ..... not inferred\nVacated rooms .......... omitted unless still operational\n\nThe plan is a closure aid, not a construction drawing. Dimensions remain subordinate to the measured Site records.\n\nFiled with FM-23 and cross-referenced from both Site Directories.",
+      "source_status": "authored-for-integration",
       "parent_collection_id": "FM-23"
     },
     {
@@ -21114,11 +21184,11 @@
       ],
       "effects": [
         {
-          "op": "SET_PROJECTION",
-          "target": "ISOMETRIC"
+          "op": "RECORD_NOTEBOOK_FACT",
+          "target": "FM-23_ISOMETRIC_DIRECTORY"
         }
       ],
-      "effect_summary": "SET_PROJECTION ISOMETRIC",
+      "effect_summary": "RECORD_NOTEBOOK_FACT FM-23_ISOMETRIC_DIRECTORY",
       "persistent": true,
       "idempotent": true,
       "source_order": 25
@@ -24157,6 +24227,31 @@
     {
       "parent_id": "FM-23",
       "child_id": "FM-23-RS-0001",
+      "relation": "contains_document"
+    },
+    {
+      "parent_id": "FM-23",
+      "child_id": "FM-23-RS-0002",
+      "relation": "contains_document"
+    },
+    {
+      "parent_id": "FM-23",
+      "child_id": "FM-23-RS-0003",
+      "relation": "contains_document"
+    },
+    {
+      "parent_id": "FM-23",
+      "child_id": "FM-23-RS-0004",
+      "relation": "contains_document"
+    },
+    {
+      "parent_id": "FM-23",
+      "child_id": "FM-23-RS-0005",
+      "relation": "contains_document"
+    },
+    {
+      "parent_id": "FM-23",
+      "child_id": "FM-23-RS-0006",
       "relation": "contains_document"
     },
     {
@@ -28506,7 +28601,7 @@
     },
     {
       "parent_id": "T-025",
-      "child_id": "ISOMETRIC",
+      "child_id": "FM-23_ISOMETRIC_DIRECTORY",
       "relation": "trigger_effect_target"
     },
     {
