@@ -1407,6 +1407,66 @@ static void Floppy144CatalogueDrawDocument(
                 catalogue->document_scroll_line
             );
     }
+    if(
+        bAuthored &&
+        uBodyLineCount > FLOPPY144_DOCUMENT_BODY_MAX_LINES
+    )
+    {
+        const uint32_t uTrackX=594U;
+        const uint32_t uTrackY=FLOPPY144_DOCUMENT_BODY_TOP;
+        const uint32_t uTrackHeight=
+            FLOPPY144_DOCUMENT_BODY_MAX_LINES*
+            FLOPPY144_DOCUMENT_BODY_LINE_HEIGHT;
+        const uint32_t uMaximumScroll=
+            uBodyLineCount-
+            FLOPPY144_DOCUMENT_BODY_MAX_LINES;
+        uint32_t uThumbHeight=
+            (
+                uTrackHeight*
+                FLOPPY144_DOCUMENT_BODY_MAX_LINES
+            )/
+            uBodyLineCount;
+        uint32_t uTravel;
+        uint32_t uThumbY;
+
+        if(uThumbHeight<18U)uThumbHeight=18U;
+        if(uThumbHeight>uTrackHeight)uThumbHeight=uTrackHeight;
+
+        uTravel=uTrackHeight-uThumbHeight;
+        uThumbY=
+            uTrackY+
+            (
+                uTravel*
+                catalogue->document_scroll_line
+            )/
+            uMaximumScroll;
+
+        Floppy144DrawFillRect(
+            surface,
+            uTrackX,
+            uTrackY,
+            6U,
+            uTrackHeight,
+            panel
+        );
+        Floppy144DrawRect(
+            surface,
+            uTrackX,
+            uTrackY,
+            6U,
+            uTrackHeight,
+            border
+        );
+        Floppy144DrawFillRect(
+            surface,
+            uTrackX+2U,
+            uThumbY+1U,
+            2U,
+            uThumbHeight>2U?uThumbHeight-2U:uThumbHeight,
+            amber
+        );
+    }
+
     else
     {
         Floppy144CatalogueTextCentred(
