@@ -114,7 +114,7 @@ void Floppy144NotebookViewDraw(
 
         if(b.count>FLOPPY144_NOTEBOOK_VISIBLE_LINES)
         {
-            const uint32_t uTrackX=604U,uTrackY=54U;
+            const uint32_t uTrackX=602U,uTrackY=54U;
             const uint32_t uTrackHeight=FLOPPY144_NOTEBOOK_VISIBLE_LINES*FLOPPY144_NOTEBOOK_LINE_HEIGHT;
             uint32_t uThumbHeight=(uTrackHeight*FLOPPY144_NOTEBOOK_VISIBLE_LINES)/b.count;
             uint32_t uTravel,uThumbY;
@@ -122,9 +122,16 @@ void Floppy144NotebookViewDraw(
             if(uThumbHeight>uTrackHeight)uThumbHeight=uTrackHeight;
             uTravel=uTrackHeight-uThumbHeight;
             uThumbY=uTrackY+(uTravel*top)/(b.count-FLOPPY144_NOTEBOOK_VISIBLE_LINES);
-            Floppy144DrawFillRect(&s,uTrackX,uTrackY,4U,uTrackHeight,panel);
-            Floppy144DrawRect(&s,uTrackX,uTrackY,4U,uTrackHeight,border);
-            Floppy144DrawFillRect(&s,uTrackX+1U,uThumbY,2U,uThumbHeight,amber);
+            Floppy144DrawFillRect(&s,uTrackX,uTrackY,6U,uTrackHeight,panel);
+            Floppy144DrawRect(&s,uTrackX,uTrackY,6U,uTrackHeight,border);
+            Floppy144DrawFillRect(
+                &s,
+                uTrackX+2U,
+                uThumbY+1U,
+                2U,
+                uThumbHeight>2U?uThumbHeight-2U:uThumbHeight,
+                amber
+            );
         }
     }
     Floppy144DrawFillRect(&s,10U,306U,620U,28U,bg);Floppy144DrawRect(&s,10U,306U,620U,28U,border);
