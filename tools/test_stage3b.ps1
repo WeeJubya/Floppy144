@@ -567,96 +567,40 @@ function Test-Stage3B5CoordinatorWiring {
         }
     }
 
-    foreach($RequiredIsoToken in @(
-        'Floppy144IsometricRectVisibleInRoom',
-        'Floppy144IsometricConfigureRoomProjection',
-        'Floppy144IsometricDrawFarRoomWalls',
-        'Floppy144IsometricBoundaryIsNearCutaway',
-        'Floppy144IsometricRectDepth',
-        'nPlayerDepth',
-        'Floppy144IsometricFillQuad'
+    if(
+        $MainSource -notmatch
+            'case FLOPPY144_SCREEN_OFFICE:[\s\S]*?Floppy144Site2DDraw' -or
+        $MainSource -match
+            'Floppy144RunStateIsIsometric' -or
+        $MainSource -match
+            'Floppy144SiteIsometricDraw\('
+    ) {
+        throw "Stage 3 release must keep live Site exploration on the proven 2D renderer."
+    }
+
+    foreach($RequiredDirectoryIsoToken in @(
+        'FM-23_ISOMETRIC_DIRECTORY',
+        'Floppy144GameDataFactRecorded',
+        'Floppy144SiteIsometricDirectoryDraw'
     )) {
-        if($SiteIsoSource -notmatch [regex]::Escape($RequiredIsoToken)) {
-            throw "FM-23 isometric room-play contract is missing: $RequiredIsoToken"
+        if($SiteDirectorySource -notmatch [regex]::Escape($RequiredDirectoryIsoToken)) {
+            throw "FM-23 Site Directory upgrade contract is missing: $RequiredDirectoryIsoToken"
         }
     }
 
-    if(
-        $SiteIsoSource -notmatch
-            'nRectRight>=nRoomRight\s*\|\|\s*nRectBottom>=nRoomBottom' -or
-        $SiteIsoSource -notmatch
-            'pRect->room==\(uint8_t\)eRoom' -or
-        $SiteIsoSource -notmatch
-            'nPlayerDepth<nRectDepth'
-    ) {
-        throw "FM-23 no longer preserves active-room visibility, cutaway walls, and player/furniture depth ordering."
-    }
-
-    foreach($RequiredIsoPresentationToken in @(
-        'Floppy144IsometricShadeColour',
-        'Floppy144IsometricDrawPrismAlphaX16',
-        'Floppy144IsometricDrawChair',
-        'Floppy144IsometricDrawNearRoomWalls',
-        'uAlpha=38U',
-        'Painter-facing solid',
-        'g_nIsoHalfTileX=10',
-        'g_nIsoHalfTileY=4',
-        'g_nIsoHeightScale=6',
-        'g_nIsoCentreX16=pRunState->player_site_x',
-        'g_nIsoCentreY16=pRunState->player_site_y'
+    foreach($RequiredDirectoryOverviewToken in @(
+        'Floppy144IsometricConfigureDirectoryProjection',
+        'Floppy144IsometricDrawPrismWireX16',
+        'Floppy144IsometricDirectoryRectVisible',
+        'Floppy144IsometricDirectoryDrawRoomLabels',
+        'GDR SITE DIRECTORY // ISOMETRIC ACCOMMODATION PLAN',
+        'g_nIsoHalfTileX=3',
+        'g_nIsoHalfTileY=1',
+        'g_nIsoHeightScale=2'
     )) {
-        if($SiteIsoSource -notmatch [regex]::Escape($RequiredIsoPresentationToken)) {
-            throw "FM-23 solid-room presentation contract is missing: $RequiredIsoPresentationToken"
+        if($SiteIsoSource -notmatch [regex]::Escape($RequiredDirectoryOverviewToken)) {
+            throw "FM-23 recovered accommodation-plan overview is missing: $RequiredDirectoryOverviewToken"
         }
-    }
-
-    foreach($RequiredWallMountToken in @(
-        'Floppy144IsometricWallFixtureAttachment',
-        'Floppy144IsometricWallAttachmentIsNear',
-        'RECEPTION_SITE_DIRECTORY',
-        'bPartitionMounted',
-        'nWallPlane16',
-        'FLOPPY144_ISO_WALL_LEFT',
-        'FLOPPY144_ISO_WALL_RIGHT',
-        'FLOPPY144_ISO_WALL_TOP',
-        'FLOPPY144_ISO_WALL_BOTTOM'
-    )) {
-        if($SiteIsoSource -notmatch [regex]::Escape($RequiredWallMountToken)) {
-            throw "FM-23 wall-mounted-item plane resolution is missing: $RequiredWallMountToken"
-        }
-    }
-
-    if(
-        $SiteIsoSource -notmatch
-            'pRect->type==\s*\(uint8_t\)FLOPPY144_SITE_PARTITION_WALL[\s\S]*?64U' -or
-        $SiteIsoSource -notmatch
-            '!bPartitionMounted\s*&&\s*Floppy144IsometricWallAttachmentIsNear'
-    ) {
-        throw "FM-23 no longer renders partition walls at 25 percent or keeps near-wall fixtures in the foreground wall layer."
-    }
-
-    if(
-        $SiteIsoSource -notmatch
-            'nX < FLOPPY144_ISO_VIEWPORT_X' -or
-        $SiteIsoSource -notmatch
-            'nY < FLOPPY144_ISO_VIEWPORT_Y' -or
-        $SiteIsoSource -notmatch
-            'FLOPPY144_ISO_VIEWPORT_WIDTH' -or
-        $SiteIsoSource -notmatch
-            'FLOPPY144_ISO_VIEWPORT_HEIGHT'
-    ) {
-        throw "FM-23 zoomed camera is no longer clipped to the fixed Site viewport."
-    }
-
-    if(
-        $SiteIsoSource -match
-            'Floppy144IsometricLine\(pSurface,\s*ax,\s*ay,\s*atx,\s*aty' -or
-        $SiteIsoSource -notmatch
-            'eElement==FLOPPY144_SITE_CHAIR' -or
-        $SiteIsoSource -notmatch
-            'Floppy144IsometricDrawBoundaryAlpha\([\s\S]*?38U'
-    ) {
-        throw "FM-23 has regressed hidden-edge suppression, composite chairs, or 15-percent near-boundary alpha."
     }
 
     if(
