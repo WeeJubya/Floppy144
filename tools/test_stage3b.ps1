@@ -500,6 +500,8 @@ function Test-Stage3B5CoordinatorWiring {
     $Site2DPath = Join-Path $SourceDir "floppy144_site_2d.c"
     $SiteIsoPath = Join-Path $SourceDir "floppy144_site_isometric.c"
     $SiteDirectoryPath = Join-Path $SourceDir "floppy144_site_directory.c"
+    $CataloguePath = Join-Path $SourceDir "floppy144_catalogue.c"
+    $NotebookViewPath = Join-Path $SourceDir "floppy144_notebook_view.c"
     $DrawingRuntimeHeaderPath = Join-Path $SourceDir "floppy144_drawing_runtime.h"
     $DrawingRuntimeSourcePath = Join-Path $SourceDir "floppy144_drawing_runtime.c"
 
@@ -511,6 +513,8 @@ function Test-Stage3B5CoordinatorWiring {
         $Site2DPath,
         $SiteIsoPath,
         $SiteDirectoryPath,
+        $CataloguePath,
+        $NotebookViewPath,
         $DrawingRuntimeHeaderPath,
         $DrawingRuntimeSourcePath
     )) {
@@ -526,6 +530,8 @@ function Test-Stage3B5CoordinatorWiring {
     $Site2DSource = Get-Content -Raw -Path $Site2DPath
     $SiteIsoSource = Get-Content -Raw -Path $SiteIsoPath
     $SiteDirectorySource = Get-Content -Raw -Path $SiteDirectoryPath
+    $CatalogueSource = Get-Content -Raw -Path $CataloguePath
+    $NotebookViewSource = Get-Content -Raw -Path $NotebookViewPath
     $DrawingRuntimeHeader = Get-Content -Raw -Path $DrawingRuntimeHeaderPath
     $DrawingRuntimeSource = Get-Content -Raw -Path $DrawingRuntimeSourcePath
 
@@ -651,6 +657,23 @@ function Test-Stage3B5CoordinatorWiring {
             'Floppy144IsometricDrawBoundaryAlpha\([\s\S]*?38U'
     ) {
         throw "FM-23 has regressed hidden-edge suppression, composite chairs, or 15-percent near-boundary alpha."
+    }
+
+    if(
+        $CatalogueSource -notmatch
+            'uTrackHeight=\s*FLOPPY144_DOCUMENT_BODY_MAX_LINES\*\s*FLOPPY144_DOCUMENT_BODY_LINE_HEIGHT' -or
+        $CatalogueSource -notmatch
+            'catalogue->document_scroll_line' -or
+        $CatalogueSource -notmatch
+            'uThumbHeight>2U\?uThumbHeight-2U:uThumbHeight' -or
+        $NotebookViewSource -notmatch
+            'FLOPPY144_NOTEBOOK_VISIBLE_LINES\*FLOPPY144_NOTEBOOK_LINE_HEIGHT' -or
+        $NotebookViewSource -notmatch
+            'uThumbY=uTrackY\+\(uTravel\*top\)' -or
+        $NotebookViewSource -notmatch
+            'uThumbHeight>2U\?uThumbHeight-2U:uThumbHeight'
+    ) {
+        throw "Document Viewer or Notebook proportional scrollbar contract is missing."
     }
 
     if(
