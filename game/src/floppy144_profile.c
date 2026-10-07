@@ -304,6 +304,82 @@ bool Floppy144DiscoveryProfileRecordEvidence
     return true;
 }
 
+/*
+ * Count the distinct collections recorded across all recoveries.
+ */
+uint32_t Floppy144DiscoveryProfileCollectionsEverRestoredCount(
+    const Floppy144DiscoveryProfile *profile
+)
+{
+    uint32_t collection_index;
+    uint32_t count;
+
+    if(profile == NULL)
+    {
+        return 0U;
+    }
+
+    count =
+        0U;
+
+    for(
+        collection_index = 0U;
+        collection_index < (uint32_t)FLOPPY144_COLLECTION_COUNT;
+        ++collection_index
+    )
+    {
+        if(
+            Floppy144DiscoveryProfileCollectionEverRestored(
+                profile,
+                (Floppy144CollectionId)collection_index
+            )
+        )
+        {
+            ++count;
+        }
+    }
+
+    return count;
+}
+
+/*
+ * Count the distinct evidence items recorded across all recoveries.
+ */
+uint32_t Floppy144DiscoveryProfileEvidenceEverEstablishedCount(
+    const Floppy144DiscoveryProfile *profile
+)
+{
+    uint32_t evidence_index;
+    uint32_t count;
+
+    if(profile == NULL)
+    {
+        return 0U;
+    }
+
+    count =
+        0U;
+
+    for(
+        evidence_index = 0U;
+        evidence_index < (uint32_t)FLOPPY144_EVIDENCE_COUNT;
+        ++evidence_index
+    )
+    {
+        if(
+            Floppy144DiscoveryProfileEvidenceEverEstablished(
+                profile,
+                (Floppy144EvidenceId)evidence_index
+            )
+        )
+        {
+            ++count;
+        }
+    }
+
+    return count;
+}
+
 bool Floppy144DiscoveryProfileRecordCompletion(
     Floppy144DiscoveryProfile *profile,
     const Floppy144RunState *run_state,

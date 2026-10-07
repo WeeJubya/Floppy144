@@ -661,6 +661,7 @@ static const char *const floppy144_main_menu_labels[] =
     "RETURN TO ACTIVE SITE",
     "RECORD CURRENT SESSION",
     "REINSTATE RECORDED SESSION",
+    "OPERATOR PROFILE",
     "TERMINATE RECOVERY ENVIRONMENT"
 };
 
@@ -690,6 +691,7 @@ bool Floppy144MainMenuOptionEnabled(
     switch(option)
     {
         case FLOPPY144_MAIN_MENU_INITIATE_SESSION:
+        case FLOPPY144_MAIN_MENU_OPERATOR_PROFILE:
         case FLOPPY144_MAIN_MENU_TERMINATE:
         {
             return true;
@@ -1092,7 +1094,7 @@ void Floppy144MainMenuDraw(
 
         uint32_t row_y =
             174U +
-            option_index * 16U;
+            option_index * 13U;
 
         uint32_t label_width =
             Floppy144DrawTextWidth(

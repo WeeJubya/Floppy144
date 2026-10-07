@@ -27,6 +27,7 @@
 #include "floppy144_lifecycle.h"
 #include "floppy144_notebook_view.h"
 #include "floppy144_recovery.h"
+#include "floppy144_profile_view.h"
 #include "floppy144_terminal.h"
 #include "floppy144_timing.h"
 #include "floppy144_world.h"
@@ -47,7 +48,8 @@
 /*
  * Top-level screen state
  *
- * Only one of the splash, main menu, office, terminal or catalogue is active.
+ * Only one top-level presentation screen is active at a time. Profile is a
+ * child of Session Control rather than a resumable recovery-session screen.
  * This enum is the game's small screen-state machine.
  */
 
@@ -55,6 +57,7 @@ typedef enum Floppy144Screen
 {
     FLOPPY144_SCREEN_SPLASH,
     FLOPPY144_SCREEN_MAIN_MENU,
+    FLOPPY144_SCREEN_PROFILE,
     FLOPPY144_SCREEN_OFFICE,
     FLOPPY144_SCREEN_SITE_DIRECTORY,
     FLOPPY144_SCREEN_CABINET,
@@ -533,6 +536,16 @@ static void Floppy144Redraw(
             break;
         }
 
+        case FLOPPY144_SCREEN_PROFILE:
+        {
+            Floppy144ProfileViewDraw(
+                pSurface,
+                &global_profile
+            );
+
+            break;
+        }
+
         case FLOPPY144_SCREEN_OFFICE:
         {
             /*
@@ -960,7 +973,8 @@ static void Floppy144OpenMainMenu(
     if(
         global_session_active &&
         global_screen != FLOPPY144_SCREEN_SPLASH &&
-        global_screen != FLOPPY144_SCREEN_MAIN_MENU
+        global_screen != FLOPPY144_SCREEN_MAIN_MENU &&
+        global_screen != FLOPPY144_SCREEN_PROFILE
     )
     {
         global_resume_screen =
@@ -1366,6 +1380,22 @@ static void Floppy144MainMenuActivate(
 
             global_persistence_warnings |=
                 FLOPPY144_PERSISTENCE_WARNING_SAVE;
+
+            Floppy144Redraw(
+                window
+            );
+
+            return;
+        }
+
+        case FLOPPY144_MAIN_MENU_OPERATOR_PROFILE:
+        {
+            /*
+             * The Profile view reads the already-loaded persistent discovery
+             * profile. Opening it never merges, saves or mutates run state.
+             */
+            global_screen =
+                FLOPPY144_SCREEN_PROFILE;
 
             Floppy144Redraw(
                 window
@@ -2257,6 +2287,31 @@ static bool Floppy144HandleActionEvent(
 
                             return true;
                         }
+                    }
+
+                    break;
+                }
+
+                /*
+                 * Operator Profile is a read-only persistent record in S4C-01.
+                 * Backspace returns to the parent Session Control menu with
+                 * the Profile option still selected.
+                 */
+                case FLOPPY144_SCREEN_PROFILE:
+                {
+                    if(eAction == F144_ACTION_BACK)
+                    {
+                        global_screen =
+                            FLOPPY144_SCREEN_MAIN_MENU;
+
+                        global_main_menu_option =
+                            FLOPPY144_MAIN_MENU_OPERATOR_PROFILE;
+
+                        Floppy144Redraw(
+                            window
+                        );
+
+                        return true;
                     }
 
                     break;

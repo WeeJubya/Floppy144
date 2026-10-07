@@ -325,3 +325,23 @@ Core.
 
 See `docs/stage4/build_architecture.md` for the full dependency map, test
 strategy and future-platform attachment point.
+
+
+## Operator Profile screen - Stage 4C
+
+Stage 4C exposes the existing persistent discovery profile through an
+always-available **OPERATOR PROFILE** entry in GDR Session Control.
+
+The screen is deliberately read-only in S4C-01. It displays only data stored
+in `Floppy144DiscoveryProfile`: operator name, body configuration, recoveries
+begun, cumulative distinct collections restored, cumulative distinct evidence
+established, completed-recovery count, and the latest completion snapshot.
+
+Current recovery-session state is not passed to the Profile renderer. Active
+run reconstruction percentage, current-run collections/evidence, recovery seed
+and other transient session values therefore cannot be mistaken for permanent
+operator history.
+
+A fresh profile displays `UNASSIGNED` for an empty operator name and zeroed
+history safely. Name editing and body-style editing remain reserved for
+S4C-02/S4C-03.

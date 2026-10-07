@@ -301,6 +301,130 @@ static void TestLegacyRunMigration(
     );
 }
 
+/*
+ * Populate every persistent discovery-profile field used by the player-facing
+ * Profile screen so migration/round-trip tests exercise the real history.
+ */
+static void TestPopulateProfileHistory(
+    Floppy144DiscoveryProfile *profile,
+    const char *operator_name,
+    uint32_t sessions
+)
+{
+    if(
+        profile == NULL ||
+        operator_name == NULL
+    )
+    {
+        return;
+    }
+
+    Floppy144DiscoveryProfileReset(
+        profile
+    );
+
+    (void)Floppy144DiscoveryProfileSetOperatorName(
+        profile,
+        operator_name
+    );
+
+    (void)Floppy144DiscoveryProfileSetBodyStyle(
+        profile,
+        FLOPPY144_OPERATOR_BODY_STYLE_B
+    );
+
+    profile->recovery_sessions_begun =
+        sessions;
+
+    (void)Floppy144DiscoveryProfileRecordCollection(
+        profile,
+        (Floppy144CollectionId)0
+    );
+
+    (void)Floppy144DiscoveryProfileRecordCollection(
+        profile,
+        (Floppy144CollectionId)(
+            FLOPPY144_COLLECTION_COUNT -
+            1
+        )
+    );
+
+    (void)Floppy144DiscoveryProfileRecordEvidence(
+        profile,
+        (Floppy144EvidenceId)0
+    );
+
+    (void)Floppy144DiscoveryProfileRecordEvidence(
+        profile,
+        (Floppy144EvidenceId)(
+            FLOPPY144_EVIDENCE_COUNT -
+            1
+        )
+    );
+
+    profile->latest_completion_evidence[0] =
+        1U;
+
+    profile->completed_recoveries =
+        2U;
+
+    profile->latest_completion_evidence_percent =
+        78U;
+
+    profile->latest_completion_flags =
+        FLOPPY144_PROFILE_COMPLETION_EVIDENCE_RESOLVED;
+
+    profile->latest_completion_recovered_kb =
+        1234U;
+
+    profile->dirty =
+        1U;
+}
+
+/*
+ * Verify a loaded profile retained every field displayed by Profile.
+ */
+static bool TestProfileHistoryMatches(
+    const Floppy144DiscoveryProfile *profile,
+    const char *operator_name,
+    uint32_t sessions
+)
+{
+    if(
+        profile == NULL ||
+        operator_name == NULL
+    )
+    {
+        return false;
+    }
+
+    return
+        strcmp(
+            profile->operator_name,
+            operator_name
+        ) == 0 &&
+        profile->body_style ==
+            (uint8_t)FLOPPY144_OPERATOR_BODY_STYLE_B &&
+        profile->recovery_sessions_begun ==
+            sessions &&
+        Floppy144DiscoveryProfileCollectionsEverRestoredCount(
+            profile
+        ) == 2U &&
+        Floppy144DiscoveryProfileEvidenceEverEstablishedCount(
+            profile
+        ) == 2U &&
+        profile->latest_completion_evidence[0] ==
+            1U &&
+        profile->completed_recoveries ==
+            2U &&
+        profile->latest_completion_evidence_percent ==
+            78U &&
+        profile->latest_completion_flags ==
+            FLOPPY144_PROFILE_COMPLETION_EVIDENCE_RESOLVED &&
+        profile->latest_completion_recovered_kb ==
+            1234U;
+}
+
 static void TestLegacyProfileMigration(const char *root)
 {
     TestPathContext context;
@@ -318,9 +442,11 @@ static void TestLegacyProfileMigration(const char *root)
         "legacy-profile path resolves"
     );
 
-    Floppy144DiscoveryProfileReset(&profile);
-    profile.recovery_sessions_begun=17U;
-    profile.dirty=1U;
+    TestPopulateProfileHistory(
+        &profile,
+        "LEGACY OPERATOR",
+        17U
+    );
 
     Expect(
         Floppy144PersistenceSaveProfile(legacy_path,&profile),
@@ -340,8 +466,12 @@ static void TestLegacyProfileMigration(const char *root)
         "migrated profile reloads"
     );
     Expect(
-        loaded.recovery_sessions_begun==17U,
-        "migrated profile preserves history"
+        TestProfileHistoryMatches(
+            &loaded,
+            "LEGACY OPERATOR",
+            17U
+        ),
+        "migrated profile preserves complete operator history"
     );
     Expect(
         Floppy144PersistenceFileExists(legacy_path),
@@ -537,9 +667,11 @@ static void TestRoundTrips(const char *root)
         "autosave reinstate path reloads"
     );
 
-    Floppy144DiscoveryProfileReset(&profile);
-    profile.recovery_sessions_begun=23U;
-    profile.dirty=1U;
+    TestPopulateProfileHistory(
+        &profile,
+        "ROUND TRIP OPERATOR",
+        23U
+    );
 
     Expect(
         Floppy144PersistenceSaveProfile(
@@ -555,8 +687,12 @@ static void TestRoundTrips(const char *root)
             Floppy144StoragePath(&paths,F144_PERSISTENCE_PROFILE),
             &loaded_profile
         ) &&
-        loaded_profile.recovery_sessions_begun==23U,
-        "profile reloads through resolved path"
+        TestProfileHistoryMatches(
+            &loaded_profile,
+            "ROUND TRIP OPERATOR",
+            23U
+        ),
+        "profile history reloads through resolved path"
     );
 
     Floppy144SettingsReset(&settings);

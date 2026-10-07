@@ -64,6 +64,10 @@ jobs:
         shell: pwsh
         run: .\tools\test_stage4_config.ps1
 
+      - name: Stage 4C operator profile screen
+        shell: pwsh
+        run: .\tools\test_stage4_profile_screen.ps1
+
       - name: Stage 4 build architecture
         shell: pwsh
         run: .\tools\test_stage4_build_architecture.ps1

@@ -119,6 +119,22 @@ bool Floppy144DiscoveryProfileRecordEvidence
  Floppy144EvidenceId evidence
 );
 
+/*
+ * Count the distinct collections retained in the operator's cumulative
+ * discovery history.
+ */
+uint32_t Floppy144DiscoveryProfileCollectionsEverRestoredCount(
+    const Floppy144DiscoveryProfile *profile
+);
+
+/*
+ * Count the distinct evidence items retained in the operator's cumulative
+ * discovery history.
+ */
+uint32_t Floppy144DiscoveryProfileEvidenceEverEstablishedCount(
+    const Floppy144DiscoveryProfile *profile
+);
+
 
 #define FLOPPY144_PROFILE_COMPLETION_EVIDENCE_RESOLVED 0x01U
 #define FLOPPY144_PROFILE_COMPLETION_CAPACITY_EXHAUSTED 0x02U
