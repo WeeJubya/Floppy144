@@ -687,6 +687,264 @@ static void TestMissingDirectoryAndCapacity(const char *root)
     );
 }
 
+/*
+ * Verify that Stage 3's historical working-directory probe follows the actual
+ * launch CWD while the executable-directory compatibility probe remains tied
+ * to the executable location. This models launching Stage 4 from a different
+ * working directory without touching the user's real AppData directory.
+ */
+static void TestDifferentWorkingDirectory(
+    const char *root
+)
+{
+    char original_cwd[F144_PLATFORM_PATH_CAPACITY];
+    char alternate_cwd[F144_PLATFORM_PATH_CAPACITY];
+    char executable_path[F144_PLATFORM_PATH_CAPACITY];
+    char executable_directory[F144_PLATFORM_PATH_CAPACITY];
+    char expected_cwd_legacy[F144_PLATFORM_PATH_CAPACITY];
+    char expected_exe_legacy[F144_PLATFORM_PATH_CAPACITY];
+    char actual_cwd_legacy[F144_PLATFORM_PATH_CAPACITY];
+    char actual_exe_legacy[F144_PLATFORM_PATH_CAPACITY];
+    char current_before[F144_PLATFORM_PATH_CAPACITY];
+    char current_after[F144_PLATFORM_PATH_CAPACITY];
+    char *separator;
+    DWORD length;
+    bool changed;
+
+    memset(
+        original_cwd,
+        0,
+        sizeof(original_cwd)
+    );
+
+    memset(
+        alternate_cwd,
+        0,
+        sizeof(alternate_cwd)
+    );
+
+    memset(
+        executable_path,
+        0,
+        sizeof(executable_path)
+    );
+
+    memset(
+        executable_directory,
+        0,
+        sizeof(executable_directory)
+    );
+
+    memset(
+        expected_cwd_legacy,
+        0,
+        sizeof(expected_cwd_legacy)
+    );
+
+    memset(
+        expected_exe_legacy,
+        0,
+        sizeof(expected_exe_legacy)
+    );
+
+    memset(
+        actual_cwd_legacy,
+        0,
+        sizeof(actual_cwd_legacy)
+    );
+
+    memset(
+        actual_exe_legacy,
+        0,
+        sizeof(actual_exe_legacy)
+    );
+
+    memset(
+        current_before,
+        0,
+        sizeof(current_before)
+    );
+
+    memset(
+        current_after,
+        0,
+        sizeof(current_after)
+    );
+
+    length =
+        GetCurrentDirectoryA(
+            (DWORD)sizeof(original_cwd),
+            original_cwd
+        );
+
+    Expect(
+        length > 0U &&
+        length < (DWORD)sizeof(original_cwd),
+        "original working directory resolves"
+    );
+
+    Expect(
+        TestJoinPath(
+            root,
+            "alternate-cwd",
+            alternate_cwd,
+            (uint32_t)sizeof(alternate_cwd)
+        ) &&
+        TestMakeDirectory(
+            alternate_cwd
+        ),
+        "alternate working directory exists"
+    );
+
+    length =
+        GetModuleFileNameA(
+            NULL,
+            executable_path,
+            (DWORD)sizeof(executable_path)
+        );
+
+    Expect(
+        length > 0U &&
+        length < (DWORD)sizeof(executable_path),
+        "test executable path resolves"
+    );
+
+    (void)snprintf(
+        executable_directory,
+        sizeof(executable_directory),
+        "%s",
+        executable_path
+    );
+
+    separator =
+        strrchr(
+            executable_directory,
+            '\\'
+        );
+
+    if(separator == NULL)
+    {
+        separator =
+            strrchr(
+                executable_directory,
+                '/'
+            );
+    }
+
+    Expect(
+        separator != NULL,
+        "test executable directory resolves"
+    );
+
+    if(separator != NULL)
+    {
+        *separator =
+            '\0';
+    }
+
+    Expect(
+        f144Win32PersistencePathForRoot(
+            root,
+            F144_PERSISTENCE_MANUAL_SAVE,
+            current_before,
+            (uint32_t)sizeof(current_before)
+        ),
+        "current persistence path resolves before CWD change"
+    );
+
+    changed =
+        SetCurrentDirectoryA(
+            alternate_cwd
+        ) != 0;
+
+    Expect(
+        changed,
+        "process working directory changes for launch simulation"
+    );
+
+    if(changed)
+    {
+        Expect(
+            TestJoinPath(
+                alternate_cwd,
+                "floppy144_manual.sav",
+                expected_cwd_legacy,
+                (uint32_t)sizeof(expected_cwd_legacy)
+            ),
+            "expected CWD legacy path builds"
+        );
+
+        Expect(
+            TestJoinPath(
+                executable_directory,
+                "floppy144_manual.sav",
+                expected_exe_legacy,
+                (uint32_t)sizeof(expected_exe_legacy)
+            ),
+            "expected executable legacy path builds"
+        );
+
+        Expect(
+            f144Win32PlatformLegacyPersistencePath(
+                NULL,
+                F144_PERSISTENCE_MANUAL_SAVE,
+                0U,
+                actual_cwd_legacy,
+                (uint32_t)sizeof(actual_cwd_legacy)
+            ),
+            "legacy CWD candidate resolves after working-directory change"
+        );
+
+        Expect(
+            _stricmp(
+                actual_cwd_legacy,
+                expected_cwd_legacy
+            ) == 0,
+            "legacy CWD candidate follows the launch working directory"
+        );
+
+        Expect(
+            f144Win32PlatformLegacyPersistencePath(
+                NULL,
+                F144_PERSISTENCE_MANUAL_SAVE,
+                1U,
+                actual_exe_legacy,
+                (uint32_t)sizeof(actual_exe_legacy)
+            ),
+            "legacy executable-directory candidate resolves"
+        );
+
+        Expect(
+            _stricmp(
+                actual_exe_legacy,
+                expected_exe_legacy
+            ) == 0,
+            "legacy executable-directory candidate ignores launch CWD"
+        );
+
+        Expect(
+            f144Win32PersistencePathForRoot(
+                root,
+                F144_PERSISTENCE_MANUAL_SAVE,
+                current_after,
+                (uint32_t)sizeof(current_after)
+            ) &&
+            _stricmp(
+                current_before,
+                current_after
+            ) == 0,
+            "current persistence location is independent of launch CWD"
+        );
+    }
+
+    Expect(
+        SetCurrentDirectoryA(
+            original_cwd
+        ) != 0,
+        "original working directory is restored"
+    );
+}
+
 int main(void)
 {
     const char *root=getenv("F144_TEST_ROOT");
@@ -719,6 +977,7 @@ int main(void)
     TestRoundTrips(root);
     TestMalformedLegacy(root);
     TestMissingDirectoryAndCapacity(root);
+    TestDifferentWorkingDirectory(root);
 
     if(failures!=0)
     {

@@ -114,6 +114,7 @@ $compileArgs = @(
     "/utf-8",
     $testSource,
     (Join-Path $root "src\f144_platform.c"),
+    (Join-Path $root "src\f144_win32_lifecycle.c"),
     (Join-Path $root "game\src\floppy144_timing.c"),
     (Join-Path $root "game\src\floppy144_lifecycle.c"),
     (Join-Path $root "game\src\floppy144_settings.c"),

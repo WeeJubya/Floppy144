@@ -5,7 +5,11 @@
  * explicit fake monotonic timestamps.
  */
 
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
 #include "f144_platform.h"
+#include "f144_win32_lifecycle.h"
 #include "floppy144_lifecycle.h"
 #include "floppy144_settings.h"
 #include "floppy144_timing.h"
@@ -274,12 +278,82 @@ static void TestLifecycleState(void)
     );
 }
 
+/*
+ * Verify the Win32 message adapter maps focus and orderly shutdown messages to
+ * the same lifecycle concepts consumed by portable game code.
+ */
+static void TestWin32LifecycleTranslation(void)
+{
+    F144LifecycleEvent event;
+
+    memset(
+        &event,
+        0,
+        sizeof(event)
+    );
+
+    Expect(
+        f144Win32TranslateLifecycleEvent(
+            (uint32_t)WM_ACTIVATEAPP,
+            (uintptr_t)TRUE,
+            &event
+        ) &&
+        event.type == F144_LIFECYCLE_ACTIVE &&
+        event.request_autosave == 0U,
+        "Win32 activation maps to active lifecycle state"
+    );
+
+    Expect(
+        f144Win32TranslateLifecycleEvent(
+            (uint32_t)WM_ACTIVATEAPP,
+            (uintptr_t)FALSE,
+            &event
+        ) &&
+        event.type == F144_LIFECYCLE_INACTIVE,
+        "Win32 deactivation maps to inactive lifecycle state"
+    );
+
+    Expect(
+        f144Win32TranslateLifecycleEvent(
+            (uint32_t)WM_CLOSE,
+            0U,
+            &event
+        ) &&
+        event.type == F144_LIFECYCLE_SHUTDOWN_REQUESTED,
+        "Win32 close maps to orderly shutdown request"
+    );
+
+    Expect(
+        f144Win32TranslateLifecycleEvent(
+            (uint32_t)WM_DESTROY,
+            0U,
+            &event
+        ) &&
+        event.type == F144_LIFECYCLE_SHUTDOWN,
+        "Win32 destroy maps to completed shutdown"
+    );
+
+    event.type =
+        F144_LIFECYCLE_ACTIVE;
+
+    Expect(
+        !f144Win32TranslateLifecycleEvent(
+            (uint32_t)WM_SIZE,
+            0U,
+            &event
+        ) &&
+        event.type == F144_LIFECYCLE_NONE,
+        "unrelated Win32 messages do not become lifecycle events"
+    );
+}
+
 int main(void)
 {
     TestPlatformClockAndQuit();
     TestTimingProgression();
     TestAutosaveTiming();
     TestLifecycleState();
+    TestWin32LifecycleTranslation();
 
     if(failures!=0)
     {

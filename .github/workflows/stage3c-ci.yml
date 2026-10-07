@@ -68,6 +68,10 @@ jobs:
         shell: pwsh
         run: .\tools\test_stage4_build_architecture.ps1
 
+      - name: Stage 4B integration sign-off audit
+        shell: pwsh
+        run: .\tools\test_stage4b_integration.ps1
+
       - name: Install Premake
         shell: pwsh
         run: |
@@ -92,9 +96,9 @@ jobs:
         shell: pwsh
         run: msbuild .\build\Floppy144.sln /t:Floppy144PlatformWin32 /m /p:Configuration=release /p:Platform=windows /p:WarningLevel=Level4 /p:TreatWarningsAsErrors=true
 
-      - name: Release build
+      - name: Clean Release rebuild
         shell: pwsh
-        run: msbuild .\build\Floppy144.sln /m /p:Configuration=release /p:Platform=windows /p:WarningLevel=Level4 /p:TreatWarningsAsErrors=true
+        run: msbuild .\build\Floppy144.sln /t:Rebuild /m /p:Configuration=release /p:Platform=windows /p:WarningLevel=Level4 /p:TreatWarningsAsErrors=true
 
       - name: Release size
         shell: pwsh

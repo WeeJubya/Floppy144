@@ -161,9 +161,30 @@ $coreSources +=
 $coreSources +=
     Get-Item -LiteralPath (Join-Path $root "src\f144_platform.c")
 
+$coreHeaders = @(
+    Get-ChildItem -Path (Join-Path $root "game\src") -Filter "*.h" -File |
+        Where-Object {
+            $_.Name -notin @(
+                "floppy144_persistence.h",
+                "floppy144_storage.h"
+            )
+        }
+)
+
+$coreHeaders +=
+    Get-Item -LiteralPath (Join-Path $root "include\f144_startup_config.h")
+
+$coreHeaders +=
+    Get-Item -LiteralPath (Join-Path $root "include\f144_platform.h")
+
+$coreFiles =
+    @($coreSources) +
+    @($coreHeaders)
+
 $coreForbiddenPatterns = @(
     '(?i)#\s*include\s*[<"]windows\.h[>"]',
     '(?i)#\s*include\s*"f144_win32_[^"]+"',
+    '(?i)#\s*include\s*"f144_runtime\.h"',
     '\bHWND\b',
     '\bHDC\b',
     '\bWPARAM\b',
@@ -178,15 +199,16 @@ $coreForbiddenPatterns = @(
     '\bMoveFileExA\s*\('
 )
 
-foreach($file in $coreSources)
+foreach($file in $coreFiles)
 {
-    $sourceText = Get-Content -LiteralPath $file.FullName -Raw
+    $sourceText =
+        Get-Content -LiteralPath $file.FullName -Raw
 
     foreach($pattern in $coreForbiddenPatterns)
     {
         if($sourceText -match $pattern)
         {
-            throw "Portable Core source contains a Win32 dependency: $($file.Name) :: $pattern"
+            throw "Portable Core file contains a Win32/runtime dependency: $($file.Name) :: $pattern"
         }
     }
 }
@@ -239,6 +261,6 @@ else
     Write-Host "Resource/icon audit: found $($resourceFiles.Count) resource file(s)."
 }
 
-Write-Host "Portable Core source audit: $($coreSources.Count) C translation unit(s), no Win32 dependency found."
+Write-Host "Portable Core audit: $($coreSources.Count) C translation unit(s) and $($coreHeaders.Count) header(s), no Win32/runtime dependency found."
 Write-Host "Persistence debt audit: mixed codec/Win32 file I/O remains quarantined in the application target."
 Write-Host "STAGE 4 BUILD ARCHITECTURE AUDIT: PASS"
