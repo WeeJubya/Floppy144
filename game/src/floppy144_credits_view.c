@@ -82,5 +82,5 @@ void Floppy144CreditsViewDraw(Floppy144Surface *surface)
 
     Floppy144DrawFillRect(surface,64U,300U,512U,1U,border);
     Floppy144DrawText(surface,68U,310U,"LICENSING SCOPE QUESTIONS REMAIN DOCUMENTED IN PROJECT PROVENANCE",1U,muted);
-    Floppy144DrawText(surface,10U,346U,"BACKSPACE  BACK TO SETTINGS",1U,muted);
+    Floppy144DrawText(surface,10U,346U,"BACKSPACE  BACK",1U,muted);
 }

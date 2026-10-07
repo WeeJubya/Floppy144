@@ -44,6 +44,7 @@
 #include "floppy144_settings_runtime.h"
 #include "floppy144_settings_view.h"
 #include "floppy144_credits_view.h"
+#include "floppy144_completion_view.h"
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -68,7 +69,7 @@ typedef enum Floppy144Screen
     FLOPPY144_SCREEN_SITE_DIRECTORY,
     FLOPPY144_SCREEN_CABINET,
     FLOPPY144_SCREEN_NOTEBOOK,
-    FLOPPY144_SCREEN_EVIDENCE_COMPLETE,
+    FLOPPY144_SCREEN_COMPLETION,
     FLOPPY144_SCREEN_TERMINAL,
     FLOPPY144_SCREEN_CATALOGUE
 } Floppy144Screen;
@@ -123,9 +124,10 @@ static bool global_main_menu_notice_is_warning;
 static bool global_reinstate_confirmation_pending;
 static bool global_reinstate_continue_on_keyup;
 static uint32_t global_reinstate_continue_key;
-static uint32_t global_completion_top_line;
+static Floppy144CompletionViewState global_completion_view;
 static bool global_completion_evidence_resolved;
 static bool global_completion_capacity_exhausted;
+static Floppy144Screen global_credits_return_screen;
 
 static Floppy144MainMenuOption
     global_main_menu_option;
@@ -199,307 +201,6 @@ static void Floppy144BindStaticRenderer(
  * Each screen module writes a complete 640x360 frame into the backbuffer.
  * InvalidateRect then asks Windows to present that frame through WM_PAINT.
  */
-
-#define FLOPPY144_COMPLETION_RENDER_LINES 256U
-#define FLOPPY144_COMPLETION_LINE_CAPACITY 128U
-#define FLOPPY144_COMPLETION_VISIBLE_LINES 13U
-#define FLOPPY144_COMPLETION_BODY_WIDTH 520U
-
-typedef struct Floppy144CompletionRenderBuffer
-{
-    char lines[FLOPPY144_COMPLETION_RENDER_LINES][FLOPPY144_COMPLETION_LINE_CAPACITY];
-    uint32_t count;
-} Floppy144CompletionRenderBuffer;
-
-static void Floppy144CompletionAppendWrapped(
-    Floppy144CompletionRenderBuffer *pBuffer,
-    const char *pszPrefix,
-    const char *pszText
-)
-{
-    const char *p=pszText;
-    char line[FLOPPY144_COMPLETION_LINE_CAPACITY];
-    uint32_t len=0U;
-    bool bFirst=true;
-
-    if(pBuffer==NULL||pszText==NULL||pBuffer->count>=FLOPPY144_COMPLETION_RENDER_LINES)return;
-
-    if(pszPrefix!=NULL)
-    {
-        len=(uint32_t)snprintf(line,sizeof(line),"%s",pszPrefix);
-        if(len>=sizeof(line))len=(uint32_t)sizeof(line)-1U;
-    }
-    else
-    {
-        line[0]='\0';
-    }
-
-    while(*p!='\0'&&pBuffer->count<FLOPPY144_COMPLETION_RENDER_LINES)
-    {
-        const char *word;
-        uint32_t wordLen=0U,candidateLen;
-        char candidate[FLOPPY144_COMPLETION_LINE_CAPACITY];
-
-        while(*p==' '||*p=='\t'||*p=='\n'||*p=='\r')++p;
-        if(*p=='\0')break;
-
-        word=p;
-        while(
-            p[wordLen]!='\0'&&
-            p[wordLen]!=' '&&
-            p[wordLen]!='\t'&&
-            p[wordLen]!='\n'&&
-            p[wordLen]!='\r'
-        )++wordLen;
-
-        candidateLen=len;
-        if(candidateLen>0U&&candidateLen+1U<sizeof(candidate))candidate[candidateLen++]=' ';
-        if(candidateLen+wordLen>=sizeof(candidate))wordLen=(uint32_t)sizeof(candidate)-candidateLen-1U;
-
-        memcpy(candidate,line,len);
-        memcpy(candidate+candidateLen,word,wordLen);
-        candidateLen+=wordLen;
-        candidate[candidateLen]='\0';
-
-        if(len>0U&&Floppy144DrawTextWidth(candidate,1U)>FLOPPY144_COMPLETION_BODY_WIDTH)
-        {
-            line[len]='\0';
-            (void)snprintf(
-                pBuffer->lines[pBuffer->count++],
-                FLOPPY144_COMPLETION_LINE_CAPACITY,
-                "%s",
-                line
-            );
-            (void)snprintf(line,sizeof(line),"       ");
-            len=7U;
-            bFirst=false;
-            continue;
-        }
-
-        memcpy(line,candidate,candidateLen+1U);
-        len=candidateLen;
-        p+=wordLen;
-    }
-
-    if(len>0U&&pBuffer->count<FLOPPY144_COMPLETION_RENDER_LINES)
-    {
-        line[len]='\0';
-        (void)snprintf(
-            pBuffer->lines[pBuffer->count++],
-            FLOPPY144_COMPLETION_LINE_CAPACITY,
-            "%s",
-            line
-        );
-    }
-
-    (void)bFirst;
-}
-
-static void Floppy144CompletionBuild(
-    const Floppy144RunState *pRunState,
-    Floppy144CompletionRenderBuffer *pBuffer
-)
-{
-    uint32_t uRecord;
-    uint32_t uEvidenceNumber=0U;
-
-    if(pBuffer==NULL)return;
-    pBuffer->count=0U;
-    if(pRunState==NULL)return;
-
-    for(uRecord=0U;uRecord<Floppy144GameDataRecordCount();++uRecord)
-    {
-        const Floppy144DataRecord *pEvidence=
-            Floppy144GameDataRecordAt(uRecord);
-        Floppy144EvidenceId eEvidence;
-        char szPrefix[24];
-
-        if(
-            pEvidence==NULL ||
-            pEvidence->eKind!=FLOPPY144_DATA_EVIDENCE ||
-            pEvidence->pszId==NULL
-        )
-        {
-            continue;
-        }
-
-        eEvidence=Floppy144GameDataEvidenceId(pEvidence->pszId);
-        ++uEvidenceNumber;
-
-        (void)snprintf(
-            szPrefix,
-            sizeof(szPrefix),
-            "%u.",
-            (unsigned)uEvidenceNumber
-        );
-
-        if(
-            eEvidence!=FLOPPY144_EVIDENCE_COUNT &&
-            Floppy144RunStateEvidenceEstablished(pRunState,eEvidence)
-        )
-        {
-            const char *pszNotebook=
-                pEvidence->pszE!=NULL&&pEvidence->pszE[0]!='\0'
-                ? pEvidence->pszE
-                : pEvidence->pszA;
-
-            Floppy144CompletionAppendWrapped(
-                pBuffer,
-                szPrefix,
-                pszNotebook
-            );
-        }
-        else
-        {
-            Floppy144CompletionAppendWrapped(
-                pBuffer,
-                szPrefix,
-                "[ DATA OBSCURED - EVIDENCE NOT RECOVERED ]"
-            );
-        }
-    }
-}
-
-static void Floppy144EvidenceCompleteDraw(Floppy144Surface *pSurface)
-{
-    const uint32_t bg=FLOPPY144_RGB(11,16,18),panel=FLOPPY144_RGB(22,31,33),border=FLOPPY144_RGB(86,103,107),text=FLOPPY144_RGB(202,211,205),muted=FLOPPY144_RGB(118,133,132),amber=FLOPPY144_RGB(194,153,76),green=FLOPPY144_RGB(100,156,111);
-    Floppy144Surface s;
-    Floppy144CompletionRenderBuffer b;
-    uint32_t u,top,maxTop;
-    const char *pszOutcome;
-
-    if(pSurface==NULL||pSurface->pixels==NULL)return;
-
-    s=*pSurface;
-
-    uint32_t uEvidence;
-    uint32_t uRecoveredEvidence=0U;
-    uint32_t uEvidencePercent=0U;
-    char szEvidencePercent[48];
-    const char *pszTitle="RECOVERY COMPLETE";
-    const char *pszTruth="VERSION OF THE TRUTH RECOVERED";
-
-    Floppy144CompletionBuild(&global_run_state,&b);
-    maxTop=b.count>FLOPPY144_COMPLETION_VISIBLE_LINES
-        ? b.count-FLOPPY144_COMPLETION_VISIBLE_LINES
-        : 0U;
-    top=global_completion_top_line>maxTop?maxTop:global_completion_top_line;
-
-    for(uEvidence=0U;uEvidence<(uint32_t)FLOPPY144_EVIDENCE_COUNT;++uEvidence)
-    {
-        if(
-            Floppy144RunStateEvidenceEstablished(
-                &global_run_state,
-                (Floppy144EvidenceId)uEvidence
-            )
-        )
-        {
-            ++uRecoveredEvidence;
-        }
-    }
-
-    uEvidencePercent=
-        (uRecoveredEvidence*100U)/
-        (uint32_t)FLOPPY144_EVIDENCE_COUNT;
-
-    (void)snprintf(
-        szEvidencePercent,
-        sizeof(szEvidencePercent),
-        "EVIDENCE RECOVERED: %u%% (%u/%u)",
-        (unsigned)uEvidencePercent,
-        (unsigned)uRecoveredEvidence,
-        (unsigned)FLOPPY144_EVIDENCE_COUNT
-    );
-
-    pszOutcome=
-        global_completion_evidence_resolved &&
-        global_completion_capacity_exhausted
-        ? "EVIDENCE RESOLVED / CAPACITY EXHAUSTED"
-        : (
-            global_completion_evidence_resolved
-            ? "EVIDENCE RESOLVED"
-            : "RECOVERY CAPACITY EXHAUSTED"
-        );
-
-    Floppy144DrawClear(&s,bg);
-    Floppy144DrawFillRect(&s,32U,24U,576U,310U,panel);
-    Floppy144DrawRect(&s,32U,24U,576U,310U,border);
-
-    Floppy144DrawText(
-        &s,
-        320U-Floppy144DrawTextWidth(pszTitle,2U)/2U,
-        38U,
-        pszTitle,
-        2U,
-        green
-    );
-    Floppy144DrawText(
-        &s,
-        320U-Floppy144DrawTextWidth(pszOutcome,1U)/2U,
-        66U,
-        pszOutcome,
-        1U,
-        amber
-    );
-    Floppy144DrawText(
-        &s,
-        320U-Floppy144DrawTextWidth(szEvidencePercent,1U)/2U,
-        82U,
-        szEvidencePercent,
-        1U,
-        text
-    );
-    Floppy144DrawText(
-        &s,
-        320U-Floppy144DrawTextWidth(pszTruth,1U)/2U,
-        98U,
-        pszTruth,
-        1U,
-        muted
-    );
-
-    for(u=0U;u<FLOPPY144_COMPLETION_VISIBLE_LINES&&top+u<b.count;++u)
-    {
-        Floppy144DrawText(
-            &s,
-            50U,
-            116U+u*15U,
-            b.lines[top+u],
-            1U,
-            text
-        );
-    }
-
-    if(maxTop>0U)
-    {
-        const uint32_t uTrackX=588U,uTrackY=116U,uTrackHeight=180U;
-        uint32_t uThumbHeight=(uTrackHeight*FLOPPY144_COMPLETION_VISIBLE_LINES)/b.count;
-        uint32_t uTravel,uThumbY;
-
-        if(uThumbHeight<18U)uThumbHeight=18U;
-        if(uThumbHeight>uTrackHeight)uThumbHeight=uTrackHeight;
-
-        uTravel=uTrackHeight-uThumbHeight;
-        uThumbY=uTrackY+(uTravel*top)/maxTop;
-
-        Floppy144DrawFillRect(&s,uTrackX,uTrackY,4U,uTrackHeight,bg);
-        Floppy144DrawRect(&s,uTrackX,uTrackY,4U,uTrackHeight,border);
-        Floppy144DrawFillRect(&s,uTrackX+1U,uThumbY,2U,uThumbHeight,amber);
-    }
-
-    {
-        const char *pszReturn="PRESS ENTER TO RETURN";
-        Floppy144DrawText(
-            &s,
-            320U-Floppy144DrawTextWidth(pszReturn,1U)/2U,
-            321U,
-            pszReturn,
-            1U,
-            muted
-        );
-    }
-}
-
 
 static void Floppy144Redraw(
     HWND window
@@ -637,9 +338,16 @@ static void Floppy144Redraw(
             break;
         }
 
-        case FLOPPY144_SCREEN_EVIDENCE_COMPLETE:
+        case FLOPPY144_SCREEN_COMPLETION:
         {
-            Floppy144EvidenceCompleteDraw(pSurface);
+            Floppy144CompletionViewDraw(
+                pSurface,
+                &global_completion_view,
+                &global_run_state,
+                &global_profile,
+                global_completion_evidence_resolved,
+                global_completion_capacity_exhausted
+            );
             break;
         }
 
@@ -2614,10 +2322,12 @@ static bool Floppy144HandleTextInput(
 
                             global_run_state.dirty=0U;
                             global_session_active=false;
-                            global_completion_top_line=0U;
+                            Floppy144CompletionViewReset(
+                                &global_completion_view
+                            );
                             global_main_menu_option=
                                 FLOPPY144_MAIN_MENU_INITIATE_SESSION;
-                            global_screen=FLOPPY144_SCREEN_EVIDENCE_COMPLETE;
+                            global_screen=FLOPPY144_SCREEN_COMPLETION;
                         }
                         else if(
                             Floppy144RunStateRoomReconstructed(
@@ -3046,6 +2756,8 @@ static bool Floppy144HandleActionEvent(
                                     FLOPPY144_SETTINGS_OPTION_CREDITS
                             )
                             {
+                                global_credits_return_screen =
+                                    FLOPPY144_SCREEN_SETTINGS;
                                 global_screen =
                                     FLOPPY144_SCREEN_CREDITS;
                                 global_settings_notice =
@@ -3090,10 +2802,22 @@ static bool Floppy144HandleActionEvent(
                 {
                     if(eAction == F144_ACTION_BACK)
                     {
-                        global_screen =
-                            FLOPPY144_SCREEN_SETTINGS;
-                        global_settings_option =
-                            FLOPPY144_SETTINGS_OPTION_CREDITS;
+                        if(
+                            global_credits_return_screen ==
+                                FLOPPY144_SCREEN_COMPLETION
+                        )
+                        {
+                            global_screen =
+                                FLOPPY144_SCREEN_COMPLETION;
+                        }
+                        else
+                        {
+                            global_screen =
+                                FLOPPY144_SCREEN_SETTINGS;
+                            global_settings_option =
+                                FLOPPY144_SETTINGS_OPTION_CREDITS;
+                        }
+
                         Floppy144Redraw(window);
                         return true;
                     }
@@ -3394,47 +3118,156 @@ static bool Floppy144HandleActionEvent(
                     break;
                 }
 
-                case FLOPPY144_SCREEN_EVIDENCE_COMPLETE:
+                case FLOPPY144_SCREEN_COMPLETION:
                 {
-                    Floppy144CompletionRenderBuffer b;
-                    uint32_t uMaxTop;
+                    if(
+                        Floppy144CompletionViewFinalNoteOpen(
+                            &global_completion_view
+                        )
+                    )
+                    {
+                        switch(eAction)
+                        {
+                            case F144_ACTION_MOVE_UP:
+                            case F144_ACTION_NAV_UP:
+                            {
+                                Floppy144CompletionViewScrollFinalNote(
+                                    &global_completion_view,
+                                    &global_run_state,
+                                    -1
+                                );
+                                break;
+                            }
 
-                    Floppy144CompletionBuild(&global_run_state,&b);
-                    uMaxTop=b.count>FLOPPY144_COMPLETION_VISIBLE_LINES
-                        ? b.count-FLOPPY144_COMPLETION_VISIBLE_LINES
-                        : 0U;
+                            case F144_ACTION_MOVE_DOWN:
+                            case F144_ACTION_NAV_DOWN:
+                            {
+                                Floppy144CompletionViewScrollFinalNote(
+                                    &global_completion_view,
+                                    &global_run_state,
+                                    1
+                                );
+                                break;
+                            }
+
+                            case F144_ACTION_PAGE_UP:
+                            {
+                                Floppy144CompletionViewScrollFinalNote(
+                                    &global_completion_view,
+                                    &global_run_state,
+                                    -12
+                                );
+                                break;
+                            }
+
+                            case F144_ACTION_PAGE_DOWN:
+                            {
+                                Floppy144CompletionViewScrollFinalNote(
+                                    &global_completion_view,
+                                    &global_run_state,
+                                    12
+                                );
+                                break;
+                            }
+
+                            case F144_ACTION_BACK:
+                            case F144_ACTION_CONFIRM:
+                            {
+                                Floppy144CompletionViewCloseFinalNote(
+                                    &global_completion_view
+                                );
+                                break;
+                            }
+
+                            default:
+                            {
+                                return true;
+                            }
+                        }
+
+                        Floppy144Redraw(window);
+                        return true;
+                    }
 
                     switch(eAction)
                     {
                         case F144_ACTION_MOVE_UP:
-                            if(global_completion_top_line>0U)--global_completion_top_line;
+                        case F144_ACTION_NAV_UP:
+                        {
+                            Floppy144CompletionViewMoveSelection(
+                                &global_completion_view,
+                                -1
+                            );
                             break;
+                        }
 
                         case F144_ACTION_MOVE_DOWN:
-                            if(global_completion_top_line<uMaxTop)++global_completion_top_line;
+                        case F144_ACTION_NAV_DOWN:
+                        {
+                            Floppy144CompletionViewMoveSelection(
+                                &global_completion_view,
+                                1
+                            );
                             break;
-
-                        case F144_ACTION_PAGE_UP:
-                            if(global_completion_top_line>12U)global_completion_top_line-=12U;
-                            else global_completion_top_line=0U;
-                            break;
-
-                        case F144_ACTION_PAGE_DOWN:
-                            global_completion_top_line=
-                                global_completion_top_line+12U<uMaxTop
-                                ? global_completion_top_line+12U
-                                : uMaxTop;
-                            break;
+                        }
 
                         case F144_ACTION_CONFIRM:
-                            global_main_menu_notice=NULL;
-                            global_main_menu_notice_is_warning=false;
-                            global_screen=FLOPPY144_SCREEN_MAIN_MENU;
-                            global_office_notice=NULL;
+                        {
+                            switch(
+                                Floppy144CompletionViewSelectedOption(
+                                    &global_completion_view
+                                )
+                            )
+                            {
+                                case FLOPPY144_COMPLETION_OPTION_FINAL_NOTE:
+                                {
+                                    Floppy144CompletionViewOpenFinalNote(
+                                        &global_completion_view
+                                    );
+                                    break;
+                                }
+
+                                case FLOPPY144_COMPLETION_OPTION_CREDITS:
+                                {
+                                    global_credits_return_screen =
+                                        FLOPPY144_SCREEN_COMPLETION;
+                                    global_screen =
+                                        FLOPPY144_SCREEN_CREDITS;
+                                    break;
+                                }
+
+                                case FLOPPY144_COMPLETION_OPTION_MAIN_MENU:
+                                {
+                                    global_main_menu_notice=NULL;
+                                    global_main_menu_notice_is_warning=false;
+                                    global_screen=FLOPPY144_SCREEN_MAIN_MENU;
+                                    global_office_notice=NULL;
+                                    break;
+                                }
+
+                                case FLOPPY144_COMPLETION_OPTION_COUNT:
+                                {
+                                    break;
+                                }
+                            }
+
                             break;
+                        }
+
+                        case F144_ACTION_BACK:
+                        {
+                            /*
+                             * Summary owns an explicit Return to Main Menu
+                             * action. Backspace cannot accidentally bypass
+                             * the completed-session record.
+                             */
+                            return true;
+                        }
 
                         default:
+                        {
                             return true;
+                        }
                     }
 
                     Floppy144Redraw(window);
