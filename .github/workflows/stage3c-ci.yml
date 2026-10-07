@@ -80,6 +80,10 @@ jobs:
         shell: pwsh
         run: .\tools\test_stage4_settings.ps1
 
+      - name: Stage 4C credits and attribution
+        shell: pwsh
+        run: .\tools\test_stage4_credits.ps1
+
       - name: Stage 4 build architecture
         shell: pwsh
         run: .\tools\test_stage4_build_architecture.ps1
