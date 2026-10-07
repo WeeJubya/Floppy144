@@ -100,6 +100,10 @@ jobs:
         shell: pwsh
         run: .\tools\test_stage4b_integration.ps1
 
+      - name: Stage 4C integration sign-off audit
+        shell: pwsh
+        run: .\tools\test_stage4c_integration.ps1
+
       - name: Install Premake
         shell: pwsh
         run: |
