@@ -153,7 +153,7 @@ foreach($required in @(
 
 foreach($required in @(
     'LEFT/RIGHT SELECT',
-    'LEFT/RIGHT  BODY STYLE',
+    'LEFT/RIGHT BODY STYLE',
     'Floppy144ProfileViewDrawBodyPreview'
 ))
 {
