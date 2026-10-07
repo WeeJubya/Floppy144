@@ -29,6 +29,8 @@ typedef struct Floppy144TimingState
 
 typedef struct Floppy144TimingEvents
 {
+    /* Monotonic elapsed time since the previous game timing update. */
+    uint32_t presentation_elapsed_ms;
     uint32_t terminal_restore_elapsed_ms;
     uint8_t splash_frame_due;
     uint8_t terminal_cursor_toggle;

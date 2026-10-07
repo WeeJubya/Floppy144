@@ -310,6 +310,7 @@ $sources = @(
     (Join-Path $sourceDir "floppy144_profile.c"),
     (Join-Path $sourceDir "floppy144_profile_edit.c"),
     (Join-Path $sourceDir "floppy144_profile_view.c"),
+    (Join-Path $sourceDir "floppy144_player_visual.c"),
     (Join-Path $sourceDir "floppy144_settings.c"),
     (Join-Path $sourceDir "floppy144_settings_runtime.c"),
     (Join-Path $sourceDir "floppy144_settings_view.c"),

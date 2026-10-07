@@ -111,6 +111,10 @@ static void TestTimingProgression(void)
 
     events=Floppy144TimingAdvance(&timing,1015ULL);
     Expect(
+        events.presentation_elapsed_ms==15U,
+        "presentation timing reports monotonic frame elapsed time"
+    );
+    Expect(
         events.splash_frame_due==0U &&
         events.terminal_restore_elapsed_ms==0U &&
         events.terminal_cursor_toggle==0U &&
@@ -158,6 +162,10 @@ static void TestTimingProgression(void)
      * replay or underflow.
      */
     events=Floppy144TimingAdvance(&timing,2000ULL);
+    Expect(
+        events.presentation_elapsed_ms==0U,
+        "backwards clock produces no negative presentation elapsed time"
+    );
     Expect(
         events.splash_frame_due==0U,
         "backwards clock does not resurrect stopped splash timing"

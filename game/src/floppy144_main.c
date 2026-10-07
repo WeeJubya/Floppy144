@@ -27,6 +27,7 @@
 #include "floppy144_lifecycle.h"
 #include "floppy144_notebook_view.h"
 #include "floppy144_recovery.h"
+#include "floppy144_player_visual.h"
 #include "floppy144_profile_edit.h"
 #include "floppy144_profile_view.h"
 #include "floppy144_terminal.h"
@@ -84,6 +85,7 @@ typedef enum Floppy144Screen
 static F144Runtime *global_runtime;
 static F144Platform global_platform;
 static Floppy144MovementInput global_movement_input;
+static Floppy144PlayerVisualState global_player_visual;
 static Floppy144LifecycleState global_lifecycle;
 static Floppy144TimingState global_timing;
 
@@ -293,13 +295,14 @@ static void Floppy144Redraw(
              * enhances the Site Directory only; playable ISO room projection
              * is retained in source for a later release.
              */
-            Floppy144Site2DDrawForBodyStyle(
+            Floppy144Site2DDrawForPlayerState(
                 pSurface,
                 &global_run_state,
                 global_office_notice,
                 Floppy144DiscoveryProfileBodyStyle(
                     &global_profile
-                )
+                ),
+                &global_player_visual
             );
 
             break;
@@ -647,6 +650,19 @@ static void Floppy144UpdateTiming(
                 &global_timing
             );
         }
+    }
+
+    if(
+        events.presentation_elapsed_ms != 0U &&
+        global_screen == FLOPPY144_SCREEN_OFFICE &&
+        Floppy144PlayerVisualAdvance(
+            &global_player_visual,
+            events.presentation_elapsed_ms
+        )
+    )
+    {
+        redraw =
+            true;
     }
 
     if(
@@ -1439,6 +1455,10 @@ static void Floppy144MainMenuActivate(
                 Floppy144RunStateBegin(
                     &global_run_state,
                     recovery_seed
+                );
+
+                Floppy144PlayerVisualReset(
+                    &global_player_visual
                 );
 
                 Floppy144DiscoveryProfileBeginRecovery(
@@ -2440,11 +2460,40 @@ static bool Floppy144HandleActionEvent(
 
     if(pEvent->type == F144_ACTION_EVENT_UP)
     {
-        (void)Floppy144MovementInputSetAction(
-            &global_movement_input,
-            pEvent->action,
-            false
-        );
+        bool movement_action =
+            Floppy144MovementInputSetAction(
+                &global_movement_input,
+                pEvent->action,
+                false
+            );
+
+        if(movement_action)
+        {
+            int32_t movement_x;
+            int32_t movement_y;
+
+            Floppy144MovementInputVector(
+                &global_movement_input,
+                FLOPPY144_SITE_MOVE_STEP_X16,
+                &movement_x,
+                &movement_y
+            );
+
+            if(
+                Floppy144PlayerVisualSetMovement(
+                    &global_player_visual,
+                    movement_x,
+                    movement_y,
+                    F144_ACTION_NONE
+                ) &&
+                global_screen == FLOPPY144_SCREEN_OFFICE
+            )
+            {
+                Floppy144Redraw(
+                    window
+                );
+            }
+        }
 
             if(
                 global_screen == FLOPPY144_SCREEN_MAIN_MENU &&
@@ -2484,6 +2533,13 @@ static bool Floppy144HandleActionEvent(
     {
         Floppy144MovementInputReset(
             &global_movement_input
+        );
+
+        (void)Floppy144PlayerVisualSetMovement(
+            &global_player_visual,
+            0,
+            0,
+            F144_ACTION_NONE
         );
     }
 
@@ -2946,9 +3002,16 @@ static bool Floppy144HandleActionEvent(
 
                             Floppy144MovementInputVector(
                                 &global_movement_input,
-                                8,
+                                FLOPPY144_SITE_MOVE_STEP_X16,
                                 &movement_x,
                                 &movement_y
+                            );
+
+                            (void)Floppy144PlayerVisualSetMovement(
+                                &global_player_visual,
+                                movement_x,
+                                movement_y,
+                                eAction
                             );
 
                             if(
@@ -4091,6 +4154,10 @@ int CALLBACK WinMain(
 
     Floppy144MovementInputReset(
         &global_movement_input
+    );
+
+    Floppy144PlayerVisualReset(
+        &global_player_visual
     );
 
     {

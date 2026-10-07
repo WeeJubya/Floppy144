@@ -3,6 +3,7 @@
  */
 
 #include "floppy144_profile_view.h"
+#include "floppy144_player_visual.h"
 
 #include <stddef.h>
 #include <stdio.h>
@@ -51,52 +52,31 @@ static void Floppy144ProfileViewDrawBodyPreview(
     Floppy144OperatorBodyStyle body_style
 )
 {
-    const uint32_t body_colour = FLOPPY144_RGB(72, 103, 118);
-    const uint32_t shirt_light = FLOPPY144_RGB(112, 139, 148);
-    const uint32_t skin_colour = FLOPPY144_RGB(205, 186, 158);
-    const uint32_t trouser_colour = FLOPPY144_RGB(39, 48, 54);
-    const uint32_t edge_colour = FLOPPY144_RGB(18, 23, 26);
-    const uint32_t shadow_colour = FLOPPY144_RGB(31, 35, 34);
-    uint32_t foot_x = 548U;
-    uint32_t foot_y = 118U;
-    uint32_t sprite_width = 28U;
-    uint32_t sprite_height = 38U;
-    uint32_t head_size = 11U;
-    uint32_t torso_width;
-    uint32_t torso_x;
-    uint32_t torso_y = foot_y - sprite_height + head_size - 2U;
-    uint32_t torso_height = 20U;
-    uint32_t leg_width;
+    Floppy144PlayerVisualState player_visual;
 
     if(surface == NULL)
     {
         return;
     }
 
-    if(
-        body_style < 0 ||
-        body_style >= FLOPPY144_OPERATOR_BODY_STYLE_COUNT
-    )
-    {
-        body_style = FLOPPY144_OPERATOR_BODY_STYLE_DEFAULT;
-    }
+    Floppy144PlayerVisualReset(
+        &player_visual
+    );
 
-    torso_width =
-        body_style == FLOPPY144_OPERATOR_BODY_STYLE_B
-            ? 24U
-            : 21U;
-    torso_x = foot_x - torso_width / 2U;
-    leg_width = torso_width / 3U;
-
-    Floppy144DrawFillRect(surface,foot_x-sprite_width/2U,foot_y-3U,sprite_width,5U,shadow_colour);
-    Floppy144DrawFillRect(surface,torso_x,torso_y,torso_width,torso_height,body_colour);
-    Floppy144DrawRect(surface,torso_x,torso_y,torso_width,torso_height,edge_colour);
-    Floppy144DrawFillRect(surface,torso_x+4U,torso_y+5U,5U,5U,shirt_light);
-    Floppy144DrawFillRect(surface,foot_x-head_size/2U,foot_y-sprite_height,head_size,head_size,skin_colour);
-    Floppy144DrawRect(surface,foot_x-head_size/2U,foot_y-sprite_height,head_size,head_size,edge_colour);
-    Floppy144DrawFillRect(surface,foot_x-head_size/2U,foot_y-sprite_height,head_size,2U,trouser_colour);
-    Floppy144DrawFillRect(surface,torso_x+2U,torso_y+torso_height,leg_width,foot_y-(torso_y+torso_height),trouser_colour);
-    Floppy144DrawFillRect(surface,torso_x+torso_width-leg_width-2U,torso_y+torso_height,leg_width,foot_y-(torso_y+torso_height),trouser_colour);
+    Floppy144PlayerVisualDraw(
+        surface,
+        548,
+        118,
+        28,
+        38,
+        28,
+        body_style,
+        &player_visual,
+        500,
+        72,
+        96,
+        52
+    );
 }
 
 /*

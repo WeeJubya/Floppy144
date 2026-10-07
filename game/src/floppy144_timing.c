@@ -147,6 +147,16 @@ Floppy144TimingEvents Floppy144TimingAdvance(
             timing->last_update_ms;
     }
 
+    {
+        uint64_t elapsed =
+            now_ms - timing->last_update_ms;
+
+        events.presentation_elapsed_ms =
+            elapsed > UINT32_MAX
+                ? UINT32_MAX
+                : (uint32_t)elapsed;
+    }
+
     timing->last_update_ms =
         now_ms;
 

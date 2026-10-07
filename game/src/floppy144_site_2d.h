@@ -10,6 +10,7 @@
 
 #include "floppy144_draw.h"
 #include "floppy144_profile.h"
+#include "floppy144_player_visual.h"
 #include "floppy144_run_state.h"
 
 void Floppy144Site2DDraw(
@@ -27,4 +28,16 @@ void Floppy144Site2DDrawForBodyStyle(
     const Floppy144RunState *run_state,
     const char *notice,
     Floppy144OperatorBodyStyle body_style
+);
+
+/*
+ * Stage 4D directional-player draw. Facing and gait are transient presentation
+ * state and never become part of the persistent recovery RunState.
+ */
+void Floppy144Site2DDrawForPlayerState(
+    Floppy144Surface *runtime,
+    const Floppy144RunState *run_state,
+    const char *notice,
+    Floppy144OperatorBodyStyle body_style,
+    const Floppy144PlayerVisualState *player_visual
 );

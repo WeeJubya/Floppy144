@@ -12,6 +12,7 @@
 
 #include "floppy144_site_2d.h"
 #include "floppy144_site_2d_camera.h"
+#include "floppy144_player_visual.h"
 
 #include "floppy144_draw.h"
 #include "floppy144_drawing_runtime.h"
@@ -3389,41 +3390,14 @@ static void Floppy144Site2DDrawPlayer(
     Floppy144Surface *surface,
     const Floppy144SiteCamera2D *camera,
     const Floppy144RunState *run_state,
-    Floppy144OperatorBodyStyle body_style
+    Floppy144OperatorBodyStyle body_style,
+    const Floppy144PlayerVisualState *player_visual
 )
 {
-    const uint32_t body_colour =
-        FLOPPY144_RGB(72, 103, 118);
-
-    const uint32_t shirt_light =
-        FLOPPY144_RGB(112, 139, 148);
-
-    const uint32_t skin_colour =
-        FLOPPY144_RGB(205, 186, 158);
-
-    const uint32_t trouser_colour =
-        FLOPPY144_RGB(39, 48, 54);
-
-    const uint32_t edge_colour =
-        FLOPPY144_RGB(18, 23, 26);
-
-    const uint32_t shadow_colour =
-        FLOPPY144_RGB(31, 35, 34);
-
     int32_t foot_x;
     int32_t foot_y;
-
     int32_t sprite_width;
     int32_t sprite_height;
-
-    int32_t sprite_y;
-
-    int32_t head_size;
-    int32_t torso_x;
-    int32_t torso_y;
-    int32_t torso_width;
-    int32_t torso_height;
-    int32_t leg_width;
     int32_t collision_shadow_width;
 
     if(
@@ -3443,128 +3417,40 @@ static void Floppy144Site2DDrawPlayer(
         &foot_y
     );
 
-    sprite_width = (FLOPPY144_SITE_PLAYER_VISUAL_WIDTH_X16 * FLOPPY144_SITE_2D_PIXELS_PER_UNIT) / FLOPPY144_SITE_FIXED_ONE;
+    sprite_width =
+        (
+            FLOPPY144_SITE_PLAYER_VISUAL_WIDTH_X16 *
+            FLOPPY144_SITE_2D_PIXELS_PER_UNIT
+        ) /
+        FLOPPY144_SITE_FIXED_ONE;
 
-    sprite_height = (FLOPPY144_SITE_2D_PLAYER_VISUAL_HEIGHT_X16 * FLOPPY144_SITE_2D_PIXELS_PER_UNIT) / FLOPPY144_SITE_FIXED_ONE;
+    sprite_height =
+        (
+            FLOPPY144_SITE_2D_PLAYER_VISUAL_HEIGHT_X16 *
+            FLOPPY144_SITE_2D_PIXELS_PER_UNIT
+        ) /
+        FLOPPY144_SITE_FIXED_ONE;
 
-    collision_shadow_width = (FLOPPY144_SITE_PLAYER_COLLISION_WIDTH_X16 * FLOPPY144_SITE_2D_PIXELS_PER_UNIT) / FLOPPY144_SITE_FIXED_ONE;
+    collision_shadow_width =
+        (
+            FLOPPY144_SITE_PLAYER_COLLISION_WIDTH_X16 *
+            FLOPPY144_SITE_2D_PIXELS_PER_UNIT
+        ) /
+        FLOPPY144_SITE_FIXED_ONE;
 
-    sprite_y =
-        foot_y - sprite_height;
-
-    head_size =
-        sprite_width * 2 / 5;
-
-    if(head_size < 8)
-    {
-        head_size = 8;
-    }
-
-    if(
-        body_style < 0 ||
-        body_style >= FLOPPY144_OPERATOR_BODY_STYLE_COUNT
-    )
-    {
-        body_style =
-            FLOPPY144_OPERATOR_BODY_STYLE_DEFAULT;
-    }
-
-    torso_width =
-        body_style == FLOPPY144_OPERATOR_BODY_STYLE_B
-            ? sprite_width * 7 / 8
-            : sprite_width * 3 / 4;
-
-    torso_x =
-        foot_x - torso_width / 2;
-
-    torso_y =
-        sprite_y + head_size - 2;
-
-    torso_height =
-        sprite_height - head_size - sprite_height / 4;
-
-    leg_width =
-        torso_width / 3;
-
-    Floppy144Site2DFill(
+    Floppy144PlayerVisualDraw(
         surface,
-        foot_x - collision_shadow_width / 2,
-        foot_y - 3,
+        foot_x,
+        foot_y,
+        sprite_width,
+        sprite_height,
         collision_shadow_width,
-        6,
-        shadow_colour
-    );
-
-    Floppy144Site2DFill(
-        surface,
-        torso_x,
-        torso_y,
-        torso_width,
-        torso_height,
-        body_colour
-    );
-
-    Floppy144Site2DOutline(
-        surface,
-        torso_x,
-        torso_y,
-        torso_width,
-        torso_height,
-        edge_colour
-    );
-
-    Floppy144Site2DFill(
-        surface,
-        torso_x + 4,
-        torso_y + 5,
-        5,
-        5,
-        shirt_light
-    );
-
-    Floppy144Site2DFill(
-        surface,
-        foot_x - head_size / 2,
-        sprite_y,
-        head_size,
-        head_size,
-        skin_colour
-    );
-
-    Floppy144Site2DOutline(
-        surface,
-        foot_x - head_size / 2,
-        sprite_y,
-        head_size,
-        head_size,
-        edge_colour
-    );
-
-    Floppy144Site2DFill(
-        surface,
-        foot_x - head_size / 2,
-        sprite_y,
-        head_size,
-        head_size / 5,
-        trouser_colour
-    );
-
-    Floppy144Site2DFill(
-        surface,
-        torso_x + 2,
-        torso_y + torso_height,
-        leg_width,
-        foot_y - (torso_y + torso_height),
-        trouser_colour
-    );
-
-    Floppy144Site2DFill(
-        surface,
-        torso_x + torso_width - leg_width - 2,
-        torso_y + torso_height,
-        leg_width,
-        foot_y - (torso_y + torso_height),
-        trouser_colour
+        body_style,
+        player_visual,
+        FLOPPY144_SITE_2D_VIEWPORT_X,
+        FLOPPY144_SITE_2D_VIEWPORT_Y,
+        FLOPPY144_SITE_2D_VIEWPORT_WIDTH,
+        FLOPPY144_SITE_2D_VIEWPORT_HEIGHT
     );
 }
 
@@ -3634,11 +3520,12 @@ static const char *Floppy144Site2DRoomLabel(
     }
 }
 
-void Floppy144Site2DDrawForBodyStyle(
+void Floppy144Site2DDrawForPlayerState(
     Floppy144Surface *pSurface,
     const Floppy144RunState *run_state,
     const char *notice,
-    Floppy144OperatorBodyStyle body_style
+    Floppy144OperatorBodyStyle body_style,
+    const Floppy144PlayerVisualState *player_visual
 )
 {
     const uint32_t background =
@@ -4006,7 +3893,8 @@ void Floppy144Site2DDrawForBodyStyle(
             &surface,
             &camera,
             run_state,
-            body_style
+            body_style,
+            player_visual
         );
     }
 
@@ -4075,6 +3963,22 @@ void Floppy144Site2DDrawForBodyStyle(
  * Preserve the Stage 3 renderer contract for tests and callers that do not
  * know about persistent operator identity.
  */
+void Floppy144Site2DDrawForBodyStyle(
+    Floppy144Surface *pSurface,
+    const Floppy144RunState *run_state,
+    const char *notice,
+    Floppy144OperatorBodyStyle body_style
+)
+{
+    Floppy144Site2DDrawForPlayerState(
+        pSurface,
+        run_state,
+        notice,
+        body_style,
+        NULL
+    );
+}
+
 void Floppy144Site2DDraw(
     Floppy144Surface *pSurface,
     const Floppy144RunState *run_state,

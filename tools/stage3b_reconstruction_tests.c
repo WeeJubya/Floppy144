@@ -2401,6 +2401,14 @@ static void Floppy144TestCompletedRecoveryProfileSnapshot(void)
     Floppy144RunStateBegin(&sRunState,144U);
     Floppy144DiscoveryProfileReset(&sProfile);
 
+    F144_CHECK(
+        Floppy144DiscoveryProfileSetBodyStyle(
+            &sProfile,
+            FLOPPY144_OPERATOR_BODY_STYLE_B
+        ),
+        "profile accepts Type B before persistence round-trip"
+    );
+
     (void)Floppy144RunStateBitSet(
         sRunState.collections,
         (uint32_t)FLOPPY144_COLLECTION_DR01
@@ -2447,6 +2455,8 @@ static void Floppy144TestCompletedRecoveryProfileSnapshot(void)
     );
 
     F144_CHECK(
+        Floppy144DiscoveryProfileBodyStyle(&sDecoded)==
+            FLOPPY144_OPERATOR_BODY_STYLE_B &&
         sDecoded.completed_recoveries==sProfile.completed_recoveries &&
         sDecoded.latest_completion_evidence[0]==
             sProfile.latest_completion_evidence[0] &&
@@ -2456,7 +2466,7 @@ static void Floppy144TestCompletedRecoveryProfileSnapshot(void)
             sProfile.latest_completion_flags &&
         sDecoded.latest_completion_recovered_kb==
             sProfile.latest_completion_recovered_kb,
-        "decoded profile preserves latest completed recovery comparison data"
+        "decoded profile preserves body style and completion comparison data"
     );
 }
 

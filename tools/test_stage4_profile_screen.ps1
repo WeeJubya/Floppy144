@@ -16,6 +16,9 @@ $recoverySourcePath =
 $profileViewPath =
     Join-Path $root "game\src\floppy144_profile_view.c"
 
+$playerVisualPath =
+    Join-Path $root "game\src\floppy144_player_visual.c"
+
 $profileHeaderPath =
     Join-Path $root "game\src\floppy144_profile.h"
 
@@ -50,6 +53,9 @@ $recoverySource =
 
 $profileViewSource =
     Get-Content -LiteralPath $profileViewPath -Raw
+
+$playerVisualSource =
+    Get-Content -LiteralPath $playerVisualPath -Raw
 
 $profileHeader =
     Get-Content -LiteralPath $profileHeaderPath -Raw
@@ -136,7 +142,7 @@ foreach($required in @(
     'F144_ACTION_MOVE_LEFT',
     'F144_ACTION_MOVE_RIGHT',
     'Floppy144PersistenceSaveProfile',
-    'Floppy144Site2DDrawForBodyStyle'
+    'Floppy144Site2DDrawForPlayerState'
 ))
 {
     if($mainSource -notmatch [regex]::Escape($required))
@@ -158,9 +164,10 @@ foreach($required in @(
 }
 
 if(
-    $site2DHeader -notmatch [regex]::Escape('Floppy144Site2DDrawForBodyStyle') -or
-    $site2DSource -notmatch [regex]::Escape('FLOPPY144_OPERATOR_BODY_STYLE_B') -or
-    $site2DSource -notmatch [regex]::Escape('sprite_width * 7 / 8')
+    $site2DHeader -notmatch [regex]::Escape('Floppy144Site2DDrawForPlayerState') -or
+    $site2DSource -notmatch [regex]::Escape('Floppy144PlayerVisualDraw') -or
+    $playerVisualSource -notmatch [regex]::Escape('FLOPPY144_OPERATOR_BODY_STYLE_B') -or
+    $playerVisualSource -notmatch [regex]::Escape('sprite_width * 7 / 8')
 )
 {
     throw "Current player renderer is not consuming the cosmetic body style."
@@ -284,6 +291,7 @@ $compileArgs = @(
     (Join-Path $root "game\src\floppy144_profile.c"),
     (Join-Path $root "game\src\floppy144_profile_edit.c"),
     (Join-Path $root "game\src\floppy144_profile_view.c"),
+    (Join-Path $root "game\src\floppy144_player_visual.c"),
     (Join-Path $root "game\src\floppy144_draw.c"),
     $includePlatform,
     $includeGame,
