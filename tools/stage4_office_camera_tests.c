@@ -36,6 +36,18 @@ static void SetPlayer(
     state->player_site_y = y16;
 }
 
+static int HalfUnitStepProjectsToWholePixels(
+    int32_t pixels_per_unit
+)
+{
+    return
+        (
+            FLOPPY144_SITE_MOVE_STEP_X16 *
+            pixels_per_unit
+        ) %
+        FLOPPY144_SITE_FIXED_ONE == 0;
+}
+
 static void CheckCandidateScales(
     Floppy144RunState *state,
     const Floppy144Surface *surface
@@ -103,44 +115,30 @@ static void CheckCandidateScales(
     }
 
     EXPECT(
-        (FLOPPY144_SITE_MOVE_STEP_X16 * 10) %
-            FLOPPY144_SITE_FIXED_ONE == 0,
+        HalfUnitStepProjectsToWholePixels(10),
         "50 percent keeps whole-pixel half-unit movement"
     );
 
     EXPECT(
-        (FLOPPY144_SITE_MOVE_STEP_X16 * 12) %
-            FLOPPY144_SITE_FIXED_ONE == 0,
+        HalfUnitStepProjectsToWholePixels(12),
         "60 percent keeps whole-pixel half-unit movement"
     );
 
     EXPECT(
-        (FLOPPY144_SITE_MOVE_STEP_X16 * 13) %
-            FLOPPY144_SITE_FIXED_ONE != 0,
+        !HalfUnitStepProjectsToWholePixels(13),
         "65 percent produces fractional half-unit movement"
     );
 
     EXPECT(
-        (FLOPPY144_SITE_MOVE_STEP_X16 * 14) %
-            FLOPPY144_SITE_FIXED_ONE == 0,
+        HalfUnitStepProjectsToWholePixels(14),
         "70 percent keeps whole-pixel half-unit movement"
     );
 
     EXPECT(
-        (FLOPPY144_SITE_MOVE_STEP_X16 * 15) %
-            FLOPPY144_SITE_FIXED_ONE != 0,
+        !HalfUnitStepProjectsToWholePixels(15),
         "75 percent produces fractional half-unit movement"
     );
 
-    /*
-     * Fifty percent remains a valid transform candidate, but 60 percent keeps
-     * 20 percent more pixels on every world-space feature while still exposing
-     * a much larger view than the original 20 px/unit presentation.
-     */
-    EXPECT(
-        12 > 10,
-        "selected scale retains more feature detail than 50 percent"
-    );
 }
 
 static void CheckSelectedScaleTransform(
