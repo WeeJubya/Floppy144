@@ -18,23 +18,23 @@ void Floppy144SettingsReset
     );
 
     settings->crt_mode =
-    (uint8_t)FLOPPY144_CRT_FULL;
+    (uint8_t)FLOPPY144_SETTINGS_DEFAULT_CRT_MODE;
 
     settings->text_speed =
-    (uint8_t)FLOPPY144_TEXT_SPEED_NORMAL;
+    (uint8_t)FLOPPY144_SETTINGS_DEFAULT_TEXT_SPEED;
 
     /*
      * Ten preserves the current unattenuated audio behaviour.
      */
 
     settings->music_volume =
-    FLOPPY144_SETTINGS_VOLUME_MAX;
+    FLOPPY144_SETTINGS_DEFAULT_MUSIC_VOLUME;
 
     settings->sfx_volume =
-    FLOPPY144_SETTINGS_VOLUME_MAX;
+    FLOPPY144_SETTINGS_DEFAULT_SFX_VOLUME;
 
     settings->autosave_mode =
-    (uint8_t)FLOPPY144_AUTOSAVE_5_MINUTES;
+    (uint8_t)FLOPPY144_SETTINGS_DEFAULT_AUTOSAVE_MODE;
 }
 
 bool Floppy144SettingsSetCrtMode

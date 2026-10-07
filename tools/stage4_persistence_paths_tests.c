@@ -712,6 +712,8 @@ static void TestRoundTrips(const char *root)
     Floppy144DiscoveryProfile decoded_profile;
     Floppy144Settings settings;
     Floppy144Settings loaded_settings;
+    Floppy144Settings decoded_settings;
+    uint8_t settings_payload[FLOPPY144_SETTINGS_PAYLOAD_V1_SIZE];
     uint8_t profile_payload[
         FLOPPY144_PROFILE_PAYLOAD_V1_SIZE
     ];
@@ -1005,6 +1007,37 @@ static void TestRoundTrips(const char *root)
         ) &&
         loaded_settings.sfx_volume==4U,
         "settings reload through resolved path"
+    );
+
+    Expect(
+        Floppy144PersistenceEncodeSettings(
+            &loaded_settings,
+            settings_payload,
+            FLOPPY144_SETTINGS_PAYLOAD_V1_SIZE
+        ),
+        "settings compatibility payload encodes"
+    );
+
+    settings_payload[0]=0xffU;
+    settings_payload[1]=0xffU;
+    settings_payload[2]=0xffU;
+    settings_payload[3]=0xffU;
+    settings_payload[4]=0xffU;
+    memset(&decoded_settings,0,sizeof(decoded_settings));
+
+    Expect(
+        Floppy144PersistenceDecodeSettings(
+            &decoded_settings,
+            settings_payload,
+            FLOPPY144_SETTINGS_PAYLOAD_V1_SIZE
+        ) &&
+        decoded_settings.crt_mode==(uint8_t)FLOPPY144_SETTINGS_DEFAULT_CRT_MODE &&
+        decoded_settings.text_speed==(uint8_t)FLOPPY144_SETTINGS_DEFAULT_TEXT_SPEED &&
+        decoded_settings.music_volume==FLOPPY144_SETTINGS_DEFAULT_MUSIC_VOLUME &&
+        decoded_settings.sfx_volume==FLOPPY144_SETTINGS_DEFAULT_SFX_VOLUME &&
+        decoded_settings.autosave_mode==(uint8_t)FLOPPY144_SETTINGS_DEFAULT_AUTOSAVE_MODE &&
+        decoded_settings.dirty!=0U,
+        "out-of-range V1 settings normalise field-by-field"
     );
 }
 

@@ -41,6 +41,8 @@
 #include "floppy144_site_object.h"
 #include "floppy144_site_rooms.h"
 #include "floppy144_site_view.h"
+#include "floppy144_settings_runtime.h"
+#include "floppy144_settings_view.h"
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -59,6 +61,7 @@ typedef enum Floppy144Screen
     FLOPPY144_SCREEN_SPLASH,
     FLOPPY144_SCREEN_MAIN_MENU,
     FLOPPY144_SCREEN_PROFILE,
+    FLOPPY144_SCREEN_SETTINGS,
     FLOPPY144_SCREEN_OFFICE,
     FLOPPY144_SCREEN_SITE_DIRECTORY,
     FLOPPY144_SCREEN_CABINET,
@@ -124,6 +127,12 @@ static bool global_completion_capacity_exhausted;
 
 static Floppy144MainMenuOption
     global_main_menu_option;
+
+static Floppy144SettingsOption
+    global_settings_option;
+
+static const char *
+    global_settings_notice;
 
 static Floppy144Screen
     global_resume_screen;
@@ -516,7 +525,10 @@ static void Floppy144Redraw(
 
             Floppy144SplashDraw(
                 pSurface,
-                elapsed_milliseconds
+                Floppy144SettingsTextElapsedMs(
+                    &global_settings,
+                    elapsed_milliseconds
+                )
             );
 
             break;
@@ -545,6 +557,18 @@ static void Floppy144Redraw(
                 pSurface,
                 &global_profile,
                 &global_profile_name_edit
+            );
+
+            break;
+        }
+
+        case FLOPPY144_SCREEN_SETTINGS:
+        {
+            Floppy144SettingsViewDraw(
+                pSurface,
+                &global_settings,
+                global_settings_option,
+                global_settings_notice
             );
 
             break;
@@ -629,6 +653,11 @@ static void Floppy144Redraw(
             break;
         }
     }
+
+    Floppy144SettingsApplyCrtFilter(
+        pSurface,
+        &global_settings
+    );
 
     InvalidateRect(
         window,
@@ -884,10 +913,13 @@ static void Floppy144UpdateTiming(
             true;
 
         if(
-            Floppy144TimingSplashElapsedMs(
-                &global_timing,
-                f144PlatformMonotonicMs(
-                    &global_platform
+            Floppy144SettingsTextElapsedMs(
+                &global_settings,
+                Floppy144TimingSplashElapsedMs(
+                    &global_timing,
+                    f144PlatformMonotonicMs(
+                        &global_platform
+                    )
                 )
             ) >= FLOPPY144_SPLASH_ANIMATION_MS
         )
@@ -1005,7 +1037,8 @@ static void Floppy144OpenMainMenu(
         global_session_active &&
         global_screen != FLOPPY144_SCREEN_SPLASH &&
         global_screen != FLOPPY144_SCREEN_MAIN_MENU &&
-        global_screen != FLOPPY144_SCREEN_PROFILE
+        global_screen != FLOPPY144_SCREEN_PROFILE &&
+        global_screen != FLOPPY144_SCREEN_SETTINGS
     )
     {
         global_resume_screen =
@@ -1344,6 +1377,299 @@ static void Floppy144CommitProfileBodyStyle(
 }
 
 /*
+ * Open persistent environment settings.
+ */
+static void Floppy144OpenSettings(
+    HWND window
+)
+{
+    global_settings_option =
+        FLOPPY144_SETTINGS_OPTION_CRT;
+
+    global_settings_notice =
+        NULL;
+
+    global_screen =
+        FLOPPY144_SCREEN_SETTINGS;
+
+    Floppy144Redraw(
+        window
+    );
+}
+
+/*
+ * Apply one stepped settings adjustment and persist it atomically.
+ *
+ * Runtime consumers are updated only after the settings file has been
+ * replaced successfully. A failed save restores the complete previous
+ * settings structure, so the screen never advertises an unpersisted value.
+ */
+static void Floppy144CommitSettingsAdjustment(
+    HWND window,
+    int32_t direction
+)
+{
+    Floppy144Settings original_settings;
+    bool changed =
+        false;
+    int32_t step =
+        direction < 0
+            ? -1
+            : 1;
+
+    if(direction == 0)
+    {
+        return;
+    }
+
+    original_settings =
+        global_settings;
+
+    switch(global_settings_option)
+    {
+        case FLOPPY144_SETTINGS_OPTION_CRT:
+        {
+            int32_t next =
+                (int32_t)global_settings.crt_mode +
+                step;
+
+            if(next < 0)
+            {
+                next =
+                    (int32_t)FLOPPY144_CRT_COUNT - 1;
+            }
+            else if(
+                next >=
+                    (int32_t)FLOPPY144_CRT_COUNT
+            )
+            {
+                next =
+                    0;
+            }
+
+            changed =
+                Floppy144SettingsSetCrtMode(
+                    &global_settings,
+                    (Floppy144CrtMode)next
+                );
+
+            break;
+        }
+
+        case FLOPPY144_SETTINGS_OPTION_TEXT_SPEED:
+        {
+            int32_t next =
+                (int32_t)global_settings.text_speed +
+                step;
+
+            if(next < 0)
+            {
+                next =
+                    (int32_t)FLOPPY144_TEXT_SPEED_COUNT - 1;
+            }
+            else if(
+                next >=
+                    (int32_t)FLOPPY144_TEXT_SPEED_COUNT
+            )
+            {
+                next =
+                    0;
+            }
+
+            changed =
+                Floppy144SettingsSetTextSpeed(
+                    &global_settings,
+                    (Floppy144TextSpeed)next
+                );
+
+            break;
+        }
+
+        case FLOPPY144_SETTINGS_OPTION_MUSIC_VOLUME:
+        {
+            int32_t next =
+                (int32_t)global_settings.music_volume +
+                step;
+
+            if(next < 0)
+            {
+                next = 0;
+            }
+
+            if(
+                next >
+                    (int32_t)FLOPPY144_SETTINGS_VOLUME_MAX
+            )
+            {
+                next =
+                    (int32_t)FLOPPY144_SETTINGS_VOLUME_MAX;
+            }
+
+            changed =
+                Floppy144SettingsSetMusicVolume(
+                    &global_settings,
+                    (uint8_t)next
+                );
+
+            break;
+        }
+
+        case FLOPPY144_SETTINGS_OPTION_SFX_VOLUME:
+        {
+            int32_t next =
+                (int32_t)global_settings.sfx_volume +
+                step;
+
+            if(next < 0)
+            {
+                next = 0;
+            }
+
+            if(
+                next >
+                    (int32_t)FLOPPY144_SETTINGS_VOLUME_MAX
+            )
+            {
+                next =
+                    (int32_t)FLOPPY144_SETTINGS_VOLUME_MAX;
+            }
+
+            changed =
+                Floppy144SettingsSetSfxVolume(
+                    &global_settings,
+                    (uint8_t)next
+                );
+
+            break;
+        }
+
+        case FLOPPY144_SETTINGS_OPTION_AUTOSAVE:
+        {
+            int32_t next =
+                (int32_t)global_settings.autosave_mode +
+                step;
+
+            if(next < 0)
+            {
+                next =
+                    (int32_t)FLOPPY144_AUTOSAVE_MODE_COUNT - 1;
+            }
+            else if(
+                next >=
+                    (int32_t)FLOPPY144_AUTOSAVE_MODE_COUNT
+            )
+            {
+                next =
+                    0;
+            }
+
+            changed =
+                Floppy144SettingsSetAutosaveMode(
+                    &global_settings,
+                    (Floppy144AutosaveMode)next
+                );
+
+            break;
+        }
+
+        case FLOPPY144_SETTINGS_OPTION_COUNT:
+        {
+            break;
+        }
+    }
+
+    if(!changed)
+    {
+        Floppy144Redraw(
+            window
+        );
+
+        return;
+    }
+
+    if(
+        !Floppy144PersistenceSaveSettings(
+            Floppy144StoragePath(
+                &global_storage_paths,
+                F144_PERSISTENCE_SETTINGS
+            ),
+            &global_settings
+        )
+    )
+    {
+        global_settings =
+            original_settings;
+
+        global_settings_notice =
+            "SETTINGS COULD NOT BE SAVED";
+
+        global_persistence_warnings |=
+            FLOPPY144_PERSISTENCE_WARNING_SETTINGS;
+
+        Floppy144Redraw(
+            window
+        );
+
+        return;
+    }
+
+    global_persistence_warnings &=
+        (uint8_t)~FLOPPY144_PERSISTENCE_WARNING_SETTINGS;
+
+    global_settings_notice =
+        NULL;
+
+    switch(global_settings_option)
+    {
+        case FLOPPY144_SETTINGS_OPTION_MUSIC_VOLUME:
+        {
+            (void)f144PlatformSetMusicVolume(
+                &global_platform,
+                global_settings.music_volume
+            );
+
+            break;
+        }
+
+        case FLOPPY144_SETTINGS_OPTION_SFX_VOLUME:
+        {
+            (void)f144PlatformSetSfxVolume(
+                &global_platform,
+                global_settings.sfx_volume
+            );
+
+            break;
+        }
+
+        case FLOPPY144_SETTINGS_OPTION_AUTOSAVE:
+        {
+            Floppy144TimingSetAutosaveInterval(
+                &global_timing,
+                f144PlatformMonotonicMs(
+                    &global_platform
+                ),
+                Floppy144SettingsAutosaveIntervalMs(
+                    &global_settings
+                )
+            );
+
+            break;
+        }
+
+        case FLOPPY144_SETTINGS_OPTION_CRT:
+        case FLOPPY144_SETTINGS_OPTION_TEXT_SPEED:
+        case FLOPPY144_SETTINGS_OPTION_COUNT:
+        {
+            break;
+        }
+    }
+
+    Floppy144Redraw(
+        window
+    );
+}
+
+/*
  * Execute the selected session-control option.
  */
 
@@ -1670,6 +1996,15 @@ static void Floppy144MainMenuActivate(
              * not merge current run state or modify recovery progression.
              */
             Floppy144OpenOperatorProfile(
+                window
+            );
+
+            return;
+        }
+
+        case FLOPPY144_MAIN_MENU_SETTINGS:
+        {
+            Floppy144OpenSettings(
                 window
             );
 
@@ -2616,6 +2951,99 @@ static bool Floppy144HandleActionEvent(
                             );
 
                             return true;
+                        }
+                    }
+
+                    break;
+                }
+
+                /*
+                 * Persistent environment settings use stepped controls.
+                 */
+                case FLOPPY144_SCREEN_SETTINGS:
+                {
+                    switch(eAction)
+                    {
+                        case F144_ACTION_MOVE_UP:
+                        case F144_ACTION_NAV_UP:
+                        {
+                            int32_t next =
+                                (int32_t)global_settings_option - 1;
+
+                            if(next < 0)
+                            {
+                                next =
+                                    (int32_t)FLOPPY144_SETTINGS_OPTION_COUNT - 1;
+                            }
+
+                            global_settings_option =
+                                (Floppy144SettingsOption)next;
+
+                            global_settings_notice =
+                                NULL;
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_MOVE_DOWN:
+                        case F144_ACTION_NAV_DOWN:
+                        {
+                            global_settings_option =
+                                (Floppy144SettingsOption)(
+                                    (
+                                        (uint32_t)global_settings_option +
+                                        1U
+                                    ) %
+                                    (uint32_t)FLOPPY144_SETTINGS_OPTION_COUNT
+                                );
+
+                            global_settings_notice =
+                                NULL;
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_MOVE_LEFT:
+                        {
+                            Floppy144CommitSettingsAdjustment(
+                                window,
+                                -1
+                            );
+
+                            return true;
+                        }
+
+                        case F144_ACTION_MOVE_RIGHT:
+                        case F144_ACTION_CONFIRM:
+                        {
+                            Floppy144CommitSettingsAdjustment(
+                                window,
+                                1
+                            );
+
+                            return true;
+                        }
+
+                        case F144_ACTION_BACK:
+                        {
+                            global_screen =
+                                FLOPPY144_SCREEN_MAIN_MENU;
+
+                            global_main_menu_option =
+                                FLOPPY144_MAIN_MENU_SETTINGS;
+
+                            global_settings_notice =
+                                NULL;
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        default:
+                        {
+                            break;
                         }
                     }
 
@@ -3859,6 +4287,27 @@ int CALLBACK WinMain(
                 &global_settings
             );
         }
+        else if(global_settings.dirty != 0U)
+        {
+            /*
+             * A checksum-valid V1 file may contain an out-of-range field.
+             * The decoder repairs only that field; persist the normalized V1
+             * payload immediately so future launches are clean.
+             */
+            if(
+                !Floppy144PersistenceSaveSettings(
+                    Floppy144StoragePath(
+                        &global_storage_paths,
+                        F144_PERSISTENCE_SETTINGS
+                    ),
+                    &global_settings
+                )
+            )
+            {
+                global_persistence_warnings |=
+                    FLOPPY144_PERSISTENCE_WARNING_SETTINGS;
+            }
+        }
     }
 
     global_terminal_authentication_complete =
@@ -3940,6 +4389,11 @@ int CALLBACK WinMain(
         0U
     );
 
+    Floppy144SettingsApplyCrtFilter(
+        f144PlatformFramebuffer(&global_platform),
+        &global_settings
+    );
+
     ShowWindow(
         runtime.window,
         show_command
@@ -3975,6 +4429,11 @@ int CALLBACK WinMain(
     Floppy144SplashDraw(
         f144PlatformFramebuffer(&global_platform),
         0U
+    );
+
+    Floppy144SettingsApplyCrtFilter(
+        f144PlatformFramebuffer(&global_platform),
+        &global_settings
     );
 
     (void)f144Win32TimingStartWake(
