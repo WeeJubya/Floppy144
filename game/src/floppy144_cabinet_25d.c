@@ -1348,6 +1348,8 @@ bool Floppy144Cabinet25DDraw(
     uint32_t selected_content
 )
 {
+    Floppy144Surface clipped_surface;
+    Floppy144Surface *draw_surface;
     const char *type;
     const char *variant;
     int32_t width;
@@ -1365,6 +1367,21 @@ bool Floppy144Cabinet25DDraw(
     {
         return false;
     }
+
+    /*
+     * The right-hand Contents list starts at x=318. Keep a twelve-pixel gutter
+     * between the 2.5D presentation and that functional UI. Passing a clipped
+     * surface through every family also contains unusually wide/future objects
+     * without duplicating clipping logic in each primitive renderer.
+     */
+    clipped_surface=*surface;
+
+    if(clipped_surface.width>306U)
+    {
+        clipped_surface.width=306U;
+    }
+
+    draw_surface=&clipped_surface;
 
     type=parent->pszB!=NULL?parent->pszB:"";
     variant=parent->pszC!=NULL?parent->pszC:"";
@@ -1389,19 +1406,19 @@ bool Floppy144Cabinet25DDraw(
     if(Floppy144Cabinet25DStringEqual(type,"WALL_MOUNTED_ITEM"))
     {
         Floppy144Cabinet25DDrawWallFixture(
-            surface,parent,width,depth,mirror,octant
+            draw_surface,parent,width,depth,mirror,octant
         );
     }
     else if(Floppy144Cabinet25DStringEqual(variant,"DOOR"))
     {
         Floppy144Cabinet25DDrawDoor(
-            surface,width,depth,mirror,octant
+            draw_surface,width,depth,mirror,octant
         );
     }
     else if(Floppy144Cabinet25DStringEqual(variant,"CHAIR"))
     {
         Floppy144Cabinet25DDrawChair(
-            surface,width,depth,mirror,octant
+            draw_surface,width,depth,mirror,octant
         );
     }
     else if(
@@ -1412,7 +1429,7 @@ bool Floppy144Cabinet25DDraw(
     )
     {
         Floppy144Cabinet25DDrawDeskFamily(
-            surface,parent,width,depth,mirror,octant
+            draw_surface,parent,width,depth,mirror,octant
         );
     }
     else if(
@@ -1424,7 +1441,7 @@ bool Floppy144Cabinet25DDraw(
     )
     {
         Floppy144Cabinet25DDrawStorageFamily(
-            surface,parent,width,depth,mirror,octant
+            draw_surface,parent,width,depth,mirror,octant
         );
     }
     else if(
@@ -1437,19 +1454,19 @@ bool Floppy144Cabinet25DDraw(
     )
     {
         Floppy144Cabinet25DDrawTableFamily(
-            surface,width,depth,mirror,octant
+            draw_surface,width,depth,mirror,octant
         );
     }
     else if(Floppy144Cabinet25DStringEqual(variant,"TROLLEY"))
     {
         Floppy144Cabinet25DDrawTrolley(
-            surface,width,depth,mirror,octant
+            draw_surface,width,depth,mirror,octant
         );
     }
     else if(Floppy144Cabinet25DStringEqual(variant,"SOFA"))
     {
         Floppy144Cabinet25DDrawSofa(
-            surface,width,depth,mirror,octant
+            draw_surface,width,depth,mirror,octant
         );
     }
     else if(
@@ -1458,7 +1475,7 @@ bool Floppy144Cabinet25DDraw(
     )
     {
         Floppy144Cabinet25DDrawServerOrFridge(
-            surface,parent,width,depth,mirror,octant
+            draw_surface,parent,width,depth,mirror,octant
         );
     }
     else if(Floppy144Cabinet25DStringEqual(variant,"COFFEE_MAKER"))
@@ -1467,7 +1484,7 @@ bool Floppy144Cabinet25DDraw(
             Floppy144Cabinet25DMakeBox(width,depth,82,mirror);
 
         Floppy144Cabinet25DDrawBox(
-            surface,&appliance,
+            draw_surface,&appliance,
             F144_25D_RGB(89,100,95),
             F144_25D_RGB(55,67,62),
             F144_25D_RGB(42,53,48),
@@ -1475,7 +1492,7 @@ bool Floppy144Cabinet25DDraw(
         );
 
         Floppy144DrawRect(
-            surface,
+            draw_surface,
             (uint32_t)(Floppy144Cabinet25DMinX(&appliance)+14),
             (uint32_t)(appliance.c.y+22),
             (uint32_t)(Floppy144Cabinet25DMaxX(&appliance)-Floppy144Cabinet25DMinX(&appliance)-28),
@@ -1489,14 +1506,14 @@ bool Floppy144Cabinet25DDraw(
     )
     {
         Floppy144Cabinet25DDrawWallFixture(
-            surface,parent,width,depth,mirror,octant
+            draw_surface,parent,width,depth,mirror,octant
         );
     }
     else
     {
         recognized=false;
         Floppy144Cabinet25DDrawFallback(
-            surface,width,depth,mirror,octant
+            draw_surface,width,depth,mirror,octant
         );
     }
 
@@ -1505,7 +1522,7 @@ bool Floppy144Cabinet25DDraw(
      * selected item and scroll position continue to live in CabinetState.
      */
     Floppy144Cabinet25DDrawMarkers(
-        surface,
+        draw_surface,
         content_count,
         selected_content,
         &marker_box
