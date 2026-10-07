@@ -28,16 +28,17 @@
 #include <string.h>
 
 /*
- * Fixed zoom.
+ * Fixed Site presentation scale.
  *
- * At 20 pixels per Site unit Reception's 33 x 34 footprint is approximately
- * 660 x 680 pixels. The logical backbuffer therefore acts as a window onto a
- * larger room rather than forcing the complete room onto one screen.
+ * Stage 4D deliberately reduces the original 20 px/Site-unit scale to
+ * 12 px/Site-unit (60%). The 576 x 252 viewport therefore shows exactly
+ * 48 x 21 Site units. Twelve pixels is also divisible by the half-unit
+ * movement cadence, so every 0.5-unit step remains an exact six-pixel move.
  *
- * Camera sizing is derived from the actual backbuffer dimensions, so a later
- * 640 x 480 canvas requires no Site-camera rewrite.
+ * World geometry, collision and interaction coordinates stay in the canonical
+ * x16 Site model; only this projection scale changes.
  */
-#define FLOPPY144_SITE_2D_PIXELS_PER_UNIT 20
+#define FLOPPY144_SITE_2D_PIXELS_PER_UNIT 12
 #define FLOPPY144_SITE_2D_CAMERA_GUTTER_X16 FLOPPY144_SITE_FIXED_ONE
 #define FLOPPY144_SITE_2D_CAMERA_TOP_GUTTER_X16 (6 * FLOPPY144_SITE_FIXED_ONE)
 
@@ -88,6 +89,9 @@ typedef struct Floppy144SiteCamera2D
     int32_t screen_y;
     int32_t width;
     int32_t height;
+
+    /* Integer pixels per canonical Site unit for this projection. */
+    int32_t pixels_per_unit;
 }
 Floppy144SiteCamera2D;
 
@@ -205,10 +209,11 @@ static bool Floppy144Site2DRectVisibleInRoom(
         rect->to_room == (uint8_t)room;
 }
 
-static bool Floppy144Site2DBuildCamera(
+static bool Floppy144Site2DBuildCameraAtScale(
     Floppy144RoomId room,
     const Floppy144RunState *run_state,
     const Floppy144Surface *surface,
+    int32_t pixels_per_unit,
     Floppy144SiteCamera2D *camera
 )
 {
@@ -236,7 +241,8 @@ static bool Floppy144Site2DBuildCamera(
     if(
         run_state == NULL ||
         surface == NULL ||
-        camera == NULL
+        camera == NULL ||
+        pixels_per_unit <= 0
     )
     {
         return false;
@@ -307,14 +313,15 @@ static bool Floppy144Site2DBuildCamera(
     camera->screen_y = FLOPPY144_SITE_2D_VIEWPORT_Y;
     camera->width = FLOPPY144_SITE_2D_VIEWPORT_WIDTH;
     camera->height = FLOPPY144_SITE_2D_VIEWPORT_HEIGHT;
+    camera->pixels_per_unit = pixels_per_unit;
 
     visible_width16 =
         (camera->width * FLOPPY144_SITE_FIXED_ONE) /
-        FLOPPY144_SITE_2D_PIXELS_PER_UNIT;
+        pixels_per_unit;
 
     visible_height16 =
         (camera->height * FLOPPY144_SITE_FIXED_ONE) /
-        FLOPPY144_SITE_2D_PIXELS_PER_UNIT;
+        pixels_per_unit;
 
     Floppy144SiteViewPoint(
         run_state->player_site_x,
@@ -368,6 +375,23 @@ static bool Floppy144Site2DBuildCamera(
     return true;
 }
 
+static bool Floppy144Site2DBuildCamera(
+    Floppy144RoomId room,
+    const Floppy144RunState *run_state,
+    const Floppy144Surface *surface,
+    Floppy144SiteCamera2D *camera
+)
+{
+    return
+        Floppy144Site2DBuildCameraAtScale(
+            room,
+            run_state,
+            surface,
+            FLOPPY144_SITE_2D_PIXELS_PER_UNIT,
+            camera
+        );
+}
+
 static int32_t Floppy144Site2DProjectViewX16(
     const Floppy144SiteCamera2D *camera,
     int32_t view_x16
@@ -381,7 +405,7 @@ static int32_t Floppy144Site2DProjectViewX16(
     return
         camera->screen_x +
         ((view_x16 - camera->x16) *
-        FLOPPY144_SITE_2D_PIXELS_PER_UNIT) /
+        camera->pixels_per_unit) /
         FLOPPY144_SITE_FIXED_ONE;
 }
 
@@ -398,7 +422,7 @@ static int32_t Floppy144Site2DProjectViewY16(
     return
         camera->screen_y +
         ((view_y16 - camera->y16) *
-        FLOPPY144_SITE_2D_PIXELS_PER_UNIT) /
+        camera->pixels_per_unit) /
         FLOPPY144_SITE_FIXED_ONE;
 }
 
@@ -477,16 +501,104 @@ static bool Floppy144Site2DProjectRect(
 
     screen_rect->width =
         (int32_t)view_rect.width *
-        FLOPPY144_SITE_2D_PIXELS_PER_UNIT;
+        camera->pixels_per_unit;
 
     screen_rect->height =
         (int32_t)view_rect.height *
-        FLOPPY144_SITE_2D_PIXELS_PER_UNIT;
+        camera->pixels_per_unit;
 
     return
         screen_rect->width > 0 &&
         screen_rect->height > 0;
 }
+
+#if defined(FLOPPY144_SITE_2D_TEST_ACCESS)
+uint32_t Floppy144Site2DTestPixelsPerUnit(
+    void
+)
+{
+    return
+        (uint32_t)FLOPPY144_SITE_2D_PIXELS_PER_UNIT;
+}
+
+bool Floppy144Site2DTestBuildCameraForScale(
+    Floppy144RoomId room,
+    const Floppy144RunState *run_state,
+    const Floppy144Surface *surface,
+    int32_t pixels_per_unit,
+    Floppy144Site2DCameraProbe *probe
+)
+{
+    Floppy144SiteCamera2D camera;
+
+    if(
+        probe == NULL ||
+        !Floppy144Site2DBuildCameraAtScale(
+            room,
+            run_state,
+            surface,
+            pixels_per_unit,
+            &camera
+        )
+    )
+    {
+        return false;
+    }
+
+    probe->x16 = camera.x16;
+    probe->y16 = camera.y16;
+    probe->screen_x = camera.screen_x;
+    probe->screen_y = camera.screen_y;
+    probe->width = camera.width;
+    probe->height = camera.height;
+    probe->pixels_per_unit = camera.pixels_per_unit;
+    probe->visible_width16 =
+        (camera.width * FLOPPY144_SITE_FIXED_ONE) /
+        camera.pixels_per_unit;
+    probe->visible_height16 =
+        (camera.height * FLOPPY144_SITE_FIXED_ONE) /
+        camera.pixels_per_unit;
+
+    return true;
+}
+
+bool Floppy144Site2DTestProjectWorldPoint(
+    const Floppy144Site2DCameraProbe *probe,
+    int32_t world_x16,
+    int32_t world_y16,
+    int32_t *screen_x,
+    int32_t *screen_y
+)
+{
+    Floppy144SiteCamera2D camera;
+
+    if(
+        probe == NULL ||
+        probe->pixels_per_unit <= 0
+    )
+    {
+        return false;
+    }
+
+    camera.x16 = probe->x16;
+    camera.y16 = probe->y16;
+    camera.screen_x = probe->screen_x;
+    camera.screen_y = probe->screen_y;
+    camera.width = probe->width;
+    camera.height = probe->height;
+    camera.pixels_per_unit = probe->pixels_per_unit;
+
+    Floppy144Site2DProjectPoint(
+        &camera,
+        world_x16,
+        world_y16,
+        screen_x,
+        screen_y
+    );
+
+    return true;
+}
+#endif
 
 static bool Floppy144Site2DClipRect(
     const Floppy144Surface *surface,

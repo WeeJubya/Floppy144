@@ -96,6 +96,10 @@ jobs:
         shell: pwsh
         run: .\tools\test_stage4_help_presentation.ps1
 
+      - name: Stage 4D office camera scale
+        shell: pwsh
+        run: .\tools\test_stage4_office_camera.ps1
+
       - name: Stage 4 build architecture
         shell: pwsh
         run: .\tools\test_stage4_build_architecture.ps1
