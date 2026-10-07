@@ -13,6 +13,103 @@
 
 #define F144_25D_RGB(r,g,b) FLOPPY144_RGB((r),(g),(b))
 
+#define F144_25D_PANEL_RIGHT 306U
+
+static void Floppy144Cabinet25DFillRect(
+    Floppy144Surface *surface,
+    uint32_t x,
+    uint32_t y,
+    uint32_t width,
+    uint32_t height,
+    uint32_t colour
+)
+{
+    uint32_t right;
+
+    if(
+        surface == NULL ||
+        surface->pixels == NULL ||
+        width == 0U ||
+        height == 0U ||
+        x >= F144_25D_PANEL_RIGHT
+    )
+    {
+        return;
+    }
+
+    right=x+width;
+
+    if(
+        right < x ||
+        right > F144_25D_PANEL_RIGHT
+    )
+    {
+        right=F144_25D_PANEL_RIGHT;
+    }
+
+    Floppy144DrawFillRect(
+        surface,
+        x,
+        y,
+        right-x,
+        height,
+        colour
+    );
+}
+
+static void Floppy144Cabinet25DRect(
+    Floppy144Surface *surface,
+    uint32_t x,
+    uint32_t y,
+    uint32_t width,
+    uint32_t height,
+    uint32_t colour
+)
+{
+    if(width==0U||height==0U)
+    {
+        return;
+    }
+
+    Floppy144Cabinet25DFillRect(surface,x,y,width,1U,colour);
+
+    if(height>1U)
+    {
+        Floppy144Cabinet25DFillRect(
+            surface,
+            x,
+            y+height-1U,
+            width,
+            1U,
+            colour
+        );
+    }
+
+    if(height>2U)
+    {
+        Floppy144Cabinet25DFillRect(
+            surface,
+            x,
+            y+1U,
+            1U,
+            height-2U,
+            colour
+        );
+
+        if(width>1U)
+        {
+            Floppy144Cabinet25DFillRect(
+                surface,
+                x+width-1U,
+                y+1U,
+                1U,
+                height-2U,
+                colour
+            );
+        }
+    }
+}
+
 typedef struct Floppy144Cabinet25DPoint
 {
     int32_t x;
@@ -57,6 +154,7 @@ static void Floppy144Cabinet25DPixel(
         surface->pixels == NULL ||
         x < 0 ||
         y < 0 ||
+        (uint32_t)x >= F144_25D_PANEL_RIGHT ||
         (uint32_t)x >= surface->width ||
         (uint32_t)y >= surface->height
     )
@@ -204,7 +302,7 @@ static void Floppy144Cabinet25DFillQuad(
                 max_x >= min_x
             )
             {
-                Floppy144DrawFillRect(
+                Floppy144Cabinet25DFillRect(
                     surface,
                     (uint32_t)min_x,
                     (uint32_t)y,
@@ -511,7 +609,7 @@ static void Floppy144Cabinet25DDrawMarkers(
 
         if(y>286)break;
 
-        Floppy144DrawFillRect(
+        Floppy144Cabinet25DFillRect(
             surface,
             (uint32_t)(x<32?32:x),
             (uint32_t)y,
@@ -643,7 +741,7 @@ static void Floppy144Cabinet25DDrawDeskFamily(
 
         if(monitor_w<30)monitor_w=30;
 
-        Floppy144DrawFillRect(
+        Floppy144Cabinet25DFillRect(
             surface,
             (uint32_t)monitor_x,
             (uint32_t)(box.a.y+18),
@@ -651,7 +749,7 @@ static void Floppy144Cabinet25DDrawDeskFamily(
             42U,
             F144_25D_RGB(31,40,42)
         );
-        Floppy144DrawRect(
+        Floppy144Cabinet25DRect(
             surface,
             (uint32_t)monitor_x,
             (uint32_t)(box.a.y+18),
@@ -659,7 +757,7 @@ static void Floppy144Cabinet25DDrawDeskFamily(
             42U,
             edge
         );
-        Floppy144DrawFillRect(
+        Floppy144Cabinet25DFillRect(
             surface,
             (uint32_t)(monitor_x+monitor_w/2-2),
             (uint32_t)(box.a.y+60),
@@ -667,7 +765,7 @@ static void Floppy144Cabinet25DDrawDeskFamily(
             12U,
             edge
         );
-        Floppy144DrawFillRect(
+        Floppy144Cabinet25DFillRect(
             surface,
             (uint32_t)(monitor_x+monitor_w/4),
             (uint32_t)(box.a.y+72),
@@ -685,7 +783,7 @@ static void Floppy144Cabinet25DDrawDeskFamily(
         for(i=0U;i<4U;++i)
         {
             int32_t x=min_x+18+(int32_t)i*(max_x-min_x-36)/4;
-            Floppy144DrawRect(
+            Floppy144Cabinet25DRect(
                 surface,
                 (uint32_t)x,
                 (uint32_t)(bottom+8),
@@ -700,7 +798,7 @@ static void Floppy144Cabinet25DDrawDeskFamily(
         int32_t drawer_w=(max_x-min_x)/5;
         if(drawer_w<18)drawer_w=18;
 
-        Floppy144DrawRect(
+        Floppy144Cabinet25DRect(
             surface,
             (uint32_t)(min_x+8),
             (uint32_t)(bottom+8),
@@ -708,7 +806,7 @@ static void Floppy144Cabinet25DDrawDeskFamily(
             24U,
             edge
         );
-        Floppy144DrawRect(
+        Floppy144Cabinet25DRect(
             surface,
             (uint32_t)(max_x-drawer_w-8),
             (uint32_t)(bottom+8),
@@ -759,7 +857,7 @@ static void Floppy144Cabinet25DDrawStorageFamily(
         {
             int32_t y=front_y+(int32_t)i*19;
 
-            Floppy144DrawFillRect(
+            Floppy144Cabinet25DFillRect(
                 surface,
                 (uint32_t)(min_x+10),
                 (uint32_t)y,
@@ -769,7 +867,7 @@ static void Floppy144Cabinet25DDrawStorageFamily(
             );
         }
 
-        Floppy144DrawRect(
+        Floppy144Cabinet25DRect(
             surface,
             (uint32_t)(min_x+7),
             (uint32_t)(front_y-6),
@@ -803,13 +901,13 @@ static void Floppy144Cabinet25DDrawStorageFamily(
             );
         }
 
-        Floppy144DrawFillRect(
+        Floppy144Cabinet25DFillRect(
             surface,
             (uint32_t)(centre-12),
             (uint32_t)(box.c.y+42),
             5U,3U,edge
         );
-        Floppy144DrawFillRect(
+        Floppy144Cabinet25DFillRect(
             surface,
             (uint32_t)(centre+7),
             (uint32_t)(box.c.y+42),
@@ -917,8 +1015,8 @@ static void Floppy144Cabinet25DDrawTrolley(
         int32_t left=Floppy144Cabinet25DMinX(&shelf)+12;
         int32_t right=Floppy144Cabinet25DMaxX(&shelf)-12;
 
-        Floppy144DrawFillRect(surface,(uint32_t)left,(uint32_t)bottom,10U,5U,edge);
-        Floppy144DrawFillRect(surface,(uint32_t)(right-10),(uint32_t)bottom,10U,5U,edge);
+        Floppy144Cabinet25DFillRect(surface,(uint32_t)left,(uint32_t)bottom,10U,5U,edge);
+        Floppy144Cabinet25DFillRect(surface,(uint32_t)(right-10),(uint32_t)bottom,10U,5U,edge);
     }
 }
 
@@ -994,7 +1092,7 @@ static void Floppy144Cabinet25DDrawServerOrFridge(
     {
         for(i=0U;i<7U;++i)
         {
-            Floppy144DrawRect(
+            Floppy144Cabinet25DRect(
                 surface,
                 (uint32_t)(min_x+10),
                 (uint32_t)(box.c.y+12+(int32_t)i*13),
@@ -1015,13 +1113,13 @@ static void Floppy144Cabinet25DDrawServerOrFridge(
             edge
         );
 
-        Floppy144DrawFillRect(
+        Floppy144Cabinet25DFillRect(
             surface,
             (uint32_t)(max_x-18),
             (uint32_t)(box.c.y+16),
             4U,18U,edge
         );
-        Floppy144DrawFillRect(
+        Floppy144Cabinet25DFillRect(
             surface,
             (uint32_t)(max_x-18),
             (uint32_t)(box.c.y+55),
@@ -1057,7 +1155,7 @@ static void Floppy144Cabinet25DDrawWallFixture(
     x=166-panel_width/2;
 
     /* Wall shadow plus shallow right/bottom extrusion. */
-    Floppy144DrawFillRect(
+    Floppy144Cabinet25DFillRect(
         surface,
         (uint32_t)(x+7),
         (uint32_t)(y+7),
@@ -1065,7 +1163,7 @@ static void Floppy144Cabinet25DDrawWallFixture(
         (uint32_t)panel_height,
         F144_25D_RGB(35,44,41)
     );
-    Floppy144DrawFillRect(
+    Floppy144Cabinet25DFillRect(
         surface,
         (uint32_t)x,
         (uint32_t)y,
@@ -1073,7 +1171,7 @@ static void Floppy144Cabinet25DDrawWallFixture(
         (uint32_t)panel_height,
         F144_25D_RGB(65,78,72)
     );
-    Floppy144DrawRect(
+    Floppy144Cabinet25DRect(
         surface,
         (uint32_t)x,
         (uint32_t)y,
@@ -1090,7 +1188,7 @@ static void Floppy144Cabinet25DDrawWallFixture(
         )
     )
     {
-        Floppy144DrawRect(
+        Floppy144Cabinet25DRect(
             surface,
             (uint32_t)(x+14),
             (uint32_t)(y+14),
@@ -1101,7 +1199,7 @@ static void Floppy144Cabinet25DDrawWallFixture(
 
         for(i=0U;i<4U;++i)
         {
-            Floppy144DrawFillRect(
+            Floppy144Cabinet25DFillRect(
                 surface,
                 (uint32_t)(x+26),
                 (uint32_t)(y+30+(int32_t)i*20),
@@ -1120,7 +1218,7 @@ static void Floppy144Cabinet25DDrawWallFixture(
 
         for(i=0U;i<3U;++i)
         {
-            Floppy144DrawFillRect(
+            Floppy144Cabinet25DFillRect(
                 surface,
                 (uint32_t)(x+12+(int32_t)i*(screen+8)),
                 (uint32_t)(y+22),
@@ -1128,7 +1226,7 @@ static void Floppy144Cabinet25DDrawWallFixture(
                 (uint32_t)(panel_height-44),
                 F144_25D_RGB(20,30,33)
             );
-            Floppy144DrawRect(
+            Floppy144Cabinet25DRect(
                 surface,
                 (uint32_t)(x+12+(int32_t)i*(screen+8)),
                 (uint32_t)(y+22),
@@ -1148,7 +1246,7 @@ static void Floppy144Cabinet25DDrawWallFixture(
             int32_t column=(int32_t)(i%4U);
             int32_t row=(int32_t)(i/4U);
 
-            Floppy144DrawRect(
+            Floppy144Cabinet25DRect(
                 surface,
                 (uint32_t)(x+24+column*(panel_width-48)/4),
                 (uint32_t)(y+32+row*42),
@@ -1161,7 +1259,7 @@ static void Floppy144Cabinet25DDrawWallFixture(
         Floppy144Cabinet25DStringEqual(parent->pszC,"FIRST_AID_KIT")
     )
     {
-        Floppy144DrawFillRect(
+        Floppy144Cabinet25DFillRect(
             surface,
             (uint32_t)(x+panel_width/2-8),
             (uint32_t)(y+24),
@@ -1169,7 +1267,7 @@ static void Floppy144Cabinet25DDrawWallFixture(
             (uint32_t)(panel_height-48),
             edge
         );
-        Floppy144DrawFillRect(
+        Floppy144Cabinet25DFillRect(
             surface,
             (uint32_t)(x+24),
             (uint32_t)(y+panel_height/2-8),
@@ -1193,7 +1291,7 @@ static void Floppy144Cabinet25DDrawWallFixture(
                 hook,y+panel_height-28,
                 edge
             );
-            Floppy144DrawFillRect(
+            Floppy144Cabinet25DFillRect(
                 surface,
                 (uint32_t)(hook-2),
                 (uint32_t)(y+panel_height-36),
@@ -1209,7 +1307,7 @@ static void Floppy144Cabinet25DDrawWallFixture(
         for(i=0U;i<5U;++i)
         {
             int32_t cable=x+26+(int32_t)i*(panel_width-52)/5;
-            Floppy144DrawFillRect(
+            Floppy144Cabinet25DFillRect(
                 surface,
                 (uint32_t)cable,
                 (uint32_t)(y+16),
@@ -1221,7 +1319,7 @@ static void Floppy144Cabinet25DDrawWallFixture(
     }
     else
     {
-        Floppy144DrawRect(
+        Floppy144Cabinet25DRect(
             surface,
             (uint32_t)(x+16),
             (uint32_t)(y+16),
@@ -1237,7 +1335,7 @@ static void Floppy144Cabinet25DDrawWallFixture(
         {
             for(i=0U;i<4U;++i)
             {
-                Floppy144DrawFillRect(
+                Floppy144Cabinet25DFillRect(
                     surface,
                     (uint32_t)(x+28+(int32_t)i*28),
                     (uint32_t)(y+panel_height-38),
@@ -1273,7 +1371,7 @@ static void Floppy144Cabinet25DDrawDoor(
     min_x=Floppy144Cabinet25DMinX(&box);
     max_x=Floppy144Cabinet25DMaxX(&box);
 
-    Floppy144DrawRect(
+    Floppy144Cabinet25DRect(
         surface,
         (uint32_t)(min_x+14),
         (uint32_t)(box.c.y+18),
@@ -1281,7 +1379,7 @@ static void Floppy144Cabinet25DDrawDoor(
         40U,
         edge
     );
-    Floppy144DrawRect(
+    Floppy144Cabinet25DRect(
         surface,
         (uint32_t)(min_x+14),
         (uint32_t)(box.c.y+68),
@@ -1289,7 +1387,7 @@ static void Floppy144Cabinet25DDrawDoor(
         46U,
         edge
     );
-    Floppy144DrawFillRect(
+    Floppy144Cabinet25DFillRect(
         surface,
         (uint32_t)(max_x-24),
         (uint32_t)(box.c.y+63),
@@ -1348,8 +1446,6 @@ bool Floppy144Cabinet25DDraw(
     uint32_t selected_content
 )
 {
-    Floppy144Surface clipped_surface;
-    Floppy144Surface *draw_surface;
     const char *type;
     const char *variant;
     int32_t width;
@@ -1369,19 +1465,10 @@ bool Floppy144Cabinet25DDraw(
     }
 
     /*
-     * The right-hand Contents list starts at x=318. Keep a twelve-pixel gutter
-     * between the 2.5D presentation and that functional UI. Passing a clipped
-     * surface through every family also contains unusually wide/future objects
-     * without duplicating clipping logic in each primitive renderer.
+     * The right-hand Contents list starts at x=318. Local 2.5D primitives
+     * preserve the real framebuffer stride while clipping all presentation
+     * pixels to x < 306, leaving a twelve-pixel safety gutter.
      */
-    clipped_surface=*surface;
-
-    if(clipped_surface.width>306U)
-    {
-        clipped_surface.width=306U;
-    }
-
-    draw_surface=&clipped_surface;
 
     type=parent->pszB!=NULL?parent->pszB:"";
     variant=parent->pszC!=NULL?parent->pszC:"";
@@ -1406,19 +1493,19 @@ bool Floppy144Cabinet25DDraw(
     if(Floppy144Cabinet25DStringEqual(type,"WALL_MOUNTED_ITEM"))
     {
         Floppy144Cabinet25DDrawWallFixture(
-            draw_surface,parent,width,depth,mirror,octant
+            surface,parent,width,depth,mirror,octant
         );
     }
     else if(Floppy144Cabinet25DStringEqual(variant,"DOOR"))
     {
         Floppy144Cabinet25DDrawDoor(
-            draw_surface,width,depth,mirror,octant
+            surface,width,depth,mirror,octant
         );
     }
     else if(Floppy144Cabinet25DStringEqual(variant,"CHAIR"))
     {
         Floppy144Cabinet25DDrawChair(
-            draw_surface,width,depth,mirror,octant
+            surface,width,depth,mirror,octant
         );
     }
     else if(
@@ -1429,7 +1516,7 @@ bool Floppy144Cabinet25DDraw(
     )
     {
         Floppy144Cabinet25DDrawDeskFamily(
-            draw_surface,parent,width,depth,mirror,octant
+            surface,parent,width,depth,mirror,octant
         );
     }
     else if(
@@ -1441,7 +1528,7 @@ bool Floppy144Cabinet25DDraw(
     )
     {
         Floppy144Cabinet25DDrawStorageFamily(
-            draw_surface,parent,width,depth,mirror,octant
+            surface,parent,width,depth,mirror,octant
         );
     }
     else if(
@@ -1454,19 +1541,19 @@ bool Floppy144Cabinet25DDraw(
     )
     {
         Floppy144Cabinet25DDrawTableFamily(
-            draw_surface,width,depth,mirror,octant
+            surface,width,depth,mirror,octant
         );
     }
     else if(Floppy144Cabinet25DStringEqual(variant,"TROLLEY"))
     {
         Floppy144Cabinet25DDrawTrolley(
-            draw_surface,width,depth,mirror,octant
+            surface,width,depth,mirror,octant
         );
     }
     else if(Floppy144Cabinet25DStringEqual(variant,"SOFA"))
     {
         Floppy144Cabinet25DDrawSofa(
-            draw_surface,width,depth,mirror,octant
+            surface,width,depth,mirror,octant
         );
     }
     else if(
@@ -1475,7 +1562,7 @@ bool Floppy144Cabinet25DDraw(
     )
     {
         Floppy144Cabinet25DDrawServerOrFridge(
-            draw_surface,parent,width,depth,mirror,octant
+            surface,parent,width,depth,mirror,octant
         );
     }
     else if(Floppy144Cabinet25DStringEqual(variant,"COFFEE_MAKER"))
@@ -1484,15 +1571,15 @@ bool Floppy144Cabinet25DDraw(
             Floppy144Cabinet25DMakeBox(width,depth,82,mirror);
 
         Floppy144Cabinet25DDrawBox(
-            draw_surface,&appliance,
+            surface,&appliance,
             F144_25D_RGB(89,100,95),
             F144_25D_RGB(55,67,62),
             F144_25D_RGB(42,53,48),
             F144_25D_RGB(149,163,155)
         );
 
-        Floppy144DrawRect(
-            draw_surface,
+        Floppy144Cabinet25DRect(
+            surface,
             (uint32_t)(Floppy144Cabinet25DMinX(&appliance)+14),
             (uint32_t)(appliance.c.y+22),
             (uint32_t)(Floppy144Cabinet25DMaxX(&appliance)-Floppy144Cabinet25DMinX(&appliance)-28),
@@ -1506,14 +1593,14 @@ bool Floppy144Cabinet25DDraw(
     )
     {
         Floppy144Cabinet25DDrawWallFixture(
-            draw_surface,parent,width,depth,mirror,octant
+            surface,parent,width,depth,mirror,octant
         );
     }
     else
     {
         recognized=false;
         Floppy144Cabinet25DDrawFallback(
-            draw_surface,width,depth,mirror,octant
+            surface,width,depth,mirror,octant
         );
     }
 
@@ -1522,7 +1609,7 @@ bool Floppy144Cabinet25DDraw(
      * selected item and scroll position continue to live in CabinetState.
      */
     Floppy144Cabinet25DDrawMarkers(
-        draw_surface,
+        surface,
         content_count,
         selected_content,
         &marker_box
