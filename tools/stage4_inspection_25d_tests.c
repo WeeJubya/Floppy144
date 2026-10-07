@@ -157,11 +157,9 @@ static uint32_t DrawParent(
 
 static void TestEveryCanonicalParentVariant(void)
 {
-    const char *seen[64];
+    const char *seen[64]={0};
     uint32_t seen_count=0U;
     uint32_t i;
-
-    memset(seen,0,sizeof(seen));
 
     for(i=0U;i<ARRAY_COUNT(g_records);++i)
     {
