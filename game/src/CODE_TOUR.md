@@ -75,6 +75,22 @@ When compact runtime-generated music/SFX is introduced, composition/event
 generation stays portable and outside the Win32 layer; only native playback
 belongs behind that adapter.
 
+## Single-instance ownership
+
+Desktop process exclusivity is a launcher/platform responsibility. On Windows,
+`src/f144_win32_single_instance.c` acquires a named OS mutex keyed to the
+Roaming AppData profile environment before window creation or persistence
+resolution. The game/core does not know the mutex name, handle or process
+semantics.
+
+A refused second instance exits before any save/profile/settings path is
+resolved. `-debug` is protected too. Regression/headless binaries do not call
+the production launcher, so they need no bypass.
+
+Linux/macOS implementations should plug in at the corresponding native
+launcher boundary using their platform-appropriate exclusivity primitive,
+without changing Core.
+
 ## Timing and lifecycle ownership
 
 `F144Platform` supplies one monotonic millisecond clock. Game cadence lives in

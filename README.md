@@ -245,3 +245,26 @@ not pause or alter gameplay because Stage 3 had no such policy. A lifecycle
 event can carry an explicit autosave request, ready for later mobile
 background/suspend policy without exposing persistence internals to a platform
 backend.
+
+## Single-instance protection - Stage 4
+
+The Windows launcher now acquires a platform-specific named mutex before it
+creates the game window or resolves any writable persistence path. The mutex
+name is derived from the current Roaming AppData profile environment, so two
+FLOPPY//144 processes targeting the same `%APPDATA%\Floppy144` data set
+cannot run concurrently, while separate Windows profile environments are not
+needlessly coupled.
+
+The mutex lives in the Windows `Global\` object namespace and is owned by the
+process. Windows releases it automatically if the process exits or crashes, so
+there is no persistent lock file to strand or repair. A second launch shows a
+short "already running" message and exits before profile/settings/save files are
+opened. If ownership cannot be established safely, the launcher fails closed.
+
+`-debug` obeys the same protection. Headless/regression tools are separate
+test executables and do not enter the production `WinMain`, so no test bypass
+is required or exposed in release builds.
+
+Future Linux/macOS launchers should implement their own process-exclusivity
+mechanism at the equivalent launcher/platform boundary. Core/game modules
+must remain unaware of the native lock primitive.

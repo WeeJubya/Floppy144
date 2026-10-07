@@ -13,6 +13,7 @@
 #include "f144_win32_input.h"
 #include "f144_win32_lifecycle.h"
 #include "f144_win32_platform.h"
+#include "f144_win32_single_instance.h"
 #include "f144_win32_timing.h"
 
 #include "floppy144_catalogue.h"
@@ -3091,6 +3092,11 @@ int CALLBACK WinMain(
 
     F144Runtime runtime = {0};
 
+    F144Win32SingleInstance single_instance =
+    {
+        NULL
+    };
+
     F144Image planes[
         F144_MAX_PLANES
     ] = {0};
@@ -3108,6 +3114,48 @@ int CALLBACK WinMain(
     MSG message = {0};
 
     (void)previous_instance;
+
+    /*
+     * Acquire platform-specific ownership before creating a window, resolving
+     * persistence, loading settings/profile data, or parsing developer mode.
+     * -debug deliberately obeys the same production-data protection.
+     */
+    {
+        F144Win32SingleInstanceResult instance_result =
+            f144Win32SingleInstanceAcquire(
+                &single_instance
+            );
+
+        if(
+            instance_result ==
+            F144_WIN32_SINGLE_INSTANCE_ALREADY_RUNNING
+        )
+        {
+            MessageBoxA(
+                NULL,
+                "FLOPPY//144 is already running for this Windows profile.",
+                "Floppy//144",
+                MB_OK | MB_ICONINFORMATION
+            );
+
+            return 0;
+        }
+
+        if(
+            instance_result !=
+            F144_WIN32_SINGLE_INSTANCE_ACQUIRED
+        )
+        {
+            MessageBoxA(
+                NULL,
+                "FLOPPY//144 could not establish single-instance protection and will not start.",
+                "Floppy//144",
+                MB_OK | MB_ICONERROR
+            );
+
+            return 4;
+        }
+    }
 
     global_debug_guidance =
         Floppy144CommandLineHasSwitch(
@@ -3165,6 +3213,10 @@ int CALLBACK WinMain(
 
     if(!RegisterClassA(&window_class))
     {
+        f144Win32SingleInstanceRelease(
+            &single_instance
+        );
+
         return 1;
     }
 
@@ -3191,6 +3243,10 @@ int CALLBACK WinMain(
 
     if(!runtime.window)
     {
+        f144Win32SingleInstanceRelease(
+            &single_instance
+        );
+
         return 2;
     }
 
@@ -3388,6 +3444,10 @@ int CALLBACK WinMain(
             runtime.window
         );
 
+        f144Win32SingleInstanceRelease(
+            &single_instance
+        );
+
         return 3;
     }
 
@@ -3501,7 +3561,16 @@ int CALLBACK WinMain(
 
     global_runtime = 0;
 
-    return runtime.shutdown(
-        &runtime
-    );
+    {
+        int32_t shutdown_result =
+            runtime.shutdown(
+                &runtime
+            );
+
+        f144Win32SingleInstanceRelease(
+            &single_instance
+        );
+
+        return shutdown_result;
+    }
 }

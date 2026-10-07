@@ -56,6 +56,10 @@ jobs:
         shell: pwsh
         run: .\tools\test_stage4_timing_lifecycle.ps1
 
+      - name: Stage 4 single-instance protection
+        shell: pwsh
+        run: .\tools\test_stage4_single_instance.ps1
+
       - name: Install Premake
         shell: pwsh
         run: |

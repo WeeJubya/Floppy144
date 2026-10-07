@@ -86,6 +86,7 @@ files({
     "./src/f144_win32_input.c",
     "./src/f144_win32_lifecycle.c",
     "./src/f144_win32_platform.c",
+    "./src/f144_win32_single_instance.c",
     "./src/f144_win32_storage.c",
     "./src/f144_win32_timing.c",
     "./include/f144_platform.h",
@@ -93,6 +94,7 @@ files({
     "./include/f144_win32_input.h",
     "./include/f144_win32_lifecycle.h",
     "./include/f144_win32_platform.h",
+    "./include/f144_win32_single_instance.h",
     "./include/f144_win32_storage.h",
     "./include/f144_win32_timing.h"
 })
