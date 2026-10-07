@@ -43,6 +43,7 @@
 #include "floppy144_site_view.h"
 #include "floppy144_settings_runtime.h"
 #include "floppy144_settings_view.h"
+#include "floppy144_credits_view.h"
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -62,6 +63,7 @@ typedef enum Floppy144Screen
     FLOPPY144_SCREEN_MAIN_MENU,
     FLOPPY144_SCREEN_PROFILE,
     FLOPPY144_SCREEN_SETTINGS,
+    FLOPPY144_SCREEN_CREDITS,
     FLOPPY144_SCREEN_OFFICE,
     FLOPPY144_SCREEN_SITE_DIRECTORY,
     FLOPPY144_SCREEN_CABINET,
@@ -574,6 +576,15 @@ static void Floppy144Redraw(
             break;
         }
 
+        case FLOPPY144_SCREEN_CREDITS:
+        {
+            Floppy144CreditsViewDraw(
+                pSurface
+            );
+
+            break;
+        }
+
         case FLOPPY144_SCREEN_OFFICE:
         {
             /*
@@ -1038,7 +1049,8 @@ static void Floppy144OpenMainMenu(
         global_screen != FLOPPY144_SCREEN_SPLASH &&
         global_screen != FLOPPY144_SCREEN_MAIN_MENU &&
         global_screen != FLOPPY144_SCREEN_PROFILE &&
-        global_screen != FLOPPY144_SCREEN_SETTINGS
+        global_screen != FLOPPY144_SCREEN_SETTINGS &&
+        global_screen != FLOPPY144_SCREEN_CREDITS
     )
     {
         global_resume_screen =
@@ -1572,6 +1584,7 @@ static void Floppy144CommitSettingsAdjustment(
             break;
         }
 
+        case FLOPPY144_SETTINGS_OPTION_CREDITS:
         case FLOPPY144_SETTINGS_OPTION_COUNT:
         {
             break;
@@ -1658,6 +1671,7 @@ static void Floppy144CommitSettingsAdjustment(
 
         case FLOPPY144_SETTINGS_OPTION_CRT:
         case FLOPPY144_SETTINGS_OPTION_TEXT_SPEED:
+        case FLOPPY144_SETTINGS_OPTION_CREDITS:
         case FLOPPY144_SETTINGS_OPTION_COUNT:
         {
             break;
@@ -3016,8 +3030,30 @@ static bool Floppy144HandleActionEvent(
                         }
 
                         case F144_ACTION_MOVE_RIGHT:
+                        {
+                            Floppy144CommitSettingsAdjustment(
+                                window,
+                                1
+                            );
+
+                            return true;
+                        }
+
                         case F144_ACTION_CONFIRM:
                         {
+                            if(
+                                global_settings_option ==
+                                    FLOPPY144_SETTINGS_OPTION_CREDITS
+                            )
+                            {
+                                global_screen =
+                                    FLOPPY144_SCREEN_CREDITS;
+                                global_settings_notice =
+                                    NULL;
+                                Floppy144Redraw(window);
+                                return true;
+                            }
+
                             Floppy144CommitSettingsAdjustment(
                                 window,
                                 1
@@ -3048,6 +3084,21 @@ static bool Floppy144HandleActionEvent(
                     }
 
                     break;
+                }
+
+                case FLOPPY144_SCREEN_CREDITS:
+                {
+                    if(eAction == F144_ACTION_BACK)
+                    {
+                        global_screen =
+                            FLOPPY144_SCREEN_SETTINGS;
+                        global_settings_option =
+                            FLOPPY144_SETTINGS_OPTION_CREDITS;
+                        Floppy144Redraw(window);
+                        return true;
+                    }
+
+                    return true;
                 }
 
                 /*

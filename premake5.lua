@@ -229,6 +229,10 @@ buildoptions({
     "/utf-8"
 })
 
+postbuildcommands({
+    '{COPYFILE} "%{wks.location}/../LICENSE" "%{cfg.targetdir}/LICENSE"'
+})
+
 filter("configurations:debug")
 runtime("debug")
 symbols("On")
