@@ -88,6 +88,9 @@ void Floppy144DiscoveryProfileReset
         0,
         sizeof(*profile)
     );
+
+    profile->body_style =
+        (uint8_t)FLOPPY144_OPERATOR_BODY_STYLE_DEFAULT;
 }
 
 /*
@@ -284,6 +287,23 @@ bool Floppy144DiscoveryProfileSetOperatorName
     1U;
 
     return true;
+}
+
+Floppy144OperatorBodyStyle Floppy144DiscoveryProfileBodyStyle(
+    const Floppy144DiscoveryProfile *profile
+)
+{
+    if(
+        profile == NULL ||
+        profile->body_style >=
+            (uint8_t)FLOPPY144_OPERATOR_BODY_STYLE_COUNT
+    )
+    {
+        return FLOPPY144_OPERATOR_BODY_STYLE_DEFAULT;
+    }
+
+    return
+        (Floppy144OperatorBodyStyle)profile->body_style;
 }
 
 bool Floppy144DiscoveryProfileSetBodyStyle

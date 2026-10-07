@@ -19,7 +19,7 @@ static const char *Floppy144ProfileViewBodyStyleText(
         return "UNASSIGNED";
     }
 
-    switch((Floppy144OperatorBodyStyle)profile->body_style)
+    switch(Floppy144DiscoveryProfileBodyStyle(profile))
     {
         case FLOPPY144_OPERATOR_BODY_STYLE_A:
         {
@@ -38,6 +38,65 @@ static const char *Floppy144ProfileViewBodyStyleText(
     }
 
     return "UNASSIGNED";
+}
+
+/*
+ * Draw the current Stage 3 player motif as a compact personnel-record preview.
+ * Type A preserves the historical silhouette; Type B changes only torso
+ * proportion. Stage 4D can replace this primitive art without changing the
+ * persistent body-style contract.
+ */
+static void Floppy144ProfileViewDrawBodyPreview(
+    Floppy144Surface *surface,
+    Floppy144OperatorBodyStyle body_style
+)
+{
+    const uint32_t body_colour = FLOPPY144_RGB(72, 103, 118);
+    const uint32_t shirt_light = FLOPPY144_RGB(112, 139, 148);
+    const uint32_t skin_colour = FLOPPY144_RGB(205, 186, 158);
+    const uint32_t trouser_colour = FLOPPY144_RGB(39, 48, 54);
+    const uint32_t edge_colour = FLOPPY144_RGB(18, 23, 26);
+    const uint32_t shadow_colour = FLOPPY144_RGB(31, 35, 34);
+    uint32_t foot_x = 548U;
+    uint32_t foot_y = 118U;
+    uint32_t sprite_width = 28U;
+    uint32_t sprite_height = 38U;
+    uint32_t head_size = 11U;
+    uint32_t torso_width;
+    uint32_t torso_x;
+    uint32_t torso_y = foot_y - sprite_height + head_size - 2U;
+    uint32_t torso_height = 20U;
+    uint32_t leg_width;
+
+    if(surface == NULL)
+    {
+        return;
+    }
+
+    if(
+        body_style < 0 ||
+        body_style >= FLOPPY144_OPERATOR_BODY_STYLE_COUNT
+    )
+    {
+        body_style = FLOPPY144_OPERATOR_BODY_STYLE_DEFAULT;
+    }
+
+    torso_width =
+        body_style == FLOPPY144_OPERATOR_BODY_STYLE_B
+            ? 24U
+            : 21U;
+    torso_x = foot_x - torso_width / 2U;
+    leg_width = torso_width / 3U;
+
+    Floppy144DrawFillRect(surface,foot_x-sprite_width/2U,foot_y-3U,sprite_width,5U,shadow_colour);
+    Floppy144DrawFillRect(surface,torso_x,torso_y,torso_width,torso_height,body_colour);
+    Floppy144DrawRect(surface,torso_x,torso_y,torso_width,torso_height,edge_colour);
+    Floppy144DrawFillRect(surface,torso_x+4U,torso_y+5U,5U,5U,shirt_light);
+    Floppy144DrawFillRect(surface,foot_x-head_size/2U,foot_y-sprite_height,head_size,head_size,skin_colour);
+    Floppy144DrawRect(surface,foot_x-head_size/2U,foot_y-sprite_height,head_size,head_size,edge_colour);
+    Floppy144DrawFillRect(surface,foot_x-head_size/2U,foot_y-sprite_height,head_size,2U,trouser_colour);
+    Floppy144DrawFillRect(surface,torso_x+2U,torso_y+torso_height,leg_width,foot_y-(torso_y+torso_height),trouser_colour);
+    Floppy144DrawFillRect(surface,torso_x+torso_width-leg_width-2U,torso_y+torso_height,leg_width,foot_y-(torso_y+torso_height),trouser_colour);
 }
 
 /*
@@ -222,6 +281,7 @@ void Floppy144ProfileViewDraw(
     uint32_t evidence_count;
     uint32_t title_width;
     char edit_name[FLOPPY144_PROFILE_NAME_CAPACITY + 2U];
+    char body_style_line[32];
     char line[96];
 
     if(
@@ -273,6 +333,13 @@ void Floppy144ProfileViewDraw(
         Floppy144ProfileViewBodyStyleText(
             profile
         );
+
+    (void)snprintf(
+        body_style_line,
+        sizeof(body_style_line),
+        "< %s >",
+        body_style
+    );
 
     completion_outcome =
         Floppy144ProfileViewCompletionOutcomeText(
@@ -427,9 +494,28 @@ void Floppy144ProfileViewDraw(
         surface,
         340U,
         102U,
-        body_style,
+        body_style_line,
         1U,
-        text
+        amber
+    );
+
+    if(!editing_name)
+    {
+        Floppy144DrawText(
+            surface,
+            340U,
+            114U,
+            "LEFT/RIGHT SELECT",
+            1U,
+            muted
+        );
+    }
+
+    Floppy144ProfileViewDrawBodyPreview(
+        surface,
+        Floppy144DiscoveryProfileBodyStyle(
+            profile
+        )
     );
 
     Floppy144DrawFillRect(
@@ -616,7 +702,7 @@ void Floppy144ProfileViewDraw(
         346U,
         editing_name
             ? "ENTER  SAVE   ESC  CANCEL   BACKSPACE  DELETE"
-            : "ENTER  EDIT NAME   BACKSPACE  BACK",
+            : "LEFT/RIGHT  BODY STYLE   ENTER  EDIT NAME   BACKSPACE  BACK",
         1U,
         muted
     );

@@ -13,6 +13,7 @@
 
 #include "floppy144_persistence.h"
 #include "floppy144_profile.h"
+#include "floppy144_profile_view.h"
 #include "floppy144_run_state.h"
 #include "floppy144_settings.h"
 #include "floppy144_storage.h"
@@ -627,6 +628,77 @@ static void TestNewLocationWins(const char *root)
     );
 }
 
+/*
+ * Render the persistent profile after reload so body-style persistence is
+ * covered through the existing player-facing presentation path.
+ */
+static uint32_t TestProfileRenderHash(
+    const Floppy144DiscoveryProfile *profile
+)
+{
+    enum
+    {
+        TEST_PROFILE_WIDTH = 640,
+        TEST_PROFILE_HEIGHT = 360
+    };
+
+    Floppy144Surface surface;
+    uint32_t *pixels;
+    uint32_t hash;
+    uint32_t index;
+    uint32_t count;
+
+    if(profile == NULL)
+    {
+        return 0U;
+    }
+
+    count =
+        (uint32_t)(
+            TEST_PROFILE_WIDTH *
+            TEST_PROFILE_HEIGHT
+        );
+
+    pixels =
+        (uint32_t *)malloc(
+            (size_t)count *
+            sizeof(uint32_t)
+        );
+
+    if(pixels == NULL)
+    {
+        return 0U;
+    }
+
+    memset(
+        pixels,
+        0,
+        (size_t)count *
+        sizeof(uint32_t)
+    );
+
+    surface.pixels = pixels;
+    surface.width = TEST_PROFILE_WIDTH;
+    surface.height = TEST_PROFILE_HEIGHT;
+
+    Floppy144ProfileViewDraw(
+        &surface,
+        profile,
+        NULL
+    );
+
+    hash = 2166136261U;
+
+    for(index = 0U; index < count; ++index)
+    {
+        hash ^= pixels[index];
+        hash *= 16777619U;
+    }
+
+    free(pixels);
+    return hash;
+}
+
 static void TestRoundTrips(const char *root)
 {
     TestPathContext context;
@@ -637,8 +709,15 @@ static void TestRoundTrips(const char *root)
     Floppy144RunState loaded;
     Floppy144DiscoveryProfile profile;
     Floppy144DiscoveryProfile loaded_profile;
+    Floppy144DiscoveryProfile decoded_profile;
     Floppy144Settings settings;
     Floppy144Settings loaded_settings;
+    uint8_t profile_payload[
+        FLOPPY144_PROFILE_PAYLOAD_V1_SIZE
+    ];
+    uint32_t type_a_hash;
+    uint32_t type_b_hash;
+    uint32_t style_index;
 
     Expect(TestPrepareContext(root,"round-trips",&context),"round-trip context");
     TestBindPlatform(&platform,&context);
@@ -752,6 +831,159 @@ static void TestRoundTrips(const char *root)
             24U
         ),
         "operator name survives restart after another recovery"
+    );
+
+    /*
+     * Body style remains a profile-only cosmetic value. Exercise both styles,
+     * repeated changes, restart persistence, legacy zero/default semantics,
+     * malformed-value normalisation, and presentation after reload.
+     */
+    type_b_hash =
+        TestProfileRenderHash(
+            &profile
+        );
+
+    Expect(
+        type_b_hash != 0U,
+        "reloaded Type B profile renders"
+    );
+
+    Expect(
+        Floppy144DiscoveryProfileSetBodyStyle(
+            &profile,
+            FLOPPY144_OPERATOR_BODY_STYLE_A
+        ),
+        "body style changes to Type A"
+    );
+
+    Expect(
+        Floppy144PersistenceSaveProfile(
+            Floppy144StoragePath(
+                &paths,
+                F144_PERSISTENCE_PROFILE
+            ),
+            &profile
+        ),
+        "Type A body style saves"
+    );
+
+    memset(&loaded_profile,0,sizeof(loaded_profile));
+
+    Expect(
+        Floppy144PersistenceLoadProfile(
+            Floppy144StoragePath(
+                &paths,
+                F144_PERSISTENCE_PROFILE
+            ),
+            &loaded_profile
+        ) &&
+        Floppy144DiscoveryProfileBodyStyle(
+            &loaded_profile
+        ) == FLOPPY144_OPERATOR_BODY_STYLE_A,
+        "Type A body style survives restart"
+    );
+
+    type_a_hash =
+        TestProfileRenderHash(
+            &loaded_profile
+        );
+
+    Expect(
+        type_a_hash != 0U &&
+        type_a_hash != type_b_hash,
+        "reloaded styles produce distinct profile previews"
+    );
+
+    for(style_index = 0U; style_index < 8U; ++style_index)
+    {
+        Floppy144OperatorBodyStyle expected =
+            (style_index & 1U) == 0U
+                ? FLOPPY144_OPERATOR_BODY_STYLE_B
+                : FLOPPY144_OPERATOR_BODY_STYLE_A;
+
+        Expect(
+            Floppy144DiscoveryProfileSetBodyStyle(
+                &loaded_profile,
+                expected
+            ),
+            "body style can be changed repeatedly before save"
+        );
+
+        Expect(
+            Floppy144PersistenceSaveProfile(
+                Floppy144StoragePath(
+                    &paths,
+                    F144_PERSISTENCE_PROFILE
+                ),
+                &loaded_profile
+            ),
+            "repeated body-style change persists"
+        );
+
+        memset(&profile,0,sizeof(profile));
+
+        Expect(
+            Floppy144PersistenceLoadProfile(
+                Floppy144StoragePath(
+                    &paths,
+                    F144_PERSISTENCE_PROFILE
+                ),
+                &profile
+            ) &&
+            Floppy144DiscoveryProfileBodyStyle(
+                &profile
+            ) == expected,
+            "repeated body-style change survives reload"
+        );
+
+        loaded_profile = profile;
+    }
+
+    Expect(
+        Floppy144PersistenceEncodeProfile(
+            &loaded_profile,
+            profile_payload,
+            FLOPPY144_PROFILE_PAYLOAD_V1_SIZE
+        ),
+        "body-style compatibility profile encodes"
+    );
+
+    profile_payload[
+        FLOPPY144_PROFILE_NAME_CAPACITY
+    ] = 0U;
+
+    memset(&decoded_profile,0,sizeof(decoded_profile));
+
+    Expect(
+        Floppy144PersistenceDecodeProfile(
+            &decoded_profile,
+            profile_payload,
+            FLOPPY144_PROFILE_PAYLOAD_V1_SIZE
+        ) &&
+        Floppy144DiscoveryProfileBodyStyle(
+            &decoded_profile
+        ) == FLOPPY144_OPERATOR_BODY_STYLE_DEFAULT &&
+        decoded_profile.dirty == 0U,
+        "old/uninitialised zero body style remains valid default Type A"
+    );
+
+    profile_payload[
+        FLOPPY144_PROFILE_NAME_CAPACITY
+    ] = 0xFEU;
+
+    memset(&decoded_profile,0,sizeof(decoded_profile));
+
+    Expect(
+        Floppy144PersistenceDecodeProfile(
+            &decoded_profile,
+            profile_payload,
+            FLOPPY144_PROFILE_PAYLOAD_V1_SIZE
+        ) &&
+        Floppy144DiscoveryProfileBodyStyle(
+            &decoded_profile
+        ) == FLOPPY144_OPERATOR_BODY_STYLE_DEFAULT &&
+        decoded_profile.dirty != 0U,
+        "invalid body style normalises safely without rejecting profile"
     );
 
     Floppy144SettingsReset(&settings);

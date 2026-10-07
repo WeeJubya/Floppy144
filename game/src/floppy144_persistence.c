@@ -647,7 +647,9 @@ bool Floppy144PersistenceEncodeProfile
     FLOPPY144_PROFILE_NAME_CAPACITY;
 
     payload[offset++] =
-    profile->body_style;
+        (uint8_t)Floppy144DiscoveryProfileBodyStyle(
+            profile
+        );
 
     /*
      * Three reserved scalar bytes.
@@ -932,6 +934,9 @@ bool Floppy144PersistenceDecodeProfile
     bool name_terminated =
     false;
 
+    bool body_style_normalized =
+    false;
+
     if(
         profile == NULL ||
         payload == NULL ||
@@ -981,7 +986,25 @@ bool Floppy144PersistenceDecodeProfile
     }
 
     decoded.body_style =
-    payload[offset++];
+        payload[offset++];
+
+    /*
+     * The body-style byte has always occupied this V1 slot. Zero therefore
+     * remains the natural legacy/default Type A. A malformed value must not
+     * invalidate otherwise sound profile history: normalise it to Type A and
+     * leave the profile dirty so the next successful profile save repairs it.
+     */
+    if(
+        decoded.body_style >=
+            (uint8_t)FLOPPY144_OPERATOR_BODY_STYLE_COUNT
+    )
+    {
+        decoded.body_style =
+            (uint8_t)FLOPPY144_OPERATOR_BODY_STYLE_DEFAULT;
+
+        body_style_normalized =
+            true;
+    }
 
     /*
      * Reserved V1 bytes must remain zero.
@@ -1120,16 +1143,10 @@ bool Floppy144PersistenceDecodeProfile
         return false;
     }
 
-    if(
-        decoded.body_style >=
-        (uint8_t)FLOPPY144_OPERATOR_BODY_STYLE_COUNT
-    )
-    {
-        return false;
-    }
-
     decoded.dirty =
-    0U;
+        body_style_normalized
+            ? 1U
+            : 0U;
 
     *profile =
     decoded;

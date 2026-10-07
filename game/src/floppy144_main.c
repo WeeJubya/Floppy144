@@ -556,10 +556,13 @@ static void Floppy144Redraw(
              * enhances the Site Directory only; playable ISO room projection
              * is retained in source for a later release.
              */
-            Floppy144Site2DDraw(
+            Floppy144Site2DDrawForBodyStyle(
                 pSurface,
                 &global_run_state,
-                global_office_notice
+                global_office_notice,
+                Floppy144DiscoveryProfileBodyStyle(
+                    &global_profile
+                )
             );
 
             break;
@@ -1218,6 +1221,97 @@ static void Floppy144CommitProfileNameEdit(
     Floppy144ProfileNameEditCancel(
         &global_profile_name_edit
     );
+
+    Floppy144Redraw(
+        window
+    );
+}
+
+/*
+ * Change the cosmetic body style and persist it immediately.
+ *
+ * This is profile-only identity state. No recovery/session data is touched,
+ * and a failed file replacement restores the exact previous profile.
+ */
+static void Floppy144CommitProfileBodyStyle(
+    HWND window,
+    bool forward
+)
+{
+    Floppy144DiscoveryProfile original_profile;
+    Floppy144OperatorBodyStyle current_style;
+    Floppy144OperatorBodyStyle next_style;
+    uint32_t style_count;
+    uint32_t next_index;
+
+    style_count =
+        (uint32_t)FLOPPY144_OPERATOR_BODY_STYLE_COUNT;
+
+    if(style_count == 0U)
+    {
+        return;
+    }
+
+    current_style =
+        Floppy144DiscoveryProfileBodyStyle(
+            &global_profile
+        );
+
+    if(forward)
+    {
+        next_index =
+            ((uint32_t)current_style + 1U) %
+            style_count;
+    }
+    else
+    {
+        next_index =
+            ((uint32_t)current_style +
+             style_count - 1U) %
+            style_count;
+    }
+
+    next_style =
+        (Floppy144OperatorBodyStyle)next_index;
+
+    original_profile =
+        global_profile;
+
+    if(
+        !Floppy144DiscoveryProfileSetBodyStyle(
+            &global_profile,
+            next_style
+        )
+    )
+    {
+        Floppy144Redraw(
+            window
+        );
+
+        return;
+    }
+
+    if(
+        !Floppy144PersistenceSaveProfile(
+            Floppy144StoragePath(
+                &global_storage_paths,
+                F144_PERSISTENCE_PROFILE
+            ),
+            &global_profile
+        )
+    )
+    {
+        global_profile =
+            original_profile;
+
+        global_persistence_warnings |=
+            FLOPPY144_PERSISTENCE_WARNING_PROFILE;
+    }
+    else
+    {
+        global_persistence_warnings &=
+            (uint8_t)~FLOPPY144_PERSISTENCE_WARNING_PROFILE;
+    }
 
     Floppy144Redraw(
         window
@@ -2531,6 +2625,26 @@ static bool Floppy144HandleActionEvent(
                         return true;
                     }
 
+                    if(eAction == F144_ACTION_MOVE_LEFT)
+                    {
+                        Floppy144CommitProfileBodyStyle(
+                            window,
+                            false
+                        );
+
+                        return true;
+                    }
+
+                    if(eAction == F144_ACTION_MOVE_RIGHT)
+                    {
+                        Floppy144CommitProfileBodyStyle(
+                            window,
+                            true
+                        );
+
+                        return true;
+                    }
+
                     if(eAction == F144_ACTION_CONFIRM)
                     {
                         Floppy144ProfileNameEditBegin(
@@ -3651,6 +3765,27 @@ int CALLBACK WinMain(
             {
                 global_persistence_warnings |=
                 FLOPPY144_PERSISTENCE_WARNING_PROFILE;
+            }
+        }
+        else if(global_profile.dirty != 0U)
+        {
+            /*
+             * A valid V1 profile with an invalid body-style byte is repaired
+             * in memory by the decoder. Persist that safe default immediately
+             * without treating the historical profile as corrupt.
+             */
+            if(
+                !Floppy144PersistenceSaveProfile(
+                    Floppy144StoragePath(
+                        &global_storage_paths,
+                        F144_PERSISTENCE_PROFILE
+                    ),
+                    &global_profile
+                )
+            )
+            {
+                global_persistence_warnings |=
+                    FLOPPY144_PERSISTENCE_WARNING_PROFILE;
             }
         }
     }

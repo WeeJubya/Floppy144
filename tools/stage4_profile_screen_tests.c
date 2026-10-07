@@ -294,6 +294,13 @@ static void TestFreshProfile(
     );
 
     Expect(
+        Floppy144DiscoveryProfileBodyStyle(
+            &profile
+        ) == FLOPPY144_OPERATOR_BODY_STYLE_DEFAULT,
+        "fresh profile uses the historical default body style"
+    );
+
+    Expect(
         profile.recovery_sessions_begun == 0U &&
         profile.completed_recoveries == 0U,
         "fresh profile has zero recovery history"
@@ -357,6 +364,9 @@ static void TestExistingProfile(
     Floppy144RunState completed_run;
     uint32_t completed_hash;
     uint32_t without_completion_hash;
+    uint32_t type_a_hash;
+    uint32_t type_b_hash;
+    uint32_t invalid_hash;
     uint32_t index;
 
     Floppy144DiscoveryProfileReset(
@@ -371,13 +381,83 @@ static void TestExistingProfile(
         "existing profile accepts operator name"
     );
 
+    type_a_hash =
+        TestDrawProfile(
+            &profile,
+            pixels
+        );
+
     Expect(
         Floppy144DiscoveryProfileSetBodyStyle(
             &profile,
             FLOPPY144_OPERATOR_BODY_STYLE_B
         ),
-        "existing profile accepts body style"
+        "existing profile accepts Type B body style"
     );
+
+    type_b_hash =
+        TestDrawProfile(
+            &profile,
+            pixels
+        );
+
+    Expect(
+        type_a_hash != type_b_hash,
+        "each valid body style produces a distinct profile preview"
+    );
+
+    {
+        Floppy144DiscoveryProfile invalid_profile =
+            profile;
+
+        invalid_profile.body_style =
+            0xFEU;
+
+        Expect(
+            Floppy144DiscoveryProfileBodyStyle(
+                &invalid_profile
+            ) == FLOPPY144_OPERATOR_BODY_STYLE_DEFAULT,
+            "invalid body style safely resolves to the default"
+        );
+
+        invalid_hash =
+            TestDrawProfile(
+                &invalid_profile,
+                pixels
+            );
+
+        Expect(
+            invalid_hash == type_a_hash,
+            "invalid body style renders using the default Type A preview"
+        );
+    }
+
+    for(
+        index = 0U;
+        index < 8U;
+        ++index
+    )
+    {
+        Floppy144OperatorBodyStyle expected =
+            (index & 1U) == 0U
+                ? FLOPPY144_OPERATOR_BODY_STYLE_A
+                : FLOPPY144_OPERATOR_BODY_STYLE_B;
+
+        Expect(
+            Floppy144DiscoveryProfileSetBodyStyle(
+                &profile,
+                expected
+            ),
+            "body style can be changed repeatedly"
+        );
+
+        Expect(
+            Floppy144DiscoveryProfileBodyStyle(
+                &profile
+            ) == expected,
+            "repeated body-style selection remains valid"
+        );
+    }
 
     for(
         index = 0U;

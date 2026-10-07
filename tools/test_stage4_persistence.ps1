@@ -101,6 +101,8 @@ $sources = @(
     "game\src\floppy144_effect.c",
     "game\src\floppy144_persistence.c",
     "game\src\floppy144_profile.c",
+    "game\src\floppy144_profile_edit.c",
+    "game\src\floppy144_profile_view.c",
     "game\src\floppy144_settings.c",
     "game\src\floppy144_draw.c",
     "game\src\floppy144_site.c",

@@ -28,6 +28,9 @@ typedef enum Floppy144OperatorBodyStyle
 }
 Floppy144OperatorBodyStyle;
 
+#define FLOPPY144_OPERATOR_BODY_STYLE_DEFAULT \
+    FLOPPY144_OPERATOR_BODY_STYLE_A
+
 typedef struct Floppy144DiscoveryProfile
 {
     char operator_name[
@@ -114,6 +117,14 @@ bool Floppy144DiscoveryProfileSetOperatorName
 (
     Floppy144DiscoveryProfile *profile,
  const char *name
+);
+
+/*
+ * Return a valid cosmetic body style for rendering/UI. Missing or malformed
+ * profile data always falls back to the historical Type A silhouette.
+ */
+Floppy144OperatorBodyStyle Floppy144DiscoveryProfileBodyStyle(
+    const Floppy144DiscoveryProfile *profile
 );
 
 bool Floppy144DiscoveryProfileSetBodyStyle

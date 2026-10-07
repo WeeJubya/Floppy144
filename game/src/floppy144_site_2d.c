@@ -3724,7 +3724,8 @@ static void Floppy144Site2DDrawSiteRect(
 static void Floppy144Site2DDrawPlayer(
     Floppy144Surface *surface,
     const Floppy144SiteCamera2D *camera,
-    const Floppy144RunState *run_state
+    const Floppy144RunState *run_state,
+    Floppy144OperatorBodyStyle body_style
 )
 {
     const uint32_t body_colour =
@@ -3795,8 +3796,19 @@ static void Floppy144Site2DDrawPlayer(
         head_size = 8;
     }
 
+    if(
+        body_style < 0 ||
+        body_style >= FLOPPY144_OPERATOR_BODY_STYLE_COUNT
+    )
+    {
+        body_style =
+            FLOPPY144_OPERATOR_BODY_STYLE_DEFAULT;
+    }
+
     torso_width =
-        sprite_width * 3 / 4;
+        body_style == FLOPPY144_OPERATOR_BODY_STYLE_B
+            ? sprite_width * 7 / 8
+            : sprite_width * 3 / 4;
 
     torso_x =
         foot_x - torso_width / 2;
@@ -3958,10 +3970,11 @@ static const char *Floppy144Site2DRoomLabel(
     }
 }
 
-void Floppy144Site2DDraw(
+void Floppy144Site2DDrawForBodyStyle(
     Floppy144Surface *pSurface,
     const Floppy144RunState *run_state,
-    const char *notice
+    const char *notice,
+    Floppy144OperatorBodyStyle body_style
 )
 {
     const uint32_t background =
@@ -4328,7 +4341,8 @@ void Floppy144Site2DDraw(
         Floppy144Site2DDrawPlayer(
             &surface,
             &camera,
-            run_state
+            run_state,
+            body_style
         );
     }
 
@@ -4390,5 +4404,23 @@ void Floppy144Site2DDraw(
         "ESC RECOVERY",
         1U,
         muted
+    );
+}
+
+/*
+ * Preserve the Stage 3 renderer contract for tests and callers that do not
+ * know about persistent operator identity.
+ */
+void Floppy144Site2DDraw(
+    Floppy144Surface *pSurface,
+    const Floppy144RunState *run_state,
+    const char *notice
+)
+{
+    Floppy144Site2DDrawForBodyStyle(
+        pSurface,
+        run_state,
+        notice,
+        FLOPPY144_OPERATOR_BODY_STYLE_DEFAULT
     );
 }
