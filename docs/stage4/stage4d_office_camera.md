@@ -37,6 +37,12 @@ Rectangle dimensions are projected at the same integer pixels-per-unit scale.
 World geometry, collision footprints, proximity targeting, doors and trigger
 coordinates are not screen-space data.
 
+S4D-02 isolates that fixed-point transform in
+`floppy144_site_2d_camera.c/.h`. The renderer consumes the shared camera
+result, while the dedicated regression can exercise the same production
+transform directly without linking unrelated furniture, cabinet, drawing or
+progression systems.
+
 ## Candidate evaluation
 
 The deferred requirement requested an approximate 50-75% presentation scale.

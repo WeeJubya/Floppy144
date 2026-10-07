@@ -11,14 +11,18 @@ $IncludeDir = Join-Path $Root "include"
 Write-Host "=== STAGE 4D OFFICE CAMERA / ZOOM AUDIT ==="
 
 $Site2DPath = Join-Path $SourceDir "floppy144_site_2d.c"
+$CameraPath = Join-Path $SourceDir "floppy144_site_2d_camera.c"
+$CameraHeaderPath = Join-Path $SourceDir "floppy144_site_2d_camera.h"
 $SiteHeaderPath = Join-Path $SourceDir "floppy144_site.h"
 $LayoutPath = Join-Path $SourceDir "floppy144_site_generated.def"
 
 $Site2DSource = Get-Content -LiteralPath $Site2DPath -Raw
+$CameraSource = Get-Content -LiteralPath $CameraPath -Raw
+$CameraHeader = Get-Content -LiteralPath $CameraHeaderPath -Raw
 $SiteHeader = Get-Content -LiteralPath $SiteHeaderPath -Raw
 $LayoutSource = Get-Content -LiteralPath $LayoutPath -Raw
 
-if($Site2DSource -notmatch '#define\s+FLOPPY144_SITE_2D_PIXELS_PER_UNIT\s+12\b') {
+if($CameraHeader -notmatch '#define\s+FLOPPY144_SITE_2D_PIXELS_PER_UNIT\s+12\b') {
     throw "S4D-02 selected Site scale is not 12 px per Site unit."
 }
 
@@ -37,14 +41,27 @@ foreach($Invariant in @(
 foreach($Required in @(
     'FLOPPY144_SITE_2D_VIEWPORT_WIDTH  576',
     'FLOPPY144_SITE_2D_VIEWPORT_HEIGHT 252',
+    'FLOPPY144_SITE_2D_PIXELS_PER_UNIT 12'
+)) {
+    if($CameraHeader -notmatch [regex]::Escape($Required)) {
+        throw "Camera configuration evidence missing: $Required"
+    }
+}
+
+foreach($Required in @(
     'Floppy144Site2DBuildCameraAtScale',
     'camera->pixels_per_unit',
-    'Floppy144Site2DTestBuildCameraForScale',
-    'Floppy144Site2DTestProjectWorldPoint'
+    'camera->visible_width16',
+    'camera->visible_height16',
+    'Floppy144Site2DProjectPoint'
 )) {
-    if($Site2DSource -notmatch [regex]::Escape($Required)) {
-        throw "Camera-scale implementation evidence missing: $Required"
+    if($CameraSource -notmatch [regex]::Escape($Required)) {
+        throw "Camera transform implementation evidence missing: $Required"
     }
+}
+
+if($Site2DSource -notmatch [regex]::Escape('#include "floppy144_site_2d_camera.h"')) {
+    throw "Site renderer is not consuming the shared Stage 4D camera transform."
 }
 
 $ExpectedRooms = @(
@@ -89,9 +106,10 @@ $ExePath = Join-Path $TempDir "stage4_office_camera_tests.exe"
 
 $Sources = @(
     (Join-Path $ScriptDir "stage4_office_camera_tests.c"),
-    $Site2DPath,
+    $CameraPath,
     (Join-Path $SourceDir "floppy144_site_rooms.c"),
-    (Join-Path $SourceDir "floppy144_site_view.c")
+    (Join-Path $SourceDir "floppy144_site_view.c"),
+    (Join-Path $SourceDir "floppy144_site.c")
 )
 
 $Args = @(
@@ -101,17 +119,13 @@ $Args = @(
     "/W4",
     "/WX",
     "/O1",
-    "/Gy",
     "/utf-8",
-    "/DFLOPPY144_SITE_2D_TEST_ACCESS",
     ("/I" + $SourceDir),
     ("/I" + $IncludeDir)
 )
 
 $Args += $Sources
 $Args += ("/Fe:" + $ExePath)
-$Args += "/link"
-$Args += "/OPT:REF"
 
 Push-Location $TempDir
 try {

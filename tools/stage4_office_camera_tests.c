@@ -6,7 +6,7 @@
  * can be compared without touching collision, interactions or authored data.
  */
 
-#include "floppy144_site_2d.h"
+#include "floppy144_site_2d_camera.h"
 #include "floppy144_site.h"
 #include "floppy144_site_rooms.h"
 
@@ -46,6 +46,27 @@ static int HalfUnitStepProjectsToWholePixels(
             pixels_per_unit
         ) %
         FLOPPY144_SITE_FIXED_ONE == 0;
+}
+
+static int ProjectPointEquals(
+    const Floppy144SiteCamera2D *camera,
+    int32_t world_x16,
+    int32_t world_y16,
+    int32_t expected_x,
+    int32_t expected_y
+)
+{
+    Floppy144Site2DProjectPoint(
+        camera,
+        world_x16,
+        world_y16,
+        &screen_x,
+        &screen_y
+    );
+
+    return
+        screen_x == expected_x &&
+        screen_y == expected_y;
 }
 
 static void CheckCandidateScales(
@@ -90,10 +111,10 @@ static void CheckCandidateScales(
 
     for(index = 0U; index < 5U; ++index)
     {
-        Floppy144Site2DCameraProbe probe;
+        Floppy144SiteCamera2D probe;
 
         EXPECT(
-            Floppy144Site2DTestBuildCameraForScale(
+            Floppy144Site2DBuildCameraAtScale(
                 FLOPPY144_ROOM_MAIN_OFFICE,
                 state,
                 surface,
@@ -146,14 +167,9 @@ static void CheckSelectedScaleTransform(
     const Floppy144Surface *surface
 )
 {
-    Floppy144Site2DCameraProbe probe;
+    Floppy144SiteCamera2D probe;
     int32_t screen_x;
     int32_t screen_y;
-
-    EXPECT(
-        Floppy144Site2DTestPixelsPerUnit() == 12U,
-        "production Site scale is 12 px per unit"
-    );
 
     SetPlayer(
         state,
@@ -162,14 +178,18 @@ static void CheckSelectedScaleTransform(
     );
 
     EXPECT(
-        Floppy144Site2DTestBuildCameraForScale(
+        Floppy144Site2DBuildCamera(
             FLOPPY144_ROOM_MAIN_OFFICE,
             state,
             surface,
-            12,
             &probe
         ),
-        "Main Office camera builds at selected scale"
+        "Main Office production camera builds"
+    );
+
+    EXPECT(
+        probe.pixels_per_unit == 12,
+        "production Site scale is 12 px per unit"
     );
 
     EXPECT(
@@ -181,28 +201,24 @@ static void CheckSelectedScaleTransform(
     );
 
     EXPECT(
-        Floppy144Site2DTestProjectWorldPoint(
+        ProjectPointEquals(
             &probe,
             state->player_site_x,
             state->player_site_y,
-            &screen_x,
-            &screen_y
-        ) &&
-        screen_x == 320 &&
-        screen_y == 158,
+            320,
+            158
+        ),
         "player is centred on the scrolling axis at a stable integer pixel"
     );
 
     EXPECT(
-        Floppy144Site2DTestProjectWorldPoint(
+        ProjectPointEquals(
             &probe,
             86 * FLOPPY144_SITE_FIXED_ONE,
             78 * FLOPPY144_SITE_FIXED_ONE,
-            &screen_x,
-            &screen_y
-        ) &&
-        screen_x == 356 &&
-        screen_y == 98,
+            356,
+            98
+        ),
         "known Main Office desk origin projects to stable screen coordinates"
     );
 
@@ -214,33 +230,34 @@ static void CheckSelectedScaleTransform(
     );
 
     EXPECT(
-        Floppy144Site2DTestBuildCameraForScale(
+        Floppy144Site2DBuildCamera(
             FLOPPY144_ROOM_MAIN_OFFICE,
             state,
             surface,
-            12,
             &probe
-        ) &&
-        Floppy144Site2DTestProjectWorldPoint(
+        ),
+        "Main Office camera rebuilds after half-unit movement"
+    );
+
+    EXPECT(
+        ProjectPointEquals(
             &probe,
             state->player_site_x,
             state->player_site_y,
-            &screen_x,
-            &screen_y
-        ) &&
-        screen_y == 158,
+            320,
+            158
+        ),
         "half-unit camera tracking leaves the player vertically stable"
     );
 
     EXPECT(
-        Floppy144Site2DTestProjectWorldPoint(
+        ProjectPointEquals(
             &probe,
             86 * FLOPPY144_SITE_FIXED_ONE,
             78 * FLOPPY144_SITE_FIXED_ONE,
-            &screen_x,
-            &screen_y
-        ) &&
-        screen_y == 92,
+            356,
+            92
+        ),
         "half-unit camera movement pans world content by exactly six pixels"
     );
 }
@@ -262,7 +279,7 @@ static void CheckRoomCoverage(
             (Floppy144RoomId)room_index;
 
         Floppy144SiteRegion bounds;
-        Floppy144Site2DCameraProbe probe;
+        Floppy144SiteCamera2D probe;
 
         EXPECT(
             Floppy144SiteRoomBounds(
@@ -283,7 +300,7 @@ static void CheckRoomCoverage(
         );
 
         EXPECT(
-            Floppy144Site2DTestBuildCameraForScale(
+            Floppy144Site2DBuildCameraAtScale(
                 room,
                 state,
                 surface,
@@ -309,7 +326,7 @@ static void CheckRecordsHorizontalFit(
     const Floppy144Surface *surface
 )
 {
-    Floppy144Site2DCameraProbe probe;
+    Floppy144SiteCamera2D probe;
     int32_t x0;
     int32_t y0;
     int32_t x1;
@@ -322,7 +339,7 @@ static void CheckRecordsHorizontalFit(
     );
 
     EXPECT(
-        Floppy144Site2DTestBuildCameraForScale(
+        Floppy144Site2DBuildCameraAtScale(
             FLOPPY144_ROOM_RECORDS_OFFICE,
             state,
             surface,
@@ -342,21 +359,23 @@ static void CheckRecordsHorizontalFit(
         "Records Office horizontal extent fits without camera pan"
     );
 
+    Floppy144Site2DProjectPoint(
+        &probe,
+        53 * FLOPPY144_SITE_FIXED_ONE,
+        20 * FLOPPY144_SITE_FIXED_ONE,
+        &x0,
+        &y0
+    );
+
+    Floppy144Site2DProjectPoint(
+        &probe,
+        101 * FLOPPY144_SITE_FIXED_ONE,
+        20 * FLOPPY144_SITE_FIXED_ONE,
+        &x1,
+        &y1
+    );
+
     EXPECT(
-        Floppy144Site2DTestProjectWorldPoint(
-            &probe,
-            53 * FLOPPY144_SITE_FIXED_ONE,
-            20 * FLOPPY144_SITE_FIXED_ONE,
-            &x0,
-            &y0
-        ) &&
-        Floppy144Site2DTestProjectWorldPoint(
-            &probe,
-            101 * FLOPPY144_SITE_FIXED_ONE,
-            20 * FLOPPY144_SITE_FIXED_ONE,
-            &x1,
-            &y1
-        ) &&
         x0 == 32 &&
         x1 == 608,
         "Records Office gutter-to-gutter width exactly fills viewport"
