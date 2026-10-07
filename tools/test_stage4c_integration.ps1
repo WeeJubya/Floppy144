@@ -163,7 +163,7 @@ if(
 }
 
 foreach($required in @(
-    'BACKSPACE  BACK',
+    'BACKSPACE BACK',
     'GREY DOOR REPUBLIC',
     'WEEJUBYA',
     'RIVER2D-DERIVED',

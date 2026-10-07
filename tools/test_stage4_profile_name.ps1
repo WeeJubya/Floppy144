@@ -149,11 +149,11 @@ if(
 
 if(
     $viewSource -notmatch
-        'ENTER  EDIT NAME' -or
+        'ENTER EDIT NAME' -or
     $viewSource -notmatch
-        'ENTER  SAVE' -or
+        'ENTER SAVE' -or
     $viewSource -notmatch
-        'BACKSPACE  DELETE'
+        'BACKSPACE DELETE'
 )
 {
     throw "Profile screen does not explain edit controls."
