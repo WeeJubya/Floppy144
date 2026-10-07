@@ -98,11 +98,63 @@ static const char *Floppy144ProfileViewCompletionOutcomeText(
 }
 
 /*
+ * Return the editor/status line shown above the profile footer.
+ */
+static const char *Floppy144ProfileViewNameEditStatusText(
+    const Floppy144ProfileNameEditState *name_edit
+)
+{
+    if(
+        name_edit == NULL ||
+        !Floppy144ProfileNameEditActive(
+            name_edit
+        )
+    )
+    {
+        return "PROFILE HISTORY IS RETAINED BETWEEN RECOVERIES";
+    }
+
+    switch((Floppy144ProfileNameEditNotice)name_edit->notice)
+    {
+        case FLOPPY144_PROFILE_NAME_EDIT_NOTICE_EMPTY:
+        {
+            return "NAME REQUIRED - TYPE A NAME OR PRESS ESC TO CANCEL";
+        }
+
+        case FLOPPY144_PROFILE_NAME_EDIT_NOTICE_FULL:
+        {
+            return "NAME LIMIT REACHED - MAXIMUM 31 CHARACTERS";
+        }
+
+        case FLOPPY144_PROFILE_NAME_EDIT_NOTICE_UNSUPPORTED:
+        {
+            return "USE LETTERS, NUMBERS, SPACE, APOSTROPHE, HYPHEN OR PERIOD";
+        }
+
+        case FLOPPY144_PROFILE_NAME_EDIT_NOTICE_SAVE_FAILED:
+        {
+            return "PROFILE COULD NOT BE SAVED - ENTER RETRIES / ESC CANCELS";
+        }
+
+        case FLOPPY144_PROFILE_NAME_EDIT_NOTICE_NONE:
+        {
+            return
+                name_edit->first_time_setup != 0U
+                    ? "NEW OPERATOR SETUP - ENTER SAVES / ESC CANCELS"
+                    : "EDIT OPERATOR NAME - ENTER SAVES / ESC CANCELS";
+        }
+    }
+
+    return "";
+}
+
+/*
  * Draw the persistent GDR operator record without mutating profile history.
  */
 void Floppy144ProfileViewDraw(
     Floppy144Surface *surface,
-    const Floppy144DiscoveryProfile *profile
+    const Floppy144DiscoveryProfile *profile,
+    const Floppy144ProfileNameEditState *name_edit
 )
 {
     const uint32_t background =
@@ -164,9 +216,12 @@ void Floppy144ProfileViewDraw(
     const char *operator_name;
     const char *body_style;
     const char *completion_outcome;
+    const char *edit_status;
+    bool editing_name;
     uint32_t collection_count;
     uint32_t evidence_count;
     uint32_t title_width;
+    char edit_name[FLOPPY144_PROFILE_NAME_CAPACITY + 2U];
     char line[96];
 
     if(
@@ -178,10 +233,41 @@ void Floppy144ProfileViewDraw(
         return;
     }
 
-    operator_name =
-        profile->operator_name[0] != '\0'
-            ? profile->operator_name
-            : "UNASSIGNED";
+    editing_name =
+        Floppy144ProfileNameEditActive(
+            name_edit
+        );
+
+    if(editing_name)
+    {
+        (void)snprintf(
+            edit_name,
+            sizeof(edit_name),
+            "%s_",
+            Floppy144ProfileNameEditText(
+                name_edit
+            )
+        );
+
+        operator_name =
+            edit_name;
+    }
+    else
+    {
+        operator_name =
+            Floppy144DiscoveryProfileHasOperatorName(
+                profile
+            )
+                ? Floppy144DiscoveryProfileOperatorName(
+                    profile
+                )
+                : "UNASSIGNED";
+    }
+
+    edit_status =
+        Floppy144ProfileViewNameEditStatusText(
+            name_edit
+        );
 
     body_style =
         Floppy144ProfileViewBodyStyleText(
@@ -290,16 +376,43 @@ void Floppy144ProfileViewDraw(
         muted
     );
 
+    if(editing_name)
+    {
+        Floppy144DrawRect(
+            surface,
+            50U,
+            96U,
+            246U,
+            18U,
+            amber
+        );
+    }
+
     Floppy144DrawText(
         surface,
         56U,
         102U,
         operator_name,
         1U,
-        profile->operator_name[0] != '\0'
+        editing_name ||
+        Floppy144DiscoveryProfileHasOperatorName(
+            profile
+        )
             ? amber
             : muted
     );
+
+    if(!editing_name)
+    {
+        Floppy144DrawText(
+            surface,
+            56U,
+            114U,
+            "ENTER  EDIT NAME",
+            1U,
+            amber
+        );
+    }
 
     Floppy144DrawText(
         surface,
@@ -487,16 +600,23 @@ void Floppy144ProfileViewDraw(
         surface,
         56U,
         316U,
-        "PROFILE HISTORY IS RETAINED BETWEEN RECOVERIES",
+        edit_status,
         1U,
-        muted
+        editing_name &&
+        name_edit != NULL &&
+        name_edit->notice !=
+            FLOPPY144_PROFILE_NAME_EDIT_NOTICE_NONE
+            ? amber
+            : muted
     );
 
     Floppy144DrawText(
         surface,
         10U,
         346U,
-        "BACKSPACE  BACK",
+        editing_name
+            ? "ENTER  SAVE   ESC  CANCEL   BACKSPACE  DELETE"
+            : "ENTER  EDIT NAME   BACKSPACE  BACK",
         1U,
         muted
     );

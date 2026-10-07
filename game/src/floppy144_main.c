@@ -27,6 +27,7 @@
 #include "floppy144_lifecycle.h"
 #include "floppy144_notebook_view.h"
 #include "floppy144_recovery.h"
+#include "floppy144_profile_edit.h"
 #include "floppy144_profile_view.h"
 #include "floppy144_terminal.h"
 #include "floppy144_timing.h"
@@ -86,6 +87,7 @@ static Floppy144CatalogueState global_catalogue;
 static Floppy144CabinetState global_cabinet;
 static Floppy144NotebookViewState global_notebook;
 static Floppy144DiscoveryProfile global_profile;
+static Floppy144ProfileNameEditState global_profile_name_edit;
 static Floppy144Settings global_settings;
 static Floppy144WorldState global_world;
 static Floppy144RunState global_run_state;
@@ -540,7 +542,8 @@ static void Floppy144Redraw(
         {
             Floppy144ProfileViewDraw(
                 pSurface,
-                &global_profile
+                &global_profile,
+                &global_profile_name_edit
             );
 
             break;
@@ -1079,6 +1082,149 @@ static void Floppy144MainMenuMoveSelection(
 }
 
 /*
+ * Open the persistent operator record.
+ *
+ * A fresh profile begins in the optional name-setup editor immediately. This
+ * does not make identity mandatory for gameplay: Escape may cancel setup and
+ * the player can return to Session Control with the profile still UNASSIGNED.
+ */
+static void Floppy144OpenOperatorProfile(
+    HWND window
+)
+{
+    Floppy144ProfileNameEditReset(
+        &global_profile_name_edit
+    );
+
+    global_screen =
+        FLOPPY144_SCREEN_PROFILE;
+
+    if(
+        !Floppy144DiscoveryProfileHasOperatorName(
+            &global_profile
+        )
+    )
+    {
+        Floppy144ProfileNameEditBegin(
+            &global_profile_name_edit,
+            &global_profile,
+            true
+        );
+    }
+
+    Floppy144Redraw(
+        window
+    );
+}
+
+/*
+ * Commit the transient operator-name edit atomically at profile level.
+ *
+ * The persistent profile is copied before mutation. If the profile file
+ * cannot be replaced successfully, the in-memory profile is restored and the
+ * player's edit buffer remains available for retry or cancellation.
+ */
+static void Floppy144CommitProfileNameEdit(
+    HWND window
+)
+{
+    Floppy144DiscoveryProfile original_profile;
+    const char *edited_name;
+
+    if(
+        !Floppy144ProfileNameEditActive(
+            &global_profile_name_edit
+        )
+    )
+    {
+        return;
+    }
+
+    edited_name =
+        Floppy144ProfileNameEditText(
+            &global_profile_name_edit
+        );
+
+    if(
+        strcmp(
+            edited_name,
+            Floppy144DiscoveryProfileOperatorName(
+                &global_profile
+            )
+        ) == 0
+    )
+    {
+        Floppy144ProfileNameEditCancel(
+            &global_profile_name_edit
+        );
+
+        Floppy144Redraw(
+            window
+        );
+
+        return;
+    }
+
+    if(
+        !Floppy144ProfileNameEditReadyToSave(
+            &global_profile_name_edit
+        )
+    )
+    {
+        Floppy144Redraw(
+            window
+        );
+
+        return;
+    }
+
+    original_profile =
+        global_profile;
+
+    if(
+        !Floppy144DiscoveryProfileSetOperatorName(
+            &global_profile,
+            edited_name
+        ) ||
+        !Floppy144PersistenceSaveProfile(
+            Floppy144StoragePath(
+                &global_storage_paths,
+                F144_PERSISTENCE_PROFILE
+            ),
+            &global_profile
+        )
+    )
+    {
+        global_profile =
+            original_profile;
+
+        global_persistence_warnings |=
+            FLOPPY144_PERSISTENCE_WARNING_PROFILE;
+
+        Floppy144ProfileNameEditMarkSaveFailed(
+            &global_profile_name_edit
+        );
+
+        Floppy144Redraw(
+            window
+        );
+
+        return;
+    }
+
+    global_persistence_warnings &=
+        (uint8_t)~FLOPPY144_PERSISTENCE_WARNING_PROFILE;
+
+    Floppy144ProfileNameEditCancel(
+        &global_profile_name_edit
+    );
+
+    Floppy144Redraw(
+        window
+    );
+}
+
+/*
  * Execute the selected session-control option.
  */
 
@@ -1391,13 +1537,10 @@ static void Floppy144MainMenuActivate(
         case FLOPPY144_MAIN_MENU_OPERATOR_PROFILE:
         {
             /*
-             * The Profile view reads the already-loaded persistent discovery
-             * profile. Opening it never merges, saves or mutates run state.
+             * Profile reads only persistent operator history. Opening it does
+             * not merge current run state or modify recovery progression.
              */
-            global_screen =
-                FLOPPY144_SCREEN_PROFILE;
-
-            Floppy144Redraw(
+            Floppy144OpenOperatorProfile(
                 window
             );
 
@@ -1745,6 +1888,40 @@ static bool Floppy144HandleTextInput(
 
     uCodepoint =
         pEvent->codepoint;
+
+    /*
+     * Operator-name entry consumes only the platform-neutral text stream.
+     *
+     * Enter is handled by the logical Confirm action so its trailing carriage
+     * return must not become name data. Backspace edits the transient buffer.
+     */
+    if(
+        global_screen == FLOPPY144_SCREEN_PROFILE &&
+        Floppy144ProfileNameEditActive(
+            &global_profile_name_edit
+        )
+    )
+    {
+        if(uCodepoint == (uint32_t)'\b')
+        {
+            (void)Floppy144ProfileNameEditBackspace(
+                &global_profile_name_edit
+            );
+        }
+        else if(uCodepoint != (uint32_t)'\r')
+        {
+            (void)Floppy144ProfileNameEditInputCodepoint(
+                &global_profile_name_edit,
+                uCodepoint
+            );
+        }
+
+        Floppy144Redraw(
+            window
+        );
+
+        return true;
+    }
 
             /* STAGE 3B.5 CABINET CHARACTER INPUT */
             if(global_screen == FLOPPY144_SCREEN_CABINET)
@@ -2191,6 +2368,28 @@ static bool Floppy144HandleActionEvent(
 
             if(eAction == F144_ACTION_MENU)
             {
+                /*
+                 * Escape cancels a name edit without leaving Profile. The
+                 * original persistent name has not been changed at this point.
+                 */
+                if(
+                    global_screen == FLOPPY144_SCREEN_PROFILE &&
+                    Floppy144ProfileNameEditActive(
+                        &global_profile_name_edit
+                    )
+                )
+                {
+                    Floppy144ProfileNameEditCancel(
+                        &global_profile_name_edit
+                    );
+
+                    Floppy144Redraw(
+                        window
+                    );
+
+                    return true;
+                }
+
                 if(
                     global_screen == FLOPPY144_SCREEN_TERMINAL &&
                     Floppy144TerminalRestoreInProgress(
@@ -2293,12 +2492,60 @@ static bool Floppy144HandleActionEvent(
                 }
 
                 /*
-                 * Operator Profile is a read-only persistent record in S4C-01.
-                 * Backspace returns to the parent Session Control menu with
-                 * the Profile option still selected.
+                 * Operator Profile owns its small edit state independently of
+                 * recovery-session state.
                  */
                 case FLOPPY144_SCREEN_PROFILE:
                 {
+                    if(
+                        Floppy144ProfileNameEditActive(
+                            &global_profile_name_edit
+                        )
+                    )
+                    {
+                        if(eAction == F144_ACTION_CONFIRM)
+                        {
+                            Floppy144CommitProfileNameEdit(
+                                window
+                            );
+
+                            return true;
+                        }
+
+                        /*
+                         * Backspace is performed by the following text event.
+                         * Consume its logical action here so it cannot close
+                         * the Profile before WM_CHAR delivers '\b'.
+                         */
+                        if(eAction == F144_ACTION_BACK)
+                        {
+                            return true;
+                        }
+
+                        /*
+                         * Printable keys such as A/I/W/S also have gameplay
+                         * meanings. While editing, their logical actions are
+                         * swallowed and their characters arrive separately
+                         * through F144TextInputEvent.
+                         */
+                        return true;
+                    }
+
+                    if(eAction == F144_ACTION_CONFIRM)
+                    {
+                        Floppy144ProfileNameEditBegin(
+                            &global_profile_name_edit,
+                            &global_profile,
+                            false
+                        );
+
+                        Floppy144Redraw(
+                            window
+                        );
+
+                        return true;
+                    }
+
                     if(eAction == F144_ACTION_BACK)
                     {
                         global_screen =
@@ -3407,6 +3654,10 @@ int CALLBACK WinMain(
             }
         }
     }
+
+    Floppy144ProfileNameEditReset(
+        &global_profile_name_edit
+    );
 
     {
         bool settings_file_exists =

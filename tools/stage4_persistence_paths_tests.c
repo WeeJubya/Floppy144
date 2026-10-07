@@ -448,6 +448,21 @@ static void TestLegacyProfileMigration(const char *root)
         17U
     );
 
+    /*
+     * Pre-S4C-02 files may contain a NUL-terminated name which the new player
+     * editor would not offer. Loading/migration remains schema-compatible and
+     * must preserve that historical value rather than rejecting the profile.
+     */
+    (void)snprintf(
+        profile.operator_name,
+        sizeof(profile.operator_name),
+        "%s",
+        "LEGACY@OPERATOR"
+    );
+
+    profile.dirty =
+        1U;
+
     Expect(
         Floppy144PersistenceSaveProfile(legacy_path,&profile),
         "legacy profile saves"
@@ -468,10 +483,10 @@ static void TestLegacyProfileMigration(const char *root)
     Expect(
         TestProfileHistoryMatches(
             &loaded,
-            "LEGACY OPERATOR",
+            "LEGACY@OPERATOR",
             17U
         ),
-        "migrated profile preserves complete operator history"
+        "migrated profile preserves complete legacy operator history"
     );
     Expect(
         Floppy144PersistenceFileExists(legacy_path),
@@ -669,7 +684,7 @@ static void TestRoundTrips(const char *root)
 
     TestPopulateProfileHistory(
         &profile,
-        "ROUND TRIP OPERATOR",
+        "Glynn Williams",
         23U
     );
 
@@ -689,10 +704,54 @@ static void TestRoundTrips(const char *root)
         ) &&
         TestProfileHistoryMatches(
             &loaded_profile,
-            "ROUND TRIP OPERATOR",
+            "Glynn Williams",
             23U
         ),
         "profile history reloads through resolved path"
+    );
+
+    /*
+     * Profile identity is independent of a recovery save. Beginning another
+     * recovery increments profile history but must preserve the same name.
+     * Saving and reloading again models an application restart.
+     */
+    Floppy144DiscoveryProfileBeginRecovery(
+        &loaded_profile
+    );
+
+    Expect(
+        strcmp(
+            loaded_profile.operator_name,
+            "Glynn Williams"
+        ) == 0,
+        "starting another recovery preserves operator identity"
+    );
+
+    Expect(
+        Floppy144PersistenceSaveProfile(
+            Floppy144StoragePath(&paths,F144_PERSISTENCE_PROFILE),
+            &loaded_profile
+        ),
+        "updated profile persists after another recovery begins"
+    );
+
+    memset(
+        &profile,
+        0,
+        sizeof(profile)
+    );
+
+    Expect(
+        Floppy144PersistenceLoadProfile(
+            Floppy144StoragePath(&paths,F144_PERSISTENCE_PROFILE),
+            &profile
+        ) &&
+        TestProfileHistoryMatches(
+            &profile,
+            "Glynn Williams",
+            24U
+        ),
+        "operator name survives restart after another recovery"
     );
 
     Floppy144SettingsReset(&settings);

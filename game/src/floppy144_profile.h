@@ -8,6 +8,8 @@
 #include <stdint.h>
 
 #define FLOPPY144_PROFILE_NAME_CAPACITY          32U
+#define FLOPPY144_PROFILE_NAME_MAX_LENGTH        \
+    (FLOPPY144_PROFILE_NAME_CAPACITY - 1U)
 #define FLOPPY144_PROFILE_COLLECTION_CAPACITY    64U
 #define FLOPPY144_PROFILE_EVIDENCE_CAPACITY      32U
 
@@ -76,6 +78,36 @@ bool Floppy144DiscoveryProfileMergeRunState
 void Floppy144DiscoveryProfileReset
 (
     Floppy144DiscoveryProfile *profile
+);
+
+/*
+ * Report whether one ASCII codepoint is accepted by player-facing operator
+ * name entry. The set mirrors glyphs the current bitmap font can render
+ * clearly without substitution.
+ */
+bool Floppy144DiscoveryProfileOperatorNameCharacterSupported(
+    uint32_t codepoint
+);
+
+/*
+ * Validate a complete player-entered operator name.
+ */
+bool Floppy144DiscoveryProfileOperatorNameValid(
+    const char *name
+);
+
+/*
+ * Report whether the persistent profile currently has an assigned name.
+ */
+bool Floppy144DiscoveryProfileHasOperatorName(
+    const Floppy144DiscoveryProfile *profile
+);
+
+/*
+ * Return the stored name, or an empty string when no profile/name exists.
+ */
+const char *Floppy144DiscoveryProfileOperatorName(
+    const Floppy144DiscoveryProfile *profile
 );
 
 bool Floppy144DiscoveryProfileSetOperatorName

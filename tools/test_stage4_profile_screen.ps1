@@ -180,6 +180,7 @@ $compileArgs = @(
     "/utf-8",
     $testSource,
     (Join-Path $root "game\src\floppy144_profile.c"),
+    (Join-Path $root "game\src\floppy144_profile_edit.c"),
     (Join-Path $root "game\src\floppy144_profile_view.c"),
     (Join-Path $root "game\src\floppy144_draw.c"),
     $includePlatform,

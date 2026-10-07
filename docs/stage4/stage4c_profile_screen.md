@@ -105,11 +105,13 @@ Opening or escaping from Profile therefore does not overwrite
 
 ## Editing
 
-S4C-01 is read-only.
+S4C-01 originally shipped this screen as read-only. S4C-02 now adds
+player-facing operator-name entry/editing while leaving body-style editing for
+S4C-03.
 
-Existing setter APIs for operator name and body style remain unchanged, but the
-Profile screen does not invoke them. Player-facing operator-name editing is
-reserved for S4C-02 and body-style editing for S4C-03.
+The S4C-01 persistent/current-run separation remains unchanged: editing affects
+only `Floppy144DiscoveryProfile.operator_name` and never writes identity into
+`Floppy144RunState`.
 
 ## Regression coverage
 

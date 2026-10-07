@@ -90,6 +90,147 @@ void Floppy144DiscoveryProfileReset
     );
 }
 
+/*
+ * Report whether one codepoint is safe for player-entered operator identity.
+ *
+ * Storage remains mixed-case ASCII. Rendering may uppercase it later because
+ * the compact 5x7 font contains uppercase glyphs only.
+ */
+bool Floppy144DiscoveryProfileOperatorNameCharacterSupported(
+    uint32_t codepoint
+)
+{
+    if(
+        (
+            codepoint >= (uint32_t)'A' &&
+            codepoint <= (uint32_t)'Z'
+        ) ||
+        (
+            codepoint >= (uint32_t)'a' &&
+            codepoint <= (uint32_t)'z'
+        ) ||
+        (
+            codepoint >= (uint32_t)'0' &&
+            codepoint <= (uint32_t)'9'
+        )
+    )
+    {
+        return true;
+    }
+
+    return
+        codepoint == (uint32_t)' ' ||
+        codepoint == (uint32_t)'\'' ||
+        codepoint == (uint32_t)'-' ||
+        codepoint == (uint32_t)'.';
+}
+
+/*
+ * Validate a complete player-entered operator name.
+ *
+ * A name must fit the fixed persistent field, contain only supported glyphs
+ * and include at least one letter or digit so whitespace/punctuation-only
+ * values cannot masquerade as an assigned identity.
+ */
+bool Floppy144DiscoveryProfileOperatorNameValid(
+    const char *name
+)
+{
+    size_t length;
+    size_t index;
+    bool has_alphanumeric;
+
+    if(name == NULL)
+    {
+        return false;
+    }
+
+    length =
+        strlen(name);
+
+    if(
+        length == 0U ||
+        length >
+            (size_t)FLOPPY144_PROFILE_NAME_MAX_LENGTH
+    )
+    {
+        return false;
+    }
+
+    has_alphanumeric =
+        false;
+
+    for(
+        index = 0U;
+        index < length;
+        ++index
+    )
+    {
+        uint32_t codepoint =
+            (uint32_t)(unsigned char)name[index];
+
+        if(
+            !Floppy144DiscoveryProfileOperatorNameCharacterSupported(
+                codepoint
+            )
+        )
+        {
+            return false;
+        }
+
+        if(
+            (
+                codepoint >= (uint32_t)'A' &&
+                codepoint <= (uint32_t)'Z'
+            ) ||
+            (
+                codepoint >= (uint32_t)'a' &&
+                codepoint <= (uint32_t)'z'
+            ) ||
+            (
+                codepoint >= (uint32_t)'0' &&
+                codepoint <= (uint32_t)'9'
+            )
+        )
+        {
+            has_alphanumeric =
+                true;
+        }
+    }
+
+    return has_alphanumeric;
+}
+
+/*
+ * Report whether persistent operator identity has been assigned.
+ *
+ * Legacy profiles are considered assigned when the stored field is non-empty;
+ * they remain load-compatible even if they predate the S4C-02 entry rules.
+ */
+bool Floppy144DiscoveryProfileHasOperatorName(
+    const Floppy144DiscoveryProfile *profile
+)
+{
+    return
+        profile != NULL &&
+        profile->operator_name[0] != '\0';
+}
+
+/*
+ * Return the persistent operator name for later personalisation systems.
+ */
+const char *Floppy144DiscoveryProfileOperatorName(
+    const Floppy144DiscoveryProfile *profile
+)
+{
+    if(profile == NULL)
+    {
+        return "";
+    }
+
+    return profile->operator_name;
+}
+
 bool Floppy144DiscoveryProfileSetOperatorName
 (
     Floppy144DiscoveryProfile *profile,
@@ -109,9 +250,9 @@ bool Floppy144DiscoveryProfileSetOperatorName
     strlen(name);
 
     if(
-        length == 0U ||
-        length >=
-        FLOPPY144_PROFILE_NAME_CAPACITY
+        !Floppy144DiscoveryProfileOperatorNameValid(
+            name
+        )
     )
     {
         return false;

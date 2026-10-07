@@ -258,7 +258,8 @@ static uint32_t TestDrawProfile(
 
     Floppy144ProfileViewDraw(
         &surface,
-        profile
+        profile,
+        NULL
     );
 
     return TestSurfaceHash(

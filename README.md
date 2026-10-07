@@ -345,3 +345,31 @@ operator history.
 A fresh profile displays `UNASSIGNED` for an empty operator name and zeroed
 history safely. Name editing and body-style editing remain reserved for
 S4C-02/S4C-03.
+
+
+## Operator name entry and editing - Stage 4C
+
+The persistent operator identity can now be entered and edited from the
+**OPERATOR PROFILE** screen.
+
+The stored field remains the existing 32-byte
+`Floppy144DiscoveryProfile.operator_name`; player-entered names therefore use
+at most 31 ASCII characters plus the terminating NUL. Storage preserves the
+player's case. The compact presentation font uppercases lowercase letters only
+while drawing them.
+
+New entry accepts letters, digits, spaces, apostrophe, hyphen and period.
+Control characters, unsupported glyphs and input beyond the 31-character limit
+are ignored safely. Empty or whitespace/punctuation-only names cannot be
+confirmed.
+
+A fresh profile remains compatible with Stage 3 and may still start a recovery
+without a name. Opening Profile while unassigned begins an optional
+**NEW OPERATOR SETUP** edit immediately; Escape cancels it. Existing profiles
+use **ENTER EDIT NAME**. Backspace deletes while editing, Enter saves, and
+Escape restores the original stored name.
+
+The editor consumes only `F144TextInputEvent` codepoints. It contains no
+Win32 key/message handling. The confirmed name is saved to the profile file,
+not to manual/autosave recovery state, and is exposed through the portable
+profile accessor for later terminal personalisation.
