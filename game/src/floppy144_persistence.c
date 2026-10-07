@@ -1157,9 +1157,11 @@ bool Floppy144PersistenceDecodeProfile
 bool Floppy144PersistenceEncodeSettings
 (
     const Floppy144Settings *settings,
- uint8_t *payload,
- uint32_t payload_size
+    uint8_t *payload,
+    uint32_t payload_size
 ){
+    Floppy144Settings defaults;
+
     if(
         settings == NULL ||
         payload == NULL ||
@@ -1170,6 +1172,10 @@ bool Floppy144PersistenceEncodeSettings
         return false;
     }
 
+    Floppy144SettingsReset(
+        &defaults
+    );
+
     memset(
         payload,
         0,
@@ -1177,19 +1183,34 @@ bool Floppy144PersistenceEncodeSettings
     );
 
     payload[0] =
-    settings->crt_mode;
+        settings->crt_mode <
+            (uint8_t)FLOPPY144_CRT_COUNT
+            ? settings->crt_mode
+            : defaults.crt_mode;
 
     payload[1] =
-    settings->text_speed;
+        settings->text_speed <
+            (uint8_t)FLOPPY144_TEXT_SPEED_COUNT
+            ? settings->text_speed
+            : defaults.text_speed;
 
     payload[2] =
-    settings->music_volume;
+        settings->music_volume <=
+            FLOPPY144_SETTINGS_VOLUME_MAX
+            ? settings->music_volume
+            : defaults.music_volume;
 
     payload[3] =
-    settings->sfx_volume;
+        settings->sfx_volume <=
+            FLOPPY144_SETTINGS_VOLUME_MAX
+            ? settings->sfx_volume
+            : defaults.sfx_volume;
 
     payload[4] =
-    settings->autosave_mode;
+        settings->autosave_mode <
+            (uint8_t)FLOPPY144_AUTOSAVE_MODE_COUNT
+            ? settings->autosave_mode
+            : defaults.autosave_mode;
 
     return true;
 }
@@ -1197,10 +1218,12 @@ bool Floppy144PersistenceEncodeSettings
 bool Floppy144PersistenceDecodeSettings
 (
     Floppy144Settings *settings,
- const uint8_t *payload,
- uint32_t payload_size
+    const uint8_t *payload,
+    uint32_t payload_size
 ){
     Floppy144Settings decoded;
+    bool normalized =
+        false;
 
     if(
         settings == NULL ||
@@ -1216,42 +1239,71 @@ bool Floppy144PersistenceDecodeSettings
         &decoded
     );
 
-    decoded.crt_mode =
-    payload[0];
+    if(payload[0] < (uint8_t)FLOPPY144_CRT_COUNT)
+    {
+        decoded.crt_mode =
+            payload[0];
+    }
+    else
+    {
+        normalized =
+            true;
+    }
 
-    decoded.text_speed =
-    payload[1];
+    if(payload[1] < (uint8_t)FLOPPY144_TEXT_SPEED_COUNT)
+    {
+        decoded.text_speed =
+            payload[1];
+    }
+    else
+    {
+        normalized =
+            true;
+    }
 
-    decoded.music_volume =
-    payload[2];
+    if(payload[2] <= FLOPPY144_SETTINGS_VOLUME_MAX)
+    {
+        decoded.music_volume =
+            payload[2];
+    }
+    else
+    {
+        normalized =
+            true;
+    }
 
-    decoded.sfx_volume =
-    payload[3];
-
-    decoded.autosave_mode =
-    payload[4];
+    if(payload[3] <= FLOPPY144_SETTINGS_VOLUME_MAX)
+    {
+        decoded.sfx_volume =
+            payload[3];
+    }
+    else
+    {
+        normalized =
+            true;
+    }
 
     if(
-        decoded.crt_mode >=
-        (uint8_t)FLOPPY144_CRT_COUNT ||
-        decoded.text_speed >=
-        (uint8_t)FLOPPY144_TEXT_SPEED_COUNT ||
-        decoded.music_volume >
-        FLOPPY144_SETTINGS_VOLUME_MAX ||
-        decoded.sfx_volume >
-        FLOPPY144_SETTINGS_VOLUME_MAX ||
-        decoded.autosave_mode >=
-        (uint8_t)FLOPPY144_AUTOSAVE_MODE_COUNT
+        payload[4] <
+            (uint8_t)FLOPPY144_AUTOSAVE_MODE_COUNT
     )
     {
-        return false;
+        decoded.autosave_mode =
+            payload[4];
+    }
+    else
+    {
+        normalized =
+            true;
     }
 
     decoded.dirty =
-    0U;
+        normalized
+            ? 1U
+            : 0U;
 
     *settings =
-    decoded;
+        decoded;
 
     return true;
 }

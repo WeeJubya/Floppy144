@@ -45,6 +45,16 @@ void Floppy144TimingStopSplash(
     Floppy144TimingState *timing
 );
 
+/*
+ * Re-arm autosave from the current monotonic instant without disturbing
+ * splash, terminal restore or cursor schedules.
+ */
+void Floppy144TimingSetAutosaveInterval(
+    Floppy144TimingState *timing,
+    uint64_t now_ms,
+    uint32_t autosave_interval_ms
+);
+
 uint32_t Floppy144TimingSplashElapsedMs(
     const Floppy144TimingState *timing,
     uint64_t now_ms

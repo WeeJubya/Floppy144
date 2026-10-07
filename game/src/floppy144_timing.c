@@ -72,6 +72,32 @@ void Floppy144TimingStopSplash(
     }
 }
 
+void Floppy144TimingSetAutosaveInterval(
+    Floppy144TimingState *timing,
+    uint64_t now_ms,
+    uint32_t autosave_interval_ms
+)
+{
+    if(timing == NULL)
+    {
+        return;
+    }
+
+    if(now_ms < timing->last_update_ms)
+    {
+        now_ms =
+            timing->last_update_ms;
+    }
+
+    timing->autosave_interval_ms =
+        autosave_interval_ms;
+
+    timing->next_autosave_ms =
+        autosave_interval_ms != 0U
+            ? now_ms + autosave_interval_ms
+            : 0U;
+}
+
 uint32_t Floppy144TimingSplashElapsedMs(
     const Floppy144TimingState *timing,
     uint64_t now_ms
