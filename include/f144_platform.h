@@ -3,9 +3,8 @@
  *
  * This is the platform-neutral boundary seen by FLOPPY//144 game code.
  * Stage 4B now covers display/presentation, logical input, persistent-storage
- * paths and semantic audio requests. Timing, lifecycle and quit handling are
- * added only when their owning migration reaches them. Text input remains a
- * separate native-to-core stream.
+ * paths, semantic audio, monotonic timing and application lifecycle concepts.
+ * Text input remains a separate native-to-core stream.
  *
  * Single-instance acquisition and raw command-line parsing are launcher-only
  * concerns and intentionally do not belong in this game-facing contract.
@@ -74,6 +73,30 @@ typedef struct F144TextInputEvent
 {
     uint32_t codepoint;
 } F144TextInputEvent;
+
+typedef enum F144LifecycleEventType
+{
+    F144_LIFECYCLE_NONE = 0,
+    F144_LIFECYCLE_START,
+    F144_LIFECYCLE_ACTIVE,
+    F144_LIFECYCLE_INACTIVE,
+    F144_LIFECYCLE_SUSPEND,
+    F144_LIFECYCLE_RESUME,
+    F144_LIFECYCLE_SHUTDOWN_REQUESTED,
+    F144_LIFECYCLE_SHUTDOWN,
+    F144_LIFECYCLE_COUNT
+} F144LifecycleEventType;
+
+typedef struct F144LifecycleEvent
+{
+    F144LifecycleEventType type;
+
+    /*
+     * Future mobile/platform policy may ask the game to make a safety autosave
+     * while delivering a lifecycle event. Win32 does not request one today.
+     */
+    uint8_t request_autosave;
+} F144LifecycleEvent;
 
 #define F144_PLATFORM_PATH_CAPACITY 512U
 
@@ -146,6 +169,14 @@ typedef struct F144PlatformApi
         F144Platform *platform,
         uint8_t volume
     );
+
+    uint64_t (*monotonic_ms)(
+        F144Platform *platform
+    );
+
+    void (*quit)(
+        F144Platform *platform
+    );
 } F144PlatformApi;
 
 struct F144Platform
@@ -212,4 +243,12 @@ bool f144PlatformSetMusicVolume(
 bool f144PlatformSetSfxVolume(
     F144Platform *platform,
     uint8_t volume
+);
+
+uint64_t f144PlatformMonotonicMs(
+    F144Platform *platform
+);
+
+void f144PlatformQuit(
+    F144Platform *platform
 );

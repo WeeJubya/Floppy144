@@ -3,6 +3,7 @@
 #include "f144_win32_platform.h"
 #include "f144_win32_audio.h"
 #include "f144_win32_storage.h"
+#include "f144_win32_timing.h"
 
 #include <stdio.h>
 
@@ -482,6 +483,33 @@ static void f144Win32PlatformPresent(
     runtime->bltBuffer(runtime);
 }
 
+static void f144Win32PlatformQuit(
+    F144Platform *platform
+)
+{
+    F144Runtime *runtime;
+
+    if(platform == NULL)
+    {
+        return;
+    }
+
+    f144Win32TimingStopWake(
+        platform
+    );
+
+    runtime =
+        (F144Runtime *)platform->state;
+
+    if(runtime != NULL)
+    {
+        runtime->running =
+            false;
+    }
+
+    PostQuitMessage(0);
+}
+
 static const F144PlatformApi f144_win32_platform_api =
 {
     f144Win32PlatformFramebuffer,
@@ -494,7 +522,9 @@ static const F144PlatformApi f144_win32_platform_api =
     f144Win32AudioStopMusic,
     f144Win32AudioPlaySfx,
     f144Win32AudioSetMusicVolume,
-    f144Win32AudioSetSfxVolume
+    f144Win32AudioSetSfxVolume,
+    f144Win32MonotonicMs,
+    f144Win32PlatformQuit
 };
 
 void f144Win32PlatformBind(

@@ -133,6 +133,24 @@ static bool TestLegacyPersistencePath(
     );
 }
 
+static uint64_t TestMonotonicMs(
+    F144Platform *platform
+)
+{
+    (void)platform;
+    return 144U;
+}
+
+static void TestQuit(
+    F144Platform *platform
+)
+{
+    if(platform != NULL)
+    {
+        platform->surface.width = 0U;
+    }
+}
+
 int Floppy144Stage4PlatformHeaderCompileTest(void)
 {
     F144PlatformApi api =
@@ -140,7 +158,16 @@ int Floppy144Stage4PlatformHeaderCompileTest(void)
         TestFramebuffer,
         TestPresent,
         TestPersistencePath,
-        TestLegacyPersistencePath
+        TestLegacyPersistencePath,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        TestMonotonicMs,
+        TestQuit
     };
     F144Platform platform = {0};
 
@@ -180,6 +207,19 @@ int Floppy144Stage4PlatformHeaderCompileTest(void)
         {
             return 3;
         }
+    }
+
+    if(f144PlatformMonotonicMs(&platform) != 144U)
+    {
+        return 4;
+    }
+
+    platform.surface.width = 1U;
+    f144PlatformQuit(&platform);
+
+    if(platform.surface.width != 0U)
+    {
+        return 5;
     }
 
     f144PlatformPresent(&platform);

@@ -271,3 +271,39 @@ bool f144PlatformSetSfxVolume(
 
     return true;
 }
+
+uint64_t f144PlatformMonotonicMs(
+    F144Platform *platform
+)
+{
+    if(
+        platform == NULL ||
+        platform->api == NULL ||
+        platform->api->monotonic_ms == NULL
+    )
+    {
+        return 0U;
+    }
+
+    return platform->api->monotonic_ms(
+        platform
+    );
+}
+
+void f144PlatformQuit(
+    F144Platform *platform
+)
+{
+    if(
+        platform == NULL ||
+        platform->api == NULL ||
+        platform->api->quit == NULL
+    )
+    {
+        return;
+    }
+
+    platform->api->quit(
+        platform
+    );
+}

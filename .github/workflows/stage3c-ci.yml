@@ -52,6 +52,10 @@ jobs:
         shell: pwsh
         run: .\tools\test_stage4_audio.ps1
 
+      - name: Stage 4 timing and lifecycle
+        shell: pwsh
+        run: .\tools\test_stage4_timing_lifecycle.ps1
+
       - name: Install Premake
         shell: pwsh
         run: |

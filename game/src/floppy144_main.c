@@ -11,7 +11,9 @@
 #include "f144_platform.h"
 #include "f144_runtime.h"
 #include "f144_win32_input.h"
+#include "f144_win32_lifecycle.h"
 #include "f144_win32_platform.h"
+#include "f144_win32_timing.h"
 
 #include "floppy144_catalogue.h"
 #include "floppy144_cabinet.h"
@@ -19,9 +21,11 @@
 #include "floppy144_draw.h"
 #include "floppy144_interaction_engine.h"
 #include "floppy144_input.h"
+#include "floppy144_lifecycle.h"
 #include "floppy144_notebook_view.h"
 #include "floppy144_recovery.h"
 #include "floppy144_terminal.h"
+#include "floppy144_timing.h"
 #include "floppy144_world.h"
 #include "floppy144_run_state.h"
 #include "floppy144_persistence.h"
@@ -67,6 +71,8 @@ typedef enum Floppy144Screen
 static F144Runtime *global_runtime;
 static F144Platform global_platform;
 static Floppy144MovementInput global_movement_input;
+static Floppy144LifecycleState global_lifecycle;
+static Floppy144TimingState global_timing;
 
 static Floppy144Screen global_screen;
 static Floppy144TerminalState global_terminal;
@@ -134,20 +140,19 @@ Floppy144PersistenceWarning;
 
 static uint8_t global_persistence_warnings;
 
-static DWORD global_splash_started_ticks;
-
-#define FLOPPY144_SPLASH_TIMER_ID          144U
-#define FLOPPY144_SPLASH_FRAME_MS           16U
-#define FLOPPY144_SPLASH_ANIMATION_MS     3700U
-
-#define FLOPPY144_AUTOSAVE_TIMER_ID         145U
-#define FLOPPY144_TERMINAL_CURSOR_TIMER_ID  146U
-#define FLOPPY144_TERMINAL_RESTORE_TIMER_ID 147U
-#define FLOPPY144_TERMINAL_CURSOR_MS        500U
-#define FLOPPY144_TERMINAL_RESTORE_MS        50U
+#define FLOPPY144_SPLASH_ANIMATION_MS 3700U
 
 static const char *Floppy144PersistenceWarningText(
     void
+);
+
+static void Floppy144HandleLifecycleEvent(
+    HWND window,
+    const F144LifecycleEvent *event
+);
+
+static void Floppy144UpdateTiming(
+    HWND window
 );
 
 /*
@@ -492,13 +497,17 @@ static void Floppy144Redraw(
     {
         case FLOPPY144_SCREEN_SPLASH:
         {
-            DWORD elapsed_milliseconds =
-                GetTickCount() -
-                global_splash_started_ticks;
+            uint32_t elapsed_milliseconds =
+                Floppy144TimingSplashElapsedMs(
+                    &global_timing,
+                    f144PlatformMonotonicMs(
+                        &global_platform
+                    )
+                );
 
             Floppy144SplashDraw(
                 pSurface,
-                (uint32_t)elapsed_milliseconds
+                elapsed_milliseconds
             );
 
             break;
@@ -749,6 +758,169 @@ static void Floppy144UpdateDiscoveryProfile(
     }
 }
 
+static void Floppy144AutosaveIfNeeded(
+    HWND window
+)
+{
+    if(
+        !global_session_active ||
+        global_run_state.dirty == 0U
+    )
+    {
+        return;
+    }
+
+    Floppy144UpdateDiscoveryProfile();
+
+    if(
+        Floppy144PersistenceSaveRunState(
+            Floppy144StoragePath(
+                &global_storage_paths,
+                F144_PERSISTENCE_AUTOSAVE
+            ),
+            &global_run_state
+        )
+    )
+    {
+        global_persistence_warnings &=
+            (uint8_t)~FLOPPY144_PERSISTENCE_WARNING_AUTOSAVE;
+    }
+    else
+    {
+        global_persistence_warnings |=
+            FLOPPY144_PERSISTENCE_WARNING_AUTOSAVE;
+
+        Floppy144Redraw(
+            window
+        );
+    }
+}
+
+static void Floppy144HandleLifecycleEvent(
+    HWND window,
+    const F144LifecycleEvent *event
+)
+{
+    if(event == NULL)
+    {
+        return;
+    }
+
+    Floppy144LifecycleApply(
+        &global_lifecycle,
+        event
+    );
+
+    /*
+     * Win32 never requests an autosave through lifecycle events today. The
+     * neutral flag exists so a future mobile suspend/background adapter can
+     * request the already-proven autosave path without learning persistence
+     * internals.
+     */
+    if(event->request_autosave != 0U)
+    {
+        Floppy144AutosaveIfNeeded(
+            window
+        );
+    }
+
+    if(
+        event->type ==
+        F144_LIFECYCLE_SHUTDOWN_REQUESTED
+    )
+    {
+        Floppy144UpdateDiscoveryProfile();
+
+        f144PlatformQuit(
+            &global_platform
+        );
+    }
+}
+
+static void Floppy144UpdateTiming(
+    HWND window
+)
+{
+    Floppy144TimingEvents events =
+        Floppy144TimingAdvance(
+            &global_timing,
+            f144PlatformMonotonicMs(
+                &global_platform
+            )
+        );
+
+    bool redraw =
+        false;
+
+    if(
+        events.splash_frame_due != 0U &&
+        global_screen == FLOPPY144_SCREEN_SPLASH
+    )
+    {
+        redraw =
+            true;
+
+        if(
+            Floppy144TimingSplashElapsedMs(
+                &global_timing,
+                f144PlatformMonotonicMs(
+                    &global_platform
+                )
+            ) >= FLOPPY144_SPLASH_ANIMATION_MS
+        )
+        {
+            Floppy144TimingStopSplash(
+                &global_timing
+            );
+        }
+    }
+
+    if(
+        events.terminal_restore_elapsed_ms != 0U &&
+        global_screen == FLOPPY144_SCREEN_TERMINAL &&
+        Floppy144TerminalRestoreInProgress(
+            &global_terminal
+        )
+    )
+    {
+        Floppy144TerminalAdvanceRestore(
+            &global_terminal,
+            &global_world,
+            &global_run_state,
+            events.terminal_restore_elapsed_ms
+        );
+
+        redraw =
+            true;
+    }
+
+    if(
+        events.terminal_cursor_toggle != 0U &&
+        global_screen == FLOPPY144_SCREEN_TERMINAL
+    )
+    {
+        global_terminal.cursor_visible =
+            !global_terminal.cursor_visible;
+
+        redraw =
+            true;
+    }
+
+    if(events.autosave_due != 0U)
+    {
+        Floppy144AutosaveIfNeeded(
+            window
+        );
+    }
+
+    if(redraw)
+    {
+        Floppy144Redraw(
+            window
+        );
+    }
+}
+
 static void Floppy144ConfigureTerminalSession(
     void
 )
@@ -903,7 +1075,9 @@ static void Floppy144MainMenuActivate(
 
             {
                 uint32_t recovery_seed =
-                (uint32_t)GetTickCount();
+                    (uint32_t)f144PlatformMonotonicMs(
+                        &global_platform
+                    );
 
                 if(recovery_seed == 0U)
                 {
@@ -1178,11 +1352,15 @@ static void Floppy144MainMenuActivate(
 
         case FLOPPY144_MAIN_MENU_TERMINATE:
         {
-            PostMessageA(
+            F144LifecycleEvent event =
+            {
+                F144_LIFECYCLE_SHUTDOWN_REQUESTED,
+                0U
+            };
+
+            Floppy144HandleLifecycleEvent(
                 window,
-                WM_CLOSE,
-                0,
-                0
+                &event
             );
 
             return;
@@ -1971,9 +2149,8 @@ static bool Floppy144HandleActionEvent(
 
                 if(global_screen == FLOPPY144_SCREEN_SPLASH)
                 {
-                    KillTimer(
-                        window,
-                        FLOPPY144_SPLASH_TIMER_ID
+                    Floppy144TimingStopSplash(
+                        &global_timing
                     );
                 }
 
@@ -1998,9 +2175,8 @@ static bool Floppy144HandleActionEvent(
                 {
                     if(eAction == F144_ACTION_CONFIRM)
                     {
-                        KillTimer(
-                            window,
-                            FLOPPY144_SPLASH_TIMER_ID
+                        Floppy144TimingStopSplash(
+                            &global_timing
                         );
 
                         Floppy144OpenMainMenu(
@@ -2666,63 +2842,53 @@ static LRESULT CALLBACK Floppy144WindowProc(
 {
     (void)l_param;
 
+    {
+        F144LifecycleEvent lifecycle_event;
+
+        if(
+            f144Win32TranslateLifecycleEvent(
+                (uint32_t)message,
+                (uintptr_t)w_param,
+                &lifecycle_event
+            )
+        )
+        {
+            Floppy144HandleLifecycleEvent(
+                window,
+                &lifecycle_event
+            );
+
+            /*
+             * Activation remains a native window notification as well as a
+             * game lifecycle notification. Preserve DefWindowProc handling.
+             * Orderly close/destroy are consumed by the lifecycle path.
+             */
+            if(
+                lifecycle_event.type != F144_LIFECYCLE_ACTIVE &&
+                lifecycle_event.type != F144_LIFECYCLE_INACTIVE
+            )
+            {
+                return 0;
+            }
+        }
+    }
+
+    if(
+        f144Win32TimingIsWakeMessage(
+            (uint32_t)message,
+            (uintptr_t)w_param
+        )
+    )
+    {
+        Floppy144UpdateTiming(
+            window
+        );
+
+        return 0;
+    }
+
     switch(message)
     {
-        /* Window lifetime: stop the runtime loop and post the process quit message. */
-        case WM_CLOSE:
-        {
-            if(global_runtime)
-            {
-                global_runtime->running = false;
-            }
-
-            Floppy144UpdateDiscoveryProfile();
-
-            KillTimer(
-                window,
-                FLOPPY144_AUTOSAVE_TIMER_ID
-            );
-
-            KillTimer(
-                window,
-                FLOPPY144_TERMINAL_CURSOR_TIMER_ID
-            );
-
-            KillTimer(
-                window,
-                FLOPPY144_TERMINAL_RESTORE_TIMER_ID
-            );
-
-            PostQuitMessage(0);
-            return 0;
-        }
-
-        case WM_DESTROY:
-        {
-            if(global_runtime)
-            {
-                global_runtime->running = false;
-            }
-
-            KillTimer(
-                window,
-                FLOPPY144_AUTOSAVE_TIMER_ID
-            );
-
-            KillTimer(
-                window,
-                FLOPPY144_TERMINAL_CURSOR_TIMER_ID
-            );
-
-            KillTimer(
-                window,
-                FLOPPY144_TERMINAL_RESTORE_TIMER_ID
-            );
-
-            PostQuitMessage(0);
-            return 0;
-        }
-
         /*
          * Native input adapter
          *
@@ -2741,114 +2907,6 @@ static LRESULT CALLBACK Floppy144WindowProc(
 
             if(Floppy144HandleTextInput(window,&sTextEvent))
             {
-                return 0;
-            }
-
-            break;
-        }
-        /*
-         * Splash animation timer
-         *
-         * Elapsed time, rather than frame count, controls movement. The timer
-         * stops once the disk has settled.
-         */
-
-        case WM_TIMER:
-        {
-            if(
-                w_param ==
-                    FLOPPY144_SPLASH_TIMER_ID &&
-                global_screen ==
-                    FLOPPY144_SCREEN_SPLASH
-            )
-            {
-                DWORD elapsed_milliseconds =
-                    GetTickCount() -
-                    global_splash_started_ticks;
-
-                Floppy144Redraw(
-                    window
-                );
-
-                if(
-                    elapsed_milliseconds >=
-                        FLOPPY144_SPLASH_ANIMATION_MS
-                )
-                {
-                    KillTimer(
-                        window,
-                        FLOPPY144_SPLASH_TIMER_ID
-                    );
-                }
-
-                return 0;
-            }
-
-            if(w_param == FLOPPY144_TERMINAL_RESTORE_TIMER_ID)
-            {
-                if(
-                    global_screen == FLOPPY144_SCREEN_TERMINAL &&
-                    Floppy144TerminalRestoreInProgress(
-                        &global_terminal
-                    )
-                )
-                {
-                    Floppy144TerminalAdvanceRestore(
-                        &global_terminal,
-                        &global_world,
-                        &global_run_state,
-                        FLOPPY144_TERMINAL_RESTORE_MS
-                    );
-
-                    Floppy144Redraw(window);
-                }
-
-                return 0;
-            }
-
-            if(w_param == FLOPPY144_TERMINAL_CURSOR_TIMER_ID)
-            {
-                if(global_screen == FLOPPY144_SCREEN_TERMINAL)
-                {
-                    global_terminal.cursor_visible =
-                        !global_terminal.cursor_visible;
-
-                    Floppy144Redraw(window);
-                }
-
-                return 0;
-            }
-
-            if(w_param == FLOPPY144_AUTOSAVE_TIMER_ID)
-            {
-                if(
-                    global_session_active &&
-                    global_run_state.dirty != 0U
-                )
-                {
-                    Floppy144UpdateDiscoveryProfile();
-
-                    if(
-                        Floppy144PersistenceSaveRunState(
-                            Floppy144StoragePath(&global_storage_paths,F144_PERSISTENCE_AUTOSAVE),
-                            &global_run_state
-                        )
-                    )
-                    {
-                        global_persistence_warnings &=
-                        (uint8_t)~FLOPPY144_PERSISTENCE_WARNING_AUTOSAVE;
-                    }
-                    else
-                    {
-                        global_persistence_warnings |=
-                        FLOPPY144_PERSISTENCE_WARNING_AUTOSAVE;
-
-                        Floppy144Redraw(
-                            window
-                        );
-                    }
-                }
-
                 return 0;
             }
 
@@ -3147,9 +3205,6 @@ int CALLBACK WinMain(
     global_screen =
         FLOPPY144_SCREEN_SPLASH;
 
-    global_splash_started_ticks =
-        0U;
-
     global_persistence_warnings =
         FLOPPY144_PERSISTENCE_WARNING_NONE;
 
@@ -3368,51 +3423,42 @@ int CALLBACK WinMain(
         show_command
     );
 
-    global_splash_started_ticks =
-        GetTickCount();
+    Floppy144TimingReset(
+        &global_timing,
+        f144PlatformMonotonicMs(
+            &global_platform
+        ),
+        Floppy144SettingsAutosaveIntervalMs(
+            &global_settings
+        )
+    );
+
+    Floppy144LifecycleReset(
+        &global_lifecycle
+    );
+
+    {
+        F144LifecycleEvent start_event =
+        {
+            F144_LIFECYCLE_START,
+            0U
+        };
+
+        Floppy144HandleLifecycleEvent(
+            runtime.window,
+            &start_event
+        );
+    }
 
     Floppy144SplashDraw(
         f144PlatformFramebuffer(&global_platform),
         0U
     );
 
-    SetTimer(
-        runtime.window,
-        FLOPPY144_SPLASH_TIMER_ID,
-        FLOPPY144_SPLASH_FRAME_MS,
-        NULL
+    (void)f144Win32TimingStartWake(
+        &global_platform,
+        FLOPPY144_SPLASH_FRAME_MS
     );
-
-    SetTimer(
-        runtime.window,
-        FLOPPY144_TERMINAL_CURSOR_TIMER_ID,
-        FLOPPY144_TERMINAL_CURSOR_MS,
-        NULL
-    );
-
-    SetTimer(
-        runtime.window,
-        FLOPPY144_TERMINAL_RESTORE_TIMER_ID,
-        FLOPPY144_TERMINAL_RESTORE_MS,
-        NULL
-    );
-
-    {
-        uint32_t autosave_interval =
-        Floppy144SettingsAutosaveIntervalMs(
-            &global_settings
-        );
-
-        if(autosave_interval != 0U)
-        {
-            SetTimer(
-                runtime.window,
-                FLOPPY144_AUTOSAVE_TIMER_ID,
-                (UINT)autosave_interval,
-                     NULL
-            );
-        }
-    }
 
     UpdateWindow(
         runtime.window

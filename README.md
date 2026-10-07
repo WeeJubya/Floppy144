@@ -224,3 +224,24 @@ and device handling belong in the Win32 backend.
 The current Win32 audio adapter is intentionally silent. This preserves the
 audited behaviour exactly while leaving the platform seam ready for the
 separately approved generated-audio feature and Stage 4C persisted volume UI.
+
+## Timing and lifecycle platform boundary - Stage 4
+
+FLOPPY//144 game timing now uses the platform-neutral
+`f144PlatformMonotonicMs()` clock. Windows supplies that clock with
+`GetTickCount64`, but game code no longer depends on `GetTickCount`,
+`SetTimer`, `KillTimer` or `WM_TIMER` semantics.
+
+The game owns deterministic deadlines for the existing behaviours: 16 ms splash
+animation opportunities, 50 ms terminal-restoration quanta, 500 ms terminal
+cursor blinking, and the persisted 5/10/30-minute (or off) autosave cadence.
+The Win32 layer uses one native wake timer only to give the game opportunities
+to advance those deadlines.
+
+Lifecycle events are platform-neutral: start, active, inactive, suspend,
+resume, shutdown-requested and shutdown. Windows currently maps activation and
+orderly close/destroy messages into those events. Inactive/suspend/resume do
+not pause or alter gameplay because Stage 3 had no such policy. A lifecycle
+event can carry an explicit autosave request, ready for later mobile
+background/suspend policy without exposing persistence internals to a platform
+backend.

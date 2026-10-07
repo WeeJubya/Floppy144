@@ -75,6 +75,24 @@ When compact runtime-generated music/SFX is introduced, composition/event
 generation stays portable and outside the Win32 layer; only native playback
 belongs behind that adapter.
 
+## Timing and lifecycle ownership
+
+`F144Platform` supplies one monotonic millisecond clock. Game cadence lives in
+`floppy144_timing.c`, which owns splash, terminal restore, cursor blink and
+autosave deadlines. The Win32 timer is only a native wake mechanism in
+`src/f144_win32_timing.c`; its timer ID and `WM_TIMER` never define game
+behaviour.
+
+`floppy144_lifecycle.c` stores platform-neutral started/active/inactive/
+suspended/shutdown state. The Win32 adapter translates activation, close and
+destroy messages into the same lifecycle events future desktop/mobile
+platforms can deliver. Current inactive/suspend/resume notifications are
+state-only and deliberately have no gameplay side effects.
+
+Lifecycle events can explicitly request the existing autosave path. Windows
+does not request lifecycle autosaves today, preserving Stage 3 behaviour while
+leaving a clean mobile suspend/background hook.
+
 ## Persistence ownership
 
 `floppy144_persistence.c` owns the existing versioned bytes, checksums and
