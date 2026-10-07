@@ -170,8 +170,6 @@ static void CheckSelectedScaleTransform(
 )
 {
     Floppy144SiteCamera2D probe;
-    int32_t screen_x;
-    int32_t screen_y;
 
     SetPlayer(
         state,
