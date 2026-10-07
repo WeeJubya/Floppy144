@@ -20,6 +20,26 @@
 #define FLOPPY144_TERMINAL_RESTORE_MS_PER_KB     18U
 
 /*
+ * Terminal transcript geometry.
+ *
+ * The Stage 3C shell already spans almost the full 640-pixel framebuffer.
+ * Help remained visually narrow because each authored guidance sentence was
+ * emitted as a separate short row. The normal transcript begins at x=34;
+ * the inner horizontal rule ends at x=610. Leaving the same four-pixel inset
+ * on the right gives Help a 572-pixel safe reading band without changing the
+ * frame, font metrics or footer.
+ */
+#define FLOPPY144_TERMINAL_TEXT_X                 34U
+#define FLOPPY144_TERMINAL_INNER_RULE_RIGHT_X    610U
+#define FLOPPY144_TERMINAL_TEXT_RIGHT_INSET        4U
+#define FLOPPY144_TERMINAL_HELP_TEXT_WIDTH \
+    (FLOPPY144_TERMINAL_INNER_RULE_RIGHT_X - \
+     FLOPPY144_TERMINAL_TEXT_RIGHT_INSET - \
+     FLOPPY144_TERMINAL_TEXT_X)
+
+#define FLOPPY144_TERMINAL_HELP_ROW_GAP "   "
+
+/*
  * Small terminal drawing helpers
  *
  * The first helper centres headings. The second draws one selectable
@@ -1730,13 +1750,141 @@ static const char *const floppy144_terminal_help_page_3[] =
     NULL
 };
 
+/*
+ * Reflow authored Help guidance into the full terminal reading band.
+ *
+ * The Help arrays remain the content authority. This helper changes only
+ * presentation: adjacent non-empty authored rows are packed left-to-right
+ * while they fit the safe text width and fixed terminal line buffer. Blank
+ * rows still force a paragraph break, so titles and section structure remain
+ * unchanged.
+ */
+static void Floppy144TerminalPushHelpPageContent(
+    Floppy144TerminalState *terminal,
+    const char *const *lines
+)
+{
+    char row[FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
+    char candidate[FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
+    uint32_t line_index;
+
+    if(
+        terminal == NULL ||
+        lines == NULL
+    )
+    {
+        return;
+    }
+
+    row[0] =
+        '\0';
+
+    for(
+        line_index = 0U;
+        lines[line_index] != NULL;
+        ++line_index
+    )
+    {
+        const char *line =
+            lines[line_index];
+
+        if(line[0] == '\0')
+        {
+            if(row[0] != '\0')
+            {
+                Floppy144TerminalPushLine(
+                    terminal,
+                    row
+                );
+
+                row[0] =
+                    '\0';
+            }
+
+            Floppy144TerminalPushLine(
+                terminal,
+                ""
+            );
+
+            continue;
+        }
+
+        if(row[0] == '\0')
+        {
+            (void)snprintf(
+                row,
+                sizeof(row),
+                "%s",
+                line
+            );
+
+            continue;
+        }
+
+        if(
+            strlen(row) +
+                strlen(FLOPPY144_TERMINAL_HELP_ROW_GAP) +
+                strlen(line) +
+                1U <=
+            sizeof(candidate)
+        )
+        {
+            (void)snprintf(
+                candidate,
+                sizeof(candidate),
+                "%s%s%s",
+                row,
+                FLOPPY144_TERMINAL_HELP_ROW_GAP,
+                line
+            );
+
+            if(
+                Floppy144DrawTextWidth(
+                    candidate,
+                    1U
+                ) <=
+                FLOPPY144_TERMINAL_HELP_TEXT_WIDTH
+            )
+            {
+                (void)snprintf(
+                    row,
+                    sizeof(row),
+                    "%s",
+                    candidate
+                );
+
+                continue;
+            }
+        }
+
+        Floppy144TerminalPushLine(
+            terminal,
+            row
+        );
+
+        (void)snprintf(
+            row,
+            sizeof(row),
+            "%s",
+            line
+        );
+    }
+
+    if(row[0] != '\0')
+    {
+        Floppy144TerminalPushLine(
+            terminal,
+            row
+        );
+    }
+}
+
 static void Floppy144TerminalPrintHelpPage(
     Floppy144TerminalState *terminal
 )
 {
     const char *const *lines;
     char line[FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
-    uint32_t line_index;
 
     if(
         terminal == NULL ||
@@ -1807,17 +1955,10 @@ static void Floppy144TerminalPrintHelpPage(
         ""
     );
 
-    for(
-        line_index = 0U;
-    lines[line_index] != NULL;
-    ++line_index
-    )
-    {
-        Floppy144TerminalPushLine(
-            terminal,
-            lines[line_index]
-        );
-    }
+    Floppy144TerminalPushHelpPageContent(
+        terminal,
+        lines
+    );
 }
 
 static void Floppy144TerminalOpenHelpPager(
@@ -4737,7 +4878,7 @@ void Floppy144TerminalDraw(
     {
         Floppy144DrawText(
             &surface,
-            34U,
+            FLOPPY144_TERMINAL_TEXT_X,
             output_y,
             terminal->output[line_index],
             1U,

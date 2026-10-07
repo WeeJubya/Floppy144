@@ -92,6 +92,10 @@ jobs:
         shell: pwsh
         run: .\tools\test_stage4_completion.ps1
 
+      - name: Stage 4D widened Help presentation
+        shell: pwsh
+        run: .\tools\test_stage4_help_presentation.ps1
+
       - name: Stage 4 build architecture
         shell: pwsh
         run: .\tools\test_stage4_build_architecture.ps1
