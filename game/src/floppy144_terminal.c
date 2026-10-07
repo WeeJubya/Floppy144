@@ -406,6 +406,66 @@ static void Floppy144TerminalPushLine(
     ++terminal->output_count;
 }
 
+/*
+ * Insert a transcript line without disturbing the fixed environment line at
+ * index zero. If the buffer is already full, the oldest tail line is dropped,
+ * matching the terminal's existing bounded-output behaviour.
+ */
+static void Floppy144TerminalInsertLine(
+    Floppy144TerminalState *terminal,
+    uint32_t line_index,
+    const char *text
+)
+{
+    uint32_t move_index;
+
+    if(
+        terminal == NULL ||
+        text == NULL
+    )
+    {
+        return;
+    }
+
+    if(
+        terminal->output_count >=
+            FLOPPY144_TERMINAL_OUTPUT_LINES
+    )
+    {
+        terminal->output_count =
+            FLOPPY144_TERMINAL_OUTPUT_LINES - 1U;
+    }
+
+    if(line_index > terminal->output_count)
+    {
+        line_index =
+            terminal->output_count;
+    }
+
+    for(
+        move_index = terminal->output_count;
+        move_index > line_index;
+        --move_index
+    )
+    {
+        snprintf(
+            terminal->output[move_index],
+            FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY,
+            "%s",
+            terminal->output[move_index - 1U]
+        );
+    }
+
+    snprintf(
+        terminal->output[line_index],
+        FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY,
+        "%s",
+        text
+    );
+
+    ++terminal->output_count;
+}
+
 static void Floppy144TerminalPushWrappedLine(
     Floppy144TerminalState *terminal,
     const char *text
@@ -4183,6 +4243,86 @@ void Floppy144TerminalResetAtRoom(
         FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY,
         "%s",
         environment_line
+    );
+}
+
+void Floppy144TerminalApplyOperatorIdentity(
+    Floppy144TerminalState *terminal,
+    const char *operator_name,
+    bool authenticate
+)
+{
+    const char *display_name;
+    char operator_line[
+        FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY
+    ];
+
+    if(
+        terminal == NULL ||
+        terminal->output_count == 0U
+    )
+    {
+        return;
+    }
+
+    display_name =
+        operator_name != NULL &&
+        operator_name[0] != '\0'
+            ? operator_name
+            : "GDR OPERATOR";
+
+    (void)snprintf(
+        operator_line,
+        sizeof(operator_line),
+        "OPERATOR: %s",
+        display_name
+    );
+
+    if(authenticate)
+    {
+        /*
+         * Keep output[0] as the physical/environment identity because
+         * Floppy144TerminalRefreshEnvironmentLine updates that slot later.
+         * The authentication block follows it and is intentionally immediate:
+         * atmosphere without a new timer, modal state or input delay.
+         */
+        Floppy144TerminalInsertLine(
+            terminal,
+            1U,
+            "GDR NETWORK ACCESS"
+        );
+
+        Floppy144TerminalInsertLine(
+            terminal,
+            2U,
+            operator_line
+        );
+
+        Floppy144TerminalInsertLine(
+            terminal,
+            3U,
+            "VERIFYING PROFILE..."
+        );
+
+        Floppy144TerminalInsertLine(
+            terminal,
+            4U,
+            "ACCESS ACCEPTED"
+        );
+
+        Floppy144TerminalInsertLine(
+            terminal,
+            5U,
+            ""
+        );
+
+        return;
+    }
+
+    Floppy144TerminalInsertLine(
+        terminal,
+        1U,
+        operator_line
     );
 }
 

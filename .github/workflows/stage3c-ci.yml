@@ -72,6 +72,10 @@ jobs:
         shell: pwsh
         run: .\tools\test_stage4_profile_name.ps1
 
+      - name: Stage 4C terminal authentication
+        shell: pwsh
+        run: .\tools\test_stage4_terminal_auth.ps1
+
       - name: Stage 4 build architecture
         shell: pwsh
         run: .\tools\test_stage4_build_architecture.ps1

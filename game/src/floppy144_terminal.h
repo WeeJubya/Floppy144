@@ -157,6 +157,19 @@ void Floppy144TerminalConfigureSession(
     bool restoration_location_restrictions
 );
 
+/*
+ * Add persistent operator identity to a newly-reset terminal transcript.
+ *
+ * authenticate=true adds the compact GDR verification sequence. false adds
+ * only the current operator line, allowing physical terminal re-entry to
+ * remain personalised without replaying the authentication ceremony.
+ */
+void Floppy144TerminalApplyOperatorIdentity(
+    Floppy144TerminalState *terminal,
+    const char *operator_name,
+    bool authenticate
+);
+
 void Floppy144TerminalMoveSelection(
     Floppy144TerminalState *terminal,
     int32_t direction
