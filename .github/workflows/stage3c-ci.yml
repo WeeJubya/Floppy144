@@ -60,6 +60,10 @@ jobs:
         shell: pwsh
         run: .\tools\test_stage4_single_instance.ps1
 
+      - name: Stage 4 developer configuration
+        shell: pwsh
+        run: .\tools\test_stage4_config.ps1
+
       - name: Install Premake
         shell: pwsh
         run: |

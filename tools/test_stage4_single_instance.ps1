@@ -41,7 +41,7 @@ foreach($required in @(
 }
 
 $acquireIndex = $mainSource.IndexOf('f144Win32SingleInstanceAcquire')
-$debugIndex = $mainSource.LastIndexOf('Floppy144CommandLineHasSwitch')
+$debugIndex = $mainSource.IndexOf('f144Win32StartupConfigFromCommandLine')
 $storageIndex = $mainSource.IndexOf('Floppy144StorageResolve')
 
 if($acquireIndex -lt 0) {
@@ -61,7 +61,7 @@ if(
     $acquireIndex -gt $debugIndex
 )
 {
-    throw "-debug must not bypass single-instance protection."
+    throw "Platform configuration acquisition must not bypass single-instance protection."
 }
 
 foreach($required in @(

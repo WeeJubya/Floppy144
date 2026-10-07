@@ -268,3 +268,32 @@ is required or exposed in release builds.
 Future Linux/macOS launchers should implement their own process-exclusivity
 mechanism at the equivalent launcher/platform boundary. Core/game modules
 must remain unaware of the native lock primitive.
+
+## Developer configuration - Stage 4
+
+Raw launch-option parsing is platform-owned. Windows converts the WinMain
+command-line tail into the portable `F144StartupConfig` object; game systems query
+semantic values rather than parsing Windows arguments themselves.
+
+Supported Windows developer options are:
+
+```text
+-debug
+-debug -seed <non-zero uint32>
+-debug -date <YYYY-MM-DD>
+```
+
+`-debug` retains its existing meaning: it enables diagnostic terminal
+recovery breadcrumbs. There is no separate debug-document set, debug overlay,
+developer keyboard shortcut or player-facing logging mode in the current
+production game.
+
+`-seed` and `-date` are deterministic developer/regression hooks prepared
+for Stage 4E. They are ignored unless `-debug` is also present. The portable
+configuration API can inject the same values directly in tests or future
+platform launchers, so regression work does not depend on a real command line,
+random environment or calendar clock.
+
+The legacy F144 runtime still contains a handful of unconditional stderr error
+messages for internal rendering/timestamp failures. They are implementation
+diagnostics rather than `-debug` facilities and are unchanged by S4B-07.

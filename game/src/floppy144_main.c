@@ -8,8 +8,10 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
+#include "f144_startup_config.h"
 #include "f144_platform.h"
 #include "f144_runtime.h"
+#include "f144_win32_startup_config.h"
 #include "f144_win32_input.h"
 #include "f144_win32_lifecycle.h"
 #include "f144_win32_platform.h"
@@ -90,7 +92,7 @@ static Floppy144StoragePaths global_storage_paths;
 
 static bool global_recorded_session_available;
 static bool global_recorded_session_is_autosave;
-static bool global_debug_guidance;
+static F144StartupConfig global_config;
 
 /*
  * Short-lived interface state
@@ -922,13 +924,19 @@ static void Floppy144UpdateTiming(
     }
 }
 
+/*
+ * Apply portable launch configuration and profile policy to the active
+ * terminal session.
+ */
 static void Floppy144ConfigureTerminalSession(
     void
 )
 {
     Floppy144TerminalConfigureSession(
         &global_terminal,
-        global_debug_guidance,
+        f144StartupConfigDebugEnabled(
+            &global_config
+        ),
         global_profile.recovery_sessions_begun <= 1U,
         true
     );
@@ -1075,15 +1083,30 @@ static void Floppy144MainMenuActivate(
             );
 
             {
-                uint32_t recovery_seed =
-                    (uint32_t)f144PlatformMonotonicMs(
-                        &global_platform
-                    );
+                uint32_t recovery_seed;
 
-                if(recovery_seed == 0U)
+                /*
+                 * Stage 4E regression runs may inject a deterministic seed
+                 * through portable configuration. Ordinary launches retain
+                 * the established monotonic-clock-derived seed.
+                 */
+                if(
+                    !f144StartupConfigRecoverySeedOverride(
+                        &global_config,
+                        &recovery_seed
+                    )
+                )
                 {
                     recovery_seed =
-                    1U;
+                        (uint32_t)f144PlatformMonotonicMs(
+                            &global_platform
+                        );
+
+                    if(recovery_seed == 0U)
+                    {
+                        recovery_seed =
+                            1U;
+                    }
                 }
 
                 Floppy144RunStateBegin(
@@ -3010,62 +3033,6 @@ static LRESULT CALLBACK Floppy144WindowProc(
 }
 
 
-static bool Floppy144CommandLineHasSwitch(
-    const char *command_line,
-    const char *switch_name
-)
-{
-    size_t switch_length;
-
-    if(command_line == NULL || switch_name == NULL)
-    {
-        return false;
-    }
-
-    switch_length =
-        strlen(switch_name);
-
-    while(*command_line != '\0')
-    {
-        const char *token_start;
-        size_t token_length;
-
-        while(*command_line == ' ' || *command_line == '\t')
-        {
-            ++command_line;
-        }
-
-        token_start =
-            command_line;
-
-        while(
-            *command_line != '\0' &&
-            *command_line != ' ' &&
-            *command_line != '\t'
-        )
-        {
-            ++command_line;
-        }
-
-        token_length =
-            (size_t)(command_line - token_start);
-
-        if(
-            token_length == switch_length &&
-            strncmp(
-                token_start,
-                switch_name,
-                switch_length
-            ) == 0
-        )
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 /*
  * Application entry point
  *
@@ -3157,11 +3124,23 @@ int CALLBACK WinMain(
         }
     }
 
-    global_debug_guidance =
-        Floppy144CommandLineHasSwitch(
+    /*
+     * The Win32 launcher owns raw argument parsing. Game systems receive only
+     * the portable semantic configuration produced by that adapter.
+     */
+    if(
+        !f144Win32StartupConfigFromCommandLine(
             command_line,
-            "-debug"
+            &global_config
+        )
+    )
+    {
+        f144Win32SingleInstanceRelease(
+            &single_instance
         );
+
+        return 5;
+    }
 
     /*
      * Configure Floppy144
