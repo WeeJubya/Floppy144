@@ -607,17 +607,15 @@ function Test-Stage3B5CoordinatorWiring {
 
     if(
         $CatalogueSource -notmatch
-            'uTrackHeight=\s*FLOPPY144_DOCUMENT_BODY_MAX_LINES\*\s*FLOPPY144_DOCUMENT_BODY_LINE_HEIGHT' -or
+            'Floppy144DrawScrollbar' -or
         $CatalogueSource -notmatch
             'catalogue->document_scroll_line' -or
         $CatalogueSource -notmatch
-            'uThumbHeight>2U\?uThumbHeight-2U:uThumbHeight' -or
+            'FLOPPY144_DOCUMENT_BODY_MAX_LINES\*\s*FLOPPY144_DOCUMENT_BODY_LINE_HEIGHT' -or
         $NotebookViewSource -notmatch
-            'FLOPPY144_NOTEBOOK_VISIBLE_LINES\*FLOPPY144_NOTEBOOK_LINE_HEIGHT' -or
+            'Floppy144DrawScrollbar' -or
         $NotebookViewSource -notmatch
-            'uThumbY=uTrackY\+\(uTravel\*top\)' -or
-        $NotebookViewSource -notmatch
-            'uThumbHeight>2U\?uThumbHeight-2U:uThumbHeight'
+            'FLOPPY144_NOTEBOOK_VISIBLE_LINES\*\s*FLOPPY144_NOTEBOOK_LINE_HEIGHT'
     ) {
         throw "Document Viewer or Notebook proportional scrollbar contract is missing."
     }
@@ -978,7 +976,7 @@ function Test-PhysicalItemPlayerFacingContract {
 
     if(
         $CabinetSource -notmatch
-            'UP/DOWN SELECT  ENTER VIEW  BACKSPACE SITE' -or
+            'UP/DOWN SELECT   ENTER VIEW   BACKSPACE BACK' -or
         $CabinetSource -notmatch
             'ITEM INSPECTED - NOTEBOOK UPDATED'
     ) {

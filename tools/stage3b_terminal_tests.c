@@ -713,8 +713,8 @@ static void Floppy144TestCollectionListPresentation(void)
 
     F144_CHECK(
         sTerminal.output_count >= 2U &&
-        strstr(sTerminal.output[1], "Q: EXIT") != NULL,
-        "collection LIST page visibly advertises Q: EXIT"
+        strstr(sTerminal.output[1], "Q: RETURN") != NULL,
+        "collection LIST page visibly advertises Q: RETURN"
     );
 
     if(sTerminal.output_count >= 3U)

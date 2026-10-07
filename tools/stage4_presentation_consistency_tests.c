@@ -69,11 +69,13 @@ static uint32_t CountPixelsOutsideTrack(void)
 static void TestScrollbarContract(void)
 {
     Floppy144Surface surface={g_pixels,TEST_WIDTH,TEST_HEIGHT};
+    uint32_t empty_hash;
     uint32_t top_hash;
     uint32_t bottom_hash;
     uint32_t clamped_hash;
 
     memset(g_pixels,0,sizeof(g_pixels));
+    empty_hash=HashPixels();
 
     Floppy144DrawScrollbar(
         &surface,
@@ -89,7 +91,7 @@ static void TestScrollbarContract(void)
     );
 
     CHECK(
-        HashPixels()==2166136261U,
+        HashPixels()==empty_hash,
         "scrollbar is absent when all content fits"
     );
 
@@ -111,7 +113,7 @@ static void TestScrollbarContract(void)
     top_hash=HashPixels();
 
     CHECK(
-        top_hash!=2166136261U,
+        top_hash!=empty_hash,
         "overflow content draws a visible scrollbar"
     );
 
