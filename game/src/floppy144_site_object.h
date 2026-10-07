@@ -66,6 +66,15 @@ const char *Floppy144SiteFocusedParentId(
 );
 
 /*
+ * Resolve the projection-neutral Site rectangle belonging to one generated
+ * furniture/fixture parent. Inspection presentation uses this to recover the
+ * authored aspect ratio and signed rotation without duplicating geometry data.
+ */
+const Floppy144SiteRect *Floppy144SiteRectForParentId(
+    const char *pszParentId
+);
+
+/*
  * Resolve an authored Access interaction owned by the currently focused
  * conventional door. The interaction is returned only while its prerequisites
  * are satisfied, so the footer and the A key expose the same player action.

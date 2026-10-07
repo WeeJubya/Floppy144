@@ -53,6 +53,15 @@ void Floppy144CabinetReset(
 );
 
 /*
+ * Presentation-only progression gate. The existing schematic remains active
+ * until Main Office reconstruction; thereafter Inspection may use the richer
+ * pseudo-isometric parent representation.
+ */
+bool Floppy144CabinetEnhancedPresentationUnlocked(
+    const Floppy144RunState *pRunState
+);
+
+/*
  * Resolve a generated secure cabinet only when that cabinet owns the current
  * Site proximity focus. Opening an already-unlocked cabinet goes directly to
  * Cabinet Interior.

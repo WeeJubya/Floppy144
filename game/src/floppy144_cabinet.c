@@ -3,6 +3,7 @@
  */
 
 #include "floppy144_cabinet.h"
+#include "floppy144_cabinet_25d.h"
 
 #include "floppy144_draw.h"
 #include "floppy144_interaction_engine.h"
@@ -370,6 +371,19 @@ void Floppy144CabinetReset(
     memset(pCabinet, 0, sizeof(*pCabinet));
     pCabinet->uCabinetOrdinal = 0xffU;
 }
+
+bool Floppy144CabinetEnhancedPresentationUnlocked(
+    const Floppy144RunState *pRunState
+)
+{
+    return
+        pRunState != NULL &&
+        Floppy144RunStateRoomReconstructed(
+            pRunState,
+            FLOPPY144_ROOM_MAIN_OFFICE
+        );
+}
+
 
 bool Floppy144CabinetOpenNearby(
     Floppy144CabinetState *pCabinet,
@@ -2051,12 +2065,54 @@ static void Floppy144CabinetDrawInterior(
     );
     Floppy144DrawText(pSurface, 28U, 48U, pCabinet->szDisplayName, 1U, uText);
 
-    Floppy144CabinetDrawContainerBody(
-        pSurface,
-        pCabinet,
-        uMetal,
-        uEdge
-    );
+    uCount =
+        Floppy144CabinetVisibleContentCount(
+            pCabinet,
+            pRunState
+        );
+
+    if(Floppy144CabinetEnhancedPresentationUnlocked(pRunState))
+    {
+        const Floppy144DataRecord *pParent =
+            Floppy144CabinetParentRecord(
+                pCabinet->szCabinetId
+            );
+
+        const Floppy144SiteRect *pSiteRect =
+            Floppy144SiteRectForParentId(
+                pCabinet->szCabinetId
+            );
+
+        (void)Floppy144Cabinet25DDraw(
+            pSurface,
+            pParent,
+            pSiteRect,
+            uCount,
+            pCabinet->uSelectedContent
+        );
+    }
+    else
+    {
+        /*
+         * Preserve the established Stage 3 schematic until Main Office
+         * reconstruction unlocks the presentation enhancement.
+         */
+        Floppy144CabinetDrawContainerBody(
+            pSurface,
+            pCabinet,
+            uMetal,
+            uEdge
+        );
+
+        Floppy144CabinetDrawContentMarkers(
+            pSurface,
+            pCabinet,
+            uCount,
+            pCabinet->uSelectedContent,
+            uEdge,
+            uBright
+        );
+    }
 
     Floppy144DrawText(
         pSurface,
@@ -2065,17 +2121,6 @@ static void Floppy144CabinetDrawInterior(
         "RECOVERED CONTENTS - INSPECTION ONLY",
         1U,
         uMuted
-    );
-
-    uCount = Floppy144CabinetVisibleContentCount(pCabinet, pRunState);
-
-    Floppy144CabinetDrawContentMarkers(
-        pSurface,
-        pCabinet,
-        uCount,
-        pCabinet->uSelectedContent,
-        uEdge,
-        uBright
     );
 
     if(uCount == 0U)

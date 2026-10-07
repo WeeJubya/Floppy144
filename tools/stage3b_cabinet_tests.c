@@ -18,6 +18,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 static int g_nFailures = 0;
@@ -1172,6 +1173,183 @@ static void Floppy144TestFocusedCabinetAccess(void)
     );
 }
 
+static uint32_t Floppy144TestSurfaceHash(
+    const uint32_t *pPixels,
+    uint32_t uCount
+)
+{
+    uint32_t uHash=2166136261U;
+    uint32_t uIndex;
+
+    for(uIndex=0U;uIndex<uCount;++uIndex)
+    {
+        uHash^=pPixels[uIndex];
+        uHash*=16777619U;
+    }
+
+    return uHash;
+}
+
+static void Floppy144TestInspectionPresentationProgression(void)
+{
+    enum
+    {
+        TEST_WIDTH=640,
+        TEST_HEIGHT=360
+    };
+
+    Floppy144WorldState sWorld;
+    Floppy144RunState sState;
+    Floppy144CabinetState sCabinet;
+    Floppy144Surface sSurface;
+    const Floppy144SiteRect *pSecretaryDeskRect;
+    uint32_t *pPixels;
+    uint32_t uBasicHash;
+    uint32_t uEnhancedHash;
+    uint32_t uCountBefore;
+    uint32_t uSelectedBefore;
+
+    Floppy144TestReset(&sWorld,&sState,&sCabinet);
+
+    F144_CHECK(
+        Floppy144RunStateReconstructRoom(
+            &sState,
+            FLOPPY144_ROOM_RECEPTION
+        ),
+        "Inspection presentation fixture reconstructs Reception"
+    );
+
+    F144_CHECK(
+        !Floppy144CabinetEnhancedPresentationUnlocked(
+            &sState
+        ),
+        "2.5D Inspection presentation is locked before Main Office restoration"
+    );
+
+    F144_CHECK(
+        Floppy144CabinetOpenParent(
+            &sCabinet,
+            &sState,
+            "RECEPTION_DESK"
+        ),
+        "pre-unlock Reception desk opens the established Contents framework"
+    );
+
+    uCountBefore=
+        Floppy144CabinetVisibleContentCount(
+            &sCabinet,
+            &sState
+        );
+
+    if(uCountBefore>1U)
+    {
+        Floppy144CabinetMoveSelection(
+            &sCabinet,
+            &sState,
+            1
+        );
+    }
+
+    uSelectedBefore=
+        sCabinet.uSelectedContent;
+
+    pPixels=
+        (uint32_t *)calloc(
+            (size_t)TEST_WIDTH*(size_t)TEST_HEIGHT,
+            sizeof(uint32_t)
+        );
+
+    F144_CHECK(
+        pPixels!=NULL,
+        "Inspection presentation framebuffer allocates"
+    );
+
+    if(pPixels==NULL)
+    {
+        return;
+    }
+
+    sSurface.pixels=pPixels;
+    sSurface.width=TEST_WIDTH;
+    sSurface.height=TEST_HEIGHT;
+
+    Floppy144CabinetDraw(
+        &sSurface,
+        &sCabinet,
+        &sState
+    );
+
+    uBasicHash=
+        Floppy144TestSurfaceHash(
+            pPixels,
+            TEST_WIDTH*TEST_HEIGHT
+        );
+
+    F144_CHECK(
+        Floppy144RunStateReconstructRoom(
+            &sState,
+            FLOPPY144_ROOM_MAIN_OFFICE
+        ),
+        "Main Office restoration succeeds for Inspection presentation unlock"
+    );
+
+    F144_CHECK(
+        Floppy144CabinetEnhancedPresentationUnlocked(
+            &sState
+        ),
+        "Main Office restoration unlocks 2.5D Inspection presentation"
+    );
+
+    memset(
+        pPixels,
+        0,
+        (size_t)TEST_WIDTH*(size_t)TEST_HEIGHT*sizeof(uint32_t)
+    );
+
+    Floppy144CabinetDraw(
+        &sSurface,
+        &sCabinet,
+        &sState
+    );
+
+    uEnhancedHash=
+        Floppy144TestSurfaceHash(
+            pPixels,
+            TEST_WIDTH*TEST_HEIGHT
+        );
+
+    F144_CHECK(
+        uBasicHash!=uEnhancedHash,
+        "Main Office restoration changes only the parent presentation layer"
+    );
+
+    F144_CHECK(
+        Floppy144CabinetVisibleContentCount(
+            &sCabinet,
+            &sState
+        )==uCountBefore &&
+        sCabinet.uSelectedContent==uSelectedBefore,
+        "presentation unlock preserves contents count and current selection"
+    );
+
+    pSecretaryDeskRect=
+        Floppy144SiteRectForParentId(
+            "SECRETARY_OFFICE_DESK"
+        );
+
+    F144_CHECK(
+        pSecretaryDeskRect!=NULL &&
+        pSecretaryDeskRect->rotation==135 &&
+        pSecretaryDeskRect->authored_width16==
+            6U*FLOPPY144_SITE_FIXED_ONE &&
+        pSecretaryDeskRect->authored_height16==
+            4U*FLOPPY144_SITE_FIXED_ONE,
+        "Inspection renderer can recover authored diagonal Secretary desk geometry"
+    );
+
+    free(pPixels);
+}
+
 static void Floppy144TestActLengthContract(void)
 {
     Floppy144WorldState sWorld;
@@ -1206,6 +1384,7 @@ int main(void)
     Floppy144TestShelvingPresentationAndRecoveredOrder();
     Floppy144TestAllCorridorDoorContainers();
     Floppy144TestDoorParentDisplayName();
+    Floppy144TestInspectionPresentationProgression();
     Floppy144TestRecoveredChildRevealsCabinetCode();
     Floppy144TestSecurityCabinetUnlockAndContents();
     Floppy144TestPerCabinetUnlockPersistence();

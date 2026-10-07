@@ -2470,6 +2470,43 @@ const char *Floppy144SiteFocusedParentId(
     return pParent != NULL ? pParent->pszId : NULL;
 }
 
+const Floppy144SiteRect *Floppy144SiteRectForParentId(
+    const char *pszParentId
+)
+{
+    uint32_t uRectIndex;
+
+    if(pszParentId == NULL)
+    {
+        return NULL;
+    }
+
+    for(
+        uRectIndex = 0U;
+        uRectIndex < Floppy144SiteRectCount();
+        ++uRectIndex
+    )
+    {
+        const Floppy144SiteRect *pRect =
+            Floppy144SiteRectAt(uRectIndex);
+
+        const Floppy144DataRecord *pParent =
+            Floppy144SiteParentRecordForRect(pRect);
+
+        if(
+            pParent != NULL &&
+            pParent->pszId != NULL &&
+            strcmp(pParent->pszId, pszParentId) == 0
+        )
+        {
+            return pRect;
+        }
+    }
+
+    return NULL;
+}
+
+
 bool Floppy144SiteAccessInteractionNearby(
     const Floppy144RunState *pState,
     Floppy144InteractionId *pInteraction

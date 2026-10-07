@@ -1075,6 +1075,7 @@ Invoke-Stage3BStep -Label "PHYSICAL ITEM PLAYER-FACING CONTRACT" -Action {
 $CabinetSources = @(
     (Join-Path $ScriptDir "stage3b_cabinet_tests.c"),
     (Join-Path $SourceDir "floppy144_cabinet.c"),
+    (Join-Path $SourceDir "floppy144_cabinet_25d.c"),
     (Join-Path $SourceDir "floppy144_game_data.c"),
     (Join-Path $SourceDir "floppy144_trigger_engine.c"),
     (Join-Path $SourceDir "floppy144_interaction_engine.c"),
