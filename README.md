@@ -297,3 +297,31 @@ random environment or calendar clock.
 The legacy F144 runtime still contains a handful of unconditional stderr error
 messages for internal rendering/timestamp failures. They are implementation
 diagnostics rather than `-debug` facilities and are unchanged by S4B-07.
+
+
+## Final Stage 4B build separation
+
+Premake now generates three production targets:
+
+```text
+Floppy144Core
+Floppy144PlatformWin32
+Floppy144
+```
+
+`Floppy144Core` contains the portable gameplay/state/rendering and semantic
+platform contracts. `Floppy144PlatformWin32` contains the native Windows
+implementation and legacy presenter support. `Floppy144` is the final Windows
+application and links both static libraries plus `user32`, `gdi32` and
+`shell32`.
+
+No DLL dependency was introduced. No SDL3/Linux/macOS/mobile dependency was
+added.
+
+The remaining portability debt is explicit: `floppy144_persistence.c` still
+mixes portable persistence encoding with Win32/MSVC file I/O, so it is
+quarantined in the Windows application target instead of being mislabeled as
+Core.
+
+See `docs/stage4/build_architecture.md` for the full dependency map, test
+strategy and future-platform attachment point.

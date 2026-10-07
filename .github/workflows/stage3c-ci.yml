@@ -64,6 +64,10 @@ jobs:
         shell: pwsh
         run: .\tools\test_stage4_config.ps1
 
+      - name: Stage 4 build architecture
+        shell: pwsh
+        run: .\tools\test_stage4_build_architecture.ps1
+
       - name: Install Premake
         shell: pwsh
         run: |
@@ -79,6 +83,14 @@ jobs:
       - name: Generate Visual Studio 2022 project
         shell: pwsh
         run: premake5 vs2022
+
+      - name: Build portable Core target
+        shell: pwsh
+        run: msbuild .\build\Floppy144.sln /t:Floppy144Core /m /p:Configuration=release /p:Platform=windows /p:WarningLevel=Level4 /p:TreatWarningsAsErrors=true
+
+      - name: Build Win32 platform target
+        shell: pwsh
+        run: msbuild .\build\Floppy144.sln /t:Floppy144PlatformWin32 /m /p:Configuration=release /p:Platform=windows /p:WarningLevel=Level4 /p:TreatWarningsAsErrors=true
 
       - name: Release build
         shell: pwsh

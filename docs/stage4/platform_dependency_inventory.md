@@ -1037,3 +1037,29 @@ The Core should know semantic actions, semantic audio cues, bytes to persist, mo
 It should not know HWND, WM messages, VK constants, GDI, WinMIDI, AppData APIs, mutexes or mobile lifecycle APIs.
 
 That boundary preserves the completed Stage 3 game while giving Stage 4 one narrow place to solve each operating system.
+
+
+## S4B-08 implementation result
+
+The build-separation recommendation above has now been implemented.
+
+The authoritative post-S4B-08 layout and remaining portability debt are
+documented in `docs/stage4/build_architecture.md`.
+
+The important distinction is that the new `Floppy144Core` target contains
+only source that passes the Win32-dependency audit. The mixed
+`floppy144_persistence.c` codec/file-I/O module is deliberately excluded and
+quarantined in the Windows application target until that final storage seam is
+split properly.
+
+The three production targets are:
+
+```text
+Floppy144Core              portable static library
+Floppy144PlatformWin32     Windows implementation static library
+Floppy144                  Windows launcher/application
+```
+
+The former `F144 Runtime` target has been absorbed into
+`Floppy144PlatformWin32`; no DLL boundary or new runtime dependency was
+introduced.
