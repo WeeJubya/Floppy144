@@ -56,6 +56,8 @@ static int ProjectPointEquals(
     int32_t expected_y
 )
 {
+    int32_t screen_x;
+    int32_t screen_y;
     Floppy144Site2DProjectPoint(
         camera,
         world_x16,
