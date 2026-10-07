@@ -1170,32 +1170,77 @@ void Floppy144MainMenuDraw(
 
     if(reinstate_confirmation)
     {
+        char restored_session_text[64];
+
         /*
-         * This deliberately covers the status/capacity strip. The restored
-         * percentage exists underneath, but is not revealed until the player
-         * acknowledges the reinstatement.
+         * Successful reinstate remains a state of Session Control rather than
+         * a separate modal screen. Reuse the menu's inner margins, panel,
+         * dividers and typography so the acknowledgement reads as part of the
+         * same GDR system.
+         *
+         * The normal status/capacity strip is still deliberately hidden until
+         * acknowledgement. The existing input handshake then paints one
+         * ordinary active-session menu frame, including the loaded percentage,
+         * before the matching key-up returns to gameplay.
          */
+        if(run_state != NULL)
+        {
+            (void)snprintf(
+                restored_session_text,
+                sizeof(restored_session_text),
+                "RECOVERY SEED: %u",
+                (unsigned)run_state->recovery_seed
+            );
+        }
+        else
+        {
+            (void)snprintf(
+                restored_session_text,
+                sizeof(restored_session_text),
+                "%s",
+                "RECOVERY STATE: REINSTATED"
+            );
+        }
+
         Floppy144DrawFillRect(
             &surface,
-            96U,
-            256U,
-            448U,
-            62U,
+            48U,
+            164U,
+            544U,
+            154U,
             panel_dark
         );
 
         Floppy144DrawRect(
             &surface,
-            96U,
-            256U,
-            448U,
-            62U,
+            48U,
+            164U,
+            544U,
+            154U,
+            border
+        );
+
+        Floppy144DrawFillRect(
+            &surface,
+            56U,
+            174U,
+            528U,
+            24U,
+            panel
+        );
+
+        Floppy144DrawRect(
+            &surface,
+            56U,
+            174U,
+            528U,
+            24U,
             green
         );
 
         Floppy144RecoveryTextCentred(
             &surface,
-            270U,
+            180U,
             "SESSION RESTORED",
             2U,
             green
@@ -1203,10 +1248,43 @@ void Floppy144MainMenuDraw(
 
         Floppy144RecoveryTextCentred(
             &surface,
-            298U,
-            "PRESS ANY KEY TO CONTINUE",
+            214U,
+            "RECORDED RECOVERY STATE REINSTATED",
             1U,
             text
+        );
+
+        Floppy144RecoveryTextCentred(
+            &surface,
+            234U,
+            restored_session_text,
+            1U,
+            muted
+        );
+
+        Floppy144DrawFillRect(
+            &surface,
+            56U,
+            254U,
+            528U,
+            1U,
+            border
+        );
+
+        Floppy144RecoveryTextCentred(
+            &surface,
+            270U,
+            "RECOVERY STATUS AVAILABLE AFTER ACKNOWLEDGEMENT",
+            1U,
+            muted
+        );
+
+        Floppy144RecoveryTextCentred(
+            &surface,
+            296U,
+            "PRESS ANY KEY TO CONTINUE",
+            1U,
+            amber
         );
     }
 }
