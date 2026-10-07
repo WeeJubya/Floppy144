@@ -495,10 +495,6 @@ static void Floppy144CatalogueDrawList(
     char collection_text[32];
 
     uint32_t visible_row;
-    uint32_t thumb_y;
-    uint32_t thumb_height;
-    uint32_t thumb_travel;
-    uint32_t max_top_index;
 
     /* Display uses one-based record numbers while state remains zero-based. */
     snprintf(
@@ -638,59 +634,16 @@ static void Floppy144CatalogueDrawList(
         );
     }
 
-    Floppy144DrawFillRect(
+    Floppy144DrawScrollbar(
         surface,
-        594,
-        98,
-        4,
-        188,
-        border
-    );
-
-    /*
-     * Size and position the scrollbar from the registered record count.
-     */
-
-    thumb_height =
-        record_count > 0U
-            ? (
-                188U *
-                FLOPPY144_CATALOGUE_ROWS
-              ) / record_count
-            : 188U;
-
-    if(thumb_height < 20U)
-    {
-        thumb_height = 20U;
-    }
-
-    if(thumb_height > 188U)
-    {
-        thumb_height = 188U;
-    }
-
-    max_top_index =
-        record_count > FLOPPY144_CATALOGUE_ROWS
-            ? record_count - FLOPPY144_CATALOGUE_ROWS
-            : 0U;
-
-    thumb_travel =
-        188U - thumb_height;
-
-    thumb_y =
-        max_top_index > 0U
-            ? 98U +
-                catalogue->top_index *
-                thumb_travel /
-                max_top_index
-            : 98U;
-
-    Floppy144DrawFillRect(
-        surface,
-        592,
-        thumb_y,
-        8,
-        thumb_height,
+        594U,
+        98U,
+        188U,
+        record_count,
+        FLOPPY144_CATALOGUE_ROWS,
+        catalogue->top_index,
+        panel,
+        border,
         amber
     );
 
@@ -716,7 +669,7 @@ static void Floppy144CatalogueDrawList(
         surface,
         22,
         316,
-        "UP DOWN SELECT",
+        "UP/DOWN SELECT",
         1,
         text
     );
@@ -725,7 +678,7 @@ static void Floppy144CatalogueDrawList(
         surface,
         188,
         316,
-        "PGUP PGDN PAGE",
+        "PGUP/PGDN PAGE",
         1,
         muted
     );
@@ -743,7 +696,7 @@ static void Floppy144CatalogueDrawList(
         surface,
         502,
         316,
-        "BACKSPACE RETURN",
+        "BACKSPACE BACK",
         1,
         muted
     );
@@ -1412,57 +1365,17 @@ static void Floppy144CatalogueDrawDocument(
         uBodyLineCount > FLOPPY144_DOCUMENT_BODY_MAX_LINES
     )
     {
-        const uint32_t uTrackX=594U;
-        const uint32_t uTrackY=FLOPPY144_DOCUMENT_BODY_TOP;
-        const uint32_t uTrackHeight=
+        Floppy144DrawScrollbar(
+            surface,
+            594U,
+            FLOPPY144_DOCUMENT_BODY_TOP,
             FLOPPY144_DOCUMENT_BODY_MAX_LINES*
-            FLOPPY144_DOCUMENT_BODY_LINE_HEIGHT;
-        const uint32_t uMaximumScroll=
-            uBodyLineCount-
-            FLOPPY144_DOCUMENT_BODY_MAX_LINES;
-        uint32_t uThumbHeight=
-            (
-                uTrackHeight*
-                FLOPPY144_DOCUMENT_BODY_MAX_LINES
-            )/
-            uBodyLineCount;
-        uint32_t uTravel;
-        uint32_t uThumbY;
-
-        if(uThumbHeight<18U)uThumbHeight=18U;
-        if(uThumbHeight>uTrackHeight)uThumbHeight=uTrackHeight;
-
-        uTravel=uTrackHeight-uThumbHeight;
-        uThumbY=
-            uTrackY+
-            (
-                uTravel*
-                catalogue->document_scroll_line
-            )/
-            uMaximumScroll;
-
-        Floppy144DrawFillRect(
-            surface,
-            uTrackX,
-            uTrackY,
-            6U,
-            uTrackHeight,
-            panel
-        );
-        Floppy144DrawRect(
-            surface,
-            uTrackX,
-            uTrackY,
-            6U,
-            uTrackHeight,
-            border
-        );
-        Floppy144DrawFillRect(
-            surface,
-            uTrackX+2U,
-            uThumbY+1U,
-            2U,
-            uThumbHeight>2U?uThumbHeight-2U:uThumbHeight,
+                FLOPPY144_DOCUMENT_BODY_LINE_HEIGHT,
+            uBodyLineCount,
+            FLOPPY144_DOCUMENT_BODY_MAX_LINES,
+            catalogue->document_scroll_line,
+            panel,
+            border,
             amber
         );
     }

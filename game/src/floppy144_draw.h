@@ -33,6 +33,14 @@
      ((uint32_t)(blue)))
 
 /*
+ * Shared presentation grammar.
+ *
+ * Formal GDR record/configuration screens leave their functional panel at
+ * y=334 and place the one-line input footer on this common baseline.
+ */
+#define FLOPPY144_UI_FORMAL_FOOTER_Y 346U
+
+/*
  * Drawing primitives
  *
  * Clear fills the whole surface. FillRect draws a clipped solid block.
@@ -60,6 +68,23 @@ void Floppy144DrawRect(
     uint32_t width,
     uint32_t height,
     uint32_t colour
+);
+
+/*
+ * Shared six-pixel scrollbar used by scrollable lists and text views.
+ * Nothing is drawn when the complete content already fits in the viewport.
+ */
+void Floppy144DrawScrollbar(
+    Floppy144Surface *surface,
+    uint32_t x,
+    uint32_t y,
+    uint32_t height,
+    uint32_t total_items,
+    uint32_t visible_items,
+    uint32_t top_item,
+    uint32_t track_colour,
+    uint32_t border_colour,
+    uint32_t thumb_colour
 );
 
 uint32_t Floppy144DrawTextWidth(

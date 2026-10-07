@@ -108,6 +108,10 @@ jobs:
         shell: pwsh
         run: .\tools\test_stage4_inspection_25d.ps1
 
+      - name: Stage 4D presentation consistency
+        shell: pwsh
+        run: .\tools\test_stage4_presentation_consistency.ps1
+
       - name: Stage 4 build architecture
         shell: pwsh
         run: .\tools\test_stage4_build_architecture.ps1

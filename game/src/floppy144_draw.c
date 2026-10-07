@@ -245,6 +245,94 @@ void Floppy144DrawRect(
         colour
     );
 }
+
+/*
+ * Draw the common scroll indicator.
+ *
+ * The six-pixel track, one-pixel outline and two-pixel inset thumb are shared
+ * by Catalogue, Notebook, documents, Completion and Inspection. The helper
+ * receives logical item/line counts so individual screens keep ownership of
+ * their navigation state while presenting the same visual affordance.
+ */
+void Floppy144DrawScrollbar(
+    Floppy144Surface *surface,
+    uint32_t x,
+    uint32_t y,
+    uint32_t height,
+    uint32_t total_items,
+    uint32_t visible_items,
+    uint32_t top_item,
+    uint32_t track_colour,
+    uint32_t border_colour,
+    uint32_t thumb_colour
+)
+{
+    uint32_t maximum_top;
+    uint32_t thumb_height;
+    uint32_t travel;
+    uint32_t thumb_y;
+
+    if(
+        surface == NULL ||
+        surface->pixels == NULL ||
+        height == 0U ||
+        visible_items == 0U ||
+        total_items <= visible_items
+    )
+    {
+        return;
+    }
+
+    maximum_top=total_items-visible_items;
+
+    if(top_item>maximum_top)
+    {
+        top_item=maximum_top;
+    }
+
+    thumb_height=
+        (height*visible_items)/total_items;
+
+    if(thumb_height<18U)
+    {
+        thumb_height=18U;
+    }
+
+    if(thumb_height>height)
+    {
+        thumb_height=height;
+    }
+
+    travel=height-thumb_height;
+    thumb_y=y+(travel*top_item)/maximum_top;
+
+    Floppy144DrawFillRect(
+        surface,
+        x,
+        y,
+        6U,
+        height,
+        track_colour
+    );
+
+    Floppy144DrawRect(
+        surface,
+        x,
+        y,
+        6U,
+        height,
+        border_colour
+    );
+
+    Floppy144DrawFillRect(
+        surface,
+        x+2U,
+        thumb_y+1U,
+        2U,
+        thumb_height>2U?thumb_height-2U:thumb_height,
+        thumb_colour
+    );
+}
 /*
  * Circle primitives
  *

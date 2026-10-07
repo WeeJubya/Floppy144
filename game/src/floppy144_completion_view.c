@@ -755,8 +755,8 @@ static void Floppy144CompletionDrawSummary(
 
     Floppy144CompletionTextCentred(
         surface,
-        321U,
-        "UP/DOWN SELECT   ENTER OPEN",
+        FLOPPY144_UI_FORMAL_FOOTER_Y,
+        "UP/DOWN SELECT   ENTER CONFIRM",
         1U,
         muted
     );
@@ -841,56 +841,24 @@ static void Floppy144CompletionDrawFinalNote(
         );
     }
 
-    if(max_top>0U)
-    {
-        const uint32_t track_x=588U;
-        const uint32_t track_y=102U;
-        const uint32_t track_height=188U;
-        uint32_t thumb_height=
-            (
-                track_height*
-                FLOPPY144_COMPLETION_VISIBLE_LINES
-            )/buffer.count;
-        uint32_t travel;
-        uint32_t thumb_y;
-
-        if(thumb_height<18U) thumb_height=18U;
-        if(thumb_height>track_height) thumb_height=track_height;
-
-        travel=track_height-thumb_height;
-        thumb_y=track_y+(travel*top)/max_top;
-
-        Floppy144DrawFillRect(
-            surface,
-            track_x,
-            track_y,
-            4U,
-            track_height,
-            panel_dark
-        );
-        Floppy144DrawRect(
-            surface,
-            track_x,
-            track_y,
-            4U,
-            track_height,
-            border
-        );
-        Floppy144DrawFillRect(
-            surface,
-            track_x+1U,
-            thumb_y,
-            2U,
-            thumb_height,
-            amber
-        );
-    }
+    Floppy144DrawScrollbar(
+        surface,
+        586U,
+        102U,
+        188U,
+        buffer.count,
+        FLOPPY144_COMPLETION_VISIBLE_LINES,
+        top,
+        panel_dark,
+        border,
+        amber
+    );
 
     Floppy144DrawFillRect(surface,48U,302U,544U,1U,border);
     Floppy144CompletionTextCentred(
         surface,
-        315U,
-        "UP/DOWN SCROLL   PGUP/PGDN PAGE   BACKSPACE SUMMARY",
+        FLOPPY144_UI_FORMAL_FOOTER_Y,
+        "UP/DOWN SCROLL   PGUP/PGDN PAGE   ENTER/BACKSPACE BACK TO SUMMARY",
         1U,
         muted
     );

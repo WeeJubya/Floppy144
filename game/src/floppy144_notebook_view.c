@@ -112,28 +112,20 @@ void Floppy144NotebookViewDraw(
         for(u=0U;u<FLOPPY144_NOTEBOOK_VISIBLE_LINES&&top+u<b.count;++u)
             Floppy144DrawText(&s,FLOPPY144_NOTEBOOK_BODY_LEFT,FLOPPY144_NOTEBOOK_BODY_TOP+u*FLOPPY144_NOTEBOOK_LINE_HEIGHT,b.lines[top+u],1U,text);
 
-        if(b.count>FLOPPY144_NOTEBOOK_VISIBLE_LINES)
-        {
-            const uint32_t uTrackX=602U,uTrackY=54U;
-            const uint32_t uTrackHeight=FLOPPY144_NOTEBOOK_VISIBLE_LINES*FLOPPY144_NOTEBOOK_LINE_HEIGHT;
-            uint32_t uThumbHeight=(uTrackHeight*FLOPPY144_NOTEBOOK_VISIBLE_LINES)/b.count;
-            uint32_t uTravel,uThumbY;
-            if(uThumbHeight<18U)uThumbHeight=18U;
-            if(uThumbHeight>uTrackHeight)uThumbHeight=uTrackHeight;
-            uTravel=uTrackHeight-uThumbHeight;
-            uThumbY=uTrackY+(uTravel*top)/(b.count-FLOPPY144_NOTEBOOK_VISIBLE_LINES);
-            Floppy144DrawFillRect(&s,uTrackX,uTrackY,6U,uTrackHeight,panel);
-            Floppy144DrawRect(&s,uTrackX,uTrackY,6U,uTrackHeight,border);
-            Floppy144DrawFillRect(
-                &s,
-                uTrackX+2U,
-                uThumbY+1U,
-                2U,
-                uThumbHeight>2U?uThumbHeight-2U:uThumbHeight,
-                amber
-            );
-        }
+        Floppy144DrawScrollbar(
+            &s,
+            602U,
+            54U,
+            FLOPPY144_NOTEBOOK_VISIBLE_LINES*
+                FLOPPY144_NOTEBOOK_LINE_HEIGHT,
+            b.count,
+            FLOPPY144_NOTEBOOK_VISIBLE_LINES,
+            top,
+            panel,
+            border,
+            amber
+        );
     }
     Floppy144DrawFillRect(&s,10U,306U,620U,28U,bg);Floppy144DrawRect(&s,10U,306U,620U,28U,border);
-    Floppy144DrawText(&s,22U,316U,"UP/DOWN SCROLL   PGUP/PGDN PAGE",1U,text);
+    Floppy144DrawText(&s,22U,316U,"UP/DOWN SCROLL   PGUP/PGDN PAGE   N/BACKSPACE BACK",1U,text);
 }

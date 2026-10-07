@@ -1162,8 +1162,8 @@ void Floppy144MainMenuDraw(
 
     Floppy144RecoveryTextCentred(
         &surface,
-        321U,
-        "ENTER SELECT",
+        FLOPPY144_UI_FORMAL_FOOTER_Y,
+        "UP/DOWN SELECT   ENTER CONFIRM",
         1U,
         muted
     );

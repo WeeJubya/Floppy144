@@ -3559,6 +3559,7 @@ void Floppy144Site2DDrawForPlayerState(
     const char *room_label;
     const char *context_label = NULL;
     const char *prompt;
+    const char *menu_prompt = "ESC SESSION CONTROL";
     char status_text[64];
 
     uint32_t index;
@@ -3951,9 +3952,12 @@ void Floppy144Site2DDrawForPlayerState(
 
     Floppy144DrawText(
         &surface,
-        526U,
+        FLOPPY144_SITE_2D_FOOTER_X+
+            FLOPPY144_SITE_2D_FOOTER_WIDTH-
+            12U-
+            Floppy144DrawTextWidth(menu_prompt,1U),
         322U,
-        "ESC RECOVERY",
+        menu_prompt,
         1U,
         muted
     );

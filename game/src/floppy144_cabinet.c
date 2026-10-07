@@ -1367,7 +1367,7 @@ static void Floppy144CabinetDrawKeypad(
         pSurface,
         118U,
         232U,
-        "0-9 ENTER CODE  ENTER SUBMIT  BACKSPACE RETURN",
+        "0-9 CODE   ENTER SUBMIT   BACKSPACE BACK",
         1U,
         uMuted
     );
@@ -2185,13 +2185,26 @@ static void Floppy144CabinetDrawInterior(
                 uIndex == pCabinet->uSelectedContent ? uBright : uText
             );
         }
+
+        Floppy144DrawScrollbar(
+            pSurface,
+            610U,
+            108U,
+            180U,
+            uCount,
+            uVisibleRows,
+            uFirst,
+            uPanel,
+            uEdge,
+            uBright
+        );
     }
 
     Floppy144DrawText(
         pSurface,
         318U,
         294U,
-        "UP/DOWN SELECT  ENTER VIEW  BACKSPACE SITE",
+        "UP/DOWN SELECT   ENTER VIEW   BACKSPACE BACK",
         1U,
         uMuted
     );
@@ -2261,8 +2274,8 @@ static void Floppy144CabinetDrawInterior(
             94U,
             266U,
             pCabinet->bSecureContainer
-                ? "BACKSPACE: CABINET"
-                : "BACKSPACE: CONTENTS",
+                ? "BACKSPACE BACK TO CABINET"
+                : "BACKSPACE BACK TO CONTENTS",
             1U,
             uMuted
         );

@@ -2521,7 +2521,7 @@ static void Floppy144TerminalPrintCollectionPage(
     (void)snprintf(
         szLine,
         sizeof(szLine),
-        "PAGE %u OF %u   Q: EXIT",
+        "PAGE %u OF %u   Q: RETURN",
         (unsigned)pTerminal->record_pager_page,
         (unsigned)uPageCount
     );
@@ -5024,23 +5024,16 @@ void Floppy144TerminalDraw(
             1U,
             text
         );
-        {
-            const char *pszReturnPrompt =
-                terminal->record_pager_active
-                    ? "Q: EXIT"
-                    : "Q RETURN";
-
-            Floppy144DrawText(
-                &surface,
-                630U -
-                    Floppy144DrawTextWidth(pszReturnPrompt, 1U) -
-                    12U,
-                316U,
-                pszReturnPrompt,
-                1U,
-                muted
-            );
-        }
+        Floppy144DrawText(
+            &surface,
+            630U -
+                Floppy144DrawTextWidth("Q RETURN", 1U) -
+                12U,
+            316U,
+            "Q RETURN",
+            1U,
+            muted
+        );
     }
     else
     {

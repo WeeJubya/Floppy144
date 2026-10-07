@@ -172,15 +172,15 @@ static const char *Floppy144ProfileViewNameEditStatusText(
 
         case FLOPPY144_PROFILE_NAME_EDIT_NOTICE_SAVE_FAILED:
         {
-            return "PROFILE COULD NOT BE SAVED - ENTER RETRIES / ESC CANCELS";
+            return "PROFILE COULD NOT BE SAVED - ENTER RETRY   ESC CANCEL";
         }
 
         case FLOPPY144_PROFILE_NAME_EDIT_NOTICE_NONE:
         {
             return
                 name_edit->first_time_setup != 0U
-                    ? "NEW OPERATOR SETUP - ENTER SAVES / ESC CANCELS"
-                    : "EDIT OPERATOR NAME - ENTER SAVES / ESC CANCELS";
+                    ? "NEW OPERATOR SETUP - ENTER SAVE   ESC CANCEL"
+                    : "EDIT OPERATOR NAME - ENTER SAVE   ESC CANCEL";
         }
     }
 
@@ -455,7 +455,7 @@ void Floppy144ProfileViewDraw(
             surface,
             56U,
             114U,
-            "ENTER  EDIT NAME",
+            "ENTER EDIT NAME",
             1U,
             amber
         );
@@ -679,10 +679,10 @@ void Floppy144ProfileViewDraw(
     Floppy144DrawText(
         surface,
         10U,
-        346U,
+        FLOPPY144_UI_FORMAL_FOOTER_Y,
         editing_name
-            ? "ENTER  SAVE   ESC  CANCEL   BACKSPACE  DELETE"
-            : "LEFT/RIGHT  BODY STYLE   ENTER  EDIT NAME   BACKSPACE  BACK",
+            ? "ENTER SAVE   ESC CANCEL   BACKSPACE DELETE"
+            : "LEFT/RIGHT BODY STYLE   ENTER EDIT NAME   BACKSPACE BACK",
         1U,
         muted
     );

@@ -209,5 +209,5 @@ void Floppy144SettingsViewDraw(
     }
 
     Floppy144DrawText(surface,96U,286U,status_text!=NULL?status_text:"CHANGES ARE SAVED AUTOMATICALLY",1U,status_text!=NULL?amber:muted);
-    Floppy144DrawText(surface,10U,346U,"UP/DOWN SELECT   LEFT/RIGHT CHANGE   ENTER CHANGE/OPEN   BACKSPACE BACK",1U,muted);
+    Floppy144DrawText(surface,10U,FLOPPY144_UI_FORMAL_FOOTER_Y,"UP/DOWN SELECT   LEFT/RIGHT CHANGE   ENTER CHANGE/OPEN   BACKSPACE BACK",1U,muted);
 }
