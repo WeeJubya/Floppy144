@@ -24,6 +24,12 @@ jobs:
         shell: pwsh
         run: .\tools\build_game_data.ps1
 
+      - name: Verify generated archive registries are committed
+        shell: pwsh
+        run: |
+          git diff --exit-code -- game/src/floppy144_documents.generated.inc game/src/floppy144_collections.def game/src/floppy144_collections.generated.def
+          if($LASTEXITCODE -ne 0) { throw "Generated archive registries drift from canonical game data." }
+
       - name: Stage 2 regression
         shell: pwsh
         run: .\tools\test_stage2.ps1
