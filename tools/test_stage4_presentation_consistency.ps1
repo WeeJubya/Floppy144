@@ -50,6 +50,20 @@ foreach($Token in $Forbidden)
 {
     foreach($Name in @('Recovery','Profile','Settings','Credits','Completion','Catalogue','Notebook','Cabinet','Terminal','Site'))
     {
+        /*
+         * BACKSPACE RETURN appears legitimately in Terminal Help prose
+         * ("BACKSPACE RETURNS FROM RECORD VIEW."). S4D-05 is policing the
+         * footer grammar, not rewriting authored Help content preserved by
+         * S4D-01, so do not treat that prose substring as a footer violation.
+         */
+        if(
+            $Name -eq 'Terminal' -and
+            $Token -eq 'BACKSPACE RETURN'
+        )
+        {
+            continue
+        }
+
         if($Sources[$Name].Contains($Token))
         {
             throw "Legacy presentation wording remains in $($Name): $Token"
@@ -88,7 +102,10 @@ $RequiredBySource = @{
     )
     Terminal = @(
         'Q: RETURN',
-        '"Q RETURN"'
+        '"SPACE/ENTER NEXT   BACKSPACE PREVIOUS"',
+        '"Q RETURN"',
+        '"UP/DOWN HISTORY   BACKSPACE EDIT   ENTER SUBMIT"',
+        '"TYPE EXIT TO CLOSE"'
     )
     Site = @(
         'ESC SESSION CONTROL',
