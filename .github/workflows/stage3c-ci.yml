@@ -1,4 +1,4 @@
-name: Stage 3C Integration
+name: Stage 4 Release Candidate Gate
 
 on:
   push:
@@ -182,6 +182,10 @@ jobs:
         shell: pwsh
         run: .\tools\test_stage4g_grey_door.ps1
 
+      - name: Stage 4 final source release-candidate gate
+        shell: pwsh
+        run: .\tools\test_stage4_final_gate.ps1 -Phase Source
+
       - name: Install Premake
         shell: pwsh
         run: |
@@ -226,6 +230,10 @@ jobs:
         shell: pwsh
         run: .\tools\test_stage4f_application_icon.ps1 -Phase Built -Executable .\bin\release\Floppy144.exe
 
+      - name: Stage 4 final built-artifact gate
+        shell: pwsh
+        run: .\tools\test_stage4_final_gate.ps1 -Phase Built -ReleaseDirectory .\bin\release -Executable .\bin\release\Floppy144.exe
+
       - name: Release size
         shell: pwsh
         run: |
@@ -243,23 +251,54 @@ jobs:
           Write-Host "Archive headroom: $remaining bytes (minimum 350000)."
           if($remaining -lt 350000) { throw "S4E-08 safety reserve failed." }
 
-      - name: Package Stage 3C source
+      - name: Package Stage 4 source
         shell: pwsh
         run: |
-          $staging = Join-Path $env:RUNNER_TEMP "Floppy144_Stage3C_Source"
+          $staging = Join-Path $env:RUNNER_TEMP "Floppy144_Stage4_Source"
+          $zip = Join-Path $env:RUNNER_TEMP "Floppy144_Stage4_Source.zip"
+          if(Test-Path -LiteralPath $staging) { Remove-Item -LiteralPath $staging -Recurse -Force }
+          if(Test-Path -LiteralPath $zip) { Remove-Item -LiteralPath $zip -Force }
           New-Item -ItemType Directory -Force -Path $staging | Out-Null
-          git ls-files | ForEach-Object {
+
+          git ls-files | Where-Object {
+            $_ -notmatch '(?i)\.(exe|obj|sav|dat)
+          } | ForEach-Object {
             $source = Join-Path $PWD $_
             $target = Join-Path $staging $_
             $parent = Split-Path -Parent $target
             if($parent) { New-Item -ItemType Directory -Force -Path $parent | Out-Null }
             Copy-Item -LiteralPath $source -Destination $target
           }
-          Compress-Archive -Path (Join-Path $staging '*') -DestinationPath Floppy144_Stage3C_Source.zip -Force
 
-      - name: Upload Stage 3C source
+          Compress-Archive -Path (Join-Path $staging '*') -DestinationPath $zip -Force
+
+      - name: Verify Stage 4 source package
+        shell: pwsh
+        run: |
+          $zip = Join-Path $env:RUNNER_TEMP "Floppy144_Stage4_Source.zip"
+          $verify = Join-Path $env:RUNNER_TEMP "Floppy144_Stage4_Source_Verify"
+          if(Test-Path -LiteralPath $verify) { Remove-Item -LiteralPath $verify -Recurse -Force }
+          Expand-Archive -LiteralPath $zip -DestinationPath $verify -Force
+
+          foreach($required in @("LICENSE","premake5.lua","game\src\floppy144_main.c","include\f144_platform.h")) {
+            if(-not (Test-Path -LiteralPath (Join-Path $verify $required) -PathType Leaf)) {
+              throw "Stage 4 source package missing: $required"
+            }
+          }
+
+          $forbidden = @(Get-ChildItem -LiteralPath $verify -Recurse -File | Where-Object {
+            $_.Extension -match '(?i)^\.(exe|obj|sav|dat)
+          })
+          if($forbidden.Count -ne 0) {
+            $forbidden.FullName | Write-Host
+            throw "Stage 4 source package contains compiled tool/runtime-state artefacts."
+          }
+
+          Write-Host "STAGE 4 SOURCE PACKAGE: PASS"
+
+      - name: Upload Stage 4 source
         uses: actions/upload-artifact@v4
         with:
-          name: Floppy144-Stage3C-Source
-          path: Floppy144_Stage3C_Source.zip
+          name: Floppy144-Stage4-Source
+          path: ${{ runner.temp }}\Floppy144_Stage4_Source.zip
           if-no-files-found: error
