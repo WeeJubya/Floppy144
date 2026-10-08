@@ -13,6 +13,8 @@
 
 #include "floppy144_persistence.h"
 #include "floppy144_document.h"
+#include "floppy144_game_data.h"
+#include "floppy144_collection_registry.h"
 #include "floppy144_catalogue.h"
 #include "floppy144_variation.h"
 #include "floppy144_grey_door.h"
@@ -1911,6 +1913,251 @@ static void TestGreyDoorOneShotLifecycle(const char *root)
         "manual/autosave priority, wall/no-scar, new-run reset\n");
 }
 
+
+/*
+ * S4G-05: the full gate, with ACTUAL disk round-trips at the three persistent
+ * boundaries. This exercises all viable secret-stage entry points with seeded
+ * early, middle, late and low-headroom run snapshots. The scene never has a
+ * writable path back into normal state.
+ *
+ * The later contexts are deliberately synthetic snapshots, not a replacement
+ * for the Stage 3 full gameplay traversal regressions.
+ */
+static void TestStage4GCompleteJourney(const char *root)
+{
+    static const uint32_t seeds[]={
+        0U,1U,42U,144U,146U,2026U,65535U,
+        0x12345678U,0xffffffffU,9441U,271828U,314159U
+    };
+    static uint32_t pixels[640U*360U];
+    Floppy144Surface surface;
+    Floppy144RunState run,original,restored,expected,manual,completed;
+    Floppy144GreyDoorCandidate candidate,chosen;
+    Floppy144GreyEncounter scene;
+    Floppy144DiscoveryProfile profile,profile_before;
+    char save_path[F144_PLATFORM_PATH_CAPACITY];
+    char auto_path[F144_PLATFORM_PATH_CAPACITY];
+    uint32_t candidate_count=Floppy144GreyDoorCandidateCount();
+    uint32_t seed_i,variant,first_slot=0U,different=0U,total=0U;
+    uint32_t rect_count=Floppy144SiteRectCount();
+    uint32_t initial_bytes=0U,baseline_percent=0U;
+    bool baseline_evidence=false,baseline_exhaustion=false;
+
+    memset(&surface,0,sizeof(surface));
+    surface.width=640U;
+    surface.height=360U;
+    surface.pixels=pixels;
+    Expect(TestJoinPath(root,"stage4g-full-manual.sav",save_path,
+        (uint32_t)sizeof(save_path)) &&
+        TestJoinPath(root,"stage4g-full-autosave.sav",auto_path,
+        (uint32_t)sizeof(auto_path)),
+        "S4G-05 full journey has isolated physical save paths");
+    Expect(candidate_count>=2U,"S4G-05 has multiple safe derived wall slots");
+
+    for(seed_i=0U;seed_i<(uint32_t)(sizeof(seeds)/sizeof(seeds[0]));++seed_i)
+    for(variant=0U;variant<4U;++variant)
+    {
+        uint32_t slot,k;
+        uint32_t entered_phase=0U;
+        Floppy144CollectionId collection=FLOPPY144_COLLECTION_DR01;
+        uint32_t index=0U;
+        Floppy144RunStateBegin(&run,seeds[seed_i]);
+        Floppy144DiscoveryProfileReset(&profile);
+        (void)Floppy144DiscoveryProfileSetBodyStyle(
+            &profile,FLOPPY144_OPERATOR_BODY_STYLE_B);
+        profile.recovery_sessions_begun=3U;
+        profile.completed_recoveries=1U;
+        profile_before=profile;
+
+        /* DR-01 is restored in every legitimate route to the hidden record. */
+        (void)Floppy144RunStateBitSet(
+            run.collections,(uint32_t)FLOPPY144_COLLECTION_DR01);
+        (void)Floppy144RunStateReconstructRoom(
+            &run,FLOPPY144_ROOM_CORRIDOR);
+        if(variant>0U)
+        {
+            /* Intermediate reconstructed rooms and distinct ending routes. */
+            (void)Floppy144RunStateReconstructRoom(
+                &run,FLOPPY144_ROOM_MAIN_OFFICE);
+            (void)Floppy144RunStateBitSet(run.collections,
+                (uint32_t)FLOPPY144_COLLECTION_DR02);
+            (void)Floppy144RunStateBitSet(run.evidence,0U);
+            (void)Floppy144RunStateBitSet(run.notebook,0U);
+            run.notebook_order_count=1U;
+            run.notebook_order[0]=0U;
+            run.act=(uint8_t)(variant==1U?FLOPPY144_RUN_ACT_I:
+                variant==2U?FLOPPY144_RUN_ACT_II:FLOPPY144_RUN_ACT_III);
+            run.branch=(uint8_t)(variant==2U?
+                FLOPPY144_RUN_BRANCH_TECHNOLOGY_FIRST:
+                FLOPPY144_RUN_BRANCH_RECORDS_FIRST);
+        }
+        if(variant==3U)
+        {
+            /* Exercise the transition very near the real 1,440 KB ceiling.
+               Use source collection weights, never fake the capacity. */
+            for(k=0U;k<(uint32_t)FLOPPY144_COLLECTION_COUNT;++k)
+            {
+                const Floppy144CollectionDefinition *def;
+                uint32_t before_used;
+                if(k==(uint32_t)FLOPPY144_COLLECTION_DR01 ||
+                   k==(uint32_t)FLOPPY144_COLLECTION_DR02) continue;
+                def=Floppy144CollectionGet((Floppy144CollectionId)k);
+                if(def==NULL) continue;
+                before_used=Floppy144RunStateRecoveredKb(&run);
+                if(before_used+def->size_kb<=FLOPPY144_RECOVERY_CAPACITY_KB)
+                    (void)Floppy144RunStateBitSet(run.collections,k);
+            }
+            Expect(Floppy144RunStateFreeKb(&run)<250U,
+                "S4G-05 synthetic late route is close to capacity exhaustion");
+        }
+
+        /* Save before trigger: there is no display/hook and restoring does
+           not independently discover the door. */
+        Expect(run.grey_door_state==(uint8_t)FLOPPY144_GREY_DOOR_UNAVAILABLE &&
+            !Floppy144GreyDoorForRun(&run,&candidate) &&
+            Floppy144PersistenceSaveRunState(save_path,&run) &&
+            Floppy144PersistenceLoadRunState(save_path,&restored) &&
+            restored.grey_door_state==(uint8_t)FLOPPY144_GREY_DOOR_UNAVAILABLE &&
+            !Floppy144GreyDoorForRun(&restored,&candidate),
+            "S4G-05 UNAVAILABLE manual checkpoint and app restart remain hidden");
+        run=restored;
+
+        Expect(Floppy144DocumentFindRecordId(
+            FLOPPY144_GREY_DOOR_RECORD_ID,&collection,&index) &&
+            collection==FLOPPY144_GREY_DOOR_RECORD_COLLECTION &&
+            index==FLOPPY144_GREY_DOOR_RECORD_INDEX &&
+            Floppy144DocumentAccessible(&run,collection,index) &&
+            Floppy144DocumentApplyEffects(NULL,&run,collection,index) &&
+            run.grey_door_state==(uint8_t)FLOPPY144_GREY_DOOR_AVAILABLE,
+            "S4G-05 reachable authored document alone activates one Door");
+        slot=Floppy144RunStateGreyDoorPlacementSlot(&run,candidate_count);
+        if(seed_i==0U) first_slot=slot;
+        if(slot!=first_slot) different=1U;
+        Expect(Floppy144GreyDoorForRun(&run,&candidate) &&
+            Floppy144GreyDoorCandidateSafe(&candidate) &&
+            Floppy144GreyDoorCandidateAt(slot,&chosen) &&
+            memcmp(&candidate,&chosen,sizeof(candidate))==0,
+            "S4G-05 selected placement is stable and independently safe");
+        (void)Floppy144VariationValue(seeds[seed_i],
+            "staff.noticeboard.annotation.v1","AMB-NB-07");
+        Expect(slot==Floppy144RunStateGreyDoorPlacementSlot(
+                &run,candidate_count),
+            "S4G-05 other seeded features cannot reroll Grey Door");
+
+        /* Save AFTER trigger and restore the actual V3 file. */
+        Expect(Floppy144PersistenceSaveRunState(auto_path,&run) &&
+            Floppy144PersistenceLoadRunState(auto_path,&restored) &&
+            restored.grey_door_state==(uint8_t)FLOPPY144_GREY_DOOR_AVAILABLE &&
+            Floppy144RunStateGreyDoorPlacementSlot(
+                &restored,candidate_count)==slot,
+            "S4G-05 AVAILABLE autosave and process restart retain identical door");
+        run=restored;
+        Floppy144RunStateSetPlayerSitePosition(
+            &run,candidate.stand_x16,candidate.stand_y16);
+        Expect(Floppy144GreyDoorNearby(&run),
+            "S4G-05 selected Door can physically be accessed");
+        original=run;
+        initial_bytes=Floppy144RunStateRecoveredKb(&run);
+        baseline_percent=Floppy144RunStateRecoveredPercent(&run);
+        baseline_evidence=Floppy144GameDataEvidenceResolved(&run);
+        baseline_exhaustion=
+            Floppy144RunStateAvailableRecoveryCapacityExhausted(&run);
+        Expect(baseline_percent<=100U,
+            "S4G-05 real restored percentage never reaches visual-only 144%%");
+
+        Expect(Floppy144GreyEncounterBegin(&scene,&run) &&
+            !Floppy144GreyEncounterSaveAllowed(&scene),
+            "S4G-05 opening A enters unsaveable temporary scene");
+        for(k=0U;k<12U && scene.phase!=(uint8_t)FLOPPY144_GREY_EXPLORE;++k)
+            (void)Floppy144GreyEncounterAdvance(&scene,100U);
+        Expect(scene.phase==(uint8_t)FLOPPY144_GREY_EXPLORE,
+            "S4G-05 transition reaches impossible office");
+        while(scene.local_x<440)
+            (void)Floppy144GreyEncounterMove(&scene,12,0);
+        Expect(Floppy144GreyEncounterInspect(&scene) &&
+            scene.phase==(uint8_t)FLOPPY144_GREY_IDENTIFY,
+            "S4G-05 I/Inspect begins Developer sequence");
+
+        for(k=0U;k<200U && !Floppy144GreyEncounterFinished(&scene);++k)
+        {
+            entered_phase |= 1U<<scene.phase;
+            Expect(!Floppy144GreyEncounterSaveAllowed(&scene),
+                "S4G-05 autosave/manual save prohibited inside all temporary phases");
+            Floppy144GreyEncounterDraw(&surface,&scene);
+            (void)Floppy144GreyEncounterAdvance(&scene,100U);
+        }
+        Expect(Floppy144GreyEncounterFinished(&scene) &&
+            (entered_phase&(1U<<FLOPPY144_GREY_IDENTIFY))!=0U &&
+            (entered_phase&(1U<<FLOPPY144_GREY_TURN))!=0U &&
+            (entered_phase&(1U<<FLOPPY144_GREY_DIALOGUE))!=0U &&
+            (entered_phase&(1U<<FLOPPY144_GREY_CAPACITY))!=0U &&
+            (entered_phase&(1U<<FLOPPY144_GREY_GLITCH))!=0U &&
+            Floppy144GreyEncounterSaveAllowed(&scene),
+            "S4G-05 office, Developer, exact dialogue, 144%% and CRT stages finish");
+
+        /* Absolutely no real state mutated during rendering or animation.
+           Completion may change only the hidden flag and dirty bit. */
+        Expect(memcmp(&run,&original,sizeof(run))==0 &&
+            memcmp(&profile,&profile_before,sizeof(profile))==0 &&
+            Floppy144RunStateRecoveredKb(&run)==initial_bytes &&
+            Floppy144RunStateRecoveredPercent(&run)==baseline_percent &&
+            Floppy144GameDataEvidenceResolved(&run)==baseline_evidence &&
+            Floppy144RunStateAvailableRecoveryCapacityExhausted(&run)==
+                baseline_exhaustion &&
+            Floppy144SiteRectCount()==rect_count,
+            "S4G-05 game progress, final routes, Profile and geometry untouched");
+
+        expected=original;
+        expected.grey_door_state=(uint8_t)FLOPPY144_GREY_DOOR_COMPLETED;
+        expected.dirty=1U;
+        Expect(Floppy144RunStateGreyDoorComplete(&run) &&
+            memcmp(&run,&expected,sizeof(run))==0 &&
+            scene.return_x16==run.player_site_x &&
+            scene.return_y16==run.player_site_y &&
+            !Floppy144GreyDoorForRun(&run,&candidate) &&
+            !Floppy144GreyDoorNearby(&run),
+            "S4G-05 only hidden lifecycle flag and dirty change on corridor return");
+
+        /* Autosave resumes IMMEDIATELY after return, and old same-seed
+           pre-trigger manual saves cannot reactivate a completed run. */
+        Expect(Floppy144GreyEncounterSaveAllowed(&scene) &&
+            Floppy144PersistenceSaveRunState(auto_path,&run) &&
+            Floppy144PersistenceLoadRunState(auto_path,&completed) &&
+            completed.grey_door_state==(uint8_t)FLOPPY144_GREY_DOOR_COMPLETED &&
+            Floppy144PersistenceLoadRunState(save_path,&manual) &&
+            Floppy144RunStateGreyDoorCompletedAutosavePreferred(
+                &manual,&completed),
+            "S4G-05 completed autosave beats earlier same-seed manual after restart");
+        run=completed;
+        run.dirty=0U;
+        expected=run;
+        Expect(Floppy144DocumentApplyEffects(NULL,&run,collection,index) &&
+            memcmp(&run,&expected,sizeof(run))==0 &&
+            !Floppy144GreyDoorForRun(&run,&candidate) &&
+            !Floppy144GreyEncounterBegin(&scene,&run),
+            "S4G-05 reopened terminal document cannot replay a completed encounter");
+        Expect(memcmp(&profile,&profile_before,sizeof(profile))==0 &&
+            Floppy144RunStateRecoveredKb(&run)==initial_bytes &&
+            Floppy144RunStateRecoveredPercent(&run)==baseline_percent &&
+            Floppy144GameDataEvidenceResolved(&run)==baseline_evidence &&
+            Floppy144RunStateAvailableRecoveryCapacityExhausted(&run)==
+                baseline_exhaustion,
+            "S4G-05 no changes to Profile, ending flags or final percentages");
+        ++total;
+        if(variant==0U)
+            printf("S4G-05 seed=%u slot=%u wall=(%u,%u %ux%u) free=%u KB\n",
+                (unsigned)seeds[seed_i],(unsigned)slot,
+                (unsigned)chosen.rect.x,(unsigned)chosen.rect.y,
+                (unsigned)chosen.rect.width,(unsigned)chosen.rect.height,
+                (unsigned)Floppy144RunStateFreeKb(&run));
+    }
+    Expect(different!=0U,
+        "S4G-05 two or more fixed seeds produce different wall locations");
+    printf("S4G-05 full journey: %u seeded route scenarios, %u valid candidates, "
+        "all three physical save boundaries, one-shot and neutral endings PASS\n",
+        (unsigned)total,(unsigned)candidate_count);
+}
+
 int main(void)
 {
     const char *root=getenv("F144_TEST_ROOT");
@@ -1948,6 +2195,7 @@ int main(void)
     TestGreyDoorPlacement(root);
     TestGreyEncounter(root);
     TestGreyDoorOneShotLifecycle(root);
+    TestStage4GCompleteJourney(root);
 
     if(failures!=0)
     {

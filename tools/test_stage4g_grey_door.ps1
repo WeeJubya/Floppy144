@@ -83,7 +83,9 @@ $noMention = @(
     "game\src\floppy144_profile.c",
     "game\src\floppy144_profile_view.c",
     "game\src\floppy144_credits_view.c",
-    "game\src\floppy144_recovery.c"
+    "game\src\floppy144_recovery.c",
+    "game\src\floppy144_settings_view.c",
+    "game\src\floppy144_intro.c"
 )
 foreach($relative in $noMention) {
     $text = Read-Source $relative
@@ -102,5 +104,30 @@ if($main -match '(?i)printf\s*\([^;]*GREY[ _]DOOR') {
     throw "The shipping launcher is leaking Grey Door diagnostic output."
 }
 Write-Host "S4G-04 NON-ACKNOWLEDGEMENT / ONE-SHOT SOURCE AUDIT: PASS"
+# S4G-05 release integration assertions. The secret has no native
+# implementation dependency: only the established framebuffer, logical
+# actions, monotonic Stage 4B tick, and Stage 4E variation service.
+Require $tests 'TestStage4GCompleteJourney(root)' 'No complete save/exit/reload seed-matrix journey gate.'
+Require $grey 'Floppy144VariationRange(' 'Grey Door seed does not use Stage 4E stateless variation.'
+Require $run 'Floppy144RunStateGreyDoorCompletedAutosavePreferred' 'Same-run manual/autosave one-shot guard missing.'
+Require $main 'Floppy144TimingAdvance(' 'Grey Door is not ticked by Stage 4B time service.'
+Require $main 'Floppy144GreyEncounterAdvance(' 'Temporary scene timing not wired.'
+Require $main 'F144_ACTION_INSPECT' 'Developer inspect must use platform-neutral actions.'
+Require $main 'Floppy144GreyEncounterDraw(' 'Impossible office not using neutral framebuffer screen dispatch.'
+Require $main 'Floppy144SettingsApplyCrtFilter(' 'Ordinary CRT presentation path missing.'
+Require $encounter 'Floppy144DrawText(' 'Encounter dialogue must render in software.'
+Require $encounter 'Floppy144DrawFillRect(' 'Encounter geometry must render in software.'
+foreach($core in @($grey,$encounter)) {
+    if($core -match '(?i)(windows\.h|win32|HWND|GetTickCount\s*\(|GetAsyncKeyState\s*\(|rand\s*\(|srand\s*\()') {
+        throw 'Platform-specific dependency or uncontrolled randomness leaked into Grey Door Core.'
+    }
+}
+if(($run + $persist) -match 'RESTORATION CAPACITY:\s*144%') {
+    throw 'False 144% display leaked into authoritative capacity or persistence source.'
+}
+# The normal archive's single orphan document clue is intentional. Only the
+# existing studio name in Credits is exempt; no further ordinary UI spoilers.
+Write-Host "S4G-05 INTEGRATION / ARCHITECTURE / SECRECY SOURCE AUDIT: PASS"
+
 Write-Host "S4G-01 ISOLATION / SCHEMA AUDIT: PASS"
 Write-Host "Behavioural round-trip cases run in test_stage4_persistence.ps1 (CI)."
