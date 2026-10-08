@@ -1,12 +1,13 @@
 # Stage 4E integration, determinism and replay acceptance (S4E-10)
 
-**Status: HOLD / NOT SIGNED OFF (as inspected on 2026-10-08).**
-**Scope:** `Stage4` at `ff2a02679f6b8ecf23ac16c266b21d22f3b38655`.
+**Status: S4E-07 IMPLEMENTED / AUTOMATED PASS; S4E-10 MANUAL REPLAY SIGN-OFF STILL PENDING.**
+**Scope:** `Stage4` at tested code commit `5368f2c8976631b89de8b74b2503ee48c1be21e7`.
 **Rule:** No Stage 4F work or new feature work is accepted through this gate.
 
 This record distinguishes **verified green regression/build evidence** from **unmet
-S4E-10 acceptance criteria**. A clean CI result does not, on its own, prove
-the omitted DR-04 seeded A/B arrangement or two complete end-to-end runs.
+S4E-10 acceptance criteria**. The updated suite does prove both DR-04
+permutations, both initial branch choices and two seed-class full-site
+reconstruction routes. It does not replace two manual interactive playthroughs.
 
 ## Commit and evidence provenance
 
@@ -19,16 +20,18 @@ the omitted DR-04 seeded A/B arrangement or two complete end-to-end runs.
   `a411836d2` archive expansion/regression corrections.
 - S4E-09 optional-collection decision: `1df5e32e9` /
   `ff2a02679` (both documentary).
-- There is **no identifiable S4E-07/DR-04 swap commit or specific swap
-  regression** in the inspected linear `Stage4` history between S4E-06 and
-  S4E-08. This states what is in this branch, not whether equivalent work was
-  completed in another workspace.
-- Freshest examined exact-HEAD GitHub Actions Windows workflow:
-  [run 37767175122](https://github.com/WeeJubya/Floppy144/actions/runs/37767175122),
-  job `113277569837`, **success**, at `ff2a02679`.
-  Source: `.github/workflows/stage3c-ci.yml`.
-- This S4E-10 report is documentary; its creation is not a claim that an
-  additional playable end-to-end acceptance route was executed.
+- S4E-07 was omitted from the original S4E-06 to S4E-08 sequence. It was
+  subsequently implemented on top of S4E-08's renumbered archive by
+  `4f9b47aa5`; tests `85ed6b4e5`, and cross-suite/dual-seed
+  reconstruction `5368f2c89`.
+- Current production-equivalent Windows CI:
+  [run 37769519595](https://github.com/WeeJubya/Floppy144/actions/runs/37769519595),
+  job `113285337591`, **success** on `5368f2c89`.
+  Stage 2, 3A, 3B, 4B, 4C, 4D, all 4E checks and clean Release passed.
+- Implementation details, seed cases and safeguards:
+  [stage4e_dr04_swap.md](stage4e_dr04_swap.md).
+- This report records passing automated routes; no claim is made that a
+  human-operated, uninterrupted full-game session has been completed.
 
 ## Deterministic service and save semantics
 
@@ -53,9 +56,9 @@ guaranteed if option arrays or namespace versions deliberately change.
 | Takeaway special | CLASSIFIED BEEF IN A BOX | STAPLED-TOGETHER NOODLES |
 | Crossword, P-074 | ORDER / INDEX | QUEUE / SHELF |
 | Paperback, P-073 | SENIOR LINE MANAGER / CRISPIN QUIBBLE | HEARTBROKEN ARCHIVE CLERK / MILLICENT MUDDLE |
-| DR-04 Records title at compiled slot | Physical Archive Reconciliation Workstream: RS-0216 | **Same RS-0216** |
-| DR-04 Technology title at compiled slot | Terminal Network Remediation Workstream: RS-0147 | **Same RS-0147** |
-| DR-04 arrangement A/B | **Not demonstrated** | **Not demonstrated** |
+| DR-04 at fixed RS-0216 | Technology (T-011) | Technology (T-011) |
+| DR-04 at fixed RS-0147 | Records (T-010) | Records (T-010) |
+| DR-04 swap class | Swapped | Swapped |
 
 Takeaway and paperback have byte-exact known-seed assertions. Crossword
 tests also assert the five-row grid and clue/answer crossing. All three
@@ -69,22 +72,31 @@ documents. Do not hardcode those obsolete numbers in a new acceptance test.
 Test the canonical authored identities and T-010/T-011 effects, then resolve
 the *current* player-facing IDs.
 
-**DR-04 blocker:** In the inspected branch,
-`Floppy144DocumentGet(collection, record_index)` reads fixed generated
-document definitions, `Floppy144CatalogueBuildRecord(collection, index,...)`
-resolves those definitions without run state, and the Terminal and core
-coordinator have no seeded remap for the two authored workstream records.
-Neither seed 144 nor seed 145 can exchange their placement in the current
-generated catalogue. Static T-010/T-011 branch-choice progression tests do
-not establish the requested S4E-07 presentation permutation.
+**S4E-07 correction and seeded arrangement:** The two workstreams are
+located by immutable T-010 (Records) and T-011 (Technology) authored
+identities. The post-S4E-08 *slot numbers* remain RS-0216 and RS-0147.
+`Floppy144VariationRange(seed,"dr04.workstream-swap.v1","DR-04",2)`
+decides which payload is displayed in each slot. The seed value is saved,
+not regenerated after reinstatement. The terminal LIST, OPEN, viewer,
+scrolling, post-open recommendation, trigger-access gate and effect
+application now share this identity-based resolution.
 
-Before PASS, either reconcile an actually implemented S4E-07 commit into
-`Stage4`, or repair this missing mapping through the proper runtime
-identity layer, without changing the canonical authored trigger identity
-or authoring a new feature. Add exact A/B tests for LIST, OPEN,
-document viewer, notebook, recommendations, trigger/evidence/restoration,
-V1/V2 save/reload, both routes and completion. Keep tests ID-agnostic across
-future authored catalogue distributions.
+Two **opposite** deterministic seed classes were needed: 144 and 145
+happen to select the *same* swapped class, so the explicit A/B tests use
+**146 (not swapped)** and **144 (swapped)**:
+
+| Fixed record ID | Seed 146: no swap | Seed 144: swapped |
+| --- | --- | --- |
+| DR-04-RS-0216 | Records, T-010 | Technology, T-011 |
+| DR-04-RS-0147 | Technology, T-011 | Records, T-010 |
+
+The real Terminal and persisted RunState fixtures test both seed classes
+with **both Records-first and Technology-first choices** (four paths),
+LIST pages, OPEN, viewer resolution, branch gating, V2 save/reload and
+terminal re-entry. The canonical room progression and Act II branch
+fixtures additionally run under both permutation classes. No canonical JSON,
+generated document output, trigger definition, evidence or notebook text
+was changed. No existing player guidance hardcodes either swapped slot.
 
 ## Platform-neutral date and seasonal matrix
 
@@ -176,18 +188,18 @@ Exact-HEAD CI run 37767175122 succeeded at all configured steps:
 - Independent portable Core and Win32 builds, clean production-equivalent
   Release rebuild, hard size gate and 350,000-byte reserve gate.
 
-**Not verified in this S4E-10 pass:** two distinct DR-04 seeded
-permutations (and the required complete A/B story routes); two full
-fresh-profile/alternate-route *interactive end-to-end* playthroughs with
-mid-route save/reload; a standalone Stage 4E integration test proving all
-replay surfaces simultaneously. The existing Stage 3B fixture routes and
-Stage 4C smoke are genuine passing tests, but are not substitutes for
-those outstanding criteria. Prior CI success cannot clear this gate.
+**Still requiring manual sign-off:** two uninterrupted, interactive
+fresh-profile/alternate-route end-to-end playthroughs under opposite seed
+classes, with in-game mid-route save/reload, visual notebook inspection
+and human acceptance of the completed endings. The automated four-path
+seeded OPEN regression, two-seed full-site reconstruction, all existing
+Stage 3B ending fixtures and Stage 4C smoke now pass. Automated coverage
+does not claim a complete human-operated playthrough.
 
 ## Production build and size
 
-Latest examined production-equivalent Windows x64 Release, on exact
-`ff2a02679`: MSBuild Core **0 warnings / 0 errors**; Platform
+Latest completed production-equivalent Windows x64 Release, on exact
+`5368f2c89`: MSBuild Core **0 warnings / 0 errors**; Platform
 **0 / 0**; clean rebuilt application **0 / 0**.
 
 | Metric | Bytes |
@@ -195,14 +207,15 @@ Latest examined production-equivalent Windows x64 Release, on exact
 | Competition ceiling | 1,474,560 |
 | Stage 3 baseline Release | 659,968 |
 | Stage 4D Release | 695,808 |
-| Stage 4E Release | **709,120** |
-| Stage 4E delta vs Stage 3 | **+49,152** |
-| Stage 4E delta vs Stage 4D | **+13,312** |
+| Stage 4E Release with S4E-07 | **709,632** |
+| Stage 4E delta vs Stage 3 | **+49,664** |
+| Stage 4E delta vs Stage 4D | **+13,824** |
+| S4E-07 delta vs pre-swap S4E-09 | **+512** |
 | S4E-06 Release before archive expansion | 707,584 |
 | Observed archive-expansion delta vs S4E-06 | **+1,536** |
-| Remaining to absolute cap | **765,440** |
+| Remaining to absolute cap | **764,928** |
 | Protected Stage 4F / final QA reserve | **350,000** |
-| Headroom above protected reserve | **415,440** |
+| Headroom above protected reserve | **414,928** |
 
 Both size gates **PASS**. This figure is the compiled
 `Floppy144.exe` payload, not the much larger on-disk canonical JSON
@@ -210,19 +223,15 @@ or generated C source file lengths.
 
 ## Remaining sign-off actions
 
-1. Find/reconcile the S4E-07 implementation in the active `Stage4`
-   branch or correct the actual missing seeded DR-04 arrangement.
-2. Implement A/B golden-vector assertions against **current authored
-   identity and triggers**, without relying on S4E-08-invalidated
-   `RS-0063` and `RS-0087` numbering.
-3. Re-test LIST, viewer, notebook, recommendations, evidence,
-   restoration, save/reload and completion through both permutations.
-4. Execute/document a true seed-144 fresh-profile end-to-end playthrough
-   and seed-145 alternate route, restoring from mid-run saves.
-5. Rerun complete Windows CI and the strict 1,474,560-byte and
-   350,000-byte reserve gates at the eventual sign-off commit.
+1. Perform and document an actual seed-146 fresh-profile run and seed-144
+   alternate-route *interactive* playthrough, with mid-route save/reload.
+2. Confirm visual notebook wording and dynamically generated terminal
+   recommendations in both sessions, and reach both endings normally.
+3. Confirm completion snapshots survive profile reinstatement and sign
+   the S4E-10 human visual/replay gate.
 
-**Decision: S4E-10 HOLD. Stage 4F is NOT authorised by this record.**
-A successful inherited suite and comfortable payload are positive
-evidence, but deterministic A/B workstream replay remains an unproven
-mandatory acceptance criterion in the checked-in branch.
+**Decision: S4E-07 automated gate PASS; S4E-10 manual replay HOLD.**
+The branch passes both compiled deterministic arrangements, existing
+progression, clean Release, absolute size and protected reserve. Stage 4F
+is not authorised by this report until the outstanding interactive acceptance
+cases have been recorded.
