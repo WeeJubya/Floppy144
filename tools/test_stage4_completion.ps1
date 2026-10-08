@@ -142,7 +142,7 @@ foreach($required in @(
     'FLOPPY144_COMPLETION_OPTION_MAIN_MENU',
     'Floppy144CompletionViewOpenFinalNote',
     'FLOPPY144_SCREEN_CREDITS',
-    'FLOPPY144_SCREEN_MAIN_MENU'
+    'Floppy144OpenMainMenu'
 ))
 {
     if($completionCase -notmatch [regex]::Escape($required))
