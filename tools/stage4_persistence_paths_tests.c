@@ -1412,7 +1412,7 @@ static void TestDifferentWorkingDirectory(
 /* S4G-01: isolated orphan record, stable placement, V1/V2/V3 compatibility. */
 static void TestGreyDoorDiscovery(const char *root)
 {
-    Floppy144RunState run, before, loaded, older;
+    Floppy144RunState run = {0}, before = {0}, loaded = {0}, older = {0};
     Floppy144DiscoveryProfile profile, profile_before;
     Floppy144CollectionId collection = FLOPPY144_COLLECTION_DR01;
     uint32_t index = 999U;

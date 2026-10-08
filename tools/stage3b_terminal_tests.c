@@ -2946,6 +2946,41 @@ static void Floppy144TestDr04SeededWorkstreamSlots(void)
     }
 }
 
+/* S4G-01: real terminal LIST/OPEN route, not just the registry shortcut. */
+static void Floppy144TestGreyDoorOrphanTerminalRoute(void)
+{
+    Floppy144WorldState world;
+    Floppy144RunState run;
+    Floppy144TerminalState terminal;
+    Floppy144CatalogueState catalogue;
+    uint32_t original_kb;
+
+    Floppy144TestReachOpeningCollections(&world,&run,&terminal);
+    original_kb=Floppy144RunStateRecoveredKb(&run);
+    F144_CHECK(run.grey_door_state==(uint8_t)FLOPPY144_GREY_DOOR_UNAVAILABLE,
+        "orphan record is unavailable before it is viewed");
+    Floppy144TestSubmitCommand(&terminal,&world,&run,"LIST DR-01 2");
+    F144_CHECK(Floppy144TerminalRecordPagerActive(&terminal) &&
+        Floppy144TestTerminalContains(&terminal,FLOPPY144_GREY_DOOR_RECORD_ID),
+        "last DR-01 terminal index page contains the uncounted orphan record");
+    Floppy144TerminalCloseRecordPager(&terminal);
+    Floppy144TestSubmitCommand(&terminal,&world,&run,
+        "OPEN DR-00-RS-0144");
+    F144_CHECK(terminal.open_record_requested &&
+        terminal.requested_collection==FLOPPY144_GREY_DOOR_RECORD_COLLECTION &&
+        terminal.requested_record_index==FLOPPY144_GREY_DOOR_RECORD_INDEX,
+        "OPEN routes orphan through the normal command/document protocol");
+    F144_CHECK(Floppy144CatalogueOpenRecord(&catalogue,
+        terminal.requested_collection,terminal.requested_record_index) &&
+        Floppy144CatalogueDocumentOpen(&catalogue),
+        "orphan opens in the standard scrollable document viewer");
+    F144_CHECK(Floppy144DocumentApplyEffects(&world,&run,
+        terminal.requested_collection,terminal.requested_record_index) &&
+        run.grey_door_state==(uint8_t)FLOPPY144_GREY_DOOR_AVAILABLE &&
+        Floppy144RunStateRecoveredKb(&run)==original_kb,
+        "the normal document-open event enables the door without capacity cost");
+}
+
 int main(void)
 {
     Floppy144TestFm18SuppressionRecordRestoresServerPanel();
@@ -2962,6 +2997,7 @@ int main(void)
     Floppy144TestCommandHistory();
     Floppy144TestBranchDocumentAccessGate();
     Floppy144TestDr04SeededWorkstreamSlots();
+    Floppy144TestGreyDoorOrphanTerminalRoute();
 
     if(g_nFailures != 0)
     {
