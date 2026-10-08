@@ -208,7 +208,7 @@ bool Floppy144GreyDoorCandidateAt(
 }
 
 /* Hathaway-only wall directly LEFT of the Corridor Site Directory.
-   Directory: (35,56) 6x1; forced panel: (31,56) 4x1. The overlay
+   Directory: (35,56) 6x1; forced panel: (29,56) 4x1. The overlay
    leaves the existing wall, collision map and Directory untouched. */
 bool Floppy144GreyDoorHathawayCandidate(Floppy144GreyDoorCandidate *out)
 {
@@ -219,13 +219,13 @@ bool Floppy144GreyDoorHathawayCandidate(Floppy144GreyDoorCandidate *out)
     test.rect.room=(uint8_t)FLOPPY144_ROOM_CORRIDOR;
     test.rect.from_room=(uint8_t)FLOPPY144_ROOM_CORRIDOR;
     test.rect.to_room=(uint8_t)FLOPPY144_ROOM_CORRIDOR;
-    test.rect.x=31U;
+    test.rect.x=29U;
     test.rect.y=56U;
     test.rect.width=4U;
     test.rect.height=1U;
     test.rect.authored_width16=4U*FLOPPY144_SITE_FIXED_ONE;
     test.rect.authored_height16=FLOPPY144_SITE_FIXED_ONE;
-    test.stand_x16=33*FLOPPY144_SITE_FIXED_ONE;
+    test.stand_x16=31*FLOPPY144_SITE_FIXED_ONE;
     test.stand_y16=55*FLOPPY144_SITE_FIXED_ONE;
     if(out==NULL ||
        Floppy144SiteRoomAtPosition(test.stand_x16,test.stand_y16) !=
@@ -241,7 +241,7 @@ bool Floppy144GreyDoorHathawayCandidate(Floppy144GreyDoorCandidate *out)
             const Floppy144SiteRect *f=Floppy144SiteRectAt(i);
             if(f==NULL || f->room!=(uint8_t)FLOPPY144_ROOM_CORRIDOR ||
                f->type>(uint8_t)FLOPPY144_SITE_FLOOR_D) continue;
-            if(33>=(int32_t)f->x && 33<(int32_t)f->x+f->width)
+            if(31>=(int32_t)f->x && 31<(int32_t)f->x+f->width)
             {
                 if(55>=(int32_t)f->y && 55<(int32_t)f->y+f->height)
                     interior_floor=true;
@@ -255,7 +255,7 @@ bool Floppy144GreyDoorHathawayCandidate(Floppy144GreyDoorCandidate *out)
     {
         const Floppy144SiteRect *r=Floppy144SiteRectAt(i);
         if(r==NULL || r->type<=(uint8_t)FLOPPY144_SITE_FLOOR_D) continue;
-        if((int32_t)r->x<35 && (int32_t)r->x+(int32_t)r->width>31 &&
+        if((int32_t)r->x<33 && (int32_t)r->x+(int32_t)r->width>29 &&
            (int32_t)r->y<57 && (int32_t)r->y+(int32_t)r->height>56)
             return false;
     }

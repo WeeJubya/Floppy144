@@ -2173,7 +2173,7 @@ static void TestStage4HInspection(const char *root)
     Floppy144RunStateBegin(&run,144U);
     normal=run;
     Expect(Floppy144GreyDoorHathawayCandidate(&doorway) &&
-        doorway.rect.x==31U && doorway.rect.y==56U &&
+        doorway.rect.x==29U && doorway.rect.y==56U &&
         doorway.rect.width==4U && doorway.rect.height==1U &&
         !Floppy144SitePositionBlocked(doorway.stand_x16,doorway.stand_y16),
         "S4H fixed visual Door is beside actual Site Directory and reachable");

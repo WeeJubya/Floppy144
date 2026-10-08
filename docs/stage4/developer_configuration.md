@@ -41,7 +41,7 @@ objects, capabilities and necessary access prerequisites. All secure
 cabinets are unlocked. The Site Directory remains at its original
 Corridor position `(35,56)` with size `6x1`. A fixed, interactive Grey
 Door panel occupies the immediately adjacent south Corridor wall
-`(31,56)`, size `4x1`, rather than using seeded placement. The temporary
+`(29,56)`, size `4x1`, rather than using seeded placement. The temporary
 Grey Door Republic scene is fully accessible and can be replayed
 repeatedly without ever setting the normal run's discovery/completed bit.
 
