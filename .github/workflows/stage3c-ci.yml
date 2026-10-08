@@ -281,7 +281,8 @@ jobs:
           New-Item -ItemType Directory -Force -Path $staging | Out-Null
 
           git ls-files | Where-Object {
-            $_ -notmatch '(?i)\.(exe|obj|sav|dat)
+            $extension = [IO.Path]::GetExtension($_).ToLowerInvariant()
+            $extension -notin @(".exe",".obj",".sav",".dat")
           } | ForEach-Object {
             $source = Join-Path $PWD $_
             $target = Join-Path $staging $_
@@ -307,7 +308,7 @@ jobs:
           }
 
           $forbidden = @(Get-ChildItem -LiteralPath $verify -Recurse -File | Where-Object {
-            $_.Extension -match '(?i)^\.(exe|obj|sav|dat)
+            $_.Extension.ToLowerInvariant() -in @(".exe",".obj",".sav",".dat")
           })
           if($forbidden.Count -ne 0) {
             $forbidden.FullName | Write-Host
