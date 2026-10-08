@@ -112,6 +112,10 @@ jobs:
         shell: pwsh
         run: .\tools\test_stage4_presentation_consistency.ps1
 
+      - name: Stage 4D integration sign-off audit
+        shell: pwsh
+        run: .\tools\test_stage4d_integration.ps1
+
       - name: Stage 4 build architecture
         shell: pwsh
         run: .\tools\test_stage4_build_architecture.ps1
