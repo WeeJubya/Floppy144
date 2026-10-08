@@ -6,6 +6,7 @@
 #include "floppy144_cabinet_25d.h"
 #include "floppy144_crossword.h"
 #include "floppy144_noticeboard.h"
+#include "floppy144_paperback.h"
 #include "floppy144_takeaway.h"
 
 #include "floppy144_draw.h"
@@ -642,6 +643,33 @@ bool Floppy144CabinetOpenParent(
         }
     }
 
+    /*
+     * P-073 is intentionally hidden until T-012. The bookcase can be
+     * inspected earlier, but no generated title appears until this existing
+     * physical item becomes visible through normal Stage 3 progression.
+     */
+    if(Floppy144CabinetStringEqual(pszParentId, "STAFF_ROOM_BOOKCASE_02"))
+    {
+        const Floppy144DataRecord *pBook =
+            Floppy144GameDataFind(FLOPPY144_DATA_PHYSICAL_ITEM, "P-073");
+
+        if(
+            pBook != NULL &&
+            Floppy144CabinetStringEqual(pBook->pszC, pszParentId) &&
+            Floppy144SitePhysicalItemVisible(pRunState, pBook) &&
+            Floppy144PaperbackGenerate(
+                pRunState->recovery_seed,
+                pCabinet->szPaperbackText,
+                (uint32_t)sizeof(pCabinet->szPaperbackText)
+            )
+        )
+        {
+            /* Keep the canonical ID, title, parent, type and order. */
+            pCabinet->sGeneratedPaperback = *pBook;
+            pCabinet->sGeneratedPaperback.pszF = pCabinet->szPaperbackText;
+        }
+    }
+
     return true;
 }
 
@@ -1226,6 +1254,17 @@ const Floppy144DataRecord *Floppy144CabinetVisibleContentAt(
                 )
                 {
                     return &pCabinet->sGeneratedCrossword;
+                }
+
+                if(
+                    pCabinet->sGeneratedPaperback.pszId != NULL &&
+                    Floppy144CabinetStringEqual(
+                        pWinner->pszId,
+                        pCabinet->sGeneratedPaperback.pszId
+                    )
+                )
+                {
+                    return &pCabinet->sGeneratedPaperback;
                 }
 
                 return pWinner;

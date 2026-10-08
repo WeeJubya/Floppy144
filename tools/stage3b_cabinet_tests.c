@@ -12,6 +12,7 @@
 #include "floppy144_takeaway.h"
 #include "floppy144_variation.h"
 #include "floppy144_persistence.h"
+#include "floppy144_paperback.h"
 #include "floppy144_run_state.h"
 #include "floppy144_site.h"
 #include "floppy144_site_object.h"
@@ -1952,6 +1953,200 @@ static void Floppy144TestCrosswordPresentation(void)
     );
 }
 
+
+/*
+ * S4E-06 tests canonical P-073 in the actual Stage 3B.5 Bookcase UI.
+ * No new item/reveal state is introduced by cover generation.
+ */
+static void Floppy144TestPaperbackPresentation(void)
+{
+    Floppy144WorldState world;
+    Floppy144RunState run;
+    Floppy144RunState before;
+    Floppy144RunState loaded;
+    Floppy144RunState alternate_run;
+    Floppy144CabinetState cabinet;
+    Floppy144CabinetState loaded_cabinet;
+    Floppy144CabinetState alternate_cabinet;
+    const Floppy144DataRecord *original =
+        Floppy144GameDataFind(FLOPPY144_DATA_PHYSICAL_ITEM, "P-073");
+    const Floppy144DataRecord *paperback;
+    Floppy144TriggerId trigger = Floppy144GameDataTriggerId("T-012");
+    uint8_t encoded[FLOPPY144_SAVE_PAYLOAD_V2_SIZE];
+    static uint32_t guard[640U * 360U + 2U];
+    Floppy144Surface screen;
+    char original_cover[FLOPPY144_PAPERBACK_TEXT_CAPACITY];
+    uint32_t previous_count;
+    uint32_t selected;
+    uint32_t after_count;
+
+    F144_CHECK(
+        original != NULL &&
+        original->pszId != NULL &&
+        strcmp(original->pszId, "P-073") == 0 &&
+        original->pszA != NULL &&
+        strcmp(original->pszA, "Dog-eared paperback") == 0 &&
+        original->pszC != NULL &&
+        strcmp(original->pszC, "STAFF_ROOM_BOOKCASE_02") == 0 &&
+        original->pszF != NULL &&
+        strcmp(original->pszF,
+            "Dog-eared paperback. Recovered in Staff Room.") == 0 &&
+        Floppy144InteractionForPhysicalSource("P-073") ==
+            FLOPPY144_INTERACTION_COUNT,
+        "canonical P-073 remains a non-interactive dog-eared paperback"
+    );
+
+    Floppy144TestReset(&world, &run, &cabinet);
+    (void)Floppy144RunStateReconstructRoom(
+        &run, FLOPPY144_ROOM_STAFF_ROOM
+    );
+    F144_CHECK(
+        Floppy144CabinetOpenParent(
+            &cabinet, &run, "STAFF_ROOM_BOOKCASE_02"
+        ),
+        "Coffee-room Bookcase 02 uses original Cabinet Interior screen"
+    );
+    previous_count = Floppy144CabinetVisibleContentCount(
+        &cabinet, &run
+    );
+    F144_CHECK(
+        trigger != FLOPPY144_TRIGGER_COUNT &&
+        Floppy144TestVisibleContentIndex(&cabinet, &run, "P-073") ==
+            UINT32_MAX &&
+        cabinet.sGeneratedPaperback.pszId == NULL,
+        "before T-012 paperback cover is not generated and P-073 is hidden"
+    );
+
+    F144_CHECK(
+        trigger < FLOPPY144_TRIGGER_COUNT &&
+        Floppy144RunStateFireTrigger(&run, trigger),
+        "original T-012 progression reveals the paperback"
+    );
+    F144_CHECK(
+        Floppy144CabinetOpenParent(
+            &cabinet, &run, "STAFF_ROOM_BOOKCASE_02"
+        ),
+        "reopening Bookcase 02 after reveal uses existing Cabinet routing"
+    );
+    after_count = Floppy144CabinetVisibleContentCount(
+        &cabinet, &run
+    );
+    selected = Floppy144TestVisibleContentIndex(
+        &cabinet, &run, "P-073"
+    );
+    paperback = selected != UINT32_MAX
+        ? Floppy144CabinetVisibleContentAt(&cabinet, &run, selected)
+        : NULL;
+    F144_CHECK(
+        after_count == previous_count + 1U &&
+        paperback == &cabinet.sGeneratedPaperback &&
+        paperback->pszId != NULL &&
+        strcmp(paperback->pszId, "P-073") == 0 &&
+        paperback->pszA != NULL &&
+        strcmp(paperback->pszA, "Dog-eared paperback") == 0 &&
+        paperback->pszF == cabinet.szPaperbackText &&
+        strcmp(paperback->pszF,
+            "TITLE: SENIOR LINE MANAGER\n"
+            "BY: CRISPIN QUIBBLE\n"
+            "THE LAST PAGE IS A LEAVE REQUEST") == 0,
+        "original P-073 list identity and slot have seed-144 cover on Inspect"
+    );
+    if(paperback == NULL || paperback->pszF == NULL)
+        return;
+
+    (void)snprintf(original_cover,sizeof(original_cover),"%s",paperback->pszF);
+    before = run;
+    cabinet.uSelectedContent = selected;
+    F144_CHECK(
+        Floppy144CabinetInspectSelected(&cabinet,&world,&run) &&
+        Floppy144CabinetDetailOpen(&cabinet) &&
+        memcmp(&before,&run,sizeof(run)) == 0,
+        "reading paperback cover causes no gameplay RunState mutation"
+    );
+
+    memset(guard,0,sizeof(guard));
+    guard[0]=0x13579BDFU;
+    guard[640U * 360U + 1U]=0x2468ACE0U;
+    screen.pixels=&guard[1];
+    screen.width=640U;
+    screen.height=360U;
+    Floppy144CabinetDraw(&screen,&cabinet,&run);
+    F144_CHECK(
+        guard[0]==0x13579BDFU &&
+        guard[640U * 360U + 1U]==0x2468ACE0U,
+        "paperback detail render stays inside 640x360 bitmap"
+    );
+    F144_CHECK(
+        Floppy144CabinetBackspace(&cabinet) &&
+        !Floppy144CabinetDetailOpen(&cabinet),
+        "paperback detail exits to normal Bookcase Contents"
+    );
+
+    (void)Floppy144VariationValue(
+        run.recovery_seed, "takeaway.name.business.v1", "P-330"
+    );
+    (void)Floppy144VariationValue(
+        run.recovery_seed, "staff.crossword.pattern.v1", "P-074"
+    );
+    F144_CHECK(
+        Floppy144CabinetOpenParent(
+            &cabinet,&run,"STAFF_ROOM_BOOKCASE_02"
+        ) &&
+        strcmp(cabinet.szPaperbackText,original_cover)==0 &&
+        Floppy144CabinetVisibleContentCount(&cabinet,&run)==after_count,
+        "reopening after other flavour services keeps same title and item count"
+    );
+
+    F144_CHECK(
+        Floppy144PersistenceEncodeRunState(
+            &run,encoded,(uint32_t)sizeof(encoded)
+        ) &&
+        Floppy144PersistenceDecodeRunState(
+            &loaded,encoded,(uint32_t)sizeof(encoded)
+        ),
+        "existing V2 save codec round-trips without paperback data fields"
+    );
+    F144_CHECK(
+        loaded.recovery_seed == run.recovery_seed &&
+        Floppy144CabinetOpenParent(
+            &loaded_cabinet,&loaded,"STAFF_ROOM_BOOKCASE_02"
+        ) &&
+        strcmp(original_cover,loaded_cabinet.szPaperbackText)==0,
+        "save/reload regenerates identical cover and byline from saved seed"
+    );
+
+    Floppy144RunStateBegin(&alternate_run,145U);
+    (void)Floppy144RunStateReconstructRoom(
+        &alternate_run,FLOPPY144_ROOM_STAFF_ROOM
+    );
+    F144_CHECK(
+        trigger < FLOPPY144_TRIGGER_COUNT &&
+        Floppy144RunStateFireTrigger(&alternate_run,trigger) &&
+        Floppy144CabinetOpenParent(
+            &alternate_cabinet,&alternate_run,"STAFF_ROOM_BOOKCASE_02"
+        ) &&
+        strcmp(alternate_cabinet.szPaperbackText,
+            "TITLE: HEARTBROKEN ARCHIVE CLERK\n"
+            "BY: MILLICENT MUDDLE\n"
+            "THE LAST PAGE IS A LEAVE REQUEST")==0 &&
+        strcmp(original_cover,alternate_cabinet.szPaperbackText)!=0,
+        "known seed 145 regenerates different cover and author"
+    );
+    F144_CHECK(
+        original != NULL &&
+        strcmp(original->pszF,
+            "Dog-eared paperback. Recovered in Staff Room.") == 0,
+        "original generated P-073 description is never overwritten"
+    );
+    F144_CHECK(
+        Floppy144CabinetOpenParent(
+            &cabinet,&run,"STAFF_ROOM_BOOKCASE_01"
+        ) &&
+        cabinet.sGeneratedPaperback.pszId==NULL,
+        "other Bookcase contents never receive a generated paperback"
+    );
+}
+
 int main(void)
 {
     Floppy144TestGeneratedCabinetDiscovery();
@@ -1971,6 +2166,7 @@ int main(void)
     Floppy144TestNoticeboardCalendar();
     Floppy144TestTakeawayMenuPresentation();
     Floppy144TestCrosswordPresentation();
+    Floppy144TestPaperbackPresentation();
 
     if(g_nFailures != 0)
     {

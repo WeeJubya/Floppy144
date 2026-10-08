@@ -84,6 +84,10 @@ jobs:
         shell: pwsh
         run: .\tools\test_stage4_crossword.ps1
 
+      - name: Stage 4E deterministic paperback titles
+        shell: pwsh
+        run: .\tools\test_stage4_paperback.ps1
+
       - name: Stage 4C operator profile screen
         shell: pwsh
         run: .\tools\test_stage4_profile_screen.ps1

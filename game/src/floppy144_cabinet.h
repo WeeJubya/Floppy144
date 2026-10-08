@@ -13,6 +13,7 @@
 
 #include "floppy144_crossword.h"
 #include "floppy144_game_data.h"
+#include "floppy144_paperback.h"
 #include "floppy144_run_state.h"
 #include "floppy144_takeaway.h"
 #include "floppy144_world.h"
@@ -64,6 +65,13 @@ typedef struct Floppy144CabinetState
     /* P-074 stays a canonical physical item. Only its detail is generated. */
     Floppy144DataRecord sGeneratedCrossword;
     Floppy144CrosswordView sCrosswordView;
+
+    /*
+     * P-073: a transient paperback cover description, rebuilt from the
+     * canonical recovery seed after every open/reload.
+     */
+    Floppy144DataRecord sGeneratedPaperback;
+    char szPaperbackText[FLOPPY144_PAPERBACK_TEXT_CAPACITY];
 }
 Floppy144CabinetState;
 
