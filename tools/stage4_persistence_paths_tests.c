@@ -1804,24 +1804,36 @@ static void TestGreyDoorOneShotLifecycle(const char *root)
         Floppy144RunStateGreyDoorPlacementSlot(&run,count)==selected_index,
         "S4G-04 corridor re-entry preserves same unique seeded location");
 
-    /* Candidate footprint is a visible face of a pre-existing SOLID wall,
-       never a door threshold. All three states therefore have the exact same
-       blocked result at any of its wall cells. */
-    for(i=0U;i<(uint32_t)door.rect.width;++i)
+    /*
+     * The canonical Site collision system includes floor-footprint and
+     * room-topology checks, rather than treating every drawn wall cell as a
+     * low-level blocking rectangle. Compare actual movement from the same
+     * reachable Corridor stance across all three states. The anomaly must
+     * neither create a passage nor obstruct one that was already valid.
+     */
     {
-        int32_t x=((int32_t)door.rect.x+(int32_t)i)*FLOPPY144_SITE_FIXED_ONE;
-        int32_t y=(int32_t)door.rect.y*FLOPPY144_SITE_FIXED_ONE;
-        Expect(Floppy144SitePositionBlocked(x,y),
-            "S4G-04 solid north wall remains blocked while AVAILABLE");
+        Floppy144RunState unseen=run,available=run,done=run;
+        int32_t dx=door.rect.width>door.rect.height
+            ? 0 : FLOPPY144_SITE_MOVE_STEP_X16;
+        int32_t dy=door.rect.width>door.rect.height
+            ? -FLOPPY144_SITE_MOVE_STEP_X16 : 0;
+        unseen.grey_door_state=(uint8_t)FLOPPY144_GREY_DOOR_UNAVAILABLE;
+        done.grey_door_state=(uint8_t)FLOPPY144_GREY_DOOR_COMPLETED;
+        for(i=0U;i<12U;++i)
+        {
+            bool old_move=Floppy144RunStateMovePlayerSite(&unseen,dx,dy);
+            bool open_move=Floppy144RunStateMovePlayerSite(&available,dx,dy);
+            bool gone_move=Floppy144RunStateMovePlayerSite(&done,dx,dy);
+            Expect(old_move==open_move && old_move==gone_move &&
+                unseen.player_site_x==available.player_site_x &&
+                available.player_site_x==done.player_site_x &&
+                unseen.player_site_y==available.player_site_y &&
+                available.player_site_y==done.player_site_y,
+                "S4G-04 wall movement/collision identical across all three states");
+        }
     }
-    if(door.rect.height>door.rect.width)
-    {
-        for(i=0U;i<(uint32_t)door.rect.height;++i)
-            Expect(Floppy144SitePositionBlocked(
-                (int32_t)door.rect.x*FLOPPY144_SITE_FIXED_ONE,
-                ((int32_t)door.rect.y+(int32_t)i)*FLOPPY144_SITE_FIXED_ONE),
-                "S4G-04 solid east wall remains blocked while AVAILABLE");
-    }
+    Expect(Floppy144SiteRectCount()==initial_rect_count,
+        "S4G-04 no Grey Door geometry is inserted into the Site");
 
     Expect(Floppy144PersistenceSaveRunState(path,&run) &&
         Floppy144PersistenceLoadRunState(path,&reloaded) &&
