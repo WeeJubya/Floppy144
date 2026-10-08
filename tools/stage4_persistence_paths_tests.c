@@ -1726,6 +1726,179 @@ static void TestGreyEncounter(const char *root)
         (unsigned)count);
 }
 
+
+/* S4G-04: entire run-level state machine, permanent save state, unrelated
+   recovery independence, and deterministic location through room changes. */
+static void TestGreyDoorOneShotLifecycle(const char *root)
+{
+    Floppy144RunState run={0},fresh={0},manual={0},autosave={0},
+        completed={0},reloaded={0};
+    Floppy144DiscoveryProfile profile,profile_before;
+    Floppy144GreyDoorCandidate door={0};
+    uint32_t i,seed=9441U,count=Floppy144GreyDoorCandidateCount();
+    uint32_t initial_rect_count=Floppy144SiteRectCount();
+    uint32_t initial_collections;
+    uint32_t selected_index;
+    int32_t px,py;
+    char path[F144_PLATFORM_PATH_CAPACITY];
+
+    Floppy144DiscoveryProfileReset(&profile);
+    profile_before=profile;
+    Floppy144RunStateBegin(&run,seed);
+    initial_collections=Floppy144RunStateRecoveredKb(&run);
+    Expect(run.grey_door_state==(uint8_t)FLOPPY144_GREY_DOOR_UNAVAILABLE &&
+        !Floppy144GreyDoorForRun(&run,&door) &&
+        !Floppy144GreyDoorNearby(&run) &&
+        Floppy144SiteRectCount()==initial_rect_count,
+        "S4G-04 pristine run has zero Door rendering/hook/collision geometry");
+
+    Expect(TestJoinPath(root,"grey-one-shot.sav",path,
+        (uint32_t)sizeof(path)),"S4G-04 save path");
+    Expect(Floppy144PersistenceSaveRunState(path,&run) &&
+        Floppy144PersistenceLoadRunState(path,&reloaded) &&
+        reloaded.grey_door_state==(uint8_t)FLOPPY144_GREY_DOOR_UNAVAILABLE &&
+        !Floppy144GreyDoorForRun(&reloaded,&door),
+        "S4G-04 UNSEEN save/reload is invisible");
+
+    (void)Floppy144RunStateReconstructRoom(
+        &run,FLOPPY144_ROOM_CORRIDOR);
+    Expect(!Floppy144GreyDoorForRun(&run,&door),
+        "S4G-04 corridor reconstructed BEFORE discovery still has no door");
+    selected_index=Floppy144RunStateGreyDoorPlacementSlot(&run,count);
+    Expect(Floppy144GreyDoorCandidateAt(selected_index,&door),
+        "S4G-04 deterministic candidate resolves");
+    Floppy144RunStateSetPlayerSitePosition(
+        &run,door.stand_x16,door.stand_y16);
+    px=run.player_site_x;py=run.player_site_y;
+    Expect(!Floppy144GreyDoorNearby(&run),
+        "S4G-04 before record, even standing at chosen wall cannot Inspect");
+    Expect(Floppy144RunStateGreyDoorDiscover(&run) &&
+        !Floppy144RunStateGreyDoorDiscover(&run) &&
+        Floppy144GreyDoorNearby(&run) &&
+        Floppy144GreyDoorForRun(&run,&door),
+        "S4G-04 first record opens one persistent logical Grey Door hook");
+
+    /* The orphan document is legitimately accessible only after DR-01;
+       recording this state also tests terminal re-entry after completion. */
+    (void)Floppy144RunStateBitSet(
+        run.collections,(uint32_t)FLOPPY144_COLLECTION_DR01);
+    manual=run;
+    run.dirty=0U;
+    (void)Floppy144RunStateReconstructRoom(&run,FLOPPY144_ROOM_SECURITY);
+    Expect(Floppy144GreyDoorForRun(&run,&door) &&
+        Floppy144RunStateGreyDoorPlacementSlot(&run,count)==selected_index,
+        "S4G-04 reconstructing other rooms never moves or deletes Door");
+    Expect(Floppy144RunStateReconstructRoom(
+        &run,FLOPPY144_ROOM_RECEPTION),
+        "S4G-04 unrelated reception room reconstructs normally");
+    {
+        int32_t rx,ry;
+        Floppy144SiteSpawnPosition(&rx,&ry);
+        Floppy144RunStateSetPlayerSitePosition(&run,rx,ry);
+        Expect(!Floppy144GreyDoorNearby(&run) &&
+            Floppy144GreyDoorForRun(&run,&door),
+            "S4G-04 remote room has no interaction, Door stays in corridor");
+    }
+    Floppy144RunStateSetPlayerSitePosition(&run,px,py);
+    Expect(Floppy144GreyDoorNearby(&run) &&
+        Floppy144RunStateGreyDoorPlacementSlot(&run,count)==selected_index,
+        "S4G-04 corridor re-entry preserves same unique seeded location");
+
+    /* Candidate footprint is a visible face of a pre-existing SOLID wall,
+       never a door threshold. All three states therefore have the exact same
+       blocked result at any of its wall cells. */
+    for(i=0U;i<(uint32_t)door.rect.width;++i)
+    {
+        int32_t x=((int32_t)door.rect.x+(int32_t)i)*FLOPPY144_SITE_FIXED_ONE;
+        int32_t y=(int32_t)door.rect.y*FLOPPY144_SITE_FIXED_ONE;
+        Expect(Floppy144SitePositionBlocked(x,y),
+            "S4G-04 solid north wall remains blocked while AVAILABLE");
+    }
+    if(door.rect.height>door.rect.width)
+    {
+        for(i=0U;i<(uint32_t)door.rect.height;++i)
+            Expect(Floppy144SitePositionBlocked(
+                (int32_t)door.rect.x*FLOPPY144_SITE_FIXED_ONE,
+                ((int32_t)door.rect.y+(int32_t)i)*FLOPPY144_SITE_FIXED_ONE),
+                "S4G-04 solid east wall remains blocked while AVAILABLE");
+    }
+
+    Expect(Floppy144PersistenceSaveRunState(path,&run) &&
+        Floppy144PersistenceLoadRunState(path,&reloaded) &&
+        Floppy144GreyDoorForRun(&reloaded,&door) &&
+        Floppy144RunStateGreyDoorPlacementSlot(&reloaded,count)==selected_index,
+        "S4G-04 AVAILABLE save/reload preserves exact deterministic position");
+
+    Expect(Floppy144RunStateGreyDoorComplete(&run) &&
+        run.grey_door_state==(uint8_t)FLOPPY144_GREY_DOOR_COMPLETED &&
+        !Floppy144GreyDoorForRun(&run,&door) &&
+        !Floppy144GreyDoorNearby(&run) &&
+        Floppy144SiteRectCount()==initial_rect_count,
+        "S4G-04 COMPLETED is a silent, geometry-free permanent state");
+    run.dirty=0U;
+    completed=run;
+    for(i=0U;i<3U;++i)
+    {
+        Expect(Floppy144DocumentApplyEffects(NULL,&run,
+            FLOPPY144_GREY_DOOR_RECORD_COLLECTION,
+            FLOPPY144_GREY_DOOR_RECORD_INDEX) &&
+            memcmp(&run,&completed,sizeof(run))==0,
+            "S4G-04 repeated terminal/document views NEVER resurrect completed Door");
+    }
+    Expect(!Floppy144RunStateGreyDoorDiscover(&run) &&
+        !Floppy144RunStateGreyDoorComplete(&run) &&
+        run.dirty==0U,
+        "S4G-04 completed->available and completed->completed are forbidden");
+    Expect(Floppy144PersistenceSaveRunState(path,&run) &&
+        Floppy144PersistenceLoadRunState(path,&reloaded) &&
+        reloaded.grey_door_state==(uint8_t)FLOPPY144_GREY_DOOR_COMPLETED &&
+        !Floppy144GreyDoorForRun(&reloaded,&door) &&
+        !Floppy144GreyDoorNearby(&reloaded),
+        "S4G-04 completed restart/save does not recreate Door");
+    (void)Floppy144RunStateReconstructRoom(
+        &reloaded,FLOPPY144_ROOM_MAIN_OFFICE);
+    Expect(!Floppy144GreyDoorForRun(&reloaded,&door),
+        "S4G-04 later room restoration cannot resurrect completed Door");
+
+    /* Narrow priority exception: matching run, completed autosave wins.
+       Other runs, even if they carry an available Door, remain independent. */
+    autosave=run;
+    Expect(Floppy144RunStateGreyDoorCompletedAutosavePreferred(
+        &manual,&autosave),
+        "S4G-04 completed autosave takes precedence over pre-event manual");
+    Expect(!Floppy144RunStateGreyDoorCompletedAutosavePreferred(
+        &autosave,&manual) &&
+        !Floppy144RunStateGreyDoorCompletedAutosavePreferred(
+            &autosave,&autosave),
+        "S4G-04 completed manual cannot be demoted");
+    autosave.recovery_seed++;
+    Expect(!Floppy144RunStateGreyDoorCompletedAutosavePreferred(
+        &manual,&autosave),
+        "S4G-04 unrelated run seed cannot hijack a recorded session");
+    autosave=manual;
+    Expect(!Floppy144RunStateGreyDoorCompletedAutosavePreferred(
+        &manual,&autosave),
+        "S4G-04 ordinary manual checkpoint keeps precedence");
+
+    Floppy144RunStateBegin(&fresh,seed+1U);
+    Expect(fresh.grey_door_state==(uint8_t)FLOPPY144_GREY_DOOR_UNAVAILABLE &&
+        !Floppy144GreyDoorForRun(&fresh,&door) &&
+        Floppy144RunStateRecoveredKb(&fresh)==initial_collections &&
+        !Floppy144RunStateCollectionRestored(&fresh,FLOPPY144_COLLECTION_DR01) &&
+        memcmp(&profile,&profile_before,sizeof(profile))==0,
+        "S4G-04 fresh recovery restores opportunity without altering Profile");
+    Floppy144RunStateBegin(&fresh,seed);
+    Expect(fresh.grey_door_state==(uint8_t)FLOPPY144_GREY_DOOR_UNAVAILABLE &&
+        !Floppy144GreyDoorForRun(&fresh,&door),
+        "S4G-04 explicit new run resets one-shot even with deterministic seed override");
+    (void)Floppy144RunStateReconstructRoom(&fresh,FLOPPY144_ROOM_CORRIDOR);
+    Expect(Floppy144RunStateGreyDoorDiscover(&fresh) &&
+        Floppy144GreyDoorForRun(&fresh,&door),
+        "S4G-04 independent new run can discover Grey Door afresh");
+    printf("S4G-04 lifecycle hardening: UNSEEN/AVAILABLE/COMPLETED, "
+        "manual/autosave priority, wall/no-scar, new-run reset\n");
+}
+
 int main(void)
 {
     const char *root=getenv("F144_TEST_ROOT");
@@ -1762,6 +1935,7 @@ int main(void)
     TestGreyDoorDiscovery(root);
     TestGreyDoorPlacement(root);
     TestGreyEncounter(root);
+    TestGreyDoorOneShotLifecycle(root);
 
     if(failures!=0)
     {

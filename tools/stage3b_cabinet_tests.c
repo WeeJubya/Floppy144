@@ -14,6 +14,9 @@
 #include "floppy144_persistence.h"
 #include "floppy144_paperback.h"
 #include "floppy144_run_state.h"
+#include "floppy144_grey_door.h"
+#include "floppy144_site_2d.h"
+#include "floppy144_site_directory.h"
 #include "floppy144_site.h"
 #include "floppy144_site_object.h"
 #include "floppy144_trigger_engine.h"
@@ -2147,6 +2150,115 @@ static void Floppy144TestPaperbackPresentation(void)
     );
 }
 
+
+/*
+ * S4G-04: pixel-level no-scar proof.
+ *
+ * Render at the *same* corridor stance in all three valid states, with the
+ * same seed, camera, HUD and player. UNAVAILABLE and COMPLETED must produce
+ * byte-for-byte identical 640x360 frames; AVAILABLE must differ. The Site
+ * Directory must remain identical through the full lifecycle.
+ */
+static void Floppy144TestGreyDoorNoScar(void)
+{
+    uint32_t *before_pixels=(uint32_t *)malloc(640U*360U*sizeof(uint32_t));
+    uint32_t *available_pixels=(uint32_t *)malloc(640U*360U*sizeof(uint32_t));
+    uint32_t *after_pixels=(uint32_t *)malloc(640U*360U*sizeof(uint32_t));
+    Floppy144Surface before_surface,available_surface,after_surface;
+    Floppy144RunState run;
+    Floppy144GreyDoorCandidate candidate;
+    uint32_t original_rect_count=Floppy144SiteRectCount();
+    uint32_t i;
+    static const uint32_t seeds[]={144U,146U,2026U,0x12345678U};
+
+    F144_CHECK(before_pixels!=NULL && available_pixels!=NULL &&
+        after_pixels!=NULL,"S4G no-scar frame buffers can be allocated");
+    if(before_pixels==NULL || available_pixels==NULL || after_pixels==NULL)
+    {
+        free(before_pixels);free(available_pixels);free(after_pixels);
+        return;
+    }
+    memset(&before_surface,0,sizeof(before_surface));
+    before_surface.pixels=before_pixels;
+    before_surface.width=640U;
+    before_surface.height=360U;
+    available_surface=before_surface;
+    available_surface.pixels=available_pixels;
+    after_surface=before_surface;
+    after_surface.pixels=after_pixels;
+
+    for(i=0U;i<(uint32_t)(sizeof(seeds)/sizeof(seeds[0]));++i)
+    {
+        Floppy144RunStateBegin(&run,seeds[i]);
+        F144_CHECK(Floppy144RunStateReconstructRoom(
+            &run,FLOPPY144_ROOM_CORRIDOR),
+            "S4G room restoration initialises the corridor without the door");
+        F144_CHECK(Floppy144GreyDoorCandidateAt(
+            Floppy144RunStateGreyDoorPlacementSlot(
+                &run,Floppy144GreyDoorCandidateCount()),&candidate),
+            "S4G seeded candidate for pixel-level wall audit");
+        Floppy144RunStateSetPlayerSitePosition(
+            &run,candidate.stand_x16,candidate.stand_y16);
+        F144_CHECK(!Floppy144GreyDoorForRun(&run,&candidate) &&
+            !Floppy144GreyDoorNearby(&run),
+            "S4G unseen Door creates no visible or inspectable hook");
+
+        Floppy144Site2DDrawForPlayerState(
+            &before_surface,&run,NULL,FLOPPY144_OPERATOR_BODY_STYLE_A,NULL);
+        Floppy144SiteDirectoryDraw(&before_surface,&run);
+        F144_CHECK(Floppy144RunStateGreyDoorDiscover(&run),
+            "S4G first view advances the one-shot state");
+        F144_CHECK(Floppy144GreyDoorForRun(&run,&candidate) &&
+            Floppy144GreyDoorNearby(&run),
+            "S4G discovered Door provides exactly one overlay and proximity");
+
+        Floppy144SiteDirectoryDraw(&available_surface,&run);
+        F144_CHECK(memcmp(before_pixels,available_pixels,
+            640U*360U*sizeof(uint32_t))==0,
+            "S4G Directory contains no pre/post/unlocked Easter egg marker");
+        Floppy144Site2DDrawForPlayerState(
+            &before_surface,&run,NULL,FLOPPY144_OPERATOR_BODY_STYLE_A,NULL);
+        /* Re-render the baseline using an identical copy with only the
+           one-shot state cleared. No other bytes of RunState can change. */
+        {
+            Floppy144RunState pristine=run;
+            pristine.grey_door_state=(uint8_t)FLOPPY144_GREY_DOOR_UNAVAILABLE;
+            Floppy144Site2DDrawForPlayerState(
+                &before_surface,&pristine,NULL,
+                FLOPPY144_OPERATOR_BODY_STYLE_A,NULL);
+        }
+        Floppy144Site2DDrawForPlayerState(
+            &available_surface,&run,NULL,FLOPPY144_OPERATOR_BODY_STYLE_A,NULL);
+        F144_CHECK(memcmp(before_pixels,available_pixels,
+            640U*360U*sizeof(uint32_t))!=0,
+            "S4G available Door visibly changes exactly one corridor view");
+
+        F144_CHECK(Floppy144RunStateGreyDoorComplete(&run),
+            "S4G availability is consumed once");
+        Floppy144Site2DDrawForPlayerState(
+            &after_surface,&run,NULL,FLOPPY144_OPERATOR_BODY_STYLE_A,NULL);
+        F144_CHECK(memcmp(before_pixels,after_pixels,
+            640U*360U*sizeof(uint32_t))==0,
+            "S4G COMPLETED wall and prompts pixel-match UNSEEN with no scar");
+        F144_CHECK(!Floppy144GreyDoorForRun(&run,&candidate) &&
+            !Floppy144GreyDoorNearby(&run) &&
+            Floppy144SiteRectCount()==original_rect_count,
+            "S4G consumed Door has no hook, geometry or collision change");
+        Floppy144SiteDirectoryDraw(&before_surface,&run);
+        Floppy144SiteDirectoryDraw(&after_surface,&run);
+        F144_CHECK(memcmp(before_pixels,after_pixels,
+            640U*360U*sizeof(uint32_t))==0,
+            "S4G post-completion Directory remains byte-identical");
+        F144_CHECK(!Floppy144RunStateGreyDoorDiscover(&run) &&
+            !Floppy144RunStateGreyDoorComplete(&run),
+            "S4G completed lifecycle is irreversible");
+    }
+    free(before_pixels);
+    free(available_pixels);
+    free(after_pixels);
+    puts("S4G-04 visual lifecycle: UNSEEN == COMPLETED; AVAILABLE differs; directory unchanged");
+}
+
 int main(void)
 {
     Floppy144TestGeneratedCabinetDiscovery();
@@ -2167,6 +2279,7 @@ int main(void)
     Floppy144TestTakeawayMenuPresentation();
     Floppy144TestCrosswordPresentation();
     Floppy144TestPaperbackPresentation();
+    Floppy144TestGreyDoorNoScar();
 
     if(g_nFailures != 0)
     {

@@ -494,6 +494,31 @@ static bool Floppy144RecordedSessionAvailable(
         )
     )
     {
+        /*
+         * A successfully finished Grey Door event is deliberately irreversible
+         * in this saved recovery. It is silently checkpointed to autosave on
+         * exit, even if an older manually recorded session still exists.
+         *
+         * Preserve the standard manual-first rule for every other case and
+         * do not transfer the hidden flag between different run seeds.
+         */
+        Floppy144RunState completed_autosave;
+        if(
+            Floppy144PersistenceLoadRunState(
+                Floppy144StoragePath(
+                    &global_storage_paths, F144_PERSISTENCE_AUTOSAVE
+                ),
+                &completed_autosave
+            ) &&
+            Floppy144RunStateGreyDoorCompletedAutosavePreferred(
+                &global_recorded_run_state, &completed_autosave
+            )
+        )
+        {
+            global_recorded_run_state = completed_autosave;
+            global_recorded_session_is_autosave = true;
+        }
+
         return true;
     }
 
@@ -707,7 +732,30 @@ static void Floppy144UpdateTiming(
                global_run_state.player_site_y ==
                    global_grey_encounter.return_y16)
             {
-                (void)Floppy144RunStateGreyDoorComplete(&global_run_state);
+                if(Floppy144RunStateGreyDoorComplete(&global_run_state))
+                {
+                    /*
+                     * Complete the one-shot transaction immediately, before
+                     * returning to an ordinary save/reload entry point.
+                     * Do not update the Profile, add a notebook note or show
+                     * a player-facing unlock/completion message.
+                     */
+                    if(!Floppy144PersistenceSaveRunState(
+                        Floppy144StoragePath(
+                            &global_storage_paths, F144_PERSISTENCE_AUTOSAVE
+                        ),
+                        &global_run_state
+                    ))
+                    {
+                        global_persistence_warnings |=
+                            FLOPPY144_PERSISTENCE_WARNING_AUTOSAVE;
+                    }
+                    else
+                    {
+                        global_persistence_warnings &=
+                            (uint8_t)~FLOPPY144_PERSISTENCE_WARNING_AUTOSAVE;
+                    }
+                }
             }
             Floppy144MovementInputReset(&global_movement_input);
             (void)Floppy144PlayerVisualSetMovement(

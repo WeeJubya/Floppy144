@@ -1242,6 +1242,23 @@ bool Floppy144RunStateGreyDoorComplete(Floppy144RunState *state)
     return true;
 }
 
+/*
+ * The completion bit is a monotonic property of a saved recovery run.
+ * A pre-encounter manual checkpoint must not undo a newer completed
+ * autosave. A different-seed recovery is always independent.
+ */
+bool Floppy144RunStateGreyDoorCompletedAutosavePreferred(
+    const Floppy144RunState *manual,
+    const Floppy144RunState *autosave
+)
+{
+    return manual != NULL &&
+        autosave != NULL &&
+        manual->recovery_seed == autosave->recovery_seed &&
+        manual->grey_door_state != (uint8_t)FLOPPY144_GREY_DOOR_COMPLETED &&
+        autosave->grey_door_state == (uint8_t)FLOPPY144_GREY_DOOR_COMPLETED;
+}
+
 void Floppy144RunStateReset
 (
     Floppy144RunState *state

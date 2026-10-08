@@ -66,5 +66,34 @@ if($canonical.Contains('DR-00-RS-0144')) {
 if($run -match '(?i)\b(rand|srand|time|GetTickCount)\s*\(') {
     throw 'Grey Door run-state logic must not use a sequential random generator.'
 }
+# S4G-04: enforce absence from EVERY ordinary player-facing summary and
+# persistent progression presentation. The one fictionally authored orphan
+# record is allowed before discovery and remains the only archive clue.
+Require $run 'Floppy144RunStateGreyDoorCompletedAutosavePreferred' 'Finished run can be resurrected by a stale manual checkpoint.'
+Require $main 'Floppy144RunStateGreyDoorCompletedAutosavePreferred' 'Recorded-session load path bypasses one-shot reconciliation.'
+Require $main 'F144_PERSISTENCE_AUTOSAVE' 'Finished encounter is not checkpointed.'
+Require $tests 'TestGreyDoorOneShotLifecycle(root)' 'Full three-state lifecycle regression missing.'
+$visualTests = Read-Source "tools\stage3b_cabinet_tests.c"
+Require $visualTests 'Floppy144TestGreyDoorNoScar();' 'Pixel-level one-shot restoration regression missing.'
+Require $visualTests 'memcmp(before_pixels,after_pixels' 'No byte-for-byte original-wall verification.'
+$noMention = @(
+    "game\src\floppy144_site_directory.c",
+    "game\src\floppy144_notebook_view.c",
+    "game\src\floppy144_completion_view.c",
+    "game\src\floppy144_profile.c",
+    "game\src\floppy144_profile_view.c",
+    "game\src\floppy144_credits_view.c",
+    "game\src\floppy144_recovery.c"
+)
+foreach($relative in $noMention) {
+    $text = Read-Source $relative
+    if($text -match '(?i)(GREY[ _]DOOR|DR-00-RS-0144|GreyDoor)') {
+        throw "Grey Door acknowledgement has leaked into ordinary player-facing content: $relative"
+    }
+}
+if($main -match '(?i)printf\s*\([^;]*GREY[ _]DOOR') {
+    throw "The shipping launcher is leaking Grey Door diagnostic output."
+}
+Write-Host "S4G-04 NON-ACKNOWLEDGEMENT / ONE-SHOT SOURCE AUDIT: PASS"
 Write-Host "S4G-01 ISOLATION / SCHEMA AUDIT: PASS"
 Write-Host "Behavioural round-trip cases run in test_stage4_persistence.ps1 (CI)."

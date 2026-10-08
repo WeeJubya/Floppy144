@@ -337,6 +337,18 @@ void Floppy144RunStateSetPlayerSitePosition
 /* Independent seed domain: slot indexes a vetted candidate list, not world coordinates. */
 bool Floppy144RunStateGreyDoorDiscover(Floppy144RunState *state);
 bool Floppy144RunStateGreyDoorComplete(Floppy144RunState *state);
+
+/*
+ * Manual recovery records normally take priority over autosave. If the
+ * matching run's later autosave has permanently consumed the Grey Door,
+ * prefer that autosave to avoid reviving a completed anomaly on restart.
+ * NEVER merge across different recovery seeds or persist the result in
+ * Profile-level statistics.
+ */
+bool Floppy144RunStateGreyDoorCompletedAutosavePreferred(
+    const Floppy144RunState *manual,
+    const Floppy144RunState *autosave
+);
 uint32_t Floppy144RunStateGreyDoorPlacementSlot(
     const Floppy144RunState *state, uint32_t candidate_count
 );
