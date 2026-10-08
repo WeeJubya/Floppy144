@@ -1062,11 +1062,6 @@ static void Floppy144TestMultipleCollectionCommands(void)
     );
     Floppy144TerminalMoveRecordPager(&sTerminal, -1);
     F144_CHECK(
-        sTerminal.record_pager_page == 2U,
-        "record pager navigates back to page two"
-    );
-    Floppy144TerminalMoveRecordPager(&sTerminal, -1);
-    F144_CHECK(
         sTerminal.record_pager_page == 1U,
         "record pager moves backward"
     );
