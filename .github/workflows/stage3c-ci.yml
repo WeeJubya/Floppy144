@@ -323,3 +323,75 @@ jobs:
           name: Floppy144-Stage4-Source
           path: ${{ runner.temp }}\Floppy144_Stage4_Source.zip
           if-no-files-found: error
+
+      # The independent root entry points must be tested as actual Windows
+      # commands. CI's existing release gates above remain unchanged.
+      - name: Validate standalone testbuild and run workflows
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          Write-Host "=== STANDALONE testbuild.ps1 ==="
+          .\testbuild.ps1
+          if($LASTEXITCODE -ne 0) { throw "Standalone testbuild returned $LASTEXITCODE." }
+
+          Write-Host "=== STANDALONE run.ps1 ==="
+          .\run.ps1 -build release
+          if($LASTEXITCODE -ne 0) { throw "Standalone run returned $LASTEXITCODE." }
+
+          $runSource = Get-Content -LiteralPath .\run.ps1 -Raw
+          if($runSource -match 'test_stage[234]' -or $runSource -match 'testbuild\.ps1') {
+            throw "run.ps1 still invokes extracted regressions."
+          }
+          $testSource = Get-Content -LiteralPath .\testbuild.ps1 -Raw
+          if($testSource -match '(?m)^\s*&\s+.*run\.ps1') {
+            throw "testbuild.ps1 invokes run.ps1 rather than its own tests."
+          }
+          Write-Host "STANDALONE TEST / RUN: PASS"
+
+      - name: Validate cleanbuild order and failure short-circuit
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          Write-Host "=== CLEAN BUILD: DIFF / CLEAN / TEST / BUILD ==="
+          .\cleanbuild.ps1
+          if($LASTEXITCODE -ne 0) { throw "Standalone cleanbuild returned $LASTEXITCODE." }
+          if(-not (Test-Path -LiteralPath .\bin\release\Floppy144.exe)) {
+            throw "Successful cleanbuild did not produce the Release executable."
+          }
+          Write-Host "CLEAN BUILD COMPLETE: PASS"
+
+          # Temporary and reversible fixture, never committed. The initial
+          # cleanbuild cleanup removes its solution; Stage 2 fails before any
+          # run.ps1 Premake/MSBuild invocation can recreate that solution.
+          $fixture = Join-Path $PWD 'tools\test_stage2.ps1'
+          $original = [IO.File]::ReadAllBytes($fixture)
+          try {
+            [IO.File]::WriteAllText(
+              $fixture, "throw 'INJECTED STAGE 2 FAILURE (CI-ONLY)'"
+            )
+            $failureSeen = $false
+            try {
+              .\cleanbuild.ps1
+            }
+            catch {
+              $failureSeen = $true
+              Write-Host "Expected injected test failure propagated: $($_.Exception.Message)"
+            }
+            if(-not $failureSeen) {
+              throw "cleanbuild failed to propagate the injected test failure."
+            }
+            if(Test-Path -LiteralPath .\build\Floppy144.sln) {
+              throw "run.ps1 was reached after a failed regression."
+            }
+            Write-Host "CLEAN BUILD FAILED-TEST SHORT-CIRCUIT: PASS"
+          }
+          finally {
+            [IO.File]::WriteAllBytes($fixture, $original)
+          }
+          git diff --exit-code -- tools/test_stage2.ps1
+          if($LASTEXITCODE -ne 0) {
+            throw "Temporary regression fixture was not restored cleanly."
+          }
+          Write-Host "ROOT THREE-WORKFLOW ACCEPTANCE: PASS"

@@ -12,33 +12,19 @@ param
     $solutionPath = ".\build\Floppy144.sln"
     $releaseExe = ".\bin\release\Floppy144.exe"
 
-    New-Item -ItemType Directory -Force .\obj, .\build, .\bin | Out-Null
+    # All relative Premake/MSBuild paths are rooted at this script's location.
+    Push-Location $PSScriptRoot
+    try {
+        New-Item -ItemType Directory -Force .\obj, .\build, .\bin | Out-Null
 
     Write-Host ""
     Write-Host "=== FLOPPY//144 STAGE 2 DATA BUILD ==="
-    & .\tools\build_game_data.ps1
+    $global:LASTEXITCODE = 0
+    & (Join-Path $PSScriptRoot "tools\build_game_data.ps1")
 
     if($LASTEXITCODE -ne 0) {
         throw "Game-data build failed with exit code $LASTEXITCODE."
     }
-
-    Write-Host ""
-    Write-Host "=== FLOPPY//144 STAGE 2 REGRESSION ==="
-    & .\tools\test_stage2.ps1
-
-    if($LASTEXITCODE -ne 0) {
-        throw "Stage 2 regression failed with exit code $LASTEXITCODE."
-    }
-
-    Write-Host ""
-    Write-Host "=== FLOPPY//144 STAGE 3A PROLOGUE REGRESSION ==="
-    & .\tools\test_stage3a.ps1
-
-    if($LASTEXITCODE -ne 0) {
-        throw "Stage 3A Prologue regression failed with exit code $LASTEXITCODE."
-    }
-
-    & .\tools\test_stage3b.ps1
 
     if(-not (Get-Command premake5 -ErrorAction SilentlyContinue)) {
         throw "premake5 was not found on PATH."
@@ -91,5 +77,9 @@ param
         }
 
         Write-Host "SIZE GATE: PASS" -ForegroundColor Green
+    }
+    }
+    finally {
+        Pop-Location
     }
 }
