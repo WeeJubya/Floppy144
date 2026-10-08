@@ -26,7 +26,7 @@ $persistence = Read-F144File "game\src\floppy144_persistence.c"
 $workflow = Read-F144File ".github\workflows\stage3c-ci.yml"
 $decision = Read-F144File "docs\stage4\stage4e_optional_early_collections_decision.md"
 $authored = Get-Content -LiteralPath (Join-Path $root "data\floppy144_game_data.json") -Raw |
-    ConvertFrom-Json -Depth 100
+    ConvertFrom-Json
 
 $portable = @(
     "game\src\floppy144_variation.c",

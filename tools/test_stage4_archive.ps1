@@ -3,7 +3,7 @@ Set-StrictMode -Version Latest
 
 $root = Split-Path -Parent $PSScriptRoot
 $data = Get-Content -Raw -LiteralPath (Join-Path $root "data\floppy144_game_data.json") |
-    ConvertFrom-Json -Depth 100
+    ConvertFrom-Json
 $compiled = Get-Content -Raw -LiteralPath (Join-Path $root "game\src\floppy144_documents.generated.inc")
 $collDef = Get-Content -Raw -LiteralPath (Join-Path $root "game\src\floppy144_collections.def")
 $catalogue = Get-Content -Raw -LiteralPath (Join-Path $root "game\src\floppy144_catalogue.c")
