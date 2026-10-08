@@ -1931,8 +1931,9 @@ static void TestStage4GCompleteJourney(const char *root)
     };
     static uint32_t pixels[640U*360U];
     Floppy144Surface surface;
-    Floppy144RunState run,original,restored,expected,manual,completed;
-    Floppy144GreyDoorCandidate candidate,chosen;
+    Floppy144RunState run={0},original={0},restored={0},
+        expected={0},manual={0},completed={0};
+    Floppy144GreyDoorCandidate candidate={0},chosen={0};
     Floppy144GreyEncounter scene;
     Floppy144DiscoveryProfile profile,profile_before;
     char save_path[F144_PLATFORM_PATH_CAPACITY];
