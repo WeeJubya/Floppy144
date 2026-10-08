@@ -56,74 +56,100 @@ static const char *floppy144_record_forms[10] =
  * permutation. This restores the less mechanical record-number texture from
  * the Technical Slice without returning to an out-of-order catalogue.
  */
+/*
+ * Cache each collection's sorted irregular filing numbers.
+ * With 75 records in late-act collections, repeatedly recomputing every
+ * rank during terminal LIST/OPEN would otherwise be quadratic per row and
+ * extremely costly in FindRecord's complete-archive scan. The compact
+ * lookup is derived only from immutable collection metadata, never a run
+ * seed, persisted state or OS randomness.
+ */
+#define FLOPPY144_CATALOGUE_NUMBER_CACHE_LIMIT 128U
+static uint16_t floppy144_number_cache
+    [FLOPPY144_COLLECTION_COUNT][FLOPPY144_CATALOGUE_NUMBER_CACHE_LIMIT];
+static uint16_t floppy144_number_cache_sizes[FLOPPY144_COLLECTION_COUNT];
+
 static uint32_t Floppy144CatalogueOrderedRecordNumber(
+    Floppy144CollectionId collection,
     const Floppy144CatalogueDefinition *definition,
     uint32_t index
 )
 {
-    uint32_t modulus;
+    uint32_t count;
     uint32_t source;
+    uint32_t ci = (uint32_t)collection;
+    uint32_t modulus;
 
     if(
         definition == NULL ||
+        ci >= (uint32_t)FLOPPY144_COLLECTION_COUNT ||
         definition->record_count == 0U ||
         index >= definition->record_count
     )
-    {
         return 0U;
+
+    count = definition->record_count;
+    modulus = count * FLOPPY144_RECORD_NUMBER_DENSITY;
+
+    if(count <= FLOPPY144_CATALOGUE_NUMBER_CACHE_LIMIT)
+    {
+        if(floppy144_number_cache_sizes[ci] != count)
+        {
+            /*
+             * Insertion sort once per collection. The source permutation
+             * remains exactly the same as the Stage 3C number generator;
+             * this changes performance, not the chosen record numbers.
+             */
+            for(source = 0U; source < count; ++source)
+            {
+                uint32_t candidate =
+                    1U +
+                    ((source * definition->record_number_multiplier +
+                      definition->record_number_offset) % modulus);
+                uint32_t pos = source;
+
+                while(
+                    pos > 0U &&
+                    floppy144_number_cache[ci][pos - 1U] > candidate
+                )
+                {
+                    floppy144_number_cache[ci][pos] =
+                        floppy144_number_cache[ci][pos - 1U];
+                    --pos;
+                }
+
+                floppy144_number_cache[ci][pos] = (uint16_t)candidate;
+            }
+            floppy144_number_cache_sizes[ci] = (uint16_t)count;
+        }
+
+        return definition->record_number_base +
+            floppy144_number_cache[ci][index];
     }
 
-    modulus =
-        definition->record_count *
-        FLOPPY144_RECORD_NUMBER_DENSITY;
-
-    for(source = 0U; source < definition->record_count; ++source)
+    /*
+     * Defensive fallback for a future oversized catalogue. Current
+     * S4E-08 data tops out at 75 rows and the historical target is 100.
+     */
+    for(source = 0U; source < count; ++source)
     {
-        uint32_t candidate =
-            definition->record_number_base +
-            1U +
-            (
-                (
-                    source *
-                    definition->record_number_multiplier +
-                    definition->record_number_offset
-                ) %
-                modulus
-            );
-
+        uint32_t candidate = 1U +
+            ((source * definition->record_number_multiplier +
+              definition->record_number_offset) % modulus);
         uint32_t rank = 0U;
         uint32_t other;
-
-        for(other = 0U; other < definition->record_count; ++other)
+        for(other = 0U; other < count; ++other)
         {
-            uint32_t other_candidate =
-                definition->record_number_base +
-                1U +
-                (
-                    (
-                        other *
-                        definition->record_number_multiplier +
-                        definition->record_number_offset
-                    ) %
-                    modulus
-                );
-
+            uint32_t other_candidate = 1U +
+                ((other * definition->record_number_multiplier +
+                  definition->record_number_offset) % modulus);
             if(other_candidate < candidate)
-            {
                 ++rank;
-            }
         }
-
         if(rank == index)
-        {
-            return candidate;
-        }
+            return definition->record_number_base + candidate;
     }
-
-    return
-        definition->record_number_base +
-        index +
-        1U;
+    return definition->record_number_base + index + 1U;
 }
 
 /*
@@ -196,6 +222,7 @@ void Floppy144CatalogueBuildRecord(
      */
     record_number =
         Floppy144CatalogueOrderedRecordNumber(
+            collection,
             definition,
             index
         );

@@ -83,7 +83,7 @@ static void emit_collections(JsonValue*root,const char*outdir)
         fprintf(f,",\n    %s, %ldU, %s,\n    ",domain_enum(domain),size_kb,required?"true":"false");
         cstr(f,"DATA-DRIVEN COLLECTION GENERATED FROM FLOPPY144_GAME_DATA.JSON.");fprintf(f,", NULL, %ldU, ",records);cstr(f,name);fprintf(f,", ");
         {char pref[32];snprintf(pref,sizeof(pref),"%s-RS",id);cstr(f,pref);}
-        fprintf(f,",\n    floppy144_generated_generic_subjects, 12U, false, 0U, 37U, %luU\n)\n\n",11UL+(unsigned long)i*17UL);
+        fprintf(f,",\n    floppy144_generated_generic_subjects, 36U, false, 0U, 37U, %luU\n)\n\n",11UL+(unsigned long)i*17UL);
     }
     fclose(f);
 }
@@ -273,7 +273,21 @@ static void emit_documents(JsonValue*root,const char*outdir)
             special=preserved_document_slot(rid,records);
             if(special>=0L){idx=special;}
             else{
-                long desired=(long)(((authored_ordinal+1U)*(size_t)records)/(authored_total+1U));long attempts=0L;
+                /*
+                 * Stage 4E: spread readable material through the larger
+                 * catalogue while changing its visible ordering. Canonical
+                 * JSON/source order remains unchanged for trigger choices.
+                 * A coprime reverse-cycle permutation ensures every ordinal
+                 * gets a distinct preferred band. A collection offset avoids
+                 * identical placement rhythms across the archive.
+                 */
+                size_t scrambled=authored_total>1U
+                    ? ((authored_ordinal*(authored_total-1U) +
+                        ci*3U) % authored_total)
+                    : 0U;
+                long desired=(long)(((scrambled+1U)*(size_t)records)/
+                    (authored_total+1U));
+                long attempts=0L;
                 if(desired>=records)desired=records-1L;
                 idx=desired;
                 while(used[idx]&&attempts<records){idx=(idx+1L)%records;++attempts;}

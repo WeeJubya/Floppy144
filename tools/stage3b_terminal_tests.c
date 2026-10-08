@@ -1027,10 +1027,15 @@ static void Floppy144TestMultipleCollectionCommands(void)
 
     Floppy144TerminalMoveRecordPager(&sTerminal, 1);
     F144_CHECK(
-        sTerminal.record_pager_page == 2U,
-        "record pager clamps at final page"
+        sTerminal.record_pager_page == 3U,
+        "record pager advances to third page"
     );
 
+    Floppy144TerminalMoveRecordPager(&sTerminal, -1);
+    F144_CHECK(
+        sTerminal.record_pager_page == 2U,
+        "record pager can navigate back to page two"
+    );
     Floppy144TerminalMoveRecordPager(&sTerminal, -1);
     F144_CHECK(
         sTerminal.record_pager_page == 1U,
@@ -1049,7 +1054,7 @@ static void Floppy144TestMultipleCollectionCommands(void)
         ) != NULL &&
         strstr(
             sTerminal.output[0],
-            "            PAGE 1 OF 2"
+            "            PAGE 1 OF 3"
         ) != NULL,
         "record pager keeps collection and page indicator together on first line"
     );
@@ -1607,9 +1612,9 @@ static void Floppy144TestPlayerRecoveryPolicy(void)
         F144_CHECK(
             pFm23!=NULL &&
             pFm23->size_kb==101U &&
-            pFm23->catalogue.record_count==20U &&
+            pFm23->catalogue.record_count==50U &&
             uAuthored==6U,
-            "FM-23 is a full optional collection with 20 records and six authored documents"
+            "FM-23 is a full optional collection with 50 records and six authored documents"
         );
 
         F144_CHECK(
@@ -1950,7 +1955,7 @@ static void Floppy144TestBranchDocumentAccessGate(void)
         pEntryDocument->record_id_override != NULL &&
         strcmp(
             pEntryDocument->record_id_override,
-            "DR-04-RS-0111"
+            "DR-04-RS-0037"
         ) == 0,
         "DR-04 handover checklist is the first player-facing recovery document"
     );
@@ -1960,7 +1965,7 @@ static void Floppy144TestBranchDocumentAccessGate(void)
         pChoiceBriefing->record_id_override != NULL &&
         strcmp(
             pChoiceBriefing->record_id_override,
-            "DR-04-RS-0037"
+            "DR-04-RS-0111"
         ) == 0,
         "DR-04 neutral workstream summary follows the handover checklist"
     );
@@ -1970,13 +1975,13 @@ static void Floppy144TestBranchDocumentAccessGate(void)
         pRecordsBranchDocument->record_id_override != NULL &&
         strcmp(
             pRecordsBranchDocument->record_id_override,
-            "DR-04-RS-0063"
+            "DR-04-RS-0087"
         ) == 0 &&
         pTechnologyBranchDocument != NULL &&
         pTechnologyBranchDocument->record_id_override != NULL &&
         strcmp(
             pTechnologyBranchDocument->record_id_override,
-            "DR-04-RS-0087"
+            "DR-04-RS-0063"
         ) == 0,
         "both DR-04 branch documents follow the neutral briefing"
     );
@@ -2044,7 +2049,7 @@ static void Floppy144TestBranchDocumentAccessGate(void)
     F144_CHECK(
         Floppy144TestTerminalContains(
             &sTerminal,
-            "NEXT RECOVERY ACTION: OPEN RS-0037"
+            "NEXT RECOVERY ACTION: OPEN RS-0111"
         ),
         "DR-04 handover checklist points to the neutral workstream summary"
     );
@@ -2063,7 +2068,7 @@ static void Floppy144TestBranchDocumentAccessGate(void)
     F144_CHECK(
         Floppy144TestTerminalContains(
             &sTerminal,
-            "NEXT RECOVERY ACTION: OPEN RS-0063 OR RS-0087"
+            "NEXT RECOVERY ACTION: OPEN RS-0087 OR RS-0063"
         ),
         "DR-04 briefing offers Records or Technology as an equal branch choice"
     );
@@ -2150,7 +2155,7 @@ static void Floppy144TestBranchDocumentAccessGate(void)
     F144_CHECK(
         Floppy144TestTerminalContains(
             &sTerminal,
-            "NEXT RECOVERY ACTION: OPEN RS-0063 OR RS-0087"
+            "NEXT RECOVERY ACTION: OPEN RS-0087 OR RS-0063"
         ),
         "DR-04 briefing keeps both workstream choices after one branch has fired"
     );
@@ -2259,7 +2264,7 @@ static void Floppy144TestBranchDocumentAccessGate(void)
     F144_CHECK(
         Floppy144TestTerminalContains(
             &sTerminal,
-            "NEXT RECOVERY ACTION: OPEN RS-0063 OR RS-0087"
+            "NEXT RECOVERY ACTION: OPEN RS-0087 OR RS-0063"
         ),
         "DR-04 briefing keeps both authored workstreams after both have been viewed"
     );
@@ -2355,7 +2360,7 @@ static void Floppy144TestStaleEvidenceSaveRecovery(void)
 
     F144_CHECK(
         Floppy144DocumentFindRecordId(
-            "DR-31-RS-0031",
+            "DR-31-RS-0129",
             &eCollection,
             &uRecordIndex
         ) &&
@@ -2386,7 +2391,7 @@ static void Floppy144TestStaleEvidenceSaveRecovery(void)
 
     F144_CHECK(
         Floppy144DocumentFindRecordId(
-            "DR-31-RS-0068",
+            "DR-31-RS-0092",
             &eCollection,
             &uRecordIndex
         ) &&
@@ -2450,7 +2455,7 @@ static void Floppy144TestStaleEvidenceSaveRecovery(void)
 
 /*
  * FM-18 has an absolute dependency on FM-13. The Server Room requirement on
- * FM-18-RS-0074 is an additional document gate, not an alternate route into
+ * FM-18-RS-0098 is an additional document gate, not an alternate route into
  * the collection. Reconstructing the Server Room alone must therefore never
  * make FM-18 recoverable.
  */
@@ -2560,13 +2565,13 @@ static void Floppy144TestFm18SuppressionRecordRestoresServerPanel(void)
 
     F144_CHECK(
         Floppy144DocumentFindRecordId(
-            "FM-18-RS-0037",
+            "FM-18-RS-0135",
             &eCollection,
             &uEnvironmentalRecordIndex
         ) &&
         eCollection == eFm18 &&
         Floppy144DocumentFindRecordId(
-            "FM-18-RS-0074",
+            "FM-18-RS-0098",
             &eCollection,
             &uSuppressionRecordIndex
         ) &&
@@ -2589,7 +2594,7 @@ static void Floppy144TestFm18SuppressionRecordRestoresServerPanel(void)
             &sRunState,
             "P-037"
         ),
-        "FM-18-RS-0037 restores the Facilities environmental event log"
+        "FM-18-RS-0135 restores the Facilities environmental event log"
     );
 
     F144_CHECK(
@@ -2607,7 +2612,7 @@ static void Floppy144TestFm18SuppressionRecordRestoresServerPanel(void)
             &sRunState,
             "P-103"
         ),
-        "FM-18-RS-0074 cannot restore the Server Room panel before Server Room reconstruction"
+        "FM-18-RS-0098 cannot restore the Server Room panel before Server Room reconstruction"
     );
 
     F144_CHECK(
@@ -2633,7 +2638,7 @@ static void Floppy144TestFm18SuppressionRecordRestoresServerPanel(void)
             &sRunState,
             "P-103"
         ),
-        "FM-18-RS-0074 restores P-103 once Server Room is reconstructed"
+        "FM-18-RS-0098 restores P-103 once Server Room is reconstructed"
     );
 }
 

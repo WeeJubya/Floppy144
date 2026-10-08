@@ -6,7 +6,13 @@
 /* Neutral procedural labels for catalogue entries without authored bodies. */
 static const char *const floppy144_generated_generic_subjects[]={
     "ADMINISTRATIVE","OPERATIONAL","SITE","STAFF","ACCESS","TRANSFER",
-    "MAINTENANCE","REVIEW","CLOSURE","EXCEPTION","VERIFICATION","RECOVERY"
+    "MAINTENANCE","REVIEW","CLOSURE","EXCEPTION","VERIFICATION","RECOVERY",
+    "STATIONERY","FACILITIES","DISTRIBUTION","CORRESPONDENCE",
+    "EQUIPMENT","RECEPTION","PERSONNEL","DELIVERY",
+    "BUILDING","INVENTORY","RETENTION","SCHEDULING",
+    "CATERING","POSTAGE","MEETING","FILING",
+    "TELEPHONY","SUPPLIES","STORAGE","WORKPLACE",
+    "DISPOSAL","ROUTING","ATTENDANCE","SERVICING"
 };
 const Floppy144CollectionDefinition floppy144_collection_definitions[FLOPPY144_COLLECTION_COUNT]={
 #define FLOPPY144_COLLECTION(symbol,code_text,title_text,domain_value,size_kb_value,required_value,description_text,evidence_description_text,catalogue_record_count,catalogue_heading_text,catalogue_record_id_prefix,catalogue_subjects,catalogue_subject_count,catalogue_exact_titles,catalogue_record_number_base,catalogue_record_number_multiplier,catalogue_record_number_offset) {FLOPPY144_COLLECTION_##symbol,code_text,title_text,domain_value,size_kb_value,required_value,description_text,evidence_description_text,{catalogue_record_count,catalogue_heading_text,catalogue_record_id_prefix,catalogue_subjects,catalogue_subject_count,catalogue_exact_titles,catalogue_record_number_base,catalogue_record_number_multiplier,catalogue_record_number_offset}},

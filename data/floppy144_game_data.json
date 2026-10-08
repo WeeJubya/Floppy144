@@ -16636,7 +16636,7 @@
       "domain": "Department of Records",
       "content_budget": {
         "act": "Prologue",
-        "records": 8,
+        "records": 15,
         "readable_documents": 4,
         "trigger_documents_budget": 1
       },
@@ -16662,7 +16662,7 @@
       "domain": "Department of Records",
       "content_budget": {
         "act": "Prologue",
-        "records": 6,
+        "records": 15,
         "readable_documents": 4,
         "trigger_documents_budget": 0
       },
@@ -16686,7 +16686,7 @@
       "domain": "Department of Records",
       "content_budget": {
         "act": "Prologue",
-        "records": 6,
+        "records": 15,
         "readable_documents": 4,
         "trigger_documents_budget": 0
       },
@@ -16710,7 +16710,7 @@
       "domain": "Department of Records",
       "content_budget": {
         "act": "Act II",
-        "records": 18,
+        "records": 50,
         "readable_documents": 6,
         "trigger_documents_budget": 2
       },
@@ -16745,7 +16745,7 @@
       "domain": "Department of Records",
       "content_budget": {
         "act": "Act II",
-        "records": 24,
+        "records": 50,
         "readable_documents": 6,
         "trigger_documents_budget": 2
       },
@@ -16783,7 +16783,7 @@
       "domain": "Department of Records",
       "content_budget": {
         "act": "Act II",
-        "records": 12,
+        "records": 50,
         "readable_documents": 4,
         "trigger_documents_budget": 0
       },
@@ -16807,7 +16807,7 @@
       "domain": "Department of Records",
       "content_budget": {
         "act": "Act II",
-        "records": 20,
+        "records": 50,
         "readable_documents": 6,
         "trigger_documents_budget": 2
       },
@@ -16845,7 +16845,7 @@
       "domain": "Department of Records",
       "content_budget": {
         "act": "Act II",
-        "records": 18,
+        "records": 50,
         "readable_documents": 6,
         "trigger_documents_budget": 2
       },
@@ -16882,7 +16882,7 @@
       "domain": "Department of Records",
       "content_budget": {
         "act": "Act III",
-        "records": 20,
+        "records": 75,
         "readable_documents": 6,
         "trigger_documents_budget": 3
       },
@@ -16919,7 +16919,7 @@
       "domain": "Department of Records",
       "content_budget": {
         "act": "Act III",
-        "records": 18,
+        "records": 75,
         "readable_documents": 6,
         "trigger_documents_budget": 1
       },
@@ -16955,7 +16955,7 @@
       "domain": "Human Resources",
       "content_budget": {
         "act": "Act I",
-        "records": 18,
+        "records": 25,
         "readable_documents": 6,
         "trigger_documents_budget": 2
       },
@@ -17001,7 +17001,7 @@
       "domain": "Human Resources",
       "content_budget": {
         "act": "Act II",
-        "records": 16,
+        "records": 50,
         "readable_documents": 5,
         "trigger_documents_budget": 1
       },
@@ -17041,7 +17041,7 @@
       "domain": "Human Resources",
       "content_budget": {
         "act": "Act III",
-        "records": 18,
+        "records": 75,
         "readable_documents": 6,
         "trigger_documents_budget": 2
       },
@@ -17161,7 +17161,7 @@
       "domain": "Facilities Management",
       "content_budget": {
         "act": "Act I",
-        "records": 20,
+        "records": 25,
         "readable_documents": 6,
         "trigger_documents_budget": 2
       },
@@ -17199,7 +17199,7 @@
       "domain": "Facilities Management",
       "content_budget": {
         "act": "Act I",
-        "records": 22,
+        "records": 25,
         "readable_documents": 6,
         "trigger_documents_budget": 2
       },
@@ -17234,7 +17234,7 @@
       "domain": "Facilities Management",
       "content_budget": {
         "act": "Act III",
-        "records": 18,
+        "records": 75,
         "readable_documents": 6,
         "trigger_documents_budget": 2
       },
@@ -17273,7 +17273,7 @@
       "domain": "Facilities Management",
       "content_budget": {
         "act": "Act II",
-        "records": 20,
+        "records": 50,
         "readable_documents": 6,
         "trigger_documents_budget": 1
       },
@@ -17315,7 +17315,7 @@
       "domain": "Operational Security",
       "content_budget": {
         "act": "Act III",
-        "records": 20,
+        "records": 75,
         "readable_documents": 6,
         "trigger_documents_budget": 2
       },
@@ -17355,7 +17355,7 @@
       "domain": "Operational Security",
       "content_budget": {
         "act": "Act III",
-        "records": 10,
+        "records": 75,
         "readable_documents": 4,
         "trigger_documents_budget": 2
       },
@@ -17387,7 +17387,7 @@
       "domain": "Operational Security",
       "content_budget": {
         "act": "Act III",
-        "records": 22,
+        "records": 75,
         "readable_documents": 7,
         "trigger_documents_budget": 3
       },
@@ -17429,7 +17429,7 @@
       "domain": "Operational Security",
       "content_budget": {
         "act": "Act III",
-        "records": 16,
+        "records": 75,
         "readable_documents": 5,
         "trigger_documents_budget": 2
       },
@@ -17484,7 +17484,7 @@
       "domain": "Operational Security",
       "content_budget": {
         "act": "Act III",
-        "records": 18,
+        "records": 75,
         "readable_documents": 6,
         "trigger_documents_budget": 1
       },
@@ -17522,7 +17522,7 @@
       "domain": "Technology Services",
       "content_budget": {
         "act": "Act II",
-        "records": 20,
+        "records": 50,
         "readable_documents": 6,
         "trigger_documents_budget": 2
       },
@@ -17558,7 +17558,7 @@
       "domain": "Technology Services",
       "content_budget": {
         "act": "Act II",
-        "records": 22,
+        "records": 50,
         "readable_documents": 6,
         "trigger_documents_budget": 2
       },
@@ -17595,7 +17595,7 @@
       "domain": "Technology Services",
       "content_budget": {
         "act": "Act II",
-        "records": 12,
+        "records": 50,
         "readable_documents": 4,
         "trigger_documents_budget": 0
       },
@@ -17624,7 +17624,7 @@
       "domain": "Technology Services",
       "content_budget": {
         "act": "Act II",
-        "records": 20,
+        "records": 50,
         "readable_documents": 6,
         "trigger_documents_budget": 2
       },
@@ -17664,7 +17664,7 @@
       "domain": "Technology Services",
       "content_budget": {
         "act": "Act III",
-        "records": 20,
+        "records": 75,
         "readable_documents": 6,
         "trigger_documents_budget": 3
       },
@@ -17703,7 +17703,7 @@
       "domain": "Technology Services",
       "content_budget": {
         "act": "Act III",
-        "records": 24,
+        "records": 75,
         "readable_documents": 8,
         "trigger_documents_budget": 3
       },
@@ -17750,7 +17750,7 @@
       "domain": "Technology Services",
       "content_budget": {
         "act": "Act II",
-        "records": 6,
+        "records": 50,
         "readable_documents": 6,
         "trigger_documents_budget": 0
       },

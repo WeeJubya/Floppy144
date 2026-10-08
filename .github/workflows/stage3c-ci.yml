@@ -88,6 +88,10 @@ jobs:
         shell: pwsh
         run: .\tools\test_stage4_paperback.ps1
 
+      - name: Stage 4E archive density and record-identity audit
+        shell: pwsh
+        run: .\tools\test_stage4_archive.ps1
+
       - name: Stage 4C operator profile screen
         shell: pwsh
         run: .\tools\test_stage4_profile_screen.ps1
@@ -187,6 +191,15 @@ jobs:
           if(-not $exe) { throw "Release Floppy144.exe not found." }
           Write-Host "Release bytes: $($exe.Length)"
           if($exe.Length -gt 1474560) { throw "Release size gate failed." }
+
+      - name: Stage 4E reserve for Stage 4F and final QA
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem -Recurse -Filter Floppy144.exe | Where-Object { $_.FullName -match 'Release' } | Select-Object -First 1
+          if(-not $exe) { throw "Release executable missing for reserve check." }
+          $remaining = 1474560 - $exe.Length
+          Write-Host "Archive headroom: $remaining bytes (minimum 350000)."
+          if($remaining -lt 350000) { throw "S4E-08 safety reserve failed." }
 
       - name: Package Stage 3C source
         shell: pwsh
