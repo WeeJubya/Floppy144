@@ -2052,6 +2052,19 @@ static void Floppy144InteractOffice(
             )
         )
         {
+            F144CalendarDate today;
+
+            /*
+             * Only the Noticeboard setter can attach contextual material.
+             * No content code touches Win32 or the animation clock.
+             */
+            if(f144PlatformCalendarDate(&global_platform, &global_config, &today))
+            {
+                Floppy144CabinetSetNoticeboardDate(
+                    &global_cabinet, &global_run_state, &today
+                );
+            }
+
             global_office_notice = NULL;
             global_resume_screen = FLOPPY144_SCREEN_CABINET;
             global_screen = FLOPPY144_SCREEN_CABINET;

@@ -9,6 +9,7 @@
 #pragma once
 
 #include "floppy144_draw.h"
+#include "f144_startup_config.h"
 
 #include "floppy144_game_data.h"
 #include "floppy144_run_state.h"
@@ -45,6 +46,10 @@ typedef struct Floppy144CabinetState
     bool bSecureContainer;
 
     const char *pszStatus;
+
+    /* Transient seasonal flyer, never part of persistent/generated PI lists. */
+    Floppy144DataRecord sContextualFlyer;
+    const char *pszContextualAnnotation;
 }
 Floppy144CabinetState;
 
@@ -82,6 +87,18 @@ bool Floppy144CabinetOpenParent(
     Floppy144CabinetState *pCabinet,
     const Floppy144RunState *pRunState,
     const char *pszParentId
+);
+
+/*
+ * Append one date-selected atmospheric flyer to a reconstructed Noticeboard.
+ * All existing permanent physical children retain their IDs/content/order.
+ * Invoked after successful OpenParent; a failed calendar query leaves the
+ * historical contents exactly as before.
+ */
+void Floppy144CabinetSetNoticeboardDate(
+    Floppy144CabinetState *pCabinet,
+    const Floppy144RunState *pRunState,
+    const F144CalendarDate *pDate
 );
 
 const char *Floppy144CabinetId(

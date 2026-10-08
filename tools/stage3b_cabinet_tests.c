@@ -1375,6 +1375,200 @@ static void Floppy144TestActLengthContract(void)
     );
 }
 
+/*
+ * S4E-03: exercise the real canonical noticeboard, date-window data and the
+ * same transient Cabinet Interior path as the player. Dates are injected,
+ * never read from the CI/developer machine.
+ */
+static void Floppy144TestNoticeboardCalendar(void)
+{
+    static const struct
+    {
+        uint16_t year;
+        uint8_t month;
+        uint8_t day;
+        const char *ambient_id;
+    } dates[] =
+    {
+        { 2026U, 1U, 1U, "AMB-NB-01" },   /* New Year */
+        { 2026U, 1U, 15U, "AMB-NB-08" },  /* ordinary winter */
+        { 2026U, 2U, 14U, "AMB-NB-02" },  /* Valentine */
+        { 2026U, 3U, 31U, "AMB-NB-03" },  /* spring/Easter window */
+        { 2026U, 4U, 21U, "AMB-NB-08" },  /* ordinary spring */
+        { 2026U, 7U, 15U, "AMB-NB-04" },  /* summer */
+        { 2026U, 9U, 15U, "AMB-NB-08" },  /* ordinary autumn */
+        { 2026U, 10U, 31U, "AMB-NB-05" }, /* Halloween */
+        { 2026U, 11U, 5U, "AMB-NB-06" },  /* Bonfire */
+        { 2026U, 12U, 20U, "AMB-NB-07" }, /* Christmas */
+        { 2026U, 12U, 31U, "AMB-NB-01" }  /* year-end wrap */
+    };
+    static const char *permanent[] =
+    {
+        "P-075", "P-078", "P-138",
+        "P-329", "P-330", "P-331", "P-332", "P-333", "P-334"
+    };
+    Floppy144WorldState world;
+    Floppy144RunState run;
+    Floppy144RunState before;
+    Floppy144CabinetState cabinet;
+    Floppy144CabinetState alternate;
+    F144CalendarDate date;
+    uint32_t i;
+    uint32_t j;
+    uint32_t original_count;
+    uint32_t guarded[640U * 360U + 2U];
+    Floppy144Surface surface;
+    const Floppy144DataRecord *original_social =
+        Floppy144GameDataFind(FLOPPY144_DATA_PHYSICAL_ITEM, "P-138");
+
+    F144_CHECK(
+        original_social != NULL && original_social->pszF != NULL &&
+        strstr(original_social->pszF, "Final-week staff tea") != NULL,
+        "permanent authored P-138 still contains its original final-week text"
+    );
+
+    Floppy144TestReset(&world, &run, &cabinet);
+    (void)Floppy144RunStateReconstructRoom(&run, FLOPPY144_ROOM_STAFF_ROOM);
+    F144_CHECK(
+        Floppy144CabinetOpenParent(
+            &cabinet, &run, "STAFF_ROOM_NOTICEBOARD"
+        ),
+        "canonical Staff Room Noticeboard opens normally"
+    );
+    original_count = Floppy144CabinetVisibleContentCount(&cabinet, &run);
+    F144_CHECK(
+        original_count == (uint32_t)(sizeof(permanent) / sizeof(permanent[0])),
+        "all nine authored physical notices remain on the board"
+    );
+    for(j = 0U; j < (uint32_t)(sizeof(permanent) / sizeof(permanent[0])); ++j)
+    {
+        F144_CHECK(
+            Floppy144TestVisibleContentIndex(&cabinet, &run, permanent[j]) != UINT32_MAX,
+            "all canonical permanent physical notices retain their IDs"
+        );
+    }
+
+    for(i = 0U; i < (uint32_t)(sizeof(dates) / sizeof(dates[0])); ++i)
+    {
+        const Floppy144DataRecord *flyer;
+        const char *first_annotation;
+        uint32_t original_indices[9];
+
+        for(j = 0U; j < 9U; ++j)
+        {
+            original_indices[j] =
+                Floppy144TestVisibleContentIndex(&cabinet, &run, permanent[j]);
+        }
+
+        date.year = dates[i].year;
+        date.month = dates[i].month;
+        date.day = dates[i].day;
+
+        Floppy144CabinetSetNoticeboardDate(&cabinet, &run, &date);
+        F144_CHECK(
+            Floppy144CabinetVisibleContentCount(&cabinet, &run) ==
+                original_count + 1U,
+            "seasonal flyer appends without suppressing permanent entries"
+        );
+
+        flyer = Floppy144CabinetVisibleContentAt(&cabinet, &run, original_count);
+        F144_CHECK(
+            flyer != NULL && flyer->pszId != NULL &&
+            strcmp(flyer->pszId, dates[i].ambient_id) == 0 &&
+            flyer->pszF != NULL &&
+            cabinet.pszContextualAnnotation != NULL,
+            "calendar date chooses the expected authored contextual flyer"
+        );
+
+        first_annotation = cabinet.pszContextualAnnotation;
+        Floppy144CabinetSetNoticeboardDate(&cabinet, &run, &date);
+        F144_CHECK(
+            cabinet.pszContextualAnnotation == first_annotation &&
+            Floppy144CabinetVisibleContentAt(&cabinet, &run, original_count) != NULL,
+            "same seed and date selects identical stable flyer and marginalia"
+        );
+
+        for(j = 0U; j < 9U; ++j)
+        {
+            F144_CHECK(
+                Floppy144TestVisibleContentIndex(&cabinet, &run, permanent[j]) ==
+                    original_indices[j],
+                "seasonal flyer never reorders an authored permanent notice"
+            );
+        }
+
+        cabinet.uSelectedContent = original_count;
+        before = run;
+        F144_CHECK(
+            Floppy144CabinetInspectSelected(&cabinet, &world, &run) &&
+            Floppy144CabinetDetailOpen(&cabinet) &&
+            memcmp(&run, &before, sizeof(run)) == 0,
+            "inspecting contextual flyer does not change gameplay RunState"
+        );
+
+        /* The original detail/list renderer must not exceed the framebuffer. */
+        memset(guarded, 0, sizeof(guarded));
+        guarded[0] = 0x13579BDFU;
+        guarded[640U * 360U + 1U] = 0x2468ACE0U;
+        surface.pixels = &guarded[1];
+        surface.width = 640U;
+        surface.height = 360U;
+        Floppy144CabinetDraw(&surface, &cabinet, &run);
+        F144_CHECK(
+            guarded[0] == 0x13579BDFU &&
+            guarded[640U * 360U + 1U] == 0x2468ACE0U,
+            "seasonal detail renderer stays within 640x360 surface"
+        );
+        F144_CHECK(
+            Floppy144CabinetBackspace(&cabinet) &&
+            !Floppy144CabinetDetailOpen(&cabinet),
+            "Backspace returns from seasonal flyer to the scrolling contents"
+        );
+        cabinet.uSelectedContent = 0U;
+    }
+
+    /* Different seeds can select different marginalia without changing flyer. */
+    date.year = 2026U;
+    date.month = 12U;
+    date.day = 20U;
+    Floppy144CabinetSetNoticeboardDate(&cabinet, &run, &date);
+    Floppy144TestReset(&world, &before, &alternate);
+    Floppy144RunStateBegin(&before, 145U);
+    (void)Floppy144RunStateReconstructRoom(&before, FLOPPY144_ROOM_STAFF_ROOM);
+    F144_CHECK(
+        Floppy144CabinetOpenParent(&alternate, &before, "STAFF_ROOM_NOTICEBOARD"),
+        "second seeded run opens the same noticeboard"
+    );
+    Floppy144CabinetSetNoticeboardDate(&alternate, &before, &date);
+    F144_CHECK(
+        cabinet.sContextualFlyer.pszId != NULL &&
+        alternate.sContextualFlyer.pszId != NULL &&
+        strcmp(cabinet.sContextualFlyer.pszId, alternate.sContextualFlyer.pszId) == 0 &&
+        strcmp(cabinet.pszContextualAnnotation, alternate.pszContextualAnnotation) != 0,
+        "different recovery seeds alter only atmospheric marginalia"
+    );
+
+    date.month = 0U;
+    Floppy144CabinetSetNoticeboardDate(&cabinet, &run, &date);
+    F144_CHECK(
+        Floppy144CabinetVisibleContentCount(&cabinet, &run) == original_count,
+        "invalid date falls back to all permanent physical notices"
+    );
+
+    F144_CHECK(
+        Floppy144CabinetOpenParent(&cabinet, &run, "STAFF_ROOM_WORKTOP"),
+        "unrelated parent opens normally"
+    );
+    original_count = Floppy144CabinetVisibleContentCount(&cabinet, &run);
+    date.month = 12U;
+    Floppy144CabinetSetNoticeboardDate(&cabinet, &run, &date);
+    F144_CHECK(
+        Floppy144CabinetVisibleContentCount(&cabinet, &run) == original_count &&
+        cabinet.sContextualFlyer.pszId == NULL,
+        "date-aware additions never affect non-noticeboard contents"
+    );
+}
+
 int main(void)
 {
     Floppy144TestGeneratedCabinetDiscovery();
@@ -1391,6 +1585,7 @@ int main(void)
     Floppy144TestSiteKeySetInteraction();
     Floppy144TestFocusedCabinetAccess();
     Floppy144TestActLengthContract();
+    Floppy144TestNoticeboardCalendar();
 
     if(g_nFailures != 0)
     {

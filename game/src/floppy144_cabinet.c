@@ -4,6 +4,7 @@
 
 #include "floppy144_cabinet.h"
 #include "floppy144_cabinet_25d.h"
+#include "floppy144_noticeboard.h"
 
 #include "floppy144_draw.h"
 #include "floppy144_interaction_engine.h"
@@ -592,6 +593,56 @@ bool Floppy144CabinetOpenParent(
     return true;
 }
 
+void Floppy144CabinetSetNoticeboardDate(
+    Floppy144CabinetState *pCabinet,
+    const Floppy144RunState *pRunState,
+    const F144CalendarDate *pDate
+)
+{
+    const Floppy144DataRecord *pParent;
+    const Floppy144DataRecord *pPermanent;
+    const Floppy144DataRecord *pAmbient;
+    const char *pszAnnotation;
+
+    if(pCabinet == NULL)
+        return;
+
+    /* Applying a new date never leaves an old flyer behind. */
+    memset(&pCabinet->sContextualFlyer, 0, sizeof(pCabinet->sContextualFlyer));
+    pCabinet->pszContextualAnnotation = NULL;
+
+    if(
+        pRunState == NULL || pDate == NULL ||
+        !pCabinet->bInteriorOpen || pCabinet->bSecureContainer
+    )
+        return;
+
+    pParent = Floppy144CabinetParentRecord(pCabinet->szCabinetId);
+    pPermanent = Floppy144GameDataFind(
+        FLOPPY144_DATA_PHYSICAL_ITEM, "P-138"
+    );
+
+    if(
+        pParent == NULL ||
+        !Floppy144CabinetStringEqual(pParent->pszC, "NOTICEBOARD") ||
+        pPermanent == NULL ||
+        !Floppy144CabinetStringEqual(pPermanent->pszC, pCabinet->szCabinetId) ||
+        !Floppy144SitePhysicalItemVisible(pRunState, pPermanent) ||
+        !Floppy144NoticeboardSelect(
+            *pDate, pRunState->recovery_seed, &pAmbient, &pszAnnotation
+        )
+    )
+        return;
+
+    pCabinet->sContextualFlyer.eKind = FLOPPY144_DATA_PHYSICAL_ITEM;
+    pCabinet->sContextualFlyer.pszId = pAmbient->pszId;
+    pCabinet->sContextualFlyer.pszA = "Seasonal staff circular";
+    pCabinet->sContextualFlyer.pszB = pPermanent->pszB;
+    pCabinet->sContextualFlyer.pszC = pCabinet->szCabinetId;
+    pCabinet->sContextualFlyer.pszF = pAmbient->pszE;
+    pCabinet->pszContextualAnnotation = pszAnnotation;
+}
+
 const char *Floppy144CabinetId(
     const Floppy144CabinetState *pCabinet
 )
@@ -922,6 +973,12 @@ uint32_t Floppy144CabinetVisibleContentCount(
             break;
     }
 
+    if(
+        pCabinet->sContextualFlyer.pszId != NULL &&
+        uCount < uLimit
+    )
+        ++uCount;
+
     return uCount;
 }
 
@@ -1101,6 +1158,17 @@ const Floppy144DataRecord *Floppy144CabinetVisibleContentAt(
         }
     }
 
+    /*
+     * All canonical physical children, including required clue material, keep
+     * their existing seeded order. The seasonal flyer is an extra final row.
+     */
+    if(
+        pCabinet->sContextualFlyer.pszId != NULL &&
+        uVisibleIndex + 1U ==
+            Floppy144CabinetVisibleContentCount(pCabinet, pRunState)
+    )
+        return &pCabinet->sContextualFlyer;
+
     return NULL;
 }
 
@@ -1168,6 +1236,17 @@ bool Floppy144CabinetInspectSelected(
 
     if(pItem == NULL)
         return false;
+
+    /*
+     * Contextual flyers never enter the interaction engine or mutate RunState.
+     * Their AMB-NB identifiers are atmospheric, not gameplay sources.
+     */
+    if(pItem == &pCabinet->sContextualFlyer)
+    {
+        pCabinet->pszStatus = "STAFF CIRCULAR - INFORMATION ONLY";
+        pCabinet->bDetailOpen = true;
+        return true;
+    }
 
     eInteraction = Floppy144InteractionForPhysicalSource(pItem->pszId);
 
@@ -2248,22 +2327,33 @@ static void Floppy144CabinetDrawInterior(
              * authored documents, but may contain enough transcription to
              * make labels, notices, tags and checklists feel like real props.
              */
-            Floppy144CabinetDrawWrappedText(
-                pSurface,
-                94U,
-                150U,
-                pszDetail,
-                54U,
-                3U,
-                20U,
-                uText
-            );
+            if(pItem == &pCabinet->sContextualFlyer)
+            {
+                /*
+                 * Two separately wrapped blocks make the full authored
+                 * headline and marginalia readable inside the 500x224 panel.
+                 * No permanent notice is replaced or text silently discarded.
+                 */
+                Floppy144CabinetDrawWrappedText(
+                    pSurface, 94U, 134U, pszDetail, 54U, 3U, 16U, uText
+                );
+                Floppy144CabinetDrawWrappedText(
+                    pSurface, 94U, 192U,
+                    pCabinet->pszContextualAnnotation, 54U, 2U, 16U, uMuted
+                );
+            }
+            else
+            {
+                Floppy144CabinetDrawWrappedText(
+                    pSurface, 94U, 150U, pszDetail, 54U, 3U, 20U, uText
+                );
+            }
         }
 
         Floppy144DrawText(
             pSurface,
             94U,
-            226U,
+            pItem == &pCabinet->sContextualFlyer ? 234U : 226U,
             pCabinet->pszStatus != NULL ? pCabinet->pszStatus : "ITEM INSPECTED",
             1U,
             uBright
