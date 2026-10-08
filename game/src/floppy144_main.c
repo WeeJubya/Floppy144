@@ -287,7 +287,9 @@ static void Floppy144Redraw(
         case FLOPPY144_SCREEN_CREDITS:
         {
             Floppy144CreditsViewDraw(
-                pSurface
+                pSurface,
+                global_credits_return_screen !=
+                    FLOPPY144_SCREEN_COMPLETION
             );
 
             break;
@@ -2880,7 +2882,11 @@ static bool Floppy144HandleActionEvent(
 
                 case FLOPPY144_SCREEN_CREDITS:
                 {
-                    if(eAction == F144_ACTION_CONFIRM)
+                    if(
+                        eAction == F144_ACTION_CONFIRM &&
+                        global_credits_return_screen !=
+                            FLOPPY144_SCREEN_COMPLETION
+                    )
                     {
                         global_screen =
                             FLOPPY144_SCREEN_SPLASH;
@@ -3119,14 +3125,6 @@ static bool Floppy144HandleActionEvent(
                             return true;
                         }
 
-                        case F144_ACTION_MENU:
-                        {
-                            global_screen =
-                                FLOPPY144_SCREEN_MAIN_MENU;
-
-                            Floppy144Redraw(window);
-                            return true;
-                        }
                     }
 
                     break;
@@ -3341,11 +3339,14 @@ static bool Floppy144HandleActionEvent(
 
                                 case FLOPPY144_COMPLETION_OPTION_MAIN_MENU:
                                 {
-                                    global_main_menu_notice=NULL;
-                                    global_main_menu_notice_is_warning=false;
-                                    global_screen=FLOPPY144_SCREEN_MAIN_MENU;
-                                    global_office_notice=NULL;
-                                    break;
+                                    global_office_notice =
+                                        NULL;
+
+                                    Floppy144OpenMainMenu(
+                                        window
+                                    );
+
+                                    return true;
                                 }
 
                                 case FLOPPY144_COMPLETION_OPTION_COUNT:
@@ -3450,18 +3451,6 @@ static bool Floppy144HandleActionEvent(
                  */
                 case FLOPPY144_SCREEN_TERMINAL:
                 {
-                    if(eAction == F144_ACTION_MENU)
-                    {
-                        global_screen =
-                            FLOPPY144_SCREEN_OFFICE;
-
-                        Floppy144Redraw(
-                            window
-                        );
-
-                        return true;
-                    }
-
                     if(
                         !Floppy144TerminalHelpPagerActive(
                             &global_terminal

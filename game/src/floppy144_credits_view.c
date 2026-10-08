@@ -42,7 +42,18 @@ uint32_t Floppy144CreditsViewMaxLineWidth(void)
     return maximum;
 }
 
-void Floppy144CreditsViewDraw(Floppy144Surface *surface)
+const char *Floppy144CreditsViewFooter(bool intro_replay_available)
+{
+    return
+        intro_replay_available
+            ? "ENTER REPLAY INTRO   BACKSPACE BACK"
+            : "BACKSPACE BACK";
+}
+
+void Floppy144CreditsViewDraw(
+    Floppy144Surface *surface,
+    bool intro_replay_available
+)
 {
     const uint32_t background=FLOPPY144_RGB(17,23,28);
     const uint32_t panel=FLOPPY144_RGB(24,33,39);
@@ -82,5 +93,5 @@ void Floppy144CreditsViewDraw(Floppy144Surface *surface)
 
     Floppy144DrawFillRect(surface,64U,300U,512U,1U,border);
     Floppy144DrawText(surface,68U,310U,"LICENSING SCOPE QUESTIONS REMAIN DOCUMENTED IN PROJECT PROVENANCE",1U,muted);
-    Floppy144DrawText(surface,10U,FLOPPY144_UI_FORMAL_FOOTER_Y,"ENTER REPLAY INTRO   BACKSPACE BACK",1U,muted);
+    Floppy144DrawText(surface,10U,FLOPPY144_UI_FORMAL_FOOTER_Y,Floppy144CreditsViewFooter(intro_replay_available),1U,muted);
 }

@@ -144,7 +144,7 @@ static uint32_t DrawCredits(void)
 {
     Floppy144Surface surface={pixels,640U,360U};
     memset(pixels,0,sizeof(pixels));
-    Floppy144CreditsViewDraw(&surface);
+    Floppy144CreditsViewDraw(&surface,true);
     return HashPixels();
 }
 

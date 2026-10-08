@@ -49,10 +49,14 @@ all skip immediately to GDR Session Control from any beat.
 Normal completion also opens Session Control automatically. There is no
 framebuffer reset outside the normal complete-screen redraw path.
 
-Credits now advertises **ENTER REPLAY INTRO**. Confirm from Credits re-arms
-only the existing splash/intro animation deadline and starts the intro at zero.
-It does not reset autosave, profile, run state, evidence, notebook or recovery
-state. Completing or skipping a replay goes to Session Control.
+Credits reached from Settings advertises **ENTER REPLAY INTRO**. Confirm there
+re-arms only the existing splash/intro animation deadline and starts the intro
+at zero. It does not reset autosave, profile, run state, evidence, notebook or
+recovery state. Completing or skipping a replay goes to Session Control.
+
+S4F-03 later refined this rule for the end-of-recovery route: Credits opened
+from Completion intentionally omits Intro Replay, so the completed journey
+cannot be accidentally diverted back through startup presentation.
 
 ## Settings and platform boundaries
 

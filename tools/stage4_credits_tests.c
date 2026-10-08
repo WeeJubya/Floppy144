@@ -28,7 +28,7 @@ int main(void)
     int nonzero=0;
 
     memset(pixels,0,sizeof(pixels));
-    Floppy144CreditsViewDraw(&surface);
+    Floppy144CreditsViewDraw(&surface,true);
     for(i=0U;i<640U*360U;++i){if(pixels[i]!=0U){nonzero=1;break;}}
 
     Expect(nonzero,"credits screen renders");
@@ -42,6 +42,20 @@ int main(void)
     Expect(Contains("REDISTRIBUTED UNDER GNU GPL V3 TERMS"),"redistribution notice");
     Expect(Contains("LICENSE"),"full licence reference");
     Expect(Contains("NO WARRANTY"),"no-warranty notice");
+    Expect(
+        strcmp(
+            Floppy144CreditsViewFooter(true),
+            "ENTER REPLAY INTRO   BACKSPACE BACK"
+        )==0,
+        "Settings-owned Credits offers intro replay"
+    );
+    Expect(
+        strcmp(
+            Floppy144CreditsViewFooter(false),
+            "BACKSPACE BACK"
+        )==0,
+        "Completion-owned Credits preserves completion journey"
+    );
 
     if(failures!=0){printf("STAGE 4C CREDITS TESTS: FAIL (%d)\n",failures);return 1;}
     printf("STAGE 4C CREDITS TESTS: PASS\n");
