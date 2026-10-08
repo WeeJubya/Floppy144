@@ -38,7 +38,8 @@ Select Initiate Session from the normal menu: the game starts directly
 in the playable Site instead of requiring terminal reconstruction.
 A RAM-only RunState inspection flag reveals **all collections and rooms**,
 objects, capabilities and necessary access prerequisites. All secure
-cabinets are unlocked. The Site Directory remains at its original
+cabinets are unlocked, and all authored physical items, including items
+normally revealed by later interactions, can be inspected. The Site Directory remains at its original
 Corridor position `(35,56)` with size `6x1`. A fixed, interactive Grey
 Door panel occupies the immediately adjacent south Corridor wall
 `(29,56)`, size `4x1`, rather than using seeded placement. The temporary

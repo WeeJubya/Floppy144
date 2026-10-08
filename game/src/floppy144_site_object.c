@@ -1165,6 +1165,14 @@ bool Floppy144SitePhysicalItemVisible(
         return false;
     }
 
+    /* Hathaway inspects the entire restored inventory, including children
+       normally revealed only by later interactions. This is a RAM-only view
+       and never grants the child in a production recovery. */
+    if(pState->hathaway_inspection != 0U)
+    {
+        return true;
+    }
+
     if(
         !Floppy144SitePhysicalItemRevealControlled(
             pPhysicalItem->pszId

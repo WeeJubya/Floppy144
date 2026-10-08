@@ -31,6 +31,9 @@
 `hathaway_inspection` flag and marks every generated collection, room,
 runtime object and relevant triggering/capability prerequisite available.
 Secure cabinets are unlocked by setting the existing 32-bit cabinet mask.
+The existing Site physical-item visibility resolver reveals every authored
+physical child in Hathaway, including normally interaction-reveal-gated items,
+while leaving normal production discovery rules unchanged.
 The coordinator hydrates the normal world from this synthetic state and
 starts the player immediately in 2D Site exploration after Initiate Session.
 

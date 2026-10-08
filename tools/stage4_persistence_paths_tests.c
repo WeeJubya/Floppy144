@@ -18,6 +18,7 @@
 #include "floppy144_catalogue.h"
 #include "floppy144_variation.h"
 #include "floppy144_grey_door.h"
+#include "floppy144_site_object.h"
 #include "floppy144_grey_encounter.h"
 #include "floppy144_site_rooms.h"
 #include "floppy144_profile.h"
@@ -2194,6 +2195,20 @@ static void TestStage4HInspection(const char *root)
     for(i=0U;i<FLOPPY144_SECURE_CABINET_MAX;++i)
         Expect(Floppy144RunStateSecureCabinetUnlocked(&run,i),
             "S4H every secure cabinet is unlocked");
+    {
+        uint32_t record,found=0U,visible=0U;
+        for(record=0U;record<Floppy144GameDataRecordCount();++record)
+        {
+            const Floppy144DataRecord *pi=
+                Floppy144GameDataRecordAt(record);
+            if(pi==NULL || pi->eKind!=FLOPPY144_DATA_PHYSICAL_ITEM)
+                continue;
+            ++found;
+            if(Floppy144SitePhysicalItemVisible(&run,pi)) ++visible;
+        }
+        Expect(found>=500U && visible==found,
+            "S4H every authored physical item is inspectable in restored world");
+    }
     Expect(Floppy144GreyDoorForRun(&run,&seeded) &&
         memcmp(&seeded,&doorway,sizeof(doorway))==0,
         "S4H fixed Door overrides normal seeded selection");
