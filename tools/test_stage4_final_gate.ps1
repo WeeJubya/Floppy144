@@ -30,6 +30,27 @@ try
 
     function Assert-CleanCheckout
     {
+        # Several inherited cl.exe regression harnesses place only their
+        # intermediate .obj files in the repository root. Their executables
+        # already live in temporary/build directories. Remove those untracked
+        # intermediates before proving repository cleanliness, but never remove
+        # a tracked object file or any other untracked path.
+        foreach($object in @(Get-ChildItem -LiteralPath $root -File -Filter "*.obj"))
+        {
+            $tracked = @(& git ls-files -- $object.Name)
+            if($LASTEXITCODE -ne 0)
+            {
+                throw "Could not determine whether regression object is tracked: $($object.Name)"
+            }
+
+            if($tracked.Count -ne 0)
+            {
+                throw "Refusing to remove tracked root object during final gate: $($object.Name)"
+            }
+
+            Remove-Item -LiteralPath $object.FullName -Force
+        }
+
         $diff = & git diff --exit-code -- 2>&1
         if($LASTEXITCODE -ne 0)
         {
