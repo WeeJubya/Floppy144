@@ -207,11 +207,50 @@ bool Floppy144GreyDoorCandidateAt(
     return true;
 }
 
+/* Hathaway-only wall directly LEFT of the Corridor Site Directory.
+   Directory: (35,56) 6x1; forced panel: (31,56) 4x1. The overlay
+   leaves the existing wall, collision map and Directory untouched. */
+bool Floppy144GreyDoorHathawayCandidate(Floppy144GreyDoorCandidate *out)
+{
+    Floppy144GreyDoorCandidate test;
+    uint32_t i;
+    memset(&test,0,sizeof(test));
+    test.rect.type=(uint8_t)FLOPPY144_SITE_DOOR;
+    test.rect.room=(uint8_t)FLOPPY144_ROOM_CORRIDOR;
+    test.rect.from_room=(uint8_t)FLOPPY144_ROOM_CORRIDOR;
+    test.rect.to_room=(uint8_t)FLOPPY144_ROOM_CORRIDOR;
+    test.rect.x=31U;
+    test.rect.y=56U;
+    test.rect.width=4U;
+    test.rect.height=1U;
+    test.rect.authored_width16=4U*FLOPPY144_SITE_FIXED_ONE;
+    test.rect.authored_height16=FLOPPY144_SITE_FIXED_ONE;
+    test.stand_x16=33*FLOPPY144_SITE_FIXED_ONE;
+    test.stand_y16=55*FLOPPY144_SITE_FIXED_ONE;
+    if(out==NULL || !GreyDoorIsCorridor(33,55) ||
+       GreyDoorIsCorridor(33,56) ||
+       Floppy144SitePositionBlocked(test.stand_x16,test.stand_y16))
+        return false;
+    for(i=0U;i<Floppy144SiteRectCount();++i)
+    {
+        const Floppy144SiteRect *r=Floppy144SiteRectAt(i);
+        if(r==NULL || r->type<=(uint8_t)FLOPPY144_SITE_FLOOR_D) continue;
+        if((int32_t)r->x<35 && (int32_t)r->x+(int32_t)r->width>31 &&
+           (int32_t)r->y<57 && (int32_t)r->y+(int32_t)r->height>56)
+            return false;
+    }
+    *out=test;
+    return true;
+}
+
 bool Floppy144GreyDoorForRun(
     const Floppy144RunState *state, Floppy144GreyDoorCandidate *out
 )
 {
     uint32_t count=Floppy144GreyDoorCandidateCount();
+    if(state != NULL && state->hathaway_inspection != 0U &&
+       Floppy144RunStateRoomReconstructed(state,FLOPPY144_ROOM_CORRIDOR))
+        return Floppy144GreyDoorHathawayCandidate(out);
     if(state==NULL || out==NULL ||
        state->grey_door_state != (uint8_t)FLOPPY144_GREY_DOOR_AVAILABLE ||
        count==0U ||

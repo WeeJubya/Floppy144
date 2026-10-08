@@ -74,7 +74,7 @@ static void TestDefaultConfiguration(void)
 }
 
 /*
- * Verify that the historical exact -debug switch enables intended debug mode.
+ * Verify that the historical exact -GDR-CinderEllie switch enables intended debug mode.
  */
 static void TestDebugSwitch(void)
 {
@@ -82,22 +82,22 @@ static void TestDebugSwitch(void)
 
     Expect(
         f144Win32StartupConfigFromCommandLine(
-            "-debug",
+            "-GDR-CinderEllie",
             &config
         ),
-        "-debug command line parses"
+        "-GDR-CinderEllie command line parses"
     );
 
     Expect(
         f144StartupConfigDebugEnabled(
             &config
         ),
-        "-debug enables semantic debug mode"
+        "-GDR-CinderEllie enables semantic debug mode"
     );
 
     Expect(
         f144Win32StartupConfigFromCommandLine(
-            "-DEBUG",
+            "-GDR-CINDERELLIE",
             &config
         ),
         "case-variant command line parses"
@@ -109,6 +109,52 @@ static void TestDebugSwitch(void)
         ),
         "debug switch remains exact and case-sensitive"
     );
+}
+
+/* S4H: Exact case, legacy removal, unrelated switches and precedence. */
+static void TestHathawaySwitch(void)
+{
+    F144StartupConfig config;
+    static const char *invalid[]={
+        "-debug", "-gdr-cinderellie", "-GDR-CINDERELLIE",
+        "-GDR-cinderellie", "-gdr-hathaway",
+        "-GDR-hathaway", "-GDR-HATHAWAY", "-unrelated",
+        "-GDR-Hathaway-extra"
+    };
+    uint32_t i;
+    for(i=0U;i<sizeof(invalid)/sizeof(invalid[0]);++i)
+    {
+        Expect(f144Win32StartupConfigFromCommandLine(invalid[i],&config) &&
+            !f144StartupConfigDebugEnabled(&config) &&
+            !f144StartupConfigVisualInspectionEnabled(&config),
+            "S4H invalid-case, legacy and unrelated flags are inactive");
+    }
+    Expect(f144Win32StartupConfigFromCommandLine(
+        "-GDR-CinderEllie",&config) &&
+        f144StartupConfigDebugEnabled(&config) &&
+        !f144StartupConfigVisualInspectionEnabled(&config),
+        "S4H exact CinderEllie preserves existing debug");
+    Expect(f144Win32StartupConfigFromCommandLine(
+        "-GDR-Hathaway",&config) &&
+        !f144StartupConfigDebugEnabled(&config) &&
+        f144StartupConfigVisualInspectionEnabled(&config),
+        "S4H exact Hathaway enables ONLY inspection");
+    Expect(f144Win32StartupConfigFromCommandLine(
+        "-GDR-CinderEllie -GDR-Hathaway -seed 146 -date 2027-01-01",
+        &config) &&
+        f144StartupConfigVisualInspectionEnabled(&config) &&
+        !f144StartupConfigDebugEnabled(&config) &&
+        !config.recovery_seed_override_enabled &&
+        !config.fixed_date_override_enabled,
+        "S4H Hathaway wins combined flags and prevents debug overrides");
+    Expect(f144Win32StartupConfigFromCommandLine(
+        "-GDR-Hathaway -GDR-CinderEllie -date 2027-01-01 -seed 146",
+        &config) &&
+        f144StartupConfigVisualInspectionEnabled(&config) &&
+        !f144StartupConfigDebugEnabled(&config) &&
+        !config.recovery_seed_override_enabled &&
+        !config.fixed_date_override_enabled,
+        "S4H argument order does not change Hathaway precedence");
 }
 
 /*
@@ -140,7 +186,7 @@ static void TestDeveloperOverrideGating(void)
             &config,
             &seed
         ),
-        "seed override is ignored without -debug"
+        "seed override is ignored without -GDR-CinderEllie"
     );
 
     Expect(
@@ -148,12 +194,12 @@ static void TestDeveloperOverrideGating(void)
             &config,
             &date
         ),
-        "date override is ignored without -debug"
+        "date override is ignored without -GDR-CinderEllie"
     );
 }
 
 /*
- * Verify that -debug can activate deterministic seed/date overrides in any
+ * Verify that -GDR-CinderEllie can activate deterministic seed/date overrides in any
  * supported token order.
  */
 static void TestDeveloperOverrides(void)
@@ -164,7 +210,7 @@ static void TestDeveloperOverrides(void)
 
     Expect(
         f144Win32StartupConfigFromCommandLine(
-            "-seed 144 -date 2028-02-29 -debug",
+            "-seed 144 -date 2028-02-29 -GDR-CinderEllie",
             &config
         ),
         "debug override command line parses"
@@ -209,7 +255,7 @@ static void TestMalformedOverrides(void)
 
     Expect(
         f144Win32StartupConfigFromCommandLine(
-            "-debug -seed 0 -date 2027-02-29",
+            "-GDR-CinderEllie -seed 0 -date 2027-02-29",
             &config
         ),
         "malformed override command line still parses safely"
@@ -304,6 +350,7 @@ int main(void)
 {
     TestDefaultConfiguration();
     TestDebugSwitch();
+    TestHathawaySwitch();
     TestDeveloperOverrideGating();
     TestDeveloperOverrides();
     TestMalformedOverrides();

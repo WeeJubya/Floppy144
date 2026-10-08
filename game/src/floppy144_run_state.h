@@ -71,6 +71,7 @@ typedef struct Floppy144RunState
     uint8_t projection;
     uint8_t archive_services_initialised;
     uint8_t grey_door_state; /* S4G per-run save field */
+    uint8_t hathaway_inspection; /* S4H: RAM-only, never encoded */
 
     int32_t player_site_x;
     int32_t player_site_y;
@@ -352,6 +353,9 @@ bool Floppy144RunStateGreyDoorCompletedAutosavePreferred(
 uint32_t Floppy144RunStateGreyDoorPlacementSlot(
     const Floppy144RunState *state, uint32_t candidate_count
 );
+
+/* Non-persistent, synthetic all-restored visual inspection snapshot. */
+void Floppy144RunStateEnableHathawayInspection(Floppy144RunState *state);
 
 void Floppy144RunStateReset
 (

@@ -40,7 +40,8 @@ foreach($required in @(
 }
 
 foreach($required in @(
-    '"-debug"',
+    '"-GDR-CinderEllie"',
+    '"-GDR-Hathaway"',
     '"-seed"',
     '"-date"',
     'f144StartupConfigSetRecoverySeedOverride',
@@ -70,6 +71,20 @@ if($mainSource -match '"-debug"')
     throw "The game coordinator must not know the raw -debug spelling."
 }
 
+# Stage 4H: no legacy alias, portable semantic inspection state.
+foreach($required in @(
+    'f144StartupConfigVisualInspectionEnabled',
+    'Floppy144RunStateEnableHathawayInspection',
+    'INSPECTION MODE - SAVING DISABLED'
+)) {
+    if($mainSource -notmatch [regex]::Escape($required)) {
+        throw "Hathaway mode not wired into coordinator: $required"
+    }
+}
+if($winConfigSource -match '"-debug"' -or
+   $winConfigSource -match 'StrStrI|_stricmp|CompareString') {
+    throw "Legacy or case-insensitive developer switch is still active."
+}
 Write-Host "STAGE 4 CONFIGURATION BOUNDARY AUDIT: PASS"
 Write-Host ""
 Write-Host "=== BUILD STAGE 4 CONFIGURATION REGRESSION ==="

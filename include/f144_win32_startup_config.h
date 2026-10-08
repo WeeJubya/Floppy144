@@ -14,11 +14,12 @@
  * Convert the raw Win32 command-line tail into portable F144 configuration.
  *
  * Supported developer options:
- *   -debug
+ *   -GDR-CinderEllie
+ *   -GDR-Hathaway
  *   -seed <non-zero uint32>
  *   -date <YYYY-MM-DD>
  *
- * Seed/date overrides are applied only when -debug is present.
+ * Seed/date overrides require exact -GDR-CinderEllie without Hathaway.
  */
 bool f144Win32StartupConfigFromCommandLine(
     const char *command_line,

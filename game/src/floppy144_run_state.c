@@ -792,6 +792,7 @@ static bool Floppy144RunStateRoomTransitionAllowed
     Floppy144RoomId eToRoom
 )
 {
+    if(pState!=NULL && pState->hathaway_inspection!=0U)return true;
     return Floppy144GameDataRoomTransitionAllowed(pState, eFromRoom, eToRoom);
 }
 
@@ -883,6 +884,7 @@ static bool Floppy144RunStateExteriorDoorUnlocked
         return false;
     }
 
+    if(pState->hathaway_inspection!=0U)return true;
     for(
         uRecordIndex = 0U;
         uRecordIndex < Floppy144GameDataRecordCount();
@@ -1257,6 +1259,28 @@ bool Floppy144RunStateGreyDoorCompletedAutosavePreferred(
         manual->recovery_seed == autosave->recovery_seed &&
         manual->grey_door_state != (uint8_t)FLOPPY144_GREY_DOOR_COMPLETED &&
         autosave->grey_door_state == (uint8_t)FLOPPY144_GREY_DOOR_COMPLETED;
+}
+
+void Floppy144RunStateEnableHathawayInspection(Floppy144RunState *state)
+{
+    uint32_t i;
+    if(state==NULL)return;
+    state->hathaway_inspection=1U;
+    for(i=0U;i<(uint32_t)FLOPPY144_ROOM_COUNT;++i)
+        (void)Floppy144RunStateBitSet(state->rooms,i);
+    for(i=0U;i<(uint32_t)FLOPPY144_COLLECTION_COUNT;++i)
+        (void)Floppy144RunStateBitSet(state->collections,i);
+    for(i=0U;i<(uint32_t)FLOPPY144_OBJECT_COUNT;++i)
+    {
+        (void)Floppy144RunStateBitSet(state->objects_visible,i);
+        (void)Floppy144RunStateBitSet(state->objects_unlocked,i);
+    }
+    for(i=0U;i<(uint32_t)FLOPPY144_TRIGGER_COUNT;++i)
+        (void)Floppy144RunStateBitSet(state->triggers,i);
+    for(i=0U;i<(uint32_t)FLOPPY144_CAPABILITY_COUNT;++i)
+        (void)Floppy144RunStateBitSet(state->capabilities,i);
+    state->secure_cabinets_unlocked=UINT32_MAX;
+    state->dirty=0U;
 }
 
 void Floppy144RunStateReset

@@ -130,6 +130,22 @@ bool f144StartupConfigDebugEnabled(
     return config->debug_enabled;
 }
 
+void f144StartupConfigSetVisualInspectionEnabled(
+    F144StartupConfig *config, bool enabled
+)
+{
+    if(config == NULL) return;
+    config->visual_inspection_enabled = enabled;
+    if(enabled) config->debug_enabled = false;
+}
+
+bool f144StartupConfigVisualInspectionEnabled(
+    const F144StartupConfig *config
+)
+{
+    return config != NULL && config->visual_inspection_enabled;
+}
+
 /*
  * Install a deterministic non-zero recovery seed.
  */

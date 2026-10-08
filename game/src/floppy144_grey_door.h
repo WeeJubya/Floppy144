@@ -22,4 +22,5 @@ bool Floppy144GreyDoorCandidateSafe(const Floppy144GreyDoorCandidate *candidate)
 bool Floppy144GreyDoorForRun(
     const Floppy144RunState *state, Floppy144GreyDoorCandidate *out
 );
+bool Floppy144GreyDoorHathawayCandidate(Floppy144GreyDoorCandidate *out);
 bool Floppy144GreyDoorNearby(const Floppy144RunState *state);

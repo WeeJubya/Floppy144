@@ -32,7 +32,8 @@ bool Floppy144GreyEncounterBegin(
 )
 {
     if(scene==NULL || run==NULL ||
-       run->grey_door_state!=(uint8_t)FLOPPY144_GREY_DOOR_AVAILABLE ||
+       (run->grey_door_state!=(uint8_t)FLOPPY144_GREY_DOOR_AVAILABLE &&
+        run->hathaway_inspection==0U) ||
        !Floppy144GreyDoorNearby(run))
         return false;
     memset(scene,0,sizeof(*scene));

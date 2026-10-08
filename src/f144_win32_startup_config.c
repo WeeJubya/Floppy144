@@ -309,6 +309,7 @@ bool f144Win32StartupConfigFromCommandLine(
 {
     const char *cursor;
     bool debug_enabled;
+    bool hathaway_enabled = false;
     bool seed_seen;
     bool date_seen;
     uint32_t parsed_seed;
@@ -364,13 +365,23 @@ bool f144Win32StartupConfigFromCommandLine(
             f144Win32StartupConfigTokenEquals(
                 token_start,
                 token_length,
-                "-debug"
+                "-GDR-CinderEllie"
             )
         )
         {
             debug_enabled =
                 true;
 
+            continue;
+        }
+
+        if(
+            f144Win32StartupConfigTokenEquals(
+                token_start, token_length, "-GDR-Hathaway"
+            )
+        )
+        {
+            hathaway_enabled = true;
             continue;
         }
 
@@ -439,15 +450,18 @@ bool f144Win32StartupConfigFromCommandLine(
 
     f144StartupConfigSetDebugEnabled(
         config,
-        debug_enabled
+        debug_enabled && !hathaway_enabled
+    );
+    f144StartupConfigSetVisualInspectionEnabled(
+        config, hathaway_enabled
     );
 
     /*
      * Deterministic overrides are developer facilities, so ordinary release
      * launches cannot activate them accidentally without explicitly enabling
-     * -debug as well.
+     * -GDR-CinderEllie as well. Hathaway always overrides debug.
      */
-    if(debug_enabled)
+    if(debug_enabled && !hathaway_enabled)
     {
         if(seed_seen)
         {

@@ -2159,6 +2159,85 @@ static void TestStage4GCompleteJourney(const char *root)
         (unsigned)total,(unsigned)candidate_count);
 }
 
+
+/* S4H: Hathaway uses an isolated, RAM-only all-revealed snapshot. The
+   directory-adjacent Door is a fixed presentation override and can be
+   inspected repeatedly without consuming the saved Grey Door lifecycle. */
+static void TestStage4HInspection(const char *root)
+{
+    Floppy144RunState run={0},normal={0},reloaded={0};
+    Floppy144GreyDoorCandidate doorway={0},seeded={0};
+    Floppy144GreyEncounter scene;
+    uint32_t i,visited=0U;
+    char path[F144_PLATFORM_PATH_CAPACITY];
+    Floppy144RunStateBegin(&run,144U);
+    normal=run;
+    Expect(Floppy144GreyDoorHathawayCandidate(&doorway) &&
+        doorway.rect.x==31U && doorway.rect.y==56U &&
+        doorway.rect.width==4U && doorway.rect.height==1U &&
+        !Floppy144SitePositionBlocked(doorway.stand_x16,doorway.stand_y16),
+        "S4H fixed visual Door is beside actual Site Directory and reachable");
+    Expect(!Floppy144GreyDoorForRun(&run,&seeded) &&
+        run.grey_door_state==(uint8_t)FLOPPY144_GREY_DOOR_UNAVAILABLE,
+        "S4H baseline Door remains undiscovered");
+    Floppy144RunStateEnableHathawayInspection(&run);
+    Expect(run.hathaway_inspection==1U &&
+        run.grey_door_state==(uint8_t)FLOPPY144_GREY_DOOR_UNAVAILABLE,
+        "S4H synthetic inspection flag cannot discover a normal Door");
+    for(i=0U;i<(uint32_t)FLOPPY144_COLLECTION_COUNT;++i)
+        Expect(Floppy144RunStateCollectionRestored(
+            &run,(Floppy144CollectionId)i),
+            "S4H all collections represented as restored");
+    for(i=0U;i<(uint32_t)FLOPPY144_ROOM_COUNT;++i)
+        Expect(Floppy144RunStateRoomReconstructed(
+            &run,(Floppy144RoomId)i),"S4H all rooms visible");
+    for(i=0U;i<FLOPPY144_SECURE_CABINET_MAX;++i)
+        Expect(Floppy144RunStateSecureCabinetUnlocked(&run,i),
+            "S4H every secure cabinet is unlocked");
+    Expect(Floppy144GreyDoorForRun(&run,&seeded) &&
+        memcmp(&seeded,&doorway,sizeof(doorway))==0,
+        "S4H fixed Door overrides normal seeded selection");
+    Floppy144RunStateSetPlayerSitePosition(
+        &run,doorway.stand_x16,doorway.stand_y16);
+    Expect(Floppy144GreyDoorNearby(&run),
+        "S4H forced door offers ordinary proximity interaction");
+    for(i=0U;i<2U;++i)
+    {
+        uint32_t frame=0U;
+        Expect(Floppy144GreyEncounterBegin(&scene,&run),
+            "S4H repeated scene entry works");
+        while(scene.phase!=(uint8_t)FLOPPY144_GREY_EXPLORE &&
+              frame++<50U)
+            (void)Floppy144GreyEncounterAdvance(&scene,100U);
+        while(scene.local_x<440)
+            (void)Floppy144GreyEncounterMove(&scene,12,0);
+        Expect(Floppy144GreyEncounterInspect(&scene),
+            "S4H Developer inspection works repeatedly");
+        for(frame=0U;frame<200U&&!Floppy144GreyEncounterFinished(&scene);++frame)
+            (void)Floppy144GreyEncounterAdvance(&scene,100U);
+        Expect(Floppy144GreyEncounterFinished(&scene) &&
+            run.grey_door_state==(uint8_t)FLOPPY144_GREY_DOOR_UNAVAILABLE &&
+            Floppy144GreyDoorForRun(&run,&seeded) &&
+            Floppy144GreyDoorNearby(&run),
+            "S4H scene returns to corridor and door remains indefinitely");
+        ++visited;
+    }
+    Expect(visited==2U,"S4H forced Door was entered and exited twice");
+    Expect(TestJoinPath(root,"hathaway-never-saved.sav",path,
+        (uint32_t)sizeof(path)) &&
+        Floppy144PersistenceSaveRunState(path,&normal) &&
+        Floppy144PersistenceLoadRunState(path,&reloaded) &&
+        reloaded.hathaway_inspection==0U &&
+        reloaded.grey_door_state==(uint8_t)FLOPPY144_GREY_DOOR_UNAVAILABLE,
+        "S4H ordinary persisted run never inherits inspection mode");
+    /* Even a raw save codec cannot reconstruct the non-persistent flag.
+       The coordinator separately prohibits actually writing it in Hathaway. */
+    Expect(Floppy144RunStateRecoveredPercent(&normal)==0U &&
+        !Floppy144GreyDoorForRun(&reloaded,&seeded),
+        "S4H normal restored game remains a fresh recovery");
+    puts("S4H: 35-collection/11-room inspector, all cabinets, fixed reusable Door, normal-save isolation PASS");
+}
+
 int main(void)
 {
     const char *root=getenv("F144_TEST_ROOT");
@@ -2197,6 +2276,7 @@ int main(void)
     TestGreyEncounter(root);
     TestGreyDoorOneShotLifecycle(root);
     TestStage4GCompleteJourney(root);
+    TestStage4HInspection(root);
 
     if(failures!=0)
     {

@@ -27,6 +27,7 @@ bool f144CalendarDateValid(
 typedef struct F144StartupConfig
 {
     bool debug_enabled;
+    bool visual_inspection_enabled; /* Hathaway; independent of debug */
 
     bool recovery_seed_override_enabled;
     uint32_t recovery_seed_override;
@@ -54,6 +55,14 @@ void f144StartupConfigSetDebugEnabled(
  * Report whether developer/debug facilities are enabled.
  */
 bool f144StartupConfigDebugEnabled(
+    const F144StartupConfig *config
+);
+
+/* Case-sensitive -GDR-Hathaway semantic state; never persisted. */
+void f144StartupConfigSetVisualInspectionEnabled(
+    F144StartupConfig *config, bool enabled
+);
+bool f144StartupConfigVisualInspectionEnabled(
     const F144StartupConfig *config
 );
 

@@ -114,6 +114,41 @@ static bool global_recorded_session_is_autosave;
 static F144StartupConfig global_config;
 
 /*
+ * One writing boundary for every ordinary profile/settings/run save in the
+ * Win32 coordinator. Hathaway is entirely disposable and must not modify
+ * a real recovery, profile or Settings file. No game-core module parses
+ * command-line text, and the canonical save codecs remain unchanged.
+ */
+static bool Floppy144HathawayMode(void)
+{
+    return f144StartupConfigVisualInspectionEnabled(&global_config);
+}
+static bool Floppy144InspectionSaveRunState(
+    const char *path,const Floppy144RunState *state
+)
+{
+    return !Floppy144HathawayMode() &&
+        Floppy144PersistenceSaveRunState(path,state);
+}
+static bool Floppy144InspectionSaveProfile(
+    const char *path,const Floppy144DiscoveryProfile *profile
+)
+{
+    return Floppy144HathawayMode() ? true :
+        Floppy144PersistenceSaveProfile(path,profile);
+}
+static bool Floppy144InspectionSaveSettings(
+    const char *path,const Floppy144Settings *settings
+)
+{
+    return Floppy144HathawayMode() ? true :
+        Floppy144PersistenceSaveSettings(path,settings);
+}
+#define Floppy144PersistenceSaveRunState Floppy144InspectionSaveRunState
+#define Floppy144PersistenceSaveProfile Floppy144InspectionSaveProfile
+#define Floppy144PersistenceSaveSettings Floppy144InspectionSaveSettings
+
+/*
  * Short-lived interface state
  *
  * The office notice points to static text shown after an inspection. Movement
@@ -454,6 +489,8 @@ static bool Floppy144RecordedSessionAvailable(
     void
 )
 {
+    /* Never import normal saved progress into a synthetic Hathaway session. */
+    if(Floppy144HathawayMode()) return false;
     bool manual_exists;
     bool autosave_exists;
 
@@ -559,7 +596,7 @@ static void Floppy144UpdateDiscoveryProfile(
     void
 )
 {
-    if(global_session_active)
+    if(global_session_active && !Floppy144HathawayMode())
     {
         Floppy144DiscoveryProfileMergeRunState(
             &global_profile,
@@ -583,7 +620,8 @@ static void Floppy144AutosaveIfNeeded(
     if(
         !global_session_active ||
         global_run_state.dirty == 0U ||
-        global_screen == FLOPPY144_SCREEN_GREY_ENCOUNTER
+        global_screen == FLOPPY144_SCREEN_GREY_ENCOUNTER ||
+        Floppy144HathawayMode()
     )
     {
         return;
@@ -732,7 +770,8 @@ static void Floppy144UpdateTiming(
                global_run_state.player_site_y ==
                    global_grey_encounter.return_y16)
             {
-                if(Floppy144RunStateGreyDoorComplete(&global_run_state))
+                if(!Floppy144HathawayMode() &&
+                   Floppy144RunStateGreyDoorComplete(&global_run_state))
                 {
                     /*
                      * Complete the one-shot transaction immediately, before
@@ -836,7 +875,7 @@ static void Floppy144ConfigureTerminalSession(
         &global_run_state
     );
 
-    if(!allow_authentication)
+    if(!allow_authentication || Floppy144HathawayMode())
     {
         return;
     }
@@ -1557,19 +1596,31 @@ static void Floppy144MainMenuActivate(
                     &global_run_state,
                     recovery_seed
                 );
+                if(Floppy144HathawayMode())
+                {
+                    Floppy144RunStateEnableHathawayInspection(
+                        &global_run_state
+                    );
+                    Floppy144WorldHydrateFromRunState(
+                        &global_world,&global_run_state
+                    );
+                }
 
                 Floppy144PlayerVisualReset(
                     &global_player_visual
                 );
 
-                Floppy144DiscoveryProfileBeginRecovery(
-                    &global_profile
-                );
+                if(!Floppy144HathawayMode())
+                {
+                    Floppy144DiscoveryProfileBeginRecovery(
+                        &global_profile
+                    );
 
-                Floppy144PersistenceSaveProfile(
-                    Floppy144StoragePath(&global_storage_paths,F144_PERSISTENCE_PROFILE),
-                    &global_profile
-                );
+                    Floppy144PersistenceSaveProfile(
+                        Floppy144StoragePath(&global_storage_paths,F144_PERSISTENCE_PROFILE),
+                        &global_profile
+                    );
+                }
             }
 
             global_terminal_authentication_complete =
@@ -1602,11 +1653,10 @@ static void Floppy144MainMenuActivate(
             global_session_active =
                 true;
 
-            global_resume_screen =
-                FLOPPY144_SCREEN_TERMINAL;
+            global_resume_screen = Floppy144HathawayMode()
+                ? FLOPPY144_SCREEN_OFFICE : FLOPPY144_SCREEN_TERMINAL;
 
-            global_screen =
-                FLOPPY144_SCREEN_TERMINAL;
+            global_screen = global_resume_screen;
 
             Floppy144Redraw(
                 window
@@ -1632,6 +1682,13 @@ static void Floppy144MainMenuActivate(
 
         case FLOPPY144_MAIN_MENU_RECORD_SESSION:
         {
+            if(Floppy144HathawayMode())
+            {
+                global_main_menu_notice="INSPECTION MODE - SAVING DISABLED";
+                global_main_menu_notice_is_warning=false;
+                Floppy144Redraw(window);
+                return;
+            }
             Floppy144UpdateDiscoveryProfile();
 
             global_main_menu_notice =
@@ -2450,8 +2507,9 @@ static bool Floppy144HandleTextInput(
                             );
 
                         if(
-                            global_completion_evidence_resolved ||
-                            global_completion_capacity_exhausted
+                            !Floppy144HathawayMode() &&
+                            (global_completion_evidence_resolved ||
+                             global_completion_capacity_exhausted)
                         )
                         {
                             /*
@@ -4081,7 +4139,7 @@ int CALLBACK WinMain(
     /*
      * Acquire platform-specific ownership before creating a window, resolving
      * persistence, loading settings/profile data, or parsing developer mode.
-     * -debug deliberately obeys the same production-data protection.
+     * -GDR-CinderEllie and -GDR-Hathaway obey the same ownership protection.
      */
     {
         F144Win32SingleInstanceResult instance_result =
@@ -4266,8 +4324,8 @@ int CALLBACK WinMain(
             )
         )
         {
-            migration_failures =
-                Floppy144StorageMigrateLegacy(
+            migration_failures = Floppy144HathawayMode()
+                ? 0U : Floppy144StorageMigrateLegacy(
                     &global_platform,
                     &global_storage_paths
                 );
