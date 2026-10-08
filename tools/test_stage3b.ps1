@@ -298,7 +298,8 @@ $ReconstructionSources = @(
     (Join-Path $SourceDir "floppy144_collection_registry.c"),
     (Join-Path $SourceDir "floppy144_persistence.c"),
     (Join-Path $SourceDir "floppy144_profile.c"),
-    (Join-Path $SourceDir "floppy144_settings.c")
+    (Join-Path $SourceDir "floppy144_settings.c"),
+    (Join-Path $SourceDir "floppy144_variation.c")
 )
 
 Invoke-Stage3BStep -Label "STAGE 3B.3 RECONSTRUCTION REGRESSION" -Action {

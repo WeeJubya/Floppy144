@@ -12,6 +12,7 @@
 #include "floppy144_interaction_engine.h"
 #include "floppy144_persistence.h"
 #include "floppy144_run_state.h"
+#include "floppy144_variation.h"
 #include "floppy144_site.h"
 #include "floppy144_site_object.h"
 #include "floppy144_site_rooms.h"
@@ -2331,6 +2332,7 @@ static void Floppy144TestReconstructionPersistence(void)
 
     uint8_t auPayload[FLOPPY144_SAVE_PAYLOAD_V1_SIZE];
     uint32_t uRoomIndex;
+    uint32_t uChoice;
 
     Floppy144TestReset(
         &sWorld,
@@ -2348,6 +2350,10 @@ static void Floppy144TestReconstructionPersistence(void)
             (Floppy144RoomId)uRoomIndex
         );
     }
+
+    uChoice = Floppy144VariationValue(
+        sState.recovery_seed, "s4e.persistence.v1", "room-01"
+    );
 
     F144_CHECK(
         Floppy144PersistenceEncodeRunState(
@@ -2370,6 +2376,35 @@ static void Floppy144TestReconstructionPersistence(void)
         ),
         "versioned save payload decodes reconstructed Site"
     );
+
+    F144_CHECK(
+        sLoadedState.recovery_seed == sState.recovery_seed &&
+        Floppy144VariationValue(
+            sLoadedState.recovery_seed, "s4e.persistence.v1", "room-01"
+        ) == uChoice,
+        "V1 run save restores the same keyed variation"
+    );
+    {
+        uint8_t auPayloadV2[FLOPPY144_SAVE_PAYLOAD_V2_SIZE];
+        Floppy144RunState sLoadedV2;
+        Floppy144RunStateReset(&sLoadedV2);
+        F144_CHECK(
+            Floppy144PersistenceEncodeRunState(
+                &sState, auPayloadV2, (uint32_t)sizeof(auPayloadV2)
+            ) &&
+            Floppy144PersistenceDecodeRunState(
+                &sLoadedV2, auPayloadV2, (uint32_t)sizeof(auPayloadV2)
+            ),
+            "current V2 run save payload round-trips"
+        );
+        F144_CHECK(
+            sLoadedV2.recovery_seed == sState.recovery_seed &&
+            Floppy144VariationValue(
+                sLoadedV2.recovery_seed, "s4e.persistence.v1", "room-01"
+            ) == uChoice,
+            "V2 run save restores the same keyed variation"
+        );
+    }
 
     for(
         uRoomIndex = 0U;
