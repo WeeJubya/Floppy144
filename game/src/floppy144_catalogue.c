@@ -18,8 +18,8 @@
 /*
  * Catalogue size
  *
- * Act I collections expose 50 deterministic index entries. Authored record
- * positions are supplied by the central document registry.
+ * Restored collections expose between 15 and 75 index entries by act.
+ * Authored record positions are supplied by the central document registry.
  */
 
 #define FLOPPY144_CATALOGUE_ROWS         10U
@@ -30,18 +30,16 @@
  * Collection-specific subjects and numbering rules belong to the collection
  * registry. These forms are shared by every generated catalogue.
  */
-static const char *floppy144_record_forms[10] =
+static const char *const floppy144_record_forms[] =
 {
-    "FILE",
-    "REVIEW",
-    "NOTICE",
-    "AUTHORISATION",
-    "AMENDMENT",
-    "SUMMARY",
-    "REGISTER",
-    "SCHEDULE",
-    "CONFIRMATION",
-    "CHECKLIST"
+    "FILE", "REVIEW", "NOTICE", "AUTHORISATION",
+    "AMENDMENT", "SUMMARY", "REGISTER", "SCHEDULE",
+    "CONFIRMATION", "CHECKLIST", "ROUTING SLIP",
+    "DISTRIBUTION COPY", "RETENTION LIST", "DESK CIRCULAR",
+    "RECEIPT", "INDEX CARD", "HANDOVER SHEET",
+    "INVENTORY NOTE", "DUPLICATE FORM", "FILING RETURN",
+    "WEEKLY LOG", "SERVICE DOCKET", "STOCK REQUISITION",
+    "MISCELLANEOUS MINUTE"
 };
 
 #define FLOPPY144_RECORD_FORM_COUNT                                \
@@ -200,8 +198,16 @@ void Floppy144CatalogueBuildRecord(
         return;
     }
 
+    /*
+     * Stable index/collection offsets avoid repeating the exact old
+     * subject-form sequence. Variation is a pure function of catalogue
+     * metadata, so reloads and unrelated random effects cannot reshuffle
+     * these missing-body records.
+     */
     subject_index =
-        index %
+        (index * 13U +
+         definition->record_number_offset * 7U +
+         index / 7U) %
         definition->subject_count;
 
     group_index =
@@ -210,8 +216,9 @@ void Floppy144CatalogueBuildRecord(
 
     form_index =
         (
-            group_index +
-            subject_index * 3U
+            group_index * 7U +
+            index * 5U +
+            definition->record_number_offset * 3U
         ) %
         FLOPPY144_RECORD_FORM_COUNT;
 
