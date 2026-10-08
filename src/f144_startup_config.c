@@ -30,7 +30,7 @@ static bool f144StartupConfigLeapYear(
 /*
  * Validate one Gregorian calendar date before exposing it to game systems.
  */
-static bool f144StartupConfigDateValid(
+bool f144CalendarDateValid(
     uint16_t year,
     uint8_t month,
     uint8_t day
@@ -190,7 +190,7 @@ bool f144StartupConfigSetFixedDateOverride(
 {
     if(
         config == NULL ||
-        !f144StartupConfigDateValid(
+        !f144CalendarDateValid(
             year,
             month,
             day

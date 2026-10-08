@@ -41,6 +41,7 @@ files({
     "./game/src/**.h",
     "./src/f144_startup_config.c",
     "./src/f144_platform.c",
+    "./src/f144_calendar.c",
     "./include/f144_startup_config.h",
     "./include/f144_platform.h"
 })
@@ -109,6 +110,7 @@ files({
     "./src/f144_win32_runtime.c",
     "./src/string_view.c",
     "./src/f144_win32_audio.c",
+    "./src/f144_win32_calendar.c",
     "./src/f144_win32_startup_config.c",
     "./src/f144_win32_input.c",
     "./src/f144_win32_lifecycle.c",
@@ -119,6 +121,7 @@ files({
     "./include/f144_runtime.h",
     "./include/string_view.h",
     "./include/f144_win32_audio.h",
+    "./include/f144_win32_calendar.h",
     "./include/f144_win32_startup_config.h",
     "./include/f144_win32_input.h",
     "./include/f144_win32_lifecycle.h",

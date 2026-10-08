@@ -71,6 +71,7 @@ foreach($required in @(
     './game/src/**.c',
     './src/f144_startup_config.c',
     './src/f144_platform.c',
+    './src/f144_calendar.c',
     './game/src/floppy144_main.c',
     './game/src/floppy144_persistence.c',
     './game/src/floppy144_storage.c'
@@ -108,6 +109,7 @@ foreach($required in @(
     './src/f144_win32_timing.c',
     './src/f144_win32_lifecycle.c',
     './src/f144_win32_audio.c',
+    './src/f144_win32_calendar.c',
     './src/f144_win32_single_instance.c',
     './src/f144_win32_startup_config.c',
     './src/f144_runtime.c',
@@ -160,6 +162,9 @@ $coreSources +=
 
 $coreSources +=
     Get-Item -LiteralPath (Join-Path $root "src\f144_platform.c")
+
+$coreSources +=
+    Get-Item -LiteralPath (Join-Path $root "src\f144_calendar.c")
 
 $coreHeaders = @(
     Get-ChildItem -Path (Join-Path $root "game\src") -Filter "*.h" -File |

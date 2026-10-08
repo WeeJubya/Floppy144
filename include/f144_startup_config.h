@@ -17,6 +17,13 @@ typedef struct F144CalendarDate
     uint8_t day;
 } F144CalendarDate;
 
+/* Gregorian validity is shared by debug overrides and live dates. */
+bool f144CalendarDateValid(
+    uint16_t year,
+    uint8_t month,
+    uint8_t day
+);
+
 typedef struct F144StartupConfig
 {
     bool debug_enabled;

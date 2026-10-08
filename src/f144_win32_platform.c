@@ -2,6 +2,7 @@
 
 #include "f144_win32_platform.h"
 #include "f144_win32_audio.h"
+#include "f144_win32_calendar.h"
 #include "f144_win32_storage.h"
 #include "f144_win32_timing.h"
 
@@ -524,7 +525,8 @@ static const F144PlatformApi f144_win32_platform_api =
     f144Win32AudioSetMusicVolume,
     f144Win32AudioSetSfxVolume,
     f144Win32MonotonicMs,
-    f144Win32PlatformQuit
+    f144Win32PlatformQuit,
+    f144Win32LocalCalendarDate
 };
 
 void f144Win32PlatformBind(

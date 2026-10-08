@@ -36,10 +36,12 @@ clock exactly as before.
 Provides a validated fixed Gregorian calendar date. This option is applied only
 when `-debug` is also present.
 
-S4B-07 only establishes the configuration route. No current production system
-reads the platform calendar for gameplay, so this override intentionally has no
-player-visible effect yet. Stage 4E date-sensitive regression work can query it
-without adding a Windows dependency.
+S4E-02 connects this existing override to
+`f144PlatformCalendarDate(platform, config, &date)`. When debug is enabled,
+the validated fixed date is returned without querying Windows. Without debug,
+the provider reads the OS **local** calendar date, not the monotonic timer.
+Content should call the provider, not Win32 time functions. No current gameplay
+or content system consumes the date yet, so no seasonal content is introduced.
 
 ## Current debug/diagnostic audit
 

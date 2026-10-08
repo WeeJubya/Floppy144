@@ -61,7 +61,8 @@ static const F144PlatformApi test_platform_api =
     NULL,
     NULL,
     TestMonotonicMs,
-    TestQuit
+    TestQuit,
+    NULL
 };
 
 static void TestPlatformClockAndQuit(void)

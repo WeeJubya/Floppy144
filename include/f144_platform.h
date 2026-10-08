@@ -16,6 +16,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "f144_startup_config.h"
+
 /*
  * Logical input
  *
@@ -177,6 +179,12 @@ typedef struct F144PlatformApi
     void (*quit)(
         F144Platform *platform
     );
+
+    /* Local civil date, independent of the monotonic timing clock. */
+    bool (*local_calendar_date)(
+        F144Platform *platform,
+        F144CalendarDate *date
+    );
 } F144PlatformApi;
 
 struct F144Platform
@@ -247,6 +255,17 @@ bool f144PlatformSetSfxVolume(
 
 uint64_t f144PlatformMonotonicMs(
     F144Platform *platform
+);
+
+/*
+ * Return a validated local calendar date. The Stage 4B debug-only fixed date
+ * has precedence; otherwise the platform returns its local civil date.
+ * Returns false and zeroes *date for an unavailable or invalid date.
+ */
+bool f144PlatformCalendarDate(
+    F144Platform *platform,
+    const F144StartupConfig *config,
+    F144CalendarDate *date
 );
 
 void f144PlatformQuit(

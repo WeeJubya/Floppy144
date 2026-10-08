@@ -167,7 +167,8 @@ int Floppy144Stage4PlatformHeaderCompileTest(void)
         NULL,
         NULL,
         TestMonotonicMs,
-        TestQuit
+        TestQuit,
+        NULL
     };
     F144Platform platform = {0};
 
