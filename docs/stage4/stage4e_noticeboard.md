@@ -8,7 +8,10 @@ existing Site 2D/2.5D fixture and inspected using the reusable Cabinet
 Interior view, not the Document Viewer.
 
 Nine permanent physical children remain authored in generated canonical
-data and are **never replaced or hidden by seasonal selection**:
+data and are **never replaced or hidden by seasonal selection**. Importantly,
+the original progression gate remains: `P-075`, `P-078` and `P-138`
+stay hidden until `T-012` reveals them. The contextual flyer does not depend
+on, or bypass, that gate:
 
 - `P-075` social poster (Friday tea);
 - `P-078` birthday card;
@@ -61,8 +64,9 @@ two annotation variants each**, not sixteen new persistent objects.
 At successful parent inspection, the coordinator queries
 `f144PlatformCalendarDate(&global_platform, &global_config, &today)`.
 The portable Cabinet setter applies it only to the canonical fixture whose
-authored variant is `NOTICEBOARD` and whose permanent social notice
-`P-138` is present/visible.
+authored variant is `NOTICEBOARD` and which owns the authored social notice
+`P-138` in canonical data. That existing PI need not yet be revealed; its
+visibility remains governed by `T-012` regardless of the seasonal flyer.
 
 The calendar query is platform-neutral. Normal play uses the Win32 local
 calendar; `-debug -date YYYY-MM-DD` and the test configuration force a
@@ -102,8 +106,9 @@ The **real generated-data** Stage 3B.5 Cabinet regression adds explicit
 forced-date cases for winter, New Year, Valentine, spring/Easter, summer,
 ordinary autumn, Halloween, Bonfire, Christmas and year-end rollover.
 
-It also proves all nine permanent IDs and the original `P-138` content
-remain present, seasonal content appends without reordering them, repeat
+It also proves the three T-012-gated noticeboard PIs remain hidden beforehand
+and all nine authored PIs and original `P-138` content remain present
+afterwards, seasonal content appends without reordering them, repeat
 calls are deterministic, different seeds select different annotation text,
 contextual inspection does not mutate `RunState`, back navigation works,
 framebuffer guard pixels survive full detail rendering and unrelated furniture

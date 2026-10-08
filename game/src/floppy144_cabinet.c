@@ -627,7 +627,6 @@ void Floppy144CabinetSetNoticeboardDate(
         !Floppy144CabinetStringEqual(pParent->pszC, "NOTICEBOARD") ||
         pPermanent == NULL ||
         !Floppy144CabinetStringEqual(pPermanent->pszC, pCabinet->szCabinetId) ||
-        !Floppy144SitePhysicalItemVisible(pRunState, pPermanent) ||
         !Floppy144NoticeboardSelect(
             *pDate, pRunState->recovery_seed, &pAmbient, &pszAnnotation
         )

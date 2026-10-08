@@ -1435,10 +1435,40 @@ static void Floppy144TestNoticeboardCalendar(void)
         ),
         "canonical Staff Room Noticeboard opens normally"
     );
+    /*
+     * Stage 3 progression hides P-075, P-078 and P-138 until T-012.
+     * Seasonality must not reveal those canonical physical items early.
+     */
     original_count = Floppy144CabinetVisibleContentCount(&cabinet, &run);
     F144_CHECK(
+        original_count == 6U &&
+        Floppy144TestVisibleContentIndex(&cabinet, &run, "P-138") == UINT32_MAX,
+        "before T-012 the three story-controlled notices remain hidden"
+    );
+
+    date.year = 2026U;
+    date.month = 12U;
+    date.day = 20U;
+    Floppy144CabinetSetNoticeboardDate(&cabinet, &run, &date);
+    F144_CHECK(
+        Floppy144CabinetVisibleContentCount(&cabinet, &run) == 7U &&
+        Floppy144TestVisibleContentIndex(&cabinet, &run, "P-138") == UINT32_MAX &&
+        Floppy144CabinetVisibleContentAt(&cabinet, &run, 6U) != NULL,
+        "contextual flyer appears independently without revealing T-012 children"
+    );
+
+    {
+        Floppy144TriggerId trigger = Floppy144GameDataTriggerId("T-012");
+        F144_CHECK(
+            trigger != FLOPPY144_TRIGGER_COUNT &&
+            Floppy144RunStateFireTrigger(&run, trigger),
+            "test fixture completes the existing T-012 reveal condition"
+        );
+    }
+    original_count = Floppy144CabinetVisibleContentCount(&cabinet, &run) - 1U;
+    F144_CHECK(
         original_count == (uint32_t)(sizeof(permanent) / sizeof(permanent[0])),
-        "all nine authored physical notices remain on the board"
+        "all nine authored physical notices become visible after T-012"
     );
     for(j = 0U; j < (uint32_t)(sizeof(permanent) / sizeof(permanent[0])); ++j)
     {
