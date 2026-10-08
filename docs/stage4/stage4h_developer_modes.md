@@ -44,7 +44,7 @@ Normal player run creation does not set this flag.
 
 The Corridor Site Directory remains at `(35,56)` with dimensions `6x1`.
 Hathaway renders an additional Grey Door panel on the neighbouring wall
-`(29,56)` of size `4x1` with interaction stance `(31,56)`.
+`(29,56)` of size `4x1` with interaction stance `(31,55.5)`.
 A runtime check fails closed if the corridor surface/stance becomes invalid
 or another non-floor authored object overlaps it.
 This override does not use normal Stage 4G seeded placement and does not
