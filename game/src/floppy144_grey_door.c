@@ -227,10 +227,30 @@ bool Floppy144GreyDoorHathawayCandidate(Floppy144GreyDoorCandidate *out)
     test.rect.authored_height16=FLOPPY144_SITE_FIXED_ONE;
     test.stand_x16=33*FLOPPY144_SITE_FIXED_ONE;
     test.stand_y16=55*FLOPPY144_SITE_FIXED_ONE;
-    if(out==NULL || !GreyDoorIsCorridor(33,55) ||
-       GreyDoorIsCorridor(33,56) ||
+    if(out==NULL ||
+       Floppy144SiteRoomAtPosition(test.stand_x16,test.stand_y16) !=
+           FLOPPY144_ROOM_CORRIDOR ||
        Floppy144SitePositionBlocked(test.stand_x16,test.stand_y16))
         return false;
+    /* The logical room region includes the wall boundary: verify the
+       actual generated walkable FLOOR, not the region's bounding box. */
+    {
+        bool interior_floor=false,wall_floor=false;
+        for(i=0U;i<Floppy144SiteRectCount();++i)
+        {
+            const Floppy144SiteRect *f=Floppy144SiteRectAt(i);
+            if(f==NULL || f->room!=(uint8_t)FLOPPY144_ROOM_CORRIDOR ||
+               f->type>(uint8_t)FLOPPY144_SITE_FLOOR_D) continue;
+            if(33>=(int32_t)f->x && 33<(int32_t)f->x+f->width)
+            {
+                if(55>=(int32_t)f->y && 55<(int32_t)f->y+f->height)
+                    interior_floor=true;
+                if(56>=(int32_t)f->y && 56<(int32_t)f->y+f->height)
+                    wall_floor=true;
+            }
+        }
+        if(!interior_floor || wall_floor) return false;
+    }
     for(i=0U;i<Floppy144SiteRectCount();++i)
     {
         const Floppy144SiteRect *r=Floppy144SiteRectAt(i);
