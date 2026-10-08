@@ -235,7 +235,10 @@ static void Floppy144Redraw(
             Floppy144IntroDraw(
                 pSurface,
                 elapsed_milliseconds,
-                &global_settings
+                Floppy144SettingsTextElapsedMs(
+                    &global_settings,
+                    1U
+                )
             );
 
             break;
@@ -4401,7 +4404,10 @@ int CALLBACK WinMain(
     Floppy144IntroDraw(
         f144PlatformFramebuffer(&global_platform),
         0U,
-        &global_settings
+        Floppy144SettingsTextElapsedMs(
+            &global_settings,
+            1U
+        )
     );
 
     Floppy144SettingsApplyCrtFilter(
@@ -4444,7 +4450,10 @@ int CALLBACK WinMain(
     Floppy144IntroDraw(
         f144PlatformFramebuffer(&global_platform),
         0U,
-        &global_settings
+        Floppy144SettingsTextElapsedMs(
+            &global_settings,
+            1U
+        )
     );
 
     Floppy144SettingsApplyCrtFilter(

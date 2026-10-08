@@ -10,8 +10,6 @@
  */
 #include "floppy144_intro.h"
 
-#include "floppy144_settings_runtime.h"
-
 #include <stddef.h>
 
 static void Floppy144IntroTextCentred(
@@ -42,14 +40,24 @@ static void Floppy144IntroTextCentred(
 }
 
 static uint32_t Floppy144IntroTextTime(
-    const Floppy144Settings *settings,
+    uint32_t text_rate,
     uint32_t phase_elapsed_ms
 )
 {
-    return Floppy144SettingsTextElapsedMs(
-        settings,
-        phase_elapsed_ms
-    );
+    if(text_rate == UINT32_MAX)
+    {
+        return UINT32_MAX;
+    }
+
+    if(
+        text_rate == 0U ||
+        phase_elapsed_ms > UINT32_MAX / text_rate
+    )
+    {
+        return phase_elapsed_ms;
+    }
+
+    return phase_elapsed_ms * text_rate;
 }
 
 static void Floppy144IntroFooter(
@@ -106,7 +114,7 @@ static void Floppy144IntroDisk(
 static void Floppy144IntroDiscovery(
     Floppy144Surface *surface,
     uint32_t phase_ms,
-    const Floppy144Settings *settings
+    uint32_t text_rate
 )
 {
     const uint32_t background = FLOPPY144_RGB(8,11,13);
@@ -115,7 +123,7 @@ static void Floppy144IntroDiscovery(
     const uint32_t paper = FLOPPY144_RGB(76,73,66);
     const uint32_t muted = FLOPPY144_RGB(118,133,132);
     const uint32_t amber = FLOPPY144_RGB(194,153,76);
-    uint32_t text_ms = Floppy144IntroTextTime(settings,phase_ms);
+    uint32_t text_ms = Floppy144IntroTextTime(text_rate,phase_ms);
 
     Floppy144DrawClear(surface,background);
     Floppy144DrawFillRect(surface,0U,82U,640U,258U,desk);
@@ -178,7 +186,7 @@ static void Floppy144IntroDiscovery(
 static void Floppy144IntroInsertion(
     Floppy144Surface *surface,
     uint32_t phase_ms,
-    const Floppy144Settings *settings
+    uint32_t text_rate
 )
 {
     const uint32_t background = FLOPPY144_RGB(7,10,12);
@@ -190,7 +198,7 @@ static void Floppy144IntroInsertion(
     const uint32_t amber = FLOPPY144_RGB(194,153,76);
     uint32_t travel = 0U;
     uint32_t disk_x = 82U;
-    uint32_t text_ms = Floppy144IntroTextTime(settings,phase_ms);
+    uint32_t text_ms = Floppy144IntroTextTime(text_rate,phase_ms);
 
     Floppy144DrawClear(surface,background);
 
@@ -251,7 +259,7 @@ static void Floppy144IntroInsertion(
 static void Floppy144IntroProgram(
     Floppy144Surface *surface,
     uint32_t phase_ms,
-    const Floppy144Settings *settings
+    uint32_t text_rate
 )
 {
     const uint32_t background = FLOPPY144_RGB(7,10,12);
@@ -261,7 +269,7 @@ static void Floppy144IntroProgram(
     const uint32_t green = FLOPPY144_RGB(127,196,146);
     const uint32_t muted = FLOPPY144_RGB(118,133,132);
     const uint32_t amber = FLOPPY144_RGB(194,153,76);
-    uint32_t text_ms = Floppy144IntroTextTime(settings,phase_ms);
+    uint32_t text_ms = Floppy144IntroTextTime(text_rate,phase_ms);
 
     Floppy144DrawClear(surface,background);
     Floppy144DrawFillRect(surface,34U,30U,572U,292U,panel);
@@ -303,7 +311,7 @@ static void Floppy144IntroProgram(
 static void Floppy144IntroNetwork(
     Floppy144Surface *surface,
     uint32_t phase_ms,
-    const Floppy144Settings *settings
+    uint32_t text_rate
 )
 {
     const uint32_t background = FLOPPY144_RGB(8,13,11);
@@ -313,7 +321,7 @@ static void Floppy144IntroNetwork(
     const uint32_t bright = FLOPPY144_RGB(172,231,183);
     const uint32_t muted = FLOPPY144_RGB(76,119,91);
     const uint32_t amber = FLOPPY144_RGB(194,153,76);
-    uint32_t text_ms = Floppy144IntroTextTime(settings,phase_ms);
+    uint32_t text_ms = Floppy144IntroTextTime(text_rate,phase_ms);
 
     Floppy144DrawClear(surface,background);
     Floppy144DrawFillRect(surface,24U,22U,592U,306U,panel);
@@ -401,7 +409,7 @@ bool Floppy144IntroActionSkips(
 void Floppy144IntroDraw(
     Floppy144Surface *surface,
     uint32_t elapsed_ms,
-    const Floppy144Settings *settings
+    uint32_t text_rate
 )
 {
     Floppy144IntroBeat beat;
@@ -421,14 +429,14 @@ void Floppy144IntroDraw(
     switch(beat)
     {
         case FLOPPY144_INTRO_DISCOVERY:
-            Floppy144IntroDiscovery(surface,elapsed_ms,settings);
+            Floppy144IntroDiscovery(surface,elapsed_ms,text_rate);
             break;
 
         case FLOPPY144_INTRO_INSERTION:
             Floppy144IntroInsertion(
                 surface,
                 elapsed_ms - FLOPPY144_INTRO_DISCOVERY_END_MS,
-                settings
+                text_rate
             );
             break;
 
@@ -436,7 +444,7 @@ void Floppy144IntroDraw(
             Floppy144IntroProgram(
                 surface,
                 elapsed_ms - FLOPPY144_INTRO_INSERTION_END_MS,
-                settings
+                text_rate
             );
             break;
 
@@ -444,7 +452,7 @@ void Floppy144IntroDraw(
             Floppy144IntroNetwork(
                 surface,
                 elapsed_ms - FLOPPY144_INTRO_PROGRAM_END_MS,
-                settings
+                text_rate
             );
             break;
 
@@ -454,7 +462,7 @@ void Floppy144IntroDraw(
                 surface,
                 FLOPPY144_INTRO_DURATION_MS -
                     FLOPPY144_INTRO_PROGRAM_END_MS,
-                settings
+                text_rate
             );
             break;
     }

@@ -55,7 +55,11 @@ static uint64_t render(
     settings.sfx_volume=sfx_volume;
 
     memset(pixels,0,sizeof(pixels));
-    Floppy144IntroDraw(&surface,elapsed_ms,&settings);
+    Floppy144IntroDraw(
+        &surface,
+        elapsed_ms,
+        Floppy144SettingsTextElapsedMs(&settings,1U)
+    );
     Floppy144SettingsApplyCrtFilter(&surface,&settings);
 
     return checksum(pixels,WIDTH*HEIGHT);

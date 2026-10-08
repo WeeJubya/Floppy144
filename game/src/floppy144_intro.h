@@ -8,8 +8,6 @@
 #pragma once
 
 #include "floppy144_draw.h"
-#include "floppy144_settings.h"
-
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -38,5 +36,5 @@ bool Floppy144IntroActionSkips(
 void Floppy144IntroDraw(
     Floppy144Surface *surface,
     uint32_t elapsed_ms,
-    const Floppy144Settings *settings
+    uint32_t text_rate
 );

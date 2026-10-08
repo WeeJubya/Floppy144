@@ -91,9 +91,9 @@ if($credits -notmatch [regex]::Escape("ENTER REPLAY INTRO"))
     throw "Credits does not advertise intro replay."
 }
 
-if($intro -notmatch [regex]::Escape("Floppy144SettingsTextElapsedMs"))
+if($main -notmatch [regex]::Escape("Floppy144SettingsTextElapsedMs"))
 {
-    throw "Intro does not respect text-speed settings."
+    throw "Coordinator does not translate persisted text speed for the intro."
 }
 
 if($main -notmatch [regex]::Escape("Floppy144SettingsApplyCrtFilter"))
