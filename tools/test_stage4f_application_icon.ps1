@@ -9,6 +9,8 @@ param
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
+$root = Split-Path -Parent $PSScriptRoot
+
 function Assert-True
 {
     param
@@ -25,12 +27,12 @@ function Assert-True
 
 function Test-Floppy144IconSource
 {
-    $masterPath = ".\assets\branding\floppy144_app_icon.svg"
-    $icoPath = ".\platform\win32\floppy144.ico"
-    $rcPath = ".\platform\win32\floppy144_app.rc"
-    $headerPath = ".\platform\win32\floppy144_resource.h"
-    $premakePath = ".\premake5.lua"
-    $mainPath = ".\game\src\floppy144_main.c"
+    $masterPath = Join-Path $root "assets\branding\floppy144_app_icon.svg"
+    $icoPath = Join-Path $root "platform\win32\floppy144.ico"
+    $rcPath = Join-Path $root "platform\win32\floppy144_app.rc"
+    $headerPath = Join-Path $root "platform\win32\floppy144_resource.h"
+    $premakePath = Join-Path $root "premake5.lua"
+    $mainPath = Join-Path $root "game\src\floppy144_main.c"
 
     foreach($path in @(
         $masterPath,
@@ -131,7 +133,7 @@ function Test-Floppy144GeneratedProject
 {
     Test-Floppy144IconSource
 
-    $projectPath = ".\build\Floppy144.vcxproj"
+    $projectPath = Join-Path $root "build\Floppy144.vcxproj"
     Assert-True (Test-Path -LiteralPath $projectPath) "Generated Floppy144.vcxproj is missing."
 
     $project = Get-Content -LiteralPath $projectPath -Raw
