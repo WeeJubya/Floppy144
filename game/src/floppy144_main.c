@@ -557,8 +557,8 @@ static void Floppy144AutosaveIfNeeded(
 {
     if(
         !global_session_active ||
-        global_screen == FLOPPY144_SCREEN_GREY_ENCOUNTER ||
-        global_run_state.dirty == 0U
+        global_run_state.dirty == 0U ||
+        global_screen == FLOPPY144_SCREEN_GREY_ENCOUNTER
     )
     {
         return;
