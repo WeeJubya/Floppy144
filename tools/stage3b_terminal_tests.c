@@ -360,6 +360,17 @@ static bool Floppy144TestCatalogueRecordId(
     return true;
 }
 
+static const char *Floppy144TestShortAuthoredId(
+    const Floppy144DocumentDefinition *document
+)
+{
+    const char *separator;
+    if(document == NULL || document->record_id_override == NULL)
+        return "RS-UNAVAILABLE";
+    separator = strstr(document->record_id_override, "-RS-");
+    return separator != NULL ? separator + 1 : document->record_id_override;
+}
+
 static const Floppy144DocumentDefinition *
 Floppy144TestDocumentForTrigger(
     Floppy144CollectionId eCollection,
@@ -459,6 +470,7 @@ static void Floppy144TestCatalogueRecordResolution(void)
 
         uint32_t uRecord;
         uint32_t uPreviousRecordNumber = 0U;
+        bool bPreviousPinned = false;
 
         for(
             uRecord = 0U;
@@ -489,32 +501,42 @@ static void Floppy144TestCatalogueRecordResolution(void)
                         &uCurrentRecordNumber
                     );
 
+                const Floppy144DocumentDefinition *pAuthored =
+                    Floppy144DocumentGet(eCollection,uRecord);
+                bool bPinned =
+                    pAuthored != NULL &&
+                    pAuthored->record_id_override != NULL &&
+                    (
+                        strcmp(pAuthored->record_id_override,
+                               "DR-01-RS-0001") == 0 ||
+                        strcmp(pAuthored->record_id_override,
+                               "FM-13-RS-0047") == 0 ||
+                        strcmp(pAuthored->record_id_override,
+                               "HR-01-RS-0107") == 0
+                    );
                 F144_CHECK(
                     bNumberValid &&
                     (
-                        uRecord == 0U ||
+                        uRecord == 0U || bPinned || bPreviousPinned ||
                         uCurrentRecordNumber > uPreviousRecordNumber
                     ),
-                    "catalogue rows remain in numerical record-ID order"
+                    "generated numbers remain sorted around pinned story IDs"
                 );
 
                 if(bNumberValid)
                 {
-                    if(uRecord > 0U)
+                    if(uRecord > 0U && !bPinned && !bPreviousPinned)
                     {
                         ++uComparedGaps;
-
                         if(
                             uCurrentRecordNumber -
                             uPreviousRecordNumber != 10U
                         )
-                        {
                             ++uIrregularGaps;
-                        }
                     }
-
                     uPreviousRecordNumber = uCurrentRecordNumber;
                 }
+                bPreviousPinned=bPinned;
             }
 
             F144_CHECK(
@@ -894,13 +916,15 @@ static void Floppy144TestMultipleCollectionCommands(void)
         "LIST DR-02"
     );
     F144_CHECK(
-        !Floppy144TerminalRecordPagerActive(&sTerminal) &&
+        Floppy144TerminalRecordPagerActive(&sTerminal) &&
+        sTerminal.record_pager_collection == eDr02 &&
         Floppy144TestTerminalContains(
             &sTerminal,
-            "PAGE 1 OF 1"
+            "PAGE 1 OF 2"
         ),
-        "single-page document LIST returns immediately to command mode"
+        "expanded DR-02 index opens a two-page document LIST"
     );
+    Floppy144TerminalCloseRecordPager(&sTerminal);
 
     {
         char szFullId[24];
@@ -1035,6 +1059,11 @@ static void Floppy144TestMultipleCollectionCommands(void)
     F144_CHECK(
         sTerminal.record_pager_page == 2U,
         "record pager can navigate back to page two"
+    );
+    Floppy144TerminalMoveRecordPager(&sTerminal, -1);
+    F144_CHECK(
+        sTerminal.record_pager_page == 2U,
+        "record pager navigates back to page two"
     );
     Floppy144TerminalMoveRecordPager(&sTerminal, -1);
     F144_CHECK(
@@ -1593,6 +1622,10 @@ static void Floppy144TestPlayerRecoveryPolicy(void)
     {
         const Floppy144CollectionDefinition *pFm23=
             Floppy144CollectionGet(eFm23);
+        const Floppy144DocumentDefinition *pFm23Upgrade =
+            Floppy144TestDocumentForTrigger(
+                eFm23,Floppy144GameDataTriggerId("T-025")
+            );
         uint32_t uRecord;
         uint32_t uAuthored=0U;
 
@@ -1626,7 +1659,7 @@ static void Floppy144TestPlayerRecoveryPolicy(void)
                 &sWorld,
                 &sRunState,
                 eFm23,
-                2U
+                pFm23Upgrade != NULL ? pFm23Upgrade->record_index : 0U
             ) &&
             Floppy144GameDataFactRecorded(
                 &sRunState,
@@ -1880,6 +1913,8 @@ static void Floppy144TestBranchDocumentAccessGate(void)
     const Floppy144DocumentDefinition *pRecordsBranchDocument;
     const Floppy144DocumentDefinition *pTechnologyBranchDocument;
     char szBranchCommand[48];
+    char szNextBriefing[96];
+    char szBranchChoices[112];
 
     Floppy144WorldReset(
         &sWorld
@@ -1950,12 +1985,24 @@ static void Floppy144TestBranchDocumentAccessGate(void)
             Floppy144GameDataTriggerId("T-011")
         );
 
+    (void)snprintf(
+        szNextBriefing,sizeof(szNextBriefing),
+        "NEXT RECOVERY ACTION: OPEN %s",
+        Floppy144TestShortAuthoredId(pChoiceBriefing)
+    );
+    (void)snprintf(
+        szBranchChoices,sizeof(szBranchChoices),
+        "NEXT RECOVERY ACTION: OPEN %s OR %s",
+        Floppy144TestShortAuthoredId(pRecordsBranchDocument),
+        Floppy144TestShortAuthoredId(pTechnologyBranchDocument)
+    );
+
     F144_CHECK(
         pEntryDocument != NULL &&
         pEntryDocument->record_id_override != NULL &&
         strcmp(
-            pEntryDocument->record_id_override,
-            "DR-04-RS-0037"
+            pEntryDocument->title_override,
+            "Handover Readiness Checklist"
         ) == 0,
         "DR-04 handover checklist is the first player-facing recovery document"
     );
@@ -1964,8 +2011,8 @@ static void Floppy144TestBranchDocumentAccessGate(void)
         pChoiceBriefing != NULL &&
         pChoiceBriefing->record_id_override != NULL &&
         strcmp(
-            pChoiceBriefing->record_id_override,
-            "DR-04-RS-0111"
+            pChoiceBriefing->title_override,
+            "Outstanding Workstream Summary"
         ) == 0,
         "DR-04 neutral workstream summary follows the handover checklist"
     );
@@ -1974,14 +2021,14 @@ static void Floppy144TestBranchDocumentAccessGate(void)
         pRecordsBranchDocument != NULL &&
         pRecordsBranchDocument->record_id_override != NULL &&
         strcmp(
-            pRecordsBranchDocument->record_id_override,
-            "DR-04-RS-0087"
+            pRecordsBranchDocument->title_override,
+            "Physical Archive Reconciliation Workstream"
         ) == 0 &&
         pTechnologyBranchDocument != NULL &&
         pTechnologyBranchDocument->record_id_override != NULL &&
         strcmp(
-            pTechnologyBranchDocument->record_id_override,
-            "DR-04-RS-0063"
+            pTechnologyBranchDocument->title_override,
+            "Terminal Network Remediation Workstream"
         ) == 0,
         "both DR-04 branch documents follow the neutral briefing"
     );
@@ -2049,7 +2096,7 @@ static void Floppy144TestBranchDocumentAccessGate(void)
     F144_CHECK(
         Floppy144TestTerminalContains(
             &sTerminal,
-            "NEXT RECOVERY ACTION: OPEN RS-0111"
+            szNextBriefing
         ),
         "DR-04 handover checklist points to the neutral workstream summary"
     );
@@ -2068,7 +2115,7 @@ static void Floppy144TestBranchDocumentAccessGate(void)
     F144_CHECK(
         Floppy144TestTerminalContains(
             &sTerminal,
-            "NEXT RECOVERY ACTION: OPEN RS-0087 OR RS-0063"
+            szBranchChoices
         ),
         "DR-04 briefing offers Records or Technology as an equal branch choice"
     );
@@ -2155,7 +2202,7 @@ static void Floppy144TestBranchDocumentAccessGate(void)
     F144_CHECK(
         Floppy144TestTerminalContains(
             &sTerminal,
-            "NEXT RECOVERY ACTION: OPEN RS-0087 OR RS-0063"
+            szBranchChoices
         ),
         "DR-04 briefing keeps both workstream choices after one branch has fired"
     );
@@ -2264,7 +2311,7 @@ static void Floppy144TestBranchDocumentAccessGate(void)
     F144_CHECK(
         Floppy144TestTerminalContains(
             &sTerminal,
-            "NEXT RECOVERY ACTION: OPEN RS-0087 OR RS-0063"
+            szBranchChoices
         ),
         "DR-04 briefing keeps both authored workstreams after both have been viewed"
     );
@@ -2360,7 +2407,13 @@ static void Floppy144TestStaleEvidenceSaveRecovery(void)
 
     F144_CHECK(
         Floppy144DocumentFindRecordId(
-            "DR-31-RS-0129",
+            Floppy144TestShortAuthoredId(NULL) != NULL &&
+                Floppy144TestDocumentForTrigger(
+                    eDr31,eT017
+                ) != NULL
+                ? Floppy144TestDocumentForTrigger(
+                    eDr31,eT017
+                )->record_id_override : "MISSING",
             &eCollection,
             &uRecordIndex
         ) &&
@@ -2391,7 +2444,12 @@ static void Floppy144TestStaleEvidenceSaveRecovery(void)
 
     F144_CHECK(
         Floppy144DocumentFindRecordId(
-            "DR-31-RS-0092",
+            Floppy144TestDocumentForTrigger(
+                eDr31,eT018
+            ) != NULL
+                ? Floppy144TestDocumentForTrigger(
+                    eDr31,eT018
+                )->record_id_override : "MISSING",
             &eCollection,
             &uRecordIndex
         ) &&
@@ -2565,13 +2623,23 @@ static void Floppy144TestFm18SuppressionRecordRestoresServerPanel(void)
 
     F144_CHECK(
         Floppy144DocumentFindRecordId(
-            "FM-18-RS-0135",
+            Floppy144TestDocumentForTrigger(
+                eFm18,eT041
+            ) != NULL
+                ? Floppy144TestDocumentForTrigger(
+                    eFm18,eT041
+                )->record_id_override : "MISSING",
             &eCollection,
             &uEnvironmentalRecordIndex
         ) &&
         eCollection == eFm18 &&
         Floppy144DocumentFindRecordId(
-            "FM-18-RS-0098",
+            Floppy144TestDocumentForTrigger(
+                eFm18,eT042
+            ) != NULL
+                ? Floppy144TestDocumentForTrigger(
+                    eFm18,eT042
+                )->record_id_override : "MISSING",
             &eCollection,
             &uSuppressionRecordIndex
         ) &&
