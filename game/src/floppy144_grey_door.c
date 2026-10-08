@@ -226,7 +226,7 @@ bool Floppy144GreyDoorHathawayCandidate(Floppy144GreyDoorCandidate *out)
     test.rect.authored_width16=4U*FLOPPY144_SITE_FIXED_ONE;
     test.rect.authored_height16=FLOPPY144_SITE_FIXED_ONE;
     test.stand_x16=31*FLOPPY144_SITE_FIXED_ONE;
-    test.stand_y16=55*FLOPPY144_SITE_FIXED_ONE;
+    test.stand_y16=56*FLOPPY144_SITE_FIXED_ONE;
     if(out==NULL ||
        Floppy144SiteRoomAtPosition(test.stand_x16,test.stand_y16) !=
            FLOPPY144_ROOM_CORRIDOR ||
