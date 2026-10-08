@@ -50,12 +50,10 @@ foreach($Token in $Forbidden)
 {
     foreach($Name in @('Recovery','Profile','Settings','Credits','Completion','Catalogue','Notebook','Cabinet','Terminal','Site'))
     {
-        /*
-         * BACKSPACE RETURN appears legitimately in Terminal Help prose
-         * ("BACKSPACE RETURNS FROM RECORD VIEW."). S4D-05 is policing the
-         * footer grammar, not rewriting authored Help content preserved by
-         * S4D-01, so do not treat that prose substring as a footer violation.
-         */
+        # BACKSPACE RETURN appears legitimately in Terminal Help prose:
+        # "BACKSPACE RETURNS FROM RECORD VIEW." S4D-05 is policing the
+        # footer grammar, not rewriting authored Help content preserved by
+        # S4D-01, so do not treat that prose substring as a footer violation.
         if(
             $Name -eq 'Terminal' -and
             $Token -eq 'BACKSPACE RETURN'
