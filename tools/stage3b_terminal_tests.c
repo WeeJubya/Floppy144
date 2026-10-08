@@ -10,6 +10,7 @@
 #include "floppy144_document.h"
 #include "floppy144_draw.h"
 #include "floppy144_game_data.h"
+#include "floppy144_persistence.h"
 #include "floppy144_run_state.h"
 #include "floppy144_terminal.h"
 #include "floppy144_world.h"
@@ -369,6 +370,16 @@ static const char *Floppy144TestShortAuthoredId(
         return "RS-UNAVAILABLE";
     separator = strstr(document->record_id_override, "-RS-");
     return separator != NULL ? separator + 1 : document->record_id_override;
+}
+
+/* Resolve player-facing shorthand after the seed-scoped DR-04 mapping. */
+static const char *Floppy144TestShortSeededAuthoredId(
+    const Floppy144DocumentDefinition *document, uint32_t seed
+)
+{
+    const char *id = Floppy144DocumentRecordIdForSeed(document, seed);
+    const char *marker = id != NULL ? strstr(id, "-RS-") : NULL;
+    return marker != NULL ? marker + 1 : "RS-UNAVAILABLE";
 }
 
 static const Floppy144DocumentDefinition *
@@ -1988,8 +1999,8 @@ static void Floppy144TestBranchDocumentAccessGate(void)
     (void)snprintf(
         szBranchChoices,sizeof(szBranchChoices),
         "NEXT RECOVERY ACTION: OPEN %s OR %s",
-        Floppy144TestShortAuthoredId(pRecordsBranchDocument),
-        Floppy144TestShortAuthoredId(pTechnologyBranchDocument)
+        Floppy144TestShortSeededAuthoredId(pRecordsBranchDocument,sRunState.recovery_seed),
+        Floppy144TestShortSeededAuthoredId(pTechnologyBranchDocument,sRunState.recovery_seed)
     );
 
     F144_CHECK(
@@ -2067,9 +2078,9 @@ static void Floppy144TestBranchDocumentAccessGate(void)
      * Simulate the collection-local shorthand established by RESTORE DR-04.
      * The canonical neutral breadcrumb is:
      *
-     *   RS-0111 Handover Readiness Checklist
-     *       -> RS-0037 Outstanding Workstream Summary
-     *       -> RS-0063 or RS-0087 branch choice.
+     *   Handover Readiness Checklist
+     *       -> Outstanding Workstream Summary
+     *       -> whichever current DR-04 records hold the two workstreams.
      */
     sTerminal.default_record_collection =
         eDr04;
@@ -2121,7 +2132,7 @@ static void Floppy144TestBranchDocumentAccessGate(void)
         "OPEN %s",
         pRecordsBranchDocument != NULL &&
         pRecordsBranchDocument->record_id_override != NULL
-            ? pRecordsBranchDocument->record_id_override
+            ? Floppy144DocumentRecordIdForSeed(pRecordsBranchDocument,sRunState.recovery_seed)
             : "DR-04-RS-0000"
     );
 
@@ -2208,7 +2219,7 @@ static void Floppy144TestBranchDocumentAccessGate(void)
         "OPEN %s",
         pTechnologyBranchDocument != NULL &&
         pTechnologyBranchDocument->record_id_override != NULL
-            ? pTechnologyBranchDocument->record_id_override
+            ? Floppy144DocumentRecordIdForSeed(pTechnologyBranchDocument,sRunState.recovery_seed)
             : "DR-04-RS-0000"
     );
 
@@ -2251,7 +2262,7 @@ static void Floppy144TestBranchDocumentAccessGate(void)
         "OPEN %s",
         pTechnologyBranchDocument != NULL &&
         pTechnologyBranchDocument->record_id_override != NULL
-            ? pTechnologyBranchDocument->record_id_override
+            ? Floppy144DocumentRecordIdForSeed(pTechnologyBranchDocument,sRunState.recovery_seed)
             : "DR-04-RS-0000"
     );
 
@@ -2787,6 +2798,154 @@ static void Floppy144TestAvailableRecoveryAndAutomaticCompletion(void)
     );
 }
 
+
+/*
+ * S4E-07 acceptance: fixed post-expansion player-facing slots with
+ * independently seeded workstream payloads. Both initial branch choices
+ * are played through OPEN, trigger, V2 save/reload and re-entry for BOTH
+ * permutation classes. Existing reconstruction tests cover later acts.
+ */
+static void Floppy144TestDr04SeededWorkstreamSlots(void)
+{
+    static const uint32_t seeds[] = { 144U, 146U };
+    uint32_t i, choice;
+    Floppy144CollectionId dr = Floppy144GameDataCollectionId("DR-04");
+    Floppy144EvidenceId e003 = Floppy144GameDataEvidenceId("E-003");
+    const Floppy144DocumentDefinition *records =
+        Floppy144TestDocumentForTrigger(dr, Floppy144GameDataTriggerId("T-010"));
+    const Floppy144DocumentDefinition *technology =
+        Floppy144TestDocumentForTrigger(dr, Floppy144GameDataTriggerId("T-011"));
+
+    F144_CHECK(dr < FLOPPY144_COLLECTION_COUNT &&
+        e003 < FLOPPY144_EVIDENCE_COUNT &&
+        records != NULL && technology != NULL,
+        "DR-04 pair resolves by stable authored triggers");
+    if(records == NULL || technology == NULL)
+        return;
+
+    F144_CHECK(
+        strcmp(records->record_id_override, "DR-04-RS-0216") == 0 &&
+        strcmp(technology->record_id_override, "DR-04-RS-0147") == 0,
+        "S4E-08 current slot numbers are retained without renumbering"
+    );
+
+    for(i = 0U; i < 2U; ++i)
+    for(choice = 0U; choice < 2U; ++choice)
+    {
+        uint32_t seed = seeds[i];
+        bool swapped = i == 0U;
+        Floppy144WorldState world;
+        Floppy144RunState run, loaded;
+        Floppy144TerminalState term;
+        Floppy144CatalogueState catalogue;
+        uint8_t payload[FLOPPY144_SAVE_PAYLOAD_V2_SIZE];
+        char record_id[24], title[48], command[48], row[96];
+        const Floppy144DocumentDefinition *chosen =
+            choice == 0U ? records : technology;
+        const Floppy144DocumentDefinition *other =
+            choice == 0U ? technology : records;
+        uint32_t selected_slot = Floppy144DocumentSlotForSeed(chosen,seed);
+        uint32_t other_slot = Floppy144DocumentSlotForSeed(other,seed);
+        Floppy144CollectionId resolved;
+        uint32_t index;
+        const char *chosen_id =
+            Floppy144DocumentRecordIdForSeed(chosen,seed);
+
+        F144_CHECK(Floppy144DocumentDr04Swapped(seed) == swapped,
+            "seed class selects the expected DR-04 arrangement");
+        F144_CHECK(selected_slot == (swapped ? other->record_index :
+            chosen->record_index), "workstream moves to expected stable slot");
+        F144_CHECK(
+            Floppy144DocumentGetForSeed(dr,selected_slot,seed) == chosen &&
+            Floppy144DocumentGetForSeed(dr,other_slot,seed) == other,
+            "both slots resolve to their expected authored payloads"
+        );
+        Floppy144CatalogueBuildRecordForSeed(
+            dr,selected_slot,seed,record_id,sizeof(record_id),title,sizeof(title));
+        F144_CHECK(strcmp(record_id,chosen_id) == 0 &&
+            strcmp(title,chosen->title_override) == 0,
+            "LIST title and fixed record number agree with seed mapping");
+        F144_CHECK(Floppy144CatalogueFindRecord(
+            chosen_id,&resolved,&index) && resolved == dr &&
+            index == selected_slot, "OPEN ID lookup remains fixed to slot");
+
+        Floppy144WorldReset(&world);
+        Floppy144RunStateBegin(&run,seed);
+        F144_CHECK(Floppy144WorldInitialiseArchiveServices(&world) &&
+            Floppy144RunStateInitialiseArchiveServices(&run),
+            "seeded DR-04 fixture initialises archive services");
+        F144_CHECK(Floppy144RunStateBitSet(run.collections,(uint32_t)dr) &&
+            Floppy144WorldRestoreCollection(&world,dr) &&
+            Floppy144RunStateEstablishEvidence(&run,e003),
+            "seeded DR-04 fixture restores collection and branch evidence");
+        Floppy144TerminalReset(&term,&world);
+        term.debug_guidance=true;
+        term.default_record_collection=dr;
+        term.default_record_collection_valid=true;
+
+        Floppy144TestSubmitCommand(&term,&world,&run,"LIST DR-04 2");
+        Floppy144CatalogueBuildRecordForSeed(
+            dr,technology->record_index,seed,record_id,sizeof(record_id),
+            title,sizeof(title));
+        (void)snprintf(row,sizeof(row),"%s  %s",record_id,title);
+        F144_CHECK(Floppy144TestTerminalContains(&term,row),
+            "paged LIST shows correct seed-specific title in Technology base slot");
+        Floppy144TerminalCloseRecordPager(&term);
+
+        Floppy144TestSubmitCommand(&term,&world,&run,"LIST DR-04 3");
+        Floppy144CatalogueBuildRecordForSeed(
+            dr,records->record_index,seed,record_id,sizeof(record_id),
+            title,sizeof(title));
+        (void)snprintf(row,sizeof(row),"%s  %s",record_id,title);
+        F144_CHECK(Floppy144TestTerminalContains(&term,row),
+            "paged LIST shows correct seed-specific title in Records base slot");
+        Floppy144TerminalCloseRecordPager(&term);
+
+        (void)snprintf(command,sizeof(command),"OPEN %s",chosen_id);
+        Floppy144TestSubmitCommand(&term,&world,&run,command);
+        F144_CHECK(term.open_record_requested &&
+            term.requested_collection == dr &&
+            term.requested_record_index == selected_slot,
+            "OPEN routes the selected record ID to the same seed-specific slot");
+        Floppy144CatalogueReset(&catalogue,dr);
+        catalogue.recovery_seed=seed;
+        catalogue.selected_index=selected_slot;
+        Floppy144CatalogueOpenDocument(&catalogue);
+        F144_CHECK(Floppy144CatalogueDocumentOpen(&catalogue) &&
+            Floppy144DocumentGetForSeed(dr,catalogue.selected_index,
+            catalogue.recovery_seed)->trigger == chosen->trigger,
+            "document viewer uses the correct seeded workstream body");
+        F144_CHECK(Floppy144DocumentApplyEffects(
+            &world,&run,dr,selected_slot),
+            "opening selected workstream invokes its authored trigger");
+        F144_CHECK(Floppy144RunStateTriggerFired(&run,chosen->trigger) &&
+            run.branch == (uint8_t)(choice == 0U ?
+                FLOPPY144_RUN_BRANCH_RECORDS_FIRST :
+                FLOPPY144_RUN_BRANCH_TECHNOLOGY_FIRST),
+            "authored trigger identity, not record slot, commits branch");
+        F144_CHECK(!Floppy144DocumentAccessible(&run,dr,other_slot),
+            "unselected alternate remains gated after first choice");
+        F144_CHECK(Floppy144PersistenceEncodeRunState(
+            &run,payload,(uint32_t)sizeof(payload)) &&
+            Floppy144PersistenceDecodeRunState(
+                &loaded,payload,(uint32_t)sizeof(payload)),
+            "actual V2 save/reload retains seeded workstream route");
+        F144_CHECK(loaded.recovery_seed == seed &&
+            loaded.branch == run.branch &&
+            Floppy144DocumentGetForSeed(dr,selected_slot,
+                loaded.recovery_seed)->trigger == chosen->trigger &&
+            !Floppy144DocumentAccessible(&loaded,dr,other_slot),
+            "reload keeps arrangement, fired trigger and alternate branch gate");
+        Floppy144TerminalReset(&term,&world);
+        term.default_record_collection=dr;
+        term.default_record_collection_valid=true;
+        Floppy144TestSubmitCommand(&term,&world,&loaded,command);
+        F144_CHECK(term.open_record_requested &&
+            term.requested_record_index == selected_slot,
+            "terminal re-entry preserves the exact selected workstream slot");
+    }
+}
+
 int main(void)
 {
     Floppy144TestFm18SuppressionRecordRestoresServerPanel();
@@ -2802,6 +2961,7 @@ int main(void)
     Floppy144TestServerRoomItTerminal();
     Floppy144TestCommandHistory();
     Floppy144TestBranchDocumentAccessGate();
+    Floppy144TestDr04SeededWorkstreamSlots();
 
     if(g_nFailures != 0)
     {
