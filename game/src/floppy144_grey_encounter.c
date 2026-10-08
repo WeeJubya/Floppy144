@@ -217,8 +217,10 @@ static void Office(Floppy144Surface *s,const Floppy144GreyEncounter *scene)
     ModernDesk(s,55,241,158);
     ModernDesk(s,445,229,151);
     SourceMonitor(s);
-    Poster(s,54,107,0U);
-    Poster(s,127,107,1U);
+    /* The first two miniature concept boards are scattered across the
+       near desk rather than hung as GDR-style wall notices. */
+    Poster(s,60,245,0U);
+    Poster(s,135,245,1U);
     Poster(s,501,107,2U);
     Sandwich(s);
     Developer(s,scene);
