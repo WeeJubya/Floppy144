@@ -95,7 +95,24 @@ function Test-Floppy144IconSource
     Assert-True ($header -match "#define\s+IDI_FLOPPY144_APP_ICON\s+101") "Resource ID 101 is missing."
     Assert-True ($rc -match 'IDI_FLOPPY144_APP_ICON\s+ICON\s+"floppy144\.ico"') "RC file does not bind the application icon."
 
-    $coreMatch = [regex]::Match($premake, '(?m)^project\("Floppy144Core"\)\r?
+    $coreStart = $premake.IndexOf('project("Floppy144Core")')
+    $platformStart = $premake.IndexOf('project("Floppy144PlatformWin32")')
+    $launcherStart = $premake.IndexOf('project("Floppy144")', $platformStart + 1)
+
+    Assert-True ($coreStart -ge 0) "Floppy144Core project was not found in Premake."
+    Assert-True ($platformStart -gt $coreStart) "Floppy144PlatformWin32 project was not found after Core."
+    Assert-True ($launcherStart -gt $platformStart) "Floppy144 launcher project was not found after PlatformWin32."
+
+    $corePremake = $premake.Substring($coreStart, $platformStart - $coreStart)
+    $platformPremake = $premake.Substring($platformStart, $launcherStart - $platformStart)
+    $launcherPremake = $premake.Substring($launcherStart)
+
+    Assert-True ($launcherPremake -match 'filter\("platforms:Windows"\)[\s\S]*floppy144_app\.rc') "Windows launcher does not include the icon resource."
+    Assert-True ($launcherPremake -match 'resincludedirs\([\s\S]*platform/win32') "Windows resource include directory is missing."
+    Assert-True ($launcherPremake -match 'includedirs\([\s\S]*platform/win32') "Windows launcher cannot include the resource ID header."
+
+    Assert-True ($corePremake -notmatch 'platform/win32|floppy144_app\.rc|floppy144\.ico|floppy144_resource\.h') "Application/platform resources leaked into Floppy144Core."
+    Assert-True ($platformPremake -notmatch 'floppy144_app\.rc|floppy144\.ico|floppy144_resource\.h') "Application branding leaked into Floppy144PlatformWin32."
 
     Assert-True ($main -match '#include\s+"floppy144_resource\.h"') "Win32 launcher does not include the resource ID header."
     Assert-True ($main -match 'hIcon\s*=\s*LoadIconA\(\s*instance,\s*MAKEINTRESOURCEA\(\s*IDI_FLOPPY144_APP_ICON\s*\)') "Win32 window class does not load the FLOPPY//144 icon."
