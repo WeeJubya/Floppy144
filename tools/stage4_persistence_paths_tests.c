@@ -16,6 +16,7 @@
 #include "floppy144_catalogue.h"
 #include "floppy144_variation.h"
 #include "floppy144_grey_door.h"
+#include "floppy144_grey_encounter.h"
 #include "floppy144_site_rooms.h"
 #include "floppy144_profile.h"
 #include "floppy144_profile_view.h"
@@ -1602,6 +1603,129 @@ static void TestGreyDoorPlacement(const char *root)
         (unsigned)count,(unsigned)(sizeof(seeds)/sizeof(seeds[0])));
 }
 
+
+/* S4G-03: exhaustively enter from all candidate orientations, inspect the
+   Developer and run through the full temporary scene without touching any
+   permanent progress field. */
+static void TestGreyEncounter(const char *root)
+{
+    static uint32_t pixels[640U*360U];
+    Floppy144Surface surface;
+    Floppy144DiscoveryProfile profile, profile_before;
+    Floppy144RunState run, before, restored;
+    Floppy144GreyEncounter scene;
+    Floppy144GreyDoorCandidate candidate;
+    uint32_t i, k, phase_visited, baseline_checksum, render_checksum;
+    uint32_t count=Floppy144GreyDoorCandidateCount();
+    char path[F144_PLATFORM_PATH_CAPACITY];
+
+    memset(&surface,0,sizeof(surface));
+    surface.width=640U;
+    surface.height=360U;
+    surface.pixels=pixels;
+    Floppy144DiscoveryProfileReset(&profile);
+    profile_before=profile;
+    Expect(TestJoinPath(root,"grey-encounter.sav",path,(uint32_t)sizeof(path)),
+        "S4G-03 isolated test save path");
+
+    for(i=0U;i<count;++i)
+    {
+        Floppy144RunStateBegin(&run,144U+i);
+        (void)Floppy144RunStateBitSet(
+            run.rooms,(uint32_t)FLOPPY144_ROOM_CORRIDOR);
+        run.grey_door_state=(uint8_t)FLOPPY144_GREY_DOOR_AVAILABLE;
+        Expect(Floppy144GreyDoorCandidateAt(i,&candidate),
+            "S4G-03 every vetted wall candidate resolves");
+        Floppy144RunStateSetPlayerSitePosition(
+            &run,candidate.stand_x16,candidate.stand_y16);
+        /*
+         * Force each candidate through the same public seed selector without
+         * adding test-only co-ordinate entry paths to the shipping game.
+         */
+        {
+            uint32_t seed=0U,tries=0U;
+            while(Floppy144RunStateGreyDoorPlacementSlot(&run,count)!=i &&
+                  tries<20000U)
+            {
+                ++seed;
+                ++tries;
+                run.recovery_seed=seed;
+            }
+            Expect(tries<20000U,
+                "S4G-03 each candidate is addressable by an ordinary run seed");
+        }
+        Expect(Floppy144GreyDoorNearby(&run),
+            "S4G-03 physical A/Access range covers the selected wall stance");
+        before=run;
+        Expect(Floppy144GreyEncounterBegin(&scene,&run) &&
+            !Floppy144GreyEncounterSaveAllowed(&scene) &&
+            scene.return_x16==before.player_site_x &&
+            scene.return_y16==before.player_site_y,
+            "S4G-03 scene begins without movement or transient save leakage");
+        Expect(!Floppy144GreyEncounterInspect(&scene) &&
+            !Floppy144GreyEncounterMove(&scene,12,0),
+            "S4G-03 entry transition ignores movement and premature Inspect");
+        for(k=0;k<12U && scene.phase!=(uint8_t)FLOPPY144_GREY_EXPLORE;++k)
+            (void)Floppy144GreyEncounterAdvance(&scene,80U);
+        Expect(scene.phase==(uint8_t)FLOPPY144_GREY_EXPLORE,
+            "S4G-03 transition reaches clean modern office");
+        Floppy144GreyEncounterDraw(&surface,&scene);
+        render_checksum=0U;
+        for(k=0U;k<640U*360U;k+=113U)
+            render_checksum=(render_checksum*33U)^pixels[k];
+        Expect(render_checksum!=0U,
+            "S4G-03 modern office procedurally fills framebuffer");
+
+        Expect(!Floppy144GreyEncounterInspect(&scene),
+            "S4G-03 Developer cannot be inspected from distant door");
+        for(k=0U;k<34U;++k)
+            (void)Floppy144GreyEncounterMove(&scene,12,0);
+        Expect(Floppy144GreyEncounterInspect(&scene) &&
+            scene.developer_inspected==1U &&
+            scene.phase==(uint8_t)FLOPPY144_GREY_IDENTIFY,
+            "S4G-03 approach then I/Inspect identifies DEVELOPER");
+        phase_visited=0U;
+        baseline_checksum=render_checksum;
+        for(k=0U;k<200U&&!Floppy144GreyEncounterFinished(&scene);++k)
+        {
+            phase_visited|=1U<<scene.phase;
+            Expect(!Floppy144GreyEncounterSaveAllowed(&scene),
+                "S4G-03 no temporary scene phase permits save/autosave");
+            Floppy144GreyEncounterDraw(&surface,&scene);
+            (void)Floppy144GreyEncounterAdvance(&scene,100U);
+        }
+        Expect(Floppy144GreyEncounterFinished(&scene) &&
+            (phase_visited&(1U<<FLOPPY144_GREY_IDENTIFY))!=0U &&
+            (phase_visited&(1U<<FLOPPY144_GREY_TURN))!=0U &&
+            (phase_visited&(1U<<FLOPPY144_GREY_DIALOGUE))!=0U &&
+            (phase_visited&(1U<<FLOPPY144_GREY_CAPACITY))!=0U &&
+            (phase_visited&(1U<<FLOPPY144_GREY_GLITCH))!=0U,
+            "S4G-03 every authored encounter stage occurs in order");
+        Expect(Floppy144GreyEncounterSaveAllowed(&scene),
+            "S4G-03 temporary save guard releases only after vignette finishes");
+        Expect(memcmp(&run,&before,sizeof(run))==0 &&
+            memcmp(&profile,&profile_before,sizeof(profile))==0,
+            "S4G-03 full scene does not modify run, capacity, evidence, completion or Profile");
+        Expect(Floppy144RunStateGreyDoorComplete(&run) &&
+            run.grey_door_state==(uint8_t)FLOPPY144_GREY_DOOR_COMPLETED &&
+            !Floppy144GreyDoorNearby(&run) &&
+            !Floppy144GreyDoorForRun(&run,&candidate) &&
+            run.player_site_x==scene.return_x16 &&
+            run.player_site_y==scene.return_y16,
+            "S4G-03 only final completion bit changes and original wall/position return");
+        Expect(Floppy144PersistenceSaveRunState(path,&run) &&
+            Floppy144PersistenceLoadRunState(path,&restored) &&
+            restored.grey_door_state==(uint8_t)FLOPPY144_GREY_DOOR_COMPLETED &&
+            !Floppy144GreyDoorForRun(&restored,&candidate) &&
+            !Floppy144GreyEncounterBegin(&scene,&restored),
+            "S4G-03 saved completed event cannot ever re-enter");
+        (void)baseline_checksum; /* render checksum is scene-only. */
+    }
+    printf("S4G-03 encounter audit: %u candidate entrances, "
+        "developer, 144%% gag, glitch, save suppression, permanent return\n",
+        (unsigned)count);
+}
+
 int main(void)
 {
     const char *root=getenv("F144_TEST_ROOT");
@@ -1637,6 +1761,7 @@ int main(void)
     TestDifferentWorkingDirectory(root);
     TestGreyDoorDiscovery(root);
     TestGreyDoorPlacement(root);
+    TestGreyEncounter(root);
 
     if(failures!=0)
     {

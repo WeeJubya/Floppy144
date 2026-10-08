@@ -43,6 +43,7 @@
 #include "floppy144_site_isometric.h"
 #include "floppy144_site_object.h"
 #include "floppy144_grey_door.h"
+#include "floppy144_grey_encounter.h"
 #include "floppy144_site_rooms.h"
 #include "floppy144_site_view.h"
 #include "floppy144_settings_runtime.h"
@@ -70,6 +71,7 @@ typedef enum Floppy144Screen
     FLOPPY144_SCREEN_SETTINGS,
     FLOPPY144_SCREEN_CREDITS,
     FLOPPY144_SCREEN_OFFICE,
+    FLOPPY144_SCREEN_GREY_ENCOUNTER,
     FLOPPY144_SCREEN_SITE_DIRECTORY,
     FLOPPY144_SCREEN_CABINET,
     FLOPPY144_SCREEN_NOTEBOOK,
@@ -102,6 +104,7 @@ static Floppy144ProfileNameEditState global_profile_name_edit;
 static Floppy144Settings global_settings;
 static Floppy144WorldState global_world;
 static Floppy144RunState global_run_state;
+static Floppy144GreyEncounter global_grey_encounter;
 static Floppy144RunState global_recorded_run_state;
 
 static Floppy144StoragePaths global_storage_paths;
@@ -316,6 +319,12 @@ static void Floppy144Redraw(
             break;
         }
 
+        case FLOPPY144_SCREEN_GREY_ENCOUNTER:
+        {
+            Floppy144GreyEncounterDraw(pSurface,&global_grey_encounter);
+            break;
+        }
+
         case FLOPPY144_SCREEN_SITE_DIRECTORY:
         {
             Floppy144SiteDirectoryDraw(
@@ -384,7 +393,9 @@ static void Floppy144Redraw(
         }
     }
 
-    Floppy144SettingsApplyCrtFilter(
+    /* Modern office intentionally breaks the GDR CRT visual grammar. */
+    if(global_screen != FLOPPY144_SCREEN_GREY_ENCOUNTER)
+        Floppy144SettingsApplyCrtFilter(
         pSurface,
         &global_settings
     );
@@ -546,6 +557,7 @@ static void Floppy144AutosaveIfNeeded(
 {
     if(
         !global_session_active ||
+        global_screen == FLOPPY144_SCREEN_GREY_ENCOUNTER ||
         global_run_state.dirty == 0U
     )
     {
@@ -675,6 +687,35 @@ static void Floppy144UpdateTiming(
     {
         redraw =
             true;
+    }
+
+    if(global_screen == FLOPPY144_SCREEN_GREY_ENCOUNTER)
+    {
+        if(Floppy144GreyEncounterAdvance(
+               &global_grey_encounter,events.presentation_elapsed_ms))
+            redraw=true;
+
+        if(Floppy144GreyEncounterFinished(&global_grey_encounter))
+        {
+            /*
+             * All world state remained untouched inside the vignette.
+             * Mark ONLY the one-shot bit, then return to the exact
+             * original foot point and normal site renderer.
+             */
+            if(global_run_state.player_site_x ==
+                   global_grey_encounter.return_x16 &&
+               global_run_state.player_site_y ==
+                   global_grey_encounter.return_y16)
+            {
+                (void)Floppy144RunStateGreyDoorComplete(&global_run_state);
+            }
+            Floppy144MovementInputReset(&global_movement_input);
+            (void)Floppy144PlayerVisualSetMovement(
+                &global_player_visual,0,0,F144_ACTION_NONE);
+            global_office_notice=NULL;
+            global_screen=FLOPPY144_SCREEN_OFFICE;
+            redraw=true;
+        }
     }
 
     if(
@@ -1899,19 +1940,23 @@ static void Floppy144InteractOffice(
     Floppy144OfficeInteractionMode eMode
 )
 {
-    /*
-     * S4G-02 uses precisely the established A/I actions. This isolated,
-     * non-progressing inspection/access notice becomes the encounter entry
-     * in S4G-03; it must not mark the Easter egg completed prematurely.
-     */
+    /* The transient scene takes over the existing logical A/Access key. */
     if(Floppy144GreyDoorNearby(&global_run_state))
     {
-        Floppy144OfficeSetItemNotice(
-            "GREY DOOR",
-            eMode == FLOPPY144_OFFICE_INTERACTION_ACCESS
-                ? ": THE HANDLE DOES NOT MOVE."
-                : "."
-        );
+        if(eMode == FLOPPY144_OFFICE_INTERACTION_ACCESS)
+        {
+            if(Floppy144GreyEncounterBegin(
+                &global_grey_encounter,&global_run_state))
+            {
+                Floppy144MovementInputReset(&global_movement_input);
+                global_office_notice=NULL;
+                global_screen=FLOPPY144_SCREEN_GREY_ENCOUNTER;
+            }
+        }
+        else
+        {
+            Floppy144OfficeSetItemNotice("GREY DOOR",".");
+        }
         Floppy144Redraw(window);
         return;
     }
@@ -2572,6 +2617,34 @@ static bool Floppy144HandleActionEvent(
 
     eAction =
         pEvent->action;
+
+    /* No Escape to Session Control or save/reinstate inside a transient scene.
+       The same logical action adapter supplies movement and Inspect. */
+    if(global_screen == FLOPPY144_SCREEN_GREY_ENCOUNTER)
+    {
+        bool changed=false;
+        switch(eAction)
+        {
+            case F144_ACTION_MOVE_LEFT:
+                changed=Floppy144GreyEncounterMove(
+                    &global_grey_encounter,-12,0); break;
+            case F144_ACTION_MOVE_RIGHT:
+                changed=Floppy144GreyEncounterMove(
+                    &global_grey_encounter,12,0); break;
+            case F144_ACTION_MOVE_UP:
+                changed=Floppy144GreyEncounterMove(
+                    &global_grey_encounter,0,-10); break;
+            case F144_ACTION_MOVE_DOWN:
+                changed=Floppy144GreyEncounterMove(
+                    &global_grey_encounter,0,10); break;
+            case F144_ACTION_INSPECT:
+                changed=Floppy144GreyEncounterInspect(
+                    &global_grey_encounter); break;
+            default: break;
+        }
+        if(changed) Floppy144Redraw(window);
+        return true;
+    }
 
     if(global_screen != FLOPPY144_SCREEN_OFFICE)
     {

@@ -11,6 +11,7 @@ Write-Host "=== S4G-01 ORPHAN RECORD / SAVE-SCHEMA ISOLATION ==="
 
 $doc = Read-Source "game\src\floppy144_document.c"
 $grey = Read-Source "game\src\floppy144_grey_door.c"
+$encounter = Read-Source "game\src\floppy144_grey_encounter.c"
 $site2d = Read-Source "game\src\floppy144_site_2d.c"
 $main = Read-Source "game\src\floppy144_main.c"
 $header = Read-Source "game\src\floppy144_document.h"
@@ -38,6 +39,17 @@ Require $grey '"GREY_DOOR", "CORRIDOR_WALL_V1"' 'Missing independent placement n
 Require $grey 'Floppy144GreyDoorCandidateSafe' 'Exhaustive candidate filtering missing.'
 Require $site2d 'Floppy144Site2DDrawGreyDoor' 'The site overlay is missing.'
 Require $main 'Floppy144GreyDoorNearby' 'Normal Site input is not wired.'
+Require $main 'FLOPPY144_SCREEN_GREY_ENCOUNTER' 'Transient encounter screen missing.'
+Require $main 'Floppy144GreyEncounterBegin' 'Access does not open the encounter.'
+Require $main 'Floppy144GreyEncounterFinished' 'Return cleanup missing.'
+Require $main 'global_screen == FLOPPY144_SCREEN_GREY_ENCOUNTER' 'Autosave suppression missing.'
+Require $encounter '"GREY DOOR REPUBLIC"' 'Office sign missing.'
+Require $encounter '"floppy144_run_state.c"' 'Source monitor missing.'
+Require $encounter '"You\x27re not supposed to be able to get in here."' 'Developer dialogue missing.'
+Require $encounter '"RESTORATION CAPACITY: 144%"' 'Presentation-only capacity gag missing.'
+Require $encounter 'static void Glitch(' 'CRT glitch renderer missing.'
+Require $encounter 'Floppy144GreyEncounterSaveAllowed' 'Temporary save policy missing.'
+Require $tests 'TestGreyEncounter(root)' 'Full encounter test missing.'
 Require $tests 'TestGreyDoorPlacement(root)' 'No all-candidates/seed/reload geometry test.'
 Require $persistHeader 'FLOPPY144_SAVE_VERSION_V2' 'Legacy V2 save format is not recognised.'
 Require $persistHeader 'FLOPPY144_SAVE_PAYLOAD_V3_SIZE' 'No V3 byte for hidden state.'
