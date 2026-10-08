@@ -66,9 +66,13 @@ for($ci=0; $ci -lt @($data.collections).Count; ++$ci) {
     $count=[Math]::Max($budget,$docs.Count)
     $total+=$count
     $authored+=$docs.Count
-    $compiledDocs = if($byCollection.ContainsKey($symbol)) {
-        @($byCollection[$symbol].ToArray())
-    } else { @() }
+    # PowerShell unwraps pipeline output from an if expression. Force
+    # an array even for OS-41's single authored document and empty holdings.
+    $compiledDocs = @(
+        if($byCollection.ContainsKey($symbol)) {
+            $byCollection[$symbol].ToArray()
+        }
+    )
     if($compiledDocs.Count -ne $docs.Count) {
         throw "$cid authored documents missing: $($compiledDocs.Count) != $($docs.Count)."
     }
