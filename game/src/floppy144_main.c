@@ -17,6 +17,7 @@
 #include "f144_win32_platform.h"
 #include "f144_win32_single_instance.h"
 #include "f144_win32_timing.h"
+#include "floppy144_resource.h"
 
 #include "floppy144_catalogue.h"
 #include "floppy144_cabinet.h"
@@ -4026,6 +4027,23 @@ int CALLBACK WinMain(
 
     window_class.hInstance =
         instance;
+
+    window_class.hIcon =
+        LoadIconA(
+            instance,
+            MAKEINTRESOURCEA(
+                IDI_FLOPPY144_APP_ICON
+            )
+        );
+
+    if(window_class.hIcon == NULL)
+    {
+        window_class.hIcon =
+            LoadIconW(
+                NULL,
+                IDI_APPLICATION
+            );
+    }
 
     window_class.hCursor =
         LoadCursorW(0, IDC_ARROW);

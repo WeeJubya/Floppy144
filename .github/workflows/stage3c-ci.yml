@@ -166,6 +166,10 @@ jobs:
         shell: pwsh
         run: .\tools\test_stage4e_integration.ps1
 
+      - name: Stage 4F application icon source
+        shell: pwsh
+        run: .\tools\test_stage4f_application_icon.ps1 -Phase Source
+
       - name: Install Premake
         shell: pwsh
         run: |
@@ -182,6 +186,18 @@ jobs:
         shell: pwsh
         run: premake5 vs2022
 
+      - name: Verify generated application icon resource
+        shell: pwsh
+        run: .\tools\test_stage4f_application_icon.ps1 -Phase Generated
+
+      - name: Build Debug launcher with application icon
+        shell: pwsh
+        run: msbuild .\build\Floppy144.sln /t:Floppy144 /m /p:Configuration=debug /p:Platform=windows
+
+      - name: Verify Debug application icon
+        shell: pwsh
+        run: .\tools\test_stage4f_application_icon.ps1 -Phase Built -Executable .\bin\debug\Floppy144.exe
+
       - name: Build portable Core target
         shell: pwsh
         run: msbuild .\build\Floppy144.sln /t:Floppy144Core /m /p:Configuration=release /p:Platform=windows /p:WarningLevel=Level4 /p:TreatWarningsAsErrors=true
@@ -193,6 +209,10 @@ jobs:
       - name: Clean Release rebuild
         shell: pwsh
         run: msbuild .\build\Floppy144.sln /t:Rebuild /m /p:Configuration=release /p:Platform=windows /p:WarningLevel=Level4 /p:TreatWarningsAsErrors=true
+
+      - name: Verify Release application icon
+        shell: pwsh
+        run: .\tools\test_stage4f_application_icon.ps1 -Phase Built -Executable .\bin\release\Floppy144.exe
 
       - name: Release size
         shell: pwsh

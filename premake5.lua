@@ -33,7 +33,8 @@ objdir("obj/%{prj.name}/%{cfg.buildcfg}/%{cfg.platform}")
 
 includedirs({
     "./include/",
-    "./game/src/"
+    "./game/src/",
+    "./platform/win32/"
 })
 
 files({
@@ -137,6 +138,15 @@ dependson({
 
 filter("platforms:Windows")
 system("Windows")
+
+files({
+    "./platform/win32/floppy144_app.rc",
+    "./platform/win32/floppy144_resource.h"
+})
+
+resincludedirs({
+    "./platform/win32/"
+})
 
 defines({
     "BUILD_WINDOWS"

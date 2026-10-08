@@ -1,0 +1,3 @@
+#include "floppy144_resource.h"
+
+IDI_FLOPPY144_APP_ICON ICON "floppy144.ico"

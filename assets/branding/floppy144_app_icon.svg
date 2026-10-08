@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
+  <title>FLOPPY//144 application icon</title>
+  <desc>Reversed Disk 144 silhouette with amber double-slash archive mark.</desc>
+  <path fill="#262B2E" stroke="#687173" stroke-width="2" d="M8 3h48l3 3v51l-2 2H16l-8-8z"/>
+  <path fill="#191D1F" d="M12 8h43v46H18l-6-6z"/>
+  <rect x="12" y="8" width="5" height="5" fill="#070A0C" stroke="#687173"/>
+  <rect x="51" y="8" width="4" height="5" fill="#BFC1B7" stroke="#687173"/>
+  <rect x="17" y="15" width="33" height="16" fill="#BFC1B7" stroke="#687173"/>
+  <path fill="#C2994C" d="M25 27h3l6-9h-3zm9 0h3l6-9h-3z"/>
+  <rect x="18" y="36" width="32" height="17" fill="#979E9D" stroke="#C1C6C3"/>
+  <rect x="37" y="39" width="7" height="11" fill="#070A0C" stroke="#687173"/>
+  <rect x="20" y="39" width="3" height="10" fill="#C2994C"/>
+</svg>
