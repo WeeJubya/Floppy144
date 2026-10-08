@@ -273,11 +273,11 @@ static void TestExistingCommandLinePath(void)
 
     Expect(
         f144Win32StartupConfigFromCommandLine(
-            "-date 2026-12-20 -debug", &config
+            "-date 2026-12-20 -GDR-CinderEllie", &config
         ) &&
         f144PlatformCalendarDate(&platform, &config, &date) &&
         SameDate(date, 2026U, 12U, 20U),
-        "existing -debug -date parsing drives fixed-date provider"
+        "existing -GDR-CinderEllie -date parsing drives fixed-date provider"
     );
     Expect(fake.queries == 0U, "CLI fixed date avoids native query");
 
@@ -292,7 +292,7 @@ static void TestExistingCommandLinePath(void)
 
     Expect(
         f144Win32StartupConfigFromCommandLine(
-            "-debug -date 2026-12-20extra", &config
+            "-GDR-CinderEllie -date 2026-12-20extra", &config
         ) &&
         f144PlatformCalendarDate(&platform, &config, &date) &&
         SameDate(date, 2026U, 10U, 8U),
@@ -300,7 +300,7 @@ static void TestExistingCommandLinePath(void)
     );
     Expect(
         f144Win32StartupConfigFromCommandLine(
-            "-debug -date 2026/12/20", &config
+            "-GDR-CinderEllie -date 2026/12/20", &config
         ) &&
         f144PlatformCalendarDate(&platform, &config, &date) &&
         SameDate(date, 2026U, 10U, 8U),
@@ -308,7 +308,7 @@ static void TestExistingCommandLinePath(void)
     );
     Expect(
         f144Win32StartupConfigFromCommandLine(
-            "-debug -date 2027-02-29", &config
+            "-GDR-CinderEllie -date 2027-02-29", &config
         ) &&
         f144PlatformCalendarDate(&platform, &config, &date) &&
         SameDate(date, 2026U, 10U, 8U),
