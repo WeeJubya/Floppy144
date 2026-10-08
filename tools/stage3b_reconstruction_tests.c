@@ -24,6 +24,8 @@
 #include <string.h>
 
 static int g_nFailures = 0;
+/* Run the canonical end-to-end room route under both DR-04 seed classes. */
+static uint32_t g_recoveryFixtureSeed = 144U;
 
 #define F144_CHECK(bCondition, pszMessage)                         \
     do                                                            \
@@ -47,7 +49,7 @@ static void Floppy144TestReset(
 )
 {
     Floppy144WorldReset(pWorld);
-    Floppy144RunStateBegin(pState, 144U);
+    Floppy144RunStateBegin(pState, g_recoveryFixtureSeed);
 }
 
 static bool Floppy144TestRestoreCollection(
@@ -2511,6 +2513,10 @@ int main(void)
     Floppy144TestGenericReconstructionVerb();
     Floppy144TestProgressionAvailability();
     Floppy144TestCanonicalRoomProgression();
+    g_recoveryFixtureSeed = 146U;
+    Floppy144TestCanonicalRoomProgression(); /* opposite permutation */
+    Floppy144TestActIiBranchChoiceGate();     /* both branch choices */
+    g_recoveryFixtureSeed = 144U;
     Floppy144TestWallHangingCollisionContract();
     Floppy144TestRuntimeGeometryVisibility();
     Floppy144TestHiddenDoorsDoNotCreateGhostThresholds();

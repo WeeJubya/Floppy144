@@ -167,6 +167,7 @@ $sources = @(
     (Join-Path $sourceDir "floppy144_recovery.c"),
     (Join-Path $sourceDir "floppy144_catalogue.c"),
     (Join-Path $sourceDir "floppy144_document.c"),
+    (Join-Path $sourceDir "floppy144_variation.c"),
     (Join-Path $sourceDir "floppy144_effect.c"),
     (Join-Path $sourceDir "floppy144_draw.c"),
     (Join-Path $sourceDir "floppy144_site.c"),
