@@ -54,17 +54,6 @@ static const Floppy144DocumentDefinition
     },
 };
 
-uint32_t Floppy144RunStateGreyDoorPlacementSlot(
-    const Floppy144RunState *state, uint32_t candidate_count
-)
-{
-    if(state == NULL || candidate_count == 0U) return 0U;
-    return Floppy144VariationRange(
-        state->recovery_seed, "GREY_DOOR", "CORRIDOR_WALL_V1",
-        candidate_count
-    );
-}
-
 #define FLOPPY144_DOCUMENT_COUNT                                   \
     FLOPPY144_ARRAY_COUNT(floppy144_documents)
 

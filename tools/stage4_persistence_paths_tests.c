@@ -15,6 +15,8 @@
 #include "floppy144_document.h"
 #include "floppy144_catalogue.h"
 #include "floppy144_variation.h"
+#include "floppy144_grey_door.h"
+#include "floppy144_site_rooms.h"
 #include "floppy144_profile.h"
 #include "floppy144_profile_view.h"
 #include "floppy144_run_state.h"
@@ -1503,6 +1505,103 @@ static void TestGreyDoorDiscovery(const char *root)
         "S4G legacy V2 load defaults the optional door to unavailable");
 }
 
+/*
+ * Enumerate EVERY candidate, not just lucky seeds. With unchanged Site data,
+ * every exposed wall slot must remain clear, solid, physically reachable and
+ * within the established half-unit logical action distance.
+ */
+static void TestGreyDoorPlacement(const char *root)
+{
+    static const uint32_t seeds[] = {
+        0U,1U,42U,144U,146U,2026U,65535U,0x12345678U,0xffffffffU
+    };
+    Floppy144RunState run, reloaded;
+    Floppy144GreyDoorCandidate candidate;
+    uint32_t count=Floppy144GreyDoorCandidateCount();
+    uint32_t i, first_slot=0U;
+    bool seed_varied=false;
+    char save_path[F144_PLATFORM_PATH_CAPACITY];
+    uint32_t original_rect_count=Floppy144SiteRectCount();
+
+    Expect(count>=2U,
+        "S4G safe candidate inventory is nonempty and permits seed variation");
+    for(i=0U;i<count;++i)
+    {
+        uint32_t j;
+        Expect(Floppy144GreyDoorCandidateAt(i,&candidate),
+            "S4G every candidate can be resolved");
+        Expect(Floppy144GreyDoorCandidateSafe(&candidate),
+            "S4G each candidate revalidates against ALL generated geometry");
+        Expect(Floppy144SiteRoomAtPosition(
+                candidate.stand_x16,candidate.stand_y16)==
+                FLOPPY144_ROOM_CORRIDOR &&
+            !Floppy144SitePositionBlocked(
+                candidate.stand_x16,candidate.stand_y16),
+            "S4G each candidate has a collision-free corridor interaction position");
+        for(j=0U;j<Floppy144SiteRectCount();++j)
+        {
+            const Floppy144SiteRect *existing=Floppy144SiteRectAt(j);
+            const Floppy144SiteRect *door=&candidate.rect;
+            if(existing==NULL ||
+               existing->type<=(uint8_t)FLOPPY144_SITE_FLOOR_D) continue;
+            Expect(!(
+                (int32_t)existing->x < (int32_t)door->x+door->width+2 &&
+                (int32_t)existing->x+existing->width > (int32_t)door->x-2 &&
+                (int32_t)existing->y < (int32_t)door->y+door->height+2 &&
+                (int32_t)existing->y+existing->height > (int32_t)door->y-2
+            ), "S4G no door/window/noticeboard/directory/fixture intersects 2U halo");
+        }
+    }
+
+    Expect(TestJoinPath(root,"grey-door-placement.sav",save_path,
+        (uint32_t)sizeof(save_path)),"S4G placement test save path");
+    for(i=0U;i<(uint32_t)(sizeof(seeds)/sizeof(seeds[0]));++i)
+    {
+        uint32_t slot, original_kb;
+        Floppy144RunStateBegin(&run,seeds[i]);
+        (void)Floppy144RunStateBitSet(
+            run.rooms,(uint32_t)FLOPPY144_ROOM_CORRIDOR);
+        run.grey_door_state=(uint8_t)FLOPPY144_GREY_DOOR_AVAILABLE;
+        slot=Floppy144RunStateGreyDoorPlacementSlot(&run,count);
+        if(i==0U) first_slot=slot;
+        else if(slot!=first_slot) seed_varied=true;
+        original_kb=Floppy144RunStateRecoveredKb(&run);
+        Expect(Floppy144GreyDoorForRun(&run,&candidate) &&
+            Floppy144GreyDoorCandidateSafe(&candidate),
+            "S4G seeded selection always chooses a vetted candidate");
+        Floppy144RunStateSetPlayerSitePosition(
+            &run,candidate.stand_x16,candidate.stand_y16);
+        Expect(Floppy144GreyDoorNearby(&run),
+            "S4G ordinary 0.5U inspect/access proximity works");
+        (void)Floppy144VariationValue(run.recovery_seed,
+            "staff.crossword.scribble.v1","P-074");
+        Expect(Floppy144RunStateGreyDoorPlacementSlot(&run,count)==slot,
+            "S4G dedicated seed stream cannot be changed by other features");
+        Expect(Floppy144PersistenceSaveRunState(save_path,&run) &&
+            Floppy144PersistenceLoadRunState(save_path,&reloaded),
+            "S4G selected Door state survives real save/reload");
+        Expect(Floppy144GreyDoorForRun(&reloaded,&candidate) &&
+            Floppy144GreyDoorNearby(&reloaded) &&
+            Floppy144RunStateGreyDoorPlacementSlot(&reloaded,count)==slot,
+            "S4G save/reload preserves selected wall and interaction stance");
+        Expect(Floppy144RunStateGreyDoorComplete(&reloaded) &&
+            !Floppy144GreyDoorForRun(&reloaded,&candidate) &&
+            !Floppy144GreyDoorNearby(&reloaded) &&
+            Floppy144RunStateRecoveredKb(&reloaded)==original_kb,
+            "S4G completion instantly removes overlay and action without capacity change");
+        Expect(Floppy144PersistenceSaveRunState(save_path,&reloaded) &&
+            Floppy144PersistenceLoadRunState(save_path,&run) &&
+            !Floppy144GreyDoorForRun(&run,&candidate) &&
+            !Floppy144GreyDoorNearby(&run),
+            "S4G wall returns to normal after completed-run restart");
+        Expect(Floppy144SiteRectCount()==original_rect_count,
+            "S4G rendering/interaction never alters authoritative Site geometry");
+    }
+    Expect(seed_varied,"S4G at least two fixed seeds select different safe walls");
+    printf("S4G-02 corridor candidate audit: %u valid placements, %u seeds\n",
+        (unsigned)count,(unsigned)(sizeof(seeds)/sizeof(seeds[0])));
+}
+
 int main(void)
 {
     const char *root=getenv("F144_TEST_ROOT");
@@ -1537,6 +1636,7 @@ int main(void)
     TestMissingDirectoryAndCapacity(root);
     TestDifferentWorkingDirectory(root);
     TestGreyDoorDiscovery(root);
+    TestGreyDoorPlacement(root);
 
     if(failures!=0)
     {

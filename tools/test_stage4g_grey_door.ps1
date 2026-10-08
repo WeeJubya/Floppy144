@@ -10,6 +10,9 @@ function Require([string]$text,[string]$needle,[string]$message) {
 Write-Host "=== S4G-01 ORPHAN RECORD / SAVE-SCHEMA ISOLATION ==="
 
 $doc = Read-Source "game\src\floppy144_document.c"
+$grey = Read-Source "game\src\floppy144_grey_door.c"
+$site2d = Read-Source "game\src\floppy144_site_2d.c"
+$main = Read-Source "game\src\floppy144_main.c"
 $header = Read-Source "game\src\floppy144_document.h"
 $run = Read-Source "game\src\floppy144_run_state.c"
 $runHeader = Read-Source "game\src\floppy144_run_state.h"
@@ -31,7 +34,11 @@ Require $terminal 'FLOPPY144_GREY_DOOR_RECORD_INDEX' 'DR-01 LIST has no orphan p
 Require $terminal 'No post-OPEN recovery breadcrumb' 'The secret record must not announce an unlock.'
 Require $runHeader 'FLOPPY144_GREY_DOOR_COMPLETED' 'Missing completed state.'
 Require $run 'Floppy144RunStateGreyDoorComplete' 'Door cannot be permanently consumed.'
-Require $doc '"GREY_DOOR", "CORRIDOR_WALL_V1"' 'Missing independent placement namespace.'
+Require $grey '"GREY_DOOR", "CORRIDOR_WALL_V1"' 'Missing independent placement namespace.'
+Require $grey 'Floppy144GreyDoorCandidateSafe' 'Exhaustive candidate filtering missing.'
+Require $site2d 'Floppy144Site2DDrawGreyDoor' 'The site overlay is missing.'
+Require $main 'Floppy144GreyDoorNearby' 'Normal Site input is not wired.'
+Require $tests 'TestGreyDoorPlacement(root)' 'No all-candidates/seed/reload geometry test.'
 Require $persistHeader 'FLOPPY144_SAVE_VERSION_V2' 'Legacy V2 save format is not recognised.'
 Require $persistHeader 'FLOPPY144_SAVE_PAYLOAD_V3_SIZE' 'No V3 byte for hidden state.'
 Require $persist 'decoded.grey_door_state=payload[offset++]' 'V3 decoder does not preserve the one-shot state.'

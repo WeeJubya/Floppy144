@@ -42,6 +42,7 @@
 #include "floppy144_site_directory.h"
 #include "floppy144_site_isometric.h"
 #include "floppy144_site_object.h"
+#include "floppy144_grey_door.h"
 #include "floppy144_site_rooms.h"
 #include "floppy144_site_view.h"
 #include "floppy144_settings_runtime.h"
@@ -1898,6 +1899,23 @@ static void Floppy144InteractOffice(
     Floppy144OfficeInteractionMode eMode
 )
 {
+    /*
+     * S4G-02 uses precisely the established A/I actions. This isolated,
+     * non-progressing inspection/access notice becomes the encounter entry
+     * in S4G-03; it must not mark the Easter egg completed prematurely.
+     */
+    if(Floppy144GreyDoorNearby(&global_run_state))
+    {
+        Floppy144OfficeSetItemNotice(
+            "GREY DOOR",
+            eMode == FLOPPY144_OFFICE_INTERACTION_ACCESS
+                ? ": THE HANDLE DOES NOT MOVE."
+                : "."
+        );
+        Floppy144Redraw(window);
+        return;
+    }
+
     if(eMode == FLOPPY144_OFFICE_INTERACTION_ACCESS)
     {
         Floppy144InteractionId eAccessInteraction;

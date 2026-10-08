@@ -20,6 +20,7 @@
 #include "floppy144_cabinet.h"
 #include "floppy144_site.h"
 #include "floppy144_site_object.h"
+#include "floppy144_grey_door.h"
 #include "floppy144_site_rooms.h"
 #include "floppy144_site_view.h"
 
@@ -3386,6 +3387,51 @@ static void Floppy144Site2DDrawSiteRect(
     }
 }
 
+/*
+ * The impossible door is a non-colliding drawing overlay on an existing solid
+ * wall cell. It is never added to the generated Site list or Room topology.
+ */
+static void Floppy144Site2DDrawGreyDoor(
+    Floppy144Surface *surface,
+    const Floppy144SiteCamera2D *camera,
+    const Floppy144RunState *state
+)
+{
+    Floppy144GreyDoorCandidate door;
+    Floppy144SiteScreenRect projected;
+    const uint32_t frame=FLOPPY144_RGB(35,41,43);
+    const uint32_t grey=FLOPPY144_RGB(139,143,147);
+    const uint32_t sheen=FLOPPY144_RGB(174,177,181);
+    if(!Floppy144GreyDoorForRun(state,&door) ||
+       !Floppy144Site2DProjectRect(camera,&door.rect,&projected))
+        return;
+
+    Floppy144Site2DFill(surface,projected.x,projected.y,
+        projected.width,projected.height,frame);
+    Floppy144Site2DFill(surface,projected.x+2,projected.y+2,
+        projected.width-4,projected.height-4,grey);
+    Floppy144Site2DOutline(surface,projected.x,projected.y,
+        projected.width,projected.height,frame);
+    if(projected.width>projected.height)
+    {
+        Floppy144Site2DFill(surface,projected.x+5,
+            projected.y+projected.height/2,
+            projected.width-10,1,sheen);
+        Floppy144Site2DFill(surface,
+            projected.x+projected.width-8,
+            projected.y+projected.height/2+2,2,2,frame);
+    }
+    else
+    {
+        Floppy144Site2DFill(surface,
+            projected.x+projected.width/2,
+            projected.y+5,1,projected.height-10,sheen);
+        Floppy144Site2DFill(surface,
+            projected.x+projected.width/2+2,
+            projected.y+projected.height-8,2,2,frame);
+    }
+}
+
 static void Floppy144Site2DDrawPlayer(
     Floppy144Surface *surface,
     const Floppy144SiteCamera2D *camera,
@@ -3470,6 +3516,9 @@ static const char *Floppy144Site2DInteractionPrompt(
         Floppy144SiteAvailableActions(
             run_state
         );
+    if(Floppy144GreyDoorNearby(run_state))
+        uActions |= FLOPPY144_SITE_ACTION_ACCESS |
+                    FLOPPY144_SITE_ACTION_INSPECT;
 
     /* STAGE 3B.5 SECURE CABINET ACCESS PROMPT */
     Floppy144CabinetReset(&sCabinetProbe);
@@ -3610,8 +3659,8 @@ void Floppy144Site2DDrawForPlayerState(
     }
     else if(room_reconstructed)
     {
-        context_label =
-            Floppy144SiteContextLabel(run_state);
+        context_label = Floppy144GreyDoorNearby(run_state)
+            ? "GREY DOOR" : Floppy144SiteContextLabel(run_state);
 
         if(context_label != NULL)
         {
@@ -3788,6 +3837,11 @@ void Floppy144Site2DDrawForPlayerState(
                 );
             }
         }
+
+        /* A closed Grey Door occludes only the original corridor wall.
+           It is rendered after ordinary boundary cells and before furniture. */
+        if(active_room == FLOPPY144_ROOM_CORRIDOR)
+            Floppy144Site2DDrawGreyDoor(&surface,&camera,run_state);
 
         /*
          * Z2: furniture. Chairs are drawn first within this one layer so desk

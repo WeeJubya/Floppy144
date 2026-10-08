@@ -40,18 +40,18 @@ Legacy V1/V2 decoders remain intact and initialise the new byte to zero.
 New saves use V3; old saves remain readable. Neither existing file content
 nor existing profile/settings schemas need conversion.
 
-The future geometry pass calls
+The geometry pass (S4G-02) calls
 `Floppy144RunStateGreyDoorPlacementSlot(state, candidate_count)`.
 This hashes the persisted recovery seed in the independent
 `GREY_DOOR / CORRIDOR_WALL_V1` feature domain from Stage 4E. The
 result indexes a **fixed, deterministic list of safe wall candidates**.
 No coordinate is stored or rerolled on reload.
 
-**S4G-02 responsibility:** validate a stable list of candidate corridor
-wall segments against doors, wall fixtures, required interactions and
-reachability, then render the selected door. If no safe candidate exists,
-do not materialise a door. Keep the candidate ordering stable for saved
-runs once deployed. S4G-01 does not change world geometry.
+**S4G-02 implementation:** derived corridor floor-perimeter candidates,
+full non-floor 2U protected-geometry halo, validated player stance and a
+closed visual overlay. Empty inventories fail closed. No Site world-geometry
+or collision mutation occurs; Stage4G placement details are documented in
+`stage4g_placement.md`.
 
 ## Regression
 
