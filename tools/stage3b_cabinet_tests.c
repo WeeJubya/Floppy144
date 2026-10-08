@@ -6,6 +6,7 @@
  */
 
 #include "floppy144_cabinet.h"
+#include "floppy144_crossword.h"
 #include "floppy144_game_data.h"
 #include "floppy144_interaction_engine.h"
 #include "floppy144_takeaway.h"
@@ -1758,6 +1759,199 @@ static void Floppy144TestTakeawayMenuPresentation(void)
     );
 }
 
+
+/*
+ * S4E-05 tests the actual 3B.5 Cabinet/PI reveal, not a simulated UI.
+ * The canonical P-074/HR-05/T-012 game data remains the source of truth.
+ */
+static void Floppy144TestCrosswordPresentation(void)
+{
+    Floppy144WorldState world;
+    Floppy144RunState run;
+    Floppy144RunState before;
+    Floppy144RunState loaded;
+    Floppy144RunState alternate_run;
+    Floppy144CabinetState cabinet;
+    Floppy144CabinetState reloaded_cabinet;
+    Floppy144CabinetState alternate_cabinet;
+    const Floppy144DataRecord *original =
+        Floppy144GameDataFind(FLOPPY144_DATA_PHYSICAL_ITEM, "P-074");
+    const Floppy144DataRecord *crossword;
+    Floppy144TriggerId trigger =
+        Floppy144GameDataTriggerId("T-012");
+    static uint32_t guarded[640U * 360U + 2U];
+    Floppy144Surface surface;
+    uint8_t save_payload[FLOPPY144_SAVE_PAYLOAD_V2_SIZE];
+    Floppy144CrosswordView first_view;
+    uint32_t before_count;
+    uint32_t after_count;
+    uint32_t selected;
+
+    F144_CHECK(
+        original != NULL &&
+        original->pszId != NULL &&
+        strcmp(original->pszId, "P-074") == 0 &&
+        original->pszA != NULL &&
+        strcmp(original->pszA, "Half-finished crossword") == 0 &&
+        original->pszC != NULL &&
+        strcmp(original->pszC, "STAFF_ROOM_COFFEE_TABLE_01") == 0 &&
+        original->pszF != NULL &&
+        strcmp(original->pszF,
+            "Half-finished crossword. Recovered in Staff Room.") == 0 &&
+        Floppy144InteractionForPhysicalSource("P-074") ==
+            FLOPPY144_INTERACTION_COUNT,
+        "canonical P-074 original ID/title/parent/text and no interaction"
+    );
+    F144_CHECK(
+        trigger != FLOPPY144_TRIGGER_COUNT,
+        "existing T-012 reveal trigger is present"
+    );
+
+    Floppy144TestReset(&world, &run, &cabinet);
+    (void)Floppy144RunStateReconstructRoom(
+        &run, FLOPPY144_ROOM_STAFF_ROOM
+    );
+    F144_CHECK(
+        Floppy144CabinetOpenParent(
+            &cabinet, &run, "STAFF_ROOM_COFFEE_TABLE_01"
+        ),
+        "Coffee Table 01 uses the existing inspection screen"
+    );
+    before_count = Floppy144CabinetVisibleContentCount(
+        &cabinet, &run
+    );
+    F144_CHECK(
+        Floppy144TestVisibleContentIndex(&cabinet, &run, "P-074") ==
+            UINT32_MAX &&
+        cabinet.sGeneratedCrossword.pszId == NULL,
+        "before T-012 the hidden crossword is neither generated nor visible"
+    );
+
+    F144_CHECK(
+        trigger < FLOPPY144_TRIGGER_COUNT &&
+        Floppy144RunStateFireTrigger(&run, trigger),
+        "original story progression reveals P-074"
+    );
+    F144_CHECK(
+        Floppy144CabinetOpenParent(
+            &cabinet, &run, "STAFF_ROOM_COFFEE_TABLE_01"
+        ),
+        "Coffee Table 01 is inspectable after original reveal"
+    );
+    after_count = Floppy144CabinetVisibleContentCount(&cabinet, &run);
+    selected = Floppy144TestVisibleContentIndex(
+        &cabinet, &run, "P-074"
+    );
+    crossword = selected != UINT32_MAX
+        ? Floppy144CabinetVisibleContentAt(&cabinet, &run, selected)
+        : NULL;
+    F144_CHECK(
+        after_count == before_count + 1U &&
+        crossword == &cabinet.sGeneratedCrossword &&
+        crossword->pszId != NULL &&
+        strcmp(crossword->pszId, "P-074") == 0 &&
+        crossword->pszA != NULL &&
+        strcmp(crossword->pszA, "Half-finished crossword") == 0 &&
+        cabinet.sCrosswordView.variant == 4U &&
+        strcmp(cabinet.sCrosswordView.across_answer, "ORDER") == 0 &&
+        strcmp(cabinet.sCrosswordView.down_answer, "INDEX") == 0,
+        "after T-012 the canonical slot shows seed-144 crossing"
+    );
+
+    first_view = cabinet.sCrosswordView;
+    before = run;
+    cabinet.uSelectedContent = selected;
+    F144_CHECK(
+        Floppy144CabinetInspectSelected(&cabinet, &world, &run) &&
+        Floppy144CabinetDetailOpen(&cabinet) &&
+        memcmp(&before, &run, sizeof(run)) == 0,
+        "inspecting P-074 changes no RunState flags, clues or counters"
+    );
+
+    memset(guarded, 0, sizeof(guarded));
+    guarded[0] = 0x13579BDFU;
+    guarded[640U * 360U + 1U] = 0x2468ACE0U;
+    surface.pixels = &guarded[1];
+    surface.width = 640U;
+    surface.height = 360U;
+    Floppy144CabinetDraw(&surface, &cabinet, &run);
+    F144_CHECK(
+        guarded[0] == 0x13579BDFU &&
+        guarded[640U * 360U + 1U] == 0x2468ACE0U,
+        "five-by-five display keeps the 640x360 framebuffer canaries intact"
+    );
+
+    F144_CHECK(
+        Floppy144CabinetBackspace(&cabinet) &&
+        !Floppy144CabinetDetailOpen(&cabinet),
+        "Backspace returns from the crossword to Contents"
+    );
+
+    F144_CHECK(
+        Floppy144CabinetOpenParent(
+            &cabinet, &run, "STAFF_ROOM_COFFEE_TABLE_01"
+        ) &&
+        memcmp(&cabinet.sCrosswordView, &first_view, sizeof(first_view)) == 0 &&
+        Floppy144CabinetVisibleContentCount(&cabinet, &run) == after_count,
+        "reopening the same run gives an identical crossword and PI count"
+    );
+
+    F144_CHECK(
+        Floppy144PersistenceEncodeRunState(
+            &run, save_payload, (uint32_t)sizeof(save_payload)
+        ) &&
+        Floppy144PersistenceDecodeRunState(
+            &loaded, save_payload, (uint32_t)sizeof(save_payload)
+        ),
+        "the unchanged V2 save codec round-trips the crossword recovery seed"
+    );
+    F144_CHECK(
+        loaded.recovery_seed == run.recovery_seed &&
+        Floppy144CabinetOpenParent(
+            &reloaded_cabinet, &loaded, "STAFF_ROOM_COFFEE_TABLE_01"
+        ) &&
+        memcmp(
+            &reloaded_cabinet.sCrosswordView,
+            &first_view,
+            sizeof(first_view)
+        ) == 0,
+        "save/reload regenerates an identical crossing, pencil fills and note"
+    );
+
+    Floppy144RunStateBegin(&alternate_run, 145U);
+    (void)Floppy144RunStateReconstructRoom(
+        &alternate_run, FLOPPY144_ROOM_STAFF_ROOM
+    );
+    F144_CHECK(
+        trigger < FLOPPY144_TRIGGER_COUNT &&
+        Floppy144RunStateFireTrigger(&alternate_run, trigger) &&
+        Floppy144CabinetOpenParent(
+            &alternate_cabinet,
+            &alternate_run,
+            "STAFF_ROOM_COFFEE_TABLE_01"
+        ) &&
+        alternate_cabinet.sCrosswordView.variant == 3U &&
+        strcmp(alternate_cabinet.sCrosswordView.across_answer, "QUEUE") == 0 &&
+        strcmp(alternate_cabinet.sCrosswordView.down_answer, "SHELF") == 0,
+        "seed 145 gives the different QUEUE/SHELF crossing"
+    );
+
+    F144_CHECK(
+        original != NULL &&
+        strcmp(original->pszF,
+            "Half-finished crossword. Recovered in Staff Room.") == 0,
+        "the original physical-item record is still unmodified"
+    );
+
+    F144_CHECK(
+        Floppy144CabinetOpenParent(
+            &cabinet, &run, "STAFF_ROOM_COFFEE_TABLE_02"
+        ) &&
+        cabinet.sGeneratedCrossword.pszId == NULL,
+        "Coffee Table 02's completed P-137 is never replaced"
+    );
+}
+
 int main(void)
 {
     Floppy144TestGeneratedCabinetDiscovery();
@@ -1776,6 +1970,7 @@ int main(void)
     Floppy144TestActLengthContract();
     Floppy144TestNoticeboardCalendar();
     Floppy144TestTakeawayMenuPresentation();
+    Floppy144TestCrosswordPresentation();
 
     if(g_nFailures != 0)
     {

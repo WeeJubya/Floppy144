@@ -11,6 +11,7 @@
 #include "floppy144_draw.h"
 #include "f144_startup_config.h"
 
+#include "floppy144_crossword.h"
 #include "floppy144_game_data.h"
 #include "floppy144_run_state.h"
 #include "floppy144_takeaway.h"
@@ -59,6 +60,10 @@ typedef struct Floppy144CabinetState
      */
     Floppy144DataRecord sGeneratedTakeaway;
     char szTakeawayText[FLOPPY144_TAKEAWAY_MENU_CAPACITY];
+
+    /* P-074 stays a canonical physical item. Only its detail is generated. */
+    Floppy144DataRecord sGeneratedCrossword;
+    Floppy144CrosswordView sCrosswordView;
 }
 Floppy144CabinetState;
 

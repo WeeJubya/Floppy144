@@ -80,6 +80,10 @@ jobs:
         shell: pwsh
         run: .\tools\test_stage4_takeaway.ps1
 
+      - name: Stage 4E deterministic crossword variants
+        shell: pwsh
+        run: .\tools\test_stage4_crossword.ps1
+
       - name: Stage 4C operator profile screen
         shell: pwsh
         run: .\tools\test_stage4_profile_screen.ps1

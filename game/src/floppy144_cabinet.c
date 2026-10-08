@@ -4,6 +4,7 @@
 
 #include "floppy144_cabinet.h"
 #include "floppy144_cabinet_25d.h"
+#include "floppy144_crossword.h"
 #include "floppy144_noticeboard.h"
 #include "floppy144_takeaway.h"
 
@@ -618,6 +619,29 @@ bool Floppy144CabinetOpenParent(
         }
     }
 
+    /*
+     * The Coffee Table 01 half-finished crossword is also a canonical
+     * physical item. T-012 must have made P-074 visible before we attach a
+     * purely visual crossword. Never change its ID, reveal gate or data.
+     */
+    if(Floppy144CabinetStringEqual(pszParentId, "STAFF_ROOM_COFFEE_TABLE_01"))
+    {
+        const Floppy144DataRecord *pCrossword =
+            Floppy144GameDataFind(FLOPPY144_DATA_PHYSICAL_ITEM, "P-074");
+
+        if(
+            pCrossword != NULL &&
+            Floppy144CabinetStringEqual(pCrossword->pszC, pszParentId) &&
+            Floppy144SitePhysicalItemVisible(pRunState, pCrossword) &&
+            Floppy144CrosswordGenerate(
+                pRunState->recovery_seed, &pCabinet->sCrosswordView
+            )
+        )
+        {
+            pCabinet->sGeneratedCrossword = *pCrossword;
+        }
+    }
+
     return true;
 }
 
@@ -1191,6 +1215,17 @@ const Floppy144DataRecord *Floppy144CabinetVisibleContentAt(
                 )
                 {
                     return &pCabinet->sGeneratedTakeaway;
+                }
+
+                if(
+                    pCabinet->sGeneratedCrossword.pszId != NULL &&
+                    Floppy144CabinetStringEqual(
+                        pWinner->pszId,
+                        pCabinet->sGeneratedCrossword.pszId
+                    )
+                )
+                {
+                    return &pCabinet->sGeneratedCrossword;
                 }
 
                 return pWinner;
@@ -2368,7 +2403,68 @@ static void Floppy144CabinetDrawInterior(
              * authored documents, but may contain enough transcription to
              * make labels, notices, tags and checklists feel like real props.
              */
-            if(pItem == &pCabinet->sContextualFlyer)
+            if(pItem == &pCabinet->sGeneratedCrossword)
+            {
+                /*
+                 * A tiny real crossing with 5x5 fixed-position cells.
+                 * ASCII A-Z, '_' and '.' use the existing bitmap glyphs.
+                 * Text and grid are confined to the same standard detail
+                 * panel; no scrolling or input mode is introduced.
+                 */
+                uint32_t row;
+                uint32_t col;
+                const Floppy144CrosswordView *pView =
+                    &pCabinet->sCrosswordView;
+
+                Floppy144DrawText(
+                    pSurface, 94U, 122U,
+                    "COFFEE TABLE / UNFINISHED", 1U, uMuted
+                );
+
+                for(row = 0U; row < FLOPPY144_CROSSWORD_GRID_SIZE; ++row)
+                {
+                    for(col = 0U; col < FLOPPY144_CROSSWORD_GRID_SIZE; ++col)
+                    {
+                        const uint32_t x = 98U + col * 20U;
+                        const uint32_t y = 135U + row * 18U;
+                        const char symbol = pView->grid[row][col];
+
+                        Floppy144DrawFillRect(
+                            pSurface, x, y, 17U, 15U,
+                            symbol == '.' ? FLOPPY144_RGB(23, 34, 28)
+                                          : FLOPPY144_RGB(48, 69, 56)
+                        );
+                        Floppy144DrawRect(
+                            pSurface, x, y, 17U, 15U, uEdge
+                        );
+
+                        if(symbol != '.')
+                        {
+                            char glyph[2];
+                            glyph[0] = symbol;
+                            glyph[1] = '\0';
+                            Floppy144DrawText(
+                                pSurface, x + 6U, y + 4U,
+                                glyph, 1U, uBright
+                            );
+                        }
+                    }
+                }
+
+                Floppy144DrawText(
+                    pSurface, 230U, 145U,
+                    pView->across_clue, 1U, uText
+                );
+                Floppy144DrawText(
+                    pSurface, 230U, 165U,
+                    pView->down_clue, 1U, uText
+                );
+                Floppy144DrawText(
+                    pSurface, 230U, 195U,
+                    pView->annotation, 1U, uMuted
+                );
+            }
+            else if(pItem == &pCabinet->sContextualFlyer)
             {
                 /*
                  * Two separately wrapped blocks make the full authored
@@ -2394,7 +2490,8 @@ static void Floppy144CabinetDrawInterior(
         Floppy144DrawText(
             pSurface,
             94U,
-            pItem == &pCabinet->sContextualFlyer ? 234U : 226U,
+            pItem == &pCabinet->sContextualFlyer ||
+            pItem == &pCabinet->sGeneratedCrossword ? 234U : 226U,
             pCabinet->pszStatus != NULL ? pCabinet->pszStatus : "ITEM INSPECTED",
             1U,
             uBright
