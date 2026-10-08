@@ -8,6 +8,8 @@
 #include "floppy144_cabinet.h"
 #include "floppy144_game_data.h"
 #include "floppy144_interaction_engine.h"
+#include "floppy144_takeaway.h"
+#include "floppy144_variation.h"
 #include "floppy144_persistence.h"
 #include "floppy144_run_state.h"
 #include "floppy144_site.h"
@@ -1599,6 +1601,163 @@ static void Floppy144TestNoticeboardCalendar(void)
     );
 }
 
+/*
+ * Stage 4E-04: actual Cabinet Interior P-330, canonical generated data,
+ * interaction-free inspection and the frozen V2 on-disk RunState codec.
+ */
+static void Floppy144TestTakeawayMenuPresentation(void)
+{
+    Floppy144WorldState world;
+    Floppy144RunState run;
+    Floppy144RunState snapshot;
+    Floppy144RunState loaded;
+    Floppy144RunState second_run;
+    Floppy144CabinetState cabinet;
+    Floppy144CabinetState reloaded_cabinet;
+    Floppy144CabinetState different_cabinet;
+    const Floppy144DataRecord *original;
+    const Floppy144DataRecord *menu;
+    const Floppy144DataRecord *after_reload;
+    uint8_t save_payload[FLOPPY144_SAVE_PAYLOAD_V2_SIZE];
+    static uint32_t guarded[640U * 360U + 2U];
+    Floppy144Surface screen;
+    uint32_t index;
+    uint32_t count;
+    char first_menu[FLOPPY144_TAKEAWAY_MENU_CAPACITY];
+
+    Floppy144TestReset(&world, &run, &cabinet);
+    original = Floppy144GameDataFind(FLOPPY144_DATA_PHYSICAL_ITEM, "P-330");
+
+    F144_CHECK(
+        original != NULL && original->pszA != NULL &&
+        strcmp(original->pszA, "Takeaway menu") == 0 &&
+        original->pszF != NULL &&
+        strcmp(original->pszF,
+            "Takeaway menu left with this noticeboard in Staff Room.") == 0 &&
+        original->pszC != NULL &&
+        strcmp(original->pszC, "STAFF_ROOM_NOTICEBOARD") == 0 &&
+        Floppy144InteractionForPhysicalSource("P-330") ==
+            FLOPPY144_INTERACTION_COUNT,
+        "P-330 remains its original flavour-only generated PI and has no interaction"
+    );
+
+    F144_CHECK(
+        Floppy144RunStateReconstructRoom(&run, FLOPPY144_ROOM_STAFF_ROOM) &&
+        Floppy144CabinetOpenParent(&cabinet, &run, "STAFF_ROOM_NOTICEBOARD"),
+        "the real Staff Room noticeboard is accessible"
+    );
+    count = Floppy144CabinetVisibleContentCount(&cabinet, &run);
+    index = Floppy144TestVisibleContentIndex(&cabinet, &run, "P-330");
+    menu = index < count
+        ? Floppy144CabinetVisibleContentAt(&cabinet, &run, index)
+        : NULL;
+
+    F144_CHECK(
+        menu != NULL &&
+        menu == &cabinet.sGeneratedTakeaway &&
+        menu->pszId != NULL && strcmp(menu->pszId, "P-330") == 0 &&
+        menu->pszA != NULL && strcmp(menu->pszA, "Takeaway menu") == 0 &&
+        menu->pszF == cabinet.szTakeawayText &&
+        strchr(menu->pszF, '\n') != NULL,
+        "original P-330 list item shows generated text only on inspection"
+    );
+    if(menu == NULL || menu->pszF == NULL)
+        return;
+
+    (void)snprintf(first_menu, sizeof(first_menu), "%s", menu->pszF);
+
+    /* Interactions and story flags are completely untouched by menu viewing. */
+    snapshot = run;
+    cabinet.uSelectedContent = index;
+    F144_CHECK(
+        Floppy144CabinetInspectSelected(&cabinet, &world, &run) &&
+        Floppy144CabinetDetailOpen(&cabinet) &&
+        memcmp(&snapshot, &run, sizeof(run)) == 0,
+        "takeaway-menu inspection never changes gameplay RunState"
+    );
+
+    memset(guarded, 0, sizeof(guarded));
+    guarded[0] = 0x13579BDFU;
+    guarded[640U * 360U + 1U] = 0x2468ACE0U;
+    screen.pixels = &guarded[1];
+    screen.width = 640U;
+    screen.height = 360U;
+    Floppy144CabinetDraw(&screen, &cabinet, &run);
+    F144_CHECK(
+        guarded[0] == 0x13579BDFU &&
+        guarded[640U * 360U + 1U] == 0x2468ACE0U,
+        "menu inspection stays inside the 640x360 framebuffer"
+    );
+    F144_CHECK(
+        Floppy144CabinetBackspace(&cabinet) &&
+        !Floppy144CabinetDetailOpen(&cabinet),
+        "menu Backspace returns to the regular scrolling contents"
+    );
+
+    (void)Floppy144VariationValue(
+        run.recovery_seed, "staff.noticeboard.annotation.v1", "AMB-NB-07"
+    );
+    (void)Floppy144VariationValue(
+        run.recovery_seed, "takeaway.unrelated.future.v1", "OTHER_ITEM"
+    );
+    F144_CHECK(
+        Floppy144CabinetOpenParent(&cabinet, &run, "STAFF_ROOM_NOTICEBOARD") &&
+        strcmp(first_menu, cabinet.szTakeawayText) == 0 &&
+        Floppy144CabinetVisibleContentCount(&cabinet, &run) == count,
+        "reopening after other variation calls preserves menu and PI count"
+    );
+
+    F144_CHECK(
+        Floppy144PersistenceEncodeRunState(
+            &run, save_payload, (uint32_t)sizeof(save_payload)
+        ) &&
+        Floppy144PersistenceDecodeRunState(
+            &loaded, save_payload, (uint32_t)sizeof(save_payload)
+        ),
+        "V2 save/reload codec round-trips the existing recovery seed"
+    );
+    F144_CHECK(
+        loaded.recovery_seed == run.recovery_seed &&
+        Floppy144CabinetOpenParent(
+            &reloaded_cabinet, &loaded, "STAFF_ROOM_NOTICEBOARD"
+        ),
+        "decoded saved run reopens the identical noticeboard"
+    );
+    index = Floppy144TestVisibleContentIndex(
+        &reloaded_cabinet, &loaded, "P-330"
+    );
+    after_reload = index != UINT32_MAX
+        ? Floppy144CabinetVisibleContentAt(
+            &reloaded_cabinet, &loaded, index
+        )
+        : NULL;
+    F144_CHECK(
+        after_reload != NULL &&
+        after_reload->pszF != NULL &&
+        strcmp(first_menu, after_reload->pszF) == 0,
+        "save/reload produces exactly the same menu wording"
+    );
+
+    Floppy144RunStateBegin(&second_run, 145U);
+    (void)Floppy144RunStateReconstructRoom(
+        &second_run, FLOPPY144_ROOM_STAFF_ROOM
+    );
+    F144_CHECK(
+        Floppy144CabinetOpenParent(
+            &different_cabinet, &second_run, "STAFF_ROOM_NOTICEBOARD"
+        ) &&
+        strcmp(first_menu, different_cabinet.szTakeawayText) != 0,
+        "different recovery seed changes the takeaway menu"
+    );
+
+    F144_CHECK(
+        original != NULL &&
+        strcmp(original->pszF,
+            "Takeaway menu left with this noticeboard in Staff Room.") == 0,
+        "generated menu never modifies canonical authored source data"
+    );
+}
+
 int main(void)
 {
     Floppy144TestGeneratedCabinetDiscovery();
@@ -1616,6 +1775,7 @@ int main(void)
     Floppy144TestFocusedCabinetAccess();
     Floppy144TestActLengthContract();
     Floppy144TestNoticeboardCalendar();
+    Floppy144TestTakeawayMenuPresentation();
 
     if(g_nFailures != 0)
     {

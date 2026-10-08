@@ -5,6 +5,7 @@
 #include "floppy144_cabinet.h"
 #include "floppy144_cabinet_25d.h"
 #include "floppy144_noticeboard.h"
+#include "floppy144_takeaway.h"
 
 #include "floppy144_draw.h"
 #include "floppy144_interaction_engine.h"
@@ -590,6 +591,33 @@ bool Floppy144CabinetOpenParent(
             ? "RECOVERED CONTENTS"
             : "EMPTY STORAGE";
 
+    /*
+     * Only the canonical Staff Room P-330 may show a variable menu. Keep the
+     * item's authored record/ID/title and reveal rules untouched; redirect
+     * only its detail prose when the transient parent view is opened.
+     */
+    if(Floppy144CabinetStringEqual(pParent->pszC, "NOTICEBOARD"))
+    {
+        const Floppy144DataRecord *pMenu =
+            Floppy144GameDataFind(FLOPPY144_DATA_PHYSICAL_ITEM, "P-330");
+
+        if(
+            pMenu != NULL &&
+            Floppy144CabinetStringEqual(pMenu->pszC, pszParentId) &&
+            Floppy144SitePhysicalItemVisible(pRunState, pMenu) &&
+            Floppy144TakeawayMenuGenerate(
+                pRunState->recovery_seed,
+                pCabinet->szTakeawayText,
+                (uint32_t)sizeof(pCabinet->szTakeawayText)
+            )
+        )
+        {
+            pCabinet->sGeneratedTakeaway = *pMenu;
+            pCabinet->sGeneratedTakeaway.pszF =
+                pCabinet->szTakeawayText;
+        }
+    }
+
     return true;
 }
 
@@ -1152,7 +1180,21 @@ const Floppy144DataRecord *Floppy144CabinetVisibleContentAt(
             if(pNext==NULL)return NULL;
             pWinner=pNext;
 
-            if(uRankWanted==0U)return pWinner;
+            if(uRankWanted==0U)
+            {
+                if(
+                    pCabinet->sGeneratedTakeaway.pszId != NULL &&
+                    Floppy144CabinetStringEqual(
+                        pWinner->pszId,
+                        pCabinet->sGeneratedTakeaway.pszId
+                    )
+                )
+                {
+                    return &pCabinet->sGeneratedTakeaway;
+                }
+
+                return pWinner;
+            }
             --uRankWanted;
         }
     }

@@ -1076,6 +1076,7 @@ $CabinetSources = @(
     (Join-Path $SourceDir "floppy144_cabinet.c"),
     (Join-Path $SourceDir "floppy144_cabinet_25d.c"),
     (Join-Path $SourceDir "floppy144_noticeboard.c"),
+    (Join-Path $SourceDir "floppy144_takeaway.c"),
     (Join-Path $SourceDir "floppy144_variation.c"),
     (Join-Path $Root "src\f144_startup_config.c"),
     (Join-Path $SourceDir "floppy144_game_data.c"),

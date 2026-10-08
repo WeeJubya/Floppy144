@@ -13,6 +13,7 @@
 
 #include "floppy144_game_data.h"
 #include "floppy144_run_state.h"
+#include "floppy144_takeaway.h"
 #include "floppy144_world.h"
 
 #include <stdbool.h>
@@ -50,6 +51,14 @@ typedef struct Floppy144CabinetState
     /* Transient seasonal flyer, never part of persistent/generated PI lists. */
     Floppy144DataRecord sContextualFlyer;
     const char *pszContextualAnnotation;
+
+    /*
+     * P-330 presentation override, separate from canonical authored data.
+     * Valid for this transient Cabinet screen only. On reload/open, rebuild
+     * solely from the persistent recovery_seed.
+     */
+    Floppy144DataRecord sGeneratedTakeaway;
+    char szTakeawayText[FLOPPY144_TAKEAWAY_MENU_CAPACITY];
 }
 Floppy144CabinetState;
 
