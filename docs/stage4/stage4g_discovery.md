@@ -29,8 +29,11 @@ corridor wall are the only hints. There is no explicit unlock message.
 
 Opening the record after DR-01 recovery changes 0 to 1 and marks the
 run dirty. Later views have no side effects, including after 1 becomes 2.
-Completion's 1-to-2 transition will be invoked by the future encounter
-implementation, not by this task. Nothing touches the normal collection,
+Completion's 1-to-2 transition is now invoked by the Stage 4G
+encounter coordinator **after** the Developer, the presentation-only 144%
+capacity gag and the final glitch. The completed state is immediately
+checkpointed to the ordinary autosave path, and cannot be reversed by
+reopening the document. Nothing touches the normal collection,
 trigger, evidence, notebook, recovery-capacity, profile or ending fields.
 
 ## Persistence and deterministic placement

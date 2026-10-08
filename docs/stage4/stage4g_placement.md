@@ -47,13 +47,15 @@ surround and modest handle are distinct without looking like a portal.
 It has no ordinary room plaque.
 
 The common Site `A ACCESS` / `I INSPECT` bindings remain authoritative.
-Near the Door the standard footer advertises both actions. In this
-stage, `I` reports `GREY DOOR.`, and `A` reports that the handle
-does not move. The S4G encounter stage will replace only that Access
-behaviour with the impossible office.
+Near the Door the standard footer advertises both actions.
+`I` reports `GREY DOOR.`, and `A` enters the completed S4G-03
+Grey Door Republic vignette. The temporary office uses logical input and
+has no permanent collision or world-geometry override.
 
-This phase never calls `Floppy144RunStateGreyDoorComplete`: the Door
-vanishes only after the later complete encounter sets state 2.
+Placement never calls `Floppy144RunStateGreyDoorComplete`. The
+coordinator marks the completed state **only after** the entire encounter
+has finished and the original Corridor foot point is verified. S4G-04
+then prevents any repeat visit and verifies the restored wall pixel-for-pixel.
 Neither interactive branch mutates collection, notebook, evidence,
 capacity, Profile or completion history.
 
