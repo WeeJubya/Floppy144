@@ -1,237 +1,266 @@
-# Stage 4E integration, determinism and replay acceptance (S4E-10)
+# S4E-10 — Stage 4E Integration, Determinism and Replay Gate
 
-**Status: S4E-07 IMPLEMENTED / AUTOMATED PASS; S4E-10 MANUAL REPLAY SIGN-OFF STILL PENDING.**
-**Scope:** `Stage4` at tested code commit `5368f2c8976631b89de8b74b2503ee48c1be21e7`.
-**Rule:** No Stage 4F work or new feature work is accepted through this gate.
+**Date:** 2026-10-08  
+**Branch:** `Stage4`  
+**Decision:** **AUTOMATED GATE PASS; FINAL INTERACTIVE REPLAY HOLD.**  
+**Next phase:** Do **not** begin Stage 4F until the remaining human-observed fresh-profile and alternate-route playthroughs are signed off.
 
-This record distinguishes **verified green regression/build evidence** from **unmet
-S4E-10 acceptance criteria**. The updated suite does prove both DR-04
-permutations, both initial branch choices and two seed-class full-site
-reconstruction routes. It does not replace two manual interactive playthroughs.
+This is an integration/acceptance record, not permission to add content or features.
+The established Stage 3 gameplay contract, canonical JSON, generated registries,
+save schema, authored clues and Site geometry were not changed by S4E-10.
+A clean CI run and two seed-class reconstruction fixtures are genuine evidence,
+but are **not** two uninterrupted, manually observed game completions.
 
-## Commit and evidence provenance
+## 1. Provenance and exact tested build
 
-- Immutable Stage 3 source: `fe2239123f98346ed06b48bb500672a5e6e2e172`.
-- Stage 4D completed: `1ce97d226`; Release baseline **695,808 bytes**.
-- First Stage 4E variation-service commit: `a0991e76d`.
-- Stage 4E content changes: `088108824` calendar; `010f18b60` /
-  `cfa4b4a70` noticeboard; `cc4cf2d58` takeaway; `95ffa9445`
-  crossword; `170f4b43e` paperback; `cfdc86d70` through
-  `a411836d2` archive expansion/regression corrections.
-- S4E-09 optional-collection decision: `1df5e32e9` /
-  `ff2a02679` (both documentary).
-- S4E-07 was omitted from the original S4E-06 to S4E-08 sequence. It was
-  subsequently implemented on top of S4E-08's renumbered archive by
-  `4f9b47aa5`; tests `85ed6b4e5`, and cross-suite/dual-seed
-  reconstruction `5368f2c89`.
-- Current production-equivalent Windows CI:
-  [run 37769519595](https://github.com/WeeJubya/Floppy144/actions/runs/37769519595),
-  job `113285337591`, **success** on `5368f2c89`.
-  Stage 2, 3A, 3B, 4B, 4C, 4D, all 4E checks and clean Release passed.
-- Implementation details, seed cases and safeguards:
-  [stage4e_dr04_swap.md](stage4e_dr04_swap.md).
-- This report records passing automated routes; no claim is made that a
-  human-operated, uninterrupted full-game session has been completed.
+- Immutable Stage 3 baseline: `fe2239123f98346ed06b48bb500672a5e6e2e172`
+  (659,968-byte Release).
+- Stage 4D sign-off: `1ce97d226` (695,808-byte Release).
+- Stage 4E implementation begins: `a0991e76d` (portable keyed variation).
+- S4E-02: `088108824` (calendar/fixed-date provider).
+- S4E-03: `010f18b60`, `cfa4b4a70` (seasonal noticeboard and gate fix).
+- S4E-04: `cc4cf2d58` (takeaway).
+- S4E-05: `95ffa9445` (crossword).
+- S4E-06: `170f4b43e` (paperback).
+- S4E-08: `cfdc86d70` through `a411836d2` (expanded catalogue and fixes).
+- S4E-09: `1df5e32e9`, `ff2a02679` (no added optional collections).
+- S4E-07, implemented *after* S4E-08: `4f9b47aa5` (swap),
+  `85ed6b4e5` (four A/B trigger routes),
+  `5368f2c89` (linker fixtures, two-seed reconstruction).
+- Previous audit baseline: `3dbff116f` (correctly held pending S4E-07).
+- S4E-10 executable/regression implementation: **`16f2bd24bf8d153aa2011cf598e7940d64776992`**.
+- **Exact tested Windows Actions run:** [37770899275](https://github.com/WeeJubya/Floppy144/actions/runs/37770899275),
+  job `113289925028`, **SUCCESS** on that commit.
 
-## Deterministic service and save semantics
+S4E-10 adds a standalone integrated seed-matrix executable,
+`tools/stage4e_integration_tests.c`, an architecture/data/CI audit
+`tools/test_stage4e_integration.ps1`, and a permanent CI step.
+It also strengthens the inherited full-site reconstruction fixture to open
+the actual *seed-selected* DR-04 document (via
+`Floppy144DocumentApplyEffects`) for both T-010 and T-011 rather than
+bypassing the swap with direct calls to `Floppy144TriggerTryFire`.
+No shipping gameplay or data files changed in S4E-10.
 
-`Floppy144VariationValue/Range/Chance` in
-`game/src/floppy144_variation.c` use 32-bit unsigned, stateless,
-versioned FNV-1a plus avalanche, keyed by saved recovery seed, feature
-namespace and canonical item ID. No global PRNG stream or traversal-dependent
-consumption is present. `Floppy144RunState.recovery_seed` is encoded and
-decoded in V1 and V2 saved-run payloads. The ordinary initial seed is sourced
-by the platform coordinator; seeded choices themselves do not consult time.
+## 2. Deterministic variation guarantee
 
-Same seed + same build + same feature/key -> repeatable choice, irrespective
-of calls to unrelated generators. Cross-build choice identity is not
-guaranteed if option arrays or namespace versions deliberately change.
-`-debug -seed` is explicitly gated by developer configuration.
+`Floppy144VariationValue/Range/Chance` is pure, stateless unsigned
+32-bit hashing, domain-separated by a versioned feature key and item ID.
+There is no shared sequential PRNG stream and no call-order-dependent
+consumption. `RunState.recovery_seed` is persisted in the existing V1
+and V2 run-state codecs; the seed-derived presentation can be recreated
+after terminal re-entry and file load without a new save field.
+There is no direct Win32/clock/random API dependency in the variation,
+noticeboard, takeaway, crossword, paperback, document, catalogue or
+terminal Core modules.
 
-### Fixed seed matrix (actual CI golden fixtures)
+**Limit of guarantee:** identical seed + feature namespace + immutable
+content options + same build yields identical selection. A deliberate
+future change to option arrays or hash namespaces need not preserve
+bit-identical flavour across different game versions.
 
-| Content | Seed A = 144 | Seed B = 145 |
+### Verified matrix (same seeds across all generators)
+
+| Item | Seed A: **146** | Seed B: **144** |
 | --- | --- | --- |
-| Takeaway business, P-330 | THE PENDING HEDGEHOG PIE OFFICE | THE OFFICIAL SQUIRREL DUMPLING DEPOT |
-| Takeaway special | CLASSIFIED BEEF IN A BOX | STAPLED-TOGETHER NOODLES |
-| Crossword, P-074 | ORDER / INDEX | QUEUE / SHELF |
-| Paperback, P-073 | SENIOR LINE MANAGER / CRISPIN QUIBBLE | HEARTBROKEN ARCHIVE CLERK / MILLICENT MUDDLE |
-| DR-04 at fixed RS-0216 | Technology (T-011) | Technology (T-011) |
-| DR-04 at fixed RS-0147 | Records (T-010) | Records (T-010) |
-| DR-04 swap class | Swapped | Swapped |
+| Takeaway business, P-330 | THE OFFICIAL FERRET CHIP SHOP | THE PENDING HEDGEHOG PIE OFFICE |
+| Crossword P-074 | Variant 3, QUEUE / SHELF | Variant 4, ORDER / INDEX |
+| Paperback P-073 | A PAPERCLIP TOO CONFIDENTIAL (Crispin Bumblewick) | SENIOR LINE MANAGER (Crispin Quibble) |
+| DR-04 permutation bit | 0, canonical | 1, swapped |
+| Fixed DR-04-RS-0216 | Records, T-010 | Technology, T-011 |
+| Fixed DR-04-RS-0147 | Technology, T-011 | Records, T-010 |
 
-Takeaway and paperback have byte-exact known-seed assertions. Crossword
-tests also assert the five-row grid and clue/answer crossing. All three
-demonstrably change between the two seeds while preserving unrelated
-feature choices. The Cabinet regression regenerates flavour after V2
-save/reload and checks canonical identity and read-only behaviour.
+Both matrix outcomes are asserted by the new combined C executable.
+It re-invokes all flavour generators after unrelated variation calls and
+compares the full regenerated takeaway and paperback texts and crossword
+grid, answers and marginalia byte-for-byte.
+It also checks the opposite DR-04 permutation bits.
+Output from the exact CI run:
 
-**Important S4E-08 identity change:** `RS-0063` and `RS-0087` were
-the Stage 3 DR-04 branch positions; S4E-08 redistributed authored
-documents. Do not hardcode those obsolete numbers in a new acceptance test.
-Test the canonical authored identities and T-010/T-011 effects, then resolve
-the *current* player-facing IDs.
+```text
+S4E-10 SEED 146: takeaway=FERRET CHIP SHOP crossword=QUEUE/SHELF paperback=TITLE: A PAPERCLIP TOO CONFIDENTIAL swap=0
+S4E-10 SEED 144: takeaway=HEDGEHOG PIE OFFICE crossword=ORDER/INDEX paperback=TITLE: SENIOR LINE MANAGER swap=1
+STAGE 4E INTEGRATION VECTORS: PASS
+STAGE 4E INTEGRATION GATE: PASS
+```
 
-**S4E-07 correction and seeded arrangement:** The two workstreams are
-located by immutable T-010 (Records) and T-011 (Technology) authored
-identities. The post-S4E-08 *slot numbers* remain RS-0216 and RS-0147.
-`Floppy144VariationRange(seed,"dr04.workstream-swap.v1","DR-04",2)`
-decides which payload is displayed in each slot. The seed value is saved,
-not regenerated after reinstatement. The terminal LIST, OPEN, viewer,
-scrolling, post-open recommendation, trigger-access gate and effect
-application now share this identity-based resolution.
+**Why not 144/145?** Those two seeds happen to choose the *same* DR-04
+permutation, even though the flavour generators differ. Seeds **146 and
+144** deliberately exercise both permutations. Pre-existing generator
+golden tests for 144/145 also remain green.
 
-Two **opposite** deterministic seed classes were needed: 144 and 145
-happen to select the *same* swapped class, so the explicit A/B tests use
-**146 (not swapped)** and **144 (swapped)**:
+## 3. Dates, seasons and temporary presentation
 
-| Fixed record ID | Seed 146: no swap | Seed 144: swapped |
+Date provider: portable `f144PlatformCalendarDate`, injected through the
+F144 platform interface; Win32 `GetLocalTime` remains in the adapter.
+`-date YYYY-MM-DD` is only honoured with the current developer/debug
+configuration enabled. Invalid dates fail closed.
+
+These representative dates are exercised through the actual Cabinet/notice
+regressions (including permanent entries, access gates and layout/canaries):
+
+| Date | Purpose | Expected contextual item |
 | --- | --- | --- |
-| DR-04-RS-0216 | Records, T-010 | Technology, T-011 |
-| DR-04-RS-0147 | Technology, T-011 | Records, T-010 |
+| 2026-01-15 | Ordinary winter | AMB-NB-08 |
+| 2026-04-21 | Ordinary spring | AMB-NB-08 |
+| 2026-07-15 | Summer | AMB-NB-04 |
+| 2026-09-15 | Ordinary autumn | AMB-NB-08 |
+| 2026-10-31 | Halloween | AMB-NB-05 |
+| 2026-11-05 | Bonfire | AMB-NB-06 |
+| 2026-12-20 | Christmas | AMB-NB-07 |
+| 2026-01-01 / 2026-12-31 | New Year | AMB-NB-01 |
+| 2026-02-14 / 2026-03-31 | Valentine / spring notice | AMB-NB-02 / AMB-NB-03 |
 
-The real Terminal and persisted RunState fixtures test both seed classes
-with **both Records-first and Technology-first choices** (four paths),
-LIST pages, OPEN, viewer resolution, branch gating, V2 save/reload and
-terminal re-entry. The canonical room progression and Act II branch
-fixtures additionally run under both permutation classes. No canonical JSON,
-generated document output, trigger definition, evidence or notebook text
-was changed. No existing player guidance hardcodes either swapped slot.
+All nine canonical Staff Room noticeboard physical items remain
+present and three original T-012-dependent items keep their gates.
+The seasonal flyer is transient, read-only atmosphere and cannot
+alter evidence, triggers, restoration, notebook or completion.
+The spring notice is an authored fixed window, not a movable-Easter
+date calculation. The real-world local date may legitimately change
+seasonal atmosphere if a session crosses midnight; it does not reshuffle
+run-seed choices or gameplay.
 
-## Platform-neutral date and seasonal matrix
+## 4. DR-04 placement, access and replay
 
-Production calendar calls `f144PlatformCalendarDate` in portable
-`src/f144_calendar.c`. The OS local date and `GetLocalTime` stay inside
-the Win32 adapter. `-debug -date YYYY-MM-DD` or portable injected overrides
-are honoured only with debug enabled. Invalid dates and absent providers
-fail safely. The live calendar intentionally re-queries the current date;
-a change across local midnight may change the next opened seasonal flyer
-without altering progress.
+The old `DR-04-RS-0063` / `RS-0087` figures predate S4E-08. The
+post-expansion slots are permanently:
 
-These representative fixtures are exercised in
-`tools/stage3b_cabinet_tests.c`, with CI success:
+- **RS-0216:** original Records payload, *Physical Archive Reconciliation
+  Workstream*, T-010.
+- **RS-0147:** original Technology payload, *Terminal Network Remediation
+  Workstream*, T-011.
 
-| Date | Expected eligible notice |
+The fixed **record numbers/IDs never swap**; the displayed authored
+document title/body and its associated trigger move between those slots,
+based on `Floppy144VariationRange(seed,
+"dr04.workstream-swap.v1","DR-04",2)`.
+Implementation traces a workstream by authored trigger identity, not
+a hardcoded generated slot. Terminal LIST, OPEN, document viewer,
+scrolling, debug recovery recommendations, access gates and effect
+application use the consistent mapping.
+
+**A/B integration results:**
+
+- `tools/stage3b_terminal_tests.c` exercises seed 146 and 144, each
+  selecting Records-first and Technology-first: **four routes**.
+- Every case checks both fixed record numbers, seeded LIST content,
+  OPEN lookup, viewer/authored trigger identity, branch commit,
+  deferred alternate access, V2 save/reload, and terminal re-entry.
+- `tools/stage3b_reconstruction_tests.c` now runs its canonical
+  full-site reconstruction route under **both** seed classes,
+  actually applying the seeded Records document to activate T-010
+  and the seeded Technology document to activate T-011 after T-028
+  releases the alternate workstream.
+- Existing Stage 3B evidence, notebook, world/room, trigger release,
+  capacity-exhaustion and completion regressions remain passing.
+- No canonical notebook or authored content references the old slot
+  figures. Generated player recommendations resolve the current slot
+  for the authored trigger. No fixed-slot source assumption is left
+  in the DR-04 runtime mapping.
+
+These are **headless automated fixtures with some mid-Act-II progression
+prerequisites represented by fixture state**. They are not a claim that
+two human-operated, end-to-end fresh-profile completions have been observed.
+The two seed-class room-reconstruction runs are both Records-first; the
+Technology-first choice is covered as a shorter branch/reload fixture,
+not as a full uninterrupted alternate-route playthrough.
+
+## 5. Document and collection expansion
+
+| Measure | Before S4E-08 | After S4E-08 / S4E-10 |
+| --- | ---: | ---: |
+| Collections | 35 | **35** |
+| Canonical authored documents | 170 | **170** |
+| Procedural index-only records | 348 | **1,401** |
+| Total player-facing archive entries | 518 | **1,571** |
+
+S4E-08 increased procedural catalogue density by **1,053 entries**
+and preserved all 170 canonical authored documents. All 1,571 displayed
+IDs are unique in the archive audit, compiled authored positions are
+valid, and canonical registries regenerate cleanly from JSON. The new
+word pools produce deterministic administrative entries, not fake
+authorised clues. Procedural entries have no authored body, trigger,
+or evidence effects. Stage 3 terminal LIST/page/document-scroll tests,
+archive density/identity checks and generated-registry drift gate pass.
+The compiled Release grew **1,536 bytes** from S4E-06 through S4E-08,
+then **512 bytes** for S4E-07.
+
+### Optional collections (S4E-09)
+
+**NO ADDITIONAL COLLECTIONS — PASS.** The four previously declared
+empty shells (HR-14, HR-27, HR-36, FM-32) are outside the stretch-task
+decision. This stage did not introduce any new optional collection or
+additional player capacity/progression pressure.
+The [S4E-09 decision](stage4e_optional_early_collections_decision.md)
+preserves a **350,000-byte minimum reserve** for Stage 4F and final QA.
+A with/without-*new*-collection playthrough is not applicable.
+
+## 6. Full regression, platform architecture and size
+
+**Exact commit `16f2bd24b`, CI run 37770899275: SUCCESS.**
+
+| Gate | Result |
 | --- | --- |
-| 2026-01-15, winter ordinary | AMB-NB-08 (routine) |
-| 2026-04-21, spring ordinary | AMB-NB-08 (routine) |
-| 2026-07-15, summer | AMB-NB-04 |
-| 2026-09-15, autumn ordinary | AMB-NB-08 (routine) |
-| 2026-10-31, Halloween | AMB-NB-05 |
-| 2026-11-05, Bonfire | AMB-NB-06 |
-| 2026-12-20, Christmas | AMB-NB-07 |
-| 2026-01-01 / 2026-12-31 | AMB-NB-01 (New Year) |
-| 2026-02-14 / 2026-03-31 | AMB-NB-02 / AMB-NB-03 |
-| Unrelated ordinary date, e.g. 2026-01-15 | AMB-NB-08 (control) |
+| Stage 2 and Stage 3A regressions | PASS |
+| Stage 3B terminal, cabinet, doors, reconstruction and progression | PASS |
+| Stage 4B platform, input, persistence, audio, timing, configuration and integration | PASS |
+| Stage 4C Profile, Settings, terminal, reinstatement, completion and integration smoke | PASS |
+| Stage 4D Help, camera, player, 2.5D, consistency and integration | PASS |
+| Stage 4E variation, calendar, notices, three flavour generators, archive | PASS |
+| **New S4E-10 integrated seed matrix / boundary audit** | **PASS** |
+| Portable Core Release, strict warnings | PASS, 0 warnings, 0 errors |
+| Win32 platform Release, strict warnings | PASS, 0 warnings, 0 errors |
+| Clean production-equivalent x64 Release rebuild | PASS, 0 warnings, 0 errors |
+| Competition size and protected reserve | PASS |
 
-All **nine** authored Staff Room noticeboard PIs remain canonical; three
-original T-012-gated items retain their gates. Seasonal context is an
-additional transient read-only entry: no permanent notice can be displaced,
-no trigger/evidence/notebook state is awarded, and tests exercise detail
-layout, scrolling, Backspace and framebuffer canaries. The Easter period
-is a fixed authored spring window, not calculated Easter Sunday.
+Architecture remains content -> deterministic variation/date services ->
+portable Core interfaces -> F144 platform abstraction -> Win32 adapter.
+No Stage 4E flavour generator calls Win32 directly and no uncontrolled
+`rand()`/`srand()`/`time()` is used to choose persisted flavour.
+The new `test_stage4e_integration.ps1` CI audit enforces this boundary
+and asserts the seed-aware document/terminal wiring, date override
+guard, A/B fixtures, seasonal matrix and inherited regression coverage.
 
-## Flavour, browsing and generated-document acceptance
-
-- P-330 takeaway: three bounded lines; 792 business names and 95,040
-  theoretical complete menus; known seed/repeat/small-buffer, large-seed
-  sweep, original-PI identity and V2 reload checked.
-- P-074 crossword: six five-letter crossings, independent fill masks,
-  six annotations; T-012 gate, read-only inspection, save/reload and
-  guarded 640x360 rendering checked. Not an interactive scored puzzle.
-- P-073 paperback: five templates, 305 titles, 64 bylines, eight
-  marginalia; **156,160** combinations exhaustively validated; longest
-  line **48** characters against a 54-character limit; V2 regeneration
-  and T-012 gate checked.
-- Authored document identities: **170 canonical authored** before and
-  after S4E-08, same as the Stage 3 baseline; canonical JSON remains
-  the source of truth. S4E-08 restored missing generated registry entries
-  for OS-18, rather than adding new authored prose.
-- Catalogue rows: **518 -> 1,571**; procedural index-only records:
-  **348 -> 1,401**, an addition of **1,053**. Collections remain **35**.
-  All 1,571 player-facing IDs are unique in the archive audit; every
-  authored document has a unique valid compiled slot. Generation uses
-  36 neutral subject stems and 24 administrative forms, with numeric
-  sort/cache and deterministic per-collection indexing.
-- Procedural records deliberately have no authored body, evidence or
-  trigger: they must not masquerade as required recovered clues.
-  Stage 3 terminal/pager/scroll regressions and the Stage 4E archive
-  audit passed on the examined exact-HEAD run.
-- Four previously declared optional unbudgeted shells
-  (HR-14, HR-27, HR-36, FM-32) are still empty; OS-41 has one authored
-  item. S4E-09 **added no new collection** and its
-  `stage4e_optional_early_collections_decision.md` reserves capacity.
-  Consequently an added-versus-unrestored optional-collection route is
-  **not applicable**, not an unperformed test.
-- No direct Win32 or clock/global random dependency was identified in
-  `floppy144_variation.c`, `floppy144_takeaway.c`,
-  `floppy144_crossword.c`, `floppy144_paperback.c` or
-  `floppy144_noticeboard.c`. Existing platform boundary and calendar
-  tests pass. The dependency direction remains content -> portable
-  deterministic/date services -> platform API -> Win32 adapter.
-
-## Regression evidence and limitations
-
-Exact-HEAD CI run 37767175122 succeeded at all configured steps:
-
-- Stage 2; Stage 3A; Stage 3B.1–3B.5 including reconstruction, alternate
-  branch trigger fixtures, terminal, physical-item and door tests.
-- Stage 4B input, persistence/path, audio, timing/lifecycle, single
-  instance, developer config, architecture and integration checks.
-- Stage 4C Profile, operator name, terminal authentication, Settings,
-  Credits, reinstatement, completion, integration audit and headless
-  fresh-profile smoke.
-- Stage 4D Help, camera, player, 2.5D inspection, consistency,
-  integration/visual audit.
-- Stage 4E service, calendar, noticeboard, takeaway, crossword, paperback
-  and archive density/identity audit.
-- Independent portable Core and Win32 builds, clean production-equivalent
-  Release rebuild, hard size gate and 350,000-byte reserve gate.
-
-**Still requiring manual sign-off:** two uninterrupted, interactive
-fresh-profile/alternate-route end-to-end playthroughs under opposite seed
-classes, with in-game mid-route save/reload, visual notebook inspection
-and human acceptance of the completed endings. The automated four-path
-seeded OPEN regression, two-seed full-site reconstruction, all existing
-Stage 3B ending fixtures and Stage 4C smoke now pass. Automated coverage
-does not claim a complete human-operated playthrough.
-
-## Production build and size
-
-Latest completed production-equivalent Windows x64 Release, on exact
-`5368f2c89`: MSBuild Core **0 warnings / 0 errors**; Platform
-**0 / 0**; clean rebuilt application **0 / 0**.
-
-| Metric | Bytes |
+| Release size metric | Bytes |
 | --- | ---: |
-| Competition ceiling | 1,474,560 |
-| Stage 3 baseline Release | 659,968 |
-| Stage 4D Release | 695,808 |
-| Stage 4E Release with S4E-07 | **709,632** |
-| Stage 4E delta vs Stage 3 | **+49,664** |
-| Stage 4E delta vs Stage 4D | **+13,824** |
-| S4E-07 delta vs pre-swap S4E-09 | **+512** |
-| S4E-06 Release before archive expansion | 707,584 |
-| Observed archive-expansion delta vs S4E-06 | **+1,536** |
-| Remaining to absolute cap | **764,928** |
-| Protected Stage 4F / final QA reserve | **350,000** |
-| Headroom above protected reserve | **414,928** |
+| Hard ceiling | **1,474,560** |
+| Stage 3 immutable baseline | 659,968 |
+| Stage 4D baseline | 695,808 |
+| S4E-09 immediately before swap | 709,120 |
+| **S4E-10 production Release** | **709,632** |
+| Delta vs Stage 3 | **+49,664** |
+| Delta vs Stage 4D | **+13,824** |
+| Delta vs S4E-09 | **+512** |
+| **Remaining headroom** | **764,928** |
+| **Protected Stage 4F / QA reserve** | **350,000** |
+| Uncommitted headroom beyond reserve | **414,928** |
 
-Both size gates **PASS**. This figure is the compiled
-`Floppy144.exe` payload, not the much larger on-disk canonical JSON
-or generated C source file lengths.
+This is the actual Release `Floppy144.exe` executable length, not source
+or generated registry text size. No new shipping code was added by S4E-10,
+so its measured payload equals the S4E-07 production build.
 
-## Remaining sign-off actions
+## 7. Limitations and final readiness
 
-1. Perform and document an actual seed-146 fresh-profile run and seed-144
-   alternate-route *interactive* playthrough, with mid-route save/reload.
-2. Confirm visual notebook wording and dynamically generated terminal
-   recommendations in both sessions, and reach both endings normally.
-3. Confirm completion snapshots survive profile reinstatement and sign
-   the S4E-10 human visual/replay gate.
+**Automated sign-off: PASS.** Seeded flavour is repeatable, DR-04
+position swapping survives V2 save/reload, both workstream triggers
+continue to drive the intended reconstruction, archive expansion retains
+its authored clues, and the final production executable remains comfortably
+under the competition limit and preserved reserve.
 
-**Decision: S4E-07 automated gate PASS; S4E-10 manual replay HOLD.**
-The branch passes both compiled deterministic arrangements, existing
-progression, clean Release, absolute size and protected reserve. Stage 4F
-is not authorised by this report until the outstanding interactive acceptance
-cases have been recorded.
+**Manual interactive replay: HOLD.** Remaining acceptance evidence:
+
+1. Start a **new profile with developer seed 146**, play from the
+   Prologue through the complete Records-first route, inspect both DR-04
+   records and notebook hints, save/reinstate midway, and capture the ending.
+2. Start a **fresh/second profile with seed 144**, follow the
+   Technology-first alternate route to its ending, inspecting the
+   swapped titles/body, recommendations, notebook, evidence and restoration.
+   Save/reinstate at least once and check the swapped slots remain fixed.
+3. Verify both completion screens, recovery totals and persisted
+   profile-completion snapshots, and record screenshot/manual sign-off.
+
+The headless full-site and branching tests are not substitutes for
+real user-facing visual/interactive end-to-end playthroughs. Until those
+three observations are recorded, **S4E-10 is not finally signed off and
+Stage 4F remains on hold.** This is an acceptance limitation rather than
+an identified integration defect. No new features or Stage 4F code were
+introduced.
