@@ -170,6 +170,10 @@ jobs:
         shell: pwsh
         run: .\tools\test_stage4f_application_icon.ps1 -Phase Source
 
+      - name: Stage 4F GDR connection intro
+        shell: pwsh
+        run: .\tools\test_stage4f_intro.ps1
+
       - name: Install Premake
         shell: pwsh
         run: |

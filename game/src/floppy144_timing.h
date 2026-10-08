@@ -43,6 +43,11 @@ void Floppy144TimingReset(
     uint32_t autosave_interval_ms
 );
 
+void Floppy144TimingStartSplash(
+    Floppy144TimingState *timing,
+    uint64_t now_ms
+);
+
 void Floppy144TimingStopSplash(
     Floppy144TimingState *timing
 );

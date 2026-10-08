@@ -1,7 +1,8 @@
 /*
- * Floppy//144 - splash and GDR main-menu interface
+ * Floppy//144 - GDR main-menu interface
  *
- * Draws the opening presentation and the session-control screen.
+ * Draws the session-control screen. The startup intro lives in
+ * floppy144_intro.c so it remains pure presentation state.
  */
 
 #pragma once
@@ -40,15 +41,6 @@ bool Floppy144MainMenuOptionEnabled(
     Floppy144MainMenuOption option,
     bool active_session,
     bool recorded_session_available
-);
-
-/*
- * Opening splash renderer.
- */
-
-void Floppy144SplashDraw(
-    Floppy144Surface *runtime,
-    uint32_t elapsed_milliseconds
 );
 
 /*

@@ -28,6 +28,7 @@
 #include "floppy144_lifecycle.h"
 #include "floppy144_notebook_view.h"
 #include "floppy144_recovery.h"
+#include "floppy144_intro.h"
 #include "floppy144_player_visual.h"
 #include "floppy144_profile_edit.h"
 #include "floppy144_profile_view.h"
@@ -165,8 +166,6 @@ Floppy144PersistenceWarning;
 
 static uint8_t global_persistence_warnings;
 
-#define FLOPPY144_SPLASH_ANIMATION_MS 3700U
-
 static const char *Floppy144PersistenceWarningText(
     void
 );
@@ -174,6 +173,10 @@ static const char *Floppy144PersistenceWarningText(
 static void Floppy144HandleLifecycleEvent(
     HWND window,
     const F144LifecycleEvent *event
+);
+
+static void Floppy144OpenMainMenu(
+    HWND window
 );
 
 static void Floppy144UpdateTiming(
@@ -229,12 +232,10 @@ static void Floppy144Redraw(
                     )
                 );
 
-            Floppy144SplashDraw(
+            Floppy144IntroDraw(
                 pSurface,
-                Floppy144SettingsTextElapsedMs(
-                    &global_settings,
-                    elapsed_milliseconds
-                )
+                elapsed_milliseconds,
+                &global_settings
             );
 
             break;
@@ -632,25 +633,29 @@ static void Floppy144UpdateTiming(
         global_screen == FLOPPY144_SCREEN_SPLASH
     )
     {
-        redraw =
-            true;
-
-        if(
-            Floppy144SettingsTextElapsedMs(
-                &global_settings,
-                Floppy144TimingSplashElapsedMs(
-                    &global_timing,
-                    f144PlatformMonotonicMs(
-                        &global_platform
-                    )
+        uint32_t intro_elapsed_ms =
+            Floppy144TimingSplashElapsedMs(
+                &global_timing,
+                f144PlatformMonotonicMs(
+                    &global_platform
                 )
-            ) >= FLOPPY144_SPLASH_ANIMATION_MS
-        )
+            );
+
+        if(intro_elapsed_ms >= FLOPPY144_INTRO_DURATION_MS)
         {
             Floppy144TimingStopSplash(
                 &global_timing
             );
+
+            Floppy144OpenMainMenu(
+                window
+            );
+
+            return;
         }
+
+        redraw =
+            true;
     }
 
     if(
@@ -2622,6 +2627,27 @@ static bool Floppy144HandleActionEvent(
             }
 
             /*
+             * The intro is deliberately easy to dismiss for repeat players.
+             * Use only established logical actions so native key policy stays
+             * inside the platform adapter.
+             */
+            if(
+                global_screen == FLOPPY144_SCREEN_SPLASH &&
+                Floppy144IntroActionSkips(eAction)
+            )
+            {
+                Floppy144TimingStopSplash(
+                    &global_timing
+                );
+
+                Floppy144OpenMainMenu(
+                    window
+                );
+
+                return true;
+            }
+
+            /*
              * Escape never terminates the application.
              *
              * From every non-menu screen it suspends the current view and
@@ -2662,13 +2688,6 @@ static bool Floppy144HandleActionEvent(
                     return true;
                 }
 
-                if(global_screen == FLOPPY144_SCREEN_SPLASH)
-                {
-                    Floppy144TimingStopSplash(
-                        &global_timing
-                    );
-                }
-
                 if(global_screen != FLOPPY144_SCREEN_MAIN_MENU)
                 {
                     Floppy144OpenMainMenu(
@@ -2682,26 +2701,12 @@ static bool Floppy144HandleActionEvent(
             switch(global_screen)
             {
                 /*
-                 * Splash: Enter advances to session control.
-                 * Escape is handled by the universal menu route.
+                 * Intro skip actions are handled before screen-specific input.
+                 * Other actions are ignored until the next animation frame.
                  */
-
                 case FLOPPY144_SCREEN_SPLASH:
                 {
-                    if(eAction == F144_ACTION_CONFIRM)
-                    {
-                        Floppy144TimingStopSplash(
-                            &global_timing
-                        );
-
-                        Floppy144OpenMainMenu(
-                            window
-                        );
-
-                        return true;
-                    }
-
-                    break;
+                    return true;
                 }
                 /*
                  * GDR main menu: move through available options and execute
@@ -2872,6 +2877,22 @@ static bool Floppy144HandleActionEvent(
 
                 case FLOPPY144_SCREEN_CREDITS:
                 {
+                    if(eAction == F144_ACTION_CONFIRM)
+                    {
+                        global_screen =
+                            FLOPPY144_SCREEN_SPLASH;
+
+                        Floppy144TimingStartSplash(
+                            &global_timing,
+                            f144PlatformMonotonicMs(
+                                &global_platform
+                            )
+                        );
+
+                        Floppy144Redraw(window);
+                        return true;
+                    }
+
                     if(eAction == F144_ACTION_BACK)
                     {
                         if(
@@ -4377,12 +4398,10 @@ int CALLBACK WinMain(
         );
     }
 
-    Floppy144SplashDraw(
+    Floppy144IntroDraw(
         f144PlatformFramebuffer(&global_platform),
-        Floppy144SettingsTextElapsedMs(
-            &global_settings,
-            0U
-        )
+        0U,
+        &global_settings
     );
 
     Floppy144SettingsApplyCrtFilter(
@@ -4422,12 +4441,10 @@ int CALLBACK WinMain(
         );
     }
 
-    Floppy144SplashDraw(
+    Floppy144IntroDraw(
         f144PlatformFramebuffer(&global_platform),
-        Floppy144SettingsTextElapsedMs(
-            &global_settings,
-            0U
-        )
+        0U,
+        &global_settings
     );
 
     Floppy144SettingsApplyCrtFilter(

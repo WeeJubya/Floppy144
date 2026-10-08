@@ -61,6 +61,27 @@ void Floppy144TimingReset(
     }
 }
 
+void Floppy144TimingStartSplash(
+    Floppy144TimingState *timing,
+    uint64_t now_ms
+)
+{
+    if(timing == NULL)
+    {
+        return;
+    }
+
+    if(now_ms < timing->last_update_ms)
+    {
+        now_ms = timing->last_update_ms;
+    }
+
+    timing->splash_started_ms = now_ms;
+    timing->next_splash_frame_ms =
+        now_ms + FLOPPY144_SPLASH_FRAME_MS;
+    timing->splash_active = 1U;
+}
+
 void Floppy144TimingStopSplash(
     Floppy144TimingState *timing
 )
