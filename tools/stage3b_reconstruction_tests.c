@@ -8,6 +8,7 @@
  */
 
 #include "floppy144_collection_registry.h"
+#include "floppy144_document.h"
 #include "floppy144_game_data.h"
 #include "floppy144_interaction_engine.h"
 #include "floppy144_persistence.h"
@@ -102,6 +103,62 @@ static bool Floppy144TestFireTrigger(
             pState,
             eTrigger
         );
+}
+
+
+/*
+ * S4E-10: exercise the actual seeded OPEN -> authored trigger route during
+ * both full-site reconstruction fixtures. A direct TryFire(T-010/T-011)
+ * would skip precisely the slot/payload boundary this gate must protect.
+ */
+static bool Floppy144TestOpenDr04Workstream(
+    Floppy144WorldState *pWorld,
+    Floppy144RunState *pRunState,
+    const char *pszTriggerId
+)
+{
+    Floppy144CollectionId collection =
+        Floppy144GameDataCollectionId("DR-04");
+    Floppy144TriggerId trigger =
+        Floppy144GameDataTriggerId(pszTriggerId);
+    const Floppy144CollectionDefinition *definition;
+    uint32_t originalSlot;
+
+    if(collection == FLOPPY144_COLLECTION_COUNT ||
+       trigger == FLOPPY144_TRIGGER_COUNT || pRunState == NULL)
+        return false;
+
+    definition = Floppy144CollectionGet(collection);
+    if(definition == NULL)
+        return false;
+
+    for(originalSlot = 0U;
+        originalSlot < definition->catalogue.record_count;
+        ++originalSlot)
+    {
+        const Floppy144DocumentDefinition *document =
+            Floppy144DocumentGet(collection, originalSlot);
+        uint32_t displayedSlot;
+
+        if(document == NULL || document->trigger != trigger)
+            continue;
+
+        displayedSlot = Floppy144DocumentSlotForSeed(
+            document, pRunState->recovery_seed
+        );
+        return
+            Floppy144DocumentGetForSeed(
+                collection, displayedSlot, pRunState->recovery_seed
+            ) == document &&
+            Floppy144DocumentAccessible(
+                pRunState, collection, displayedSlot
+            ) &&
+            Floppy144DocumentApplyEffects(
+                pWorld, pRunState, collection, displayedSlot
+            ) &&
+            Floppy144RunStateTriggerFired(pRunState, trigger);
+    }
+    return false;
 }
 
 static bool Floppy144TestRunInteraction(
@@ -530,7 +587,7 @@ static void Floppy144TestCanonicalRoomProgression(void)
         Floppy144TestRunInteraction(&sWorld, &sState, "I-002") &&
         Floppy144TestRunInteraction(&sWorld, &sState, "I-003") &&
         Floppy144TestRestoreCollection(&sWorld, &sState, "DR-04") &&
-        Floppy144TestFireTrigger(&sWorld, &sState, "T-010") &&
+        Floppy144TestOpenDr04Workstream(&sWorld, &sState, "T-010") &&
         Floppy144TestRestoreCollection(&sWorld, &sState, "HR-05") &&
         Floppy144TestFireTrigger(&sWorld, &sState, "T-012"),
         "canonical progression reaches the main Stage 3B reconstruction state"
@@ -658,12 +715,12 @@ static void Floppy144TestCanonicalRoomProgression(void)
      * persistent.
      */
     F144_CHECK(
-        Floppy144TestFireTrigger(
+        Floppy144TestOpenDr04Workstream(
             &sWorld,
             &sState,
             "T-011"
         ),
-        "released alternate workstream reconstructs IT Support"
+        "released alternate seeded document reconstructs IT Support"
     );
 
     for(
