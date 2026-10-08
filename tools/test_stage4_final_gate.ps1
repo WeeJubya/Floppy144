@@ -148,8 +148,10 @@ try
         $gameSources = Get-ChildItem -LiteralPath (Join-Path $root "game\src") -File |
             Where-Object { $_.Extension -in @(".c",".h") }
 
-        $rawSwitchHits = $gameSources |
-            Select-String -Pattern '"-(debug|seed|date)(?:=|")' -CaseSensitive:$false
+        $rawSwitchHits = @(
+            $gameSources |
+                Select-String -Pattern '"-(debug|seed|date)(?:=|")' -CaseSensitive:$false
+        )
 
         if($rawSwitchHits.Count -ne 0)
         {
