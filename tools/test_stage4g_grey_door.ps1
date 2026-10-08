@@ -87,6 +87,13 @@ $noMention = @(
 )
 foreach($relative in $noMention) {
     $text = Read-Source $relative
+    if($relative -eq "game\src\floppy144_credits_view.c") {
+        # Existing studio identity predates this anomaly. It is a company
+        # credit, not a new achievement or acknowledgement of this event.
+        $text = $text.Replace(
+            "GAME DESIGN COMPANY: GREY DOOR REPUBLIC", ""
+        )
+    }
     if($text -match '(?i)(GREY[ _]DOOR|DR-00-RS-0144|GreyDoor)') {
         throw "Grey Door acknowledgement has leaked into ordinary player-facing content: $relative"
     }
