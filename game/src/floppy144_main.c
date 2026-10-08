@@ -2394,6 +2394,8 @@ static bool Floppy144HandleTextInput(
                             )
                         )
                         {
+                            global_catalogue.recovery_seed =
+                                global_run_state.recovery_seed;
                             Floppy144DocumentApplyEffects(
                                 &global_world,
                                 &global_run_state,

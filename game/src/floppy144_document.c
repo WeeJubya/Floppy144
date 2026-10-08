@@ -5,6 +5,7 @@
 #include "floppy144_document.h"
 #include "floppy144_game_data.h"
 #include "floppy144_trigger_engine.h"
+#include "floppy144_variation.h"
 
 #include <stddef.h>
 #include <string.h>
@@ -64,6 +65,78 @@ const Floppy144DocumentDefinition *Floppy144DocumentGet(
     }
 
     return NULL;
+}
+
+
+/*
+ * DR-04 workstream placement uses immutable trigger identities rather than
+ * S4E-08 generated record numbers. This is a stateless presentation mapping.
+ */
+static const Floppy144DocumentDefinition *Floppy144DocumentDr04Partner(
+    const Floppy144DocumentDefinition *document
+)
+{
+    uint32_t index;
+    Floppy144TriggerId other;
+    if(document == NULL || document->collection != FLOPPY144_COLLECTION_DR04)
+        return NULL;
+    if(document->trigger == FLOPPY144_TRIGGER_T010)
+        other = FLOPPY144_TRIGGER_T011;
+    else if(document->trigger == FLOPPY144_TRIGGER_T011)
+        other = FLOPPY144_TRIGGER_T010;
+    else
+        return NULL;
+
+    for(index = 0U; index < FLOPPY144_DOCUMENT_COUNT; ++index)
+    {
+        const Floppy144DocumentDefinition *candidate = &floppy144_documents[index];
+        if(candidate->collection == FLOPPY144_COLLECTION_DR04 &&
+           candidate->trigger == other)
+            return candidate;
+    }
+    return NULL;
+}
+
+bool Floppy144DocumentDr04Swapped(uint32_t recovery_seed)
+{
+    return Floppy144VariationRange(
+        recovery_seed, "dr04.workstream-swap.v1", "DR-04", 2U
+    ) == 1U;
+}
+
+const Floppy144DocumentDefinition *Floppy144DocumentGetForSeed(
+    Floppy144CollectionId collection, uint32_t slot, uint32_t recovery_seed
+)
+{
+    const Floppy144DocumentDefinition *document =
+        Floppy144DocumentGet(collection, slot);
+    const Floppy144DocumentDefinition *partner;
+    if(!Floppy144DocumentDr04Swapped(recovery_seed))
+        return document;
+    partner = Floppy144DocumentDr04Partner(document);
+    return partner != NULL ? partner : document;
+}
+
+const char *Floppy144DocumentRecordIdForSeed(
+    const Floppy144DocumentDefinition *document, uint32_t recovery_seed
+)
+{
+    const Floppy144DocumentDefinition *partner =
+        Floppy144DocumentDr04Swapped(recovery_seed)
+        ? Floppy144DocumentDr04Partner(document) : NULL;
+    return partner != NULL ? partner->record_id_override :
+        (document != NULL ? document->record_id_override : NULL);
+}
+
+uint32_t Floppy144DocumentSlotForSeed(
+    const Floppy144DocumentDefinition *document, uint32_t recovery_seed
+)
+{
+    const Floppy144DocumentDefinition *partner =
+        Floppy144DocumentDr04Swapped(recovery_seed)
+        ? Floppy144DocumentDr04Partner(document) : NULL;
+    return partner != NULL ? partner->record_index :
+        (document != NULL ? document->record_index : 0U);
 }
 
 /*
@@ -326,9 +399,8 @@ bool Floppy144DocumentAccessible(
     }
 
     pDocument =
-        Floppy144DocumentGet(
-            eCollection,
-            uRecordIndex
+        Floppy144DocumentGetForSeed(
+            eCollection, uRecordIndex, pRunState->recovery_seed
         );
 
     /*
@@ -373,9 +445,9 @@ bool Floppy144DocumentApplyEffects(
 )
 {
     const Floppy144DocumentDefinition *document =
-        Floppy144DocumentGet(
-            collection,
-            record_index
+        Floppy144DocumentGetForSeed(
+            collection, record_index,
+            run_state != NULL ? run_state->recovery_seed : 0U
         );
 
     if(document == NULL)

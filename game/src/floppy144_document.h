@@ -91,6 +91,18 @@ const Floppy144DocumentDefinition *Floppy144DocumentGet(
     uint32_t record_index
 );
 
+/* S4E-07: swap only the authored payloads, not catalogue slot identities. */
+bool Floppy144DocumentDr04Swapped(uint32_t recovery_seed);
+const Floppy144DocumentDefinition *Floppy144DocumentGetForSeed(
+    Floppy144CollectionId collection, uint32_t slot, uint32_t recovery_seed
+);
+const char *Floppy144DocumentRecordIdForSeed(
+    const Floppy144DocumentDefinition *document, uint32_t recovery_seed
+);
+uint32_t Floppy144DocumentSlotForSeed(
+    const Floppy144DocumentDefinition *document, uint32_t recovery_seed
+);
+
 /*
  * Resolve one exact authored player-facing record ID.
  *

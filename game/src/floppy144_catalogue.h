@@ -26,6 +26,7 @@
 typedef struct Floppy144CatalogueState
 {
     Floppy144CollectionId collection;
+    uint32_t recovery_seed; /* transient presentation seed */
     uint32_t selected_index;
     uint32_t top_index;
 
@@ -44,6 +45,12 @@ typedef struct Floppy144CatalogueState
  * Authored records obtain their metadata and effects from the document
  * registry rather than exposing collection-specific queries here.
  */
+
+void Floppy144CatalogueBuildRecordForSeed(
+    Floppy144CollectionId collection, uint32_t index, uint32_t recovery_seed,
+    char *record_id, size_t record_id_size,
+    char *title, size_t title_size
+);
 
 void Floppy144CatalogueBuildRecord(
     Floppy144CollectionId collection,

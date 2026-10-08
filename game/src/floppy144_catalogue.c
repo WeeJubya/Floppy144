@@ -158,9 +158,10 @@ static uint32_t Floppy144CatalogueOrderedRecordNumber(
  * FM-13 record 047 is overridden with its stable authored identity.
  */
 
-void Floppy144CatalogueBuildRecord(
+void Floppy144CatalogueBuildRecordForSeed(
     Floppy144CollectionId collection,
     uint32_t index,
+    uint32_t recovery_seed,
     char *record_id,
     size_t record_id_size,
     char *title,
@@ -283,15 +284,24 @@ void Floppy144CatalogueBuildRecord(
         );
     }
 
-    if(authored_document->title_override != NULL)
     {
-        snprintf(
-            title,
-            title_size,
-            "%s",
-            authored_document->title_override
-        );
+        const Floppy144DocumentDefinition *presented =
+            Floppy144DocumentGetForSeed(collection, index, recovery_seed);
+        if(presented != NULL && presented->title_override != NULL)
+            snprintf(title, title_size, "%s", presented->title_override);
     }
+}
+
+/* Zero-seed compatibility path for canonical, seed-independent queries. */
+void Floppy144CatalogueBuildRecord(
+    Floppy144CollectionId collection, uint32_t index,
+    char *record_id, size_t record_id_size,
+    char *title, size_t title_size
+)
+{
+    Floppy144CatalogueBuildRecordForSeed(
+        collection, index, 0U, record_id, record_id_size, title, title_size
+    );
 }
 
 /*
@@ -403,6 +413,7 @@ static void Floppy144CatalogueDrawRow(
     Floppy144CollectionId collection,
     uint32_t index,
     uint32_t y,
+    uint32_t recovery_seed,
     bool selected,
     uint32_t background,
     uint32_t selected_background,
@@ -415,9 +426,10 @@ static void Floppy144CatalogueDrawRow(
     char record_id[24];
     char title[48];
 
-    Floppy144CatalogueBuildRecord(
+    Floppy144CatalogueBuildRecordForSeed(
         collection,
         index,
+        recovery_seed,
         record_id,
         sizeof(record_id),
         title,
@@ -658,6 +670,7 @@ static void Floppy144CatalogueDrawList(
             catalogue->collection,
             record_index,
             98U + visible_row * 19U,
+            catalogue->recovery_seed,
             record_index == catalogue->selected_index,
             row,
             selected_row,
@@ -1231,9 +1244,10 @@ static void Floppy144CatalogueDrawDocument(
 )
 {
     const Floppy144DocumentDefinition *authored_document =
-        Floppy144DocumentGet(
+        Floppy144DocumentGetForSeed(
             catalogue->collection,
-            catalogue->selected_index
+            catalogue->selected_index,
+            catalogue->recovery_seed
         );
 
     const Floppy144CollectionDefinition *collection_definition =
@@ -1288,9 +1302,10 @@ static void Floppy144CatalogueDrawDocument(
 
     uint32_t uBodyLineCount = 0U;
 
-    Floppy144CatalogueBuildRecord(
+    Floppy144CatalogueBuildRecordForSeed(
         catalogue->collection,
         catalogue->selected_index,
+        catalogue->recovery_seed,
         record_id,
         sizeof(record_id),
         title,
@@ -1486,6 +1501,7 @@ void Floppy144CatalogueReset(
 )
 {
     catalogue->collection = collection;
+    catalogue->recovery_seed = 0U;
     catalogue->selected_index = 0;
     catalogue->top_index = 0;
     catalogue->document_scroll_line = 0U;
@@ -1679,9 +1695,10 @@ void Floppy144CatalogueScrollDocument(
     }
 
     pDocument =
-        Floppy144DocumentGet(
+        Floppy144DocumentGetForSeed(
             catalogue->collection,
-            catalogue->selected_index
+            catalogue->selected_index,
+            catalogue->recovery_seed
         );
 
     if(pDocument == NULL || pDocument->pszBody == NULL)

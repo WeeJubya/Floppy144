@@ -51,6 +51,7 @@ typedef struct Floppy144TerminalState
      * defaults unless they explicitly opt into player-facing behaviour.
      */
     bool debug_guidance;
+    uint32_t recovery_seed; /* transient LIST seed */
     bool first_profile_recovery;
     bool restoration_location_restrictions;
     bool terminal_room_valid;

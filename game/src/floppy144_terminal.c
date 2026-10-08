@@ -783,7 +783,9 @@ void Floppy144TerminalPrintNextAction(
                 const char *pszRecordId =
                     Floppy144TerminalDisplayRecordId(
                         pTerminal,
-                        pDocument->record_id_override
+                        Floppy144DocumentRecordIdForSeed(
+                            pDocument, pRunState->recovery_seed
+                        )
                     );
 
                 snprintf(
@@ -992,10 +994,10 @@ void Floppy144TerminalPrintPostOpenAction(
         return;
     }
 
+    pTerminal->recovery_seed = pRunState->recovery_seed;
     pOpenedDocument =
-        Floppy144DocumentGet(
-            eCollection,
-            uRecordIndex
+        Floppy144DocumentGetForSeed(
+            eCollection, uRecordIndex, pRunState->recovery_seed
         );
 
     if(
@@ -1071,11 +1073,15 @@ void Floppy144TerminalPrintPostOpenAction(
                 "NEXT RECOVERY ACTION: OPEN %s OR %s",
                 Floppy144TerminalDisplayRecordId(
                     pTerminal,
-                    pFirstChoice->record_id_override
+                    Floppy144DocumentRecordIdForSeed(
+                        pFirstChoice, pRunState->recovery_seed
+                    )
                 ),
                 Floppy144TerminalDisplayRecordId(
                     pTerminal,
-                    pSecondChoice->record_id_override
+                    Floppy144DocumentRecordIdForSeed(
+                        pSecondChoice, pRunState->recovery_seed
+                    )
                 )
             );
 
@@ -2901,9 +2907,10 @@ static void Floppy144TerminalPrintRecordPage(
         ++record_index
     )
     {
-        Floppy144CatalogueBuildRecord(
+        Floppy144CatalogueBuildRecordForSeed(
             terminal->record_pager_collection,
             record_index,
+            terminal->recovery_seed,
             record_id,
             sizeof(record_id),
             title,
@@ -3739,9 +3746,10 @@ static void Floppy144TerminalRequestOpenRecord(
         return;
     }
 
-    Floppy144CatalogueBuildRecord(
+    Floppy144CatalogueBuildRecordForSeed(
         collection,
         record_index,
+        run_state->recovery_seed,
         canonical_record_id,
         sizeof(canonical_record_id),
         title,
@@ -3801,6 +3809,7 @@ void Floppy144TerminalSubmitInput(
 
     terminal->open_record_requested =
         false;
+    terminal->recovery_seed = run_state->recovery_seed;
 
     /*
      * Whitespace-only submissions are true no-ops: they are not printed,
@@ -4134,6 +4143,7 @@ void Floppy144TerminalReset(
     uint32_t line_index;
     uint32_t history_index;
 
+    terminal->recovery_seed = 0U;
     terminal->selected_domain =
         FLOPPY144_COLLECTION_DOMAIN_DR;
 
