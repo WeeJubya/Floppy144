@@ -95,18 +95,358 @@ function Test-Floppy144IconSource
     Assert-True ($header -match "#define\s+IDI_FLOPPY144_APP_ICON\s+101") "Resource ID 101 is missing."
     Assert-True ($rc -match 'IDI_FLOPPY144_APP_ICON\s+ICON\s+"floppy144\.ico"') "RC file does not bind the application icon."
 
-    $launcherStart = $premake.IndexOf('project("Floppy144")')
-    Assert-True ($launcherStart -ge 0) "Floppy144 launcher project was not found in Premake."
-    $launcherPremake = $premake.Substring($launcherStart)
+    $coreMatch = [regex]::Match($premake, '(?m)^project\("Floppy144Core"\)\r?
+
+    Assert-True ($main -match '#include\s+"floppy144_resource\.h"') "Win32 launcher does not include the resource ID header."
+    Assert-True ($main -match 'hIcon\s*=\s*LoadIconA\(\s*instance,\s*MAKEINTRESOURCEA\(\s*IDI_FLOPPY144_APP_ICON\s*\)') "Win32 window class does not load the FLOPPY//144 icon."
+
+    Write-Host "S4F-01 ICON SOURCE: PASS"
+    Write-Host "Canonical SVG: 64x64 design grid"
+    Write-Host "ICO frames: $($actualSizes -join ', ')"
+}
+
+function Test-Floppy144GeneratedProject
+{
+    Test-Floppy144IconSource
+
+    $projectPath = ".\build\Floppy144.vcxproj"
+    Assert-True (Test-Path -LiteralPath $projectPath) "Generated Floppy144.vcxproj is missing."
+
+    $project = Get-Content -LiteralPath $projectPath -Raw
+    Assert-True ($project -match 'floppy144_app\.rc') "Regenerated Visual Studio project dropped the icon RC."
+    Assert-True ($project -match 'platform[\\/]+win32') "Regenerated Visual Studio project dropped the Win32 resource include path."
+
+    Write-Host "S4F-01 GENERATED PROJECT: PASS"
+}
+
+function Test-Floppy144BuiltExecutable
+{
+    param
+    (
+        [string]$Path
+    )
+
+    Test-Floppy144IconSource
+
+    Assert-True (Test-Path -LiteralPath $Path) "Built executable is missing: $Path"
+
+    if(-not ("Floppy144NativeResourceProbe" -as [type]))
+    {
+        Add-Type -TypeDefinition @"
+using System;
+using System.Runtime.InteropServices;
+
+public static class Floppy144NativeResourceProbe
+{
+    private const uint LOAD_LIBRARY_AS_DATAFILE = 0x00000002;
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern IntPtr LoadLibraryExW(string fileName, IntPtr file, uint flags);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern IntPtr FindResourceW(IntPtr module, IntPtr name, IntPtr type);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern uint SizeofResource(IntPtr module, IntPtr resource);
+
+    [DllImport("kernel32.dll")]
+    private static extern bool FreeLibrary(IntPtr module);
+
+    public static uint GroupIconSize(string fileName, int resourceId)
+    {
+        IntPtr module = LoadLibraryExW(fileName, IntPtr.Zero, LOAD_LIBRARY_AS_DATAFILE);
+        if(module == IntPtr.Zero)
+        {
+            return 0;
+        }
+
+        try
+        {
+            IntPtr resource = FindResourceW(module, new IntPtr(resourceId), new IntPtr(14));
+            if(resource == IntPtr.Zero)
+            {
+                return 0;
+            }
+
+            return SizeofResource(module, resource);
+        }
+        finally
+        {
+            FreeLibrary(module);
+        }
+    }
+}
+"@
+    }
+
+    $resolvedPath = (Resolve-Path -LiteralPath $Path).Path
+    $groupSize = [Floppy144NativeResourceProbe]::GroupIconSize($resolvedPath, 101)
+
+    Assert-True ($groupSize -gt 0) "Built executable does not contain RT_GROUP_ICON resource 101."
+
+    Write-Host "S4F-01 BUILT EXECUTABLE ICON: PASS"
+    Write-Host "Executable: $resolvedPath"
+    Write-Host "RT_GROUP_ICON 101 size: $groupSize bytes"
+}
+
+switch($Phase)
+{
+    "Source"
+    {
+        Test-Floppy144IconSource
+    }
+
+    "Generated"
+    {
+        Test-Floppy144GeneratedProject
+    }
+
+    "Built"
+    {
+        Test-Floppy144BuiltExecutable $Executable
+    }
+}
+)
+    $platformMatch = [regex]::Match($premake, '(?m)^project\("Floppy144PlatformWin32"\)\r?
+
+    Assert-True ($main -match '#include\s+"floppy144_resource\.h"') "Win32 launcher does not include the resource ID header."
+    Assert-True ($main -match 'hIcon\s*=\s*LoadIconA\(\s*instance,\s*MAKEINTRESOURCEA\(\s*IDI_FLOPPY144_APP_ICON\s*\)') "Win32 window class does not load the FLOPPY//144 icon."
+
+    Write-Host "S4F-01 ICON SOURCE: PASS"
+    Write-Host "Canonical SVG: 64x64 design grid"
+    Write-Host "ICO frames: $($actualSizes -join ', ')"
+}
+
+function Test-Floppy144GeneratedProject
+{
+    Test-Floppy144IconSource
+
+    $projectPath = ".\build\Floppy144.vcxproj"
+    Assert-True (Test-Path -LiteralPath $projectPath) "Generated Floppy144.vcxproj is missing."
+
+    $project = Get-Content -LiteralPath $projectPath -Raw
+    Assert-True ($project -match 'floppy144_app\.rc') "Regenerated Visual Studio project dropped the icon RC."
+    Assert-True ($project -match 'platform[\\/]+win32') "Regenerated Visual Studio project dropped the Win32 resource include path."
+
+    Write-Host "S4F-01 GENERATED PROJECT: PASS"
+}
+
+function Test-Floppy144BuiltExecutable
+{
+    param
+    (
+        [string]$Path
+    )
+
+    Test-Floppy144IconSource
+
+    Assert-True (Test-Path -LiteralPath $Path) "Built executable is missing: $Path"
+
+    if(-not ("Floppy144NativeResourceProbe" -as [type]))
+    {
+        Add-Type -TypeDefinition @"
+using System;
+using System.Runtime.InteropServices;
+
+public static class Floppy144NativeResourceProbe
+{
+    private const uint LOAD_LIBRARY_AS_DATAFILE = 0x00000002;
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern IntPtr LoadLibraryExW(string fileName, IntPtr file, uint flags);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern IntPtr FindResourceW(IntPtr module, IntPtr name, IntPtr type);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern uint SizeofResource(IntPtr module, IntPtr resource);
+
+    [DllImport("kernel32.dll")]
+    private static extern bool FreeLibrary(IntPtr module);
+
+    public static uint GroupIconSize(string fileName, int resourceId)
+    {
+        IntPtr module = LoadLibraryExW(fileName, IntPtr.Zero, LOAD_LIBRARY_AS_DATAFILE);
+        if(module == IntPtr.Zero)
+        {
+            return 0;
+        }
+
+        try
+        {
+            IntPtr resource = FindResourceW(module, new IntPtr(resourceId), new IntPtr(14));
+            if(resource == IntPtr.Zero)
+            {
+                return 0;
+            }
+
+            return SizeofResource(module, resource);
+        }
+        finally
+        {
+            FreeLibrary(module);
+        }
+    }
+}
+"@
+    }
+
+    $resolvedPath = (Resolve-Path -LiteralPath $Path).Path
+    $groupSize = [Floppy144NativeResourceProbe]::GroupIconSize($resolvedPath, 101)
+
+    Assert-True ($groupSize -gt 0) "Built executable does not contain RT_GROUP_ICON resource 101."
+
+    Write-Host "S4F-01 BUILT EXECUTABLE ICON: PASS"
+    Write-Host "Executable: $resolvedPath"
+    Write-Host "RT_GROUP_ICON 101 size: $groupSize bytes"
+}
+
+switch($Phase)
+{
+    "Source"
+    {
+        Test-Floppy144IconSource
+    }
+
+    "Generated"
+    {
+        Test-Floppy144GeneratedProject
+    }
+
+    "Built"
+    {
+        Test-Floppy144BuiltExecutable $Executable
+    }
+}
+)
+    $launcherMatch = [regex]::Match($premake, '(?m)^project\("Floppy144"\)\r?
+
+    Assert-True ($main -match '#include\s+"floppy144_resource\.h"') "Win32 launcher does not include the resource ID header."
+    Assert-True ($main -match 'hIcon\s*=\s*LoadIconA\(\s*instance,\s*MAKEINTRESOURCEA\(\s*IDI_FLOPPY144_APP_ICON\s*\)') "Win32 window class does not load the FLOPPY//144 icon."
+
+    Write-Host "S4F-01 ICON SOURCE: PASS"
+    Write-Host "Canonical SVG: 64x64 design grid"
+    Write-Host "ICO frames: $($actualSizes -join ', ')"
+}
+
+function Test-Floppy144GeneratedProject
+{
+    Test-Floppy144IconSource
+
+    $projectPath = ".\build\Floppy144.vcxproj"
+    Assert-True (Test-Path -LiteralPath $projectPath) "Generated Floppy144.vcxproj is missing."
+
+    $project = Get-Content -LiteralPath $projectPath -Raw
+    Assert-True ($project -match 'floppy144_app\.rc') "Regenerated Visual Studio project dropped the icon RC."
+    Assert-True ($project -match 'platform[\\/]+win32') "Regenerated Visual Studio project dropped the Win32 resource include path."
+
+    Write-Host "S4F-01 GENERATED PROJECT: PASS"
+}
+
+function Test-Floppy144BuiltExecutable
+{
+    param
+    (
+        [string]$Path
+    )
+
+    Test-Floppy144IconSource
+
+    Assert-True (Test-Path -LiteralPath $Path) "Built executable is missing: $Path"
+
+    if(-not ("Floppy144NativeResourceProbe" -as [type]))
+    {
+        Add-Type -TypeDefinition @"
+using System;
+using System.Runtime.InteropServices;
+
+public static class Floppy144NativeResourceProbe
+{
+    private const uint LOAD_LIBRARY_AS_DATAFILE = 0x00000002;
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern IntPtr LoadLibraryExW(string fileName, IntPtr file, uint flags);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern IntPtr FindResourceW(IntPtr module, IntPtr name, IntPtr type);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern uint SizeofResource(IntPtr module, IntPtr resource);
+
+    [DllImport("kernel32.dll")]
+    private static extern bool FreeLibrary(IntPtr module);
+
+    public static uint GroupIconSize(string fileName, int resourceId)
+    {
+        IntPtr module = LoadLibraryExW(fileName, IntPtr.Zero, LOAD_LIBRARY_AS_DATAFILE);
+        if(module == IntPtr.Zero)
+        {
+            return 0;
+        }
+
+        try
+        {
+            IntPtr resource = FindResourceW(module, new IntPtr(resourceId), new IntPtr(14));
+            if(resource == IntPtr.Zero)
+            {
+                return 0;
+            }
+
+            return SizeofResource(module, resource);
+        }
+        finally
+        {
+            FreeLibrary(module);
+        }
+    }
+}
+"@
+    }
+
+    $resolvedPath = (Resolve-Path -LiteralPath $Path).Path
+    $groupSize = [Floppy144NativeResourceProbe]::GroupIconSize($resolvedPath, 101)
+
+    Assert-True ($groupSize -gt 0) "Built executable does not contain RT_GROUP_ICON resource 101."
+
+    Write-Host "S4F-01 BUILT EXECUTABLE ICON: PASS"
+    Write-Host "Executable: $resolvedPath"
+    Write-Host "RT_GROUP_ICON 101 size: $groupSize bytes"
+}
+
+switch($Phase)
+{
+    "Source"
+    {
+        Test-Floppy144IconSource
+    }
+
+    "Generated"
+    {
+        Test-Floppy144GeneratedProject
+    }
+
+    "Built"
+    {
+        Test-Floppy144BuiltExecutable $Executable
+    }
+}
+)
+
+    Assert-True ($coreMatch.Success) "Floppy144Core project was not found in Premake."
+    Assert-True ($platformMatch.Success) "Floppy144PlatformWin32 project was not found in Premake."
+    Assert-True ($launcherMatch.Success) "Floppy144 launcher project was not found in Premake."
+    Assert-True ($coreMatch.Index -lt $platformMatch.Index -and $platformMatch.Index -lt $launcherMatch.Index) "Premake project boundaries are out of order."
+
+    $corePremake = $premake.Substring($coreMatch.Index, $platformMatch.Index - $coreMatch.Index)
+    $platformPremake = $premake.Substring($platformMatch.Index, $launcherMatch.Index - $platformMatch.Index)
+    $launcherPremake = $premake.Substring($launcherMatch.Index)
 
     Assert-True ($launcherPremake -match 'filter\("platforms:Windows"\)[\s\S]*floppy144_app\.rc') "Windows launcher does not include the icon resource."
     Assert-True ($launcherPremake -match 'resincludedirs\([\s\S]*platform/win32') "Windows resource include directory is missing."
+    Assert-True ($launcherPremake -match 'includedirs\([\s\S]*platform/win32') "Windows launcher cannot include the resource ID header."
 
-    $coreStart = $premake.IndexOf('project("Floppy144Core")')
-    $platformStart = $premake.IndexOf('project("Floppy144PlatformWin32")')
-    Assert-True ($coreStart -ge 0 -and $platformStart -gt $coreStart) "Premake Core/platform project boundaries are missing."
-    $corePremake = $premake.Substring($coreStart, $platformStart - $coreStart)
-    Assert-True ($corePremake -notmatch 'floppy144_app\.rc|floppy144\.ico|floppy144_resource\.h') "Application resources leaked into Floppy144Core."
+    Assert-True ($corePremake -notmatch 'platform/win32|floppy144_app\.rc|floppy144\.ico|floppy144_resource\.h') "Application/platform resources leaked into Floppy144Core."
+    Assert-True ($platformPremake -notmatch 'floppy144_app\.rc|floppy144\.ico|floppy144_resource\.h') "Application branding leaked into Floppy144PlatformWin32."
 
     Assert-True ($main -match '#include\s+"floppy144_resource\.h"') "Win32 launcher does not include the resource ID header."
     Assert-True ($main -match 'hIcon\s*=\s*LoadIconA\(\s*instance,\s*MAKEINTRESOURCEA\(\s*IDI_FLOPPY144_APP_ICON\s*\)') "Win32 window class does not load the FLOPPY//144 icon."
