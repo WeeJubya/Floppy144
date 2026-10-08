@@ -1222,6 +1222,26 @@ bool Floppy144RunStateSetBranch
     return true;
 }
 
+bool Floppy144RunStateGreyDoorDiscover(Floppy144RunState *state)
+{
+    if(state == NULL ||
+       state->grey_door_state != (uint8_t)FLOPPY144_GREY_DOOR_UNAVAILABLE)
+        return false;
+    state->grey_door_state = (uint8_t)FLOPPY144_GREY_DOOR_AVAILABLE;
+    state->dirty = 1U;
+    return true;
+}
+
+bool Floppy144RunStateGreyDoorComplete(Floppy144RunState *state)
+{
+    if(state == NULL ||
+       state->grey_door_state != (uint8_t)FLOPPY144_GREY_DOOR_AVAILABLE)
+        return false;
+    state->grey_door_state = (uint8_t)FLOPPY144_GREY_DOOR_COMPLETED;
+    state->dirty = 1U;
+    return true;
+}
+
 void Floppy144RunStateReset
 (
     Floppy144RunState *state

@@ -12,6 +12,9 @@
 #include "f144_win32_storage.h"
 
 #include "floppy144_persistence.h"
+#include "floppy144_document.h"
+#include "floppy144_catalogue.h"
+#include "floppy144_variation.h"
 #include "floppy144_profile.h"
 #include "floppy144_profile_view.h"
 #include "floppy144_run_state.h"
@@ -1405,6 +1408,101 @@ static void TestDifferentWorkingDirectory(
     );
 }
 
+
+/* S4G-01: isolated orphan record, stable placement, V1/V2/V3 compatibility. */
+static void TestGreyDoorDiscovery(const char *root)
+{
+    Floppy144RunState run, before, loaded, older;
+    Floppy144DiscoveryProfile profile, profile_before;
+    Floppy144CollectionId collection = FLOPPY144_COLLECTION_DR01;
+    uint32_t index = 999U;
+    uint32_t kb, slot;
+    uint8_t old_v2[FLOPPY144_SAVE_PAYLOAD_V2_SIZE];
+    char path[F144_PLATFORM_PATH_CAPACITY];
+    char id[24], title[48];
+
+    Floppy144RunStateBegin(&run,146U);
+    Floppy144DiscoveryProfileReset(&profile);
+    profile_before=profile;
+
+    Expect(
+        Floppy144DocumentFindRecordId(
+            FLOPPY144_GREY_DOOR_RECORD_ID,&collection,&index
+        ) &&
+        collection == FLOPPY144_GREY_DOOR_RECORD_COLLECTION &&
+        index == FLOPPY144_GREY_DOOR_RECORD_INDEX,
+        "S4G orphan record resolves outside all normal collections"
+    );
+    Expect(!Floppy144DocumentAccessible(&run,collection,index),
+        "S4G orphan unavailable until DR-01 is restored");
+    Expect(!Floppy144DocumentApplyEffects(NULL,&run,collection,index),
+        "S4G cannot be opened before recovery");
+    (void)Floppy144RunStateBitSet(
+        run.collections,(uint32_t)FLOPPY144_COLLECTION_DR01
+    );
+    Floppy144CatalogueBuildRecordForSeed(
+        collection,index,run.recovery_seed,id,sizeof(id),title,sizeof(title)
+    );
+    Expect(strcmp(id,FLOPPY144_GREY_DOOR_RECORD_ID)==0 &&
+        strcmp(title,"Unallocated Floor Area Notice")==0,
+        "S4G orphan uses ordinary authored catalogue title and record ID");
+    Expect(Floppy144DocumentAccessible(&run,collection,index),
+        "S4G orphan visible once DR-01 exists");
+    before=run;
+    kb=Floppy144RunStateRecoveredKb(&run);
+    slot=Floppy144RunStateGreyDoorPlacementSlot(&run,12U);
+    Expect(Floppy144DocumentApplyEffects(NULL,&run,collection,index) &&
+        run.grey_door_state == (uint8_t)FLOPPY144_GREY_DOOR_AVAILABLE &&
+        run.dirty == 1U,
+        "S4G first successful view enables availability and save dirtiness");
+    Expect(Floppy144RunStateRecoveredKb(&run)==kb &&
+        memcmp(run.collections,before.collections,sizeof(run.collections))==0 &&
+        memcmp(run.triggers,before.triggers,sizeof(run.triggers))==0 &&
+        memcmp(run.evidence,before.evidence,sizeof(run.evidence))==0 &&
+        memcmp(run.notebook,before.notebook,sizeof(run.notebook))==0 &&
+        memcmp(run.notebook_order,before.notebook_order,
+            sizeof(run.notebook_order))==0 &&
+        run.notebook_order_count==before.notebook_order_count &&
+        memcmp(&profile,&profile_before,sizeof(profile))==0,
+        "S4G costs no capacity and changes no gameplay or profile counters");
+    run.dirty=0U;
+    (void)Floppy144DocumentApplyEffects(NULL,&run,collection,index);
+    (void)Floppy144VariationValue(146U,"staff.crossword.scribble.v1","P-074");
+    Expect(run.grey_door_state == (uint8_t)FLOPPY144_GREY_DOOR_AVAILABLE &&
+        run.dirty==0U &&
+        Floppy144RunStateGreyDoorPlacementSlot(&run,12U)==slot,
+        "S4G repeated view neither dirties save nor rerolls placement");
+    Expect(TestJoinPath(root,"grey-door.sav",path,(uint32_t)sizeof(path)),
+        "S4G isolated save path");
+    Expect(Floppy144PersistenceSaveRunState(path,&run) &&
+        Floppy144PersistenceLoadRunState(path,&loaded),
+        "S4G V3 save/reload works");
+    Expect(loaded.grey_door_state==(uint8_t)FLOPPY144_GREY_DOOR_AVAILABLE &&
+        loaded.recovery_seed==run.recovery_seed &&
+        Floppy144RunStateGreyDoorPlacementSlot(&loaded,12U)==slot,
+        "S4G reload preserves availability and derived placement");
+    Expect(Floppy144RunStateGreyDoorComplete(&loaded) &&
+        loaded.grey_door_state==(uint8_t)FLOPPY144_GREY_DOOR_COMPLETED,
+        "S4G completion is a single persistent transition");
+    loaded.dirty=0U;
+    (void)Floppy144DocumentApplyEffects(NULL,&loaded,collection,index);
+    Expect(loaded.grey_door_state==(uint8_t)FLOPPY144_GREY_DOOR_COMPLETED &&
+        loaded.dirty==0U &&
+        !Floppy144RunStateGreyDoorComplete(&loaded) &&
+        !Floppy144RunStateGreyDoorDiscover(&loaded),
+        "S4G completed door cannot be revived by document or second completion");
+    Expect(Floppy144PersistenceSaveRunState(path,&loaded) &&
+        Floppy144PersistenceLoadRunState(path,&run) &&
+        run.grey_door_state==(uint8_t)FLOPPY144_GREY_DOOR_COMPLETED,
+        "S4G permanent completion survives save/reload");
+    Expect(Floppy144PersistenceEncodeRunState(
+        &run,old_v2,FLOPPY144_SAVE_PAYLOAD_V2_SIZE) &&
+        Floppy144PersistenceDecodeRunState(
+            &older,old_v2,FLOPPY144_SAVE_PAYLOAD_V2_SIZE) &&
+        older.grey_door_state==(uint8_t)FLOPPY144_GREY_DOOR_UNAVAILABLE,
+        "S4G legacy V2 load defaults the optional door to unavailable");
+}
+
 int main(void)
 {
     const char *root=getenv("F144_TEST_ROOT");
@@ -1438,6 +1536,7 @@ int main(void)
     TestMalformedLegacy(root);
     TestMissingDirectoryAndCapacity(root);
     TestDifferentWorkingDirectory(root);
+    TestGreyDoorDiscovery(root);
 
     if(failures!=0)
     {

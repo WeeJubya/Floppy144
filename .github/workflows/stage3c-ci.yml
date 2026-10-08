@@ -178,6 +178,10 @@ jobs:
         shell: pwsh
         run: .\tools\test_stage4f_presentation_journey.ps1
 
+      - name: Stage 4G isolated Grey Door discovery
+        shell: pwsh
+        run: .\tools\test_stage4g_grey_door.ps1
+
       - name: Install Premake
         shell: pwsh
         run: |

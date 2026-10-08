@@ -168,10 +168,20 @@ void Floppy144CatalogueBuildRecordForSeed(
     size_t title_size
 )
 {
-    const Floppy144CatalogueDefinition *definition =
-        &Floppy144CollectionGet(collection)->catalogue;
-
+    const Floppy144CatalogueDefinition *definition;
     const Floppy144DocumentDefinition *authored_document;
+
+    if(collection == FLOPPY144_GREY_DOOR_RECORD_COLLECTION)
+    {
+        authored_document = Floppy144DocumentGet(collection, index);
+        (void)snprintf(record_id, record_id_size, "%s",
+            authored_document != NULL ? authored_document->record_id_override : "UNAVAILABLE");
+        (void)snprintf(title, title_size, "%s",
+            authored_document != NULL ? authored_document->title_override : "UNAVAILABLE");
+        return;
+    }
+    definition = &Floppy144CollectionGet(collection)->catalogue;
+
 
     uint32_t subject_index;
     uint32_t group_index;
@@ -1330,7 +1340,8 @@ static void Floppy144CatalogueDrawDocument(
         surface,
         538,
         5,
-        collection_definition->code,
+        catalogue->collection == FLOPPY144_GREY_DOOR_RECORD_COLLECTION
+            ? "DR-00" : collection_definition->code,
         1,
         green
     );
@@ -1613,17 +1624,19 @@ bool Floppy144CatalogueOpenRecord(
     uint32_t record_index
 )
 {
-    const Floppy144CatalogueDefinition *definition =
-        &Floppy144CollectionGet(
-            collection
-        )->catalogue;
+    const Floppy144CatalogueDefinition *definition;
 
-    if(
-        catalogue == NULL ||
-        record_index >= definition->record_count
-    )
+    if(catalogue == NULL) return false;
+    if(collection == FLOPPY144_GREY_DOOR_RECORD_COLLECTION)
     {
-        return false;
+        if(record_index != FLOPPY144_GREY_DOOR_RECORD_INDEX) return false;
+    }
+    else
+    {
+        if((uint32_t)collection >= (uint32_t)FLOPPY144_COLLECTION_COUNT)
+            return false;
+        definition = &Floppy144CollectionGet(collection)->catalogue;
+        if(record_index >= definition->record_count) return false;
     }
 
     Floppy144CatalogueReset(

@@ -994,6 +994,9 @@ void Floppy144TerminalPrintPostOpenAction(
         return;
     }
 
+    /* No post-OPEN recovery breadcrumb or announcement for the orphan record. */
+    if(eCollection == FLOPPY144_GREY_DOOR_RECORD_COLLECTION) return;
+
     pTerminal->recovery_seed = pRunState->recovery_seed;
     pOpenedDocument =
         Floppy144DocumentGetForSeed(
@@ -2744,6 +2747,7 @@ static uint32_t Floppy144TerminalRecordPageCount(
     return
         (
             definition->catalogue.record_count +
+            (strcmp(definition->code, "DR-01") == 0 ? 1U : 0U) +
             FLOPPY144_TERMINAL_RECORDS_PER_PAGE -
             1U
         ) /
@@ -2809,10 +2813,10 @@ static void Floppy144TerminalPrintRecordPage(
         first_index +
         FLOPPY144_TERMINAL_RECORDS_PER_PAGE;
 
-    if(final_index > definition->catalogue.record_count)
     {
-        final_index =
-            definition->catalogue.record_count;
+        uint32_t display_count = definition->catalogue.record_count +
+            (terminal->record_pager_collection == FLOPPY144_COLLECTION_DR01 ? 1U : 0U);
+        if(final_index > display_count) final_index = display_count;
     }
 
     terminal->output_count =
@@ -2907,9 +2911,15 @@ static void Floppy144TerminalPrintRecordPage(
         ++record_index
     )
     {
+        /* DR-01's extra final index entry is NOT one of its 15 records. */
         Floppy144CatalogueBuildRecordForSeed(
-            terminal->record_pager_collection,
-            record_index,
+            terminal->record_pager_collection == FLOPPY144_COLLECTION_DR01 &&
+                record_index == definition->catalogue.record_count
+                ? FLOPPY144_GREY_DOOR_RECORD_COLLECTION
+                : terminal->record_pager_collection,
+            terminal->record_pager_collection == FLOPPY144_COLLECTION_DR01 &&
+                record_index == definition->catalogue.record_count
+                ? FLOPPY144_GREY_DOOR_RECORD_INDEX : record_index,
             terminal->recovery_seed,
             record_id,
             sizeof(record_id),
@@ -3697,31 +3707,26 @@ static void Floppy144TerminalRequestOpenRecord(
         return;
     }
 
-    definition =
-        Floppy144CollectionGet(
-            collection
-        );
-
-    if(
-        !Floppy144WorldCollectionRestored(
-            world,
-            collection
-        )
-    )
+    if(collection == FLOPPY144_GREY_DOOR_RECORD_COLLECTION)
     {
-        snprintf(
-            line,
-            sizeof(line),
-            "COLLECTION %s HAS NOT BEEN RESTORED.",
-            definition->code
-        );
-
-        Floppy144TerminalPushLine(
-            terminal,
-            line
-        );
-
-        return;
+        if(!Floppy144RunStateCollectionRestored(
+            run_state, FLOPPY144_COLLECTION_DR01))
+        {
+            Floppy144TerminalPushLine(
+                terminal, "RECORD ACCESS DEFERRED BY RECOVERY SEQUENCE.");
+            return;
+        }
+    }
+    else
+    {
+        definition = Floppy144CollectionGet(collection);
+        if(!Floppy144WorldCollectionRestored(world, collection))
+        {
+            snprintf(line, sizeof(line),
+                "COLLECTION %s HAS NOT BEEN RESTORED.", definition->code);
+            Floppy144TerminalPushLine(terminal, line);
+            return;
+        }
     }
 
     /*

@@ -52,6 +52,14 @@ typedef enum Floppy144RunBranch
 }
 Floppy144RunBranch;
 
+/* Isolated one-shot state, never stored in any collection/trigger/evidence bit. */
+typedef enum Floppy144GreyDoorState
+{
+    FLOPPY144_GREY_DOOR_UNAVAILABLE = 0,
+    FLOPPY144_GREY_DOOR_AVAILABLE = 1,
+    FLOPPY144_GREY_DOOR_COMPLETED = 2
+} Floppy144GreyDoorState;
+
 typedef struct Floppy144RunState
 {
     uint32_t recovery_seed;
@@ -62,6 +70,7 @@ typedef struct Floppy144RunState
 
     uint8_t projection;
     uint8_t archive_services_initialised;
+    uint8_t grey_door_state; /* S4G per-run save field */
 
     int32_t player_site_x;
     int32_t player_site_y;
@@ -323,6 +332,13 @@ void Floppy144RunStateSetPlayerSitePosition
     Floppy144RunState *state,
  int32_t x,
  int32_t y
+);
+
+/* Independent seed domain: slot indexes a vetted candidate list, not world coordinates. */
+bool Floppy144RunStateGreyDoorDiscover(Floppy144RunState *state);
+bool Floppy144RunStateGreyDoorComplete(Floppy144RunState *state);
+uint32_t Floppy144RunStateGreyDoorPlacementSlot(
+    const Floppy144RunState *state, uint32_t candidate_count
 );
 
 void Floppy144RunStateReset

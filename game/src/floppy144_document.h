@@ -14,6 +14,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+/* Stable orphan registry slot, deliberately outside the 35 collections. */
+#define FLOPPY144_GREY_DOOR_RECORD_ID "DR-00-RS-0144"
+#define FLOPPY144_GREY_DOOR_RECORD_COLLECTION FLOPPY144_COLLECTION_COUNT
+#define FLOPPY144_GREY_DOOR_RECORD_INDEX 0U
+
 /*
  * Authored document display treatments
  *

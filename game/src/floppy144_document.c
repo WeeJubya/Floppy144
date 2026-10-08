@@ -30,7 +30,40 @@ static const Floppy144DocumentDefinition
  * the only hand-edited content source.
  */
 #include "floppy144_documents.generated.inc"
+    /*
+     * One S4G orphan record, absent from collection JSON and generation totals.
+     * It still uses the existing document registry and normal document viewer.
+     */
+    {
+        FLOPPY144_GREY_DOOR_RECORD_COLLECTION, FLOPPY144_GREY_DOOR_RECORD_INDEX,
+        FLOPPY144_GREY_DOOR_RECORD_ID, "Unallocated Floor Area Notice",
+        FLOPPY144_DOCUMENT_VIEW_GENERIC, FLOPPY144_TRIGGER_COUNT,
+        NULL, 0U,
+        "GOVERNMENT DEPARTMENT OF RECORDS\n"
+        "BUILDING SERVICES / FLOORPLAN RECONCILIATION\n"
+        "REF: DR-00-RS-0144\n\n"
+        "An unallocated corridor return remains on the duplicate plan.\n"
+        "No room number has been assigned. The occupied floor area\n"
+        "is greater than the external building measurements allow.\n\n"
+        "Maintenance reports a desk lamp burning after closure.\n"
+        "Estates confirms that the corresponding wall is continuous.\n"
+        "Both statements have been filed as accurate.\n\n"
+        "The discrepancy was marked RESOLVED without a site visit.\n"
+        "Do not amend the master plan.",
+        false, false
+    },
 };
+
+uint32_t Floppy144RunStateGreyDoorPlacementSlot(
+    const Floppy144RunState *state, uint32_t candidate_count
+)
+{
+    if(state == NULL || candidate_count == 0U) return 0U;
+    return Floppy144VariationRange(
+        state->recovery_seed, "GREY_DOOR", "CORRIDOR_WALL_V1",
+        candidate_count
+    );
+}
 
 #define FLOPPY144_DOCUMENT_COUNT                                   \
     FLOPPY144_ARRAY_COUNT(floppy144_documents)
@@ -389,14 +422,14 @@ bool Floppy144DocumentAccessible(
 {
     const Floppy144DocumentDefinition *pDocument;
 
-    if(
-        pRunState == NULL ||
-        (uint32_t)eCollection >=
-            (uint32_t)FLOPPY144_COLLECTION_COUNT
-    )
-    {
+    if(pRunState == NULL) return false;
+    if(eCollection == FLOPPY144_GREY_DOOR_RECORD_COLLECTION)
+        return uRecordIndex == FLOPPY144_GREY_DOOR_RECORD_INDEX &&
+            Floppy144RunStateCollectionRestored(
+                pRunState, FLOPPY144_COLLECTION_DR01
+            );
+    if((uint32_t)eCollection >= (uint32_t)FLOPPY144_COLLECTION_COUNT)
         return false;
-    }
 
     pDocument =
         Floppy144DocumentGetForSeed(
@@ -453,6 +486,16 @@ bool Floppy144DocumentApplyEffects(
     if(document == NULL)
     {
         return false;
+    }
+
+    /* S4G: bypass generic evidence reconciliation and progression effects. */
+    if(collection == FLOPPY144_GREY_DOOR_RECORD_COLLECTION)
+    {
+        if(record_index != FLOPPY144_GREY_DOOR_RECORD_INDEX ||
+           !Floppy144DocumentAccessible(run_state, collection, record_index))
+            return false;
+        (void)Floppy144RunStateGreyDoorDiscover(run_state);
+        return true;
     }
 
     /*
