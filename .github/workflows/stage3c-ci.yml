@@ -30,6 +30,20 @@ jobs:
           git diff --exit-code -- game/src/floppy144_documents.generated.inc game/src/floppy144_collections.def game/src/floppy144_collections.generated.def
           if($LASTEXITCODE -ne 0) { throw "Generated archive registries drift from canonical game data." }
 
+      - name: Capture canonical generated snapshot for final sign-off
+        uses: actions/upload-artifact@v4
+        with:
+          name: Floppy144-Stage4-Canonical-Generated-Snapshot
+          path: |
+            game/src/*.generated.inc
+            game/src/*.generated.def
+            game/src/site_layout.generated.jsonc
+            game/src/floppy144_collections.def
+            game/src/floppy144_triggers.def
+            game/src/floppy144_interactions.def
+            game/src/floppy144_evidence.def
+          if-no-files-found: error
+
       - name: Stage 2 regression
         shell: pwsh
         run: .\tools\test_stage2.ps1
