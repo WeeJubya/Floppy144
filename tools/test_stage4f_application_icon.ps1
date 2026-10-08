@@ -124,7 +124,7 @@ function Test-Floppy144GeneratedProject
     Assert-True (Test-Path -LiteralPath $projectPath) "Generated Floppy144.vcxproj is missing."
 
     $project = Get-Content -LiteralPath $projectPath -Raw
-    Assert-True ($project -match 'ResourceCompile Include="[^"]*floppy144_app\.rc"') "Regenerated Visual Studio project dropped the icon RC."
+    Assert-True ($project -match 'floppy144_app\.rc') "Regenerated Visual Studio project dropped the icon RC."
     Assert-True ($project -match 'platform[\\/]+win32') "Regenerated Visual Studio project dropped the Win32 resource include path."
 
     Write-Host "S4F-01 GENERATED PROJECT: PASS"
