@@ -60,6 +60,14 @@ typedef enum Floppy144GreyDoorState
     FLOPPY144_GREY_DOOR_COMPLETED = 2
 } Floppy144GreyDoorState;
 
+typedef enum Floppy144OpeningRecoveryStep
+{
+    FLOPPY144_OPENING_NEEDS_LIST = 0,
+    FLOPPY144_OPENING_COLLECTIONS_LISTED = 1,
+    FLOPPY144_OPENING_DR01_RECORDS_LISTED = 2,
+    FLOPPY144_OPENING_FIRST_RECORD_OPENED = 3
+} Floppy144OpeningRecoveryStep;
+
 typedef struct Floppy144RunState
 {
     uint32_t recovery_seed;
@@ -70,6 +78,7 @@ typedef struct Floppy144RunState
 
     uint8_t projection;
     uint8_t archive_services_initialised;
+    uint8_t opening_recovery_step; /* per-run tutorial; persisted in V4 */
     uint8_t grey_door_state; /* S4G per-run save field */
     uint8_t hathaway_inspection; /* S4H: RAM-only, never encoded */
 

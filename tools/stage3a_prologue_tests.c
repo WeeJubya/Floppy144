@@ -172,10 +172,23 @@ static void Floppy144TestPrologueVerticalSlice(void)
         "INITIATE hydrates live world state"
     );
     F144_CHECK(
-        Floppy144TestTerminalContains(&sTerminal, "RESTORE DR-01"),
-        "terminal directs player to restore the first available collection"
+        Floppy144TestTerminalContains(
+            &sTerminal, "NEXT RECOVERY ACTION: LIST"),
+        "INITIATE recommends LIST"
     );
-
+    Floppy144TestSubmitCommand(&sTerminal, &sWorld, &sRunState, "LIST");
+    F144_CHECK(
+        Floppy144TerminalRecordPagerActive(&sTerminal) &&
+        Floppy144TestTerminalContains(&sTerminal, "DR-01") &&
+        Floppy144TestTerminalContains(&sTerminal, "AVAILABLE"),
+        "plain LIST shows available DR-01 before restoration"
+    );
+    Floppy144TerminalCloseRecordPager(&sTerminal);
+    F144_CHECK(
+        Floppy144TestTerminalContains(
+            &sTerminal, "NEXT RECOVERY ACTION: RESTORE DR-01"),
+        "LIST recommends RESTORE DR-01"
+    );
     Floppy144TestSubmitCommand(
         &sTerminal,
         &sWorld,
@@ -213,10 +226,21 @@ static void Floppy144TestPrologueVerticalSlice(void)
     );
     F144_CHECK(
         Floppy144TestTerminalContains(
-            &sTerminal,
-            "OPEN RS-0001"
-        ),
-        "terminal directs player to the pending trigger document"
+            &sTerminal, "NEXT RECOVERY ACTION: LIST DR-01"),
+        "restoration recommends LIST DR-01"
+    );
+    Floppy144TestSubmitCommand(
+        &sTerminal, &sWorld, &sRunState, "LIST DR-01");
+    F144_CHECK(
+        Floppy144TerminalRecordPagerActive(&sTerminal) &&
+        Floppy144TestTerminalContains(&sTerminal, "DR-01-RS-0001"),
+        "LIST DR-01 displays recovered records"
+    );
+    Floppy144TerminalCloseRecordPager(&sTerminal);
+    F144_CHECK(
+        Floppy144TestTerminalContains(
+            &sTerminal, "NEXT RECOVERY ACTION: OPEN RS-0001"),
+        "LIST DR-01 recommends OPEN RS-0001"
     );
 
     F144_CHECK(
@@ -232,7 +256,7 @@ static void Floppy144TestPrologueVerticalSlice(void)
         &sTerminal,
         &sWorld,
         &sRunState,
-        "OPEN DR-01-RS-0001"
+        "OPEN RS-0001"
     );
     F144_CHECK(
         sTerminal.open_record_requested,
@@ -376,6 +400,113 @@ static void Floppy144TestPrologueVerticalSlice(void)
 #endif
 }
 
+/* Save/reload the tutorial itself, independent of terminal-local history. */
+static void Floppy144TestOpeningTutorialResume(void)
+{
+    Floppy144WorldState world, loaded_world;
+    Floppy144RunState run, loaded;
+    Floppy144TerminalState terminal;
+    uint8_t payload[FLOPPY144_SAVE_PAYLOAD_V4_SIZE];
+
+    Floppy144WorldReset(&world);
+    Floppy144RunStateBegin(&run, 146U);
+    Floppy144TerminalReset(&terminal, &world);
+    Floppy144TestSubmitCommand(&terminal, &world, &run, "INITIATE");
+    Floppy144TestSubmitCommand(&terminal, &world, &run, "LIST");
+    Floppy144TerminalCloseRecordPager(&terminal);
+    F144_CHECK(
+        run.opening_recovery_step ==
+            (uint8_t)FLOPPY144_OPENING_COLLECTIONS_LISTED,
+        "first LIST records a persistent milestone"
+    );
+    F144_CHECK(
+        Floppy144PersistenceEncodeRunState(&run, payload, sizeof(payload)) &&
+        Floppy144PersistenceDecodeRunState(&loaded, payload, sizeof(payload)) &&
+        loaded.opening_recovery_step ==
+            (uint8_t)FLOPPY144_OPENING_COLLECTIONS_LISTED,
+        "LIST milestone survives V4 save payload"
+    );
+    Floppy144WorldReset(&loaded_world);
+    Floppy144WorldHydrateFromRunState(&loaded_world, &loaded);
+    Floppy144TerminalReset(&terminal, &loaded_world);
+    Floppy144TerminalPrintNextAction(&terminal, &loaded);
+    F144_CHECK(
+        Floppy144TestTerminalContains(
+            &terminal, "NEXT RECOVERY ACTION: RESTORE DR-01"),
+        "reinstated tutorial resumes with RESTORE"
+    );
+
+    Floppy144TestSubmitCommand(
+        &terminal, &loaded_world, &loaded, "RESTORE DR-01");
+    Floppy144TestSubmitCommand(
+        &terminal, &loaded_world, &loaded, "LIST DR-01");
+    Floppy144TerminalCloseRecordPager(&terminal);
+    F144_CHECK(
+        Floppy144PersistenceEncodeRunState(&loaded, payload, sizeof(payload)) &&
+        Floppy144PersistenceDecodeRunState(&run, payload, sizeof(payload)) &&
+        run.opening_recovery_step ==
+            (uint8_t)FLOPPY144_OPENING_DR01_RECORDS_LISTED,
+        "DR-01 index milestone survives V4 save payload"
+    );
+    Floppy144WorldReset(&world);
+    Floppy144WorldHydrateFromRunState(&world, &run);
+    Floppy144TerminalReset(&terminal, &world);
+    Floppy144TerminalPrintNextAction(&terminal, &run);
+    F144_CHECK(
+        Floppy144TestTerminalContains(
+            &terminal, "NEXT RECOVERY ACTION: OPEN RS-0001"),
+        "reopened terminal recommends OPEN RS-0001"
+    );
+    Floppy144TestSubmitCommand(&terminal, &world, &run, "OPEN RS-0001");
+    F144_CHECK(
+        terminal.open_record_requested &&
+        terminal.requested_collection == FLOPPY144_COLLECTION_DR01 &&
+        terminal.requested_record_index == 0U,
+        "restarted terminal resolves tutorial shorthand safely"
+    );
+    F144_CHECK(
+        run.opening_recovery_step ==
+            (uint8_t)FLOPPY144_OPENING_FIRST_RECORD_OPENED,
+        "valid OPEN completes the command tutorial"
+    );
+
+    /* V3 legacy saves have no tutorial byte and migrate to a safe default. */
+    {
+        uint8_t legacy[FLOPPY144_SAVE_PAYLOAD_V3_SIZE];
+        Floppy144RunState older;
+        F144_CHECK(
+            Floppy144PersistenceEncodeRunState(
+                &run, legacy, sizeof(legacy)) &&
+            Floppy144PersistenceDecodeRunState(
+                &older, legacy, sizeof(legacy)) &&
+            older.opening_recovery_step ==
+                (uint8_t)FLOPPY144_OPENING_NEEDS_LIST &&
+            Floppy144RunStateCollectionRestored(
+                &older, FLOPPY144_COLLECTION_DR01),
+            "V3 recovery migration retains restoration without bogus tutorial state"
+        );
+    }
+
+    Floppy144WorldReset(&world);
+    Floppy144RunStateBegin(&run, 147U);
+    Floppy144TerminalReset(&terminal, &world);
+    Floppy144TestSubmitCommand(&terminal, &world, &run, "INITIATE");
+    Floppy144TestSubmitCommand(&terminal, &world, &run, "RESTORE DR-01");
+    F144_CHECK(
+        Floppy144RunStateCollectionRestored(
+            &run, FLOPPY144_COLLECTION_DR01) &&
+        Floppy144TestTerminalContains(
+            &terminal, "NEXT RECOVERY ACTION: LIST DR-01"),
+        "manual RESTORE bypasses LIST without bypassing recovery checks"
+    );
+    Floppy144TestSubmitCommand(&terminal, &world, &run, "OPEN RS-0001");
+    F144_CHECK(
+        terminal.open_record_requested &&
+        terminal.requested_collection == FLOPPY144_COLLECTION_DR01,
+        "manual OPEN remains available without following LIST hints"
+    );
+}
+
 /* Prove that catalogue navigation reaches the same data-driven document path. */
 static void Floppy144TestCatalogueProloguePath(void)
 {
@@ -458,6 +589,7 @@ static void Floppy144TestCatalogueProloguePath(void)
 int main(void)
 {
     Floppy144TestPrologueVerticalSlice();
+    Floppy144TestOpeningTutorialResume();
     Floppy144TestCatalogueProloguePath();
 
     if(g_nFailures != 0)

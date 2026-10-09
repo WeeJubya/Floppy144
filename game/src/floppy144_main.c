@@ -875,6 +875,16 @@ static void Floppy144ConfigureTerminalSession(
         &global_run_state
     );
 
+    if(
+        Floppy144RunStateArchiveServicesInitialised(&global_run_state) &&
+        !Floppy144RunStateRoomReconstructed(
+            &global_run_state, FLOPPY144_ROOM_RECEPTION)
+    )
+    {
+        Floppy144TerminalPrintNextAction(
+            &global_terminal, &global_run_state);
+    }
+
     if(!allow_authentication || Floppy144HathawayMode())
     {
         return;

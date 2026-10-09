@@ -720,16 +720,33 @@ static bool Floppy144TerminalTutorialRecoveryCollection(
 }
 
 /*
+ * These discovery milestones are per recovery and must survive save/reload.
+ * Terminal command history is deliberately session-local, not persistent.
+ */
+static void Floppy144TerminalAdvanceOpeningRecovery(
+    Floppy144RunState *run_state,
+    Floppy144OpeningRecoveryStep step
+)
+{
+    if(
+        run_state != NULL &&
+        Floppy144RunStateArchiveServicesInitialised(run_state) &&
+        !Floppy144TerminalSiteHasReconstructedRoom(run_state) &&
+        run_state->opening_recovery_step < (uint8_t)step
+    )
+    {
+        run_state->opening_recovery_step = (uint8_t)step;
+        run_state->dirty = 1U;
+    }
+}
+
+/*
  * Print the next useful recovery action from current persistent state.
  *
- * Priority is deliberate:
- *   1. initialise archive services;
- *   2. open an eligible trigger document from a restored collection;
- *   3. leave the terminal once a Site room exists;
- *   4. restore the next available collection.
- *
- * No collection, document or trigger ID is embedded here. The canonical JSON
- * and generated registries decide which action satisfies each step.
+ * Before Site reconstruction, the opening DR-01 tutorial deliberately teaches
+ * LIST -> RESTORE -> LIST DR-01 -> OPEN RS-0001. This special-case guidance
+ * never gates those commands or alters available collections. After the first
+ * reconstructed room, the normal data-driven hints take precedence.
  */
 void Floppy144TerminalPrintNextAction(
     Floppy144TerminalState *pTerminal,
@@ -755,6 +772,54 @@ void Floppy144TerminalPrintNextAction(
         Floppy144TerminalSiteHasReconstructedRoom(
             pRunState
         );
+
+    /*
+     * The opening tutorial changes suggestions, never command availability
+     * or authored collection gates. Once the Site exists, fall through to
+     * the established data-driven recommendations.
+     */
+    if(!bSiteAvailable)
+    {
+        if(!Floppy144RunStateCollectionRestored(
+            pRunState, FLOPPY144_COLLECTION_DR01))
+        {
+            if(Floppy144RunStateCollectionAvailable(
+                pRunState, FLOPPY144_COLLECTION_DR01))
+            {
+                if(pRunState->opening_recovery_step ==
+                    (uint8_t)FLOPPY144_OPENING_NEEDS_LIST)
+                {
+                    Floppy144TerminalPushLine(
+                        pTerminal, "NEXT RECOVERY ACTION: LIST");
+                    return;
+                }
+                if(Floppy144TerminalRestoreAllowedAtLocation(
+                    pTerminal, pRunState, FLOPPY144_COLLECTION_DR01))
+                {
+                    Floppy144TerminalPushLine(
+                        pTerminal, "NEXT RECOVERY ACTION: RESTORE DR-01");
+                    return;
+                }
+            }
+        }
+        else if(pRunState->opening_recovery_step <
+            (uint8_t)FLOPPY144_OPENING_DR01_RECORDS_LISTED)
+        {
+            Floppy144TerminalPushLine(
+                pTerminal, "NEXT RECOVERY ACTION: LIST DR-01");
+            return;
+        }
+        else if(
+            pRunState->opening_recovery_step ==
+                (uint8_t)FLOPPY144_OPENING_DR01_RECORDS_LISTED &&
+            Floppy144DocumentAccessible(
+                pRunState, FLOPPY144_COLLECTION_DR01, 0U))
+        {
+            Floppy144TerminalPushLine(
+                pTerminal, "NEXT RECOVERY ACTION: OPEN RS-0001");
+            return;
+        }
+    }
 
     /*
      * Before the Site exists, normal play still needs enough guidance to
@@ -2592,20 +2657,6 @@ static void Floppy144TerminalPrintCollections(
     if(terminal == NULL || run_state == NULL)
         return;
 
-    if(
-        !Floppy144RunStateCollectionRestored(
-            run_state,
-            FLOPPY144_COLLECTION_DR01
-        )
-    )
-    {
-        Floppy144TerminalPushLine(
-            terminal,
-            "FULL COLLECTION INDEX UNAVAILABLE. RESTORE DR-01."
-        );
-        return;
-    }
-
     terminal->record_pager_active = true;
     terminal->record_pager_collection = FLOPPY144_COLLECTION_COUNT;
     terminal->collection_pager_state = run_state;
@@ -2952,6 +3003,7 @@ static void Floppy144TerminalPrintRecordPage(
 static void Floppy144TerminalPrintCollectionRecords(
     Floppy144TerminalState *terminal,
     const Floppy144WorldState *world,
+    Floppy144RunState *run_state,
     const char *arguments
 )
 {
@@ -3080,6 +3132,20 @@ static void Floppy144TerminalPrintCollectionRecords(
     terminal->record_pager_page =
         page;
 
+    /* A pager can show the next tutorial command when the operator closes it. */
+    terminal->collection_pager_state = run_state;
+
+    if(
+        collection == FLOPPY144_COLLECTION_DR01 &&
+        !Floppy144TerminalSiteHasReconstructedRoom(run_state)
+    )
+    {
+        Floppy144TerminalAdvanceOpeningRecovery(
+            run_state, FLOPPY144_OPENING_DR01_RECORDS_LISTED);
+        terminal->default_record_collection = collection;
+        terminal->default_record_collection_valid = true;
+    }
+
     Floppy144TerminalPrintRecordPage(
         terminal
     );
@@ -3095,6 +3161,15 @@ static void Floppy144TerminalPrintCollectionRecords(
             false;
         terminal->collection_pager_state =
             NULL;
+        if(
+            run_state != NULL &&
+            !Floppy144TerminalSiteHasReconstructedRoom(run_state) &&
+            run_state->opening_recovery_step <
+                (uint8_t)FLOPPY144_OPENING_FIRST_RECORD_OPENED
+        )
+        {
+            Floppy144TerminalPrintNextAction(terminal, run_state);
+        }
     }
 }
 
@@ -3162,14 +3237,25 @@ void Floppy144TerminalCloseRecordPager(
     Floppy144TerminalState *terminal
 )
 {
-    if(terminal == NULL)
+    const Floppy144RunState *run_state;
+    if(terminal == NULL || !terminal->record_pager_active)
     {
         return;
     }
 
-    terminal->record_pager_active =
-        false;
+    run_state = terminal->collection_pager_state;
+    terminal->record_pager_active = false;
     terminal->collection_pager_state = NULL;
+
+    if(
+        run_state != NULL &&
+        !Floppy144TerminalSiteHasReconstructedRoom(run_state) &&
+        run_state->opening_recovery_step <
+            (uint8_t)FLOPPY144_OPENING_FIRST_RECORD_OPENED
+    )
+    {
+        Floppy144TerminalPrintNextAction(terminal, run_state);
+    }
 }
 
 bool Floppy144TerminalHelpPagerActive(
@@ -3324,6 +3410,15 @@ static bool Floppy144TerminalCompleteRestore(
             );
 
         if(
+            collection == FLOPPY144_COLLECTION_DR01 &&
+            !Floppy144TerminalSiteHasReconstructedRoom(run_state) &&
+            run_state->opening_recovery_step <
+                (uint8_t)FLOPPY144_OPENING_DR01_RECORDS_LISTED
+        )
+        {
+            Floppy144TerminalPrintNextAction(terminal, run_state);
+        }
+        else if(
             pEntryDocument != NULL &&
             pEntryDocument->record_id_override != NULL &&
             Floppy144DocumentAccessible(
@@ -3625,7 +3720,7 @@ void Floppy144TerminalAdvanceRestore(
 static void Floppy144TerminalRequestOpenRecord(
     Floppy144TerminalState *terminal,
     const Floppy144WorldState *world,
-    const Floppy144RunState *run_state,
+    Floppy144RunState *run_state,
     const char *record_id
 )
 {
@@ -3653,20 +3748,29 @@ static void Floppy144TerminalRequestOpenRecord(
         record_id[2] == '-'
     )
     {
-        if(!terminal->default_record_collection_valid)
+        if(
+            !terminal->default_record_collection_valid &&
+            !(
+                run_state->opening_recovery_step >=
+                    (uint8_t)FLOPPY144_OPENING_DR01_RECORDS_LISTED &&
+                !Floppy144TerminalSiteHasReconstructedRoom(run_state) &&
+                Floppy144RunStateCollectionRestored(
+                    run_state, FLOPPY144_COLLECTION_DR01)
+            )
+        )
         {
             Floppy144TerminalPushLine(
                 terminal,
                 "NO DEFAULT COLLECTION. USE THE FULL RECORD ID."
             );
-
             return;
         }
 
-        definition =
-            Floppy144CollectionGet(
-                terminal->default_record_collection
-            );
+        definition = Floppy144CollectionGet(
+            terminal->default_record_collection_valid
+                ? terminal->default_record_collection
+                : FLOPPY144_COLLECTION_DR01
+        );
 
         snprintf(
             expanded_record_id,
@@ -3781,6 +3885,15 @@ static void Floppy144TerminalRequestOpenRecord(
 
     terminal->open_record_requested =
         true;
+
+    if(
+        collection == FLOPPY144_COLLECTION_DR01 &&
+        record_index == 0U
+    )
+    {
+        Floppy144TerminalAdvanceOpeningRecovery(
+            run_state, FLOPPY144_OPENING_FIRST_RECORD_OPENED);
+    }
 }
 void Floppy144TerminalSubmitInput(
     Floppy144TerminalState *terminal,
@@ -4011,11 +4124,14 @@ void Floppy144TerminalSubmitInput(
             Floppy144TerminalPrintCollectionRecords(
                 terminal,
                 world,
+                run_state,
                 list_arguments
             );
         }
         else
         {
+            Floppy144TerminalAdvanceOpeningRecovery(
+                run_state, FLOPPY144_OPENING_COLLECTIONS_LISTED);
             Floppy144TerminalPrintCollections(
                 terminal,
                 world,
