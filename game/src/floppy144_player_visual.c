@@ -408,20 +408,38 @@ static void f144BuildOfficeCharacter(RenderBuffer *b, float cx, float footY,
     shoulderWidth=width*.375f;
     if(c->flags&F144_COSTUME_LONG_HAIR) shoulderWidth=width*.4375f;
     if(profile) {
-        /* Far limbs first, then body, then near limbs: stable painter order. */
+        /*
+         * Profiles use a painter's order: both legs, rear sleeve, torso,
+         * skirt over the upper legs, then the foreground sleeve.
+         */
+        float rearShoulderX=cx-direction*scale*2.f;
+        float nearShoulderX=cx+direction*scale*2.f;
         f144DrawLeg(b,hipX-direction*scale,hip,-stride,liftB,scale,c);
-        f144DrawArm(b,cx-direction*scale*2.f,shoulders,-hand,scale,c);
+        f144DrawLeg(b,hipX+direction*scale,hip,stride,liftA,scale,c);
+        f144DrawArm(b,rearShoulderX,shoulders,-hand,scale,c);
         f144CapsuleAdd(b,cx,shoulders,cx+sway*.3f,hip,scale*10.f,c->cloth);
         f144CapsuleAdd(b,cx,hip,cx,hip+scale*2.f,scale*8.f,c->cloth);
-        if(c->flags&F144_COSTUME_SKIRT)
-            f144CapsuleAdd(b,cx,hip+scale*2.f,cx,hip+scale*10.f,scale*12.f,c->cloth);
-        f144DrawLeg(b,hipX+direction*scale,hip,stride,liftA,scale,c);
-        f144DrawArm(b,cx+direction*scale*2.f,shoulders,hand,scale,c);
+        if(c->flags&F144_COSTUME_SKIRT) {
+            /* The hem covers both thighs, including the near-side leg. */
+            f144CapsuleAdd(b,cx,hip+scale*2.f,cx,hip+scale*10.f,scale*13.f,c->cloth);
+            f144CapsuleAdd(b,cx,hip+scale*9.f,cx,hip+scale*11.f,scale*14.f,c->cloth);
+        }
+        /* Start inside the shoulder mass so the near arm cannot float. */
+        f144CapsuleAdd(b,cx,shoulders,nearShoulderX,shoulders+scale*2.f,
+                       scale*5.f,c->cloth);
+        f144DrawArm(b,nearShoulderX,shoulders+scale*2.f,hand,scale,c);
     } else {
+        float leftShoulder=cx-shoulderWidth;
+        float rightShoulder=cx+shoulderWidth;
         f144DrawLeg(b,hipX-scale*3.f,hip,stride*.42f,liftA,scale,c);
         f144DrawLeg(b,hipX+scale*3.f,hip,-stride*.42f,liftB,scale,c);
-        f144DrawArm(b,cx-shoulderWidth,shoulders,-scale*1.5f+hand*.22f,scale,c);
-        f144DrawArm(b,cx+shoulderWidth,shoulders,scale*1.5f-hand*.22f,scale,c);
+        /* Explicit shoulder bridges make both Type B sleeves continuous. */
+        f144CapsuleAdd(b,cx-scale*4.f,shoulders,leftShoulder,shoulders,
+                       scale*5.5f,c->cloth);
+        f144CapsuleAdd(b,cx+scale*4.f,shoulders,rightShoulder,shoulders,
+                       scale*5.5f,c->cloth);
+        f144DrawArm(b,leftShoulder,shoulders,-scale*1.5f+hand*.22f,scale,c);
+        f144DrawArm(b,rightShoulder,shoulders,scale*1.5f-hand*.22f,scale,c);
         f144CapsuleAdd(b,cx,shoulders,cx+sway*.3f,hip,scale*14.f,c->cloth);
         if(c->flags&F144_COSTUME_SKIRT)
             f144CapsuleAdd(b,cx,hip,cx,hip+scale*10.f,scale*15.f,c->cloth);
@@ -435,10 +453,20 @@ static void f144BuildOfficeCharacter(RenderBuffer *b, float cx, float footY,
             }
         }
     }
-    if(c->flags&F144_COSTUME_LONG_HAIR) {
-        /* Shoulder-length swept hair, with a narrow strand down the left. */
+    if(profile) {
+        /*
+         * Hair silhouette is independent of skin paint. Cover the trailing
+         * half of the head after the face disk is drawn below.
+         */
+        float rearX=cx-direction*scale*5.f;
+        if(c->flags&F144_COSTUME_LONG_HAIR) {
+            f144CapsuleAdd(b,rearX,headY-scale*5.f,rearX,headY+scale*9.f,
+                           scale*10.f,c->hair);
+        }
+    } else if(c->flags&F144_COSTUME_LONG_HAIR) {
         f144CapsuleAdd(b,cx,headY-scale*3.f,cx,headY+scale*7.f,scale*12.f,c->hair);
-        f144CapsuleAdd(b,cx-scale*8.f,headY-scale*3.f,cx-scale*8.f,headY+scale*9.f,scale*2.f,c->hair);
+        f144CapsuleAdd(b,cx-scale*8.f,headY-scale*3.f,
+                       cx-scale*8.f,headY+scale*9.f,scale*2.f,c->hair);
     }
     f144AddCircle(b,f144Vec(cx,headY),scale*8.f,c->skin);
     if((c->flags&F144_COSTUME_LONG_HAIR) && !back) {
@@ -447,6 +475,16 @@ static void f144BuildOfficeCharacter(RenderBuffer *b, float cx, float footY,
                        cx+scale*5.f,headY+scale*9.f,scale*4.5f,c->accent);
         f144CapsuleAdd(b,cx+scale*4.f,headY+scale*9.f,
                        cx+scale*7.f,headY+scale*13.f,scale*2.5f,c->accent);
+    }
+    if(profile) {
+        /* Type A short hair, or Type B rear fringe, drawn over the skull. */
+        float rearX=cx-direction*scale*5.f;
+        f144CapsuleAdd(b,rearX,headY-scale*5.f,
+                       rearX,headY-scale*1.f,
+                       scale*5.f,c->hair);
+        f144CapsuleAdd(b,cx-direction*scale*3.f,headY-scale*7.f,
+                       cx+direction*scale*3.f,headY-scale*7.f,
+                       scale*4.f,c->hair);
     }
     if(back) {
         f144CapsuleAdd(b,cx,headY-scale*3.f,cx,headY+scale*3.f,scale*14.f,c->hair);
