@@ -194,15 +194,16 @@ if(
 }
 
 foreach($required in @(
-    'PAGE 1 OF 3',
-    'PAGE 2 OF 3',
-    'PAGE 3 OF 3',
-    'PageFitsLayout'
+    'Floppy144TerminalHelpPageCount',
+    'PageWithinBounds',
+    'RenderInsideHelpBand',
+    'AuditHelp',
+    'normal 640x360 manual occupies two automatically filled pages'
 ))
 {
     if($helpTests -notmatch [regex]::Escape($required))
     {
-        throw "Help visual acceptance no longer covers all pages/layout: $required"
+        throw "Continuous Help acceptance no longer covers pagination/layout: $required"
     }
 }
 

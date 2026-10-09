@@ -37,7 +37,7 @@
      FLOPPY144_TERMINAL_TEXT_RIGHT_INSET - \
      FLOPPY144_TERMINAL_TEXT_X)
 
-#define FLOPPY144_TERMINAL_HELP_ROW_GAP "   "
+#define FLOPPY144_TERMINAL_HELP_ROW_GAP " "
 
 /*
  * Small terminal drawing helpers
@@ -1765,297 +1765,247 @@ static bool Floppy144TerminalRecordAccessAvailable(
     return false;
 }
 
-#define FLOPPY144_TERMINAL_HELP_PAGE_COUNT 3U
 
-/*
- * Built-in GDR operating guidance.
- *
- * This is Terminal software documentation, not recovered archive material.
- * It therefore consumes no reconstruction capacity and requires no restored
- * collection.
- */
-
-static const char *const floppy144_terminal_help_page_1[] =
+/* The manual is one ordered document; visibility depends only on OPEN. */
+typedef struct Floppy144HelpEntry
 {
-    "TERMINAL OPERATION",
-    "",
-    "ENTER COMMANDS AT THE A:\\GDR> PROMPT.",
-    "BACKSPACE EDITS THE CURRENT ENTRY.",
-    "UP/DOWN RECALL SESSION COMMANDS.",
-    "ENTER SUBMITS THE COMMAND.",
-    "ESC OPENS GDR SESSION CONTROL.",
-    "EXIT CLOSES THE TERMINAL SESSION.",
-    NULL
+    const char *text;
+    uint8_t heading;
+    uint8_t visibility; /* 0 always, 1 only locked, 2 only unlocked */
+} Floppy144HelpEntry;
+
+static const Floppy144HelpEntry floppy144_terminal_help_document[] =
+{
+    {"TERMINAL OPERATION",1U,0U},
+    {"ENTER COMMANDS AT THE A:\\GDR> PROMPT.",0U,0U},
+    {"INITIATE STARTS ARCHIVE SERVICES WHEN OFFLINE.",0U,0U},
+    {"UP/DOWN RECALL COMMANDS FROM THIS SESSION.",0U,0U},
+    {"ENTER SUBMITS A COMMAND.",0U,0U},
+    {"ESC OPENS GDR SESSION CONTROL.",0U,0U},
+    {"EXIT CLOSES THE TERMINAL SESSION.",0U,0U},
+    {"RESTORING COLLECTIONS",1U,0U},
+    {"LIST SHOWS COLLECTION STATUS, INCLUDING AVAILABLE COLLECTIONS.",0U,0U},
+    {"RESTORE <CODE> RECOVERS AN AVAILABLE COLLECTION.",0U,0U},
+    {"EXAMPLE: RESTORE DR-01.",0U,0U},
+    {"RESTORATION USES DISK RECOVERY CAPACITY. LIMIT: 1440 KB.",0U,0U},
+    {"RECORD ACCESS",1U,0U},
+    {"LIST <CODE> SHOWS THE RECORD INDEX OF A RESTORED COLLECTION.",0U,0U},
+    {"RESTORE A COLLECTION TO ENABLE OPEN.",0U,1U},
+    {"OPEN <RECORD-ID> RETRIEVES A RECOVERED RECORD.",0U,2U},
+    {"FULL RECORD IDS ARE ALWAYS ACCEPTED BY OPEN.",0U,2U},
+    {"RS-#### USES THE CURRENT RECORD COLLECTION.",0U,2U},
+    {"HELP NAVIGATION",1U,0U},
+    {"HELP <COMMAND> SHOWS COMMAND-SPECIFIC GUIDANCE.",0U,0U},
+    {"SPACE OR ENTER: NEXT HELP PAGE.",0U,0U},
+    {"BACKSPACE: PREVIOUS HELP PAGE.",0U,0U},
+    {"Q: RETURN TO THE COMMAND PROMPT.",0U,0U}
 };
 
-static const char *const floppy144_terminal_help_page_2[] =
-{
-    "RESTORING COLLECTIONS",
-    "",
-    "LIST DISPLAYS COLLECTION STATUS.",
-    "RESTORE <CODE> RECOVERS ONE COLLECTION.",
-    "EXAMPLE: RESTORE DR-01",
-    "RESTORATION USES DISK RECOVERY CAPACITY.",
-    "MAXIMUM AVAILABLE PER RECOVERY: 1440 KB.",
-    NULL
-};
+#define FLOPPY144_HELP_ROWS_MAX 64U
+#define FLOPPY144_HELP_PAGES_MAX 16U
+#define FLOPPY144_HELP_OUTPUT_TOP_Y 84U
+#define FLOPPY144_HELP_OUTPUT_STEP_Y 15U
+#define FLOPPY144_HELP_DIVIDER_Y 260U
+#define FLOPPY144_HELP_GLYPH_HEIGHT 7U
+#define FLOPPY144_HELP_HEADER_ROWS 2U
+#define FLOPPY144_HELP_BODY_ROWS \
+    (((FLOPPY144_HELP_DIVIDER_Y - FLOPPY144_HELP_OUTPUT_TOP_Y - \
+       FLOPPY144_HELP_GLYPH_HEIGHT) / FLOPPY144_HELP_OUTPUT_STEP_Y) + \
+     1U - FLOPPY144_HELP_HEADER_ROWS)
 
-static const char *const floppy144_terminal_help_page_3_locked[] =
+typedef struct Floppy144HelpLayout
 {
-    "RECORD ACCESS",
-    "",
-    "RECORD RETRIEVAL IS NOT YET AVAILABLE.",
-    "RESTORE A COLLECTION TO ENABLE OPEN.",
-    "SPACE OR ENTER: NEXT PAGE.",
-    "BACKSPACE: PREVIOUS PAGE.",
-    "Q: RETURN TO COMMAND PROMPT.",
-    NULL
-};
+    char rows[FLOPPY144_HELP_ROWS_MAX]
+             [FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
+    uint8_t is_heading[FLOPPY144_HELP_ROWS_MAX];
+    uint32_t count;
+    uint32_t start[FLOPPY144_HELP_PAGES_MAX];
+    uint32_t end[FLOPPY144_HELP_PAGES_MAX];
+    uint32_t pages;
+} Floppy144HelpLayout;
 
-static const char *const floppy144_terminal_help_page_3[] =
+static bool Floppy144HelpPushRow(
+    Floppy144HelpLayout *layout, const char *text, uint8_t heading)
 {
-    "RECORD ACCESS",
-    "",
-    "LIST <CODE> OPENS A RESTORED RECORD INDEX.",
-    "OPEN <RECORD-ID> RETRIEVES ONE RECORD.",
-    "AFTER RESTORE, RS-#### USES THAT COLLECTION.",
-    "SPACE OR ENTER: NEXT PAGE.",
-    "BACKSPACE: PREVIOUS PAGE.  Q: RETURN.",
-    NULL
-};
+    uint32_t index;
+    if(layout->count >= FLOPPY144_HELP_ROWS_MAX)
+        return false;
 
-/*
- * Reflow authored Help guidance into the full terminal reading band.
- *
- * The Help arrays remain the content authority. This helper changes only
- * presentation: adjacent non-empty authored rows are packed left-to-right
- * while they fit the safe text width and fixed terminal line buffer. Blank
- * rows still force a paragraph break, so titles and section structure remain
- * unchanged.
- */
-static void Floppy144TerminalPushHelpPageContent(
-    Floppy144TerminalState *terminal,
-    const char *const *lines
-)
+    index = layout->count++;
+    (void)snprintf(layout->rows[index], sizeof(layout->rows[index]),
+                   "%s", text);
+    layout->is_heading[index] = heading;
+    return true;
+}
+
+/* Pack a continuous paragraph by words, measuring the actual font width. */
+static bool Floppy144HelpAppendText(
+    Floppy144HelpLayout *layout, const char *text)
 {
-    char row[FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
-    char candidate[FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
-    uint32_t line_index;
-
-    if(
-        terminal == NULL ||
-        lines == NULL
-    )
+    const char *cursor = text;
+    while(*cursor != '\0')
     {
-        return;
-    }
+        uint32_t len = 0U;
+        uint32_t index;
+        int result;
+        char candidate[FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
 
-    row[0] =
-        '\0';
+        while(*cursor == ' ') ++cursor;
+        if(*cursor == '\0') break;
+        while(cursor[len] != '\0' && cursor[len] != ' ') ++len;
 
-    for(
-        line_index = 0U;
-        lines[line_index] != NULL;
-        ++line_index
-    )
-    {
-        const char *line =
-            lines[line_index];
-
-        if(line[0] == '\0')
+        if(layout->count == 0U ||
+           layout->is_heading[layout->count - 1U] ||
+           layout->rows[layout->count - 1U][0] == '\0')
         {
-            if(row[0] != '\0')
-            {
-                Floppy144TerminalPushLine(
-                    terminal,
-                    row
-                );
+            if(!Floppy144HelpPushRow(layout, "", 0U)) return false;
+        }
 
-                row[0] =
-                    '\0';
-            }
+        index = layout->count - 1U;
+        result = snprintf(
+            candidate, sizeof(candidate), "%s%s%.*s",
+            layout->rows[index],
+            layout->rows[index][0] != '\0'
+                ? FLOPPY144_TERMINAL_HELP_ROW_GAP : "",
+            (int)len, cursor
+        );
 
-            Floppy144TerminalPushLine(
-                terminal,
-                ""
-            );
+        if(result < 0) return false;
+        if((uint32_t)result >= sizeof(candidate) ||
+           Floppy144DrawTextWidth(candidate,1U) >
+               FLOPPY144_TERMINAL_HELP_TEXT_WIDTH)
+        {
+            if(!Floppy144HelpPushRow(layout, "", 0U)) return false;
+            index = layout->count - 1U;
+            result = snprintf(candidate, sizeof(candidate),
+                              "%.*s", (int)len, cursor);
+            if(result < 0 || (uint32_t)result >= sizeof(candidate) ||
+               Floppy144DrawTextWidth(candidate,1U) >
+                   FLOPPY144_TERMINAL_HELP_TEXT_WIDTH)
+                return false;
+        }
 
+        (void)snprintf(layout->rows[index], sizeof(layout->rows[index]),
+                       "%s", candidate);
+        cursor += len;
+    }
+    return true;
+}
+
+/* Derive both wrapping and page count from the active manual and text band. */
+static bool Floppy144TerminalBuildHelpLayout(
+    const Floppy144TerminalState *terminal, Floppy144HelpLayout *layout)
+{
+    uint32_t i, pos;
+    if(terminal == NULL || layout == NULL || FLOPPY144_HELP_BODY_ROWS < 2U)
+        return false;
+    memset(layout,0,sizeof(*layout));
+
+    for(i = 0U;
+        i < sizeof(floppy144_terminal_help_document) /
+            sizeof(floppy144_terminal_help_document[0]); ++i)
+    {
+        const Floppy144HelpEntry *entry = &floppy144_terminal_help_document[i];
+
+        if((entry->visibility == 1U && terminal->open_command_available) ||
+           (entry->visibility == 2U && !terminal->open_command_available))
             continue;
-        }
 
-        if(row[0] == '\0')
+        if(entry->heading)
         {
-            (void)snprintf(
-                row,
-                sizeof(row),
-                "%s",
-                line
-            );
-
-            continue;
+            if(layout->count > 0U &&
+               !Floppy144HelpPushRow(layout, "", 0U)) return false;
+            if(!Floppy144HelpPushRow(layout, entry->text, 1U)) return false;
         }
-
-        if(
-            strlen(row) +
-                strlen(FLOPPY144_TERMINAL_HELP_ROW_GAP) +
-                strlen(line) +
-                1U <=
-            sizeof(candidate)
-        )
-        {
-            (void)snprintf(
-                candidate,
-                sizeof(candidate),
-                "%s%s%s",
-                row,
-                FLOPPY144_TERMINAL_HELP_ROW_GAP,
-                line
-            );
-
-            if(
-                Floppy144DrawTextWidth(
-                    candidate,
-                    1U
-                ) <=
-                FLOPPY144_TERMINAL_HELP_TEXT_WIDTH
-            )
-            {
-                (void)snprintf(
-                    row,
-                    sizeof(row),
-                    "%s",
-                    candidate
-                );
-
-                continue;
-            }
-        }
-
-        Floppy144TerminalPushLine(
-            terminal,
-            row
-        );
-
-        (void)snprintf(
-            row,
-            sizeof(row),
-            "%s",
-            line
-        );
+        else if(!Floppy144HelpAppendText(layout, entry->text))
+            return false;
     }
 
-    if(row[0] != '\0')
+    pos = 0U;
+    while(pos < layout->count)
     {
-        Floppy144TerminalPushLine(
-            terminal,
-            row
-        );
+        uint32_t used = 0U, page;
+        while(pos < layout->count && layout->rows[pos][0] == '\0')
+            ++pos;
+        if(pos == layout->count) break;
+        if(layout->pages >= FLOPPY144_HELP_PAGES_MAX) return false;
+
+        page = layout->pages++;
+        layout->start[page] = pos;
+
+        while(pos < layout->count && used < FLOPPY144_HELP_BODY_ROWS)
+        {
+            /* Avoid orphaning headings at the bottom of a page. */
+            if(layout->is_heading[pos] &&
+               used + 1U == FLOPPY144_HELP_BODY_ROWS &&
+               pos + 1U < layout->count)
+                break;
+
+            /* Drop a section spacer rather than leaving its heading alone. */
+            if(layout->rows[pos][0] == '\0' &&
+               used + 2U >= FLOPPY144_HELP_BODY_ROWS &&
+               pos + 2U < layout->count &&
+               layout->is_heading[pos + 1U])
+            {
+                ++pos;
+                break;
+            }
+            ++pos;
+            ++used;
+        }
+        layout->end[page] = pos;
     }
+    return layout->pages > 0U;
+}
+
+uint32_t Floppy144TerminalHelpPageCount(
+    const Floppy144TerminalState *terminal)
+{
+    Floppy144HelpLayout layout;
+    return Floppy144TerminalBuildHelpLayout(terminal,&layout)
+        ? layout.pages : 0U;
 }
 
 static void Floppy144TerminalPrintHelpPage(
-    Floppy144TerminalState *terminal
-)
+    Floppy144TerminalState *terminal)
 {
-    const char *const *lines;
-    char line[FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
+    Floppy144HelpLayout layout;
+    char label[FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
+    uint32_t i, page;
 
-    if(
-        terminal == NULL ||
-        !terminal->help_pager_active
-    )
-    {
+    if(terminal == NULL || !terminal->help_pager_active ||
+       !Floppy144TerminalBuildHelpLayout(terminal,&layout))
         return;
-    }
 
-    switch(terminal->help_pager_page)
+    if(terminal->help_pager_page < 1U ||
+       terminal->help_pager_page > layout.pages)
+        terminal->help_pager_page = 1U;
+
+    page = terminal->help_pager_page - 1U;
+    terminal->output_count = 0U;
+    Floppy144TerminalPushLine(terminal,"GDR OPERATOR HELP");
+    (void)snprintf(label,sizeof(label),"PAGE %u OF %u",
+                   (unsigned)terminal->help_pager_page,
+                   (unsigned)layout.pages);
+    Floppy144TerminalPushLine(terminal,label);
+
+    for(i=layout.start[page];i<layout.end[page];++i)
     {
-        case 1U:
-        {
-            lines =
-            floppy144_terminal_help_page_1;
-
-            break;
-        }
-
-        case 2U:
-        {
-            lines =
-            floppy144_terminal_help_page_2;
-
-            break;
-        }
-
-        case 3U:
-        default:
-        {
-            lines =
-                terminal->open_command_available
-                    ? floppy144_terminal_help_page_3
-                    : floppy144_terminal_help_page_3_locked;
-
-            break;
-        }
+        /* A skipped separator is never printed as a trailing blank row. */
+        if(i + 1U == layout.end[page] && layout.rows[i][0] == '\0')
+            continue;
+        Floppy144TerminalPushLine(terminal,layout.rows[i]);
     }
-
-    terminal->output_count =
-    0U;
-
-    Floppy144TerminalPushLine(
-        terminal,
-        "GDR ARCHIVE RECOVERY SYSTEM"
-    );
-
-    Floppy144TerminalPushLine(
-        terminal,
-        "OPERATOR HELP"
-    );
-
-    snprintf(
-        line,
-        sizeof(line),
-             "PAGE %u OF %u",
-             (unsigned)terminal->help_pager_page,
-             (unsigned)FLOPPY144_TERMINAL_HELP_PAGE_COUNT
-    );
-
-    Floppy144TerminalPushLine(
-        terminal,
-        line
-    );
-
-    Floppy144TerminalPushLine(
-        terminal,
-        ""
-    );
-
-    Floppy144TerminalPushHelpPageContent(
-        terminal,
-        lines
-    );
 }
 
 static void Floppy144TerminalOpenHelpPager(
-    Floppy144TerminalState *terminal
-)
+    Floppy144TerminalState *terminal)
 {
-    if(terminal == NULL)
-    {
-        return;
-    }
-
-    terminal->record_pager_active =
-    false;
-
-    terminal->help_pager_active =
-    true;
-
-    terminal->help_pager_page =
-    1U;
-
-    Floppy144TerminalPrintHelpPage(
-        terminal
-    );
+    if(terminal == NULL) return;
+    terminal->record_pager_active = false;
+    terminal->help_pager_active = true;
+    terminal->help_pager_page = 1U;
+    Floppy144TerminalPrintHelpPage(terminal);
 }
 
 static void Floppy144TerminalPrintHelp(
@@ -3273,6 +3223,7 @@ void Floppy144TerminalMoveHelpPager(
 )
 {
     int32_t next_page;
+    uint32_t page_count;
 
     if(
         terminal == NULL ||
@@ -3283,27 +3234,17 @@ void Floppy144TerminalMoveHelpPager(
         return;
     }
 
-    next_page =
-        (int32_t)terminal->help_pager_page +
-        direction;
+    page_count = Floppy144TerminalHelpPageCount(terminal);
+    if(page_count == 0U)
+        return;
 
+    next_page = (int32_t)terminal->help_pager_page + direction;
     if(next_page < 1)
-    {
-        next_page =
-            (int32_t)FLOPPY144_TERMINAL_HELP_PAGE_COUNT;
-    }
+        next_page = (int32_t)page_count;
+    if(next_page > (int32_t)page_count)
+        next_page = 1;
 
-    if(
-        next_page >
-        (int32_t)FLOPPY144_TERMINAL_HELP_PAGE_COUNT
-    )
-    {
-        next_page =
-            1;
-    }
-
-    terminal->help_pager_page =
-        (uint32_t)next_page;
+    terminal->help_pager_page = (uint32_t)next_page;
 
     Floppy144TerminalPrintHelpPage(
         terminal
@@ -4941,7 +4882,7 @@ void Floppy144TerminalDraw(
     char site_status[64];
     char prompt[FLOPPY144_TERMINAL_OUTPUT_LINE_CAPACITY];
     uint32_t line_index;
-    uint32_t output_y = 84U;
+    uint32_t output_y = FLOPPY144_HELP_OUTPUT_TOP_Y;
     bool pager_active;
 
     if(
@@ -5015,10 +4956,11 @@ void Floppy144TerminalDraw(
             1U,
             text
         );
-        output_y += 15U;
+        output_y += FLOPPY144_HELP_OUTPUT_STEP_Y;
     }
 
-    Floppy144DrawFillRect(&surface, 30U, 260U, 580U, 1U, border);
+    Floppy144DrawFillRect(
+        &surface, 30U, FLOPPY144_HELP_DIVIDER_Y, 580U, 1U, border);
 
     if(
         !pager_active &&
@@ -5147,6 +5089,8 @@ void Floppy144TerminalDraw(
     }
     else if(pager_active)
     {
+        char pager_status[48];
+
         Floppy144DrawText(
             &surface,
             22U,
@@ -5155,13 +5099,28 @@ void Floppy144TerminalDraw(
             1U,
             text
         );
+
+        if(terminal->help_pager_active)
+        {
+            (void)snprintf(
+                pager_status, sizeof(pager_status),
+                "PAGE %u/%u   Q RETURN",
+                (unsigned)terminal->help_pager_page,
+                (unsigned)Floppy144TerminalHelpPageCount(terminal)
+            );
+        }
+        else
+        {
+            (void)snprintf(
+                pager_status, sizeof(pager_status), "%s", "Q RETURN"
+            );
+        }
+
         Floppy144DrawText(
             &surface,
-            630U -
-                Floppy144DrawTextWidth("Q RETURN", 1U) -
-                12U,
+            630U - Floppy144DrawTextWidth(pager_status, 1U) - 12U,
             316U,
-            "Q RETURN",
+            pager_status,
             1U,
             muted
         );

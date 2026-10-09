@@ -216,6 +216,11 @@ bool Floppy144TerminalHelpPagerActive(
     const Floppy144TerminalState *terminal
 );
 
+/* Dynamic page count from the ordered manual and visible terminal text area. */
+uint32_t Floppy144TerminalHelpPageCount(
+    const Floppy144TerminalState *terminal
+);
+
 void Floppy144TerminalMoveHelpPager(
     Floppy144TerminalState *terminal,
     int32_t direction

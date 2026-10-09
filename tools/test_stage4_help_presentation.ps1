@@ -15,6 +15,17 @@ Write-Host "=== STAGE 4D HELP PRESENTATION REGRESSION ==="
 
 $TerminalSource = Get-Content -LiteralPath (Join-Path $SourceDir "floppy144_terminal.c") -Raw
 
+# The manual must be content-driven, not the old three authored pages.
+if($TerminalSource -match 'FLOPPY144_TERMINAL_HELP_PAGE_COUNT|floppy144_terminal_help_page_[123]') {
+    throw "A fixed three-page Help implementation is still present."
+}
+if($TerminalSource.Contains('BACKSPACE EDITS THE CURRENT ENTRY.')) {
+    throw "Obsolete Help Backspace sentence is still present."
+}
+if($TerminalSource.Contains('FLOPPY144_TERMINAL_HELP_ROW_GAP "   "')) {
+    throw "Help still inserts triple spaces between sentences."
+}
+
 foreach($Required in @(
     'FLOPPY144_TERMINAL_HELP_TEXT_WIDTH',
     'FLOPPY144_TERMINAL_HELP_ROW_GAP',
