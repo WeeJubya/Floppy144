@@ -464,7 +464,7 @@ void Floppy144PlayerVisualDraw(
         facing=(Floppy144PlayerFacing)state->facing;
         walking=state->moving!=0U;
         if(walking)
-            phase=F144_CHARACTER_TAU*
+            phase=F144_CHARACTER_TAU*.25f + F144_CHARACTER_TAU*
                 ((float)state->walk_frame+
                  (float)state->animation_accumulator_ms/(float)FLOPPY144_PLAYER_WALK_FRAME_MS)/2.f;
     }
