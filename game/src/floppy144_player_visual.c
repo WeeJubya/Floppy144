@@ -228,7 +228,8 @@ bool Floppy144PlayerVisualAdvance(
         return false;
     }
 
-    state->walk_frame = (uint8_t)((state->walk_frame + frames * 8U) % 64U);
+    if((frames & 1U) == 0U) return false;
+    state->walk_frame ^= 1U;
     return true;
 }
 
@@ -465,7 +466,7 @@ void Floppy144PlayerVisualDraw(
         if(walking)
             phase=F144_CHARACTER_TAU*
                 ((float)state->walk_frame+
-                 (float)state->animation_accumulator_ms/(float)FLOPPY144_PLAYER_WALK_FRAME_MS)/64.f;
+                 (float)state->animation_accumulator_ms/(float)FLOPPY144_PLAYER_WALK_FRAME_MS)/2.f;
     }
     if(body_style<0 || body_style>=FLOPPY144_OPERATOR_BODY_STYLE_COUNT)
         body_style=FLOPPY144_OPERATOR_BODY_STYLE_DEFAULT;
