@@ -5,6 +5,7 @@
 #include "floppy144_player_visual.h"
 
 #include <stddef.h>
+#include <math.h>
 
 static int32_t Floppy144PlayerAbs(
     int32_t value
@@ -227,802 +228,253 @@ bool Floppy144PlayerVisualAdvance(
         return false;
     }
 
-    if((frames & 1U) == 0U)
-    {
-        return false;
-    }
-
-    state->walk_frame ^=
-        1U;
-
+    state->walk_frame = (uint8_t)((state->walk_frame + frames) % 64U);
     return true;
 }
 
-static void Floppy144PlayerFill(
-    Floppy144Surface *surface,
-    int32_t clip_x,
-    int32_t clip_y,
-    int32_t clip_width,
-    int32_t clip_height,
-    int32_t x,
-    int32_t y,
-    int32_t width,
-    int32_t height,
-    uint32_t colour
-)
-{
-    int32_t x0;
-    int32_t y0;
-    int32_t x1;
-    int32_t y1;
 
-    if(
-        surface == NULL ||
-        surface->pixels == NULL ||
-        width <= 0 ||
-        height <= 0 ||
-        clip_width <= 0 ||
-        clip_height <= 0
-    )
-    {
-        return;
-    }
+/*
+ * Fixed-size, painter-ordered vector display list.
+ * All dimensions below are local to the sprite and use float until rasterised.
+ * Coordinates are clamped by the target surface AND the caller clip rectangle.
+ */
+#define F144_CHARACTER_MAX_PRIMITIVES 96U
+#define F144_CHARACTER_TAU 6.2831853071795864769f
 
-    x0 = x;
-    y0 = y;
-    x1 = x + width;
-    y1 = y + height;
+typedef struct { float x, y; } F144Vec2;
+typedef struct { uint8_t r, g, b, a; } F144RGBA;
+typedef struct { F144Vec2 a, b; float width; } F144Segment;
+typedef struct { F144Vec2 centre; float radius; } F144Circle;
+typedef struct { F144Segment axis; } F144Capsule;
+typedef enum { F144_VEC_LINE, F144_VEC_CIRCLE, F144_VEC_CAPSULE } F144PrimitiveType;
+typedef struct {
+    F144PrimitiveType type;
+    F144RGBA colour;
+    union { F144Segment line; F144Circle circle; F144Capsule capsule; } shape;
+} F144Primitive;
+typedef struct {
+    F144Primitive primitives[F144_CHARACTER_MAX_PRIMITIVES];
+    unsigned count;
+} RenderBuffer;
 
-    if(x0 < clip_x)
-    {
-        x0 = clip_x;
-    }
+typedef struct {
+    Floppy144Surface *surface;
+    int32_t x0, y0, x1, y1;
+} F144Raster;
 
-    if(y0 < clip_y)
-    {
-        y0 = clip_y;
-    }
-
-    if(x1 > clip_x + clip_width)
-    {
-        x1 = clip_x + clip_width;
-    }
-
-    if(y1 > clip_y + clip_height)
-    {
-        y1 = clip_y + clip_height;
-    }
-
-    if(x0 < 0)
-    {
-        x0 = 0;
-    }
-
-    if(y0 < 0)
-    {
-        y0 = 0;
-    }
-
-    if(x1 > (int32_t)surface->width)
-    {
-        x1 = (int32_t)surface->width;
-    }
-
-    if(y1 > (int32_t)surface->height)
-    {
-        y1 = (int32_t)surface->height;
-    }
-
-    if(x1 <= x0 || y1 <= y0)
-    {
-        return;
-    }
-
-    Floppy144DrawFillRect(
-        surface,
-        (uint32_t)x0,
-        (uint32_t)y0,
-        (uint32_t)(x1 - x0),
-        (uint32_t)(y1 - y0),
-        colour
-    );
+static F144Vec2 f144Vec(float x, float y) { F144Vec2 p = { x, y }; return p; }
+static F144RGBA f144Colour(uint8_t r, uint8_t g, uint8_t b) {
+    F144RGBA c = { r, g, b, 255 }; return c;
 }
-
-static void Floppy144PlayerLine(
-    Floppy144Surface *surface,
-    int32_t clip_x,
-    int32_t clip_y,
-    int32_t clip_width,
-    int32_t clip_height,
-    int32_t x0,
-    int32_t y0,
-    int32_t x1,
-    int32_t y1,
-    int32_t thickness,
-    uint32_t colour
-)
-{
-    int32_t dx =
-        Floppy144PlayerAbs(x1 - x0);
-
-    int32_t sx =
-        x0 < x1 ? 1 : -1;
-
-    int32_t dy =
-        -Floppy144PlayerAbs(y1 - y0);
-
-    int32_t sy =
-        y0 < y1 ? 1 : -1;
-
-    int32_t error =
-        dx + dy;
-
-    int32_t half =
-        thickness / 2;
-
-    for(;;)
-    {
-        Floppy144PlayerFill(
-            surface,
-            clip_x,
-            clip_y,
-            clip_width,
-            clip_height,
-            x0 - half,
-            y0 - half,
-            thickness,
-            thickness,
-            colour
-        );
-
-        if(x0 == x1 && y0 == y1)
+static int32_t f144Round(float x) { return (int32_t)(x + (x >= 0 ? .5f : -.5f)); }
+static float f144Positive(float x) { return x > 0.f ? x : 0.f; }
+static void f144AddLine(RenderBuffer *b, F144Vec2 a, F144Vec2 z, float width, F144RGBA c, F144PrimitiveType t) {
+    F144Primitive *p;
+    if(b->count >= F144_CHARACTER_MAX_PRIMITIVES) return;
+    p = &b->primitives[b->count++];
+    p->type = t; p->colour = c;
+    p->shape.line.a = a; p->shape.line.b = z; p->shape.line.width = width;
+}
+static void f144AddCircle(RenderBuffer *b, F144Vec2 centre, float radius, F144RGBA c) {
+    F144Primitive *p;
+    if(b->count >= F144_CHARACTER_MAX_PRIMITIVES || radius <= 0.f) return;
+    p = &b->primitives[b->count++];
+    p->type = F144_VEC_CIRCLE; p->colour = c;
+    p->shape.circle.centre = centre; p->shape.circle.radius = radius;
+}
+static void f144CapsuleAdd(RenderBuffer *b, float x0, float y0, float x1, float y1, float width, F144RGBA c) {
+    f144AddLine(b, f144Vec(x0,y0), f144Vec(x1,y1), width, c, F144_VEC_CAPSULE);
+}
+static void f144Pixel(const F144Raster *r, int32_t x, int32_t y, F144RGBA c) {
+    if(x >= r->x0 && x < r->x1 && y >= r->y0 && y < r->y1) {
+        Floppy144DrawFillRect(r->surface, (uint32_t)x, (uint32_t)y, 1U, 1U,
+            FLOPPY144_RGB(c.r,c.g,c.b));
+    }
+}
+static void f144Disk(const F144Raster *r, int32_t cx, int32_t cy, int32_t radius, F144RGBA c) {
+    int32_t x, y;
+    if(radius < 0) return;
+    /* Bound iterations even for malformed scale or off-screen geometry. */
+    if(radius > 256) radius = 256;
+    for(y = -radius; y <= radius; ++y) {
+        if(cy+y < r->y0 || cy+y >= r->y1) continue;
+        for(x = -radius; x <= radius; ++x)
+            if(x*x+y*y <= radius*radius) f144Pixel(r,cx+x,cy+y,c);
+    }
+}
+/* Integer Bresenham centreline, with a circular pen for configurable thickness. */
+static void f144Stroke(const F144Raster *r, F144Segment s, F144RGBA c) {
+    int32_t x0=f144Round(s.a.x), y0=f144Round(s.a.y);
+    int32_t x1=f144Round(s.b.x), y1=f144Round(s.b.y);
+    int32_t dx=Floppy144PlayerAbs(x1-x0), dy=-Floppy144PlayerAbs(y1-y0);
+    int32_t sx=x0<x1?1:-1, sy=y0<y1?1:-1, err=dx+dy;
+    int32_t radius=f144Round(s.width*.5f);
+    int32_t steps=0;
+    /* Reject absurd coordinates rather than allowing an unbounded loop. */
+    if(dx > 8192 || -dy > 8192 || radius > 256) return;
+    for(;;) {
+        f144Disk(r,x0,y0,radius,c);
+        if(x0==x1 && y0==y1) break;
+        if(++steps > 8193) break;
         {
-            break;
-        }
-
-        {
-            int32_t twice_error =
-                error * 2;
-
-            if(twice_error >= dy)
-            {
-                error += dy;
-                x0 += sx;
-            }
-
-            if(twice_error <= dx)
-            {
-                error += dx;
-                y0 += sy;
-            }
+            int32_t e2=2*err;
+            if(e2>=dy) {err+=dy; x0+=sx;}
+            if(e2<=dx) {err+=dx; y0+=sy;}
         }
     }
 }
-
-static void Floppy144PlayerCircle(
-    Floppy144Surface *surface,
-    int32_t clip_x,
-    int32_t clip_y,
-    int32_t clip_width,
-    int32_t clip_height,
-    int32_t centre_x,
-    int32_t centre_y,
-    int32_t radius,
-    uint32_t colour
-)
-{
-    int32_t y;
-
-    if(radius <= 0)
-    {
-        return;
-    }
-
-    for(y = -radius; y <= radius; ++y)
-    {
-        int32_t x =
-            radius;
-
-        while(
-            x > 0 &&
-            x * x + y * y >
-                radius * radius
-        )
-        {
-            --x;
-        }
-
-        Floppy144PlayerFill(
-            surface,
-            clip_x,
-            clip_y,
-            clip_width,
-            clip_height,
-            centre_x - x,
-            centre_y + y,
-            x * 2 + 1,
-            1,
-            colour
-        );
+static void f144Rasterize(const RenderBuffer *b, const F144Raster *r) {
+    unsigned i;
+    for(i=0;i<b->count;++i) {
+        const F144Primitive *p=&b->primitives[i];
+        if(p->type==F144_VEC_CIRCLE)
+            f144Disk(r,f144Round(p->shape.circle.centre.x),
+                f144Round(p->shape.circle.centre.y),
+                f144Round(p->shape.circle.radius),p->colour);
+        else f144Stroke(r,p->shape.line,p->colour);
     }
 }
-
+/*
+ * Cosmetic flags are intentionally independent of saved body-style identity.
+ * A game UI may later expose them without touching movement/collision state.
+ */
+enum {
+    F144_COSTUME_JACKET=1U, F144_COSTUME_TIE=2U,
+    F144_COSTUME_SKIRT=4U, F144_COSTUME_LONG_HAIR=8U,
+    F144_COSTUME_SHORT_HAIR=16U
+};
+typedef struct {
+    uint32_t flags;
+    F144RGBA skin, hair, cloth, shirt, trousers, shoes;
+} F144Costume;
+static F144Costume f144OfficeCostume(Floppy144OperatorBodyStyle style) {
+    F144Costume c;
+    c.flags = style==FLOPPY144_OPERATOR_BODY_STYLE_B
+        ? (F144_COSTUME_JACKET|F144_COSTUME_LONG_HAIR)
+        : (F144_COSTUME_JACKET|F144_COSTUME_TIE|F144_COSTUME_SHORT_HAIR);
+    c.skin=f144Colour(205,186,158); c.hair=f144Colour(49,39,34);
+    c.cloth=f144Colour(72,103,118); c.shirt=f144Colour(204,214,213);
+    c.trousers=f144Colour(39,48,54); c.shoes=f144Colour(21,26,31);
+    return c;
+}
+static void f144DrawLeg(RenderBuffer *b, float hipx, float hipy,
+                        float stride, float lift, float scale, const F144Costume *c) {
+    float kneeX=hipx+stride*.45f, footX=hipx+stride;
+    float kneeY=hipy+scale*12.f-lift*.4f, footY=hipy+scale*25.f-lift;
+    f144CapsuleAdd(b,hipx,hipy,kneeX,kneeY,scale*4.8f,c->trousers);
+    f144CapsuleAdd(b,kneeX,kneeY,footX,footY,scale*4.4f,c->trousers);
+    f144CapsuleAdd(b,footX-scale*2.f,footY,footX+scale*2.5f,footY,scale*3.f,c->shoes);
+}
+static void f144DrawArm(RenderBuffer *b, float sx, float sy, float swing,
+                        float scale, const F144Costume *c) {
+    float elbowX=sx+swing*.55f, elbowY=sy+scale*9.f;
+    float handX=sx+swing, handY=sy+scale*18.f-f144Positive(-swing)*.12f;
+    f144CapsuleAdd(b,sx,sy,elbowX,elbowY,scale*4.5f,c->cloth);
+    f144CapsuleAdd(b,elbowX,elbowY,handX,handY-scale*2.f,scale*3.5f,c->cloth);
+    f144AddCircle(b,f144Vec(handX,handY),scale*2.f,c->skin);
+}
+static void f144BuildOfficeCharacter(RenderBuffer *b, float cx, float footY,
+                                      float width, float height,
+                                      Floppy144PlayerFacing facing,
+                                      float phase, int walking,
+                                      const F144Costume *c) {
+    float scale=height/68.f, stride=0.f, bob=0.f, sway=0.f;
+    float top=footY-height, shoulders, hip, headY, shoulderWidth;
+    int profile=facing==FLOPPY144_PLAYER_FACING_LEFT ||
+                facing==FLOPPY144_PLAYER_FACING_RIGHT;
+    int front=facing==FLOPPY144_PLAYER_FACING_DOWN;
+    int back=facing==FLOPPY144_PLAYER_FACING_UP;
+    float direction=facing==FLOPPY144_PLAYER_FACING_LEFT?-1.f:1.f;
+    float liftA=0.f,liftB=0.f, hand=0.f, hipX;
+    (void)width;
+    if(walking) {
+        stride=sinf(phase)*scale*6.f;
+        hand=-stride*1.3f; /* contralateral arm movement */
+        bob=(1.f-cosf(phase*2.f))*scale*.9f;
+        sway=sinf(phase)*scale*.8f;
+        liftA=f144Positive(sinf(phase))*scale*4.f;
+        liftB=f144Positive(-sinf(phase))*scale*4.f;
+    }
+    top+=bob;
+    shoulders=top+scale*27.f; hip=top+scale*43.f;
+    headY=top+scale*11.f; hipX=cx+sway;
+    shoulderWidth=(c->flags&F144_COSTUME_JACKET)?scale*8.f:scale*7.f;
+    if(profile) {
+        /* Far limbs first, then body, then near limbs: stable painter order. */
+        f144DrawLeg(b,hipX-direction*scale,hip,-stride,liftB,scale,c);
+        f144DrawArm(b,cx-direction*scale*2.f,shoulders,-hand,scale,c);
+        f144CapsuleAdd(b,cx,shoulders,cx+sway*.3f,hip,scale*10.f,c->cloth);
+        f144CapsuleAdd(b,cx,hip,cx,hip+scale*2.f,scale*8.f,c->cloth);
+        if(c->flags&F144_COSTUME_SKIRT)
+            f144CapsuleAdd(b,cx,hip+scale*2.f,cx,hip+scale*8.f,scale*13.f,c->cloth);
+        f144DrawLeg(b,hipX+direction*scale,hip,stride,liftA,scale,c);
+        f144DrawArm(b,cx+direction*scale*2.f,shoulders,hand,scale,c);
+    } else {
+        f144DrawLeg(b,hipX-scale*3.f,hip,stride*.42f,liftA,scale,c);
+        f144DrawLeg(b,hipX+scale*3.f,hip,-stride*.42f,liftB,scale,c);
+        f144DrawArm(b,cx-shoulderWidth,shoulders,-scale*1.5f+hand*.22f,scale,c);
+        f144DrawArm(b,cx+shoulderWidth,shoulders,scale*1.5f-hand*.22f,scale,c);
+        f144CapsuleAdd(b,cx,shoulders,cx+sway*.3f,hip,scale*14.f,c->cloth);
+        if(c->flags&F144_COSTUME_SKIRT)
+            f144CapsuleAdd(b,cx,hip,cx,hip+scale*6.f,scale*15.f,c->cloth);
+        if(front) {
+            f144CapsuleAdd(b,cx,shoulders+scale*2.f,cx,hip-scale*3.f,scale*4.f,c->shirt);
+            if(c->flags&F144_COSTUME_TIE)
+                f144CapsuleAdd(b,cx,shoulders+scale*5.f,cx,shoulders+scale*13.f,scale*1.6f,c->hair);
+        }
+    }
+    if(c->flags&F144_COSTUME_LONG_HAIR)
+        f144CapsuleAdd(b,cx,headY,cx,headY+scale*11.f,scale*11.f,c->hair);
+    f144AddCircle(b,f144Vec(cx,headY),scale*8.f,c->skin);
+    if(back) {
+        f144CapsuleAdd(b,cx,headY-scale*3.f,cx,headY+scale*3.f,scale*14.f,c->hair);
+    } else {
+        f144CapsuleAdd(b,cx,headY-scale*6.f,cx,headY-scale*7.f,scale*10.f,c->hair);
+        if(profile) {
+            f144AddCircle(b,f144Vec(cx+direction*scale*3.5f,headY-scale),scale*.85f,c->shoes);
+            f144AddCircle(b,f144Vec(cx+direction*scale*7.5f,headY+scale*2.f),scale*1.45f,c->skin);
+        } else {
+            f144AddCircle(b,f144Vec(cx-scale*3.f,headY),scale*.85f,c->shoes);
+            f144AddCircle(b,f144Vec(cx+scale*3.f,headY),scale*.85f,c->shoes);
+        }
+    }
+}
 void Floppy144PlayerVisualDraw(
-    Floppy144Surface *surface,
-    int32_t foot_x,
-    int32_t foot_y,
-    int32_t sprite_width,
-    int32_t sprite_height,
-    int32_t collision_shadow_width,
-    Floppy144OperatorBodyStyle body_style,
+    Floppy144Surface *surface, int32_t foot_x, int32_t foot_y,
+    int32_t sprite_width, int32_t sprite_height,
+    int32_t collision_shadow_width, Floppy144OperatorBodyStyle body_style,
     const Floppy144PlayerVisualState *state,
-    int32_t clip_x,
-    int32_t clip_y,
-    int32_t clip_width,
-    int32_t clip_height
-)
-{
-    const uint32_t body_colour =
-        FLOPPY144_RGB(72, 103, 118);
-
-    const uint32_t shirt_light =
-        FLOPPY144_RGB(112, 139, 148);
-
-    const uint32_t skin_colour =
-        FLOPPY144_RGB(205, 186, 158);
-
-    const uint32_t trouser_colour =
-        FLOPPY144_RGB(39, 48, 54);
-
-    const uint32_t edge_colour =
-        FLOPPY144_RGB(18, 23, 26);
-
-    const uint32_t shadow_colour =
-        FLOPPY144_RGB(31, 35, 34);
-
-    Floppy144PlayerFacing facing =
-        FLOPPY144_PLAYER_FACING_DOWN;
-
-    bool moving =
-        false;
-
-    int32_t phase =
-        0;
-
-    int32_t sprite_y;
-    int32_t head_radius;
-    int32_t head_x;
-    int32_t head_y;
-    int32_t torso_width;
-    int32_t torso_x;
-    int32_t torso_y;
-    int32_t leg_y;
-    int32_t torso_height;
-    int32_t shoulder_y;
-    int32_t arm_thickness;
-    int32_t leg_thickness;
-    int32_t arm_swing;
-    int32_t leg_swing;
-    int32_t left_hand_x;
-    int32_t left_hand_y;
-    int32_t right_hand_x;
-    int32_t right_hand_y;
-    int32_t left_foot_x;
-    int32_t left_foot_y;
-    int32_t right_foot_x;
-    int32_t right_foot_y;
-
-    if(
-        surface == NULL ||
-        surface->pixels == NULL ||
-        sprite_width <= 0 ||
-        sprite_height <= 0 ||
-        collision_shadow_width <= 0
-    )
-    {
-        return;
+    int32_t clip_x, int32_t clip_y, int32_t clip_width, int32_t clip_height
+) {
+    RenderBuffer b={ { {0} },0U };
+    F144Raster r;
+    F144Costume costume;
+    Floppy144PlayerFacing facing=FLOPPY144_PLAYER_FACING_DOWN;
+    float phase=0.f;
+    int walking=0;
+    if(!surface || !surface->pixels || sprite_width<=0 || sprite_height<=0 ||
+       clip_width<=0 || clip_height<=0 || collision_shadow_width<=0) return;
+    r.surface=surface;
+    r.x0=clip_x>0?clip_x:0; r.y0=clip_y>0?clip_y:0;
+    r.x1=clip_x+clip_width<(int32_t)surface->width?clip_x+clip_width:(int32_t)surface->width;
+    r.y1=clip_y+clip_height<(int32_t)surface->height?clip_y+clip_height:(int32_t)surface->height;
+    if(r.x1<=r.x0 || r.y1<=r.y0) return;
+    if(state && state->facing<FLOPPY144_PLAYER_FACING_COUNT) {
+        facing=(Floppy144PlayerFacing)state->facing;
+        walking=state->moving!=0U;
+        if(walking)
+            phase=F144_CHARACTER_TAU*
+                ((float)state->walk_frame+
+                 (float)state->animation_accumulator_ms/(float)FLOPPY144_PLAYER_WALK_FRAME_MS)/64.f;
     }
-
-    if(
-        body_style < 0 ||
-        body_style >= FLOPPY144_OPERATOR_BODY_STYLE_COUNT
-    )
-    {
-        body_style =
-            FLOPPY144_OPERATOR_BODY_STYLE_DEFAULT;
-    }
-
-    if(
-        state != NULL &&
-        state->facing <
-            (uint8_t)FLOPPY144_PLAYER_FACING_COUNT
-    )
-    {
-        facing =
-            (Floppy144PlayerFacing)state->facing;
-
-        moving =
-            state->moving != 0U;
-
-        if(moving)
-        {
-            phase =
-                state->walk_frame != 0U
-                    ? 1
-                    : -1;
-        }
-    }
-
-    sprite_y =
-        foot_y - sprite_height;
-
-    head_radius =
-        sprite_width / 5;
-
-    if(head_radius < 5)
-    {
-        head_radius = 5;
-    }
-
-    head_x =
-        foot_x;
-
-    head_y =
-        sprite_y + head_radius + 1;
-
-    torso_width =
-        body_style == FLOPPY144_OPERATOR_BODY_STYLE_B
-            ? sprite_width * 7 / 8
-            : sprite_width * 3 / 4;
-
-    if(torso_width < 8)
-    {
-        torso_width = 8;
-    }
-
-    torso_x =
-        foot_x - torso_width / 2;
-
-    torso_y =
-        sprite_y + head_radius * 2;
-
-    leg_y =
-        foot_y - sprite_height / 4;
-
-    torso_height =
-        leg_y - torso_y + 2;
-
-    if(torso_height < 8)
-    {
-        torso_height = 8;
-    }
-
-    shoulder_y =
-        torso_y + torso_height / 4;
-
-    arm_thickness =
-        sprite_width / 12;
-
-    if(arm_thickness < 3)
-    {
-        arm_thickness = 3;
-    }
-
-    leg_thickness =
-        torso_width / 5;
-
-    if(leg_thickness < 4)
-    {
-        leg_thickness = 4;
-    }
-
-    arm_swing =
-        moving
-            ? sprite_height / 14
-            : 0;
-
-    if(arm_swing < 3 && moving)
-    {
-        arm_swing = 3;
-    }
-
-    leg_swing =
-        moving
-            ? sprite_width / 9
-            : sprite_width / 14;
-
-    if(leg_swing < 2)
-    {
-        leg_swing = 2;
-    }
-
-    Floppy144PlayerFill(
-        surface,
-        clip_x,
-        clip_y,
-        clip_width,
-        clip_height,
-        foot_x - collision_shadow_width / 2,
-        foot_y - 2,
-        collision_shadow_width,
-        5,
-        shadow_colour
-    );
-
-    left_hand_x =
-        torso_x - arm_thickness;
-    right_hand_x =
-        torso_x + torso_width + arm_thickness;
-    left_hand_y =
-        torso_y + torso_height * 3 / 4;
-    right_hand_y =
-        left_hand_y;
-
-    left_foot_x =
-        foot_x - torso_width / 4;
-    right_foot_x =
-        foot_x + torso_width / 4;
-    left_foot_y =
-        foot_y;
-    right_foot_y =
-        foot_y;
-
-    if(
-        facing == FLOPPY144_PLAYER_FACING_LEFT ||
-        facing == FLOPPY144_PLAYER_FACING_RIGHT
-    )
-    {
-        int32_t forward =
-            facing == FLOPPY144_PLAYER_FACING_RIGHT
-                ? 1
-                : -1;
-
-        left_hand_x +=
-            phase * arm_swing;
-
-        right_hand_x -=
-            phase * arm_swing;
-
-        left_hand_x +=
-            forward * 2;
-
-        right_hand_x +=
-            forward * 2;
-
-        left_foot_x +=
-            phase * leg_swing;
-
-        right_foot_x -=
-            phase * leg_swing;
-
-        if(moving)
-        {
-            left_foot_x +=
-                forward * 2;
-
-            right_foot_x +=
-                forward * 2;
-        }
-    }
-    else
-    {
-        left_hand_x -=
-            moving ? 2 : 0;
-
-        right_hand_x +=
-            moving ? 2 : 0;
-
-        left_hand_y +=
-            phase * arm_swing;
-
-        right_hand_y -=
-            phase * arm_swing;
-
-        left_foot_x +=
-            phase * leg_swing;
-
-        right_foot_x -=
-            phase * leg_swing;
-
-        if(moving)
-        {
-            left_foot_y -=
-                phase > 0 ? 2 : 0;
-
-            right_foot_y -=
-                phase < 0 ? 2 : 0;
-        }
-    }
-
-    /*
-     * Limbs are drawn behind the uniform jacket so the body remains readable
-     * even when the two-frame walk cycle crosses the centre line.
-     */
-    Floppy144PlayerLine(
-        surface,
-        clip_x,
-        clip_y,
-        clip_width,
-        clip_height,
-        torso_x + 2,
-        shoulder_y,
-        left_hand_x,
-        left_hand_y,
-        arm_thickness,
-        skin_colour
-    );
-
-    Floppy144PlayerLine(
-        surface,
-        clip_x,
-        clip_y,
-        clip_width,
-        clip_height,
-        torso_x + torso_width - 3,
-        shoulder_y,
-        right_hand_x,
-        right_hand_y,
-        arm_thickness,
-        skin_colour
-    );
-
-    Floppy144PlayerLine(
-        surface,
-        clip_x,
-        clip_y,
-        clip_width,
-        clip_height,
-        foot_x - torso_width / 5,
-        leg_y,
-        left_foot_x,
-        left_foot_y,
-        leg_thickness,
-        trouser_colour
-    );
-
-    Floppy144PlayerLine(
-        surface,
-        clip_x,
-        clip_y,
-        clip_width,
-        clip_height,
-        foot_x + torso_width / 5,
-        leg_y,
-        right_foot_x,
-        right_foot_y,
-        leg_thickness,
-        trouser_colour
-    );
-
-    Floppy144PlayerFill(
-        surface,
-        clip_x,
-        clip_y,
-        clip_width,
-        clip_height,
-        torso_x,
-        torso_y,
-        torso_width,
-        torso_height,
-        edge_colour
-    );
-
-    Floppy144PlayerFill(
-        surface,
-        clip_x,
-        clip_y,
-        clip_width,
-        clip_height,
-        torso_x + 1,
-        torso_y + 1,
-        torso_width - 2,
-        torso_height - 2,
-        body_colour
-    );
-
-    /*
-     * Type A is a narrower straight jacket with one badge. Type B keeps the
-     * same outer player footprint but uses a broader torso and twin shoulder
-     * tabs. The difference is cosmetic only.
-     */
-    if(body_style == FLOPPY144_OPERATOR_BODY_STYLE_B)
-    {
-        Floppy144PlayerFill(
-            surface,
-            clip_x,
-            clip_y,
-            clip_width,
-            clip_height,
-            torso_x + 4,
-            torso_y + 4,
-            5,
-            3,
-            shirt_light
-        );
-
-        Floppy144PlayerFill(
-            surface,
-            clip_x,
-            clip_y,
-            clip_width,
-            clip_height,
-            torso_x + torso_width - 9,
-            torso_y + 4,
-            5,
-            3,
-            shirt_light
-        );
-    }
-    else
-    {
-        Floppy144PlayerFill(
-            surface,
-            clip_x,
-            clip_y,
-            clip_width,
-            clip_height,
-            torso_x + torso_width / 2 - 2,
-            torso_y + 5,
-            4,
-            6,
-            shirt_light
-        );
-    }
-
-    /* Round head: dark one-pixel-ish rim, then skin inset. */
-    Floppy144PlayerCircle(
-        surface,
-        clip_x,
-        clip_y,
-        clip_width,
-        clip_height,
-        head_x,
-        head_y,
-        head_radius,
-        edge_colour
-    );
-
-    Floppy144PlayerCircle(
-        surface,
-        clip_x,
-        clip_y,
-        clip_width,
-        clip_height,
-        head_x,
-        head_y,
-        head_radius - 1,
-        skin_colour
-    );
-
-    /*
-     * Direction marks are intentionally tiny. They make left/right immediate,
-     * distinguish front from back vertically, and cost no external sprite data.
-     */
-    switch(facing)
-    {
-        case FLOPPY144_PLAYER_FACING_LEFT:
-        {
-            Floppy144PlayerFill(
-                surface,
-                clip_x,
-                clip_y,
-                clip_width,
-                clip_height,
-                head_x - head_radius / 3 - 1,
-                head_y - 2,
-                2,
-                2,
-                edge_colour
-            );
-
-            Floppy144PlayerFill(
-                surface,
-                clip_x,
-                clip_y,
-                clip_width,
-                clip_height,
-                head_x - head_radius - 1,
-                head_y,
-                2,
-                2,
-                skin_colour
-            );
-
-            break;
-        }
-
-        case FLOPPY144_PLAYER_FACING_RIGHT:
-        {
-            Floppy144PlayerFill(
-                surface,
-                clip_x,
-                clip_y,
-                clip_width,
-                clip_height,
-                head_x + head_radius / 3,
-                head_y - 2,
-                2,
-                2,
-                edge_colour
-            );
-
-            Floppy144PlayerFill(
-                surface,
-                clip_x,
-                clip_y,
-                clip_width,
-                clip_height,
-                head_x + head_radius,
-                head_y,
-                2,
-                2,
-                skin_colour
-            );
-
-            break;
-        }
-
-        case FLOPPY144_PLAYER_FACING_UP:
-        {
-            Floppy144PlayerFill(
-                surface,
-                clip_x,
-                clip_y,
-                clip_width,
-                clip_height,
-                head_x - head_radius / 2,
-                head_y - head_radius + 2,
-                head_radius,
-                3,
-                trouser_colour
-            );
-
-            Floppy144PlayerFill(
-                surface,
-                clip_x,
-                clip_y,
-                clip_width,
-                clip_height,
-                torso_x + 3,
-                torso_y + 3,
-                torso_width - 6,
-                3,
-                shirt_light
-            );
-
-            break;
-        }
-
-        case FLOPPY144_PLAYER_FACING_DOWN:
-        default:
-        {
-            Floppy144PlayerFill(
-                surface,
-                clip_x,
-                clip_y,
-                clip_width,
-                clip_height,
-                head_x - head_radius / 3 - 2,
-                head_y - 1,
-                2,
-                2,
-                edge_colour
-            );
-
-            Floppy144PlayerFill(
-                surface,
-                clip_x,
-                clip_y,
-                clip_width,
-                clip_height,
-                head_x + head_radius / 3,
-                head_y - 1,
-                2,
-                2,
-                edge_colour
-            );
-
-            break;
-        }
-    }
+    if(body_style<0 || body_style>=FLOPPY144_OPERATOR_BODY_STYLE_COUNT)
+        body_style=FLOPPY144_OPERATOR_BODY_STYLE_DEFAULT;
+    costume=f144OfficeCostume(body_style);
+    f144CapsuleAdd(&b,(float)foot_x-(float)collision_shadow_width*.45f,
+                  (float)foot_y+1.f,(float)foot_x+(float)collision_shadow_width*.45f,
+                  (float)foot_y+1.f,3.f,f144Colour(31,35,34));
+    f144BuildOfficeCharacter(&b,(float)foot_x,(float)foot_y,
+                            (float)sprite_width,(float)sprite_height,
+                            facing,phase,walking,&costume);
+    f144Rasterize(&b,&r);
 }
