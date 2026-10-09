@@ -387,7 +387,7 @@ static void f144BuildOfficeCharacter(RenderBuffer *b, float cx, float footY,
                                       float phase, int walking,
                                       const F144Costume *c) {
     float scale=height/68.f, stride=0.f, bob=0.f, sway=0.f;
-    float top=footY-height, shoulders, hip, headY, shoulderWidth;
+    float top=footY-height, shoulders, hip, headY, shoulderWidth, torsoDiameter;
     int profile=facing==FLOPPY144_PLAYER_FACING_LEFT ||
                 facing==FLOPPY144_PLAYER_FACING_RIGHT;
     int front=facing==FLOPPY144_PLAYER_FACING_DOWN;
@@ -403,10 +403,13 @@ static void f144BuildOfficeCharacter(RenderBuffer *b, float cx, float footY,
         liftB=f144Positive(-sinf(phase))*scale*4.f;
     }
     top+=bob;
-    shoulders=top+scale*27.f; hip=top+scale*43.f;
+    /* Place the jacket at the jawline, not below it as a blue neck stalk. */
+    shoulders=top+scale*21.f; hip=top+scale*43.f;
     headY=top+scale*11.f; hipX=cx+sway;
-    shoulderWidth=width*.375f;
-    if(c->flags&F144_COSTUME_LONG_HAIR) shoulderWidth=width*.4375f;
+    /* Arm roots sit on the torso edge and overlap its outline directly. */
+    torsoDiameter=(c->flags&F144_COSTUME_SKIRT)?scale*16.f:scale*14.f;
+    shoulderWidth=width*.22f;
+    if(shoulderWidth>torsoDiameter*.5f) shoulderWidth=torsoDiameter*.5f;
     if(profile) {
         /*
          * Profiles use a painter's order: both legs, rear sleeve, torso,
@@ -417,30 +420,24 @@ static void f144BuildOfficeCharacter(RenderBuffer *b, float cx, float footY,
         f144DrawLeg(b,hipX-direction*scale,hip,-stride,liftB,scale,c);
         f144DrawLeg(b,hipX+direction*scale,hip,stride,liftA,scale,c);
         f144DrawArm(b,rearShoulderX,shoulders,-hand,scale,c);
-        f144CapsuleAdd(b,cx,shoulders,cx+sway*.3f,hip,scale*10.f,c->cloth);
+        f144CapsuleAdd(b,cx,shoulders,cx+sway*.3f,hip,torsoDiameter*.72f,c->cloth);
         f144CapsuleAdd(b,cx,hip,cx,hip+scale*2.f,scale*8.f,c->cloth);
         if(c->flags&F144_COSTUME_SKIRT) {
             /* The hem covers both thighs, including the near-side leg. */
             f144CapsuleAdd(b,cx,hip+scale*2.f,cx,hip+scale*10.f,scale*13.f,c->cloth);
             f144CapsuleAdd(b,cx,hip+scale*9.f,cx,hip+scale*11.f,scale*14.f,c->cloth);
         }
-        /* Start inside the shoulder mass so the near arm cannot float. */
-        f144CapsuleAdd(b,cx,shoulders,nearShoulderX,shoulders+scale*2.f,
-                       scale*5.f,c->cloth);
-        f144DrawArm(b,nearShoulderX,shoulders+scale*2.f,hand,scale,c);
+        /* The sleeve begins within the torso silhouette: no shoulder patch. */
+        f144DrawArm(b,nearShoulderX,shoulders,hand,scale,c);
     } else {
         float leftShoulder=cx-shoulderWidth;
         float rightShoulder=cx+shoulderWidth;
         f144DrawLeg(b,hipX-scale*3.f,hip,stride*.42f,liftA,scale,c);
         f144DrawLeg(b,hipX+scale*3.f,hip,-stride*.42f,liftB,scale,c);
-        /* Explicit shoulder bridges make both Type B sleeves continuous. */
-        f144CapsuleAdd(b,cx-scale*4.f,shoulders,leftShoulder,shoulders,
-                       scale*5.5f,c->cloth);
-        f144CapsuleAdd(b,cx+scale*4.f,shoulders,rightShoulder,shoulders,
-                       scale*5.5f,c->cloth);
+        /* Direct, overlapping sleeve-to-torso joints for both body styles. */
         f144DrawArm(b,leftShoulder,shoulders,-scale*1.5f+hand*.22f,scale,c);
         f144DrawArm(b,rightShoulder,shoulders,scale*1.5f-hand*.22f,scale,c);
-        f144CapsuleAdd(b,cx,shoulders,cx+sway*.3f,hip,scale*14.f,c->cloth);
+        f144CapsuleAdd(b,cx,shoulders,cx+sway*.3f,hip,torsoDiameter,c->cloth);
         if(c->flags&F144_COSTUME_SKIRT)
             f144CapsuleAdd(b,cx,hip,cx,hip+scale*10.f,scale*15.f,c->cloth);
         if(front) {
@@ -453,6 +450,9 @@ static void f144BuildOfficeCharacter(RenderBuffer *b, float cx, float footY,
             }
         }
     }
+    /* A short, skin-coloured neck belongs to the head, not the jacket. */
+    f144CapsuleAdd(b,cx,headY+scale*6.f,cx,shoulders+scale*1.5f,
+                   scale*4.f,c->skin);
     if(profile) {
         /*
          * Hair silhouette is independent of skin paint. Cover the trailing
