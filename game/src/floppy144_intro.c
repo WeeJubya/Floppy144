@@ -183,6 +183,55 @@ static void Floppy144IntroDiscovery(
     Floppy144IntroFooter(surface,muted);
 }
 
+/*
+ * The insertion shot shows the floppy edge-on: its six-pixel edge must fit
+ * the six-pixel opening, not the full 104 x 92 face used in the discovery shot.
+ * Clip at the aperture as the media is fed into the drive.
+ */
+static void Floppy144IntroDiskEdge(
+    Floppy144Surface *surface,
+    uint32_t x,
+    uint32_t y,
+    uint32_t aperture_x
+)
+{
+    const uint32_t disk_width = 104U;
+    uint32_t visible_width;
+
+    if(x >= aperture_x)
+    {
+        return;
+    }
+
+    visible_width = aperture_x - x;
+    if(visible_width > disk_width)
+    {
+        visible_width = disk_width;
+    }
+
+    Floppy144DrawFillRect(
+        surface,x,y,visible_width,6U,FLOPPY144_RGB(38,43,46)
+    );
+    Floppy144DrawFillRect(
+        surface,x,y,visible_width,1U,FLOPPY144_RGB(151,158,157)
+    );
+    Floppy144DrawFillRect(
+        surface,x,y+5U,visible_width,1U,FLOPPY144_RGB(104,113,115)
+    );
+    if(visible_width > 26U)
+    {
+        uint32_t shutter_width = visible_width - 26U;
+        if(shutter_width > 16U)
+        {
+            shutter_width = 16U;
+        }
+        Floppy144DrawFillRect(
+            surface,x+26U,y+1U,shutter_width,4U,
+            FLOPPY144_RGB(151,158,157)
+        );
+    }
+}
+
 static void Floppy144IntroInsertion(
     Floppy144Surface *surface,
     uint32_t phase_ms,
@@ -196,40 +245,55 @@ static void Floppy144IntroInsertion(
     const uint32_t text = FLOPPY144_RGB(202,211,205);
     const uint32_t muted = FLOPPY144_RGB(118,133,132);
     const uint32_t amber = FLOPPY144_RGB(194,153,76);
-    uint32_t travel = 0U;
-    uint32_t disk_x = 82U;
+    const uint32_t slot_x = 380U;
+    const uint32_t slot_y = 120U;
+    const uint32_t slot_width = 188U;
+    const uint32_t slot_height = 18U;
+    const uint32_t aperture_x = slot_x + 12U;
+    const uint32_t aperture_y = slot_y + 6U;
+    const uint32_t aperture_width = slot_width - 24U;
+    const uint32_t aperture_height = slot_height - 12U;
+    const uint32_t disk_start_x = 82U;
+    uint32_t disk_x = disk_start_x;
     uint32_t text_ms = Floppy144IntroTextTime(text_rate,phase_ms);
 
     Floppy144DrawClear(surface,background);
 
     if(phase_ms > 250U)
     {
-        uint32_t motion_ms =
-            phase_ms - 250U;
-
+        uint32_t motion_ms = phase_ms - 250U;
         if(motion_ms > 1550U)
         {
             motion_ms = 1550U;
         }
 
-        travel =
-            (uint32_t)(
-                ((uint64_t)motion_ms * 296U) /
-                1550U
-            );
+        disk_x += (uint32_t)(
+            ((uint64_t)motion_ms * (aperture_x - disk_start_x)) /
+            1550U
+        );
     }
-
-    disk_x += travel;
-
-    Floppy144IntroDisk(surface,disk_x,126U);
 
     Floppy144DrawFillRect(surface,360U,74U,246U,202U,casing);
     Floppy144DrawRect(surface,360U,74U,246U,202U,edge);
-    Floppy144DrawFillRect(surface,380U,120U,188U,18U,dark);
-    Floppy144DrawRect(surface,380U,120U,188U,18U,edge);
-    Floppy144DrawFillRect(surface,392U,126U,164U,6U,FLOPPY144_RGB(4,6,7));
+    Floppy144DrawFillRect(
+        surface,slot_x,slot_y,slot_width,slot_height,dark
+    );
+    Floppy144DrawRect(
+        surface,slot_x,slot_y,slot_width,slot_height,edge
+    );
+    Floppy144DrawFillRect(
+        surface,aperture_x,aperture_y,
+        aperture_width,aperture_height,FLOPPY144_RGB(4,6,7)
+    );
     Floppy144DrawText(surface,388U,92U,"REMOVABLE MEDIA",1U,muted);
-    Floppy144DrawFillRect(surface,582U,91U,8U,8U,phase_ms > 1850U ? amber : dark);
+    Floppy144DrawFillRect(
+        surface,582U,91U,8U,8U,phase_ms > 1850U ? amber : dark
+    );
+
+    /* Only the edge still outside the aperture remains visible. */
+    Floppy144IntroDiskEdge(
+        surface,disk_x,aperture_y,aperture_x
+    );
 
     if(text_ms >= 1750U)
     {
