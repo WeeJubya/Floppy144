@@ -228,7 +228,7 @@ bool Floppy144PlayerVisualAdvance(
         return false;
     }
 
-    state->walk_frame = (uint8_t)((state->walk_frame + frames) % 64U);
+    state->walk_frame = (uint8_t)((state->walk_frame + frames * 8U) % 64U);
     return true;
 }
 
