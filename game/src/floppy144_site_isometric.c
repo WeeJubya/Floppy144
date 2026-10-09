@@ -1683,7 +1683,8 @@ static bool Floppy144IsometricRectVisibleInRoom(
 {
     if(
         pRect==NULL ||
-        !Floppy144SiteRectRuntimeVisible(pRunState,pRect)
+        !Floppy144SiteRectRuntimeVisible(pRunState,pRect) ||
+        !Floppy144SiteWallFixtureVisibleFromPlayer(pRunState,pRect)
     )
     {
         return false;

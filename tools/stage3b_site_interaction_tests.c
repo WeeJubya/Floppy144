@@ -2008,7 +2008,7 @@ static void Floppy144TestContextLabels(void)
      * Directory's label rather than whichever nearby object wins proximity.
      * RECEPTION_SITE_DIRECTORY: x76 y40 w1 h6.
      */
-    Floppy144TestSetPosition(&sState, 77, 43);
+    Floppy144TestSetPosition(&sState, 78, 43);
     pszLabel = Floppy144SiteContextLabel(&sState);
     F144_CHECK(
         pszLabel != NULL &&
@@ -2044,6 +2044,109 @@ static void Floppy144TestContextLabels(void)
  * Entry doors are initially unlocked and should request a Site exit; emergency
  * doors remain locked and must not. The query must not move the player.
  */
+/*
+ * Reception's x76 partition is INSIDE the logical Reception room. A
+ * room-only focus check therefore accepted both faces. The authored
+ * RECEPTION_SITE_DIRECTORY must be approachable from the east desk side.
+ */
+static void Floppy144TestReceptionDirectoryWallSide(void)
+{
+    Floppy144WorldState world;
+    Floppy144RunState state;
+    const char *parent, *label;
+    uint32_t y;
+
+    Floppy144TestReset(&world,&state);
+    (void)Floppy144RunStateReconstructRoom(
+        &state,FLOPPY144_ROOM_RECEPTION);
+
+    /* Probe both sides along the entire mounted item, including its ends. */
+    for(y=40U;y<=46U;++y)
+    {
+        Floppy144TestSetPosition(&state,78,(int32_t)y);
+        parent=Floppy144SiteFocusedParentId(&state);
+        label=Floppy144SiteContextLabel(&state);
+        F144_CHECK(
+            parent!=NULL &&
+            strcmp(parent,"RECEPTION_SITE_DIRECTORY")==0 &&
+            label!=NULL && strcmp(label,"SITE DIRECTORY")==0 &&
+            Floppy144SiteDirectoryNearby(&state) &&
+            (Floppy144SiteAvailableActions(&state) &
+             FLOPPY144_SITE_ACTION_INSPECT)!=0U,
+            "desk-side Reception directory is targetable and inspectable"
+        );
+        F144_CHECK(
+            Floppy144SiteWallFixtureVisibleFromPlayer(
+                &state,Floppy144SiteRectForParentId(
+                    "RECEPTION_SITE_DIRECTORY")),
+            "desk-side wall hanging is visible in both projections"
+        );
+
+        Floppy144TestSetPosition(&state,75,(int32_t)y);
+        parent=Floppy144SiteFocusedParentId(&state);
+        label=Floppy144SiteContextLabel(&state);
+        F144_CHECK(
+            (parent==NULL ||
+             strcmp(parent,"RECEPTION_SITE_DIRECTORY")!=0) &&
+            (label==NULL || strcmp(label,"SITE DIRECTORY")!=0) &&
+            !Floppy144SiteDirectoryNearby(&state) &&
+            (Floppy144SiteAvailableActions(&state) &
+             FLOPPY144_SITE_ACTION_INSPECT)==0U,
+            "opposite side cannot focus, prompt or activate directory"
+        );
+        F144_CHECK(
+            !Floppy144SiteWallFixtureVisibleFromPlayer(
+                &state,Floppy144SiteRectForParentId(
+                    "RECEPTION_SITE_DIRECTORY")),
+            "opposite side cannot see the mounted item in either projection"
+        );
+    }
+
+    /* A collision footprint intersecting the wall is never a valid face. */
+    for(y=40U;y<=46U;y+=6U)
+    {
+        Floppy144RunStateSetPlayerSitePosition(
+            &state,
+            76 * FLOPPY144_SITE_FIXED_ONE +
+                FLOPPY144_SITE_FIXED_ONE / 2,
+            (int32_t)y * FLOPPY144_SITE_FIXED_ONE);
+        F144_CHECK(
+            !Floppy144SiteDirectoryNearby(&state),
+            "wall-overlapping player cannot inspect near partition ends"
+        );
+    }
+
+    /* Half-unit probes just above and below the visible directory. */
+    for(y=39U;y<=46U;y+=7U)
+    {
+        Floppy144RunStateSetPlayerSitePosition(
+            &state,
+            75 * FLOPPY144_SITE_FIXED_ONE,
+            (int32_t)y * FLOPPY144_SITE_FIXED_ONE +
+                FLOPPY144_SITE_FIXED_ONE / 2);
+        F144_CHECK(
+            !Floppy144SiteDirectoryNearby(&state) &&
+            !Floppy144SiteWallFixtureVisibleFromPlayer(
+                &state,Floppy144SiteRectForParentId(
+                    "RECEPTION_SITE_DIRECTORY")),
+            "opposite-face wall occlusion holds near partition ends"
+        );
+    }
+
+    (void)Floppy144RunStateReconstructRoom(
+        &state,FLOPPY144_ROOM_CORRIDOR);
+    Floppy144RunStateSetPlayerSitePosition(
+        &state,38 * FLOPPY144_SITE_FIXED_ONE,
+        55 * FLOPPY144_SITE_FIXED_ONE +
+            FLOPPY144_SITE_FIXED_ONE / 2);
+    F144_CHECK(
+        Floppy144SiteDirectoryNearby(&state) &&
+        (Floppy144SiteAvailableActions(&state) &
+         FLOPPY144_SITE_ACTION_INSPECT)!=0U,
+        "Corridor wall directory retains normal inspection"
+    );
+}
+
 static void Floppy144TestExteriorExitBehaviour(void)
 {
     Floppy144WorldState sWorld;
@@ -2476,6 +2579,7 @@ int main(void)
     Floppy144TestConventionalDoorAccess();
     Floppy144TestSingleFocusedParentActions();
     Floppy144TestContextLabels();
+    Floppy144TestReceptionDirectoryWallSide();
     Floppy144TestExteriorExitBehaviour();
 
     if(g_nFailures != 0)

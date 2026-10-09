@@ -2319,6 +2319,139 @@ static const Floppy144DataRecord *Floppy144SiteParentRecordForRect(
     return NULL;
 }
 
+/*
+ * Some fixtures are mounted on only one face of an internal partition.
+ * Store only the authored fixture identity and accessible face here; its
+ * coordinates and backing wall come exclusively from compiled Site geometry.
+ * The shared focus filter then protects labels, actions and activation alike.
+ */
+typedef enum Floppy144WallInteractionFace
+{
+    FLOPPY144_WALL_FACE_EAST = 0,
+    FLOPPY144_WALL_FACE_WEST,
+    FLOPPY144_WALL_FACE_NORTH,
+    FLOPPY144_WALL_FACE_SOUTH
+} Floppy144WallInteractionFace;
+
+typedef struct Floppy144WallInteractionRule
+{
+    const char *fixture_id;
+    Floppy144WallInteractionFace face;
+} Floppy144WallInteractionRule;
+
+static const Floppy144WallInteractionRule floppy144_wall_interaction_rules[] =
+{
+    { "RECEPTION_SITE_DIRECTORY", FLOPPY144_WALL_FACE_EAST }
+};
+
+bool Floppy144SiteWallFixtureVisibleFromPlayer(
+    const Floppy144RunState *pState,
+    const Floppy144SiteRect *pTarget
+)
+{
+    const Floppy144DataRecord *pFixture;
+    uint32_t uRule;
+    uint32_t uWall;
+    Floppy144WallInteractionFace eFace;
+    int32_t nWallX0, nWallX1, nWallY0, nWallY1;
+    int32_t nPlayerX0, nPlayerX1, nPlayerY0, nPlayerY1;
+
+    if(pState == NULL || pTarget == NULL)
+    {
+        return false;
+    }
+
+    if(pTarget->type != (uint8_t)FLOPPY144_SITE_WALL_MOUNTED_ITEM)
+    {
+        return true;
+    }
+
+    pFixture = Floppy144SiteParentRecordForRect(pTarget);
+    if(pFixture == NULL || pFixture->pszId == NULL)
+    {
+        return true;
+    }
+
+    for(uRule = 0U;
+        uRule < FLOPPY144_ARRAY_COUNT(floppy144_wall_interaction_rules);
+        ++uRule)
+    {
+        if(strcmp(pFixture->pszId,
+                  floppy144_wall_interaction_rules[uRule].fixture_id) == 0)
+        {
+            break;
+        }
+    }
+    if(uRule == FLOPPY144_ARRAY_COUNT(floppy144_wall_interaction_rules))
+    {
+        return true;
+    }
+
+    eFace = floppy144_wall_interaction_rules[uRule].face;
+
+    /*
+     * Fail closed if the fixture is no longer mounted on the matching
+     * partition. This avoids inventing a second wall or hard-coding x/y.
+     */
+    for(uWall = 0U; uWall < Floppy144SiteRectCount(); ++uWall)
+    {
+        const Floppy144SiteRect *pWall = Floppy144SiteRectAt(uWall);
+
+        if(pWall == NULL ||
+           pWall->type != (uint8_t)FLOPPY144_SITE_PARTITION_WALL ||
+           pWall->room != pTarget->room ||
+           !Floppy144SiteRectRuntimeVisible(pState,pWall))
+        {
+            continue;
+        }
+
+        if(eFace == FLOPPY144_WALL_FACE_EAST ||
+           eFace == FLOPPY144_WALL_FACE_WEST)
+        {
+            if(pWall->x != pTarget->x ||
+               pWall->width != pTarget->width ||
+               pWall->y > pTarget->y ||
+               (uint32_t)pWall->y + pWall->height <
+                   (uint32_t)pTarget->y + pTarget->height)
+                continue;
+        }
+        else if(pWall->y != pTarget->y ||
+                pWall->height != pTarget->height ||
+                pWall->x > pTarget->x ||
+                (uint32_t)pWall->x + pWall->width <
+                    (uint32_t)pTarget->x + pTarget->width)
+        {
+            continue;
+        }
+
+        nWallX0 = (int32_t)pWall->x * FLOPPY144_SITE_FIXED_ONE;
+        nWallX1 = ((int32_t)pWall->x + pWall->width) *
+            FLOPPY144_SITE_FIXED_ONE;
+        nWallY0 = (int32_t)pWall->y * FLOPPY144_SITE_FIXED_ONE;
+        nWallY1 = ((int32_t)pWall->y + pWall->height) *
+            FLOPPY144_SITE_FIXED_ONE;
+
+        nPlayerX0 = pState->player_site_x -
+            FLOPPY144_SITE_PLAYER_COLLISION_WIDTH_X16 / 2;
+        nPlayerX1 = pState->player_site_x +
+            FLOPPY144_SITE_PLAYER_COLLISION_WIDTH_X16 / 2;
+        nPlayerY0 = pState->player_site_y -
+            FLOPPY144_SITE_PLAYER_COLLISION_DEPTH_X16;
+        nPlayerY1 = pState->player_site_y;
+
+        switch(eFace)
+        {
+            case FLOPPY144_WALL_FACE_EAST: return nPlayerX0 >= nWallX1;
+            case FLOPPY144_WALL_FACE_WEST: return nPlayerX1 <= nWallX0;
+            case FLOPPY144_WALL_FACE_NORTH: return nPlayerY1 <= nWallY0;
+            case FLOPPY144_WALL_FACE_SOUTH: return nPlayerY0 >= nWallY1;
+            default: return false;
+        }
+    }
+
+    return false;
+}
+
 static const Floppy144SiteRect *Floppy144SiteFocusedRect(
     const Floppy144RunState *pState,
     const char **ppszLabel
@@ -2389,6 +2522,15 @@ static const Floppy144SiteRect *Floppy144SiteFocusedRect(
             eCurrentRoom >= FLOPPY144_ROOM_COUNT ||
             pRect->room != (uint8_t)eCurrentRoom
         )
+        {
+            continue;
+        }
+
+        /*
+         * Same-room partition faces are not interchangeable. Apply the
+         * authored wall-facing rule before focus ranking or prompt creation.
+         */
+        if(!Floppy144SiteWallFixtureVisibleFromPlayer(pState, pRect))
         {
             continue;
         }

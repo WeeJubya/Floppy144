@@ -94,6 +94,16 @@ bool Floppy144SiteDirectoryNearby(
 );
 
 /*
+ * Player-visible face of an authored partition-mounted fixture. Ordinary
+ * fixtures are unaffected. Reuses the generated wall and player footprint so
+ * rendering, proximity labels, prompts and Inspect agree on occlusion.
+ */
+bool Floppy144SiteWallFixtureVisibleFromPlayer(
+    const Floppy144RunState *pState,
+    const Floppy144SiteRect *pRect
+);
+
+/*
  * Resolve the GDR terminal reachable from the player's current position.
  * Returns false when no reconstructed-room terminal is within access range.
  */

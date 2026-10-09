@@ -133,7 +133,8 @@ static bool Floppy144Site2DRectVisibleInRoom(
         !Floppy144SiteRectRuntimeVisible(
             run_state,
             rect
-        )
+        ) ||
+        !Floppy144SiteWallFixtureVisibleFromPlayer(run_state, rect)
     )
     {
         return false;
