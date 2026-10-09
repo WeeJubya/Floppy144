@@ -386,7 +386,6 @@ static void f144BuildOfficeCharacter(RenderBuffer *b, float cx, float footY,
     int back=facing==FLOPPY144_PLAYER_FACING_UP;
     float direction=facing==FLOPPY144_PLAYER_FACING_LEFT?-1.f:1.f;
     float liftA=0.f,liftB=0.f, hand=0.f, hipX;
-    (void)width;
     if(walking) {
         stride=sinf(phase)*scale*6.f;
         hand=-stride*1.3f; /* contralateral arm movement */
@@ -398,7 +397,8 @@ static void f144BuildOfficeCharacter(RenderBuffer *b, float cx, float footY,
     top+=bob;
     shoulders=top+scale*27.f; hip=top+scale*43.f;
     headY=top+scale*11.f; hipX=cx+sway;
-    shoulderWidth=(c->flags&F144_COSTUME_JACKET)?scale*8.f:scale*7.f;
+    shoulderWidth=width*.375f;
+    if(c->flags&F144_COSTUME_LONG_HAIR) shoulderWidth=width*.4375f;
     if(profile) {
         /* Far limbs first, then body, then near limbs: stable painter order. */
         f144DrawLeg(b,hipX-direction*scale,hip,-stride,liftB,scale,c);
@@ -470,6 +470,16 @@ void Floppy144PlayerVisualDraw(
     if(body_style<0 || body_style>=FLOPPY144_OPERATOR_BODY_STYLE_COUNT)
         body_style=FLOPPY144_OPERATOR_BODY_STYLE_DEFAULT;
     costume=f144OfficeCostume(body_style);
+    /*
+     * Preserve Stage 4C's body-style proportions in both Site and Profile.
+     * The width selection affects vector shoulder spacing, not collisions.
+     */
+    {
+        int32_t torso_width = body_style == FLOPPY144_OPERATOR_BODY_STYLE_B
+            ? sprite_width * 7 / 8
+            : sprite_width * 3 / 4;
+        sprite_width = torso_width;
+    }
     f144CapsuleAdd(&b,(float)foot_x-(float)collision_shadow_width*.45f,
                   (float)foot_y+1.f,(float)foot_x+(float)collision_shadow_width*.45f,
                   (float)foot_y+1.f,3.f,f144Colour(31,35,34));
