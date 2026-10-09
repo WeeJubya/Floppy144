@@ -346,22 +346,29 @@ enum {
 };
 typedef struct {
     uint32_t flags;
-    F144RGBA skin, hair, cloth, shirt, trousers, shoes;
+    F144RGBA skin, hair, cloth, shirt, trousers, shoes, accent;
 } F144Costume;
 static F144Costume f144OfficeCostume(Floppy144OperatorBodyStyle style) {
     F144Costume c;
     c.flags = style==FLOPPY144_OPERATOR_BODY_STYLE_B
-        ? (F144_COSTUME_JACKET|F144_COSTUME_LONG_HAIR)
+        ? (F144_COSTUME_JACKET|F144_COSTUME_SKIRT|F144_COSTUME_LONG_HAIR)
         : (F144_COSTUME_JACKET|F144_COSTUME_TIE|F144_COSTUME_SHORT_HAIR);
-    c.skin=f144Colour(205,186,158); c.hair=f144Colour(49,39,34);
-    c.cloth=f144Colour(72,103,118); c.shirt=f144Colour(204,214,213);
-    c.trousers=f144Colour(39,48,54); c.shoes=f144Colour(21,26,31);
+    /* Colour values sampled/approximated from the two editable PowerPoint figures. */
+    c.skin=f144Colour(208,166,157); c.hair=f144Colour(133,52,13);
+    c.cloth=style==FLOPPY144_OPERATOR_BODY_STYLE_B
+        ? f144Colour(63,63,63) : f144Colour(24,98,132);
+    c.shirt=f144Colour(248,249,250);
+    c.trousers=(c.flags&F144_COSTUME_SKIRT)?c.skin:c.cloth;
+    c.shoes=f144Colour(5,5,5);
+    c.accent=style==FLOPPY144_OPERATOR_BODY_STYLE_B
+        ? f144Colour(76,196,236):f144Colour(206,6,18);
     return c;
 }
 static void f144DrawLeg(RenderBuffer *b, float hipx, float hipy,
                         float stride, float lift, float scale, const F144Costume *c) {
     float kneeX=hipx+stride*.45f, footX=hipx+stride;
     float kneeY=hipy+scale*12.f-lift*.4f, footY=hipy+scale*25.f-lift;
+    /* The skirt figure uses visible skin-coloured calves, not black trousers. */
     f144CapsuleAdd(b,hipx,hipy,kneeX,kneeY,scale*4.8f,c->trousers);
     f144CapsuleAdd(b,kneeX,kneeY,footX,footY,scale*4.4f,c->trousers);
     f144CapsuleAdd(b,footX-scale*2.f,footY,footX+scale*2.5f,footY,scale*3.f,c->shoes);
@@ -407,7 +414,7 @@ static void f144BuildOfficeCharacter(RenderBuffer *b, float cx, float footY,
         f144CapsuleAdd(b,cx,shoulders,cx+sway*.3f,hip,scale*10.f,c->cloth);
         f144CapsuleAdd(b,cx,hip,cx,hip+scale*2.f,scale*8.f,c->cloth);
         if(c->flags&F144_COSTUME_SKIRT)
-            f144CapsuleAdd(b,cx,hip+scale*2.f,cx,hip+scale*8.f,scale*13.f,c->cloth);
+            f144CapsuleAdd(b,cx,hip+scale*2.f,cx,hip+scale*10.f,scale*12.f,c->cloth);
         f144DrawLeg(b,hipX+direction*scale,hip,stride,liftA,scale,c);
         f144DrawArm(b,cx+direction*scale*2.f,shoulders,hand,scale,c);
     } else {
@@ -417,27 +424,36 @@ static void f144BuildOfficeCharacter(RenderBuffer *b, float cx, float footY,
         f144DrawArm(b,cx+shoulderWidth,shoulders,scale*1.5f-hand*.22f,scale,c);
         f144CapsuleAdd(b,cx,shoulders,cx+sway*.3f,hip,scale*14.f,c->cloth);
         if(c->flags&F144_COSTUME_SKIRT)
-            f144CapsuleAdd(b,cx,hip,cx,hip+scale*6.f,scale*15.f,c->cloth);
+            f144CapsuleAdd(b,cx,hip,cx,hip+scale*10.f,scale*15.f,c->cloth);
         if(front) {
-            f144CapsuleAdd(b,cx,shoulders+scale*2.f,cx,hip-scale*3.f,scale*4.f,c->shirt);
-            if(c->flags&F144_COSTUME_TIE)
-                f144CapsuleAdd(b,cx,shoulders+scale*5.f,cx,shoulders+scale*13.f,scale*1.6f,c->hair);
+            if(c->flags&F144_COSTUME_TIE) {
+                /* White V-shaped lapels and crimson tie from the blue suit. */
+                f144CapsuleAdd(b,cx-scale*4.f,shoulders-scale*2.f,cx,shoulders+scale*10.f,scale*2.f,c->shirt);
+                f144CapsuleAdd(b,cx+scale*4.f,shoulders-scale*2.f,cx,shoulders+scale*10.f,scale*2.f,c->shirt);
+                f144CapsuleAdd(b,cx,shoulders-scale*1.f,cx,shoulders+scale*10.f,scale*2.5f,c->accent);
+                f144AddCircle(b,f144Vec(cx,hip-scale*5.f),scale*.8f,f144Colour(212,159,24));
+            }
         }
     }
-    if(c->flags&F144_COSTUME_LONG_HAIR)
-        f144CapsuleAdd(b,cx,headY,cx,headY+scale*11.f,scale*11.f,c->hair);
+    if(c->flags&F144_COSTUME_LONG_HAIR) {
+        /* Shoulder-length swept hair, with a narrow strand down the left. */
+        f144CapsuleAdd(b,cx,headY-scale*3.f,cx,headY+scale*7.f,scale*12.f,c->hair);
+        f144CapsuleAdd(b,cx-scale*8.f,headY-scale*3.f,cx-scale*8.f,headY+scale*9.f,scale*2.f,c->hair);
+    }
     f144AddCircle(b,f144Vec(cx,headY),scale*8.f,c->skin);
+    if((c->flags&F144_COSTUME_LONG_HAIR) && !back) {
+        /* Bright-blue scarf follows the neck, with one loose pointed end. */
+        f144CapsuleAdd(b,cx-scale*5.f,headY+scale*9.f,
+                       cx+scale*5.f,headY+scale*9.f,scale*4.5f,c->accent);
+        f144CapsuleAdd(b,cx+scale*4.f,headY+scale*9.f,
+                       cx+scale*7.f,headY+scale*13.f,scale*2.5f,c->accent);
+    }
     if(back) {
         f144CapsuleAdd(b,cx,headY-scale*3.f,cx,headY+scale*3.f,scale*14.f,c->hair);
     } else {
         f144CapsuleAdd(b,cx,headY-scale*6.f,cx,headY-scale*7.f,scale*10.f,c->hair);
-        if(profile) {
-            f144AddCircle(b,f144Vec(cx+direction*scale*3.5f,headY-scale),scale*.85f,c->shoes);
-            f144AddCircle(b,f144Vec(cx+direction*scale*7.5f,headY+scale*2.f),scale*1.45f,c->skin);
-        } else {
-            f144AddCircle(b,f144Vec(cx-scale*3.f,headY),scale*.85f,c->shoes);
-            f144AddCircle(b,f144Vec(cx+scale*3.f,headY),scale*.85f,c->shoes);
-        }
+        /* The supplied character designs deliberately have blank faces. */
+        (void)direction;
     }
 }
 void Floppy144PlayerVisualDraw(
