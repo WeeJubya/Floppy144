@@ -29,6 +29,7 @@
 #include "floppy144_notebook_view.h"
 #include "floppy144_recovery.h"
 #include "floppy144_intro.h"
+#include "floppy144_audio.h"
 #include "floppy144_player_visual.h"
 #include "floppy144_profile_edit.h"
 #include "floppy144_profile_view.h"
@@ -102,6 +103,12 @@ static Floppy144NotebookViewState global_notebook;
 static Floppy144DiscoveryProfile global_profile;
 static Floppy144ProfileNameEditState global_profile_name_edit;
 static Floppy144Settings global_settings;
+static Floppy144AudioMusic global_audio_cue;
+static uint8_t global_intro_sound_stage;
+static uint64_t global_last_footstep;
+static uint32_t global_known_evidence[FLOPPY144_RUN_WORD_COUNT(FLOPPY144_EVIDENCE_COUNT)];
+static bool global_audio_evidence_snapshot_valid;
+static uint32_t global_audio_evidence_seed;
 static Floppy144WorldState global_world;
 static Floppy144RunState global_run_state;
 static Floppy144GreyEncounter global_grey_encounter;
@@ -221,6 +228,52 @@ static void Floppy144OpenMainMenu(
 static void Floppy144UpdateTiming(
     HWND window
 );
+
+/* Gameplay communicates sound only through the semantic, platform-neutral
+ * façade. Music is not restarted on screen transitions within an Act.
+ */
+static void Floppy144UpdateAudio(uint64_t now)
+{
+    Floppy144AudioMusic desired=FLOPPY144_AUDIO_MUSIC_NONE;
+    uint32_t recovery=global_session_active
+        ? Floppy144RunStateRecoveredPercent(&global_run_state):0U;
+    uint32_t i;
+    bool evidence_new=false;
+    if(global_screen!=FLOPPY144_SCREEN_SPLASH &&
+       global_screen!=FLOPPY144_SCREEN_GREY_ENCOUNTER)
+    {
+        desired=FLOPPY144_AUDIO_MUSIC_PROLOGUE;
+        if(global_session_active &&
+           global_screen!=FLOPPY144_SCREEN_MAIN_MENU &&
+           global_screen!=FLOPPY144_SCREEN_SETTINGS &&
+           global_screen!=FLOPPY144_SCREEN_PROFILE &&
+           global_screen!=FLOPPY144_SCREEN_CREDITS)
+        {
+            uint32_t act=(uint32_t)Floppy144RunStateAct(&global_run_state);
+            if(act>3U) act=3U;
+            desired=(Floppy144AudioMusic)((uint32_t)FLOPPY144_AUDIO_MUSIC_PROLOGUE+act);
+        }
+    }
+    if(global_run_state.recovery_seed!=global_audio_evidence_seed) {
+        global_audio_evidence_seed=global_run_state.recovery_seed;
+        global_audio_evidence_snapshot_valid=false;
+    }
+    if(desired!=global_audio_cue) {
+        Floppy144AudioMusicSet(&global_platform,desired);
+        global_audio_cue=desired;
+    }
+    Floppy144AudioTick(&global_platform,now,recovery);
+    for(i=0U;i<FLOPPY144_RUN_WORD_COUNT(FLOPPY144_EVIDENCE_COUNT);i++) {
+        uint32_t current=global_run_state.evidence[i];
+        if(global_audio_evidence_snapshot_valid &&
+           global_session_active && ((current & ~global_known_evidence[i])!=0U))
+            evidence_new=true;
+        global_known_evidence[i]=current;
+    }
+    global_audio_evidence_snapshot_valid=true;
+    if(evidence_new)
+        Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_EVIDENCE_FOUND);
+}
 
 /*
  * Bind Floppy144's statically linked software renderer
@@ -709,6 +762,8 @@ static void Floppy144UpdateTiming(
     bool redraw =
         false;
 
+    Floppy144UpdateAudio(f144PlatformMonotonicMs(&global_platform));
+
     if(
         events.splash_frame_due != 0U &&
         global_screen == FLOPPY144_SCREEN_SPLASH
@@ -722,6 +777,21 @@ static void Floppy144UpdateTiming(
                 )
             );
 
+        if(intro_elapsed_ms>=FLOPPY144_INTRO_DISCOVERY_END_MS &&
+           global_intro_sound_stage<1U) {
+            Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_FLOPPY_INSERT);
+            global_intro_sound_stage=1U;
+        }
+        if(intro_elapsed_ms>=FLOPPY144_INTRO_INSERTION_END_MS &&
+           global_intro_sound_stage<2U) {
+            Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_CRT_WAKE);
+            global_intro_sound_stage=2U;
+        }
+        if(intro_elapsed_ms>=FLOPPY144_INTRO_PROGRAM_END_MS &&
+           global_intro_sound_stage<3U) {
+            Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_ACCEPT);
+            global_intro_sound_stage=3U;
+        }
         if(intro_elapsed_ms >= FLOPPY144_INTRO_DURATION_MS)
         {
             Floppy144TimingStopSplash(
@@ -813,12 +883,15 @@ static void Floppy144UpdateTiming(
         )
     )
     {
-        Floppy144TerminalAdvanceRestore(
-            &global_terminal,
-            &global_world,
-            &global_run_state,
-            events.terminal_restore_elapsed_ms
-        );
+        {
+            uint32_t recovered_before=Floppy144RunStateRecoveredKb(&global_run_state);
+            Floppy144TerminalAdvanceRestore(
+                &global_terminal,&global_world,&global_run_state,
+                events.terminal_restore_elapsed_ms
+            );
+            if(Floppy144RunStateRecoveredKb(&global_run_state)>recovered_before)
+                Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_FILE_RESTORE);
+        }
 
         redraw =
             true;
@@ -1997,11 +2070,33 @@ static void Floppy144MovePlayer(
         return;
     }
 
-    Floppy144RunStateMovePlayerSite(
-        &global_run_state,
-        world_movement_x,
-        world_movement_y
-    );
+    {
+        int32_t before_x=global_run_state.player_site_x;
+        int32_t before_y=global_run_state.player_site_y;
+        uint64_t now=f144PlatformMonotonicMs(&global_platform);
+        Floppy144RunStateMovePlayerSite(
+            &global_run_state,world_movement_x,world_movement_y
+        );
+        if(before_x!=global_run_state.player_site_x ||
+           before_y!=global_run_state.player_site_y)
+        {
+            if(now>=global_last_footstep+180U || global_last_footstep==0U)
+            {
+                Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_FOOTSTEP);
+                global_last_footstep=now;
+            }
+        }
+        else if(now>=global_last_footstep+340U)
+        {
+            bool locked=false;
+            const char *door=Floppy144SiteCorridorDoorLabelNearby(
+                &global_run_state,&locked);
+            if(door!=NULL && locked) {
+                Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_DOOR_BLOCKED);
+                global_last_footstep=now;
+            }
+        }
+    }
 
     Floppy144Redraw(
         window
@@ -2040,6 +2135,23 @@ static void Floppy144OfficeSetItemNotice(
 
     global_office_notice =
         global_office_notice_buffer;
+
+    /* Physical-object names are data-driven. No action is synthesized unless
+       inspection actually resolves to an authored nearby object. */
+    if(strstr(pszItemName,"Fridge") || strstr(pszItemName,"FRIDGE"))
+        Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_FRIDGE_OPEN);
+    else if(strstr(pszItemName,"Coffee") || strstr(pszItemName,"COFFEE"))
+        Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_COFFEE_MACHINE);
+    else if(strstr(pszItemName,"Phone") || strstr(pszItemName,"PHONE"))
+        Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_TELEPHONE);
+    else if(strstr(pszItemName,"Printer") || strstr(pszItemName,"PRINTER"))
+        Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_PRINTER);
+    else if(strstr(pszItemName,"Stapler") || strstr(pszItemName,"STAPLER"))
+        Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_STAPLER);
+    else if(strstr(pszItemName,"Paper") || strstr(pszItemName,"PAPER"))
+        Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_PAPER);
+    else if(strstr(pszItemName,"Stamp") || strstr(pszItemName,"STAMP"))
+        Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_STAMP);
 }
 
 /*
@@ -2066,6 +2178,7 @@ static void Floppy144InteractOffice(
                 Floppy144MovementInputReset(&global_movement_input);
                 global_office_notice=NULL;
                 global_screen=FLOPPY144_SCREEN_GREY_ENCOUNTER;
+                Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_POWER_FAIL);
             }
         }
         else
@@ -2100,6 +2213,7 @@ static void Floppy144InteractOffice(
                     "DOOR",
                     ": ACCESS GRANTED."
                 );
+                Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_DOOR_OPEN);
             }
 
             Floppy144Redraw(window);
@@ -2126,6 +2240,7 @@ static void Floppy144InteractOffice(
             &global_world,
             eTerminalRoom
         );
+        Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_CRT_WAKE);
 
         Floppy144ConfigureTerminalSession(
             true
@@ -2482,6 +2597,9 @@ static bool Floppy144HandleTextInput(
                 return true;
             }
 
+            if(uCodepoint>=32U && uCodepoint<=126U)
+                Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_TERMINAL_TYPE);
+
             switch(uCodepoint)
             {
                 case '\b':
@@ -2496,10 +2614,23 @@ static bool Floppy144HandleTextInput(
                 case '\r':
                 {
                     Floppy144TerminalSubmitInput(
-                        &global_terminal,
-                        &global_world,
-                        &global_run_state
+                        &global_terminal,&global_world,&global_run_state
                     );
+                    if(Floppy144TerminalRestoreInProgress(&global_terminal))
+                        Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_RELAY);
+                    else
+                    {
+                        const char *line=global_terminal.output_count
+                            ? global_terminal.output[global_terminal.output_count-1U]
+                            : "";
+                        bool rejected=strstr(line,"ERROR")!=NULL ||
+                            strstr(line,"UNKNOWN")!=NULL ||
+                            strstr(line,"DENIED")!=NULL ||
+                            strstr(line,"INVALID")!=NULL ||
+                            strstr(line,"FAILED")!=NULL;
+                        Floppy144AudioPlay(&global_platform,rejected
+                            ? FLOPPY144_AUDIO_ERROR : FLOPPY144_AUDIO_ACCEPT);
+                    }
 
                     if(global_terminal.exit_requested)
                     {
@@ -3098,7 +3229,8 @@ static bool Floppy144HandleActionEvent(
                         global_screen =
                             FLOPPY144_SCREEN_SPLASH;
 
-                        Floppy144TimingStartSplash(
+                        global_intro_sound_stage=0U;
+                    Floppy144TimingStartSplash(
                             &global_timing,
                             f144PlatformMonotonicMs(
                                 &global_platform
@@ -3300,6 +3432,7 @@ static bool Floppy144HandleActionEvent(
                                     global_office_notice = NULL;
                                     global_resume_screen = FLOPPY144_SCREEN_CABINET;
                                     global_screen = FLOPPY144_SCREEN_CABINET;
+                                    Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_CABINET);
                                     Floppy144Redraw(window);
                                     return true;
                                 }
@@ -3385,11 +3518,14 @@ static bool Floppy144HandleActionEvent(
                             }
                             else
                             {
-                                (void)Floppy144CabinetSubmitCode(
+                                bool accepted=Floppy144CabinetSubmitCode(
                                     &global_cabinet,
                                     &global_world,
                                     &global_run_state
                                 );
+                                Floppy144AudioPlay(&global_platform,
+                                    accepted ? FLOPPY144_AUDIO_CABINET
+                                             : FLOPPY144_AUDIO_ERROR);
                             }
 
                             Floppy144Redraw(window);
@@ -4595,6 +4731,7 @@ int CALLBACK WinMain(
             &global_platform,
             global_settings.sfx_volume
         );
+        Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_CRT_WAKE);
     }
 
     Floppy144IntroDraw(

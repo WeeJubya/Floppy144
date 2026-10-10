@@ -272,6 +272,14 @@ bool f144PlatformSetSfxVolume(
     return true;
 }
 
+void f144PlatformAudioUpdate(F144Platform *platform,uint64_t now_ms,
+                             uint32_t recovered_percent)
+{
+    if(platform && platform->audio_initialized && platform->api &&
+       platform->api->audio_update)
+        platform->api->audio_update(platform,now_ms,recovered_percent);
+}
+
 uint64_t f144PlatformMonotonicMs(
     F144Platform *platform
 )

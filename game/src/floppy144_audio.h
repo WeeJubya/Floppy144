@@ -1,0 +1,41 @@
+/* Floppy//144 semantic game audio façade: no native multimedia dependencies. */
+#pragma once
+#include "f144_platform.h"
+#include <stdint.h>
+
+typedef enum Floppy144AudioMusic {
+    FLOPPY144_AUDIO_MUSIC_NONE=0,
+    FLOPPY144_AUDIO_MUSIC_PROLOGUE=1,
+    FLOPPY144_AUDIO_MUSIC_ACT_I=2,
+    FLOPPY144_AUDIO_MUSIC_ACT_II=3,
+    FLOPPY144_AUDIO_MUSIC_ACT_III=4
+} Floppy144AudioMusic;
+
+typedef enum Floppy144AudioSound {
+    FLOPPY144_AUDIO_TERMINAL_TYPE=1,
+    FLOPPY144_AUDIO_ACCEPT,
+    FLOPPY144_AUDIO_ERROR,
+    FLOPPY144_AUDIO_TYPEWRITER,
+    FLOPPY144_AUDIO_STAPLER,
+    FLOPPY144_AUDIO_PRINTER,
+    FLOPPY144_AUDIO_PAPER,
+    FLOPPY144_AUDIO_RELAY,
+    FLOPPY144_AUDIO_STAMP,
+    FLOPPY144_AUDIO_CABINET,
+    FLOPPY144_AUDIO_DOOR_CLOSE,
+    FLOPPY144_AUDIO_CRT_WAKE,
+    FLOPPY144_AUDIO_TELEPHONE,
+    FLOPPY144_AUDIO_POWER_FAIL,
+    FLOPPY144_AUDIO_FOOTSTEP,
+    FLOPPY144_AUDIO_FILE_RESTORE,
+    FLOPPY144_AUDIO_DOOR_BLOCKED,
+    FLOPPY144_AUDIO_EVIDENCE_FOUND,
+    FLOPPY144_AUDIO_DOOR_OPEN,
+    FLOPPY144_AUDIO_FRIDGE_OPEN,
+    FLOPPY144_AUDIO_COFFEE_MACHINE,
+    FLOPPY144_AUDIO_FLOPPY_INSERT
+} Floppy144AudioSound;
+
+void Floppy144AudioPlay(F144Platform *platform,Floppy144AudioSound effect);
+void Floppy144AudioMusicSet(F144Platform *platform,Floppy144AudioMusic cue);
+void Floppy144AudioTick(F144Platform *platform,uint64_t now_ms,uint32_t recovery_percent);

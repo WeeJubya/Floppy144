@@ -1,14 +1,16 @@
 /*
  * FLOPPY//144 Stage 4B audio-platform contract regression.
  *
- * The current shipping baseline is silent. This test validates the semantic
- * game-facing contract with a deterministic fake backend, then exercises the
- * real silent Win32 backend without touching a user audio device.
+ * Verifies the semantic boundary, original procedural MIDI and F144SFX,
+ * and the WinMM adapters with an optional real device. Device absence is safe.
  */
 
 #include "f144_platform.h"
 #include "f144_win32_audio.h"
 #include "floppy144_settings.h"
+#include "floppy144_audio.h"
+#include "f144audio.h"
+#include "f144sfx.h"
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -267,7 +269,26 @@ static void TestPersistedDefaultVolumes(void)
     );
 }
 
-static void TestCurrentWin32SilentBackend(void)
+static void TestOriginalGeneratedAudio(void)
+{
+    Expect(F144_SFX_COUNT==22, "original fourteen + eight procedural SFX");
+    F144_MusicSetAct(F144_ACT_I);
+    Expect(F144_MusicGetAct()==F144_ACT_I,"Act I selection retains original API");
+    F144_MusicSetAct(F144_ACT_III);
+    Expect(F144_MusicGetAct()==F144_ACT_III,"Act III selection");
+    F144_MusicSetSeed(0x31415926U);
+    Expect(F144_MusicGetSeed()==0x31415926U,"deterministic music seed");
+    F144_MusicSetRestoration(0U);
+    Expect(F144_MusicGetDistortion()==0U,"0% restoration is clean");
+    F144_MusicSetRestoration(29U);
+    Expect(F144_MusicGetDistortion()==9U,"floor(29/3)");
+    F144_MusicSetRestoration(100U);
+    Expect(F144_MusicGetDistortion()==33U,"floor(100/3)");
+    F144_MusicSetRestoration(144U);
+    Expect(F144_MusicGetDistortion()==48U,"Grey Door 144% supports distortion");
+}
+
+static void TestWin32Backend(void)
 {
     F144Platform platform;
     F144PlatformApi api =
@@ -288,27 +309,30 @@ static void TestCurrentWin32SilentBackend(void)
     memset(&platform,0,sizeof(platform));
     platform.api=&api;
 
-    Expect(
-        f144PlatformAudioInit(&platform),
-        "current Win32 silent backend initialises"
-    );
-    Expect(
-        f144PlatformSetMusicVolume(&platform,0U)&&
-        f144PlatformSetSfxVolume(&platform,F144_AUDIO_VOLUME_MAX),
-        "Win32 backend accepts independent volumes"
-    );
-    Expect(
-        f144PlatformPlayMusic(&platform,42U)&&
-        f144PlatformPlaySfx(&platform,9U)&&
-        f144PlatformStopMusic(&platform),
-        "Win32 backend accepts semantic playback requests"
-    );
-
-    f144PlatformAudioShutdown(&platform);
-    Expect(
-        platform.audio_initialized==0U,
-        "Win32 backend shuts down cleanly"
-    );
+    /* Headless Windows CI may lack audio devices; that is never fatal. */
+    if(f144PlatformAudioInit(&platform))
+    {
+        Expect(f144PlatformSetMusicVolume(&platform,5U) &&
+               f144PlatformSetSfxVolume(&platform,3U),
+               "original backend accepts separate persisted volumes");
+        Expect(f144PlatformPlayMusic(&platform,1U) &&
+               f144PlatformPlaySfx(&platform,F144_SFX_TELEPHONE),
+               "original v0.9 phone and WinMIDI requests are accepted");
+        f144PlatformAudioUpdate(&platform,1000U,35U);
+        f144PlatformAudioUpdate(&platform,1230U,62U);
+        Expect(f144PlatformSetMusicVolume(&platform,0U) &&
+               f144PlatformSetSfxVolume(&platform,0U),
+               "independent mute controls are supported");
+        Expect(f144PlatformStopMusic(&platform),"MIDI stop request works");
+        f144PlatformAudioShutdown(&platform);
+    }
+    else
+    {
+        Expect(!f144PlatformPlayMusic(&platform,1U) &&
+               !f144PlatformPlaySfx(&platform,F144_SFX_TERMINAL_KEY),
+               "missing MIDI and waveOut devices remain safely silent");
+    }
+    Expect(platform.audio_initialized==0U,"native audio stops cleanly");
 }
 
 int main(void)
@@ -316,7 +340,8 @@ int main(void)
     TestSuccessfulLifecycle();
     TestInitialisationFailure();
     TestPersistedDefaultVolumes();
-    TestCurrentWin32SilentBackend();
+    TestOriginalGeneratedAudio();
+    TestWin32Backend();
 
     if(failures!=0)
     {

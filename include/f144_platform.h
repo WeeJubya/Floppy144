@@ -115,8 +115,8 @@ typedef enum F144PersistenceFile
  * Semantic audio
  *
  * Cue IDs describe game-owned/generated audio content. The platform owns only
- * playback. S4B-04 deliberately defines no shipping cues because the verified
- * Stage 4 baseline contains no music/SFX generator or playback backend yet.
+ * playback. The game-facing floppy144_audio façade maps these IDs to
+ * the original procedural F144MIDI/F144SFX code.
  */
 #define F144_AUDIO_VOLUME_MAX 10U
 
@@ -185,6 +185,12 @@ typedef struct F144PlatformApi
         F144Platform *platform,
         F144CalendarDate *date
     );
+
+    /* Optional native audio scheduler tick. */
+    void (*audio_update)(
+        F144Platform *platform,uint64_t now_ms,
+        uint32_t recovered_percent
+    );
 } F144PlatformApi;
 
 struct F144Platform
@@ -252,6 +258,9 @@ bool f144PlatformSetSfxVolume(
     F144Platform *platform,
     uint8_t volume
 );
+
+void f144PlatformAudioUpdate(F144Platform *platform,uint64_t now_ms,
+                             uint32_t recovered_percent);
 
 uint64_t f144PlatformMonotonicMs(
     F144Platform *platform

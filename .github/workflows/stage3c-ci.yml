@@ -5,6 +5,7 @@ on:
     branches:
       - development/stage-3c-complete
       - Stage4
+      - development/Stage-4
   workflow_dispatch:
 
 jobs:

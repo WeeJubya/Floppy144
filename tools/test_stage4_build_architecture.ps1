@@ -141,10 +141,18 @@ foreach($required in @(
     }
 }
 
-if($appBlock -match '"winmm"')
+if($appBlock -notmatch '"winmm"')
 {
-    throw "WinMM was linked even though S4B-04 currently has no native audio backend."
+    throw "WinMM link must be owned by the final Windows executable."
 }
+foreach($source in @('./src/f144audio.c','./src/f144sfx.c'))
+{
+    if($platformBlock -notmatch [regex]::Escape($source))
+    {
+        throw "Original procedural audio source missing from Win32 project: $source"
+    }
+}
+Assert-CorePatternAbsent -Pattern 'f144audio\.c|f144sfx\.c' -Description 'native procedural audio in Core'
 
 $coreSources = @(
     Get-ChildItem -Path (Join-Path $root "game\src") -Filter "*.c" -File |

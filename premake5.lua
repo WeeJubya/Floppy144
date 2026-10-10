@@ -102,7 +102,8 @@ objdir("obj/%{prj.name}/%{cfg.buildcfg}/%{cfg.platform}")
 
 includedirs({
     "./include/",
-    "./game/src/"
+    "./game/src/",
+    "./src/"
 })
 
 files({
@@ -110,6 +111,8 @@ files({
     "./src/f144_win32_runtime.c",
     "./src/string_view.c",
     "./src/f144_win32_audio.c",
+    "./src/f144audio.c",
+    "./src/f144sfx.c",
     "./src/f144_win32_calendar.c",
     "./src/f144_win32_startup_config.c",
     "./src/f144_win32_input.c",
@@ -121,6 +124,8 @@ files({
     "./include/f144_runtime.h",
     "./include/string_view.h",
     "./include/f144_win32_audio.h",
+    "./src/f144audio.h",
+    "./src/f144sfx.h",
     "./include/f144_win32_calendar.h",
     "./include/f144_win32_startup_config.h",
     "./include/f144_win32_input.h",
@@ -235,7 +240,8 @@ defines({
 links({
     "user32",
     "gdi32",
-    "shell32"
+    "shell32",
+    "winmm"
 })
 
 buildoptions({

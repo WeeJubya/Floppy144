@@ -99,25 +99,53 @@ foreach($required in @(
     }
 }
 
-$win32ForbiddenPatterns = @(
-    '(?i)#\s*include\s*[<"]mmsystem\.h[>"]',
-    '\bmidiOut[A-Za-z0-9_]*\s*\(',
-    '\bwaveOut[A-Za-z0-9_]*\s*\(',
-    '\bPlaySound[A-Za-z0-9_]*\s*\(',
-    '\bsndPlaySound[A-Za-z0-9_]*\s*\(',
-    '\bmciSend[A-Za-z0-9_]*\s*\(',
-    '\bHMIDIOUT\b\s+[A-Za-z_]',
-    '\bHWAVEOUT\b\s+[A-Za-z_]'
-)
-
-foreach($pattern in $win32ForbiddenPatterns)
+# Native WinMM is now explicitly permitted here, but never in Core.
+foreach($required in @('F144_AudioInit','F144_SFXInit',
+                       'F144_MusicSetRestoration','F144_SFXPlay'))
 {
-    if($win32Audio -match $pattern)
+    if($win32Audio -notmatch [regex]::Escape($required))
     {
-        throw "S4B-04 unexpectedly introduced a Windows multimedia implementation before the generated-audio feature is approved: $pattern"
+        throw "Win32 adapter is missing original audio call: $required"
     }
 }
-
+$midiSource = Get-Content -LiteralPath (Join-Path $root "src\f144audio.c") -Raw
+$sfxSource = Get-Content -LiteralPath (Join-Path $root "src\f144sfx.c") -Raw
+$facade = Get-Content -LiteralPath (Join-Path $root "game\src\floppy144_audio.c") -Raw
+if($midiSource -notmatch 'F144_TOTAL_STEPS\s+9600u' -or
+   $midiSource -notmatch 'g_distortion\s*\*\s*6u' -or
+   $midiSource -notmatch 'bar\s*>=\s*580u')
+{
+    throw "30-minute MIDI duration, restoration corruption or final minute is missing."
+}
+if($sfxSource -notmatch 'make_telephone' -or
+   $sfxSource -notmatch '640u' -or
+   $sfxSource -notmatch '790u')
+{
+    throw "Approved v0.9 lower telephone chirrup is missing."
+}
+foreach($pattern in $forbiddenPatterns)
+{
+    if($facade -match $pattern)
+    {
+        throw "Game audio façade leaked native WinMM dependency: $pattern"
+    }
+}
+foreach($required in @('midiOutOpen','midiOutShortMsg'))
+{
+    if($midiSource -notmatch [regex]::Escape($required))
+    {
+        throw "Original F144MIDI implementation is missing: $required"
+    }
+}
+foreach($required in @('waveOutOpen','waveOutWrite','F144_SFX_FOOTSTEP',
+                       'F144_SFX_COFFEE_MACHINE'))
+{
+    $combined = $sfxSource + (Get-Content -LiteralPath (Join-Path $root "src\f144sfx.h") -Raw)
+    if($combined -notmatch [regex]::Escape($required))
+    {
+        throw "Original/extended F144SFX is missing: $required"
+    }
+}
 Write-Host "STAGE 4 AUDIO BOUNDARY AUDIT: PASS"
 Write-Host ""
 Write-Host "=== BUILD STAGE 4 AUDIO CONTRACT REGRESSION ==="
@@ -143,10 +171,16 @@ $compileArgs = @(
     $testSource,
     (Join-Path $root "src\f144_platform.c"),
     (Join-Path $root "src\f144_win32_audio.c"),
+    (Join-Path $root "src\f144audio.c"),
+    (Join-Path $root "src\f144sfx.c"),
+    (Join-Path $root "game\src\floppy144_audio.c"),
     (Join-Path $root "game\src\floppy144_settings.c"),
     $includePlatform,
     $includeGame,
-    "/Fe$exePath"
+    "/I" + (Join-Path $root "src"),
+    "/Fe$exePath",
+    "/link",
+    "winmm.lib"
 )
 
 & cl.exe @compileArgs

@@ -526,7 +526,8 @@ static const F144PlatformApi f144_win32_platform_api =
     f144Win32AudioSetSfxVolume,
     f144Win32MonotonicMs,
     f144Win32PlatformQuit,
-    f144Win32LocalCalendarDate
+    f144Win32LocalCalendarDate,
+    f144Win32AudioUpdate
 };
 
 void f144Win32PlatformBind(

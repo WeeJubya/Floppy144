@@ -1,0 +1,48 @@
+#ifndef F144_SFX_H
+#define F144_SFX_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef enum F144SFX {
+    F144_SFX_TERMINAL_KEY = 0,
+    F144_SFX_TERMINAL_OK,
+    F144_SFX_TERMINAL_ERROR,
+    F144_SFX_TYPEWRITER,
+    F144_SFX_STAPLER,
+    F144_SFX_PRINTER,
+    F144_SFX_PAPER,
+    F144_SFX_RELAY,
+    F144_SFX_STAMP,
+    F144_SFX_FILING_CABINET,
+    F144_SFX_DOOR,
+    F144_SFX_CRT_WAKE,
+    F144_SFX_TELEPHONE,
+    F144_SFX_POWER_FAIL,
+    F144_SFX_FOOTSTEP,
+    F144_SFX_FILE_RESTORE,
+    F144_SFX_DOOR_BLOCKED,
+    F144_SFX_EVIDENCE_FOUND,
+    F144_SFX_DOOR_OPEN,
+    F144_SFX_FRIDGE_OPEN,
+    F144_SFX_COFFEE_MACHINE,
+    F144_SFX_FLOPPY_INSERT,
+    F144_SFX_COUNT
+} F144SFX;
+
+int  F144_SFXInit(void);
+void F144_SFXShutdown(void);
+
+void F144_SFXPlay(F144SFX effect);
+
+void  F144_SFXSetVolume(float volume);
+float F144_SFXGetVolume(void);
+
+int F144_SFXIsAvailable(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif

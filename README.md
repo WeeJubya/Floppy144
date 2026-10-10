@@ -210,20 +210,21 @@ profile and settings paths through `F144Platform`; it contains no
 
 ## Audio platform boundary - Stage 4
 
-The verified Stage 4 baseline contains persisted music/SFX volume settings but
-no shipping playback backend, WinMIDI/WinMM calls, external audio library, or
-embedded production music/SFX data. S4B-04 therefore introduces the semantic
-audio boundary without changing the current silent runtime.
+BUG FIX 02 restores the approved original F144MIDI v0.7 and F144SFX v0.9
+WinMM generators behind the portable Stage 4 platform interface. Music is
+extended to 600 bars/30:00 at 80 BPM. Additional restrained layers enter at
+each five-minute boundary; the final minute removes them in stages and fades
+into the original theme. Musical corruption is deterministic from seed, Act,
+score position and `floor(restoration_percent / 3)`.
 
-Game-facing code can now initialise/shut down audio, play or replace a semantic
-music cue, stop music, trigger an SFX cue, and set independent music/SFX volume
-through `F144Platform`. Cue IDs remain platform-neutral. Future compact
-runtime music/SFX composition must remain game/core-owned; only native playback
-and device handling belong in the Win32 backend.
-
-The current Win32 audio adapter is intentionally silent. This preserves the
-audited behaviour exactly while leaving the platform seam ready for the
-separately approved generated-audio feature and Stage 4C persisted volume UI.
+The original telephone electromechanical chirrup is retained. New procedural
+F144SFX cues cover footsteps, restoration, discoveries, opening/blocked doors,
+coffee, fridge and floppy insertion. There are no audio files to ship: the
+Windows backend holds one MIDI output and one waveOut instance. Separate
+persisted 0-10 volume settings are mapped to the original 0.0-1.0 generators.
+Audio-device failure is nonfatal. Intro uses effects but no background music.
+See `docs/bug_fix_02_audio.md` for architecture, cues, regression checks and
+review notes.
 
 ## Timing and lifecycle platform boundary - Stage 4
 
