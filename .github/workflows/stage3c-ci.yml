@@ -55,6 +55,10 @@ jobs:
         shell: pwsh
         run: .\tools\test_bugfix15_chairs.ps1
 
+      - name: Bug Fix 17 Security geometry regression
+        shell: pwsh
+        run: .\tools\test_bugfix17_security.ps1
+
       - name: Stage 2 regression
         shell: pwsh
         run: .\tools\test_stage2.ps1
