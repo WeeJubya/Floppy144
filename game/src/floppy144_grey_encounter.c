@@ -1,5 +1,5 @@
 /*
- * GREY DOOR REPUBLIC. A tiny procedural office, outside world coordinates.
+ * GREY DOOR REPUBLIK. A tiny procedural office, outside world coordinates.
  * Every pixel is drawn through the existing 640x360 software framebuffer.
  */
 #include "floppy144_grey_encounter.h"
@@ -207,7 +207,7 @@ static void Office(Floppy144Surface *s,const Floppy144GreyEncounter *scene)
         FILL(s,0,i,640,1,RGB(166,178,184));
     FILL(s,25,16,590,66,RGB(242,246,243));
     Floppy144DrawRect(s,25,16,590,66,RGB(179,193,196));
-    Floppy144DrawText(s,94,34,"GREY DOOR REPUBLIC",2U,RGB(35,61,73));
+    Floppy144DrawText(s,94,34,"GREY DOOR REPUBLIK",2U,RGB(35,61,73));
     FILL(s,74,69,491,2,RGB(73,151,166));
     /* Windows glow, architectural light bands. */
     FILL(s,34,97,178,97,RGB(121,185,199));
