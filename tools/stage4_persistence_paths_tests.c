@@ -1695,6 +1695,15 @@ static void TestGreyEncounter(const char *root)
             Expect(!Floppy144GreyEncounterSaveAllowed(&scene),
                 "S4G-03 no temporary scene phase permits save/autosave");
             Floppy144GreyEncounterDraw(&surface,&scene);
+            if(scene.phase==(uint8_t)FLOPPY144_GREY_BLACKOUT)
+            {
+                uint32_t pixel;
+                for(pixel=0U;pixel<640U*360U;++pixel)
+                    Expect(pixels[pixel]==FLOPPY144_RGB(0,0,0),
+                        "BUG13 blackout covers every framebuffer pixel");
+                Expect(scene.elapsed_ms<2000U,
+                    "BUG13 blackout remains active for its full two seconds");
+            }
             (void)Floppy144GreyEncounterAdvance(&scene,100U);
         }
         Expect(Floppy144GreyEncounterFinished(&scene) &&
@@ -1702,7 +1711,8 @@ static void TestGreyEncounter(const char *root)
             (phase_visited&(1U<<FLOPPY144_GREY_TURN))!=0U &&
             (phase_visited&(1U<<FLOPPY144_GREY_DIALOGUE))!=0U &&
             (phase_visited&(1U<<FLOPPY144_GREY_CAPACITY))!=0U &&
-            (phase_visited&(1U<<FLOPPY144_GREY_GLITCH))!=0U,
+            (phase_visited&(1U<<FLOPPY144_GREY_GLITCH))!=0U &&
+            (phase_visited&(1U<<FLOPPY144_GREY_BLACKOUT))!=0U,
             "S4G-03 every authored encounter stage occurs in order");
         Expect(Floppy144GreyEncounterSaveAllowed(&scene),
             "S4G-03 temporary save guard releases only after vignette finishes");
