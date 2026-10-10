@@ -51,6 +51,10 @@ jobs:
             throw "Canonical generated runtime data differs from committed output."
           }
 
+      - name: Bug Fix 15 deterministic chair occupancy
+        shell: pwsh
+        run: .\tools\test_bugfix15_chairs.ps1
+
       - name: Stage 2 regression
         shell: pwsh
         run: .\tools\test_stage2.ps1
