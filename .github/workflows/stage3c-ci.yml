@@ -418,6 +418,10 @@ jobs:
         shell: pwsh
         run: .\tools\test_stage4_build_architecture.ps1
 
+      - name: Build standalone audio listening harness
+        shell: pwsh
+        run: .\tools\build_audio_review.ps1
+
       - name: Install Premake
         shell: pwsh
         run: |
