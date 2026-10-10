@@ -35,6 +35,7 @@ int main(void)
     Expect(Floppy144CreditsViewLineCount()==10U,"credits remain one compact page");
     Expect(Floppy144CreditsViewMaxLineWidth()<=504U,"credit lines fit panel");
     Expect(Contains("GREY DOOR REPUBLIK"),"company credit");
+    Expect(!Contains("GREY DOOR REPUBLIC"),"obsolete Grey Door spelling absent");
     Expect(Contains("WEEJUBYA"),"designer/developer credit");
     Expect(Contains("RIVER2D-DERIVED"),"River2D lineage");
     Expect(Contains("BADACRONYM"),"River2D copyright holder");
