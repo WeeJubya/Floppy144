@@ -14989,17 +14989,17 @@
       "description": "A blue pen cap is wedged beside the chair leg. The matching pen is nowhere nearby."
     },
     {
-      "id": "P-516",
-      "name": "Folded sticky note",
+      "id": "P-518",
+      "name": "Elastic band",
       "room_id": "RECEPTION",
-      "parent_id": "RECEPTION_CHAIR_11",
+      "parent_id": "RECEPTION_CHAIR_13",
       "collection_ids": [],
       "evidence_ids": [],
       "role": "Context / worldbuilding",
       "drawing_definition_id": "DRAW_CHAIR",
       "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 516,
-      "description": "A folded sticky note reads RETURN KEY before close. The reminder has been ticked once in blue ink."
+      "source_order": 518,
+      "description": "A perished elastic band is looped around the chair support. It snaps at the slightest pull."
     },
     {
       "id": "P-519",
