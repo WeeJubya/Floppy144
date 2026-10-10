@@ -8,7 +8,7 @@
 
 static const char *const floppy144_credit_lines[]=
 {
-    "GAME DESIGN COMPANY: GREY DOOR REPUBLIC",
+    "GAME DESIGN COMPANY: GREY DOOR REPUBLIK",
     "MAIN DESIGNER / DEVELOPER: WEEJUBYA",
     "",
     "RUNTIME ACKNOWLEDGEMENT",
