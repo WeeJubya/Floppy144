@@ -4,7 +4,7 @@ S4C-06 adds a compact one-page Credits/About screen reached from Settings. It do
 
 The wording is grounded in `docs/stage4/runtime_provenance.md`, the root `LICENSE`, current build metadata, and the creator/company information supplied for this stage.
 
-The screen identifies FLOPPY//144, Grey Door Republic, WeeJubya, the River2D-derived F144 runtime lineage, River2D copyright (C) 2026 BadAcronym, GNU GPL version 3 for the derived runtime, redistribution/no-warranty notices, and the full `LICENSE` location.
+The screen identifies FLOPPY//144, GREY DOOR REPUBLIK, WeeJubya, the River2D-derived F144 runtime lineage, River2D copyright (C) 2026 BadAcronym, GNU GPL version 3 for the derived runtime, redistribution/no-warranty notices, and the full `LICENSE` location.
 
 The provenance audit does not establish a whole-project FLOPPY//144 copyright holder or settle the licence scope of independently authored game material. The screen therefore makes no invented whole-game copyright/licence claim and explicitly keeps broader scope questions in the provenance record.
 
