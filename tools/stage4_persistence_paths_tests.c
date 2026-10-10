@@ -1681,7 +1681,7 @@ static void TestGreyEncounter(const char *root)
 
         Expect(!Floppy144GreyEncounterInspect(&scene),
             "S4G-03 Developer cannot be inspected from distant door");
-        for(k=0U;k<34U;++k)
+        for(k=0U;k<29U;++k)
             (void)Floppy144GreyEncounterMove(&scene,12,0);
         Expect(Floppy144GreyEncounterInspect(&scene) &&
             scene.developer_inspected==1U &&
