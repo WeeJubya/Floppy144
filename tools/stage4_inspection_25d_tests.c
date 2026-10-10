@@ -328,6 +328,156 @@ static void TestContentMarkerStates(void)
     );
 }
 
+
+/*
+ * BUG FIX 10: every authored physical child must resolve to a real inspectable
+ * parent. The renderer now chooses a projected parent face by furniture
+ * family, rather than drawing a disconnected screen-space marker grid.
+ */
+static void TestAllAuthoredPhysicalItemParents(void)
+{
+    const char *seen[256]={0};
+    uint32_t inspected=0U;
+    uint32_t categories=0U;
+    uint32_t i,j;
+    const char *variants[64]={0};
+
+    for(i=0U;i<ARRAY_COUNT(g_records);++i)
+    {
+        const Floppy144DataRecord *child=&g_records[i];
+        const Floppy144DataRecord *parent;
+        const char *id;
+        const char *variant;
+        bool duplicate=false;
+        uint32_t empty_hash,filled_hash;
+
+        if(child->eKind!=FLOPPY144_DATA_PHYSICAL_ITEM)continue;
+        id=child->pszC; /* Authored physical item's parent_id. */
+        for(j=0U;j<inspected;++j)
+        {
+            if(seen[j]!=NULL && id!=NULL &&
+               strcmp(seen[j],id)==0)
+            {
+                duplicate=true;
+                break;
+            }
+        }
+        if(duplicate)continue;
+        CHECK(id!=NULL && inspected<ARRAY_COUNT(seen),
+              "every child has an inspectable parent identifier");
+        if(id==NULL || inspected>=ARRAY_COUNT(seen))continue;
+        seen[inspected++]=id;
+        parent=FindParent(id);
+        CHECK(parent!=NULL,"physical item parent resolves to canonical furniture");
+        if(parent==NULL)continue;
+        variant=parent->pszC!=NULL?parent->pszC:parent->pszB;
+        for(j=0U;j<categories;++j)
+            if(variants[j]!=NULL && variant!=NULL &&
+               strcmp(variants[j],variant)==0)break;
+        if(j==categories && categories<ARRAY_COUNT(variants))
+            variants[categories++]=variant;
+
+        empty_hash=DrawParent(parent,0,0U,0U,NULL);
+        filled_hash=DrawParent(parent,0,1U,0U,NULL);
+        CHECK(empty_hash!=filled_hash,
+              "authored parent children alter projected Inspection surface");
+        CHECK(RegionPixelCount(306U,0U,TEST_WIDTH,TEST_HEIGHT)==0U,
+              "surface-mapped children are clipped before the contents list");
+    }
+    CHECK(inspected>=172U,
+          "all 172 authored physical-item parents receive projected children");
+    CHECK(categories>=28U,
+          "surface projection audits all 28 populated furniture categories");
+}
+
+/*
+ * Pixel-level geometry check. Only NEW selected-child pixels are counted, so
+ * a parent's existing orientation tick and built-in door fittings are ignored.
+ * The Desk 06 top and corridor door front are tested separately; neither
+ * child may appear on the floor below the furniture as before.
+ */
+static uint32_t g_child_baseline[TEST_PIXEL_COUNT];
+
+static uint32_t TestNewChildColourInBounds(
+    uint32_t x0,uint32_t y0,uint32_t x1,uint32_t y1,
+    uint32_t *outside
+)
+{
+    const uint32_t selected=0x00D8EFDCU;
+    uint32_t x,y,inside=0U;
+    *outside=0U;
+    for(y=0U;y<TEST_HEIGHT;++y)
+    for(x=0U;x<TEST_WIDTH;++x)
+    {
+        uint32_t at=y*TEST_WIDTH+x;
+        if(g_pixels[at]!=selected ||
+           g_child_baseline[at]==selected)continue;
+        if(x>=x0 && x<=x1 && y>=y0 && y<=y1)++inside;
+        else ++*outside;
+    }
+    return inside;
+}
+
+static void TestDeskAndDoorChildSurfaces(void)
+{
+    const Floppy144DataRecord *desk=FindParent("MAIN_OFFICE_DESK_06");
+    const Floppy144DataRecord *door=FindParent("COR_REC");
+    const Floppy144DataRecord *rotated=FindParent("SECRETARY_OFFICE_DESK");
+    const Floppy144DataRecord *bookcase=FindParent("IT_SUPPORT_BOOKCASE");
+    const Floppy144DataRecord *wall=FindParent("IT_SUPPORT_PATCH_PANEL");
+    uint32_t inside,outside;
+
+    CHECK(desk!=NULL && door!=NULL && rotated!=NULL,
+          "Desk 06, corridor door and rotated desk exist");
+    if(desk==NULL || door==NULL || rotated==NULL)return;
+
+    (void)DrawParent(desk,0,0U,0U,NULL);
+    memcpy(g_child_baseline,g_pixels,sizeof(g_pixels));
+    (void)DrawParent(desk,0,10U,0U,NULL);
+    inside=TestNewChildColourInBounds(79U,85U,295U,196U,&outside);
+    CHECK(inside>0U && outside==0U,
+          "Desk 06 child documents lie only on its 2.5D desktop plane");
+
+    /* Signed authored orientation still maps children to a rotated top. */
+    (void)DrawParent(rotated,135,0U,0U,NULL);
+    memcpy(g_child_baseline,g_pixels,sizeof(g_pixels));
+    (void)DrawParent(rotated,135,5U,0U,NULL);
+    inside=TestNewChildColourInBounds(30U,85U,303U,205U,&outside);
+    CHECK(inside>0U && outside==0U,
+          "diagonal desks inherit the rotated desktop perspective");
+
+    (void)DrawParent(door,0,0U,0U,NULL);
+    memcpy(g_child_baseline,g_pixels,sizeof(g_pixels));
+    (void)DrawParent(door,0,3U,0U,NULL);
+    inside=TestNewChildColourInBounds(42U,143U,75U,303U,&outside);
+    CHECK(inside>0U && outside==0U,
+          "corridor door children stay on the projected vertical door face");
+
+    /* Four shelving levels are copies of the top plane at authored lips. */
+    CHECK(bookcase!=NULL && wall!=NULL,
+          "bookcase and wall fixture examples exist");
+    if(bookcase!=NULL)
+    {
+        (void)DrawParent(bookcase,0,0U,0U,NULL);
+        memcpy(g_child_baseline,g_pixels,sizeof(g_pixels));
+        (void)DrawParent(bookcase,0,4U,3U,NULL);
+        inside=TestNewChildColourInBounds(15U,200U,303U,306U,&outside);
+        CHECK(inside>0U && outside==0U,
+              "bottom shelf item follows the projected shelf plane");
+    }
+
+    /* Wall-mounted fixture labels use the existing panel surface. */
+    if(wall!=NULL)
+    {
+        (void)DrawParent(wall,0,0U,0U,NULL);
+        memcpy(g_child_baseline,g_pixels,sizeof(g_pixels));
+        (void)DrawParent(wall,0,3U,0U,NULL);
+        inside=TestNewChildColourInBounds(38U,92U,295U,255U,&outside);
+        CHECK(inside>0U && outside==0U,
+              "wall-mounted items inherit the existing fixture panel face");
+    }
+}
+
 static void TestUnknownFallback(void)
 {
     Floppy144DataRecord future_parent;
@@ -369,6 +519,8 @@ int main(void)
     TestEveryCanonicalParentVariant();
     TestDimensionsOrientationAndWallFixtures();
     TestContentMarkerStates();
+    TestAllAuthoredPhysicalItemParents();
+    TestDeskAndDoorChildSurfaces();
     TestUnknownFallback();
 
     if(g_failures!=0)

@@ -49,6 +49,29 @@ foreach($Required in @(
     }
 }
 
+
+# BUG FIX 10: 2.5D item markers must be projected onto a parent surface.
+# The pre-reconstruction schematic may remain 2D in floppy144_cabinet.c,
+# but the enhanced renderer must never reintroduce screen-space child grids.
+foreach($Required in @(
+    'Floppy144Cabinet25DChildSurface',
+    'Floppy144Cabinet25DFaceCorners',
+    'Floppy144Cabinet25DOnFace',
+    'Floppy144Cabinet25DDrawSurfaceMarker',
+    'Floppy144Cabinet25DDrawSurfaceChildren',
+    'F144_25D_CHILD_SHELF'
+))
+{
+    if($Renderer -notmatch [regex]::Escape($Required))
+    {
+        throw "Inspectable child surface projection is missing: $Required"
+    }
+}
+if($Renderer.Contains('Floppy144Cabinet25DDrawMarkers('))
+{
+    throw "Legacy screen-space child marker renderer returned to 2.5D Inspection."
+}
+
 foreach($Forbidden in @(
     '.bmp',
     '.png',

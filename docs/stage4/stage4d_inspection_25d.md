@@ -165,6 +165,46 @@ The draw call reports that fallback was used, allowing regression coverage to
 prove the object still renders safely without requiring the game to understand
 the new class first.
 
+## BUG FIX 10: surface-projected physical children
+
+An authored physical item has a stable `parent_id`, but **no child-plane or
+screen-coordinate field**. Its `drawing_definition_id` describes an illustration,
+not the mounting surface. Desk 06, for example, has desktop papers whose
+illustration is labelled `DRAW_WALL_MOUNTED_ITEM`; that is not permission to
+mount those papers on a wall.
+
+Once the Main Office 2.5D presentation gate is enabled, all child markers
+derive their positions from their parent's existing 2.5D geometry:
+
+- desks, terminal desks, workbenches, tables, worktops, chairs, sofas, sinks
+  and trolleys use inset quads on the actual top/seat plane;
+- doors, secure/non-secure cabinets, server racks, fridges and the coffee maker
+  use inset quads on the projected vertical front plane;
+- shelving and bookcases use four separately projected horizontal shelf planes,
+  aligned with the four authored shelf lips;
+- wall-mounted fixtures use the front of the existing shallow wall panel;
+- unknown future furniture uses the generic projected top plane.
+
+Child corners are interpolated from the surface's four corners in fixed-point
+integer UV coordinates. This preserves parent aspect ratio, orientation and
+mirror transform. The projected quads are drawn after the parent, one pixel
+above the surface, with the same x<306 clipping as all other inspection
+primitives. The corridor door's inbuilt panel fixings have also moved from
+screen-space rectangles onto its front face; the door cuboid is unchanged.
+
+This is a **presentation-only change**. It does not modify any of the 634
+canonical physical items, their parent ownership, reveal rules, item selection,
+or gameplay state. The source-data audit found all 172 populated parent IDs
+resolvable among 28 inspectable furniture/fixture categories, so no per-item
+coordinate compensation was necessary.
+
+Regression checks enumerate those 172 parents and draw each empty and with
+a child; pixel comparisons verify Desk 06 top, the rotated Secretary desk,
+COR_REC door face, a bookcase shelf and a wall-mounted patch panel. Existing
+Stage 3B regressions remain responsible for item inspection/progression and
+locked-container behaviour. Windows execution and visual sign-off are required
+before declaring the release gate complete.
+
 ## Regression coverage
 
 Dedicated S4D-04 presentation tests:
