@@ -13,7 +13,9 @@ if (@($items.id | Select-Object -Unique).Count -ne $items.Count) { throw 'Duplic
 $parents = @($data.furniture.id) + @($data.fixtures.id) + @($data.connections.id)
 foreach ($item in $items) { if ($item.parent_id -and $parents -notcontains $item.parent_id) { throw "Invalid PI parent $($item.id)" } }
 $required = @($data.evidence | ForEach-Object { $_.physical_item_ids }) + @($data.interactions.physical_source)
-foreach ($id in $required) { if ($id -match '^P-[0-9]+ { throw "Missing required PI $id" } }
-Write-Host 'BUG FIX 15: PASS; 22 of 56 chairs populated'
- -and $items.id -notcontains $id) { throw "Missing required PI $id" } }
+foreach ($id in $required) {
+    if ($id -match '^P-[0-9]+$' -and $items.id -notcontains $id) {
+        throw "Missing required PI $id"
+    }
+}
 Write-Host 'BUG FIX 15: PASS; 22 of 56 chairs populated'
