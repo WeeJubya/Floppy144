@@ -32,7 +32,7 @@
     "interactions": 42,
     "ambient_interactions": 16,
     "evidence": 23,
-    "physical_items": 634,
+    "physical_items": 600,
     "rooms": 11,
     "furniture": 151,
     "fixtures": 91,
@@ -14963,32 +14963,6 @@
       "description": "A bent paperclip rests beneath the front edge of the seat. It has been unfolded and refolded several times."
     },
     {
-      "id": "P-507",
-      "name": "Pencil stub",
-      "room_id": "RECEPTION",
-      "parent_id": "RECEPTION_CHAIR_02",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 507,
-      "description": "A short pencil stub has rolled against the chair leg. The eraser is worn almost completely flat."
-    },
-    {
-      "id": "P-508",
-      "name": "Folded sticky note",
-      "room_id": "RECEPTION",
-      "parent_id": "RECEPTION_CHAIR_03",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 508,
-      "description": "A folded sticky note reads RETURN KEY before close. The reminder has been ticked once in blue ink."
-    },
-    {
       "id": "P-509",
       "name": "Plastic button",
       "room_id": "RECEPTION",
@@ -15000,32 +14974,6 @@
       "source_status": "authored-stage3c-furniture-coverage",
       "source_order": 509,
       "description": "A dark plastic button lies under the chair. A short length of navy thread is still caught through it."
-    },
-    {
-      "id": "P-510",
-      "name": "Elastic band",
-      "room_id": "RECEPTION",
-      "parent_id": "RECEPTION_CHAIR_05",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 510,
-      "description": "A perished elastic band is looped around the chair support. It snaps at the slightest pull."
-    },
-    {
-      "id": "P-511",
-      "name": "Old queue ticket",
-      "room_id": "RECEPTION",
-      "parent_id": "RECEPTION_CHAIR_06",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 511,
-      "description": "A numbered queue ticket has slipped under the chair. The printed number is 084; nothing else is written on it."
     },
     {
       "id": "P-512",
@@ -15041,45 +14989,6 @@
       "description": "A blue pen cap is wedged beside the chair leg. The matching pen is nowhere nearby."
     },
     {
-      "id": "P-513",
-      "name": "Paper fastener",
-      "room_id": "RECEPTION",
-      "parent_id": "RECEPTION_CHAIR_08",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 513,
-      "description": "A brass paper fastener lies under the seat, flattened from being stepped on more than once."
-    },
-    {
-      "id": "P-514",
-      "name": "Bent paperclip",
-      "room_id": "RECEPTION",
-      "parent_id": "RECEPTION_CHAIR_09",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 514,
-      "description": "A bent paperclip rests beneath the front edge of the seat. It has been unfolded and refolded several times."
-    },
-    {
-      "id": "P-515",
-      "name": "Pencil stub",
-      "room_id": "RECEPTION",
-      "parent_id": "RECEPTION_CHAIR_10",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 515,
-      "description": "A short pencil stub has rolled against the chair leg. The eraser is worn almost completely flat."
-    },
-    {
       "id": "P-516",
       "name": "Folded sticky note",
       "room_id": "RECEPTION",
@@ -15091,32 +15000,6 @@
       "source_status": "authored-stage3c-furniture-coverage",
       "source_order": 516,
       "description": "A folded sticky note reads RETURN KEY before close. The reminder has been ticked once in blue ink."
-    },
-    {
-      "id": "P-517",
-      "name": "Plastic button",
-      "room_id": "RECEPTION",
-      "parent_id": "RECEPTION_CHAIR_12",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 517,
-      "description": "A dark plastic button lies under the chair. A short length of navy thread is still caught through it."
-    },
-    {
-      "id": "P-518",
-      "name": "Elastic band",
-      "room_id": "RECEPTION",
-      "parent_id": "RECEPTION_CHAIR_13",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 518,
-      "description": "A perished elastic band is looped around the chair support. It snaps at the slightest pull."
     },
     {
       "id": "P-519",
@@ -15210,32 +15093,6 @@
       "description": "A numbered queue ticket has slipped under the chair. The printed number is 084; nothing else is written on it."
     },
     {
-      "id": "P-526",
-      "name": "Pen cap",
-      "room_id": "MAIN_OFFICE",
-      "parent_id": "MAIN_OFFICE_CHAIR_02",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 526,
-      "description": "A blue pen cap is wedged beside the chair leg. The matching pen is nowhere nearby."
-    },
-    {
-      "id": "P-527",
-      "name": "Paper fastener",
-      "room_id": "MAIN_OFFICE",
-      "parent_id": "MAIN_OFFICE_CHAIR_03",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 527,
-      "description": "A brass paper fastener lies under the seat, flattened from being stepped on more than once."
-    },
-    {
       "id": "P-528",
       "name": "Bent paperclip",
       "room_id": "MAIN_OFFICE",
@@ -15247,19 +15104,6 @@
       "source_status": "authored-stage3c-furniture-coverage",
       "source_order": 528,
       "description": "A bent paperclip rests beneath the front edge of the seat. It has been unfolded and refolded several times."
-    },
-    {
-      "id": "P-529",
-      "name": "Pencil stub",
-      "room_id": "MAIN_OFFICE",
-      "parent_id": "MAIN_OFFICE_CHAIR_05",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 529,
-      "description": "A short pencil stub has rolled against the chair leg. The eraser is worn almost completely flat."
     },
     {
       "id": "P-530",
@@ -15795,19 +15639,6 @@
       "description": "A perished elastic band is looped around the chair support. It snaps at the slightest pull."
     },
     {
-      "id": "P-571",
-      "name": "Old queue ticket",
-      "room_id": "RECORDS_OFFICE",
-      "parent_id": "RECORDS_OFFICE_CHAIR_02",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 571,
-      "description": "A numbered queue ticket has slipped under the chair. The printed number is 084; nothing else is written on it."
-    },
-    {
       "id": "P-572",
       "name": "Pen cap",
       "room_id": "RECORDS_OFFICE",
@@ -15819,19 +15650,6 @@
       "source_status": "authored-stage3c-furniture-coverage",
       "source_order": 572,
       "description": "A blue pen cap is wedged beside the chair leg. The matching pen is nowhere nearby."
-    },
-    {
-      "id": "P-573",
-      "name": "Paper fastener",
-      "room_id": "RECORDS_OFFICE",
-      "parent_id": "RECORDS_OFFICE_CHAIR_04",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 573,
-      "description": "A brass paper fastener lies under the seat, flattened from being stepped on more than once."
     },
     {
       "id": "P-574",
@@ -15951,32 +15769,6 @@
       "description": "A short pencil stub has rolled against the chair leg. The eraser is worn almost completely flat."
     },
     {
-      "id": "P-583",
-      "name": "Folded sticky note",
-      "room_id": "STAFF_ROOM",
-      "parent_id": "STAFF_ROOM_CHAIR_02",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 583,
-      "description": "A folded sticky note reads RETURN KEY before close. The reminder has been ticked once in blue ink."
-    },
-    {
-      "id": "P-584",
-      "name": "Plastic button",
-      "room_id": "STAFF_ROOM",
-      "parent_id": "STAFF_ROOM_CHAIR_03",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 584,
-      "description": "A dark plastic button lies under the chair. A short length of navy thread is still caught through it."
-    },
-    {
       "id": "P-585",
       "name": "Elastic band",
       "room_id": "STAFF_ROOM",
@@ -15988,19 +15780,6 @@
       "source_status": "authored-stage3c-furniture-coverage",
       "source_order": 585,
       "description": "A perished elastic band is looped around the chair support. It snaps at the slightest pull."
-    },
-    {
-      "id": "P-586",
-      "name": "Old queue ticket",
-      "room_id": "STAFF_ROOM",
-      "parent_id": "STAFF_ROOM_CHAIR_05",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 586,
-      "description": "A numbered queue ticket has slipped under the chair. The printed number is 084; nothing else is written on it."
     },
     {
       "id": "P-587",
@@ -16066,19 +15845,6 @@
       "source_status": "authored-stage3c-furniture-coverage",
       "source_order": 591,
       "description": "A cable label gives the terminal ID and archive network route. The final inspection box is initialled."
-    },
-    {
-      "id": "P-592",
-      "name": "Pen cap",
-      "room_id": "SECURITY",
-      "parent_id": "SECURITY_CHAIR_01",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 592,
-      "description": "A blue pen cap is wedged beside the chair leg. The matching pen is nowhere nearby."
     },
     {
       "id": "P-593",
@@ -16237,19 +16003,6 @@
       "description": "A short pencil stub has rolled against the chair leg. The eraser is worn almost completely flat."
     },
     {
-      "id": "P-605",
-      "name": "Folded sticky note",
-      "room_id": "SECRETARY_OFFICE",
-      "parent_id": "SECRETARY_OFFICE_CHAIR_02",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 605,
-      "description": "A folded sticky note reads RETURN KEY before close. The reminder has been ticked once in blue ink."
-    },
-    {
       "id": "P-606",
       "name": "Plastic button",
       "room_id": "SECRETARY_OFFICE",
@@ -16261,32 +16014,6 @@
       "source_status": "authored-stage3c-furniture-coverage",
       "source_order": 606,
       "description": "A dark plastic button lies under the chair. A short length of navy thread is still caught through it."
-    },
-    {
-      "id": "P-607",
-      "name": "Elastic band",
-      "room_id": "SECRETARY_OFFICE",
-      "parent_id": "SECRETARY_OFFICE_CHAIR_04",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 607,
-      "description": "A perished elastic band is looped around the chair support. It snaps at the slightest pull."
-    },
-    {
-      "id": "P-608",
-      "name": "Old queue ticket",
-      "room_id": "SECRETARY_OFFICE",
-      "parent_id": "SECRETARY_OFFICE_CHAIR_05",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 608,
-      "description": "A numbered queue ticket has slipped under the chair. The printed number is 084; nothing else is written on it."
     },
     {
       "id": "P-609",
@@ -16367,19 +16094,6 @@
       "description": "A loose handbook page describes visitor escort rules. The lower corner has been folded as a makeshift bookmark."
     },
     {
-      "id": "P-615",
-      "name": "Pen cap",
-      "room_id": "DIRECTOR_OFFICE",
-      "parent_id": "DIRECTOR_OFFICE_CHAIR_01",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 615,
-      "description": "A blue pen cap is wedged beside the chair leg. The matching pen is nowhere nearby."
-    },
-    {
       "id": "P-616",
       "name": "Paper fastener",
       "room_id": "DIRECTOR_OFFICE",
@@ -16391,45 +16105,6 @@
       "source_status": "authored-stage3c-furniture-coverage",
       "source_order": 616,
       "description": "A brass paper fastener lies under the seat, flattened from being stepped on more than once."
-    },
-    {
-      "id": "P-617",
-      "name": "Bent paperclip",
-      "room_id": "DIRECTOR_OFFICE",
-      "parent_id": "DIRECTOR_OFFICE_CHAIR_03",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 617,
-      "description": "A bent paperclip rests beneath the front edge of the seat. It has been unfolded and refolded several times."
-    },
-    {
-      "id": "P-618",
-      "name": "Pencil stub",
-      "room_id": "DIRECTOR_OFFICE",
-      "parent_id": "DIRECTOR_OFFICE_CHAIR_04",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 618,
-      "description": "A short pencil stub has rolled against the chair leg. The eraser is worn almost completely flat."
-    },
-    {
-      "id": "P-619",
-      "name": "Folded sticky note",
-      "room_id": "DIRECTOR_OFFICE",
-      "parent_id": "DIRECTOR_OFFICE_CHAIR_05",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 619,
-      "description": "A folded sticky note reads RETURN KEY before close. The reminder has been ticked once in blue ink."
     },
     {
       "id": "P-620",
@@ -16445,58 +16120,6 @@
       "description": "A dark plastic button lies under the chair. A short length of navy thread is still caught through it."
     },
     {
-      "id": "P-621",
-      "name": "Elastic band",
-      "room_id": "DIRECTOR_OFFICE",
-      "parent_id": "DIRECTOR_OFFICE_CHAIR_07",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 621,
-      "description": "A perished elastic band is looped around the chair support. It snaps at the slightest pull."
-    },
-    {
-      "id": "P-622",
-      "name": "Old queue ticket",
-      "room_id": "DIRECTOR_OFFICE",
-      "parent_id": "DIRECTOR_OFFICE_CHAIR_08",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 622,
-      "description": "A numbered queue ticket has slipped under the chair. The printed number is 084; nothing else is written on it."
-    },
-    {
-      "id": "P-623",
-      "name": "Pen cap",
-      "room_id": "DIRECTOR_OFFICE",
-      "parent_id": "DIRECTOR_OFFICE_CHAIR_09",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 623,
-      "description": "A blue pen cap is wedged beside the chair leg. The matching pen is nowhere nearby."
-    },
-    {
-      "id": "P-624",
-      "name": "Paper fastener",
-      "room_id": "DIRECTOR_OFFICE",
-      "parent_id": "DIRECTOR_OFFICE_CHAIR_10",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 624,
-      "description": "A brass paper fastener lies under the seat, flattened from being stepped on more than once."
-    },
-    {
       "id": "P-625",
       "name": "Bent paperclip",
       "room_id": "DIRECTOR_OFFICE",
@@ -16508,19 +16131,6 @@
       "source_status": "authored-stage3c-furniture-coverage",
       "source_order": 625,
       "description": "A bent paperclip rests beneath the front edge of the seat. It has been unfolded and refolded several times."
-    },
-    {
-      "id": "P-626",
-      "name": "Pencil stub",
-      "room_id": "DIRECTOR_OFFICE",
-      "parent_id": "DIRECTOR_OFFICE_CHAIR_12",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 626,
-      "description": "A short pencil stub has rolled against the chair leg. The eraser is worn almost completely flat."
     },
     {
       "id": "P-627",
@@ -16536,19 +16146,6 @@
       "description": "A plastic token numbered 12 sits beneath the cushion. No matching coat or claim ticket remains."
     },
     {
-      "id": "P-628",
-      "name": "Folded sticky note",
-      "room_id": "RECEPTION",
-      "parent_id": "RECEPTION_CHAIR_14",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 628,
-      "description": "A folded sticky note reads RETURN KEY before close. The reminder has been ticked once in blue ink."
-    },
-    {
       "id": "P-629",
       "name": "Plastic button",
       "room_id": "RECEPTION",
@@ -16562,32 +16159,6 @@
       "description": "A dark plastic button lies under the chair. A short length of navy thread is still caught through it."
     },
     {
-      "id": "P-630",
-      "name": "Elastic band",
-      "room_id": "RECEPTION",
-      "parent_id": "RECEPTION_CHAIR_16",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 630,
-      "description": "A perished elastic band is looped around the chair support. It snaps at the slightest pull."
-    },
-    {
-      "id": "P-631",
-      "name": "Old queue ticket",
-      "room_id": "RECEPTION",
-      "parent_id": "RECEPTION_CHAIR_17",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 631,
-      "description": "A numbered queue ticket has slipped under the chair. The printed number is 084; nothing else is written on it."
-    },
-    {
       "id": "P-632",
       "name": "Pen cap",
       "room_id": "RECEPTION",
@@ -16599,19 +16170,6 @@
       "source_status": "authored-stage3c-furniture-coverage",
       "source_order": 632,
       "description": "A blue pen cap is wedged beside the chair leg. The matching pen is nowhere nearby."
-    },
-    {
-      "id": "P-633",
-      "name": "Paper fastener",
-      "room_id": "RECEPTION",
-      "parent_id": "RECEPTION_CHAIR_19",
-      "collection_ids": [],
-      "evidence_ids": [],
-      "role": "Context / worldbuilding",
-      "drawing_definition_id": "DRAW_CHAIR",
-      "source_status": "authored-stage3c-furniture-coverage",
-      "source_order": 633,
-      "description": "A brass paper fastener lies under the seat, flattened from being stepped on more than once."
     },
     {
       "id": "P-634",

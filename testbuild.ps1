@@ -21,6 +21,7 @@ try {
     # The final release-candidate Source phase additionally requires a clean,
     # pushed Git checkout; it stays in CI. Binary checks follow the build.
     $checks = @(
+        [pscustomobject]@{ Label = 'Bug fix 15 chair occupancy'; Script = 'test_bugfix15_chairs.ps1'; Parameters = @{} },
         [pscustomobject]@{ Label = 'Stage 2 regression'; Script = 'test_stage2.ps1'; Parameters = @{} },
         [pscustomobject]@{ Label = 'Stage 3A regression'; Script = 'test_stage3a.ps1'; Parameters = @{} },
         [pscustomobject]@{ Label = 'Stage 3B regression'; Script = 'test_stage3b.ps1'; Parameters = @{} },
