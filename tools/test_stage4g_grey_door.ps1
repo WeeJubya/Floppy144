@@ -43,7 +43,7 @@ Require $main 'FLOPPY144_SCREEN_GREY_ENCOUNTER' 'Transient encounter screen miss
 Require $main 'Floppy144GreyEncounterBegin' 'Access does not open the encounter.'
 Require $main 'Floppy144GreyEncounterFinished' 'Return cleanup missing.'
 Require $main 'global_screen == FLOPPY144_SCREEN_GREY_ENCOUNTER' 'Autosave suppression missing.'
-Require $encounter '"GREY DOOR REPUBLIC"' 'Office sign missing.'
+Require $encounter '"GREY DOOR REPUBLIK"' 'Office sign missing.'
 Require $encounter '"floppy144_run_state.c"' 'Source monitor missing.'
 Require $encounter '"You''re not supposed to be able to get in here."' 'Developer dialogue missing.'
 Require $encounter '"RESTORATION CAPACITY: 144%"' 'Presentation-only capacity gag missing.'
@@ -93,7 +93,7 @@ foreach($relative in $noMention) {
         # Existing studio identity predates this anomaly. It is a company
         # credit, not a new achievement or acknowledgement of this event.
         $text = $text.Replace(
-            "GAME DESIGN COMPANY: GREY DOOR REPUBLIC", ""
+            "GAME DESIGN COMPANY: GREY DOOR REPUBLIK", ""
         )
     }
     if($text -match '(?i)(GREY[ _]DOOR|DR-00-RS-0144|GreyDoor)') {
