@@ -528,10 +528,10 @@ static void Floppy144TestCatalogueRecordResolution(void)
                 F144_CHECK(
                     bNumberValid &&
                     (
-                        uRecord == 0U || bPinned || bPreviousPinned ||
+                        uRecord == 0U ||
                         uCurrentRecordNumber > uPreviousRecordNumber
                     ),
-                    "generated numbers remain sorted around pinned story IDs"
+                    "all generated and pinned story IDs remain strictly ascending"
                 );
 
                 if(bNumberValid)
@@ -567,6 +567,61 @@ static void Floppy144TestCatalogueRecordResolution(void)
 
             ++uChecked;
         }
+    }
+
+    /*
+     * BUG FIX 08: move the authored HR-01 RS-0107 ahead of RS-0113
+     * without changing a player-facing ID, changing the trigger or
+     * displacing the authored RS-0134 hot-desk record.
+     */
+    {
+        static const char *const ordered_ids[] = {
+            "HR-01-RS-0097", "HR-01-RS-0107",
+            "HR-01-RS-0113", "HR-01-RS-0134"
+        };
+        uint32_t index;
+        char id[24], title[48];
+        Floppy144CollectionId resolved = FLOPPY144_COLLECTION_COUNT;
+        uint32_t slot = UINT32_MAX;
+
+        for(index = 0U; index < 4U; ++index)
+        {
+            Floppy144CatalogueBuildRecord(
+                FLOPPY144_COLLECTION_HR01,
+                8U + index,
+                id,sizeof(id),title,sizeof(title)
+            );
+            F144_CHECK(
+                strcmp(id,ordered_ids[index]) == 0,
+                "HR-01 preserved record numbering strictly follows LIST order"
+            );
+        }
+        F144_CHECK(
+            Floppy144CatalogueFindRecord(
+                "HR-01-RS-0107", &resolved, &slot
+            ) &&
+            resolved == FLOPPY144_COLLECTION_HR01 &&
+            slot == 9U,
+            "RS-0107 OPEN lookup follows the moved authored record"
+        );
+        {
+            const Floppy144DocumentDefinition *author =
+                Floppy144DocumentGet(FLOPPY144_COLLECTION_HR01,9U);
+            F144_CHECK(
+                author != NULL &&
+                author->trigger == FLOPPY144_TRIGGER_T003 &&
+                strcmp(author->record_id_override,"HR-01-RS-0107") == 0,
+                "HR-01 T-003 remains bound to RS-0107 after reorder"
+            );
+        }
+        F144_CHECK(
+            Floppy144CatalogueFindRecord(
+                "HR-01-RS-0113",&resolved,&slot
+            ) &&
+            resolved == FLOPPY144_COLLECTION_HR01 && slot == 10U &&
+            Floppy144DocumentGet(FLOPPY144_COLLECTION_HR01,10U)==NULL,
+            "original procedural RS-0113 survives and opens at new slot"
+        );
     }
 
     F144_CHECK(

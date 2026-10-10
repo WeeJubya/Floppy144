@@ -49,6 +49,8 @@ $total=0
 $authored=0
 $inversions=0
 $spreadCollections=0
+$orderingRows=0
+$orderedCollectionCount=0
 for($ci=0; $ci -lt @($data.collections).Count; ++$ci) {
     $c=$data.collections[$ci]
     $cid=[string]$c.id
@@ -106,24 +108,88 @@ for($ci=0; $ci -lt @($data.collections).Count; ++$ci) {
     $sorted=@($numbers | Sort-Object)
     $slotToId=@{}
     foreach($item in $compiledDocs) { $slotToId[$item.Slot]=$item.Id }
+
+    # The authored RS-0107 keeps its identity, but occupies index 9 before
+    # the existing procedural RS-0113 at index 10. These two numbers are
+    # special only in physical placement, not an exemption from sorting.
+    if($cid -eq 'HR-01') {
+        if($slotToId[9] -cne 'HR-01-RS-0107' -or
+           $slotToId.ContainsKey(10) -or
+           $slotToId[11] -cne 'HR-01-RS-0134') {
+            throw 'HR-01 preserved story records are not in their expected ordered slots.'
+        }
+    }
+
+    $previousNumber=-1
     for($i=0;$i -lt $count;++$i) {
         $id=if($slotToId.ContainsKey($i)) {
             $slotToId[$i]
+        } elseif($cid -eq 'HR-01' -and $i -eq 10) {
+            # The prior RS-0113 ID moves from slot 9; do not renumber it.
+            'HR-01-RS-0113'
         } else {
             '{0}-RS-{1:D4}' -f $cid,$sorted[$i]
         }
         if(-not $allIDs.Add($id)) {
             throw "Duplicate / colliding player-facing catalogue ID: $id"
         }
+        $suffix = $id.Substring($cid.Length + 4)
+        if(-not $id.StartsWith($cid + '-RS-', [StringComparison]::Ordinal) -or
+           $suffix -notmatch '^\d{4}$') {
+            throw "Malformed collection record ID: $id"
+        }
+        $number=[int]$suffix
+        if($number -le $previousNumber) {
+            throw "Out-of-order records in $cid at slot $i : $previousNumber then $number"
+        }
+        $previousNumber=$number
+        ++$orderingRows
     }
+    ++$orderedCollectionCount
+
 }
 if($total -ne 1571 -or $authored -ne 170 -or
-   $allIDs.Count -ne 1571) {
+   $allIDs.Count -ne 1571 -or
+   $orderingRows -ne 1571 -or $orderedCollectionCount -ne 35) {
     throw "Archive total mismatch: $total rows / $authored authored / $($allIDs.Count) unique."
 }
 if($spreadCollections -lt 25 -or $inversions -lt 60) {
     throw "Authored material was not spread/reordered sufficiently: $spreadCollections spread, $inversions inversions."
 }
+
+# Source JSON uses stable canonical document IDs for relationships and
+# trigger metadata; these need independent referential integrity checks.
+$canonicalIDs=[System.Collections.Generic.HashSet[string]]::new(
+    [StringComparer]::Ordinal
+)
+foreach($document in $data.documents) {
+    if(-not $canonicalIDs.Add([string]$document.id)) {
+        throw "Duplicate canonical document ID: $($document.id)"
+    }
+}
+foreach($collection in $data.collections) {
+    foreach($documentId in @($collection.document_ids)) {
+        if(-not $canonicalIDs.Contains([string]$documentId)) {
+            throw "Dangling canonical collection document link: $documentId"
+        }
+    }
+}
+foreach($relation in $data.relationships) {
+    foreach($id in @([string]$relation.parent_id,[string]$relation.child_id)) {
+        if($id -match '^[A-Z]{2}-\d{2}-RS-\d{4}$' -and
+           -not $canonicalIDs.Contains($id)) {
+            throw "Dangling canonical document relationship: $id"
+        }
+    }
+}
+foreach($trigger in $data.triggers) {
+    $documentId=[string]$trigger.trigger_document
+    if($documentId -match '^[A-Z]{2}-\d{2}-RS-\d{4}$' -and
+       -not $canonicalIDs.Contains($documentId)) {
+        throw "Dangling canonical trigger document: $documentId"
+    }
+}
+
 foreach($fixedId in @('DR-01-RS-0001','FM-13-RS-0047','HR-01-RS-0107')) {
     if(-not $authorIds.Contains($fixedId)) {
         throw "Preserved explicit authored reference missing: $fixedId"
@@ -197,4 +263,5 @@ if(-not $compiledDirectory.Value.Contains('"' + $escapedBody + '"')) {
 }
 Write-Host "HR-01-RS-0092 LAYOUT: PASS - 7 one-line staff entries"
 
+Write-Host "RECORD ORDER AUDIT: PASS - $orderedCollectionCount collections / $orderingRows ascending catalogue IDs"
 Write-Host "S4E-08 ARCHIVE AUDIT: PASS - $total entries ($authored authored, $($total-$authored) generated), $inversions order inversions, $spreadCollections spread collections"

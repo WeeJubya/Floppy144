@@ -89,6 +89,15 @@ static uint32_t Floppy144CatalogueOrderedRecordNumber(
     count = definition->record_count;
     modulus = count * FLOPPY144_RECORD_NUMBER_DENSITY;
 
+    /*
+     * HR-01's preserved RS-0107 belongs ahead of RS-0113. Re-use RS-0113
+     * in the newly vacant slot 10, rather than exposing RS-0129 or changing
+     * any authored record ID. The compiler mirrors this catalogue mapping.
+     */
+    if(collection == FLOPPY144_COLLECTION_HR01 &&
+       count == 25U && index == 10U)
+        return definition->record_number_base + 113U;
+
     if(count <= FLOPPY144_CATALOGUE_NUMBER_CACHE_LIMIT)
     {
         if(floppy144_number_cache_sizes[ci] != count)

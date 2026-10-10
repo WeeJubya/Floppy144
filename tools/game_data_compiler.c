@@ -113,10 +113,25 @@ static long preserved_document_slot(
     if(
         pszRecordId != NULL &&
         strcmp(pszRecordId,"HR-01-RS-0107") == 0 &&
-        nRecordCount > 10
+        nRecordCount > 11
     )
     {
-        return 10L;
+        /* Keep RS-0107 before the existing RS-0113 at index 10. */
+        return 9L;
+    }
+
+    if(
+        pszRecordId != NULL &&
+        strcmp(pszRecordId,"HR-01-RS-0005") == 0 &&
+        nRecordCount > 11
+    )
+    {
+        /*
+         * Preserve the authored hot-desk document at index 11. Its preferred
+         * placement would otherwise take the just-vacated index 10 and change
+         * its stable, externally visible RS-0134 identity.
+         */
+        return 11L;
     }
 
     return -1L;
@@ -155,6 +170,14 @@ static unsigned long generated_record_number(
     uOffset =
         11UL +
         (unsigned long)uCollectionOrdinal * 17UL;
+
+    /*
+     * HR-01's established RS-0113 moves from slot 9 to slot 10 when
+     * RS-0107 is placed at slot 9. The number itself is not renumbered.
+     * The same display-only exception is mirrored by the runtime catalogue.
+     */
+    if(uCollectionOrdinal == 10U && nRecordCount == 25L && nSlot == 10L)
+        return 113UL;
 
     for(uSource = 0UL; uSource < (unsigned long)nRecordCount; ++uSource)
     {
