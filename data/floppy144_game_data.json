@@ -1342,7 +1342,7 @@
             "variant": "STANDARD_DESK",
             "object": "SECURITY_DESK_01",
             "x": 50,
-            "y": 59,
+            "y": 57,
             "width": 6,
             "height": 4,
             "rotation": 90
@@ -1353,7 +1353,7 @@
             "variant": "STANDARD_DESK",
             "object": "SECURITY_DESK_02",
             "x": 44,
-            "y": 59,
+            "y": 57,
             "width": 6,
             "height": 4,
             "rotation": 90
@@ -1415,7 +1415,7 @@
             "variant": "MONITOR_BANK",
             "object": "SECURITY_MONITOR_BANK",
             "x": 44,
-            "y": 56,
+            "y": 57,
             "width": 12,
             "height": 1
           },
@@ -5866,7 +5866,7 @@
       "object_id": "SECURITY_DESK_01",
       "geometry": {
         "x": 50,
-        "y": 59,
+        "y": 57,
         "width": 6,
         "height": 4,
         "rotation": 90
@@ -5881,7 +5881,7 @@
       "object_id": "SECURITY_DESK_02",
       "geometry": {
         "x": 44,
-        "y": 59,
+        "y": 57,
         "width": 6,
         "height": 4,
         "rotation": 90
@@ -6831,7 +6831,7 @@
       "object_id": "SECURITY_MONITOR_BANK",
       "geometry": {
         "x": 44,
-        "y": 56,
+        "y": 57,
         "width": 12,
         "height": 1
       },
