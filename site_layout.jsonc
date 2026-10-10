@@ -1395,7 +1395,8 @@
                     "x": 34,
                     "y": 87,
                     "width": 6,
-                    "height": 6
+                    "height": 6,
+                    "rotation": 270
                 },
                 {
                     "id": "STAFF_ROOM_COFFEE_TABLE_01",
@@ -1497,30 +1498,34 @@
                 {
                     "type": "CHAIR",
                     "x": 36,
-                    "y": 86,
+                    "y": 84,
                     "width": 2,
-                    "height": 2
-                },
-                {
-                    "type": "CHAIR",
-                    "x": 33,
-                    "y": 89,
-                    "width": 2,
-                    "height": 2
-                },
-                {
-                    "type": "CHAIR",
-                    "x": 39,
-                    "y": 89,
-                    "width": 2,
-                    "height": 2
+                    "height": 2,
+                    "rotation": 0
                 },
                 {
                     "type": "CHAIR",
                     "x": 36,
-                    "y": 92,
+                    "y": 94,
                     "width": 2,
-                    "height": 2
+                    "height": 2,
+                    "rotation": 180
+                },
+                {
+                    "type": "CHAIR",
+                    "x": 31,
+                    "y": 89,
+                    "width": 2,
+                    "height": 2,
+                    "rotation": 270
+                },
+                {
+                    "type": "CHAIR",
+                    "x": 41,
+                    "y": 89,
+                    "width": 2,
+                    "height": 2,
+                    "rotation": 90
                 },
                 {
                     "type": "SOFA",
@@ -2061,11 +2066,11 @@
                     "type": "STANDARD_DESK",
                     "variant": "STANDARD_DESK",
                     "object": "SECRETARY_OFFICE_DESK",
-                    "centre_x": 40,
-                    "centre_y": 51,
-                    "width": 6,
-                    "height": 4,
-                    "rotation": 45
+                    "x": 36,
+                    "y": 49,
+                    "width": 4,
+                    "height": 6,
+                    "rotation": 270
                 },
                 {
                     "id": "SECRETARY_OFFICE_TERMINAL_DESK",
@@ -2109,11 +2114,11 @@
                 },
                 {
                     "type": "CHAIR",
-                    "centre_x": 42,
-                    "centre_y": 49,
+                    "x": 42,
+                    "y": 51,
                     "width": 2,
                     "height": 2,
-                    "rotation": 45
+                    "rotation": 90
                 },
                 {
                     "type": "CHAIR",
@@ -2178,11 +2183,11 @@
                     "type": "STANDARD_DESK",
                     "variant": "STANDARD_DESK",
                     "object": "DIRECTOR_OFFICE_DESK",
-                    "centre_x": 9,
-                    "centre_y": 52,
-                    "width": 8,
-                    "height": 4,
-                    "rotation": -45
+                    "x": 8,
+                    "y": 49,
+                    "width": 4,
+                    "height": 8,
+                    "rotation": 270
                 },
                 {
                     "id": "DIRECTOR_OFFICE_BOARDROOM_TABLE",
@@ -2276,35 +2281,35 @@
                 },
                 {
                     "type": "CHAIR",
-                    "centre_x": 9,
-                    "centre_y": 49,
+                    "x": 4,
+                    "y": 52,
                     "width": 2,
                     "height": 2,
-                    "rotation": -45
+                    "rotation": 270
                 },
                 {
                     "type": "CHAIR",
-                    "centre_x": 10,
-                    "centre_y": 58,
+                    "x": 14,
+                    "y": 55,
                     "width": 2,
                     "height": 2,
-                    "rotation": -45
+                    "rotation": 90
                 },
                 {
                     "type": "CHAIR",
-                    "centre_x": 13,
-                    "centre_y": 55,
+                    "x": 14,
+                    "y": 52,
                     "width": 2,
                     "height": 2,
-                    "rotation": -45
+                    "rotation": 90
                 },
                 {
                     "type": "CHAIR",
-                    "centre_x": 15,
-                    "centre_y": 52,
+                    "x": 14,
+                    "y": 49,
                     "width": 2,
                     "height": 2,
-                    "rotation": -45
+                    "rotation": 90
                 },
                 {
                     "type": "CHAIR",

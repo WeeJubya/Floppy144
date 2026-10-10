@@ -33,6 +33,140 @@ $inspectionTests = Read-Stage4DSource "tools\stage4_inspection_25d_tests.c"
 $consistencyTests = Read-Stage4DSource "tools\stage4_presentation_consistency_tests.c"
 $stage4cGate = Read-Stage4DSource "tools\test_stage4c_integration.ps1"
 
+
+# BUG FIX 12: runtime-authoritative world furniture is orthogonal, while
+# internal animation and projection rotation remain separate capabilities.
+# Test the canonical JSON, both generated data tables and the legacy
+# pre-transform design reference. Never substitute a draw-time workaround.
+function Test-OrthogonalSiteFurniture {
+    $Data = Get-Content -Raw -LiteralPath (Join-Path $root 'data\floppy144_game_data.json') |
+        ConvertFrom-Json
+    $RuntimeText = Read-Stage4DSource 'game\src\site_layout.generated.jsonc'
+    $Runtime = ($RuntimeText -replace '(?s)/\*.*?\*/','') | ConvertFrom-Json
+    $LegacyText = Read-Stage4DSource 'site_layout.jsonc'
+    $Legacy = ($LegacyText -replace '(?s)/\*.*?\*/','') | ConvertFrom-Json
+    $EmittedSite = Read-Stage4DSource 'game\src\floppy144_site_generated.def'
+    $EmittedFurniture = Read-Stage4DSource 'game\src\floppy144_game_data.generated.inc'
+    $RoomCount = 0
+    $FurnitureCount = 0
+
+    foreach($Room in $Data.site_layout_source.rooms) {
+        ++$RoomCount
+        $Mirror = @($Runtime.rooms | Where-Object { $_.id -eq $Room.id })
+        if($Mirror.Count -ne 1 -or
+           $Mirror[0].geometry.Count -ne $Room.geometry.Count) {
+            throw "Generated runtime room geometry diverged: $($Room.id)"
+        }
+        for($i=0; $i -lt $Room.geometry.Count; ++$i) {
+            $Object = $Room.geometry[$i]
+            $Generated = $Mirror[0].geometry[$i]
+            if(($Object | ConvertTo-Json -Depth 16 -Compress) -cne
+               ($Generated | ConvertTo-Json -Depth 16 -Compress)) {
+                throw "Generated Site is stale: $($Room.id) object $i"
+            }
+            if($null -ne $Object.PSObject.Properties['rotation'] -and
+               ([int]$Object.rotation % 90) -ne 0) {
+                throw "Non-cardinal world rotation: $($Room.id) object $i"
+            }
+        }
+    }
+
+    foreach($Parent in @($Data.furniture) + @($Data.fixtures)) {
+        ++$FurnitureCount
+        if($null -ne $Parent.geometry.PSObject.Properties['rotation'] -and
+           ([int]$Parent.geometry.rotation % 90) -ne 0) {
+            throw "Non-cardinal inspectable furniture: $($Parent.id)"
+        }
+    }
+    if($RoomCount -ne 11 -or $FurnitureCount -lt 172) {
+        throw "Site-wide rotation audit silently skipped rooms or parents."
+    }
+
+    $Changed = @{
+        STAFF_ROOM = @(1,12,13,14,15)
+        SECRETARY_OFFICE = @(1,6)
+        DIRECTOR_OFFICE = @(1,11,12,13,14)
+    }
+    $MovedCount = 0
+    foreach($RoomName in $Changed.Keys) {
+        $Room = @($Data.site_layout_source.rooms |
+            Where-Object { $_.id -eq $RoomName })[0]
+        $Original = @($Legacy.rooms |
+            Where-Object { $_.id -eq $RoomName })[0]
+        foreach($Index in $Changed[$RoomName]) {
+            $Item = $Room.geometry[$Index]
+            $PreTransform = $Original.geometry[$Index]
+            $X = [int]$Item.x; $Y = [int]$Item.y
+            $W = [int]$Item.width; $H = [int]$Item.height
+            $Rotation = [int]$Item.rotation
+
+            if($null -ne $Item.PSObject.Properties['centre_x'] -or
+               $null -ne $Item.PSObject.Properties['centre_y']) {
+                throw "Diagonal centre-authored furniture remains: $RoomName $Index"
+            }
+            if([int]$PreTransform.x -ne $Y -or
+               [int]$PreTransform.y -ne (100-$X-$W) -or
+               [int]$PreTransform.width -ne $H -or
+               [int]$PreTransform.height -ne $W -or
+               ([int]$PreTransform.rotation % 90) -ne 0) {
+                throw "Pre-transform furniture not mirrored: $RoomName $Index"
+            }
+            $Type = switch($Item.type) {
+                'TABLE' { 'TABLE' }
+                'STANDARD_DESK' { 'STANDARD_DESK' }
+                'CHAIR' { 'CHAIR' }
+                default { throw "Unexpected revised furniture type: $($Item.type)" }
+            }
+            $Prefix = "FLOPPY144_ROOM_$RoomName, FLOPPY144_SITE_$Type, $($X)U, $($Y)U, $($W)U, $($H)U"
+            $Expected = if($Rotation -eq 0) {
+                "SITE_GEOMETRY($Prefix)"
+            } else {
+                $CX=16*$X+8*$W; $CY=16*$Y+8*$H
+                "SITE_ROTATED_GEOMETRY($Prefix, $CX, $CY, $(16*$W), $(16*$H), $Rotation)"
+            }
+            if(-not $EmittedSite.Contains($Expected)) {
+                throw "Compiled Site footprint differs: $RoomName $Index"
+            }
+            # No furniture may overlap these revised footprints. Existing
+            # floor layers, windows and wall-mounted fixtures are not furniture.
+            for($OtherIndex=0;$OtherIndex -lt $Room.geometry.Count;++$OtherIndex) {
+                if($OtherIndex -eq $Index) { continue }
+                $Other=$Room.geometry[$OtherIndex]
+                if($Other.type -match '^FLOOR_' -or
+                   $Other.type -in @('DOOR','WINDOW','PARTITION_WALL','WALL_MOUNTED_ITEM')) {
+                    continue
+                }
+                if($X -lt ([int]$Other.x+[int]$Other.width) -and
+                   [int]$Other.x -lt ($X+$W) -and
+                   $Y -lt ([int]$Other.y+[int]$Other.height) -and
+                   [int]$Other.y -lt ($Y+$H)) {
+                    throw "Furniture overlap: $RoomName $Index / $OtherIndex"
+                }
+            }
+            ++$MovedCount
+        }
+    }
+    if($MovedCount -ne 12) { throw "Revised furniture count drifted." }
+
+    foreach($ParentId in @('DIRECTOR_OFFICE_DESK','SECRETARY_OFFICE_DESK',
+                           'STAFF_ROOM_DINING_TABLE')) {
+        $Parent = @($Data.furniture | Where-Object { $_.id -eq $ParentId })
+        if($Parent.Count -ne 1 -or
+           $null -ne $Parent[0].geometry.PSObject.Properties['centre_x']) {
+            throw "Authored cardinal parent missing: $ParentId"
+        }
+        $Expected = 'FLOPPY144_DATA_RECORD(FLOPPY144_DATA_FURNITURE, "' +
+            $ParentId + '"'
+        if(-not $EmittedFurniture.Contains($Expected)) {
+            throw "Generated furniture record missing: $ParentId"
+        }
+    }
+
+    Write-Host "ORTHOGONAL SITE AUDIT: PASS - $RoomCount rooms; $FurnitureCount parents; $MovedCount corrected placements"
+}
+
+Test-OrthogonalSiteFurniture
+
 Write-Host "=== STAGE 4D INTEGRATION / VISUAL-ACCEPTANCE AUDIT ==="
 
 $portableRenderSources = @{

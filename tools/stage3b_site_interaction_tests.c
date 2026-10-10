@@ -252,7 +252,8 @@ static void Floppy144TestPhysicalParentCoverage(void)
 }
 
 /*
- * The runtime geometry emitter must preserve centre-authored furniture too.
+ * BUG FIX 12: previously centre-authored diagonal desks now use exact
+ * cardinal x/y footprints in both the compiled site and interaction registry.
  */
 static void Floppy144TestCentredGeometryMetadata(void)
 {
@@ -270,18 +271,22 @@ static void Floppy144TestCentredGeometryMetadata(void)
 
     F144_CHECK(
         pDirectorDesk != NULL &&
-        pDirectorDesk->b0 != 0U &&
-        pDirectorDesk->n4 == 48 &&
-        pDirectorDesk->n5 == 9,
-        "Director desk retains centre-authored interaction geometry"
+        pDirectorDesk->b0 == 0U &&
+        pDirectorDesk->n0 == 43 &&
+        pDirectorDesk->n1 == 8 &&
+        pDirectorDesk->n2 == 8 &&
+        pDirectorDesk->n3 == 4,
+        "Director desk interaction geometry uses cardinal 8x4 footprint"
     );
 
     F144_CHECK(
         pSecretaryDesk != NULL &&
-        pSecretaryDesk->b0 != 0U &&
-        pSecretaryDesk->n4 == 49 &&
-        pSecretaryDesk->n5 == 40,
-        "Secretary desk retains centre-authored interaction geometry"
+        pSecretaryDesk->b0 == 0U &&
+        pSecretaryDesk->n0 == 45 &&
+        pSecretaryDesk->n1 == 36 &&
+        pSecretaryDesk->n2 == 6 &&
+        pSecretaryDesk->n3 == 4,
+        "Secretary desk interaction geometry uses cardinal 6x4 footprint"
     );
 }
 
@@ -291,6 +296,70 @@ static void Floppy144TestCentredGeometryMetadata(void)
  * staffing items explicitly revealed by T-003 must remain hidden. After T-003
  * Desk 01 exposes its real label material and Desk 02 exposes the allocation slip.
  */
+
+/*
+ * BUG FIX 12: world furniture geometry is strictly cardinal, whereas
+ * internal inspection/player/door-motion animation may still rotate.
+ * Verify all generated Site rectangles and the three revised room clusters.
+ */
+static void Floppy144TestOrthogonalSiteFurniture(void)
+{
+    static const struct
+    {
+        Floppy144RoomId room;
+        Floppy144SiteElement type;
+        uint8_t x,y,w,h;
+        int16_t facing;
+    } expected[] =
+    {
+        {FLOPPY144_ROOM_DIRECTOR_OFFICE, FLOPPY144_SITE_STANDARD_DESK,43,8,8,4,0},
+        {FLOPPY144_ROOM_DIRECTOR_OFFICE, FLOPPY144_SITE_CHAIR,46,4,2,2,0},
+        {FLOPPY144_ROOM_DIRECTOR_OFFICE, FLOPPY144_SITE_CHAIR,43,14,2,2,180},
+        {FLOPPY144_ROOM_DIRECTOR_OFFICE, FLOPPY144_SITE_CHAIR,46,14,2,2,180},
+        {FLOPPY144_ROOM_DIRECTOR_OFFICE, FLOPPY144_SITE_CHAIR,49,14,2,2,180},
+        {FLOPPY144_ROOM_SECRETARY_OFFICE, FLOPPY144_SITE_STANDARD_DESK,45,36,6,4,0},
+        {FLOPPY144_ROOM_SECRETARY_OFFICE, FLOPPY144_SITE_CHAIR,47,42,2,2,180},
+        {FLOPPY144_ROOM_STAFF_ROOM, FLOPPY144_SITE_TABLE,7,34,6,6,0},
+        {FLOPPY144_ROOM_STAFF_ROOM, FLOPPY144_SITE_CHAIR,14,36,2,2,90},
+        {FLOPPY144_ROOM_STAFF_ROOM, FLOPPY144_SITE_CHAIR,4,36,2,2,270},
+        {FLOPPY144_ROOM_STAFF_ROOM, FLOPPY144_SITE_CHAIR,9,31,2,2,0},
+        {FLOPPY144_ROOM_STAFF_ROOM, FLOPPY144_SITE_CHAIR,9,41,2,2,180}
+    };
+    uint32_t i,j;
+    uint32_t cardinal=0U;
+    for(i=0U;i<Floppy144SiteRectCount();++i)
+    {
+        const Floppy144SiteRect *rect=Floppy144SiteRectAt(i);
+        if(rect==NULL)continue;
+        F144_CHECK(
+            rect->rotation%90==0,
+            "every world Site rectangle is cardinal; animation rotation is separate"
+        );
+        ++cardinal;
+    }
+    F144_CHECK(cardinal>=250U,"world Site cardinal audit visits every rectangle");
+
+    for(i=0U;i<(uint32_t)(sizeof(expected)/sizeof(expected[0]));++i)
+    {
+        uint32_t found=0U;
+        for(j=0U;j<Floppy144SiteRectCount();++j)
+        {
+            const Floppy144SiteRect *rect=Floppy144SiteRectAt(j);
+            if(rect==NULL)continue;
+            if(rect->room==(uint8_t)expected[i].room &&
+               rect->type==(uint8_t)expected[i].type &&
+               rect->x==expected[i].x &&
+               rect->y==expected[i].y &&
+               rect->width==expected[i].w &&
+               rect->height==expected[i].h &&
+               rect->rotation==expected[i].facing)
+                ++found;
+        }
+        F144_CHECK(found==1U,
+            "Director/Secretary/Staff revised furniture has one exact footprint");
+    }
+}
+
 static void Floppy144TestMainOfficeDeskContent(void)
 {
     Floppy144WorldState sWorld;
@@ -721,7 +790,7 @@ static void Floppy144TestRotatedParentTargeting(void)
             &sState,
             Floppy144GameDataTriggerId("T-029")
         ),
-        "rotated-parent fixture reveals one Director desk item"
+        "orthogonal Director desk still reveals its authored item"
     );
 
     Floppy144TestSetPosition(&sState, 48, 9);
@@ -741,7 +810,7 @@ static void Floppy144TestRotatedParentTargeting(void)
             sTarget.pszParentId,
             "DIRECTOR_OFFICE_DESK"
         ) == 0,
-        "centre-authored Director desk participates in canonical focused targeting"
+        "orthogonal Director desk retains canonical focused targeting"
     );
 }
 
@@ -2563,6 +2632,7 @@ int main(void)
     Floppy144TestPhysicalParentCoverage();
     Floppy144TestEvidenceGatedProgression();
     Floppy144TestCentredGeometryMetadata();
+    Floppy144TestOrthogonalSiteFurniture();
     Floppy144TestMainOfficeDeskContent();
     Floppy144TestTerminalCoverage();
     Floppy144TestPhysicalInteractionExecution();

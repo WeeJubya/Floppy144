@@ -1116,7 +1116,7 @@
             "y": 34,
             "width": 6,
             "height": 6,
-            "rotation": 45
+            "rotation": 0
           },
           {
             "id": "STAFF_ROOM_COFFEE_TABLE_01",
@@ -1218,35 +1218,35 @@
           },
           {
             "type": "CHAIR",
-            "x": 11,
-            "y": 38,
+            "x": 14,
+            "y": 36,
             "width": 2,
             "height": 2,
-            "rotation": 135
+            "rotation": 90
           },
           {
             "type": "CHAIR",
-            "x": 7,
-            "y": 38,
+            "x": 4,
+            "y": 36,
             "width": 2,
             "height": 2,
-            "rotation": 45
+            "rotation": 270
           },
           {
             "type": "CHAIR",
-            "x": 11,
-            "y": 34,
+            "x": 9,
+            "y": 31,
             "width": 2,
             "height": 2,
-            "rotation": 225
+            "rotation": 0
           },
           {
             "type": "CHAIR",
-            "x": 7,
-            "y": 34,
+            "x": 9,
+            "y": 41,
             "width": 2,
             "height": 2,
-            "rotation": 315
+            "rotation": 180
           },
           {
             "type": "SOFA",
@@ -1713,11 +1713,11 @@
             "type": "STANDARD_DESK",
             "variant": "STANDARD_DESK",
             "object": "SECRETARY_OFFICE_DESK",
-            "centre_x": 49,
-            "centre_y": 40,
+            "x": 45,
+            "y": 36,
             "width": 6,
             "height": 4,
-            "rotation": 135
+            "rotation": 0
           },
           {
             "id": "SECRETARY_OFFICE_TERMINAL_DESK",
@@ -1762,11 +1762,11 @@
           },
           {
             "type": "CHAIR",
-            "centre_x": 51,
-            "centre_y": 42,
+            "x": 47,
+            "y": 42,
             "width": 2,
             "height": 2,
-            "rotation": 135
+            "rotation": 180
           },
           {
             "type": "CHAIR",
@@ -1825,11 +1825,11 @@
             "type": "STANDARD_DESK",
             "variant": "STANDARD_DESK",
             "object": "DIRECTOR_OFFICE_DESK",
-            "centre_x": 48,
-            "centre_y": 9,
+            "x": 43,
+            "y": 8,
             "width": 8,
             "height": 4,
-            "rotation": -45
+            "rotation": 0
           },
           {
             "id": "DIRECTOR_OFFICE_BOARDROOM_TABLE",
@@ -1924,35 +1924,35 @@
           },
           {
             "type": "CHAIR",
-            "centre_x": 51,
-            "centre_y": 9,
+            "x": 46,
+            "y": 4,
             "width": 2,
             "height": 2,
-            "rotation": -45
+            "rotation": 0
           },
           {
             "type": "CHAIR",
-            "centre_x": 42,
-            "centre_y": 10,
+            "x": 43,
+            "y": 14,
             "width": 2,
             "height": 2,
-            "rotation": -45
+            "rotation": 180
           },
           {
             "type": "CHAIR",
-            "centre_x": 45,
-            "centre_y": 13,
+            "x": 46,
+            "y": 14,
             "width": 2,
             "height": 2,
-            "rotation": -45
+            "rotation": 180
           },
           {
             "type": "CHAIR",
-            "centre_x": 48,
-            "centre_y": 15,
+            "x": 49,
+            "y": 14,
             "width": 2,
             "height": 2,
-            "rotation": -45
+            "rotation": 180
           },
           {
             "type": "CHAIR",
@@ -5611,7 +5611,7 @@
         "y": 34,
         "width": 6,
         "height": 6,
-        "rotation": 45
+        "rotation": 0
       },
       "drawing_definition_id": "DRAW_TABLE"
     },
@@ -5749,11 +5749,11 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "x": 11,
-        "y": 38,
+        "x": 14,
+        "y": 36,
         "width": 2,
         "height": 2,
-        "rotation": 135
+        "rotation": 90
       },
       "drawing_definition_id": "DRAW_CHAIR"
     },
@@ -5764,11 +5764,11 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "x": 7,
-        "y": 38,
+        "x": 4,
+        "y": 36,
         "width": 2,
         "height": 2,
-        "rotation": 45
+        "rotation": 270
       },
       "drawing_definition_id": "DRAW_CHAIR"
     },
@@ -5779,11 +5779,11 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "x": 11,
-        "y": 34,
+        "x": 9,
+        "y": 31,
         "width": 2,
         "height": 2,
-        "rotation": 225
+        "rotation": 0
       },
       "drawing_definition_id": "DRAW_CHAIR"
     },
@@ -5794,11 +5794,11 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "x": 7,
-        "y": 34,
+        "x": 9,
+        "y": 41,
         "width": 2,
         "height": 2,
-        "rotation": 315
+        "rotation": 180
       },
       "drawing_definition_id": "DRAW_CHAIR"
     },
@@ -6057,11 +6057,11 @@
       "variant": "STANDARD_DESK",
       "object_id": "SECRETARY_OFFICE_DESK",
       "geometry": {
-        "centre_x": 49,
-        "centre_y": 40,
+        "x": 45,
+        "y": 36,
         "width": 6,
         "height": 4,
-        "rotation": 135
+        "rotation": 0
       },
       "drawing_definition_id": "DRAW_STANDARD_DESK"
     },
@@ -6130,11 +6130,11 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "centre_x": 51,
-        "centre_y": 42,
+        "x": 47,
+        "y": 42,
         "width": 2,
         "height": 2,
-        "rotation": 135
+        "rotation": 180
       },
       "drawing_definition_id": "DRAW_CHAIR"
     },
@@ -6205,11 +6205,11 @@
       "variant": "STANDARD_DESK",
       "object_id": "DIRECTOR_OFFICE_DESK",
       "geometry": {
-        "centre_x": 48,
-        "centre_y": 9,
+        "x": 43,
+        "y": 8,
         "width": 8,
         "height": 4,
-        "rotation": -45
+        "rotation": 0
       },
       "drawing_definition_id": "DRAW_STANDARD_DESK"
     },
@@ -6348,11 +6348,11 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "centre_x": 51,
-        "centre_y": 9,
+        "x": 46,
+        "y": 4,
         "width": 2,
         "height": 2,
-        "rotation": -45
+        "rotation": 0
       },
       "drawing_definition_id": "DRAW_CHAIR"
     },
@@ -6363,11 +6363,11 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "centre_x": 42,
-        "centre_y": 10,
+        "x": 43,
+        "y": 14,
         "width": 2,
         "height": 2,
-        "rotation": -45
+        "rotation": 180
       },
       "drawing_definition_id": "DRAW_CHAIR"
     },
@@ -6378,11 +6378,11 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "centre_x": 45,
-        "centre_y": 13,
+        "x": 46,
+        "y": 14,
         "width": 2,
         "height": 2,
-        "rotation": -45
+        "rotation": 180
       },
       "drawing_definition_id": "DRAW_CHAIR"
     },
@@ -6393,11 +6393,11 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "centre_x": 48,
-        "centre_y": 15,
+        "x": 49,
+        "y": 14,
         "width": 2,
         "height": 2,
-        "rotation": -45
+        "rotation": 180
       },
       "drawing_definition_id": "DRAW_CHAIR"
     },

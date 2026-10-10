@@ -958,9 +958,9 @@ static bool Floppy144SitePhysicalParentVisible(
 
 /*
  * Runtime furniture records normally carry x/y/width/height in n0..n3.
- * Rotated centre-authored furniture carries centre_x/centre_y in n4/n5 and
- * sets b0. The Stage 3B.2 compiler emitter adds that small piece of metadata so
- * interaction targeting stays generic for the Director and Secretary desks.
+ * The b0/n4/n5 path remains compatible with historical centre-authored
+ * geometry, but all current playable furniture (including Director and
+ * Secretary desks) now uses cardinal top-left footprints.
  */
 static uint32_t Floppy144SiteDataRecordDistanceSquared(
     const Floppy144RunState *pState,
@@ -2259,9 +2259,9 @@ static const Floppy144DataRecord *Floppy144SiteParentRecordForRect(
 
         /*
          * Ordinary generated records store runtime x/y/width/height in n0..n3.
-         * Rotated centre-authored furniture stores its unrotated width/height
-         * in n2/n3, centre in n4/n5 and sets b0. Match both forms back to the
-         * same runtime Site rectangle.
+         * The b0 centre-authored path is retained for older geometry; current
+         * world furnishings all use cardinal top-left bounds. Match both
+         * forms to the same runtime Site rectangle without changing focus.
          */
         if(pRecord->b0 != 0U)
         {

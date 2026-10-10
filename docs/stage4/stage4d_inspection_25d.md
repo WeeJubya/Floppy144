@@ -114,10 +114,13 @@ The 2.5D renderer uses that rectangle to:
 
 - retain the signed rotation;
 - choose the leading pseudo-isometric axis;
-- mirror/swap the visible footprint for diagonal orientations;
+- mirror/swap the visible footprint for cardinal orientations (with dormant
+  diagonal support retained for internal compatibility);
 - draw a compact orientation tick on the leading edge.
 
-The Secretary Office diagonal desk is regression-checked at 135 degrees.
+The Secretary Office desk is orthogonal in the authored world. Inspection
+regression checks the same model at 0 and 90 degrees; no diagonal office
+placement is required.
 
 ## Wall-mounted objects
 
@@ -213,7 +216,7 @@ Dedicated S4D-04 presentation tests:
 - verify every current variant maps to a specialised renderer;
 - ensure the renderer stays inside the left-hand Inspection presentation area;
 - compare 6x4 and 2x6 dimensional silhouettes;
-- verify an authored 135-degree rotation changes presentation;
+- verify a synthetic 90-degree cardinal rotation changes presentation;
 - verify a wall-mounted patch panel differs from a freestanding worktop;
 - verify the 18x5 worktop retains unusual dimensions;
 - render empty, one-item and many-item states;

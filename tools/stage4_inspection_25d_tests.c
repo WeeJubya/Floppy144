@@ -256,7 +256,7 @@ static void TestDimensionsOrientationAndWallFixtures(void)
     uint32_t desk_hash;
     uint32_t bookcase_hash;
     uint32_t rotation_zero;
-    uint32_t rotation_135;
+    uint32_t rotation_90;
     uint32_t wall_hash;
     uint32_t wide_hash;
 
@@ -275,11 +275,11 @@ static void TestDimensionsOrientationAndWallFixtures(void)
     );
 
     rotation_zero=DrawParent(rotated,0,2U,0U,NULL);
-    rotation_135=DrawParent(rotated,135,2U,0U,NULL);
+    rotation_90=DrawParent(rotated,90,2U,0U,NULL);
 
     CHECK(
-        rotation_zero!=rotation_135,
-        "authored diagonal orientation changes pseudo-isometric presentation"
+        rotation_zero!=rotation_90,
+        "cardinal orientation changes pseudo-isometric Inspection perspective"
     );
 
     wall_hash=DrawParent(wall,0,4U,2U,NULL);
@@ -439,12 +439,12 @@ static void TestDeskAndDoorChildSurfaces(void)
           "Desk 06 child documents lie only on its 2.5D desktop plane");
 
     /* Signed authored orientation still maps children to a rotated top. */
-    (void)DrawParent(rotated,135,0U,0U,NULL);
+    (void)DrawParent(rotated,90,0U,0U,NULL);
     memcpy(g_child_baseline,g_pixels,sizeof(g_pixels));
-    (void)DrawParent(rotated,135,5U,0U,NULL);
+    (void)DrawParent(rotated,90,5U,0U,NULL);
     inside=TestNewChildColourInBounds(30U,85U,303U,205U,&outside);
     CHECK(inside>0U && outside==0U,
-          "diagonal desks inherit the rotated desktop perspective");
+          "cardinal desks inherit their orthogonal desktop perspective");
 
     (void)DrawParent(door,0,0U,0U,NULL);
     memcpy(g_child_baseline,g_pixels,sizeof(g_pixels));
