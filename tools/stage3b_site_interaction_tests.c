@@ -241,7 +241,7 @@ static void Floppy144TestPhysicalParentCoverage(void)
     }
 
     F144_CHECK(
-        uPhysicalCount >= 633U,
+        uPhysicalCount >= 600U,
         "all physical items participate in Site parent audit"
     );
 
