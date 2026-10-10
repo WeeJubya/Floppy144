@@ -5,6 +5,8 @@
 #include "floppy144_grey_encounter.h"
 #include "floppy144_grey_door.h"
 #include "floppy144_player_visual.h"
+#include "floppy144_site.h"
+#include "floppy144_site_2d_camera.h"
 #include <stddef.h>
 #include <string.h>
 
@@ -16,7 +18,7 @@
 #define DEVELOPER_Y 264
 /* In this 2D vignette the Developer is approached by the player foot point.
    The old 112px radius allowed inspection from across the office. */
-#define DEVELOPER_INSPECT_RADIUS 40
+#define DEVELOPER_INSPECT_RADIUS 24
 
 static uint32_t SceneLength(uint8_t phase)
 {
@@ -47,6 +49,7 @@ bool Floppy144GreyEncounterBegin(
     scene->local_y=264;
     scene->return_x16=run->player_site_x;
     scene->return_y16=run->player_site_y;
+    scene->restoration_start=Floppy144RunStateRecoveredPercent(run);
     Floppy144PlayerVisualReset(&scene->player_visual);
     return true;
 }
@@ -71,12 +74,7 @@ bool Floppy144GreyEncounterMove(
 }
 bool Floppy144GreyEncounterInspect(Floppy144GreyEncounter *scene)
 {
-    int32_t dx,dy;
-    if(scene==NULL || scene->phase!=(uint8_t)FLOPPY144_GREY_EXPLORE)
-        return false;
-    dx=scene->local_x-DEVELOPER_X;
-    dy=scene->local_y-DEVELOPER_Y;
-    if(dx*dx+dy*dy>DEVELOPER_INSPECT_RADIUS*DEVELOPER_INSPECT_RADIUS) return false;
+    if(!Floppy144GreyEncounterInspectNearby(scene)) return false;
     scene->developer_inspected=1U;
     scene->phase=(uint8_t)FLOPPY144_GREY_IDENTIFY;
     scene->elapsed_ms=0U;
@@ -87,12 +85,15 @@ bool Floppy144GreyEncounterAdvance(
 )
 {
     bool changed=false;
-    if(scene==NULL || scene->phase==(uint8_t)FLOPPY144_GREY_DONE ||
-       scene->phase==(uint8_t)FLOPPY144_GREY_EXPLORE)
+    if(scene==NULL || scene->phase==(uint8_t)FLOPPY144_GREY_DONE)
         return false;
     /* Large suspend-frame deltas cannot skip directly to DONE without
        visiting the intended ordered presentation states. */
     if(elapsed_ms>100U) elapsed_ms=100U;
+    if(scene->phase==(uint8_t)FLOPPY144_GREY_EXPLORE) {
+        /* The exact shared player gait continues to animate in free roam. */
+        return Floppy144PlayerVisualAdvance(&scene->player_visual,elapsed_ms);
+    }
     scene->elapsed_ms+=elapsed_ms;
     if(scene->phase==(uint8_t)FLOPPY144_GREY_ENTERING ||
        scene->phase==(uint8_t)FLOPPY144_GREY_BLACKOUT)
@@ -117,6 +118,44 @@ bool Floppy144GreyEncounterSaveAllowed(const Floppy144GreyEncounter *scene)
        The coordinator resumes run-state persistence only after return. */
     return scene==NULL || Floppy144GreyEncounterFinished(scene);
 }
+uint32_t Floppy144GreyEncounterDisplayPercent(const Floppy144GreyEncounter *scene)
+{
+    uint32_t t,elapsed,span=3200U+1800U,delta;
+    uint64_t cube;
+    if(scene==NULL) return 0U;
+    if(scene->phase<(uint8_t)FLOPPY144_GREY_DIALOGUE)
+        return scene->restoration_start;
+    if(scene->phase>=(uint8_t)FLOPPY144_GREY_GLITCH)
+        return 144U;
+    t=scene->phase==(uint8_t)FLOPPY144_GREY_DIALOGUE
+        ?scene->elapsed_ms:3200U+scene->elapsed_ms;
+    if(t>span) t=span;
+    delta=144U-scene->restoration_start;
+    /* A monotonic cubic curve: slow recognition, increasingly fast escalation.
+       64-bit intermediate prevents overflow; no RunState capacity is touched. */
+    cube=(uint64_t)t*t*t;
+    elapsed=(uint32_t)((cube*delta)/((uint64_t)span*span*span));
+    return scene->restoration_start+elapsed;
+}
+
+bool Floppy144GreyEncounterPercentFlash(const Floppy144GreyEncounter *scene)
+{
+    if(scene==NULL || Floppy144GreyEncounterDisplayPercent(scene)<=100U)
+        return false;
+    /* Two hertz with a readable 250ms dwell: no full-frame strobe. */
+    return (scene->elapsed_ms/250U)%2U==0U;
+}
+
+bool Floppy144GreyEncounterInspectNearby(const Floppy144GreyEncounter *scene)
+{
+    int32_t dx,dy;
+    if(scene==NULL || scene->phase!=(uint8_t)FLOPPY144_GREY_EXPLORE)
+        return false;
+    dx=scene->local_x-DEVELOPER_X;
+    dy=scene->local_y-DEVELOPER_Y;
+    return dx*dx+dy*dy<=DEVELOPER_INSPECT_RADIUS*DEVELOPER_INSPECT_RADIUS;
+}
+
 static void ModernDesk(Floppy144Surface *s,uint32_t x,uint32_t y,uint32_t w)
 {
     FILL(s,x+9,y+17,9,48,RGB(79,88,104));
@@ -181,28 +220,52 @@ static void Sandwich(Floppy144Surface *s)
     FILL(s,503,265,4,3,RGB(197,146,92));
     FILL(s,519,268,3,2,RGB(197,146,92));
 }
-static void Developer(Floppy144Surface *s,const Floppy144GreyEncounter *scene)
+static uint8_t DeveloperFacing(const Floppy144GreyEncounter *scene)
 {
     uint32_t turn=scene->phase==(uint8_t)FLOPPY144_GREY_TURN
-        ? scene->elapsed_ms : scene->phase>(uint8_t)FLOPPY144_GREY_TURN?1900U:0U;
-    uint32_t head_x=447U;
-    uint32_t skin=RGB(179,142,118);
-    /* Chair and figure. Shoulder and face progress through a slow turn. */
-    FILL(s,435,208,42,56,RGB(46,67,84));
-    FILL(s,443,263,25,16,RGB(44,53,60));
-    FILL(s,438,220,36,31,RGB(63,85,108));
-    if(turn>=680U) head_x=451U;
-    if(turn>=1400U) head_x=455U;
-    FILL(s,head_x,195,20,25,skin);
-    FILL(s,head_x-2,190,25,11,RGB(50,45,41));
-    if(turn<680U) FILL(s,head_x,203,20,12,RGB(49,41,37));
-    else if(turn<1400U) FILL(s,head_x+14,204,5,4,RGB(40,47,54));
-    else
-    {
-        FILL(s,head_x+4,207,3,3,RGB(37,43,48));
-        FILL(s,head_x+15,207,3,3,RGB(37,43,48));
-        FILL(s,head_x+9,216,5,2,RGB(99,66,57));
+        ?scene->elapsed_ms:scene->phase>(uint8_t)FLOPPY144_GREY_TURN?1900U:0U;
+    if(turn<635U) return FLOPPY144_PLAYER_FACING_UP;
+    if(turn<1265U) return FLOPPY144_PLAYER_FACING_RIGHT;
+    return FLOPPY144_PLAYER_FACING_DOWN;
+}
+static void Developer(Floppy144Surface *s,const Floppy144GreyEncounter *scene)
+{
+    Floppy144PlayerVisualState figure;
+    uint8_t facing=DeveloperFacing(scene);
+    int32_t x=DEVELOPER_X;
+    int32_t bob=0;
+    uint32_t chair=RGB(46,67,84),edge=RGB(28,39,51);
+    if(scene->phase>=(uint8_t)FLOPPY144_GREY_DIALOGUE &&
+       scene->phase<(uint8_t)FLOPPY144_GREY_GLITCH)
+        bob=(scene->elapsed_ms/620U)%2U==0U?0:-1;
+    /* Turn the entire upholstered chair assembly, not just the head:
+       backrest, seat, armrests and both swivel supports change direction. */
+    FILL(s,x-2,262,4,15,edge);
+    FILL(s,x-21,277,42,3,edge);
+    FILL(s,x-18,270,7,5,edge);
+    FILL(s,x+11,270,7,5,edge);
+    if(facing==FLOPPY144_PLAYER_FACING_UP) {
+        FILL(s,x-20,204,40,51,chair);
+        FILL(s,x-17,208,34,43,RGB(62,85,108));
+        FILL(s,x-22,239,8,21,edge);
+        FILL(s,x+14,239,8,21,edge);
+    } else if(facing==FLOPPY144_PLAYER_FACING_RIGHT) {
+        FILL(s,x-12,205,27,51,chair);
+        FILL(s,x+10,207,8,46,edge);
+        FILL(s,x-20,245,32,8,RGB(62,85,108));
+        FILL(s,x-13,234,6,19,edge);
+    } else {
+        FILL(s,x-20,204,40,49,chair);
+        FILL(s,x-17,210,34,40,RGB(62,85,108));
+        FILL(s,x-23,235,8,25,edge);
+        FILL(s,x+15,235,8,25,edge);
     }
+    Floppy144PlayerVisualReset(&figure);
+    figure.facing=facing;
+    /* The same vector skeleton drives the player and Developer. Only the
+       outfit differs; seated legs are naturally occluded by the desk edge. */
+    Floppy144PlayerVisualDrawDeveloper(s,x,255+bob,35,54,&figure,
+        32,85,576,215);
 }
 static void Office(Floppy144Surface *s,const Floppy144GreyEncounter *scene)
 {
@@ -216,10 +279,10 @@ static void Office(Floppy144Surface *s,const Floppy144GreyEncounter *scene)
         FILL(s,i,199,1,161,RGB(161,174,181));
     for(i=232U;i<360U;i+=28U)
         FILL(s,0,i,640,1,RGB(166,178,184));
-    FILL(s,25,16,590,66,RGB(242,246,243));
-    Floppy144DrawRect(s,25,16,590,66,RGB(179,193,196));
-    Floppy144DrawText(s,94,34,"GREY DOOR REPUBLIK",2U,RGB(35,61,73));
-    FILL(s,74,69,491,2,RGB(73,151,166));
+    FILL(s,25,26,590,56,RGB(242,246,243));
+    Floppy144DrawRect(s,25,26,590,56,RGB(179,193,196));
+    Floppy144DrawText(s,94,41,"GREY DOOR REPUBLIK",2U,RGB(35,61,73));
+    FILL(s,74,76,491,2,RGB(73,151,166));
     /* Windows glow, architectural light bands. */
     FILL(s,34,97,178,97,RGB(121,185,199));
     FILL(s,40,103,166,84,RGB(190,221,221));
@@ -239,59 +302,72 @@ static void Office(Floppy144Surface *s,const Floppy144GreyEncounter *scene)
     /* Shared game character renderer, with the vignette's transient movement
        state; this does not mutate the actual Site player. */
     Floppy144PlayerVisualDraw(s,scene->local_x,scene->local_y,
-        24,37,18,FLOPPY144_OPERATOR_BODY_STYLE_DEFAULT,
-        &scene->player_visual,0,85,640,232);
-    FILL(s,20,317,600,29,RGB(33,54,67));
+        FLOPPY144_SITE_PLAYER_VISUAL_WIDTH_X16*
+            FLOPPY144_SITE_2D_PIXELS_PER_UNIT/FLOPPY144_SITE_FIXED_ONE,
+        6*FLOPPY144_SITE_2D_PIXELS_PER_UNIT,
+        FLOPPY144_SITE_PLAYER_COLLISION_WIDTH_X16*
+            FLOPPY144_SITE_2D_PIXELS_PER_UNIT/FLOPPY144_SITE_FIXED_ONE,
+        scene->body_style,&scene->player_visual,32,85,576,215);
+    /* Exactly the Site HUD footer position and grammar. */
+    FILL(s,20,312,600,28,RGB(12,17,21));
+    Floppy144DrawRect(s,20,312,600,28,RGB(113,124,120));
     if(scene->phase==(uint8_t)FLOPPY144_GREY_EXPLORE)
-    {
-        int32_t dx=scene->local_x-DEVELOPER_X;
-        int32_t dy=scene->local_y-DEVELOPER_Y;
-        TXT(s,38,328,dx*dx+dy*dy<=DEVELOPER_INSPECT_RADIUS*DEVELOPER_INSPECT_RADIUS
-            ?"I INSPECT    ARROWS MOVE":"ARROWS MOVE",RGB(226,238,241));
-    }
+        TXT(s,32,322,Floppy144GreyEncounterInspectNearby(scene)
+            ?"I INSPECT    ARROWS MOVE":"ARROWS MOVE",RGB(201,210,203));
     else if(scene->phase>=(uint8_t)FLOPPY144_GREY_IDENTIFY &&
             scene->phase<=(uint8_t)FLOPPY144_GREY_TURN)
-        TXT(s,278,328,"DEVELOPER",RGB(248,234,207));
-    else if(scene->phase==(uint8_t)FLOPPY144_GREY_DIALOGUE)
-    {
-        FILL(s,98,267,451,46,RGB(32,51,62));
-        Floppy144DrawRect(s,98,267,451,46,RGB(97,174,181));
-        TXT(s,112,285,"You're not supposed to be able to get in here.",
-            RGB(245,248,243));
-    }
-    else if(scene->phase==(uint8_t)FLOPPY144_GREY_CAPACITY)
-    {
-        FILL(s,91,264,471,51,RGB(38,49,55));
-        Floppy144DrawText(s,117,282,"RESTORATION CAPACITY: 144%",
-            2U,RGB(245,192,105));
+        TXT(s,32,322,"DEVELOPER",RGB(201,210,203));
+
+    if(scene->phase==(uint8_t)FLOPPY144_GREY_DIALOGUE) {
+        /* Spatial speech bubble centred above the Developer's head,
+           never masquerading as footer/system or restoration text. */
+        FILL(s,306,153,291,40,RGB(32,51,62));
+        Floppy144DrawRect(s,306,153,291,40,RGB(97,174,181));
+        TXT(s,318,160,"You're not supposed to",RGB(255,255,255));
+        TXT(s,318,174,"be able to get in here.",RGB(255,255,255));
+        FILL(s,453,193,4,8,RGB(32,51,62));
     }
 }
 static void Glitch(Floppy144Surface *s,uint32_t t)
 {
-    uint32_t y;
-    uint32_t stripe;
+    uint32_t stripe,y,count;
     uint32_t buffer[640];
     if(s==NULL || s->pixels==NULL || s->width!=640U || s->height!=360U)
         return;
-    for(stripe=0U;stripe<11U;++stripe)
+    /* Deterministic build-up: light scanline instability, then displaced
+       image slices, sync loss, then isolated channel corruption. No fast
+       full-screen flashes; the final catastrophic failure is a hard blackout. */
+    count=2U+t/78U;
+    if(count>14U) count=14U;
+    for(stripe=0U;stripe<count;++stripe)
     {
-        uint32_t start=(stripe*39U+t/13U)%351U;
-        uint32_t offset=((stripe*17U+t/37U)%31U)+3U;
-        for(y=start;y<start+((stripe%3U)+1U)*3U && y<360U;++y)
+        uint32_t start=(stripe*47U+t/17U)%315U+20U;
+        uint32_t offset=((stripe*11U+t/41U)%19U)+2U;
+        uint32_t height=1U+((t/240U+stripe)%5U);
+        for(y=start;y<start+height && y<312U;++y)
         {
-            uint32_t x;
-            uint32_t *row=&s->pixels[(uint64_t)y*640U];
+            uint32_t x,*row=&s->pixels[(uint64_t)y*640U];
             memcpy(buffer,row,sizeof(buffer));
-            for(x=0U;x<640U;++x)
+            for(x=24U;x<615U;++x)
             {
                 uint32_t v=buffer[(x+offset)%640U];
-                if((stripe%3U)==0U) v=(~v)&0x00ffffffU;
+                if(t>500U && stripe%5U==0U)
+                    v=((v&0x00f0f0f0U)>>1U)|0x000a1824U;
                 row[x]=v;
             }
         }
     }
-    if((t/90U)%2U==0U)
-        TXT(s,72U,169U,"RESTORATION CAPACITY: 144%",RGB(253,250,247));
+    if(t>360U)
+    {
+        for(y=55U+(t/31U)%27U;y<300U;y+=31U)
+            FILL(s,32,y,576,1,RGB(47,70,81));
+    }
+    if(t>720U)
+    {
+        uint32_t jump=(t/67U)%12U;
+        FILL(s,32,122+jump,576,4,RGB(6,11,15));
+        TXT(s,76,141+jump,"SIGNAL LOST / RECOVERY INVALID",RGB(235,186,180));
+    }
 }
 void Floppy144GreyEncounterDraw(
     Floppy144Surface *surface,const Floppy144GreyEncounter *scene
