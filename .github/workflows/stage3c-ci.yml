@@ -396,3 +396,53 @@ jobs:
             throw "Temporary regression fixture was not restored cleanly."
           }
           Write-Host "ROOT THREE-WORKFLOW ACCEPTANCE: PASS"
+
+  audio-integration:
+    name: Audio integration / release build
+    runs-on: windows-2022
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Original MIDI and F144SFX contract tests
+        shell: pwsh
+        run: .\tools\test_stage4_audio.ps1
+
+      - name: Platform/source ownership audit
+        shell: pwsh
+        run: .\tools\test_stage4_build_architecture.ps1
+
+      - name: Install Premake
+        shell: pwsh
+        run: |
+          $url = "https://github.com/premake/premake-core/releases/download/v5.0.0-beta8/premake-5.0.0-beta8-windows.zip"
+          $zip = Join-Path $env:RUNNER_TEMP "premake.zip"
+          $dir = Join-Path $env:RUNNER_TEMP "premake"
+          Invoke-WebRequest -Uri $url -OutFile $zip
+          Expand-Archive -Path $zip -DestinationPath $dir -Force
+          $exe = Get-ChildItem -Path $dir -Recurse -Filter premake5.exe | Select-Object -First 1
+          if(-not $exe) { throw "premake5.exe unavailable" }
+          $exe.Directory.FullName | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Generate VS solution
+        shell: pwsh
+        run: premake5 vs2022
+
+      - name: Clean Release build
+        shell: pwsh
+        run: msbuild .\build\Floppy144.sln /t:Rebuild /m /p:Configuration=release /p:Platform=windows /p:WarningLevel=Level4 /p:TreatWarningsAsErrors=true
+
+      - name: Floppy size gate
+        shell: pwsh
+        run: |
+          $exe = Get-Item .\bin\release\Floppy144.exe
+          Write-Host "Final linked Floppy144.exe bytes: $($exe.Length)"
+          if($exe.Length -gt 1474560) {
+            throw "Release executable exceeds 1,474,560 byte limit"
+          }
