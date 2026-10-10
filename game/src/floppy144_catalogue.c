@@ -1315,9 +1315,14 @@ static void Floppy144CatalogueDrawDocument(
     char record_id[24];
     char title[48];
 
-    bool bAuthored =
+    /*
+     * A generated/index-only record has a catalogue identity but no recovered
+     * document body. Content and index-placeholder states are exclusive.
+     */
+    bool bHasReadableBody =
         authored_document != NULL &&
-        authored_document->pszBody != NULL;
+        authored_document->pszBody != NULL &&
+        authored_document->pszBody[0] != '\0';
 
     uint32_t uBodyLineCount = 0U;
 
@@ -1418,8 +1423,14 @@ static void Floppy144CatalogueDrawDocument(
         border
     );
 
-    /* Draw complete authored JSON text when present. */
-    if(bAuthored)
+    /*
+     * A document body owns the entire scrolling text viewport. The index-only
+     * placeholder owns that region only when no readable body exists.
+     *
+     * Keep the scrollbar nested inside the body branch: otherwise its else
+     * wrongly draws missing-content status over every short authored record.
+     */
+    if(bHasReadableBody)
     {
         uBodyLineCount =
             Floppy144CatalogueDrawBodyText(
@@ -1428,33 +1439,34 @@ static void Floppy144CatalogueDrawDocument(
                 text,
                 catalogue->document_scroll_line
             );
-    }
-    if(
-        bAuthored &&
-        uBodyLineCount > FLOPPY144_DOCUMENT_BODY_MAX_LINES
-    )
-    {
-        Floppy144DrawScrollbar(
-            surface,
-            594U,
-            FLOPPY144_DOCUMENT_BODY_TOP,
-            FLOPPY144_DOCUMENT_BODY_MAX_LINES*
-                FLOPPY144_DOCUMENT_BODY_LINE_HEIGHT,
-            uBodyLineCount,
-            FLOPPY144_DOCUMENT_BODY_MAX_LINES,
-            catalogue->document_scroll_line,
-            panel,
-            border,
-            amber
-        );
-    }
 
+        if(uBodyLineCount > FLOPPY144_DOCUMENT_BODY_MAX_LINES)
+        {
+            Floppy144DrawScrollbar(
+                surface,
+                594U,
+                FLOPPY144_DOCUMENT_BODY_TOP,
+                FLOPPY144_DOCUMENT_BODY_MAX_LINES *
+                    FLOPPY144_DOCUMENT_BODY_LINE_HEIGHT,
+                uBodyLineCount,
+                FLOPPY144_DOCUMENT_BODY_MAX_LINES,
+                catalogue->document_scroll_line,
+                panel,
+                border,
+                amber
+            );
+        }
+    }
     else
     {
+        /*
+         * Reserved index-only placeholder; never shared with body text.
+         * The record index exists, but no original authored body was recovered.
+         */
         Floppy144CatalogueTextCentred(
             surface,
             138,
-            "RECORD CONTENT NOT PRESENT ON DISK 144",
+            "DOCUMENT BODY NOT RECOVERED",
             1,
             amber
         );
@@ -1462,7 +1474,7 @@ static void Floppy144CatalogueDrawDocument(
         Floppy144CatalogueTextCentred(
             surface,
             166,
-            "INDEX ENTRY RECONSTRUCTED FROM DISK 144 CROSS REFERENCES.",
+            "INDEX ENTRY RECONSTRUCTED FROM DISK 144 CROSS-REFERENCES.",
             1,
             text
         );
@@ -1470,7 +1482,7 @@ static void Floppy144CatalogueDrawDocument(
         Floppy144CatalogueTextCentred(
             surface,
             184,
-            "THE DOCUMENT MAY EXIST IN AN UNAVAILABLE COLLECTION.",
+            "NO ORIGINAL DOCUMENT TEXT IS AVAILABLE FOR THIS ENTRY.",
             1,
             muted
         );
@@ -1498,7 +1510,7 @@ static void Floppy144CatalogueDrawDocument(
         surface,
         316,
         (
-            bAuthored &&
+            bHasReadableBody &&
             uBodyLineCount > FLOPPY144_DOCUMENT_BODY_MAX_LINES
         )
             ? "UP/DOWN SCROLL   BACKSPACE BACK"
@@ -1723,7 +1735,8 @@ void Floppy144CatalogueScrollDocument(
             catalogue->recovery_seed
         );
 
-    if(pDocument == NULL || pDocument->pszBody == NULL)
+    if(pDocument == NULL || pDocument->pszBody == NULL ||
+       pDocument->pszBody[0] == '\0')
     {
         return;
     }

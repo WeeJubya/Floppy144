@@ -651,6 +651,184 @@ static void Floppy144TestCatalogueRecordResolution(void)
 }
 
 /*
+ * BUG FIX 09: exercise the actual software renderer, not only document flags.
+ *
+ * The earlier short-document branch rendered a complete authored body, then
+ * entered the scrollbar's else and overprinted three index-only status lines.
+ * Amber status glyphs in the document text viewport therefore identify the
+ * regression without depending on any individual line of prose or font pixel.
+ * Scrollbar amber pixels at x=594 are deliberately outside the tested band.
+ */
+static uint32_t g_document_view_test_pixels[640U * 360U];
+
+static uint32_t Floppy144TestCountViewerPixels(
+    uint32_t colour, uint32_t x0, uint32_t y0,
+    uint32_t x1, uint32_t y1)
+{
+    uint32_t count = 0U, x, y;
+    for(y=y0;y<y1;++y)
+    for(x=x0;x<x1;++x)
+    {
+        if(g_document_view_test_pixels[y*640U+x]==colour)
+            ++count;
+    }
+    return count;
+}
+
+static void Floppy144TestDocumentViewerContentStates(void)
+{
+    const uint32_t amber = FLOPPY144_RGB(194,153,76);
+    const uint32_t body_text = FLOPPY144_RGB(202,211,205);
+    const uint32_t muted = FLOPPY144_RGB(118,133,132);
+    Floppy144Surface surface = {
+        g_document_view_test_pixels,640U,360U
+    };
+    Floppy144CatalogueState catalogue;
+    Floppy144CollectionId collection = FLOPPY144_COLLECTION_COUNT;
+    uint32_t slot = UINT32_MAX;
+    uint32_t body_amber;
+
+    /* The reported short authored record used to show both body and status. */
+    F144_CHECK(
+        Floppy144CatalogueFindRecord(
+            "HR-01-RS-0171",&collection,&slot) &&
+        collection==FLOPPY144_COLLECTION_HR01,
+        "HR-01-RS-0171 resolves to its authored catalogue slot"
+    );
+    if(collection!=FLOPPY144_COLLECTION_HR01) return;
+
+    F144_CHECK(
+        Floppy144CatalogueOpenRecord(&catalogue,collection,slot),
+        "short authored HR-01 document opens normally"
+    );
+    Floppy144CatalogueDraw(&surface,&catalogue);
+    body_amber=Floppy144TestCountViewerPixels(
+        amber,52U,102U,588U,285U);
+    F144_CHECK(
+        body_amber==0U &&
+        Floppy144TestCountViewerPixels(
+            muted,52U,102U,588U,285U)==0U &&
+        Floppy144TestCountViewerPixels(
+            body_text,52U,102U,588U,115U)>0U,
+        "short authored content is visible without index-only status overlay"
+    );
+    Floppy144CatalogueScrollDocument(&catalogue,1);
+    F144_CHECK(
+        catalogue.document_scroll_line==0U,
+        "short authored record needs no scrollbar or scrolling"
+    );
+
+    /*
+     * A procedural entry has no document-body registry row. It should show
+     * the index-only placeholder, never fake recovered text or scroll.
+     * HR-01 slot 10 is the generated RS-0113 entry after BUG FIX 08.
+     */
+    F144_CHECK(
+        Floppy144CatalogueOpenRecord(
+            &catalogue,FLOPPY144_COLLECTION_HR01,10U) &&
+        Floppy144DocumentGet(FLOPPY144_COLLECTION_HR01,10U)==NULL,
+        "generated/index-only record is genuinely without authored body"
+    );
+    Floppy144CatalogueDraw(&surface,&catalogue);
+    F144_CHECK(
+        Floppy144TestCountViewerPixels(
+            amber,52U,130U,588U,155U)>0U &&
+        Floppy144TestCountViewerPixels(
+            muted,52U,180U,588U,200U)>0U &&
+        Floppy144TestCountViewerPixels(
+            body_text,52U,102U,588U,115U)==0U,
+        "index-only status remains legible in its exclusive placeholder"
+    );
+    Floppy144CatalogueScrollDocument(&catalogue,1);
+    F144_CHECK(
+        catalogue.document_scroll_line==0U,
+        "index-only document cannot scroll a missing body"
+    );
+
+    /* Reusing the same frame buffer must not ghost old status over a body. */
+    F144_CHECK(
+        Floppy144CatalogueOpenRecord(
+            &catalogue,FLOPPY144_COLLECTION_HR01,slot),
+        "reopened short authored record replaces generated index page"
+    );
+    Floppy144CatalogueDraw(&surface,&catalogue);
+    F144_CHECK(
+        Floppy144TestCountViewerPixels(
+            amber,52U,102U,588U,285U)==0U &&
+        Floppy144TestCountViewerPixels(
+            muted,52U,102U,588U,285U)==0U &&
+        Floppy144TestCountViewerPixels(
+            body_text,52U,102U,588U,115U)>0U &&
+        catalogue.document_scroll_line==0U,
+        "reopened authored body has neither stale index status nor stale scroll"
+    );
+
+    /* A regular recovered trigger document also owns the entire body band. */
+    F144_CHECK(
+        Floppy144CatalogueFindRecord(
+            "DR-01-RS-0001",&collection,&slot),
+        "normal recovered DR-01 document resolves"
+    );
+    F144_CHECK(
+        Floppy144CatalogueOpenRecord(&catalogue,collection,slot),
+        "normal recovered record opens"
+    );
+    Floppy144CatalogueDraw(&surface,&catalogue);
+    F144_CHECK(
+        Floppy144TestCountViewerPixels(
+            amber,52U,102U,588U,285U)==0U &&
+        Floppy144TestCountViewerPixels(
+            muted,52U,102U,588U,285U)==0U &&
+        Floppy144TestCountViewerPixels(
+            body_text,52U,102U,588U,115U)>0U,
+        "normal recovered record displays its body, not index-only status"
+    );
+
+    /* Long, scrollable documents also must never print missing-body status. */
+    F144_CHECK(
+        Floppy144CatalogueFindRecord(
+            "FM-04-RS-0035",&collection,&slot),
+        "long FM-04 record resolves for viewer status regression"
+    );
+    if(collection==FLOPPY144_COLLECTION_COUNT) return;
+    F144_CHECK(
+        Floppy144CatalogueOpenRecord(&catalogue,collection,slot),
+        "long authored document opens normally"
+    );
+    Floppy144CatalogueDraw(&surface,&catalogue);
+    F144_CHECK(
+        Floppy144TestCountViewerPixels(
+            amber,52U,102U,588U,285U)==0U,
+        "long authored first page cannot display index-only status"
+    );
+    Floppy144CatalogueScrollDocument(&catalogue,1);
+    Floppy144CatalogueDraw(&surface,&catalogue);
+    F144_CHECK(
+        catalogue.document_scroll_line==1U &&
+        Floppy144TestCountViewerPixels(
+            amber,52U,102U,588U,285U)==0U,
+        "scrolled document retains content-only body and live scrollbar"
+    );
+    /* The header/footer remain outside the exclusive body/status viewport. */
+    F144_CHECK(
+        Floppy144TestCountViewerPixels(
+            muted,10U,5U,260U,15U)>0U &&
+        Floppy144TestCountViewerPixels(
+            amber,10U,311U,620U,334U)>0U,
+        "document viewer header and footer remain visible"
+    );
+    Floppy144CatalogueCloseDocument(&catalogue);
+    Floppy144CatalogueOpenDocument(&catalogue);
+    Floppy144CatalogueDraw(&surface,&catalogue);
+    F144_CHECK(
+        catalogue.document_scroll_line==0U &&
+        Floppy144TestCountViewerPixels(
+            amber,52U,102U,588U,285U)==0U,
+        "reopening long content resets scroll without creating ghosted status"
+    );
+}
+
+/*
  * Long recovered documents use a 13-line viewport. FM-04-RS-0035 is a compact
  * permanent fixture for scroll behaviour because its in-universe body wraps
  * beyond that window.
@@ -3044,6 +3222,7 @@ int main(void)
     Floppy144TestRestoreProgress();
     Floppy144TestExtendedGlyphs();
     Floppy144TestCatalogueRecordResolution();
+    Floppy144TestDocumentViewerContentStates();
     Floppy144TestDocumentBodyScrolling();
     Floppy144TestCollectionListPresentation();
     Floppy144TestMultipleCollectionCommands();
