@@ -1,9 +1,10 @@
 /*
- * GREY DOOR REPUBLIC. A tiny procedural office, outside world coordinates.
+ * GREY DOOR REPUBLIK. A tiny procedural office, outside world coordinates.
  * Every pixel is drawn through the existing 640x360 software framebuffer.
  */
 #include "floppy144_grey_encounter.h"
 #include "floppy144_grey_door.h"
+#include "floppy144_player_visual.h"
 #include <stddef.h>
 #include <string.h>
 
@@ -13,6 +14,9 @@
 #define TXT(s,x,y,t,c) Floppy144DrawText((s),(x),(y),(t),1U,(c))
 #define DEVELOPER_X 455
 #define DEVELOPER_Y 235
+/* In this 2D vignette the Developer is approached by the player foot point.
+   The old 112px radius allowed inspection from across the office. */
+#define DEVELOPER_INSPECT_RADIUS 40
 
 static uint32_t SceneLength(uint8_t phase)
 {
@@ -24,6 +28,7 @@ static uint32_t SceneLength(uint8_t phase)
         case FLOPPY144_GREY_DIALOGUE: return 3200U;
         case FLOPPY144_GREY_CAPACITY: return 1800U;
         case FLOPPY144_GREY_GLITCH: return 950U;
+        case FLOPPY144_GREY_BLACKOUT: return 2000U;
         default: return 0U;
     }
 }
@@ -42,6 +47,7 @@ bool Floppy144GreyEncounterBegin(
     scene->local_y=264;
     scene->return_x16=run->player_site_x;
     scene->return_y16=run->player_site_y;
+    Floppy144PlayerVisualReset(&scene->player_visual);
     return true;
 }
 bool Floppy144GreyEncounterMove(
@@ -60,6 +66,7 @@ bool Floppy144GreyEncounterMove(
     if(x==scene->local_x && y==scene->local_y) return false;
     scene->local_x=x;
     scene->local_y=y;
+    (void)Floppy144PlayerVisualSetMovement(&scene->player_visual,dx,dy,F144_ACTION_NONE);
     return true;
 }
 bool Floppy144GreyEncounterInspect(Floppy144GreyEncounter *scene)
@@ -69,7 +76,7 @@ bool Floppy144GreyEncounterInspect(Floppy144GreyEncounter *scene)
         return false;
     dx=scene->local_x-DEVELOPER_X;
     dy=scene->local_y-DEVELOPER_Y;
-    if(dx*dx+dy*dy>112*112) return false;
+    if(dx*dx+dy*dy>DEVELOPER_INSPECT_RADIUS*DEVELOPER_INSPECT_RADIUS) return false;
     scene->developer_inspected=1U;
     scene->phase=(uint8_t)FLOPPY144_GREY_IDENTIFY;
     scene->elapsed_ms=0U;
@@ -87,6 +94,10 @@ bool Floppy144GreyEncounterAdvance(
        visiting the intended ordered presentation states. */
     if(elapsed_ms>100U) elapsed_ms=100U;
     scene->elapsed_ms+=elapsed_ms;
+    if(scene->phase==(uint8_t)FLOPPY144_GREY_ENTERING ||
+       scene->phase==(uint8_t)FLOPPY144_GREY_BLACKOUT)
+        (void)Floppy144PlayerVisualSetMovement(&scene->player_visual,0,0,F144_ACTION_NONE);
+    (void)Floppy144PlayerVisualAdvance(&scene->player_visual,elapsed_ms);
     changed=elapsed_ms!=0U;
     if(scene->elapsed_ms>=SceneLength(scene->phase))
     {
@@ -207,7 +218,7 @@ static void Office(Floppy144Surface *s,const Floppy144GreyEncounter *scene)
         FILL(s,0,i,640,1,RGB(166,178,184));
     FILL(s,25,16,590,66,RGB(242,246,243));
     Floppy144DrawRect(s,25,16,590,66,RGB(179,193,196));
-    Floppy144DrawText(s,94,34,"GREY DOOR REPUBLIC",2U,RGB(35,61,73));
+    Floppy144DrawText(s,94,34,"GREY DOOR REPUBLIK",2U,RGB(35,61,73));
     FILL(s,74,69,491,2,RGB(73,151,166));
     /* Windows glow, architectural light bands. */
     FILL(s,34,97,178,97,RGB(121,185,199));
@@ -225,21 +236,17 @@ static void Office(Floppy144Surface *s,const Floppy144GreyEncounter *scene)
     Poster(s,501,107,2U);
     Sandwich(s);
     Developer(s,scene);
-    /* Small local avatar, confined to this vignette only. */
-    FILL(s,(uint32_t)(scene->local_x-8),(uint32_t)(scene->local_y-19),
-         16,19,RGB(45,69,83));
-    FILL(s,(uint32_t)(scene->local_x-5),(uint32_t)(scene->local_y-27),
-         11,9,RGB(188,152,122));
-    FILL(s,(uint32_t)(scene->local_x-7),(uint32_t)(scene->local_y),
-         5,6,RGB(53,60,69));
-    FILL(s,(uint32_t)(scene->local_x+3),(uint32_t)(scene->local_y),
-         5,6,RGB(53,60,69));
+    /* Shared game character renderer, with the vignette's transient movement
+       state; this does not mutate the actual Site player. */
+    Floppy144PlayerVisualDraw(s,scene->local_x,scene->local_y,
+        24,37,18,FLOPPY144_OPERATOR_BODY_STYLE_DEFAULT,
+        &scene->player_visual,0,85,640,232);
     FILL(s,20,317,600,29,RGB(33,54,67));
     if(scene->phase==(uint8_t)FLOPPY144_GREY_EXPLORE)
     {
         int32_t dx=scene->local_x-DEVELOPER_X;
         int32_t dy=scene->local_y-DEVELOPER_Y;
-        TXT(s,38,328,dx*dx+dy*dy<=112*112
+        TXT(s,38,328,dx*dx+dy*dy<=DEVELOPER_INSPECT_RADIUS*DEVELOPER_INSPECT_RADIUS
             ?"I INSPECT    ARROWS MOVE":"ARROWS MOVE",RGB(226,238,241));
     }
     else if(scene->phase>=(uint8_t)FLOPPY144_GREY_IDENTIFY &&
@@ -298,6 +305,11 @@ void Floppy144GreyEncounterDraw(
         t=scene->elapsed_ms;
         if(t>150U) FILL(surface,318,30,4,300,RGB(188,193,197));
         if(t>400U) FILL(surface,270,18,100,324,RGB(158,171,178));
+        return;
+    }
+    if(scene->phase==(uint8_t)FLOPPY144_GREY_BLACKOUT)
+    {
+        Floppy144DrawClear(surface,RGB(0,0,0));
         return;
     }
     Office(surface,scene);
