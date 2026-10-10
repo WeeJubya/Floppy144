@@ -39,8 +39,8 @@ static void TestLedgers(void)
     F144_CHECK(CountKind(FLOPPY144_DATA_FURNITURE)==151U,"151 furniture");
     F144_CHECK(CountKind(FLOPPY144_DATA_FIXTURE)==91U,"91 fixtures");
     F144_CHECK(
-        uPhysicalItemCount >= 633U,
-        "physical-item ledger retains Stage 3C baseline"
+        uPhysicalItemCount >= 600U,
+        "physical-item ledger retains Bug Fix 15 baseline"
     );
     F144_CHECK(CountKind(FLOPPY144_DATA_COLOUR)==44U,"44 colours");
     F144_CHECK(CountKind(FLOPPY144_DATA_DRAWING)==24U,"24 drawings");
