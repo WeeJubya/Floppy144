@@ -136,4 +136,65 @@ if($collDef -notmatch 'floppy144_generated_generic_subjects, 36U' -or
    $compiler -notmatch 'floppy144_generated_generic_subjects, 36U') {
     throw "New word pools, seeded authored placement or numbering cache not integrated."
 }
+
+# BUG FIX 07: verify HR-01-RS-0092 at the normal 536-pixel viewer width.
+# The generated runtime body must match the canonical authored body.
+$directory = @($data.documents | Where-Object { $_.id -eq 'HR-01-RS-0006' })
+if($directory.Count -ne 1) {
+    throw "Canonical Staff Contact Directory missing or duplicated."
+}
+$directory = $directory[0]
+if($directory.title -ne 'Staff Contact Directory' -or
+   $directory.collection_id -ne 'HR-01' -or
+   [int]$directory.record_index -ne 5 -or
+   $null -ne $directory.trigger_id) {
+    throw "Staff Contact Directory identity or trigger changed."
+}
+$expectedDirectoryEntries = @(
+    "Helen Cartwright | Director | Director's Office | Ext. 2909",
+    "Priya Patel | Senior Archivist | Main Office / Records Office | Ext. 2509",
+    "Daniel Price | Records Officer | Records Office / Main Office | Ext. 1109",
+    "Claire Hughes | IT Manager | Main Office / IT Support | Ext. 2202",
+    "Imran Shah | Facilities Liaison | Facilities / Main Office | Ext. 8822",
+    "Martin Webb | Project Manager | Main Office | Ext. 2303",
+    "Rachel Morgan | Security Manager | Security Office | Ext. 0806"
+)
+$staffRows = @(
+    ([string]$directory.body -split "\r?\n") |
+        Where-Object { $_ -match ' \| .* \| Ext\. \d{4}$' }
+)
+if($staffRows.Count -ne 7) {
+    throw "Staff Contact Directory must contain seven formatted entries."
+}
+for($i = 0; $i -lt $staffRows.Count; ++$i) {
+    $entry = [string]$staffRows[$i]
+    if($entry -cne $expectedDirectoryEntries[$i]) {
+        throw "Staff Contact Directory entry $($i+1) changed."
+    }
+    # The runtime bitmap font is six pixels per character minus one pixel.
+    if(($entry.Length * 6 - 1) -gt 536) {
+        throw "Staff Contact Directory entry $($i+1) exceeds the viewer width."
+    }
+    if($entry -match ' {2,}' -or $entry -match '(?i)\bDesk\s*\d+' -or
+       $entry -notmatch '^[^|]+ \| [^|]+ \| [^|]+ \| Ext\. \d{4}$') {
+        throw "Staff Contact Directory entry $($i+1) has inconsistent formatting."
+    }
+}
+if([string]$directory.body -match '(?i)\bDesk\s*\d+') {
+    throw "Staff Contact Directory still contains a desk number."
+}
+$compiledDirectory = [regex]::Match(
+    $compiled,
+    '(?m)^\s*\{ FLOPPY144_COLLECTION_HR01, 7U, "HR-01-RS-0092", "Staff Contact Directory", [^\r\n]*$'
+)
+if(-not $compiledDirectory.Success -or
+   $compiledDirectory.Value -notmatch 'FLOPPY144_TRIGGER_COUNT') {
+    throw "Generated HR-01-RS-0092 identity or trigger has changed."
+}
+$escapedBody = ([string]$directory.body).Replace('\','\\').Replace('"','\"').Replace([string][char]13,"").Replace([string][char]10,'\n')
+if(-not $compiledDirectory.Value.Contains('"' + $escapedBody + '"')) {
+    throw "Generated HR-01-RS-0092 body differs from canonical source."
+}
+Write-Host "HR-01-RS-0092 LAYOUT: PASS - 7 one-line staff entries"
+
 Write-Host "S4E-08 ARCHIVE AUDIT: PASS - $total entries ($authored authored, $($total-$authored) generated), $inversions order inversions, $spreadCollections spread collections"
