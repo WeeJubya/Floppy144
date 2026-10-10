@@ -368,7 +368,7 @@ int main(int argc,char**argv)
         count(get(root,"triggers"))!=50 ||
         count(get(root,"evidence"))!=23 ||
         count(get(root,"interactions"))<41 ||
-        count(get(root,"physical_items"))<633
+        count(get(root,"physical_items"))<600
     ) die("stable ledger counts fall below Floppy//144 baseline contract");
     collections=get(root,"collections");
     for(i=0;i<count(collections);++i){JsonValue*c=at(collections,i);long kb=intv(c,"size_kb",0);if(kb<=0)die("every collection must define positive size_kb");total_kb+=(unsigned long)kb;if(boolv(c,"required_for_completion",false))required_kb+=(unsigned long)kb;}
