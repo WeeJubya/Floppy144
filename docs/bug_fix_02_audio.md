@@ -130,3 +130,23 @@ are not part of the single executable. Report before/after release sizes
 from the clean build rather than inferring them from source bytes.
 
 **Commit intent:** `Bug Fix: Incorporated sound into F144`.
+
+## Windows CI verification (2026-10-10)
+
+- Mock WinMM audio generation: PASS, 22/22 SFX; MIDI sequence/corruption API tested.
+- Windows audio boundary and C audio contract: **PASS**.
+- Windows platform ownership/build architecture: **PASS**.
+- Windows Release clean rebuild: **PASS**, 0 errors, 3 existing
+  C4090 const-qualifier warnings in `floppy144_main.c` at lines 138, 145, 152.
+- Linked Release `Floppy144.exe`: **754,688 bytes**, leaving **719,872
+  bytes** below the 1,474,560-byte competition ceiling.
+- Independent Windows audio/release job: **PASS**:
+  https://github.com/WeeJubya/Floppy144/actions/runs/38087445573
+- General Stage 4 release-candidate workflow: **BLOCKED** at Stage 3B by
+  unrelated, older terminal/notebook, site-directory and diagonal-furniture
+  regression expectations. Those files were not changed by this audio patch;
+  do not interpret the Stage 3B failure as an audio pass or an audio failure.
+- **Acoustic/manual acceptance outstanding:** the automated runner cannot
+  verify perceived sound quality, exact device speaker output, or scene-by-scene
+  loudness. Use `tools/build_audio_review.ps1` and play through the intro,
+  normal game and settings on a Windows system.
