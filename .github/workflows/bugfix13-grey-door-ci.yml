@@ -1,0 +1,76 @@
+name: Bug Fix 13 Grey Door Republik Acceptance
+
+on:
+  push:
+    branches:
+      - bugfix/13-grey-door-republik
+  workflow_dispatch:
+
+jobs:
+  grey-door-republik:
+    runs-on: windows-2022
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Generate canonical runtime data
+        shell: pwsh
+        run: .\tools\build_game_data.ps1
+
+      - name: Stage 4 persistence and Grey Door round-trip
+        shell: pwsh
+        run: .\tools\test_stage4_persistence.ps1
+
+      - name: Grey Door source/isolation audit
+        shell: pwsh
+        run: .\tools\test_stage4g_grey_door.ps1
+
+      - name: Shared player and Developer renderer
+        shell: pwsh
+        run: .\tools\test_stage4_player_visual.ps1
+
+      - name: Logical movement and keyboard controls
+        shell: pwsh
+        run: .\tools\test_stage4_input.ps1
+
+      - name: GDR developer arguments
+        shell: pwsh
+        run: .\tools\test_stage4_config.ps1
+
+      - name: Icon and presentation source gate
+        shell: pwsh
+        run: .\tools\test_stage4f_application_icon.ps1 -Phase Source
+
+      - name: Install Premake
+        shell: pwsh
+        run: |
+          $url = "https://github.com/premake/premake-core/releases/download/v5.0.0-beta8/premake-5.0.0-beta8-windows.zip"
+          $zip = Join-Path $env:RUNNER_TEMP "premake.zip"
+          $dir = Join-Path $env:RUNNER_TEMP "premake"
+          Invoke-WebRequest -Uri $url -OutFile $zip
+          Expand-Archive -Path $zip -DestinationPath $dir -Force
+          $exe = Get-ChildItem -Path $dir -Recurse -Filter premake5.exe | Select-Object -First 1
+          if(-not $exe) { throw "premake5.exe not found" }
+          $exe.Directory.FullName | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Generate Visual Studio 2022 solution
+        shell: pwsh
+        run: premake5 vs2022
+
+      - name: Release build
+        shell: pwsh
+        run: msbuild .\build\Floppy144.sln /t:Floppy144 /m /p:Configuration=release /p:Platform=windows /p:WarningLevel=Level4 /p:TreatWarningsAsErrors=true
+
+      - name: Validate Release artifact and floppy limit
+        shell: pwsh
+        run: |
+          $exe = Get-Item .\bin\release\Floppy144.exe
+          Write-Host "Release bytes: $($exe.Length)"
+          Write-Host "Remaining headroom: $(1474560 - $exe.Length)"
+          if($exe.Length -gt 1474560) { throw "Size gate FAIL" }
+          Write-Host "BUG FIX 13 RELEASE SIZE: PASS"
