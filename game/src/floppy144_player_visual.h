@@ -82,3 +82,13 @@ void Floppy144PlayerVisualDraw(
     int32_t clip_width,
     int32_t clip_height
 );
+
+/* Developer: the identical procedural skeleton, gait and facing renderer,
+   with a distinct office costume. No second sprite system is maintained. */
+void Floppy144PlayerVisualDrawDeveloper(
+    Floppy144Surface *surface,
+    int32_t foot_x, int32_t foot_y,
+    int32_t sprite_width, int32_t sprite_height,
+    const Floppy144PlayerVisualState *state,
+    int32_t clip_x, int32_t clip_y, int32_t clip_width, int32_t clip_height
+);

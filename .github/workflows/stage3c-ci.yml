@@ -4,7 +4,8 @@ on:
   push:
     branches:
       - development/stage-3c-complete
-      - Stage4
+      - development/Stage-4
+      - bugfix/13-grey-door-republik
   workflow_dispatch:
 
 jobs:

@@ -39,6 +39,7 @@
 #include "floppy144_persistence.h"
 #include "floppy144_storage.h"
 #include "floppy144_site_2d.h"
+#include "floppy144_site_2d_camera.h"
 #include "floppy144_site_directory.h"
 #include "floppy144_site_isometric.h"
 #include "floppy144_site_object.h"
@@ -357,6 +358,15 @@ static void Floppy144Redraw(
         case FLOPPY144_SCREEN_GREY_ENCOUNTER:
         {
             Floppy144GreyEncounterDraw(pSurface,&global_grey_encounter);
+            if(global_grey_encounter.phase!=(uint8_t)FLOPPY144_GREY_BLACKOUT &&
+               global_grey_encounter.phase!=(uint8_t)FLOPPY144_GREY_DONE)
+            {
+                /* Exactly the same Site HUD implementation, with a strictly
+                   ephemeral visual percentage. Nothing edits the RunState. */
+                Floppy144Site2DDrawHeader(pSurface,&global_run_state,
+                    Floppy144GreyEncounterDisplayPercent(&global_grey_encounter),
+                    Floppy144GreyEncounterPercentFlash(&global_grey_encounter));
+            }
             break;
         }
 
@@ -428,12 +438,12 @@ static void Floppy144Redraw(
         }
     }
 
-    /* Modern office intentionally breaks the GDR CRT visual grammar. */
-    if(global_screen != FLOPPY144_SCREEN_GREY_ENCOUNTER)
-        Floppy144SettingsApplyCrtFilter(
-        pSurface,
-        &global_settings
-    );
+    /* The impossible office still uses the same CRT presentation path.
+       Never filter the complete black two-second return interval. */
+    if(global_screen != FLOPPY144_SCREEN_GREY_ENCOUNTER ||
+       (global_grey_encounter.phase!=(uint8_t)FLOPPY144_GREY_BLACKOUT &&
+        global_grey_encounter.phase!=(uint8_t)FLOPPY144_GREY_ENTERING))
+        Floppy144SettingsApplyCrtFilter(pSurface,&global_settings);
 
     InvalidateRect(
         window,
@@ -2064,6 +2074,8 @@ static void Floppy144InteractOffice(
                 &global_grey_encounter,&global_run_state))
             {
                 Floppy144MovementInputReset(&global_movement_input);
+                global_grey_encounter.body_style=
+                    Floppy144DiscoveryProfileBodyStyle(&global_profile);
                 global_office_notice=NULL;
                 global_screen=FLOPPY144_SCREEN_GREY_ENCOUNTER;
             }
@@ -2684,7 +2696,15 @@ static bool Floppy144HandleActionEvent(
                 &movement_y
             );
 
-            if(
+            if(global_screen==FLOPPY144_SCREEN_GREY_ENCOUNTER)
+            {
+                /* Same held-key release and gait semantics as Site movement. */
+                (void)Floppy144PlayerVisualSetMovement(
+                    &global_grey_encounter.player_visual,
+                    movement_x,movement_y,F144_ACTION_NONE);
+                Floppy144Redraw(window);
+            }
+            else if(
                 Floppy144PlayerVisualSetMovement(
                     &global_player_visual,
                     movement_x,
@@ -2694,9 +2714,7 @@ static bool Floppy144HandleActionEvent(
                 global_screen == FLOPPY144_SCREEN_OFFICE
             )
             {
-                Floppy144Redraw(
-                    window
-                );
+                Floppy144Redraw(window);
             }
         }
 
@@ -2742,17 +2760,27 @@ static bool Floppy144HandleActionEvent(
         switch(eAction)
         {
             case F144_ACTION_MOVE_LEFT:
-                changed=Floppy144GreyEncounterMove(
-                    &global_grey_encounter,-12,0); break;
             case F144_ACTION_MOVE_RIGHT:
-                changed=Floppy144GreyEncounterMove(
-                    &global_grey_encounter,12,0); break;
             case F144_ACTION_MOVE_UP:
-                changed=Floppy144GreyEncounterMove(
-                    &global_grey_encounter,0,-10); break;
             case F144_ACTION_MOVE_DOWN:
+            {
+                int32_t movement_x=0,movement_y=0;
+                (void)Floppy144MovementInputSetAction(
+                    &global_movement_input,eAction,true);
+                Floppy144MovementInputVector(
+                    &global_movement_input,FLOPPY144_SITE_MOVE_STEP_X16,
+                    &movement_x,&movement_y);
+                (void)Floppy144PlayerVisualSetMovement(
+                    &global_grey_encounter.player_visual,
+                    movement_x,movement_y,eAction);
                 changed=Floppy144GreyEncounterMove(
-                    &global_grey_encounter,0,10); break;
+                    &global_grey_encounter,
+                    movement_x*FLOPPY144_SITE_2D_PIXELS_PER_UNIT/
+                        FLOPPY144_SITE_FIXED_ONE,
+                    movement_y*FLOPPY144_SITE_2D_PIXELS_PER_UNIT/
+                        FLOPPY144_SITE_FIXED_ONE);
+                break;
+            }
             case F144_ACTION_INSPECT:
                 changed=Floppy144GreyEncounterInspect(
                     &global_grey_encounter); break;

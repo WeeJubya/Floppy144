@@ -1619,6 +1619,8 @@ static void TestGreyEncounter(const char *root)
     Floppy144GreyEncounter scene;
     Floppy144GreyDoorCandidate candidate;
     uint32_t i, k, phase_visited, baseline_checksum, render_checksum;
+    uint32_t last_percent=0U, max_percent=0U;
+    bool red_on=false,red_off=false;
     uint32_t count=Floppy144GreyDoorCandidateCount();
     char path[F144_PLATFORM_PATH_CAPACITY];
 
@@ -1663,8 +1665,11 @@ static void TestGreyEncounter(const char *root)
         Expect(Floppy144GreyEncounterBegin(&scene,&run) &&
             !Floppy144GreyEncounterSaveAllowed(&scene) &&
             scene.return_x16==before.player_site_x &&
-            scene.return_y16==before.player_site_y,
-            "S4G-03 scene begins without movement or transient save leakage");
+            scene.return_y16==before.player_site_y &&
+            scene.restoration_start==Floppy144RunStateRecoveredPercent(&run) &&
+            Floppy144GreyEncounterDisplayPercent(&scene)==
+                Floppy144RunStateRecoveredPercent(&run),
+            "BUG13 real run restoration and exact world return are snapshotted");
         Expect(!Floppy144GreyEncounterInspect(&scene) &&
             !Floppy144GreyEncounterMove(&scene,12,0),
             "S4G-03 entry transition ignores movement and premature Inspect");
@@ -1679,8 +1684,20 @@ static void TestGreyEncounter(const char *root)
         Expect(render_checksum!=0U,
             "S4G-03 modern office procedurally fills framebuffer");
 
-        Expect(!Floppy144GreyEncounterInspect(&scene),
-            "S4G-03 Developer cannot be inspected from distant door");
+        Expect(!Floppy144GreyEncounterInspect(&scene) &&
+            !Floppy144GreyEncounterInspectNearby(&scene),
+            "BUG13 distant Developer has neither prompt nor interaction");
+        /* Exactly 24 scene pixels is close-range; 25 is not. */
+        scene.local_x=430;
+        scene.local_y=264;
+        Expect(!Floppy144GreyEncounterInspectNearby(&scene) &&
+            !Floppy144GreyEncounterInspect(&scene),
+            "BUG13 25-pixel distance cannot inspect Developer");
+        scene.local_x=431;
+        Expect(Floppy144GreyEncounterInspectNearby(&scene),
+            "BUG13 24-pixel distance displays Inspect prompt");
+        scene.local_x=115;
+        scene.local_y=264;
         for(k=0U;k<29U;++k)
             (void)Floppy144GreyEncounterMove(&scene,12,0);
         Expect(Floppy144GreyEncounterInspect(&scene) &&
@@ -1689,9 +1706,28 @@ static void TestGreyEncounter(const char *root)
             "S4G-03 approach then I/Inspect identifies DEVELOPER");
         phase_visited=0U;
         baseline_checksum=render_checksum;
+        last_percent=scene.restoration_start;
+        max_percent=last_percent;
+        red_on=false;
+        red_off=false;
         for(k=0U;k<200U&&!Floppy144GreyEncounterFinished(&scene);++k)
         {
+            uint32_t percent=Floppy144GreyEncounterDisplayPercent(&scene);
             phase_visited|=1U<<scene.phase;
+            Expect(percent>=scene.restoration_start && percent<=144U &&
+                percent>=last_percent,
+                "BUG13 restoration visual value monotonically accelerates 0-144");
+            last_percent=percent;
+            if(percent>max_percent) max_percent=percent;
+            if(percent>100U) {
+                if(Floppy144GreyEncounterPercentFlash(&scene))
+                    red_on=true;
+                else
+                    red_off=true;
+            } else {
+                Expect(!Floppy144GreyEncounterPercentFlash(&scene),
+                    "BUG13 only >100 percent flashes red");
+            }
             Expect(!Floppy144GreyEncounterSaveAllowed(&scene),
                 "S4G-03 no temporary scene phase permits save/autosave");
             Floppy144GreyEncounterDraw(&surface,&scene);
@@ -1706,6 +1742,8 @@ static void TestGreyEncounter(const char *root)
             }
             (void)Floppy144GreyEncounterAdvance(&scene,100U);
         }
+        Expect(max_percent==144U && red_on && red_off,
+            "BUG13 reaches 144 from actual progress and >100 flashes readably");
         Expect(Floppy144GreyEncounterFinished(&scene) &&
             (phase_visited&(1U<<FLOPPY144_GREY_IDENTIFY))!=0U &&
             (phase_visited&(1U<<FLOPPY144_GREY_TURN))!=0U &&
@@ -2078,8 +2116,10 @@ static void TestStage4GCompleteJourney(const char *root)
             "S4G-05 real restored percentage never reaches visual-only 144%%");
 
         Expect(Floppy144GreyEncounterBegin(&scene,&run) &&
-            !Floppy144GreyEncounterSaveAllowed(&scene),
-            "S4G-05 opening A enters unsaveable temporary scene");
+            !Floppy144GreyEncounterSaveAllowed(&scene) &&
+            scene.restoration_start==baseline_percent &&
+            Floppy144GreyEncounterDisplayPercent(&scene)==baseline_percent,
+            "BUG13 all seeded routes start HUD from the genuine restoration");
         for(k=0U;k<12U && scene.phase!=(uint8_t)FLOPPY144_GREY_EXPLORE;++k)
             (void)Floppy144GreyEncounterAdvance(&scene,100U);
         Expect(scene.phase==(uint8_t)FLOPPY144_GREY_EXPLORE,

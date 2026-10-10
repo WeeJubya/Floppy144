@@ -13,7 +13,7 @@
 #define LINE(s,x,y,w,h,c) Floppy144DrawFillRect((s),(x),(y),(w),(h),(c))
 #define TXT(s,x,y,t,c) Floppy144DrawText((s),(x),(y),(t),1U,(c))
 #define DEVELOPER_X 455
-#define DEVELOPER_Y 235
+#define DEVELOPER_Y 264
 /* In this 2D vignette the Developer is approached by the player foot point.
    The old 112px radius allowed inspection from across the office. */
 #define DEVELOPER_INSPECT_RADIUS 40

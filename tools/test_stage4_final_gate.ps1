@@ -304,21 +304,29 @@ try
     $localHead = (& git rev-parse HEAD).Trim()
     if($LASTEXITCODE -ne 0){ throw "Could not resolve checked-out HEAD." }
 
-    $remoteLine = (& git ls-remote origin refs/heads/Stage4 | Select-Object -First 1)
+    # The Stage4 branch was renamed. Compare against the actual checkout
+    # ref, not a stale literal, so the same release gate tests bugfix branches.
+    $refBranch = if($env:GITHUB_REF_NAME) { $env:GITHUB_REF_NAME }
+        else { (& git branch --show-current).Trim() }
+    if([string]::IsNullOrWhiteSpace($refBranch)) {
+        throw "Could not resolve active branch for release sign-off."
+    }
+    $remoteLine = (& git ls-remote origin ("refs/heads/" + $refBranch) |
+        Select-Object -First 1)
     if($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($remoteLine))
     {
-        throw "Could not resolve remote Stage4 HEAD."
+        throw "Could not resolve remote $refBranch HEAD."
     }
     $remoteHead = ($remoteLine -split '\s+')[0].Trim()
 
     if($localHead -ne $remoteHead)
     {
-        throw "CI checkout HEAD $localHead does not match remote Stage4 $remoteHead."
+        throw "CI checkout HEAD $localHead does not match remote $refBranch $remoteHead."
     }
 
     Write-Host "Release bytes: $($exe.Length)"
     Write-Host "Remaining headroom: $(1474560 - $exe.Length)"
-    Write-Host "Checked-out/remote Stage4 HEAD: $localHead"
+    Write-Host "Checked-out/remote $refBranch HEAD: $localHead"
     Write-Host "S4F-04 FINAL BUILT-ARTIFACT AUDIT: PASS"
 }
 finally

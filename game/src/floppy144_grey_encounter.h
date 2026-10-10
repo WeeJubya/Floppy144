@@ -23,6 +23,8 @@ typedef enum Floppy144GreyEncounterPhase {
 
 typedef struct Floppy144GreyEncounter {
     uint32_t elapsed_ms;
+    uint32_t restoration_start;
+    Floppy144OperatorBodyStyle body_style;
     Floppy144PlayerVisualState player_visual;
     int32_t local_x;
     int32_t local_y;
@@ -48,3 +50,9 @@ bool Floppy144GreyEncounterSaveAllowed(const Floppy144GreyEncounter *scene);
 void Floppy144GreyEncounterDraw(
     Floppy144Surface *surface, const Floppy144GreyEncounter *scene
 );
+
+/* Only the *presented* percentage changes: an accelerated cubic rise from
+   actual RunState completion to 144, with a readable >100 red-blink flag. */
+uint32_t Floppy144GreyEncounterDisplayPercent(const Floppy144GreyEncounter *scene);
+bool Floppy144GreyEncounterPercentFlash(const Floppy144GreyEncounter *scene);
+bool Floppy144GreyEncounterInspectNearby(const Floppy144GreyEncounter *scene);

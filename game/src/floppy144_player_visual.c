@@ -494,12 +494,13 @@ static void f144BuildOfficeCharacter(RenderBuffer *b, float cx, float footY,
         (void)direction;
     }
 }
-void Floppy144PlayerVisualDraw(
+static void f144PlayerVisualDrawCostume(
     Floppy144Surface *surface, int32_t foot_x, int32_t foot_y,
     int32_t sprite_width, int32_t sprite_height,
     int32_t collision_shadow_width, Floppy144OperatorBodyStyle body_style,
     const Floppy144PlayerVisualState *state,
-    int32_t clip_x, int32_t clip_y, int32_t clip_width, int32_t clip_height
+    int32_t clip_x, int32_t clip_y, int32_t clip_width, int32_t clip_height,
+    bool developer
 ) {
     RenderBuffer b={ { {0} },0U };
     F144Raster r;
@@ -525,6 +526,17 @@ void Floppy144PlayerVisualDraw(
     if(body_style<0 || body_style>=FLOPPY144_OPERATOR_BODY_STYLE_COUNT)
         body_style=FLOPPY144_OPERATOR_BODY_STYLE_DEFAULT;
     costume=f144OfficeCostume(body_style);
+    if(developer) {
+        /* Same vector skeleton and directional rules as the player,
+           but with charcoal jacket, ink-red tie and silver hair. */
+        costume.flags=F144_COSTUME_JACKET|F144_COSTUME_TIE|F144_COSTUME_SHORT_HAIR;
+        costume.skin=f144Colour(188,145,126);
+        costume.hair=f144Colour(111,109,111);
+        costume.cloth=f144Colour(53,67,78);
+        costume.trousers=costume.cloth;
+        costume.shoes=f144Colour(31,32,39);
+        costume.accent=f144Colour(178,56,63);
+    }
     /*
      * Preserve Stage 4C's body-style proportions in both Site and Profile.
      * The width selection affects vector shoulder spacing, not collisions.
@@ -542,4 +554,27 @@ void Floppy144PlayerVisualDraw(
                             (float)sprite_width,(float)sprite_height,
                             facing,phase,walking,&costume);
     f144Rasterize(&b,&r);
+}
+
+void Floppy144PlayerVisualDraw(
+    Floppy144Surface *surface, int32_t foot_x, int32_t foot_y,
+    int32_t sprite_width, int32_t sprite_height,
+    int32_t collision_shadow_width, Floppy144OperatorBodyStyle body_style,
+    const Floppy144PlayerVisualState *state,
+    int32_t clip_x, int32_t clip_y, int32_t clip_width, int32_t clip_height
+) {
+    f144PlayerVisualDrawCostume(surface,foot_x,foot_y,
+        sprite_width,sprite_height,collision_shadow_width,body_style,state,
+        clip_x,clip_y,clip_width,clip_height,false);
+}
+
+void Floppy144PlayerVisualDrawDeveloper(
+    Floppy144Surface *surface, int32_t foot_x, int32_t foot_y,
+    int32_t sprite_width, int32_t sprite_height,
+    const Floppy144PlayerVisualState *state,
+    int32_t clip_x, int32_t clip_y, int32_t clip_width, int32_t clip_height
+) {
+    f144PlayerVisualDrawCostume(surface,foot_x,foot_y,
+        sprite_width,sprite_height,18,FLOPPY144_OPERATOR_BODY_STYLE_DEFAULT,
+        state,clip_x,clip_y,clip_width,clip_height,true);
 }
