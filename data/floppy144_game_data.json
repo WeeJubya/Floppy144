@@ -16626,7 +16626,7 @@
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM",
       "source_status": "authored-stage3c-progression",
       "source_order": 634,
-      "description": "PROJECT MANAGER AUTHORISATION: Main Office terminal may recover FM-04 to reconstruct Facilities. Further FM recovery uses the Facilities terminal."
+      "description": "FACILITIES AUTHORISATION / M. WEBB, PROJECT MANAGER\nInitial maintenance file held: Main Office terminal.\nFurther Facilities work orders: Facilities terminal."
     }
   ],
   "collections": [
@@ -22926,8 +22926,8 @@
         }
       ],
       "evidence_id": null,
-      "notebook": "Temporary access to Facilities: Project Manager authorised FM-04 recovery from the Main Office terminal.",
-      "follow_on": "Main Office terminal can restore FM-04",
+      "notebook": "Martin Webb's Facilities authorisation places the initial maintenance file at the Main Office terminal. Later work orders belong with the Facilities terminal.",
+      "follow_on": "Initial maintenance file held at Main Office; later Facilities work orders at the Facilities terminal.",
       "persistent": true,
       "source_order": 42
     }

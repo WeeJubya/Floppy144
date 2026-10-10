@@ -501,6 +501,105 @@ static void Floppy144TestGenericParentContents(void)
     );
 }
 
+
+/*
+ * BUG FIX 11: the Facilities authorisation is an in-world Desk 06 prop,
+ * but its existing I-042 capability and Notebook behaviour remain intact.
+ * This test reads the generated text and uses the public cabinet inspection
+ * route so no gameplay function depends on the revised wording.
+ */
+static void Floppy144TestFacilitiesAuthorisation(void)
+{
+    Floppy144WorldState world;
+    Floppy144RunState run;
+    Floppy144CabinetState cabinet;
+    const Floppy144DataRecord *item;
+    const Floppy144DataRecord *note = NULL;
+    Floppy144InteractionId interaction;
+    Floppy144CapabilityId capability;
+    uint32_t selected;
+    uint32_t i;
+
+    Floppy144TestReset(&world,&run,&cabinet);
+    item=Floppy144GameDataFind(
+        FLOPPY144_DATA_PHYSICAL_ITEM,"P-634"
+    );
+    interaction=Floppy144GameDataInteractionId("I-042");
+    capability=Floppy144GameDataCapabilityId(
+        "MAIN_OFFICE_FACILITIES_TERMINAL"
+    );
+
+    F144_CHECK(
+        item!=NULL && item->pszC!=NULL &&
+        strcmp(item->pszC,"MAIN_OFFICE_DESK_06")==0 &&
+        item->pszF!=NULL &&
+        strstr(item->pszF,"Initial maintenance file held: Main Office terminal.")!=NULL &&
+        strstr(item->pszF,"Further Facilities work orders: Facilities terminal.")!=NULL &&
+        strstr(item->pszF,"FM-04")==NULL,
+        "Desk 06 Facilities authorisation remains visible prose without collection IDs"
+    );
+    F144_CHECK(
+        interaction<FLOPPY144_INTERACTION_COUNT &&
+        capability<FLOPPY144_CAPABILITY_COUNT,
+        "P-634 still has registered I-042 and Facilities access capability"
+    );
+    if(item==NULL || interaction>=FLOPPY144_INTERACTION_COUNT ||
+       capability>=FLOPPY144_CAPABILITY_COUNT)return;
+
+    F144_CHECK(
+        Floppy144RunStateReconstructRoom(&run,FLOPPY144_ROOM_MAIN_OFFICE) &&
+        Floppy144CabinetOpenParent(
+            &cabinet,&run,"MAIN_OFFICE_DESK_06"
+        ),
+        "Main Office Desk 06 opens in the reconstructed room"
+    );
+    selected=Floppy144TestVisibleContentIndex(
+        &cabinet,&run,"P-634"
+    );
+    F144_CHECK(selected!=UINT32_MAX,
+        "permanent Facilities authorisation is present in Desk 06");
+    if(selected==UINT32_MAX)return;
+
+    Floppy144CabinetMoveSelection(&cabinet,&run,(int32_t)selected);
+    F144_CHECK(
+        Floppy144CabinetInspectSelected(
+            &cabinet,&world,&run
+        ) &&
+        Floppy144CabinetDetailOpen(&cabinet) &&
+        Floppy144RunStateInteractionCompleted(&run,interaction) &&
+        Floppy144RunStateHasCapability(&run,capability),
+        "inspecting authorisation completes I-042 and grants existing access"
+    );
+
+    for(i=0U;i<Floppy144GameDataNotebookEntryCount(&run);++i)
+    {
+        const Floppy144DataRecord *candidate=
+            Floppy144GameDataNotebookEntryAt(&run,i);
+        if(candidate!=NULL && candidate->pszId!=NULL &&
+           strcmp(candidate->pszId,"I-042")==0)
+        {
+            note=candidate;
+            break;
+        }
+    }
+    F144_CHECK(
+        note!=NULL && note->pszA!=NULL &&
+        strstr(note->pszA,"initial maintenance file")!=NULL &&
+        strstr(note->pszA,"FM-04")==NULL,
+        "I-042 still records the Notebook clue without implementation IDs"
+    );
+
+    F144_CHECK(
+        Floppy144CabinetOpenParent(
+            &cabinet,&run,"MAIN_OFFICE_DESK_06"
+        ) &&
+        Floppy144TestVisibleContentIndex(&cabinet,&run,"P-634")!=UINT32_MAX &&
+        Floppy144RunStateInteractionCompleted(&run,interaction) &&
+        Floppy144RunStateHasCapability(&run,capability),
+        "authorisation remains readable and capability persists after inspection"
+    );
+}
+
 static void Floppy144TestSeededContainerOrdering(void)
 {
     Floppy144WorldState sWorldA,sWorldB,sWorldC;
@@ -2264,6 +2363,7 @@ int main(void)
     Floppy144TestGeneratedCabinetDiscovery();
     Floppy144TestChairContentsContract();
     Floppy144TestGenericParentContents();
+    Floppy144TestFacilitiesAuthorisation();
     Floppy144TestSeededContainerOrdering();
     Floppy144TestShelvingPresentationAndRecoveredOrder();
     Floppy144TestAllCorridorDoorContainers();

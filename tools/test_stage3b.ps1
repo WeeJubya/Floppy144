@@ -778,6 +778,79 @@ function Test-PhysicalItemPlayerFacingContract {
     $Site2DSource = Get-Content -Raw -Path $Site2DPath
     $BuildSiteSource = Get-Content -Raw -Path $BuildSitePath
 
+
+    # BUG FIX 11: Desk 06 Facilities authorisation must read as an internal
+    # three-line document, not a collection-restoration tutorial. The linked
+    # Notebook/follow-on prose must not leak the mechanics either.
+    $Authorisation = @($GameData.physical_items |
+        Where-Object { $_.id -eq 'P-634' })
+    $Authority = @($GameData.interactions |
+        Where-Object { $_.id -eq 'I-042' })
+    if($Authorisation.Count -ne 1 -or $Authority.Count -ne 1) {
+        throw 'P-634 or its I-042 interaction is missing/duplicated.'
+    }
+    $Authorisation = $Authorisation[0]
+    $Authority = $Authority[0]
+    $ExpectedAuthorisation = @(
+        'FACILITIES AUTHORISATION / M. WEBB, PROJECT MANAGER',
+        'Initial maintenance file held: Main Office terminal.',
+        'Further Facilities work orders: Facilities terminal.'
+    )
+    $ActualLines = @(([string]$Authorisation.description) -split "\r?\n")
+    if($ActualLines.Count -ne 3) {
+        throw 'P-634 Facilities authorisation exceeds the three-line item viewer.'
+    }
+    for($Line = 0; $Line -lt 3; ++$Line) {
+        if($ActualLines[$Line] -cne $ExpectedAuthorisation[$Line] -or
+           $ActualLines[$Line].Length -gt 54) {
+            throw "P-634 line $($Line+1) has regressed or exceeds 54 characters."
+        }
+    }
+    if($Authorisation.name -cne 'Facilities recovery authorisation' -or
+       $Authorisation.room_id -cne 'MAIN_OFFICE' -or
+       $Authorisation.parent_id -cne 'MAIN_OFFICE_DESK_06' -or
+       [int]$Authorisation.source_order -ne 634 -or
+       $Authority.physical_source -cne 'P-634' -or
+       $Authority.type -cne 'Capability' -or
+       $Authority.notebook -notmatch 'initial maintenance file' -or
+       $Authority.notebook -notmatch 'Facilities terminal' -or
+       $Authority.follow_on -notmatch 'Main Office' -or
+       $Authority.follow_on -notmatch 'Facilities terminal') {
+        throw 'P-634 identity, Desk 06 ownership, or in-world guidance changed.'
+    }
+    foreach($PlayerText in @(
+        [string]$Authorisation.description,
+        [string]$Authority.notebook,
+        [string]$Authority.follow_on
+    )) {
+        if($PlayerText -match '(?i)\b(FM-\d{2}|collection|restore|reconstruct|recovery|capability)\b' -or
+           $PlayerText -match ' {2,}') {
+            throw 'P-634 exposes game mechanics or inconsistent spacing.'
+        }
+    }
+    $EffectPairs = @($Authority.effects | ForEach-Object {
+        "$($_.op)|$($_.target)"
+    })
+    if($EffectPairs.Count -ne 2 -or
+       $EffectPairs[0] -cne 'COMPLETE_INTERACTION|I-042' -or
+       $EffectPairs[1] -cne 'GRANT_CAPABILITY|MAIN_OFFICE_FACILITIES_TERMINAL' -or
+       -not [bool]$Authority.persistent) {
+        throw 'I-042 completion, capability grant, or persistence changed.'
+    }
+    $Generated = Get-Content -Raw -LiteralPath (
+        Join-Path $SourceDir 'floppy144_game_data.generated.inc'
+    )
+    $CompiledDescription = ([string]$Authorisation.description).Replace([string][char]13,'').Replace([string][char]10,'\n')
+    if(-not $Generated.Contains('FLOPPY144_DATA_RECORD(FLOPPY144_DATA_PHYSICAL_ITEM, "P-634"') -or
+       -not $Generated.Contains('"' + $CompiledDescription + '", 634,') -or
+       -not $Generated.Contains('FLOPPY144_DATA_RECORD(FLOPPY144_DATA_INTERACTION, "I-042"') -or
+       -not $Generated.Contains('"' + [string]$Authority.follow_on + '"') -or
+       -not $Generated.Contains('"' + [string]$Authority.notebook + '", "INTERACTION"') -or
+       -not $Generated.Contains('FLOPPY144_DATA_RECORD(FLOPPY144_DATA_INTERACTION_EFFECT, "I-042", "GRANT_CAPABILITY", "MAIN_OFFICE_FACILITIES_TERMINAL"')) {
+        throw 'Generated P-634/I-042 prose or progression data differs from canonical JSON.'
+    }
+    Write-Host 'P-634 FACILITIES AUTHORISATION: PASS - 3 in-world lines, stable I-042 effect'
+
     $ServerRoomSource =
         $GameData.site_layout_source.rooms |
         Where-Object { $_.PSObject.Properties['id'] -and $_.id -eq 'SERVER_ROOM' }
