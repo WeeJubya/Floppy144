@@ -1737,7 +1737,7 @@ static void Floppy144TestPlayerRecoveryPolicy(void)
         Floppy144TestNotebookContains(
             &sRunState,
             "I-042",
-            "Temporary access to Facilities"
+            "Martin Webb's Facilities authorisation"
         ),
         "Project Manager authorisation writes the temporary Facilities access note"
     );
@@ -1759,7 +1759,7 @@ static void Floppy144TestPlayerRecoveryPolicy(void)
         Floppy144TestNotebookContains(
             &sRunState,
             "I-042",
-            "Temporary access to Facilities"
+            "Martin Webb's Facilities authorisation"
         ),
         "written Notebook entries remain visible after their source predicate changes"
     );
@@ -1812,7 +1812,7 @@ static void Floppy144TestPlayerRecoveryPolicy(void)
         Floppy144TestNotebookContains(
             &sRunState,
             "I-042",
-            "Temporary access to Facilities"
+            "Martin Webb's Facilities authorisation"
         ),
         "temporary Facilities access note remains permanently in the Notebook after FM-04 restoration"
     );

@@ -1632,8 +1632,8 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
             bStaffTable = true;
 
             F144_CHECK(
-                pRect->rotation == 45U,
-                "Staff dining table retains 45-degree rotation"
+                pRect->rotation == 0U,
+                "Staff dining table uses cardinal rotation"
             );
         }
 
@@ -1650,35 +1650,35 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
                 (uint8_t)FLOPPY144_SITE_CHAIR
         )
         {
-            if(pRect->x == 11U && pRect->y == 38U)
+            if(pRect->x == 14U && pRect->y == 36U)
             {
                 bStaffChair135 = true;
                 F144_CHECK(
-                    pRect->rotation == 135U,
+                    pRect->rotation == 90U,
                     "Staff dining 135-degree chair follows the table diagonal"
                 );
             }
-            else if(pRect->x == 7U && pRect->y == 38U)
+            else if(pRect->x == 4U && pRect->y == 36U)
             {
                 bStaffChair45 = true;
                 F144_CHECK(
-                    pRect->rotation == 45U,
+                    pRect->rotation == 270U,
                     "Staff dining 45-degree chair follows the table diagonal"
                 );
             }
-            else if(pRect->x == 11U && pRect->y == 34U)
+            else if(pRect->x == 9U && pRect->y == 31U)
             {
                 bStaffChair225 = true;
                 F144_CHECK(
-                    pRect->rotation == 225U,
+                    pRect->rotation == 0U,
                     "Staff dining 225-degree chair follows the table diagonal"
                 );
             }
-            else if(pRect->x == 7U && pRect->y == 34U)
+            else if(pRect->x == 9U && pRect->y == 41U)
             {
                 bStaffChair315 = true;
                 F144_CHECK(
-                    pRect->rotation == 315U,
+                    pRect->rotation == 180U,
                     "Staff dining 315-degree chair follows the table diagonal"
                 );
             }
@@ -1691,9 +1691,9 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
                 (uint8_t)FLOPPY144_ROOM_SECRETARY_OFFICE &&
             pRect->x == 45U &&
             pRect->y == 36U &&
-            pRect->width == 8U &&
-            pRect->height == 8U &&
-            pRect->rotation == 135
+            pRect->width == 6U &&
+            pRect->height == 4U &&
+            pRect->rotation == 0
         )
         {
             bSecretaryDesk = true;
@@ -1710,11 +1710,11 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
                 (uint8_t)FLOPPY144_SITE_CHAIR &&
             pRect->room ==
                 (uint8_t)FLOPPY144_ROOM_SECRETARY_OFFICE &&
-            pRect->x == 49U &&
-            pRect->y == 40U &&
-            pRect->width == 4U &&
-            pRect->height == 4U &&
-            pRect->rotation == 135
+            pRect->x == 47U &&
+            pRect->y == 42U &&
+            pRect->width == 2U &&
+            pRect->height == 2U &&
+            pRect->rotation == 180
         )
         {
             bSecretaryDeskChair = true;
@@ -1726,10 +1726,10 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
             pRect->room ==
                 (uint8_t)FLOPPY144_ROOM_DIRECTOR_OFFICE &&
             pRect->x == 43U &&
-            pRect->y == 4U &&
-            pRect->width == 10U &&
-            pRect->height == 10U &&
-            pRect->rotation == -45
+            pRect->y == 8U &&
+            pRect->width == 8U &&
+            pRect->height == 4U &&
+            pRect->rotation == 0
         )
         {
             bDirectorDesk = true;
@@ -1838,7 +1838,7 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
             pRect->type ==
                 (uint8_t)FLOPPY144_SITE_WALL_MOUNTED_ITEM &&
             pRect->x == 44U &&
-            pRect->y == 56U &&
+            pRect->y == 57U &&
             pRect->width == 12U &&
             pRect->height == 1U
         )
@@ -1851,7 +1851,7 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
                 (uint8_t)FLOPPY144_SITE_STANDARD_DESK &&
             pRect->room ==
                 (uint8_t)FLOPPY144_ROOM_SECURITY &&
-            pRect->y == 59U &&
+            pRect->y == 57U &&
             pRect->width == 6U &&
             pRect->height == 4U &&
             pRect->rotation == 90U

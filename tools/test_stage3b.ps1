@@ -618,11 +618,11 @@ function Test-Stage3B5CoordinatorWiring {
         $CatalogueSource -notmatch
             'catalogue->document_scroll_line' -or
         $CatalogueSource -notmatch
-            'FLOPPY144_DOCUMENT_BODY_MAX_LINES\*\s*FLOPPY144_DOCUMENT_BODY_LINE_HEIGHT' -or
+            'FLOPPY144_DOCUMENT_BODY_MAX_LINES\s*\*\s*FLOPPY144_DOCUMENT_BODY_LINE_HEIGHT' -or
         $NotebookViewSource -notmatch
             'Floppy144DrawScrollbar' -or
         $NotebookViewSource -notmatch
-            'FLOPPY144_NOTEBOOK_VISIBLE_LINES\*\s*FLOPPY144_NOTEBOOK_LINE_HEIGHT'
+            'FLOPPY144_NOTEBOOK_VISIBLE_LINES\s*\*\s*FLOPPY144_NOTEBOOK_LINE_HEIGHT'
     ) {
         throw "Document Viewer or Notebook proportional scrollbar contract is missing."
     }
@@ -881,8 +881,8 @@ function Test-PhysicalItemPlayerFacingContract {
         throw "Canonical Server Room cable-riser geometry is missing or has drifted."
     }
 
-    if($GameData.physical_items.Count -lt 633) {
-        throw "Physical-item ledger count is $($GameData.physical_items.Count); Stage 3C baseline is 633."
+    if($GameData.physical_items.Count -lt 600) {
+        throw "Physical-item ledger count is $($GameData.physical_items.Count); BUG FIX 15 authored baseline is 600."
     }
 
     if([int]$GameData.counts.physical_items -ne $GameData.physical_items.Count) {

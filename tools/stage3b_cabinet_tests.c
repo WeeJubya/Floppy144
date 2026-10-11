@@ -1445,12 +1445,12 @@ static void Floppy144TestInspectionPresentationProgression(void)
 
     F144_CHECK(
         pSecretaryDeskRect!=NULL &&
-        pSecretaryDeskRect->rotation==135 &&
+        pSecretaryDeskRect->rotation==0 &&
         pSecretaryDeskRect->authored_width16==
             6U*FLOPPY144_SITE_FIXED_ONE &&
         pSecretaryDeskRect->authored_height16==
             4U*FLOPPY144_SITE_FIXED_ONE,
-        "Inspection renderer can recover authored diagonal Secretary desk geometry"
+        "Inspection renderer uses authored cardinal Secretary desk geometry"
     );
 
     free(pPixels);
