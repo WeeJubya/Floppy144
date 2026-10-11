@@ -150,8 +150,8 @@ for($ci=0; $ci -lt @($data.collections).Count; ++$ci) {
 }
 if($total -ne 1571 -or $authored -ne 170 -or
    $allIDs.Count -ne 1571 -or
-   $orderingRows -ne 1571 -or $orderedCollectionCount -ne 35) {
-    throw "Archive total mismatch: $total rows / $authored authored / $($allIDs.Count) unique."
+   $orderingRows -ne 1571 -or $orderedCollectionCount -ne 31) {
+    throw "Archive total mismatch: $total rows / $authored authored / $($allIDs.Count) unique / $orderingRows ordered rows / $orderedCollectionCount populated collections (expected 31; four intentionally empty holdings)."
 }
 if($spreadCollections -lt 25 -or $inversions -lt 60) {
     throw "Authored material was not spread/reordered sufficiently: $spreadCollections spread, $inversions inversions."
