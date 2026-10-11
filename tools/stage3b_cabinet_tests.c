@@ -533,7 +533,7 @@ static void Floppy144TestFacilitiesAuthorisation(void)
         item!=NULL && item->pszC!=NULL &&
         strcmp(item->pszC,"MAIN_OFFICE_DESK_06")==0 &&
         item->pszF!=NULL &&
-        strstr(item->pszF,"Initial maintenance file held: Main Office terminal.")!=NULL &&
+        strstr(item->pszF,"Initial file: Main Office terminal.")!=NULL &&
         strstr(item->pszF,"Further Facilities work orders: Facilities terminal.")!=NULL &&
         strstr(item->pszF,"FM-04")==NULL,
         "Desk 06 Facilities authorisation remains visible prose without collection IDs"
