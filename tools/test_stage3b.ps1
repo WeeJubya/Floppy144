@@ -949,15 +949,15 @@ function Test-PhysicalItemPlayerFacingContract {
                 }
             )
 
-        if($Children.Count -lt 1) {
+        if($Furniture.element_type -ne 'CHAIR' -and $Children.Count -lt 1) {
             throw "Furniture $($Furniture.id) has no physical-item context."
         }
 
         if(
             $Furniture.element_type -eq 'CHAIR' -and
-            ($Children.Count -lt 1 -or $Children.Count -gt 2)
+            ($Children.Count -gt 2)
         ) {
-            throw "Chair $($Furniture.id) has $($Children.Count) physical items; chairs must have one or two."
+            throw "Chair $($Furniture.id) has $($Children.Count) physical items; chairs may be empty after Bug Fix 15."
         }
     }
 
