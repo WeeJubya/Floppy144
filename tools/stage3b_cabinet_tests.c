@@ -1714,7 +1714,7 @@ static void Floppy144TestTakeawayMenuPresentation(void)
     Floppy144WorldState world;
     Floppy144RunState run;
     Floppy144RunState snapshot;
-    Floppy144RunState loaded;
+    Floppy144RunState loaded = {0};
     Floppy144RunState second_run;
     Floppy144CabinetState cabinet;
     Floppy144CabinetState reloaded_cabinet;
@@ -1872,7 +1872,7 @@ static void Floppy144TestCrosswordPresentation(void)
     Floppy144WorldState world;
     Floppy144RunState run;
     Floppy144RunState before;
-    Floppy144RunState loaded;
+    Floppy144RunState loaded = {0};
     Floppy144RunState alternate_run;
     Floppy144CabinetState cabinet;
     Floppy144CabinetState reloaded_cabinet;
@@ -2065,7 +2065,7 @@ static void Floppy144TestPaperbackPresentation(void)
     Floppy144WorldState world;
     Floppy144RunState run;
     Floppy144RunState before;
-    Floppy144RunState loaded;
+    Floppy144RunState loaded = {0};
     Floppy144RunState alternate_run;
     Floppy144CabinetState cabinet;
     Floppy144CabinetState loaded_cabinet;
