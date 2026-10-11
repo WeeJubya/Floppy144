@@ -793,7 +793,7 @@ function Test-PhysicalItemPlayerFacingContract {
     $Authority = $Authority[0]
     $ExpectedAuthorisation = @(
         'FACILITIES AUTHORISATION / M. WEBB, PROJECT MANAGER',
-        'Initial maintenance file held: Main Office terminal.',
+        'Initial file: Main Office terminal.',
         'Further Facilities work orders: Facilities terminal.'
     )
     $ActualLines = @(([string]$Authorisation.description) -split "\r?\n")
