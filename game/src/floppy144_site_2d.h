@@ -41,3 +41,12 @@ void Floppy144Site2DDrawForPlayerState(
     Floppy144OperatorBodyStyle body_style,
     const Floppy144PlayerVisualState *player_visual
 );
+
+/* Shared real Site HUD. GREY DOOR REPUBLIK passes only a transient visual
+   override, never mutating canonical recovered KB or the saved RunState. */
+void Floppy144Site2DDrawHeader(
+    Floppy144Surface *surface,
+    const Floppy144RunState *run_state,
+    uint32_t display_percent,
+    bool warning_flash
+);

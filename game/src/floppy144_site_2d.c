@@ -3570,6 +3570,38 @@ static const char *Floppy144Site2DRoomLabel(
     }
 }
 
+
+/*
+ * The shared Site HUD: both normal exploration and the Grey Door scene draw
+ * this exact header. The scene may provide a presentation-only percentage;
+ * the authoritative recovered KB and RunState remain unchanged.
+ */
+void Floppy144Site2DDrawHeader(
+    Floppy144Surface *surface,
+    const Floppy144RunState *run_state,
+    uint32_t display_percent,
+    bool warning_flash
+)
+{
+    char status_text[64];
+    const uint32_t muted=FLOPPY144_RGB(116,132,130);
+    const uint32_t normal=FLOPPY144_RGB(100,156,111);
+    if(surface==NULL || surface->pixels==NULL || run_state==NULL) return;
+    if(display_percent>144U) display_percent=144U;
+    (void)snprintf(status_text,sizeof(status_text),
+        "RECOVERED %u / %u KB  %u%%",
+        (unsigned)Floppy144RunStateRecoveredKb(run_state),
+        (unsigned)FLOPPY144_RECOVERY_CAPACITY_KB,
+        (unsigned)display_percent);
+    /* The HUD strip is stable even while the room behind it corrupts. */
+    Floppy144DrawFillRect(surface,0U,0U,640U,20U,
+        FLOPPY144_RGB(12,17,21));
+    Floppy144DrawText(surface,10U,5U,"GDR SITE RECONSTRUCTION",1U,muted);
+    Floppy144DrawText(surface,
+        630U-Floppy144DrawTextWidth(status_text,1U),5U,status_text,1U,
+        warning_flash?FLOPPY144_RGB(240,68,68):normal);
+}
+
 void Floppy144Site2DDrawForPlayerState(
     Floppy144Surface *pSurface,
     const Floppy144RunState *run_state,
@@ -3596,9 +3628,6 @@ void Floppy144Site2DDrawForPlayerState(
     const uint32_t muted =
         FLOPPY144_RGB(116, 132, 130);
 
-    const uint32_t green =
-        FLOPPY144_RGB(100, 156, 111);
-
     const uint32_t amber =
         FLOPPY144_RGB(194, 153, 76);
 
@@ -3610,8 +3639,6 @@ void Floppy144Site2DDrawForPlayerState(
     const char *context_label = NULL;
     const char *prompt;
     const char *menu_prompt = "ESC SESSION CONTROL";
-    char status_text[64];
-
     uint32_t index;
     uint32_t rect_count;
     bool room_reconstructed;
@@ -3674,12 +3701,6 @@ void Floppy144Site2DDrawForPlayerState(
             run_state
         );
 
-    Floppy144RunStateFormatCapacity(
-        run_state,
-        status_text,
-        (uint32_t)sizeof(status_text)
-    );
-
     /*
      * Persistent Site Exploration shell. The scrolling room view is clipped to
      * the central 576 x 252 window, leaving the reconstruction HUD untouched.
@@ -3689,23 +3710,8 @@ void Floppy144Site2DDrawForPlayerState(
         background
     );
 
-    Floppy144DrawText(
-        &surface,
-        10U,
-        5U,
-        "GDR SITE RECONSTRUCTION",
-        1U,
-        muted
-    );
-
-    Floppy144DrawText(
-        &surface,
-        630U - Floppy144DrawTextWidth(status_text, 1U),
-        5U,
-        status_text,
-        1U,
-        green
-    );
+    Floppy144Site2DDrawHeader(&surface,run_state,
+        Floppy144RunStateRecoveredPercent(run_state),false);
 
     Floppy144DrawFillRect(
         &surface,

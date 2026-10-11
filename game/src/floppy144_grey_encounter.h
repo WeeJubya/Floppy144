@@ -1,9 +1,10 @@
 /*
- * GREY DOOR REPUBLIC: temporary non-persistent vignette.
+ * GREY DOOR REPUBLIK: temporary non-persistent vignette.
  * No GDR world geometry, Profile, capacity or collection references exist here.
  */
 #pragma once
 #include "floppy144_draw.h"
+#include "floppy144_player_visual.h"
 #include "floppy144_run_state.h"
 #include <stdbool.h>
 #include <stdint.h>
@@ -16,11 +17,15 @@ typedef enum Floppy144GreyEncounterPhase {
     FLOPPY144_GREY_DIALOGUE,
     FLOPPY144_GREY_CAPACITY,
     FLOPPY144_GREY_GLITCH,
+    FLOPPY144_GREY_BLACKOUT,
     FLOPPY144_GREY_DONE
 } Floppy144GreyEncounterPhase;
 
 typedef struct Floppy144GreyEncounter {
     uint32_t elapsed_ms;
+    uint32_t restoration_start;
+    Floppy144OperatorBodyStyle body_style;
+    Floppy144PlayerVisualState player_visual;
     int32_t local_x;
     int32_t local_y;
     int32_t return_x16;
@@ -45,3 +50,9 @@ bool Floppy144GreyEncounterSaveAllowed(const Floppy144GreyEncounter *scene);
 void Floppy144GreyEncounterDraw(
     Floppy144Surface *surface, const Floppy144GreyEncounter *scene
 );
+
+/* Only the *presented* percentage changes: an accelerated cubic rise from
+   actual RunState completion to 144, with a readable >100 red-blink flag. */
+uint32_t Floppy144GreyEncounterDisplayPercent(const Floppy144GreyEncounter *scene);
+bool Floppy144GreyEncounterPercentFlash(const Floppy144GreyEncounter *scene);
+bool Floppy144GreyEncounterInspectNearby(const Floppy144GreyEncounter *scene);
