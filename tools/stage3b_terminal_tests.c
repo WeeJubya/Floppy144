@@ -3068,7 +3068,7 @@ static void Floppy144TestDr04SeededWorkstreamSlots(void)
         uint32_t seed = seeds[i];
         bool swapped = i == 0U;
         Floppy144WorldState world;
-        Floppy144RunState run, loaded;
+        Floppy144RunState run, loaded = {0};
         Floppy144TerminalState term;
         Floppy144CatalogueState catalogue;
         uint8_t payload[FLOPPY144_SAVE_PAYLOAD_V2_SIZE];
