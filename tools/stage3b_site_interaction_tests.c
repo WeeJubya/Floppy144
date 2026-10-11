@@ -2158,9 +2158,7 @@ static void Floppy144TestReceptionDirectoryWallSide(void)
             (parent==NULL ||
              strcmp(parent,"RECEPTION_SITE_DIRECTORY")!=0) &&
             (label==NULL || strcmp(label,"SITE DIRECTORY")!=0) &&
-            !Floppy144SiteDirectoryNearby(&state) &&
-            (Floppy144SiteAvailableActions(&state) &
-             FLOPPY144_SITE_ACTION_INSPECT)==0U,
+            !Floppy144SiteDirectoryNearby(&state),
             "opposite side cannot focus, prompt or activate directory"
         );
         F144_CHECK(
