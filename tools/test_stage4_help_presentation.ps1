@@ -29,7 +29,9 @@ if($TerminalSource.Contains('FLOPPY144_TERMINAL_HELP_ROW_GAP "   "')) {
 foreach($Required in @(
     'FLOPPY144_TERMINAL_HELP_TEXT_WIDTH',
     'FLOPPY144_TERMINAL_HELP_ROW_GAP',
-    'Floppy144TerminalPushHelpPageContent',
+    'Floppy144TerminalBuildHelpLayout',
+    'Floppy144HelpAppendText',
+    'Floppy144TerminalPrintHelpPage',
     'Floppy144TerminalHelpPagerActive',
     'Floppy144TerminalMoveHelpPager',
     'Floppy144TerminalCloseHelpPager'
