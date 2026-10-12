@@ -101,9 +101,12 @@ if($main -notmatch [regex]::Escape("Floppy144SettingsApplyCrtFilter"))
     throw "Intro/main presentation no longer passes through the CRT filter."
 }
 
-if($audio -notmatch [regex]::Escape("intentionally silent"))
-{
-    throw "Expected Stage 4B silent-audio baseline changed; review S4F-02 audio policy."
+# The WinMM F144MIDI/F144SFX boundary replaced Stage 4B's silent stub.
+# Intro remains presentation-only, and native audio belongs to the platform.
+foreach($required in @('F144_AudioInit','F144_SFXInit','F144_MusicSetAct','F144_SFXPlay')) {
+    if($audio -notmatch [regex]::Escape($required)) {
+        throw "F144 audio platform integration missing: $required"
+    }
 }
 
 if($intro -match "f144PlatformPlaySfx|f144PlatformPlayMusic")
