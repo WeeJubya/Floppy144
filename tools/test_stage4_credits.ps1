@@ -19,10 +19,11 @@ foreach($required in @('River2D-derived GPLv3 runtime material','Copyright (C) 2
 foreach($required in @('GNU GENERAL PUBLIC LICENSE','Version 3, 29 June 2007','Copyright (C) 2026 BadAcronym')){
  if($license -notmatch [regex]::Escape($required)){throw "Root LICENSE evidence missing: $required"}
 }
-foreach($required in @('GREY DOOR REPUBLIC','WEEJUBYA','RIVER2D-DERIVED','BADACRONYM','GNU GENERAL PUBLIC LICENSE VERSION 3','LICENSE','NO WARRANTY')){
+foreach($required in @('GREY DOOR REPUBLIK','WEEJUBYA','RIVER2D-DERIVED','BADACRONYM','GNU GENERAL PUBLIC LICENSE VERSION 3','LICENSE','NO WARRANTY')){
  if($credits -notmatch [regex]::Escape($required)){throw "Credits text missing: $required"}
 }
-if($credits -match 'COPYRIGHT \(C\) 2026 GREY DOOR REPUBLIC|COPYRIGHT \(C\) 2026 WEEJUBYA'){throw "Credits invented a whole-game copyright claim."}
+if($credits -match 'GREY DOOR REPUBLIC'){throw "Credits contain obsolete Grey Door Republic spelling."}
+if($credits -match 'COPYRIGHT \(C\) 2026 GREY DOOR REPUBLIK|COPYRIGHT \(C\) 2026 WEEJUBYA'){throw "Credits invented a whole-game copyright claim."}
 if($premake -notmatch '\{COPYFILE\}[\s\S]*LICENSE'){throw "Release build does not copy the full LICENSE beside the executable."}
 Write-Host "STAGE 4C CREDITS / PROVENANCE AUDIT: PASS"
 
