@@ -132,21 +132,21 @@ static bool Floppy144HathawayMode(void)
     return f144StartupConfigVisualInspectionEnabled(&global_config);
 }
 static bool Floppy144InspectionSaveRunState(
-    const char *path,const Floppy144RunState *state
+    const char *path,Floppy144RunState *state
 )
 {
     return !Floppy144HathawayMode() &&
         Floppy144PersistenceSaveRunState(path,state);
 }
 static bool Floppy144InspectionSaveProfile(
-    const char *path,const Floppy144DiscoveryProfile *profile
+    const char *path,Floppy144DiscoveryProfile *profile
 )
 {
     return Floppy144HathawayMode() ? true :
         Floppy144PersistenceSaveProfile(path,profile);
 }
 static bool Floppy144InspectionSaveSettings(
-    const char *path,const Floppy144Settings *settings
+    const char *path,Floppy144Settings *settings
 )
 {
     return Floppy144HathawayMode() ? true :
