@@ -178,11 +178,12 @@ foreach($required in @(
     }
 }
 
-# Audio continuity is intentionally silence-safe until the approved generated
-# backend exists. No presentation screen should have grown direct native audio.
-if($audio -notmatch [regex]::Escape("intentionally silent"))
-{
-    throw "Stage 4B silent-audio baseline changed; re-audit transition audio."
+# Procedural F144MIDI/F144SFX has replaced the old silent Stage 4B stub.
+# Game screens must still use the platform boundary instead of calling WinMM.
+foreach($required in @('F144_AudioInit','F144_SFXInit','F144_MusicSetAct','F144_SFXPlay')) {
+    if($audio -notmatch [regex]::Escape($required)) {
+        throw "Approved WinMM audio backend is missing: $required"
+    }
 }
 if($main -match '(?i)\bPlaySound\w*\b|\bwaveOut\w*\b|\bmidiOut\w*\b|\bmciSend\w*\b')
 {
