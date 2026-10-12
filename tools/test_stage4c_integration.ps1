@@ -164,7 +164,7 @@ if(
 
 foreach($required in @(
     'BACKSPACE BACK',
-    'GREY DOOR REPUBLIC',
+    'GREY DOOR REPUBLIK',
     'WEEJUBYA',
     'RIVER2D-DERIVED',
     'GNU GENERAL PUBLIC LICENSE VERSION 3'
