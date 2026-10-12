@@ -10,6 +10,26 @@ on:
   workflow_dispatch:
 
 jobs:
+  # Independent continuation gate: execute every Stage 4D+ source regression
+  # even when the main sequential release-candidate job stops at an earlier
+  # failure. Aggregate results so one stale assertion cannot hide later ones.
+  stage4_post_bugfix_audit:
+    runs-on: windows-2022
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Regenerate canonical runtime data
+        shell: pwsh
+        run: .\\tools\\build_game_data.ps1
+      - name: Stage 4D onward independent regression sweep
+        shell: pwsh
+        run: .\\tools\\test_stage4_post_bugfix.ps1
+
   stage3c:
     runs-on: windows-2022
     permissions:
