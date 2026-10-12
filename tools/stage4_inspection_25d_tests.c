@@ -384,8 +384,8 @@ static void TestAllAuthoredPhysicalItemParents(void)
         CHECK(RegionPixelCount(306U,0U,TEST_WIDTH,TEST_HEIGHT)==0U,
               "surface-mapped children are clipped before the contents list");
     }
-    CHECK(inspected>=172U,
-          "all 172 authored physical-item parents receive projected children");
+    CHECK(inspected==138U,
+          "all 138 populated physical-item parents receive projected children (34 empty chairs)");
     CHECK(categories>=28U,
           "surface projection audits all 28 populated furniture categories");
 }
