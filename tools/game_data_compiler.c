@@ -75,7 +75,6 @@ static void emit_collections(JsonValue*root,const char*outdir)
 {
     JsonValue*a=get(root,"collections"),*docs=get(root,"documents");size_t i;FILE*f=openout(outdir,"floppy144_collections.generated.def");
     fputs("/* Generated from floppy144_game_data.json. Do not edit. */\n",f);
-    fputs("/* Generated authored Notebook summaries with player-facing document IDs. */\n",notes);
     for(i=0;i<count(a);i++){
         JsonValue*c=at(a,i),*b=get(c,"content_budget");const char*id=strv(c,"id"),*name=strv(c,"name"),*domain=strv(c,"domain");
         long size_kb=intv(c,"size_kb",0),records=0;int required=boolv(c,"required_for_completion",false)?1:0;size_t ac=authored_count_for(docs,id);
@@ -277,6 +276,7 @@ static void emit_documents(JsonValue*root,const char*outdir)
 {
     JsonValue*collections=get(root,"collections"),*docs=get(root,"documents");size_t ci,di,global_ordinal=0U;FILE*f=openout(outdir,"floppy144_documents.generated.inc");FILE*notes=openout(outdir,"floppy144_document_notebook.generated.inc");
     fputs("/* Generated from floppy144_game_data.json. Do not edit. */\n",f);
+    fputs("/* Generated authored Notebook summaries with player-facing document IDs. */\n",notes);
     for(ci=0;ci<count(collections);++ci){
         JsonValue*c=at(collections,ci);const char*cid=strv(c,"id");long records=collection_record_count(root,cid);unsigned char *used;size_t authored_total,authored_ordinal=0U;
         if(records<=0) continue;
