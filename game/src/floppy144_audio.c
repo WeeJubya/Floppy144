@@ -12,7 +12,7 @@ void Floppy144AudioPlay(F144Platform *platform,Floppy144AudioSound effect)
 void Floppy144AudioMusicSet(F144Platform *platform,Floppy144AudioMusic cue)
 {
     if(cue==FLOPPY144_AUDIO_MUSIC_NONE) (void)f144PlatformStopMusic(platform);
-    else if((unsigned)cue<=FLOPPY144_AUDIO_MUSIC_ACT_III)
+    else if((unsigned)cue<=FLOPPY144_AUDIO_MUSIC_COMPLETION)
         (void)f144PlatformPlayMusic(platform,(F144MusicCueId)cue);
 }
 

@@ -19,7 +19,7 @@ int main(void)
     LARGE_INTEGER freq,last,now;
     int number_keys[4]={0},seek_keys[7]={0};
     int nextkey=0,prevkey=0,playkey=0,up=0,down=0,svup=0,svdown=0;
-    int rkey=0,ekey=0;
+    int rkey=0,ekey=0,menu_key=0,ending_key=0,game_key=0;
     unsigned cue=0U,i;
     int midi=F144_AudioInit(),sfx=F144_SFXInit();
     if(!midi && !sfx) { puts("No MIDI or waveOut device available."); return 1; }
@@ -28,6 +28,7 @@ int main(void)
     puts("F144 original-sound review: ESC quit | 1-4 Acts | F1-F7: 0,5,10,15,20,25,29m");
     puts("N/B next/previous SFX | SPACE play cue | UP/DOWN music | LEFT/RIGHT SFX");
     puts("Restoration corruption: R increase by 10, E decrease by 10");
+    puts("BF22 REVIEW: M = PLEASE HOLD (menu), C = YOUR CONTRIBUTION HAS BEEN NOTED (ending), G = gameplay");
     printf("Current cue %u/%u (see src/f144sfx.h for names)\n",cue,F144_SFX_COUNT-1U);
     QueryPerformanceFrequency(&freq);
     QueryPerformanceCounter(&last);
@@ -39,6 +40,7 @@ int main(void)
         F144_AudioUpdate(dt);
         for(i=0;i<4;i++) {
             if(pressed('1'+(int)i,&number_keys[i])) {
+                F144_MusicSetScene(F144_MUSIC_GAMEPLAY);
                 F144_MusicSetAct((F144Act)i);
                 printf("Act %u\n",i);
             }
@@ -48,6 +50,18 @@ int main(void)
                 F144_MusicSeekBar(seek_bars[i]);
                 printf("Seek %u:00\n",seek_bars[i]/20U);
             }
+        }
+        if(pressed('M',&menu_key)){
+            F144_MusicSetScene(F144_MUSIC_MENU);
+            puts("BF22 MENU: PLEASE HOLD / 70 BPM / looping");
+        }
+        if(pressed('C',&ending_key)){
+            F144_MusicSetScene(F144_MUSIC_COMPLETION);
+            puts("BF22 COMPLETION: YOUR CONTRIBUTION HAS BEEN NOTED / 65 BPM / looping");
+        }
+        if(pressed('G',&game_key)){
+            F144_MusicSetScene(F144_MUSIC_GAMEPLAY);
+            puts("BF22 GAMEPLAY: original approved 80 BPM composition");
         }
         if(pressed('N',&nextkey)) { cue=(cue+1U)%F144_SFX_COUNT; printf("SFX %u\n",cue); }
         if(pressed('B',&prevkey)) { cue=(cue+F144_SFX_COUNT-1U)%F144_SFX_COUNT; printf("SFX %u\n",cue); }

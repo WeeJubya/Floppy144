@@ -33,10 +33,16 @@ void f144Win32AudioPlayMusic(F144Platform *platform,F144MusicCueId cue)
 {
     (void)platform;
     if(cue==0U) {f144Win32AudioStopMusic(platform);return;}
-    if(cue>4U) return;
+    if(cue>6U) return;
     if(!midi_ready) return;
-    if(music_cue==0U) F144_MusicRestart();
-    F144_MusicSetAct((F144Act)(cue-1U));
+    if(cue<=4U)
+    {
+        F144_MusicSetAct((F144Act)(cue-1U));
+        F144_MusicSetScene(F144_MUSIC_GAMEPLAY);
+    }
+    else if(cue==5U)F144_MusicSetScene(F144_MUSIC_MENU);
+    else F144_MusicSetScene(F144_MUSIC_COMPLETION);
+    if(music_cue==0U)F144_MusicRestart();
     music_cue=cue;
 }
 

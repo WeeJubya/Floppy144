@@ -289,6 +289,14 @@ static void TestOriginalGeneratedAudio(void)
     Expect(F144_MusicGetDistortion()==33U,"floor(100/3)");
     F144_MusicSetRestoration(144U);
     Expect(F144_MusicGetDistortion()==48U,"Grey Door 144% supports distortion");
+    F144_MusicSetScene(F144_MUSIC_MENU);
+    Expect(F144_MusicGetScene()==F144_MUSIC_MENU,"BF22 menu scene selects without replacing Act");
+    F144_MusicSetScene(F144_MUSIC_COMPLETION);
+    Expect(F144_MusicGetScene()==F144_MUSIC_COMPLETION,"BF22 completion scene selects");
+    F144_MusicSetScene(F144_MUSIC_GAMEPLAY);
+    Expect(F144_MusicGetScene()==F144_MUSIC_GAMEPLAY &&
+           F144_MusicGetAct()==F144_ACT_III,
+           "BF22 original gameplay Act remains preserved");
 }
 
 static void TestWin32Backend(void)

@@ -67,6 +67,7 @@ static char g_device_name[128] = "Unavailable";
 
 static float    g_music_volume = 0.85f;
 static F144Act  g_act = F144_ACT_PROLOGUE;
+static F144MusicScene g_scene = F144_MUSIC_GAMEPLAY;
 static uint32_t g_seed = 0xF1441962u;
 static unsigned g_restoration = 0u;
 static uint8_t g_distortion = 0u;
@@ -131,6 +132,43 @@ void F144_MusicSetVolume(float volume)
 float F144_MusicGetVolume(void)
 {
     return g_music_volume;
+}
+
+/* BF22: transitions reset only when changing music scene, not per Act. */
+F144MusicScene F144_MusicGetScene(void) {return g_scene;}
+void F144_MusicSetScene(F144MusicScene scene)
+{
+    if(scene<F144_MUSIC_GAMEPLAY||scene>F144_MUSIC_COMPLETION)
+        scene=F144_MUSIC_GAMEPLAY;
+    if(scene==g_scene)return;
+    g_scene=scene;
+    if(!g_available)return;
+    if(scene==F144_MUSIC_GAMEPLAY)
+    {
+        /* Restore every GM voice used by the approved original composition. */
+        program(CH_MARIMBA,12u);
+        program(CH_BASS,32u);
+        program(CH_PIZZ,45u);
+        program(CH_CLARINET,71u);
+        program(CH_PAD,48u);
+        program(CH_COUNTER,71u);
+        program(CH_EXTRA_PIZZ,45u);
+    }
+    else if(scene==F144_MUSIC_MENU)
+    {
+        program(CH_MARIMBA,4u);  /* restrained electric piano */
+        program(CH_BASS,89u);   /* warm, low synthesised pad */
+        program(CH_PIZZ,8u);    /* soft celesta */
+        program(CH_PAD,88u);
+    }
+    else
+    {
+        program(CH_MARIMBA,0u);  /* acoustic piano */
+        program(CH_BASS,48u);   /* mellow string ensemble */
+        program(CH_PIZZ,11u);   /* vibraphone */
+        program(CH_PAD,89u);
+    }
+    if(g_playing)F144_MusicRestart();
 }
 
 void F144_MusicSetAct(F144Act act)
@@ -601,8 +639,64 @@ static void evolving_layers(unsigned bar,unsigned step)
         send_raw(0x99u,76u,19u); /* occasional soft office woodblock */
 }
 
+/* BF22: standalone 16-bar loops, clean of Act/restoration pitch corruption.
+ * The approved 30-minute gameplay process_step below is not modified. */
+static void scene_note(uint8_t channel,uint8_t pitch,uint8_t velocity)
+{
+    if(g_note_active[channel])note_off(channel,g_last_note[channel]);
+    send_raw((uint8_t)(0x90u|channel),pitch,velocity);
+    g_last_note[channel]=pitch;g_note_active[channel]=1u;
+}
+static void menu_scene_step(unsigned absolute_step)
+{
+    static const uint8_t melody[16]={
+        69u,72u,71u,67u,64u,67u,71u,66u,
+        69u,72u,74u,72u,71u,67u,66u,64u
+    };
+    unsigned bar=(absolute_step/16u)%16u;
+    unsigned step=absolute_step%16u;
+    uint8_t base=(bar%4u==3u)?45u:45u+(uint8_t)((bar/4u)%2u)*2u;
+    if(step==0u)
+    {
+        scene_note(CH_BASS,(uint8_t)(base-12u),28u);
+        scene_note(CH_PAD,(uint8_t)(base+7u),18u);
+    }
+    if(step==0u||step==8u)
+        scene_note(CH_MARIMBA,melody[(bar*2u+step/8u)%16u],40u);
+    if(step==5u||step==13u)mono_silence(CH_MARIMBA);
+    if(step==3u&&bar%2u==0u)
+        scene_note(CH_PIZZ,(uint8_t)(base+19u),19u);
+    if(step==7u)mono_silence(CH_PIZZ);
+    if(step==10u&&bar%3u==1u)
+        send_raw(0x99u,76u,12u); /* near-distant mechanical woodblock */
+}
+static void completion_scene_step(unsigned absolute_step)
+{
+    static const uint8_t melody[16]={
+        76u,74u,72u,69u,72u,71u,67u,69u,
+        71u,72u,76u,74u,72u,69u,68u,69u
+    };
+    unsigned bar=(absolute_step/16u)%16u;
+    unsigned step=absolute_step%16u;
+    uint8_t base=(bar%4u==2u)?41u:45u;
+    if(step==0u)
+    {
+        scene_note(CH_BASS,(uint8_t)(base-12u),26u);
+        scene_note(CH_PAD,(uint8_t)(base+12u),21u);
+    }
+    if(step==0u)
+        scene_note(CH_MARIMBA,melody[bar],37u);
+    if(step==9u)mono_silence(CH_MARIMBA);
+    if(step==10u&&bar%4u==3u)
+        scene_note(CH_PIZZ,(uint8_t)(melody[bar]-1u),16u); /* uncertain dissonance */
+    if(step==14u)mono_silence(CH_PIZZ);
+    if(step==12u&&bar%4u==1u)send_raw(0x99u,42u,11u);
+}
+
 static void process_step(unsigned absolute_step)
 {
+    if(g_scene==F144_MUSIC_MENU){menu_scene_step(absolute_step);return;}
+    if(g_scene==F144_MUSIC_COMPLETION){completion_scene_step(absolute_step);return;}
     unsigned bar =
         absolute_step / F144_STEPS_PER_BAR;
 
@@ -747,8 +841,14 @@ void F144_AudioUpdate(double dt_seconds)
 
     g_accum += dt_seconds;
 
-    while (g_accum >= F144_STEP_SECONDS) {
-        g_accum -= F144_STEP_SECONDS;
+    /* The gameplay cadence remains exactly the approved 80 BPM. */
+    {
+        double seconds_per_step=g_scene==F144_MUSIC_MENU
+            ?(60.0/70.0/4.0):
+            (g_scene==F144_MUSIC_COMPLETION?(60.0/65.0/4.0):
+                F144_STEP_SECONDS);
+        while (g_accum >= seconds_per_step) {
+        g_accum -= seconds_per_step;
 
         ++g_step;
 
@@ -759,6 +859,7 @@ void F144_AudioUpdate(double dt_seconds)
         }
 
         process_step(g_step);
+        }
     }
 }
 

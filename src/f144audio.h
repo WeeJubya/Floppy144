@@ -14,6 +14,15 @@ typedef enum F144Act {
     F144_ACT_III      = 3
 } F144Act;
 
+typedef enum F144MusicScene {
+    F144_MUSIC_GAMEPLAY=0,
+    F144_MUSIC_MENU,
+    F144_MUSIC_COMPLETION
+} F144MusicScene;
+
+void F144_MusicSetScene(F144MusicScene scene);
+F144MusicScene F144_MusicGetScene(void);
+
 int  F144_AudioInit(void);
 void F144_AudioShutdown(void);
 

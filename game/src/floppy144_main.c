@@ -243,20 +243,22 @@ static void Floppy144UpdateAudio(uint64_t now)
         ? Floppy144RunStateRecoveredPercent(&global_run_state):0U;
     uint32_t i;
     bool evidence_new=false;
-    if(global_screen!=FLOPPY144_SCREEN_SPLASH &&
-       global_screen!=FLOPPY144_SCREEN_GREY_ENCOUNTER)
+    if(global_screen==FLOPPY144_SCREEN_COMPLETION ||
+       (global_screen==FLOPPY144_SCREEN_CREDITS &&
+        global_credits_return_screen==FLOPPY144_SCREEN_COMPLETION))
+        desired=FLOPPY144_AUDIO_MUSIC_COMPLETION;
+    else if(global_screen==FLOPPY144_SCREEN_MAIN_MENU ||
+            global_screen==FLOPPY144_SCREEN_SETTINGS ||
+            global_screen==FLOPPY144_SCREEN_PROFILE ||
+            global_screen==FLOPPY144_SCREEN_CREDITS)
+        desired=FLOPPY144_AUDIO_MUSIC_MENU;
+    else if(global_screen!=FLOPPY144_SCREEN_SPLASH &&
+            global_screen!=FLOPPY144_SCREEN_GREY_ENCOUNTER)
     {
-        desired=FLOPPY144_AUDIO_MUSIC_PROLOGUE;
-        if(global_session_active &&
-           global_screen!=FLOPPY144_SCREEN_MAIN_MENU &&
-           global_screen!=FLOPPY144_SCREEN_SETTINGS &&
-           global_screen!=FLOPPY144_SCREEN_PROFILE &&
-           global_screen!=FLOPPY144_SCREEN_CREDITS)
-        {
-            uint32_t act=(uint32_t)Floppy144RunStateAct(&global_run_state);
-            if(act>3U) act=3U;
-            desired=(Floppy144AudioMusic)((uint32_t)FLOPPY144_AUDIO_MUSIC_PROLOGUE+act);
-        }
+        uint32_t act=global_session_active?
+            (uint32_t)Floppy144RunStateAct(&global_run_state):0U;
+        if(act>3U)act=3U;
+        desired=(Floppy144AudioMusic)((uint32_t)FLOPPY144_AUDIO_MUSIC_PROLOGUE+act);
     }
     if(global_run_state.recovery_seed!=global_audio_evidence_seed) {
         global_audio_evidence_seed=global_run_state.recovery_seed;
