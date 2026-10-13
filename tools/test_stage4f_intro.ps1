@@ -16,25 +16,30 @@ $main = Get-Content -LiteralPath $mainPath -Raw
 $credits = Get-Content -LiteralPath $creditsPath -Raw
 $audio = Get-Content -LiteralPath $audioPath -Raw
 
+# BF20 latest four-screen storyboard supersedes S4F's earlier two-screen material.
 foreach($required in @(
     "FLOPPY144_INTRO_DISCOVERY",
     "FLOPPY144_INTRO_INSERTION",
     "FLOPPY144_INTRO_PROGRAM_START",
     "FLOPPY144_INTRO_GDR_CONNECTION",
     "FLOPPY144_INTRO_DURATION_MS",
-    "UNIDENTIFIED REMOVABLE MEDIA",
-    "MEDIA ENGAGED",
-    "BOOTSTRAP FOUND",
-    "INITIALISING...",
-    "NETWORK INTERFACE ........ ONLINE",
-    "GDR NETWORK .............. FOUND",
-    "CONNECTING...",
-    "REMOTE SESSION ........... ACCEPTED"
+    "SITE RECOVERY DISK",
+    "DISK 144/233",
+    "BOOTSTRAP",
+    "MEDIA HEADER",
+    "RECOVERY EXECUTABLE",
+    "INITIALISING",
+    "SYSTEM READY",
+    "NETWORK INTERFACE",
+    "SEARCHING",
+    "REMOTE SESSION ACCEPTED",
+    "LOGIN:"
 ))
 {
-    if($intro -notmatch [regex]::Escape($required) -and $introHeader -notmatch [regex]::Escape($required))
+    if($intro -notmatch [regex]::Escape($required) -and
+       $introHeader -notmatch [regex]::Escape($required))
     {
-        throw "S4F-02 required intro beat/content is missing: $required"
+        throw "BF20 storyboard beat/content missing: $required"
     }
 }
 
@@ -58,27 +63,28 @@ foreach($forbidden in @(
 }
 
 foreach($required in @(
-    "Floppy144IntroDraw",
-    "Floppy144IntroActionSkips",
+    "Floppy144IntroDrawWithLogin",
+    "Floppy144IntroLoginReady",
+    "Floppy144CommitIntroLogin",
     "Floppy144TimingStartSplash",
     "FLOPPY144_INTRO_DURATION_MS",
-    "Floppy144OpenMainMenu"
+    "Floppy144OpenMainMenu",
+    "Floppy144PersistenceSaveProfile"
 ))
 {
     if($main -notmatch [regex]::Escape($required))
     {
-        throw "Game coordinator intro wiring is missing: $required"
+        throw "BF20 coordinator integration missing: $required"
     }
 }
-
-if($main -notmatch 'global_screen\s*==\s*FLOPPY144_SCREEN_SPLASH[\s\S]*Floppy144IntroActionSkips')
+if($main -match 'intro_elapsed_ms\s*>=\s*FLOPPY144_INTRO_DURATION_MS[\s\S]{0,150}Floppy144OpenMainMenu')
 {
-    throw "Intro skip route is not wired through logical actions."
+    throw "BF20 automatic menu transition bypasses required LOGIN"
 }
-
-if($main -notmatch 'intro_elapsed_ms\s*>=\s*FLOPPY144_INTRO_DURATION_MS[\s\S]*Floppy144OpenMainMenu')
+if($intro -notmatch 'return false;' -or
+   $intro -notmatch 'Floppy144IntroActionSkips')
 {
-    throw "Normal intro completion does not transition to Session Control."
+    throw "BF20 essential scenes must not be bypassed"
 }
 
 if($main -notmatch 'FLOPPY144_SCREEN_CREDITS:[\s\S]*F144_ACTION_CONFIRM[\s\S]*FLOPPY144_SCREEN_SPLASH[\s\S]*Floppy144TimingStartSplash')

@@ -78,38 +78,38 @@ int main(void)
     uint64_t off_crt;
 
     if(!require_true(Floppy144IntroBeatAt(0U)==FLOPPY144_INTRO_DISCOVERY,"0 ms discovery")) return 1;
-    if(!require_true(Floppy144IntroBeatAt(2599U)==FLOPPY144_INTRO_DISCOVERY,"discovery end")) return 2;
-    if(!require_true(Floppy144IntroBeatAt(2600U)==FLOPPY144_INTRO_INSERTION,"insertion start")) return 3;
-    if(!require_true(Floppy144IntroBeatAt(4799U)==FLOPPY144_INTRO_INSERTION,"insertion end")) return 4;
-    if(!require_true(Floppy144IntroBeatAt(4800U)==FLOPPY144_INTRO_PROGRAM_START,"program start")) return 5;
-    if(!require_true(Floppy144IntroBeatAt(6999U)==FLOPPY144_INTRO_PROGRAM_START,"program end")) return 6;
-    if(!require_true(Floppy144IntroBeatAt(7000U)==FLOPPY144_INTRO_GDR_CONNECTION,"network start")) return 7;
-    if(!require_true(Floppy144IntroBeatAt(10399U)==FLOPPY144_INTRO_GDR_CONNECTION,"network end")) return 8;
-    if(!require_true(Floppy144IntroBeatAt(10400U)==FLOPPY144_INTRO_COMPLETE,"intro completion")) return 9;
+    if(!require_true(Floppy144IntroBeatAt(3799U)==FLOPPY144_INTRO_DISCOVERY,"discovery end")) return 2;
+    if(!require_true(Floppy144IntroBeatAt(3800U)==FLOPPY144_INTRO_INSERTION,"insertion start")) return 3;
+    if(!require_true(Floppy144IntroBeatAt(7599U)==FLOPPY144_INTRO_INSERTION,"insertion end")) return 4;
+    if(!require_true(Floppy144IntroBeatAt(7600U)==FLOPPY144_INTRO_PROGRAM_START,"program start")) return 5;
+    if(!require_true(Floppy144IntroBeatAt(14999U)==FLOPPY144_INTRO_PROGRAM_START,"program end")) return 6;
+    if(!require_true(Floppy144IntroBeatAt(15000U)==FLOPPY144_INTRO_GDR_CONNECTION,"network start")) return 7;
+    if(!require_true(Floppy144IntroBeatAt(22799U)==FLOPPY144_INTRO_GDR_CONNECTION,"network end")) return 8;
+    if(!require_true(Floppy144IntroBeatAt(22800U)==FLOPPY144_INTRO_COMPLETE,"intro completion")) return 9;
 
-    if(!require_true(Floppy144IntroActionSkips(F144_ACTION_CONFIRM),"confirm skips")) return 10;
-    if(!require_true(Floppy144IntroActionSkips(F144_ACTION_BACK),"back skips")) return 11;
-    if(!require_true(Floppy144IntroActionSkips(F144_ACTION_MENU),"menu skips")) return 12;
+    if(!require_true(!Floppy144IntroActionSkips(F144_ACTION_CONFIRM),"confirm cannot skip essential intro")) return 10;
+    if(!require_true(!Floppy144IntroActionSkips(F144_ACTION_BACK),"back cannot skip")) return 11;
+    if(!require_true(!Floppy144IntroActionSkips(F144_ACTION_MENU),"menu cannot skip")) return 12;
     if(!require_true(!Floppy144IntroActionSkips(F144_ACTION_MOVE_UP),"movement does not skip")) return 13;
 
-    if(!require_true(render(1200U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U)!=0U,"discovery renders")) return 14;
-    if(!require_true(render(3600U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U)!=0U,"insertion renders")) return 15;
-    if(!require_true(render(5600U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U)!=0U,"program renders")) return 16;
-    if(!require_true(render(8500U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U)!=0U,"network renders")) return 17;
+    if(!require_true(render(1400U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U)!=0U,"discovery renders")) return 14;
+    if(!require_true(render(5200U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U)!=0U,"insertion renders")) return 15;
+    if(!require_true(render(12150U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U)!=0U,"program renders")) return 16;
+    if(!require_true(render(18000U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U)!=0U,"network renders")) return 17;
 
-    normal_program=render(5550U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U);
-    fast_program=render(5550U,FLOPPY144_TEXT_SPEED_FAST,FLOPPY144_CRT_OFF,10U);
-    instant_program=render(5550U,FLOPPY144_TEXT_SPEED_INSTANT,FLOPPY144_CRT_OFF,10U);
+    normal_program=render(12550U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U);
+    fast_program=render(12550U,FLOPPY144_TEXT_SPEED_FAST,FLOPPY144_CRT_OFF,10U);
+    instant_program=render(12550U,FLOPPY144_TEXT_SPEED_INSTANT,FLOPPY144_CRT_OFF,10U);
     if(!require_true(normal_program!=fast_program,"fast text changes staged reveal")) return 18;
     if(!require_true(fast_program!=instant_program,"instant text changes staged reveal")) return 19;
 
-    muted_network=render(9000U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,0U);
-    audible_network=render(9000U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U);
+    muted_network=render(18000U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,0U);
+    audible_network=render(18000U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U);
     if(!require_true(muted_network==audible_network,"audio volume cannot alter intro visuals")) return 20;
 
-    full_crt=render(9000U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_FULL,10U);
-    reduced_crt=render(9000U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_REDUCED,10U);
-    off_crt=render(9000U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U);
+    full_crt=render(18000U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_FULL,10U);
+    reduced_crt=render(18000U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_REDUCED,10U);
+    off_crt=render(18000U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U);
     if(!require_true(full_crt!=reduced_crt,"full/reduced CRT differ")) return 21;
     if(!require_true(reduced_crt!=off_crt,"reduced/off CRT differ")) return 22;
 
@@ -121,8 +121,11 @@ int main(void)
     if(!require_true(Floppy144TimingSplashElapsedMs(&timing,5250U)==250U,"replay restarts elapsed")) return 25;
     if(!require_true(timing.next_autosave_ms==301000U,"replay preserves autosave deadline")) return 26;
 
+    if(!require_true(!Floppy144IntroLoginReady(22799U) &&
+        Floppy144IntroLoginReady(22800U),"LOGIN is gated until full boot"))return 27;
+
     puts("S4F-02 INTRO VECTORS: PASS");
-    puts("beats=discovery,insertion,program,gdr duration=10400ms");
-    puts("skip=confirm,back,menu replay=timing-rearm settings=text+crt audio=silent-safe");
+    puts("beats=cabinet,disk-reveal,computer-crt,full-terminal duration=22800ms");
+    puts("no intro skip; persisted LOGIN when ready; replay=timing-rearm");
     return 0;
 }

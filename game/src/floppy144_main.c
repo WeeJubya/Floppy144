@@ -106,6 +106,9 @@ static Floppy144ProfileNameEditState global_profile_name_edit;
 static Floppy144Settings global_settings;
 static Floppy144AudioMusic global_audio_cue;
 static uint8_t global_intro_sound_stage;
+static char global_intro_login[FLOPPY144_PROFILE_NAME_CAPACITY];
+static uint32_t global_intro_login_length;
+static bool global_intro_login_save_failed;
 static uint64_t global_last_footstep;
 static uint32_t global_known_evidence[FLOPPY144_RUN_WORD_COUNT(FLOPPY144_EVIDENCE_COUNT)];
 static bool global_audio_evidence_snapshot_valid;
@@ -325,13 +328,15 @@ static void Floppy144Redraw(
                     )
                 );
 
-            Floppy144IntroDraw(
+            Floppy144IntroDrawWithLogin(
                 pSurface,
                 elapsed_milliseconds,
                 Floppy144SettingsTextElapsedMs(
                     &global_settings,
                     1U
-                )
+                ),
+                global_intro_login,
+                global_intro_login_save_failed
             );
 
             break;
@@ -788,32 +793,23 @@ static void Floppy144UpdateTiming(
                 )
             );
 
-        if(intro_elapsed_ms>=FLOPPY144_INTRO_DISCOVERY_END_MS &&
-           global_intro_sound_stage<1U) {
+        if(intro_elapsed_ms>=FLOPPY144_INTRO_DISK_CLICK_MS &&
+           global_intro_sound_stage<1U)
+        {
             Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_FLOPPY_INSERT);
             global_intro_sound_stage=1U;
         }
-        if(intro_elapsed_ms>=FLOPPY144_INTRO_INSERTION_END_MS &&
-           global_intro_sound_stage<2U) {
+        if(intro_elapsed_ms>=FLOPPY144_INTRO_CRT_START_MS &&
+           global_intro_sound_stage<2U)
+        {
             Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_CRT_WAKE);
             global_intro_sound_stage=2U;
         }
-        if(intro_elapsed_ms>=FLOPPY144_INTRO_PROGRAM_END_MS &&
-           global_intro_sound_stage<3U) {
+        if(intro_elapsed_ms>=FLOPPY144_INTRO_DURATION_MS &&
+           global_intro_sound_stage<3U)
+        {
             Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_ACCEPT);
             global_intro_sound_stage=3U;
-        }
-        if(intro_elapsed_ms >= FLOPPY144_INTRO_DURATION_MS)
-        {
-            Floppy144TimingStopSplash(
-                &global_timing
-            );
-
-            Floppy144OpenMainMenu(
-                window
-            );
-
-            return;
         }
 
         redraw =
@@ -1374,6 +1370,48 @@ static void Floppy144OpenSettings(
  * replaced successfully. A failed save restores the complete previous
  * settings structure, so the screen never advertises an unpersisted value.
  */
+/* BF20: commit operator login without making empty or partial identities permanent. */
+static void Floppy144CommitIntroLogin(HWND window)
+{
+    Floppy144DiscoveryProfile before=global_profile;
+    char name[FLOPPY144_PROFILE_NAME_CAPACITY];
+    uint32_t first=0U,last=global_intro_login_length,len;
+    while(first<last&&global_intro_login[first]==' ')++first;
+    while(last>first&&global_intro_login[last-1U]==' ')--last;
+    len=last-first;
+    if(len>FLOPPY144_PROFILE_NAME_MAX_LENGTH)
+        len=FLOPPY144_PROFILE_NAME_MAX_LENGTH;
+    if(len>0U)memcpy(name,global_intro_login+first,len);
+    name[len]='\0';
+    if(!Floppy144DiscoveryProfileOperatorNameValid(name))
+        (void)snprintf(name,sizeof(name),"GUEST");
+    if(strcmp(Floppy144DiscoveryProfileOperatorName(&global_profile),name)!=0)
+    {
+        if(!Floppy144DiscoveryProfileSetOperatorName(&global_profile,name))
+        {
+            global_intro_login_save_failed=true;
+            Floppy144Redraw(window);
+            return;
+        }
+    }
+    if(global_profile.dirty!=0U &&
+       !Floppy144PersistenceSaveProfile(
+           Floppy144StoragePath(&global_storage_paths,F144_PERSISTENCE_PROFILE),
+           &global_profile))
+    {
+        global_profile=before;
+        global_intro_login_save_failed=true;
+        global_persistence_warnings|=FLOPPY144_PERSISTENCE_WARNING_PROFILE;
+        Floppy144Redraw(window);
+        return;
+    }
+    global_persistence_warnings&=
+        (uint8_t)~FLOPPY144_PERSISTENCE_WARNING_PROFILE;
+    global_intro_login_save_failed=false;
+    Floppy144TimingStopSplash(&global_timing);
+    Floppy144OpenMainMenu(window);
+}
+
 static void Floppy144CommitSettingsAdjustment(
     HWND window,
     int32_t direction
@@ -2435,6 +2473,37 @@ static bool Floppy144HandleTextInput(
     uCodepoint =
         pEvent->codepoint;
 
+    /* BF20: LOGIN is the only editable field during the staged introduction. */
+    if(global_screen==FLOPPY144_SCREEN_SPLASH)
+    {
+        if(Floppy144IntroLoginReady(
+            Floppy144TimingSplashElapsedMs(
+                &global_timing,f144PlatformMonotonicMs(&global_platform))))
+        {
+            if(uCodepoint==(uint32_t)'\b')
+            {
+                if(global_intro_login_length>0U)
+                {
+                    global_intro_login[--global_intro_login_length]='\0';
+                    Floppy144AudioPlay(&global_platform,
+                        FLOPPY144_AUDIO_TERMINAL_TYPE);
+                }
+            }
+            else if(uCodepoint!=(uint32_t)'\r' &&
+                global_intro_login_length<FLOPPY144_PROFILE_NAME_MAX_LENGTH &&
+                Floppy144DiscoveryProfileOperatorNameCharacterSupported(uCodepoint))
+            {
+                global_intro_login[global_intro_login_length++]=(char)uCodepoint;
+                global_intro_login[global_intro_login_length]='\0';
+                Floppy144AudioPlay(&global_platform,
+                    FLOPPY144_AUDIO_TERMINAL_TYPE);
+            }
+            global_intro_login_save_failed=false;
+            Floppy144Redraw(window);
+        }
+        return true;
+    }
+
     /*
      * Operator-name entry consumes only the platform-neutral text stream.
      *
@@ -3011,24 +3080,15 @@ static bool Floppy144HandleActionEvent(
                 return true;
             }
 
-            /*
-             * The intro is deliberately easy to dismiss for repeat players.
-             * Use only established logical actions so native key policy stays
-             * inside the platform adapter.
-             */
-            if(
-                global_screen == FLOPPY144_SCREEN_SPLASH &&
-                Floppy144IntroActionSkips(eAction)
-            )
+            /* Boot transitions cannot be skipped. Enter confirms only LOGIN. */
+            if(global_screen==FLOPPY144_SCREEN_SPLASH)
             {
-                Floppy144TimingStopSplash(
-                    &global_timing
-                );
-
-                Floppy144OpenMainMenu(
-                    window
-                );
-
+                if(eAction==F144_ACTION_CONFIRM &&
+                   Floppy144IntroLoginReady(
+                       Floppy144TimingSplashElapsedMs(
+                           &global_timing,
+                           f144PlatformMonotonicMs(&global_platform))))
+                    Floppy144CommitIntroLogin(window);
                 return true;
             }
 
@@ -3272,6 +3332,9 @@ static bool Floppy144HandleActionEvent(
                             FLOPPY144_SCREEN_SPLASH;
 
                         global_intro_sound_stage=0U;
+                        global_intro_login_length=0U;
+                        global_intro_login[0]='\0';
+                        global_intro_login_save_failed=false;
                     Floppy144TimingStartSplash(
                             &global_timing,
                             f144PlatformMonotonicMs(
