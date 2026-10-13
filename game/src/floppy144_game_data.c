@@ -5,7 +5,6 @@
  * evidence, connection and collection facts come from generated JSON records.
  */
 #include "floppy144_game_data.h"
-#include "floppy144_document.h"
 #include "floppy144_collection_registry.h"
 #include "floppy144_object_registry.h"
 #include <stddef.h>
@@ -646,38 +645,6 @@ const Floppy144DataRecord *Floppy144GameDataNotebookOrderedEntryAt(
             return p;
     }
     return NULL;
-}
-
-/* Shared canonical OPENED marker for BF18 and BF34, including procedural slots. */
-bool Floppy144GameDataRecordOpened(
-    Floppy144RunState *state,
-    Floppy144CollectionId collection,
-    uint32_t record_index
-)
-{
-    const Floppy144DocumentDefinition *doc;
-    uint32_t u;
-    if(state==NULL ||
-       !Floppy144RunStateMarkRecordOpened(state,collection,record_index))
-        return false;
-    doc=Floppy144DocumentGetForSeed(
-        collection,record_index,state->recovery_seed
-    );
-    if(doc==NULL || doc->pszBody==NULL || doc->pszBody[0]=='\0' ||
-       doc->record_id_override==NULL)
-        return true;
-    for(u=0U;u<F144_COUNT(g_asGameData);++u)
-    {
-        const Floppy144DataRecord *p=&g_asGameData[u];
-        if(p->eKind==FLOPPY144_DATA_NOTEBOOK &&
-           Floppy144StringEqual(p->pszB,"DOCUMENT") &&
-           Floppy144StringEqual(p->pszId,doc->record_id_override))
-        {
-            (void)Floppy144RunStateAppendDocumentNote(state,(uint32_t)p->n0);
-            break;
-        }
-    }
-    return true;
 }
 
 /* Compatibility wrappers now present the same chronological order. */

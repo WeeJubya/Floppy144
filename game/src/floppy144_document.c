@@ -533,3 +533,30 @@ bool Floppy144DocumentApplyEffects(
 
     return true;
 }
+
+/* Canonical BF18/BF34 viewed state lives with the authored record registry. */
+bool Floppy144GameDataRecordOpened(
+    Floppy144RunState *state,
+    Floppy144CollectionId collection,
+    uint32_t record_index
+)
+{
+    const Floppy144DocumentDefinition *doc;
+    const Floppy144DataRecord *note;
+    if(state==NULL || !Floppy144RunStateMarkRecordOpened(
+        state,collection,record_index))
+        return false;
+    doc=Floppy144DocumentGetForSeed(
+        collection,record_index,state->recovery_seed
+    );
+    if(doc==NULL || doc->pszBody==NULL || doc->pszBody[0]=='\0' ||
+       doc->record_id_override==NULL)return true;
+    note=Floppy144GameDataFind(
+        FLOPPY144_DATA_NOTEBOOK,doc->record_id_override
+    );
+    if(note!=NULL && note->pszB!=NULL &&
+       strcmp(note->pszB,"DOCUMENT")==0)
+        (void)Floppy144RunStateAppendDocumentNote(state,(uint32_t)note->n0);
+    return true;
+}
+
