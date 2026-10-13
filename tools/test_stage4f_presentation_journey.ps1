@@ -10,10 +10,12 @@ $audio = Get-Content -LiteralPath (Join-Path $root "src\f144_win32_audio.c") -Ra
 
 Write-Host "=== S4F-03 WHOLE-GAME PRESENTATION JOURNEY AUDIT ==="
 
-# Startup: one intro route, one canonical menu opener, CRT applied after drawing.
+# BF20: startup remains one intro + one canonical menu opener, but its
+# four mandatory storyboard stages cannot be skipped before real LOGIN.
 foreach($required in @(
-    "Floppy144IntroDraw",
-    "Floppy144IntroActionSkips",
+    "Floppy144IntroDrawWithLogin",
+    "Floppy144IntroLoginReady",
+    "Floppy144CommitIntroLogin",
     "Floppy144TimingStopSplash",
     "Floppy144OpenMainMenu",
     "Floppy144SettingsApplyCrtFilter"
@@ -24,12 +26,11 @@ foreach($required in @(
         throw "Startup/presentation wiring is missing: $required"
     }
 }
-
-$introSkip = $main.IndexOf("Floppy144IntroActionSkips")
-$genericMenu = $main.IndexOf("if(eAction == F144_ACTION_MENU)",$introSkip)
-if($introSkip -lt 0 -or $genericMenu -le $introSkip)
+$loginGate=$main.IndexOf("/* Boot transitions cannot be skipped.")
+$genericMenu=$main.IndexOf("if(eAction == F144_ACTION_MENU)",$loginGate)
+if($loginGate -lt 0 -or $genericMenu -le $loginGate)
 {
-    throw "Intro skip must be handled before the universal Session Control route."
+    throw "Required LOGIN gate must be evaluated before universal Session Control"
 }
 
 # The universal MENU route is the sole screen-to-Session-Control policy.
