@@ -122,6 +122,22 @@ static unsigned make_terminal_key(F144Voice *v)
     return n;
 }
 
+
+/* BF21: resynthesise the approved 42 ms key press, then reverse every
+ * sample in memory. No stored asset or synthetic surrogate changes its timbre. */
+static unsigned make_terminal_backspace(F144Voice *v)
+{
+    unsigned n=make_terminal_key(v);
+    unsigned i;
+    for(i=0U;i<n/2U;++i)
+    {
+        int16_t sample=v->samples[i];
+        v->samples[i]=v->samples[n-1U-i];
+        v->samples[n-1U-i]=sample;
+    }
+    return n;
+}
+
 static unsigned make_terminal_ok(F144Voice *v)
 {
     unsigned n1 = ms_samples(70);
@@ -845,6 +861,8 @@ static unsigned generate(F144Voice *v, F144SFX effect)
     switch (effect) {
         case F144_SFX_TERMINAL_KEY:
             return make_terminal_key(v);
+        case F144_SFX_TERMINAL_BACKSPACE:
+            return make_terminal_backspace(v);
 
         case F144_SFX_TERMINAL_OK:
             return make_terminal_ok(v);

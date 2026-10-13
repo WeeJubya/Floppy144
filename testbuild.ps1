@@ -62,6 +62,7 @@ try {
         [pscustomobject]@{ Label = 'Stage 4F application icon source'; Script = 'test_stage4f_application_icon.ps1'; Parameters = @{ Phase = 'Source' } },
         [pscustomobject]@{ Label = 'Stage 4F GDR connection intro'; Script = 'test_stage4f_intro.ps1'; Parameters = @{} },
         [pscustomobject]@{ Label = 'Bug fix 20 four-screen storyboard and login'; Script = 'test_bugfix20_intro.ps1'; Parameters = @{} },
+        [pscustomobject]@{ Label = 'Bug fix 21 reversed Backspace audio'; Script = 'test_bugfix21_backspace.ps1'; Parameters = @{} },
         [pscustomobject]@{ Label = 'Stage 4F whole-game presentation journey'; Script = 'test_stage4f_presentation_journey.ps1'; Parameters = @{} },
         [pscustomobject]@{ Label = 'Stage 4G isolated Grey Door discovery'; Script = 'test_stage4g_grey_door.ps1'; Parameters = @{} }
     )

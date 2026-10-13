@@ -2486,7 +2486,7 @@ static bool Floppy144HandleTextInput(
                 {
                     global_intro_login[--global_intro_login_length]='\0';
                     Floppy144AudioPlay(&global_platform,
-                        FLOPPY144_AUDIO_TERMINAL_TYPE);
+                        FLOPPY144_AUDIO_TERMINAL_BACKSPACE);
                 }
             }
             else if(uCodepoint!=(uint32_t)'\r' &&
@@ -2519,16 +2519,20 @@ static bool Floppy144HandleTextInput(
     {
         if(uCodepoint == (uint32_t)'\b')
         {
-            (void)Floppy144ProfileNameEditBackspace(
+            if(Floppy144ProfileNameEditBackspace(
                 &global_profile_name_edit
-            );
+            ))
+                Floppy144AudioPlay(&global_platform,
+                    FLOPPY144_AUDIO_TERMINAL_BACKSPACE);
         }
         else if(uCodepoint != (uint32_t)'\r')
         {
-            (void)Floppy144ProfileNameEditInputCodepoint(
+            if(Floppy144ProfileNameEditInputCodepoint(
                 &global_profile_name_edit,
                 uCodepoint
-            );
+            ))
+                Floppy144AudioPlay(&global_platform,
+                    FLOPPY144_AUDIO_TERMINAL_TYPE);
         }
 
         Floppy144Redraw(
@@ -2694,10 +2698,11 @@ static bool Floppy144HandleTextInput(
             {
                 case '\b':
                 {
-                    Floppy144TerminalBackspace(
-                        &global_terminal
-                    );
-
+                    uint32_t before=global_terminal.input_length;
+                    Floppy144TerminalBackspace(&global_terminal);
+                    if(global_terminal.input_length<before)
+                        Floppy144AudioPlay(&global_platform,
+                            FLOPPY144_AUDIO_TERMINAL_BACKSPACE);
                     break;
                 }
 
