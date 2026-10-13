@@ -2407,6 +2407,46 @@ static void TestBF18DocumentNotebook(const char *root)
     puts("BF18: 170 authored summaries, exact IDs, uniqueness, opened state, repeat view, V4/V5 persistence PASS");
 }
 
+
+static void TestBF19InspectionSettings(const char *root)
+{
+    Floppy144Settings settings,loaded;
+    uint8_t bytes[FLOPPY144_SETTINGS_PAYLOAD_V1_SIZE];
+    char path[F144_PLATFORM_PATH_CAPACITY];
+    Floppy144SettingsReset(&settings);
+    Expect(settings.show_inspection_indicators==0U,
+        "BF19 default setting OFF");
+    Expect(Floppy144PersistenceEncodeSettings(
+        &settings,bytes,sizeof(bytes))&&bytes[5]==0U,
+        "BF19 old layout zero reserved byte is OFF");
+    Expect(Floppy144PersistenceDecodeSettings(
+        &loaded,bytes,sizeof(bytes))&&loaded.show_inspection_indicators==0U,
+        "BF19 legacy settings decode OFF");
+    Expect(Floppy144SettingsSetInspectionIndicators(&settings,true),
+        "BF19 setting can switch on");
+    Expect(Floppy144PersistenceEncodeSettings(
+        &settings,bytes,sizeof(bytes))&&bytes[5]==1U &&
+        Floppy144PersistenceDecodeSettings(&loaded,bytes,sizeof(bytes)) &&
+        loaded.show_inspection_indicators==1U,
+        "BF19 settings encode/decode ON");
+    Expect(TestJoinPath(root,"bf19-settings.dat",path,
+        (uint32_t)sizeof(path)) &&
+        Floppy144PersistenceSaveSettings(path,&settings) &&
+        Floppy144PersistenceLoadSettings(path,&loaded) &&
+        loaded.show_inspection_indicators==1U,
+        "BF19 settings restart retains ON");
+    Expect(Floppy144SettingsSetInspectionIndicators(&loaded,false) &&
+        Floppy144PersistenceSaveSettings(path,&loaded) &&
+        Floppy144PersistenceLoadSettings(path,&settings) &&
+        settings.show_inspection_indicators==0U,
+        "BF19 settings restart retains OFF");
+    bytes[5]=2U;
+    Expect(Floppy144PersistenceDecodeSettings(
+        &loaded,bytes,sizeof(bytes)) &&
+        loaded.show_inspection_indicators==0U && loaded.dirty==1U,
+        "BF19 malformed toggle normalizes to OFF");
+}
+
 int main(void)
 {
     const char *root=getenv("F144_TEST_ROOT");
@@ -2447,6 +2487,7 @@ int main(void)
     TestStage4GCompleteJourney(root);
     TestStage4HInspection(root);
     TestBF18DocumentNotebook(root);
+    TestBF19InspectionSettings(root);
 
     if(failures!=0)
     {

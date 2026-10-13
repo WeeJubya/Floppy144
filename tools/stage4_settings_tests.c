@@ -30,6 +30,12 @@ static void TestDefaultsAndRanges(void)
     Expect(s.text_speed==(uint8_t)FLOPPY144_TEXT_SPEED_NORMAL,"default text speed");
     Expect(s.music_volume==10U&&s.sfx_volume==10U,"default volumes");
     Expect(s.autosave_mode==(uint8_t)FLOPPY144_AUTOSAVE_5_MINUTES,"default autosave");
+    Expect(s.show_inspection_indicators==0U,"BF19 indicators default OFF");
+    Expect(Floppy144SettingsSetInspectionIndicators(&s,true)&&
+        s.show_inspection_indicators==1U,"BF19 toggle ON");
+    Expect(!Floppy144SettingsSetInspectionIndicators(&s,true),"BF19 duplicate no-op");
+    Expect(Floppy144SettingsSetInspectionIndicators(&s,false)&&
+        s.show_inspection_indicators==0U,"BF19 toggle OFF");
     Expect(Floppy144SettingsSetCrtMode(&s,FLOPPY144_CRT_REDUCED),"CRT reduced");
     Expect(Floppy144SettingsSetCrtMode(&s,FLOPPY144_CRT_OFF),"CRT off");
     Expect(!Floppy144SettingsSetCrtMode(&s,FLOPPY144_CRT_COUNT),"invalid CRT");

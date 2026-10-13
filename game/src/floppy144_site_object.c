@@ -2767,3 +2767,28 @@ uint32_t Floppy144SiteAvailableActions(
     return uActions;
 }
 
+
+/* BF19: symbol eligibility is shared with existing parent inspection rules. */
+bool Floppy144SiteFurnitureInspectionIndicator(const Floppy144RunState *state,const Floppy144SiteRect *rect)
+{
+    const Floppy144DataRecord *parent;
+    uint32_t i;
+    if(state==NULL||rect==NULL||!Floppy144SiteRectRuntimeVisible(state,rect))return false;
+    parent=Floppy144SiteParentRecordForRect(rect);
+    if(parent==NULL||parent->eKind!=FLOPPY144_DATA_FURNITURE||
+       parent->pszId==NULL||parent->pszB==NULL)return false;
+    /* Secure cabinets use Access rather than Inspect, whether locked or unlocked. */
+    if(Floppy144SiteDataStringEqual(parent->pszC,"SECURE_CABINET")||
+       !Floppy144SiteParentInspectable(parent))return false;
+    if(Floppy144SiteDataStringEqual(parent->pszB,"BOOKCASE")||
+       Floppy144SiteDataStringEqual(parent->pszB,"NONSECURE_CABINET")||
+       Floppy144SiteDataStringEqual(parent->pszB,"SHELVING_FULL"))return true;
+    for(i=0U;i<Floppy144GameDataRecordCount();++i)
+    {
+        const Floppy144DataRecord *item=Floppy144GameDataRecordAt(i);
+        if(item!=NULL&&item->eKind==FLOPPY144_DATA_PHYSICAL_ITEM&&
+           Floppy144SiteDataStringEqual(item->pszC,parent->pszId)&&
+           Floppy144SitePhysicalItemVisible(state,item))return true;
+    }
+    return false;
+}

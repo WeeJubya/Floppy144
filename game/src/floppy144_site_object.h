@@ -198,3 +198,6 @@ bool Floppy144SiteObjectGeometryVisible(
     const Floppy144RunState *state,
     const Floppy144SiteRect *rect
 );
+
+/* BF19: query actual visible, inspectable furniture; secure Access-only stays unmarked. */
+bool Floppy144SiteFurnitureInspectionIndicator(const Floppy144RunState *state,const Floppy144SiteRect *rect);

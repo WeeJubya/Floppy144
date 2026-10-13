@@ -395,14 +395,15 @@ static void Floppy144Redraw(
              * enhances the Site Directory only; playable ISO room projection
              * is retained in source for a later release.
              */
-            Floppy144Site2DDrawForPlayerState(
+            Floppy144Site2DDrawForPlayerStateWithIndicators(
                 pSurface,
                 &global_run_state,
                 global_office_notice,
                 Floppy144DiscoveryProfileBodyStyle(
                     &global_profile
                 ),
-                &global_player_visual
+                &global_player_visual,
+                global_settings.show_inspection_indicators!=0U
             );
 
             break;
@@ -1541,6 +1542,14 @@ static void Floppy144CommitSettingsAdjustment(
             break;
         }
 
+        case FLOPPY144_SETTINGS_OPTION_INSPECTION_INDICATORS:
+        {
+            changed=Floppy144SettingsSetInspectionIndicators(
+                &global_settings,
+                global_settings.show_inspection_indicators==0U
+            );
+            break;
+        }
         case FLOPPY144_SETTINGS_OPTION_CREDITS:
         case FLOPPY144_SETTINGS_OPTION_COUNT:
         {

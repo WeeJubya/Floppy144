@@ -151,6 +151,7 @@ void Floppy144SettingsViewDraw(
         "MUSIC VOLUME",
         "SFX VOLUME",
         "AUTOSAVE INTERVAL",
+        "SHOW INSPECTION INDICATORS",
         "CREDITS / ATTRIBUTION"
     };
     char values[FLOPPY144_SETTINGS_OPTION_COUNT][32];
@@ -171,6 +172,7 @@ void Floppy144SettingsViewDraw(
     Floppy144SettingsViewVolumeText(values[FLOPPY144_SETTINGS_OPTION_MUSIC_VOLUME],(uint32_t)sizeof(values[0]),settings->music_volume);
     Floppy144SettingsViewVolumeText(values[FLOPPY144_SETTINGS_OPTION_SFX_VOLUME],(uint32_t)sizeof(values[0]),settings->sfx_volume);
     (void)snprintf(values[FLOPPY144_SETTINGS_OPTION_AUTOSAVE],sizeof(values[0]),"%s",Floppy144SettingsViewAutosaveText(settings));
+    (void)snprintf(values[FLOPPY144_SETTINGS_OPTION_INSPECTION_INDICATORS],sizeof(values[0]),"%s",settings->show_inspection_indicators?"ON":"OFF");
     (void)snprintf(values[FLOPPY144_SETTINGS_OPTION_CREDITS],sizeof(values[0]),"%s","ENTER");
 
     Floppy144DrawClear(surface,background);
@@ -184,7 +186,7 @@ void Floppy144SettingsViewDraw(
 
     for(option=0U;option<(uint32_t)FLOPPY144_SETTINGS_OPTION_COUNT;++option)
     {
-        uint32_t row_y=96U+option*31U;
+        uint32_t row_y=94U+option*29U;
         bool selected=option==(uint32_t)selected_option;
         bool credits=option==(uint32_t)FLOPPY144_SETTINGS_OPTION_CREDITS;
 
@@ -208,6 +210,6 @@ void Floppy144SettingsViewDraw(
         }
     }
 
-    Floppy144DrawText(surface,96U,286U,status_text!=NULL?status_text:"CHANGES ARE SAVED AUTOMATICALLY",1U,status_text!=NULL?amber:muted);
+    Floppy144DrawText(surface,96U,290U,status_text!=NULL?status_text:"CHANGES ARE SAVED AUTOMATICALLY",1U,status_text!=NULL?amber:muted);
     Floppy144DrawText(surface,10U,FLOPPY144_UI_FORMAL_FOOTER_Y,"UP/DOWN SELECT   LEFT/RIGHT CHANGE   ENTER CHANGE/OPEN   BACKSPACE BACK",1U,muted);
 }

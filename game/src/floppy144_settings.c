@@ -211,3 +211,10 @@ uint32_t Floppy144SettingsAutosaveIntervalMs
         }
     }
 }
+
+bool Floppy144SettingsSetInspectionIndicators(Floppy144Settings *settings,bool enabled)
+{
+    uint8_t value=enabled?1U:0U;
+    if(settings==NULL||settings->show_inspection_indicators==value)return false;
+    settings->show_inspection_indicators=value;settings->dirty=1U;return true;
+}

@@ -3388,6 +3388,73 @@ static void Floppy144Site2DDrawSiteRect(
     }
 }
 
+
+/* BF19: clipped presentation-only selection glow and optional Inspect marks. */
+static void Floppy144Site2DInspectionOverlay(
+    Floppy144Surface *surface,
+    const Floppy144SiteCamera2D *camera,
+    const Floppy144RunState *state,
+    Floppy144RoomId room,
+    bool show_indicators
+)
+{
+    const char *focused=Floppy144SiteFocusedParentId(state);
+    const Floppy144SiteRect *selected=focused!=NULL ?
+        Floppy144SiteRectForParentId(focused):NULL;
+    uint32_t i;
+    for(i=0U;i<Floppy144SiteRectCount();++i)
+    {
+        const Floppy144SiteRect *r=Floppy144SiteRectAt(i);
+        Floppy144SiteScreenRect projected;
+        bool chosen,mark;
+        int32_t cx,cy;
+        const uint32_t glow=FLOPPY144_RGB(173,148,93);
+        const uint32_t muted=FLOPPY144_RGB(111,101,75);
+        if(r==NULL||r->room!=(uint8_t)room||
+           !Floppy144Site2DRectVisibleInRoom(state,room,r)||
+           !Floppy144Site2DProjectRect(camera,r,&projected))
+            continue;
+        chosen=r==selected;
+        mark=show_indicators &&
+             Floppy144SiteFurnitureInspectionIndicator(state,r);
+        if(!chosen&&!mark)continue;
+        if(chosen)
+        {
+            if(Floppy144Site2DRotationIsDiagonal(r->rotation))
+            {
+                Floppy144SitePoint2D quad[4];
+                int32_t x,y,ux,uy,vx,vy;
+                if(Floppy144Site2DDiagonalAxes(
+                    r,&projected,&x,&y,&ux,&uy,&vx,&vy))
+                {
+                    Floppy144Site2DBuildQuad(quad,x,y,ux,uy,vx,vy);
+                    Floppy144Site2DOutlineQuad(surface,quad,glow);
+                }
+                else Floppy144Site2DOutlineDiamond(surface,&projected,glow);
+            }
+            else
+            {
+                Floppy144Site2DOutline(surface,projected.x,projected.y,
+                    projected.width,projected.height,glow);
+                if(projected.width>=5&&projected.height>=5)
+                    Floppy144Site2DOutline(surface,projected.x+2,projected.y+2,
+                        projected.width-4,projected.height-4,muted);
+            }
+        }
+        if(!mark||projected.width<14||projected.height<14)continue;
+        cx=Floppy144Site2DRotationIsDiagonal(r->rotation)
+           ?projected.x+projected.width/2:projected.x+projected.width-9;
+        cy=Floppy144Site2DRotationIsDiagonal(r->rotation)
+           ?projected.y+projected.height/2:projected.y+7;
+        /* Magnifying glass on the furniture top, bounded by the camera. */
+        Floppy144Site2DLine(surface,cx-2,cy-3,cx+1,cy-3,muted);
+        Floppy144Site2DLine(surface,cx-3,cy-2,cx-3,cy+1,muted);
+        Floppy144Site2DLine(surface,cx+2,cy-2,cx+2,cy+1,muted);
+        Floppy144Site2DLine(surface,cx-2,cy+2,cx+1,cy+2,muted);
+        Floppy144Site2DLine(surface,cx+2,cy+2,cx+5,cy+5,muted);
+    }
+}
+
 /*
  * The impossible door is a non-colliding drawing overlay on an existing solid
  * wall cell. It is never added to the generated Site list or Room topology.
@@ -3602,12 +3669,13 @@ void Floppy144Site2DDrawHeader(
         warning_flash?FLOPPY144_RGB(240,68,68):normal);
 }
 
-void Floppy144Site2DDrawForPlayerState(
+void Floppy144Site2DDrawForPlayerStateWithIndicators(
     Floppy144Surface *pSurface,
     const Floppy144RunState *run_state,
     const char *notice,
     Floppy144OperatorBodyStyle body_style,
-    const Floppy144PlayerVisualState *player_visual
+    const Floppy144PlayerVisualState *player_visual,
+    bool show_inspection_indicators
 )
 {
     const uint32_t background =
@@ -3951,6 +4019,9 @@ void Floppy144Site2DDrawForPlayerState(
          * Z4: camera view. The player is composited after world layers; the
          * fixed viewport/frame below then masks the world at the camera edge.
          */
+        Floppy144Site2DInspectionOverlay(
+            &surface,&camera,run_state,active_room,show_inspection_indicators
+        );
         Floppy144Site2DDrawPlayer(
             &surface,
             &camera,
@@ -4021,6 +4092,19 @@ void Floppy144Site2DDrawForPlayerState(
         menu_prompt,
         1U,
         muted
+    );
+}
+
+void Floppy144Site2DDrawForPlayerState(
+    Floppy144Surface *surface,
+    const Floppy144RunState *state,
+    const char *notice,
+    Floppy144OperatorBodyStyle style,
+    const Floppy144PlayerVisualState *visual
+)
+{
+    Floppy144Site2DDrawForPlayerStateWithIndicators(
+        surface,state,notice,style,visual,false
     );
 }
 

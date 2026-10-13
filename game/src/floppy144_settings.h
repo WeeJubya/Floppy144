@@ -56,6 +56,8 @@ typedef struct Floppy144Settings
     uint8_t sfx_volume;
 
     uint8_t autosave_mode;
+    /* BF19 stores this in formerly reserved V1 settings byte 5. */
+    uint8_t show_inspection_indicators;
 
     uint8_t dirty;
 }
@@ -100,3 +102,5 @@ uint32_t Floppy144SettingsAutosaveIntervalMs
 (
     const Floppy144Settings *settings
 );
+
+bool Floppy144SettingsSetInspectionIndicators(Floppy144Settings *settings,bool enabled);

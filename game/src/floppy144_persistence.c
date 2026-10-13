@@ -1321,6 +1321,7 @@ bool Floppy144PersistenceEncodeSettings
             ? settings->autosave_mode
             : defaults.autosave_mode;
 
+    payload[5]=settings->show_inspection_indicators==1U?1U:0U;
     return true;
 }
 
@@ -1406,13 +1407,12 @@ bool Floppy144PersistenceDecodeSettings
             true;
     }
 
-    decoded.dirty =
-        normalized
-            ? 1U
-            : 0U;
+    /* Old configurations contain zero in reserved byte five. */
+    if(payload[5]<=1U)decoded.show_inspection_indicators=payload[5];
+    else normalized=true;
 
-    *settings =
-        decoded;
+    decoded.dirty = normalized ? 1U : 0U;
+    *settings = decoded;
 
     return true;
 }

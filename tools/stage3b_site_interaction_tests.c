@@ -2625,6 +2625,48 @@ static void Floppy144TestServerRoomCableRiserRestoration(void)
     );
 }
 
+
+/* BF19: inspect symbols follow authored furniture semantics, not proximity. */
+static void Floppy144TestBF19FurnitureIndicators(void)
+{
+    Floppy144WorldState world;
+    Floppy144RunState state;
+    uint32_t i,secure=0U,inspect=0U,scenery=0U;
+    Floppy144TestReset(&world,&state);
+    Floppy144RunStateEnableHathawayInspection(&state);
+    for(i=0U;i<Floppy144SiteRectCount();++i)
+    {
+        const Floppy144SiteRect *r=Floppy144SiteRectAt(i);
+        bool marked;
+        if(r==NULL)continue;
+        marked=Floppy144SiteFurnitureInspectionIndicator(&state,r);
+        if(r->type==(uint8_t)FLOPPY144_SITE_WINDOW)
+        {
+            ++scenery;
+            F144_CHECK(!marked,"BF19 windows never advertise Inspect");
+        }
+        if(marked)++inspect;
+    }
+    /* Walking near a locked cabinet cannot turn on its fixed symbol.
+       Cabinet Access is deliberately never advertised as Inspect. */
+    F144_CHECK(inspect>0U,"BF19 authored furniture with actual Inspect is marked");
+    F144_CHECK(scenery>0U,"BF19 noninteractive scenery exercised");
+    for(i=0U;i<Floppy144GameDataRecordCount();++i)
+    {
+        const Floppy144DataRecord *f=Floppy144GameDataRecordAt(i);
+        const Floppy144SiteRect *r;
+        if(f==NULL||f->eKind!=FLOPPY144_DATA_FURNITURE||
+           f->pszC==NULL||strcmp(f->pszC,"SECURE_CABINET")!=0)continue;
+        r=Floppy144SiteRectForParentId(f->pszId);
+        if(r==NULL)continue;
+        ++secure;
+        F144_CHECK(!Floppy144SiteFurnitureInspectionIndicator(&state,r),
+            "BF19 secure cabinet cannot show a misleading Inspect symbol");
+    }
+    F144_CHECK(secure>0U,"BF19 secure cabinet coverage");
+    puts("BF19: inspectable furniture, secure cabinetry, noninspectable scenery PASS");
+}
+
 int main(void)
 {
     Floppy144TestPhysicalParentCoverage();
@@ -2649,6 +2691,7 @@ int main(void)
     Floppy144TestContextLabels();
     Floppy144TestReceptionDirectoryWallSide();
     Floppy144TestExteriorExitBehaviour();
+    Floppy144TestBF19FurnitureIndicators();
 
     if(g_nFailures != 0)
     {

@@ -34,6 +34,15 @@ void Floppy144Site2DDrawForBodyStyle(
  * Stage 4D directional-player draw. Facing and gait are transient presentation
  * state and never become part of the persistent recovery RunState.
  */
+/* BF19: runtime option; existing entry point keeps indicators OFF. */
+void Floppy144Site2DDrawForPlayerStateWithIndicators(
+    Floppy144Surface *runtime,
+    const Floppy144RunState *run_state,
+    const char *notice,
+    Floppy144OperatorBodyStyle body_style,
+    const Floppy144PlayerVisualState *player_visual,
+    bool show_inspection_indicators
+);
 void Floppy144Site2DDrawForPlayerState(
     Floppy144Surface *runtime,
     const Floppy144RunState *run_state,
