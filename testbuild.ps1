@@ -29,6 +29,7 @@ try {
         [pscustomobject]@{ Label = 'Stage 4 platform boundary'; Script = 'test_stage4_platform.ps1'; Parameters = @{} },
         [pscustomobject]@{ Label = 'Stage 4 logical input'; Script = 'test_stage4_input.ps1'; Parameters = @{} },
         [pscustomobject]@{ Label = 'Stage 4 persistence paths'; Script = 'test_stage4_persistence.ps1'; Parameters = @{} },
+        [pscustomobject]@{ Label = 'Bug fix 18 authored Notebook coverage'; Script = 'test_bugfix18_notebook.ps1'; Parameters = @{} },
         [pscustomobject]@{ Label = 'Stage 4 audio contract'; Script = 'test_stage4_audio.ps1'; Parameters = @{} },
         [pscustomobject]@{ Label = 'Stage 4 timing and lifecycle'; Script = 'test_stage4_timing_lifecycle.ps1'; Parameters = @{} },
         [pscustomobject]@{ Label = 'Stage 4 single-instance protection'; Script = 'test_stage4_single_instance.ps1'; Parameters = @{} },

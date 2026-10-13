@@ -2303,6 +2303,110 @@ static void TestStage4HInspection(const char *root)
     puts("S4H: 35-collection/11-room inspector, all cabinets, fixed reusable Door, normal-save isolation PASS");
 }
 
+
+/* BF18: all actual document texts carry unique, first-open Notebook summaries. */
+static void TestBF18DocumentNotebook(const char *root)
+{
+    Floppy144RunState run,loaded,legacy;
+    char path[F144_PLATFORM_PATH_CAPACITY];
+    uint8_t old_v4[FLOPPY144_SAVE_PAYLOAD_V4_SIZE];
+    const Floppy144DataRecord *entries[192]={0};
+    uint32_t found=0U,idx;
+    uint32_t baseline;
+
+    Floppy144RunStateBegin(&run,180U);
+    baseline=Floppy144GameDataNotebookOrderedCount(&run);
+    for(idx=0U;idx<Floppy144GameDataRecordCount();++idx)
+    {
+        const Floppy144DataRecord *n=Floppy144GameDataRecordAt(idx);
+        if(n==NULL || n->eKind!=FLOPPY144_DATA_NOTEBOOK ||
+           n->pszB==NULL || strcmp(n->pszB,"DOCUMENT")!=0)continue;
+        if(found>=192U)
+        {
+            Expect(false,"BF18 document summaries fit fixed runtime capacity");
+            break;
+        }
+        entries[found++]=n;
+    }
+    Expect(found==170U,"BF18 every one of 170 authored documents has a Notebook summary");
+    Expect(run.document_note_count==0U &&
+           Floppy144GameDataNotebookOrderedCount(&run)==baseline,
+           "BF18 fresh run does not reveal unread authored summaries");
+    for(idx=0U;idx<found;++idx)
+    {
+        const Floppy144DataRecord *n=entries[idx];
+        Floppy144CollectionId collection;
+        uint32_t slot,other;
+        const Floppy144DataRecord *shown;
+        uint32_t before;
+        size_t id_length;
+        Expect(n->pszId!=NULL && n->pszA!=NULL && n->pszC!=NULL,
+               "BF18 authored summary metadata is complete");
+        if(n->pszId==NULL||n->pszA==NULL)continue;
+        id_length=strlen(n->pszId);
+        Expect(n->n0==(int32_t)idx &&
+               strncmp(n->pszA,n->pszId,id_length)==0 &&
+               n->pszA[id_length]==':' && n->pszA[id_length+1]==' ' &&
+               strlen(n->pszA)>id_length+35U,
+               "BF18 Notebook sentence has exact canonical ID and substantive text");
+        for(other=0U;other<idx;++other)
+        {
+            const Floppy144DataRecord *prior=entries[other];
+            Expect(strcmp(n->pszId,prior->pszId)!=0 &&
+                   strcmp(n->pszA+id_length+2U,
+                      prior->pszA+strlen(prior->pszId)+2U)!=0,
+                   "BF18 Notebook IDs and document prose remain unique");
+        }
+        Expect(Floppy144DocumentFindRecordId(n->pszId,&collection,&slot),
+               "BF18 Notebook ID resolves to authored document registry");
+        if(!Floppy144DocumentFindRecordId(n->pszId,&collection,&slot))
+            continue;
+        Expect(!Floppy144RunStateRecordOpened(&run,collection,slot),
+               "BF18 unopened document has no canonical OPENED bit");
+        before=Floppy144GameDataNotebookOrderedCount(&run);
+        Expect(Floppy144GameDataRecordOpened(&run,collection,slot) &&
+               Floppy144RunStateRecordOpened(&run,collection,slot),
+               "BF18 first opening persists canonical record state");
+        shown=Floppy144GameDataNotebookOrderedEntryAt(&run,before);
+        Expect(shown!=NULL && shown->eKind==FLOPPY144_DATA_NOTEBOOK &&
+               shown->pszB!=NULL && strcmp(shown->pszB,"DOCUMENT")==0,
+               "BF18 first opening appends an authored document Notebook entry");
+        Expect(!Floppy144GameDataRecordOpened(&run,collection,slot) &&
+               Floppy144GameDataNotebookOrderedCount(&run)==before+1U,
+               "BF18 re-opening never duplicates a Notebook entry");
+    }
+    Expect(run.document_note_count==170U &&
+           Floppy144GameDataNotebookOrderedCount(&run)==baseline+170U,
+           "BF18 all authored documents can be recorded beyond 128 old entries");
+    Expect(!Floppy144RunStateRecordOpened(&run,FLOPPY144_COLLECTION_DR01,10U) &&
+           Floppy144GameDataRecordOpened(&run,FLOPPY144_COLLECTION_DR01,10U) &&
+           run.document_note_count==170U,
+           "BF34 procedural records share OPENED bits without invented authored notes");
+
+    Expect(TestJoinPath(root,"bf18-notebook.sav",path,
+           (uint32_t)sizeof(path)) &&
+           Floppy144PersistenceSaveRunState(path,&run) &&
+           Floppy144PersistenceLoadRunState(path,&loaded),
+           "BF18 save/load succeeds with complete document history");
+    Expect(memcmp(run.records_opened,loaded.records_opened,
+              sizeof(run.records_opened))==0 &&
+           memcmp(run.document_note_order,loaded.document_note_order,
+              sizeof(run.document_note_order))==0 &&
+           run.document_note_count==loaded.document_note_count &&
+           Floppy144GameDataNotebookOrderedCount(&loaded)==baseline+170U,
+           "BF18 save/reload preserves viewed flags, ordering and Notebook contents");
+
+    Expect(Floppy144PersistenceEncodeRunState(&run,old_v4,
+           FLOPPY144_SAVE_PAYLOAD_V4_SIZE) &&
+           Floppy144PersistenceDecodeRunState(&legacy,old_v4,
+           FLOPPY144_SAVE_PAYLOAD_V4_SIZE) &&
+           legacy.document_note_count==0U &&
+           !Floppy144RunStateRecordOpened(&legacy,FLOPPY144_COLLECTION_DR01,10U) &&
+           legacy.notebook_order_count==run.notebook_order_count,
+           "BF18 V4 decoding preserves original Notebook while new status defaults unread");
+    puts("BF18: 170 authored summaries, exact IDs, uniqueness, opened state, repeat view, V4/V5 persistence PASS");
+}
+
 int main(void)
 {
     const char *root=getenv("F144_TEST_ROOT");
@@ -2342,6 +2446,7 @@ int main(void)
     TestGreyDoorOneShotLifecycle(root);
     TestStage4GCompleteJourney(root);
     TestStage4HInspection(root);
+    TestBF18DocumentNotebook(root);
 
     if(failures!=0)
     {

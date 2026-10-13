@@ -25,6 +25,10 @@
 
 #define FLOPPY144_RECOVERY_CAPACITY_KB 1440U
 #define FLOPPY144_NOTEBOOK_ORDER_MAX 128U
+/* BF18/BF34: fixed legacy Notebook history, separate versioned record-opened ledger. */
+#define FLOPPY144_RECORD_OPENED_SLOTS_PER_COLLECTION 128U
+#define FLOPPY144_DOCUMENT_NOTE_CAPACITY 192U
+#define FLOPPY144_RECORD_OPENED_BITS (FLOPPY144_COLLECTION_COUNT * FLOPPY144_RECORD_OPENED_SLOTS_PER_COLLECTION)
 
 #define FLOPPY144_RUN_WORD_BITS             32
 
@@ -131,6 +135,14 @@ typedef struct Floppy144RunState
     uint32_t capabilities[
         FLOPPY144_RUN_WORD_COUNT(FLOPPY144_CAPABILITY_COUNT)
     ];
+
+    /* Canonical per-record OPENED state for both authored and procedural records. */
+    uint32_t records_opened[
+        FLOPPY144_RUN_WORD_COUNT(FLOPPY144_RECORD_OPENED_BITS)
+    ];
+    /* First-open order, separate from the immutable 128-slot legacy Notebook. */
+    uint16_t document_note_order[FLOPPY144_DOCUMENT_NOTE_CAPACITY];
+    uint16_t document_note_count;
 }
 Floppy144RunState;
 
@@ -365,6 +377,21 @@ uint32_t Floppy144RunStateGreyDoorPlacementSlot(
 
 /* Non-persistent, synthetic all-restored visual inspection snapshot. */
 void Floppy144RunStateEnableHathawayInspection(Floppy144RunState *state);
+
+bool Floppy144RunStateRecordOpened(
+    const Floppy144RunState *state,
+    Floppy144CollectionId collection,
+    uint32_t record_index
+);
+bool Floppy144RunStateMarkRecordOpened(
+    Floppy144RunState *state,
+    Floppy144CollectionId collection,
+    uint32_t record_index
+);
+bool Floppy144RunStateAppendDocumentNote(
+    Floppy144RunState *state,
+    uint32_t authored_ordinal
+);
 
 void Floppy144RunStateReset
 (

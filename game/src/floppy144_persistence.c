@@ -324,7 +324,8 @@ bool Floppy144PersistenceEncodeRunState
     uint32_t index;
     bool bHasNotebook=payload_size==FLOPPY144_SAVE_PAYLOAD_V2_SIZE ||
         payload_size==FLOPPY144_SAVE_PAYLOAD_V3_SIZE ||
-        payload_size==FLOPPY144_SAVE_PAYLOAD_V4_SIZE;
+        payload_size==FLOPPY144_SAVE_PAYLOAD_V4_SIZE ||
+        payload_size==FLOPPY144_SAVE_PAYLOAD_V5_SIZE;
 
     if(
         state==NULL || payload==NULL ||
@@ -381,11 +382,39 @@ bool Floppy144PersistenceEncodeRunState
             return false;
         payload[offset++]=state->grey_door_state;
     }
-    if(payload_size==FLOPPY144_SAVE_PAYLOAD_V4_SIZE)
+    if(payload_size>=FLOPPY144_SAVE_PAYLOAD_V4_SIZE)
     {
         if(state->opening_recovery_step >
             (uint8_t)FLOPPY144_OPENING_FIRST_RECORD_OPENED) return false;
         payload[offset++]=state->opening_recovery_step;
+    }
+    if(payload_size==FLOPPY144_SAVE_PAYLOAD_V5_SIZE)
+    {
+        uint32_t uOther;
+        if(state->document_note_count>FLOPPY144_DOCUMENT_NOTE_CAPACITY)
+            return false;
+        for(index=0U;index<(uint32_t)(
+            sizeof(state->records_opened)/sizeof(state->records_opened[0]));++index)
+        {
+            Floppy144PersistenceWriteU32(&payload[offset],
+                state->records_opened[index]);
+            offset+=4U;
+        }
+        Floppy144PersistenceWriteU16(&payload[offset],state->document_note_count);
+        offset+=2U;
+        for(index=0U;index<FLOPPY144_DOCUMENT_NOTE_CAPACITY;++index)
+        {
+            uint16_t value=index<(uint32_t)state->document_note_count ?
+                state->document_note_order[index] : 0U;
+            if(index<(uint32_t)state->document_note_count)
+            {
+                if(value>=170U)return false;
+                for(uOther=0U;uOther<index;++uOther)
+                    if(state->document_note_order[uOther]==value)return false;
+            }
+            Floppy144PersistenceWriteU16(&payload[offset],value);
+            offset+=2U;
+        }
     }
     return offset==payload_size;
 }
@@ -401,7 +430,8 @@ bool Floppy144PersistenceDecodeRunState
     uint32_t index;
     bool bHasNotebook=payload_size==FLOPPY144_SAVE_PAYLOAD_V2_SIZE ||
         payload_size==FLOPPY144_SAVE_PAYLOAD_V3_SIZE ||
-        payload_size==FLOPPY144_SAVE_PAYLOAD_V4_SIZE;
+        payload_size==FLOPPY144_SAVE_PAYLOAD_V4_SIZE ||
+        payload_size==FLOPPY144_SAVE_PAYLOAD_V5_SIZE;
 
     if(
         state==NULL || payload==NULL ||
@@ -463,11 +493,46 @@ bool Floppy144PersistenceDecodeRunState
             if(decoded.grey_door_state>(uint8_t)FLOPPY144_GREY_DOOR_COMPLETED)
                 return false;
         }
-        if(payload_size==FLOPPY144_SAVE_PAYLOAD_V4_SIZE)
+        if(payload_size>=FLOPPY144_SAVE_PAYLOAD_V4_SIZE)
         {
             decoded.opening_recovery_step=payload[offset++];
             if(decoded.opening_recovery_step >
                 (uint8_t)FLOPPY144_OPENING_FIRST_RECORD_OPENED) return false;
+        }
+        if(payload_size==FLOPPY144_SAVE_PAYLOAD_V5_SIZE)
+        {
+            uint16_t count;
+            for(index=0U;index<(uint32_t)(
+                sizeof(decoded.records_opened)/sizeof(decoded.records_opened[0]));++index)
+            {
+                decoded.records_opened[index]=Floppy144PersistenceReadU32(
+                    &payload[offset]);
+                offset+=4U;
+            }
+            if(!Floppy144PersistenceWordArrayValid(
+                decoded.records_opened,
+                (uint32_t)(sizeof(decoded.records_opened)/
+                    sizeof(decoded.records_opened[0])),
+                FLOPPY144_RECORD_OPENED_BITS))return false;
+            count=Floppy144PersistenceReadU16(&payload[offset]);
+            offset+=2U;
+            if(count>FLOPPY144_DOCUMENT_NOTE_CAPACITY)return false;
+            decoded.document_note_count=count;
+            for(index=0U;index<FLOPPY144_DOCUMENT_NOTE_CAPACITY;++index)
+            {
+                uint32_t uOther;
+                uint16_t value=Floppy144PersistenceReadU16(&payload[offset]);
+                offset+=2U;
+                if(index>=count)
+                {
+                    if(value!=0U)return false;
+                    continue;
+                }
+                if(value>=170U)return false;
+                for(uOther=0U;uOther<index;++uOther)
+                    if(decoded.document_note_order[uOther]==value)return false;
+                decoded.document_note_order[index]=value;
+            }
         }
         if(offset!=payload_size) return false;
     }
@@ -558,8 +623,10 @@ bool Floppy144PersistenceHeaderValid
         return expected_payload_size==FLOPPY144_SAVE_PAYLOAD_V2_SIZE;
     if(header->version==FLOPPY144_SAVE_VERSION_V3)
         return expected_payload_size==FLOPPY144_SAVE_PAYLOAD_V3_SIZE;
-    if(header->version==FLOPPY144_SAVE_VERSION)
+    if(header->version==FLOPPY144_SAVE_VERSION_V4)
         return expected_payload_size==FLOPPY144_SAVE_PAYLOAD_V4_SIZE;
+    if(header->version==FLOPPY144_SAVE_VERSION)
+        return expected_payload_size==FLOPPY144_SAVE_PAYLOAD_V5_SIZE;
     return false;
 }
 
@@ -587,17 +654,17 @@ bool Floppy144PersistenceSaveRunState
     const char *path,
     Floppy144RunState *state
 ){
-    uint8_t file_data[FLOPPY144_SAVE_FILE_V4_SIZE];
+    uint8_t file_data[FLOPPY144_SAVE_FILE_V5_SIZE];
     uint8_t *payload=&file_data[FLOPPY144_SAVE_HEADER_SIZE];
     Floppy144SaveHeader header;
 
     if(path==NULL||state==NULL) return false;
-    if(!Floppy144PersistenceEncodeRunState(state,payload,FLOPPY144_SAVE_PAYLOAD_V4_SIZE)) return false;
+    if(!Floppy144PersistenceEncodeRunState(state,payload,FLOPPY144_SAVE_PAYLOAD_V5_SIZE)) return false;
 
     header.magic=FLOPPY144_SAVE_MAGIC;
     header.version=FLOPPY144_SAVE_VERSION;
-    header.payload_size=FLOPPY144_SAVE_PAYLOAD_V4_SIZE;
-    header.checksum=Floppy144PersistenceChecksum(payload,FLOPPY144_SAVE_PAYLOAD_V4_SIZE);
+    header.payload_size=FLOPPY144_SAVE_PAYLOAD_V5_SIZE;
+    header.checksum=Floppy144PersistenceChecksum(payload,FLOPPY144_SAVE_PAYLOAD_V5_SIZE);
     Floppy144PersistenceEncodeHeader(file_data,&header);
     if(!Floppy144PersistenceReplaceFile(path,file_data,(uint32_t)sizeof(file_data))) return false;
     state->dirty=0U;
@@ -609,7 +676,7 @@ bool Floppy144PersistenceLoadRunState
     const char *path,
     Floppy144RunState *state
 ){
-    uint8_t file_data[FLOPPY144_SAVE_FILE_V4_SIZE];
+    uint8_t file_data[FLOPPY144_SAVE_FILE_V5_SIZE];
     const uint8_t *payload=&file_data[FLOPPY144_SAVE_HEADER_SIZE];
     Floppy144SaveHeader header;
     Floppy144RunState decoded;
@@ -635,8 +702,10 @@ bool Floppy144PersistenceLoadRunState
         expected_payload=FLOPPY144_SAVE_PAYLOAD_V2_SIZE;
     else if(header.version==FLOPPY144_SAVE_VERSION_V3)
         expected_payload=FLOPPY144_SAVE_PAYLOAD_V3_SIZE;
-    else if(header.version==FLOPPY144_SAVE_VERSION)
+    else if(header.version==FLOPPY144_SAVE_VERSION_V4)
         expected_payload=FLOPPY144_SAVE_PAYLOAD_V4_SIZE;
+    else if(header.version==FLOPPY144_SAVE_VERSION)
+        expected_payload=FLOPPY144_SAVE_PAYLOAD_V5_SIZE;
     else
         return false;
 

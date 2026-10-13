@@ -1,0 +1,59 @@
+name: BF18 Document Notebook Gate
+
+on:
+  push:
+    branches:
+      - development/Stage-4
+  workflow_dispatch:
+
+jobs:
+  bf18-notebook:
+    runs-on: windows-2022
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Generate canonical game data
+        shell: pwsh
+        run: |
+          .\tools\build_game_data.ps1
+          git diff --exit-code -- game/src/floppy144_game_data.generated.inc
+      - name: BF18 full summary coverage
+        shell: pwsh
+        run: .\tools\test_bugfix18_notebook.ps1
+      - name: BF18 persistence and duplicate-open cases
+        shell: pwsh
+        run: .\tools\test_stage4_persistence.ps1
+      - name: Document, trigger and cabinet regressions
+        shell: pwsh
+        run: |
+          .\tools\test_stage3a.ps1
+          .\tools\test_stage3b.ps1
+      - name: Install Premake
+        shell: pwsh
+        run: |
+          $url = 'https://github.com/premake/premake-core/releases/download/v5.0.0-beta8/premake-5.0.0-beta8-windows.zip'
+          $zip = Join-Path $env:RUNNER_TEMP 'premake.zip'
+          $dir = Join-Path $env:RUNNER_TEMP 'premake'
+          Invoke-WebRequest -Uri $url -OutFile $zip
+          Expand-Archive -Path $zip -DestinationPath $dir -Force
+          $exe = Get-ChildItem -Path $dir -Recurse -Filter premake5.exe | Select-Object -First 1
+          if(-not $exe) { throw 'premake5.exe not found' }
+          $exe.Directory.FullName | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Generate Visual Studio solution
+        shell: pwsh
+        run: premake5 vs2022
+      - name: Release build
+        shell: pwsh
+        run: msbuild .\build\Floppy144.sln /t:Floppy144 /m /p:Configuration=release /p:Platform=windows /p:WarningLevel=Level4 /p:TreatWarningsAsErrors=true
+      - name: Standalone executable size
+        shell: pwsh
+        run: |
+          $bytes = (Get-Item '.\bin\release\Floppy144.exe').Length
+          Write-Host "Release bytes: $bytes"
+          if($bytes -gt 1474560) { throw 'SIZE GATE FAILED' }
+          Write-Host "BF18 SIZE: PASS, remaining $(1474560 - $bytes)"

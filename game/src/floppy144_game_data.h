@@ -56,6 +56,12 @@ Floppy144CollectionId Floppy144GameDataCollectionId(const char *pszId);
 Floppy144RoomId Floppy144GameDataRoomId(const char *pszId);
 Floppy144CapabilityId Floppy144GameDataCapabilityId(const char *pszId);
 void Floppy144GameDataCaptureNewNotebookEntries(Floppy144RunState *pState);
+/* Call only after a record viewer has actually opened its contents. */
+bool Floppy144GameDataRecordOpened(
+    Floppy144RunState *state,
+    Floppy144CollectionId collection,
+    uint32_t record_index
+);
 uint32_t Floppy144GameDataNotebookRecordCount(void);
 uint32_t Floppy144GameDataNotebookOrderedCount(const Floppy144RunState *pState);
 const Floppy144DataRecord *Floppy144GameDataNotebookOrderedEntryAt(const Floppy144RunState *pState,uint32_t uIndex);

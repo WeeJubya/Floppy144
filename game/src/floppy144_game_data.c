@@ -5,6 +5,7 @@
  * evidence, connection and collection facts come from generated JSON records.
  */
 #include "floppy144_game_data.h"
+#include "floppy144_document.h"
 #include "floppy144_collection_registry.h"
 #include "floppy144_object_registry.h"
 #include <stddef.h>
@@ -617,7 +618,8 @@ uint32_t Floppy144GameDataNotebookOrderedCount(const Floppy144RunState *pState)
      */
     return
         pState != NULL
-            ? (uint32_t)pState->notebook_order_count
+            ? (uint32_t)pState->notebook_order_count+
+              (uint32_t)pState->document_note_count
             : 0U;
 }
 
@@ -626,18 +628,55 @@ const Floppy144DataRecord *Floppy144GameDataNotebookOrderedEntryAt(
     uint32_t uIndex
 )
 {
-    if(
-        pState == NULL ||
-        uIndex >= (uint32_t)pState->notebook_order_count
-    )
-    {
-        return NULL;
-    }
-
-    return
-        Floppy144GameDataNotebookRecordAtOrdinal(
+    uint32_t u;
+    if(pState==NULL)return NULL;
+    if(uIndex<(uint32_t)pState->notebook_order_count)
+        return Floppy144GameDataNotebookRecordAtOrdinal(
             (uint32_t)pState->notebook_order[uIndex]
         );
+    uIndex-=(uint32_t)pState->notebook_order_count;
+    if(uIndex>=(uint32_t)pState->document_note_count)return NULL;
+    for(u=0U;u<F144_COUNT(g_asGameData);++u)
+    {
+        const Floppy144DataRecord *p=&g_asGameData[u];
+        if(p->eKind==FLOPPY144_DATA_NOTEBOOK &&
+           Floppy144StringEqual(p->pszB,"DOCUMENT") &&
+           p->n0==(int32_t)pState->document_note_order[uIndex])
+            return p;
+    }
+    return NULL;
+}
+
+/* Shared canonical OPENED marker for BF18 and BF34, including procedural slots. */
+bool Floppy144GameDataRecordOpened(
+    Floppy144RunState *state,
+    Floppy144CollectionId collection,
+    uint32_t record_index
+)
+{
+    const Floppy144DocumentDefinition *doc;
+    uint32_t u;
+    if(state==NULL ||
+       !Floppy144RunStateMarkRecordOpened(state,collection,record_index))
+        return false;
+    doc=Floppy144DocumentGetForSeed(
+        collection,record_index,state->recovery_seed
+    );
+    if(doc==NULL || doc->pszBody==NULL || doc->pszBody[0]=='\0' ||
+       doc->record_id_override==NULL)
+        return true;
+    for(u=0U;u<F144_COUNT(g_asGameData);++u)
+    {
+        const Floppy144DataRecord *p=&g_asGameData[u];
+        if(p->eKind==FLOPPY144_DATA_NOTEBOOK &&
+           Floppy144StringEqual(p->pszB,"DOCUMENT") &&
+           Floppy144StringEqual(p->pszId,doc->record_id_override))
+        {
+            (void)Floppy144RunStateAppendDocumentNote(state,(uint32_t)p->n0);
+            break;
+        }
+    }
+    return true;
 }
 
 /* Compatibility wrappers now present the same chronological order. */

@@ -1560,3 +1560,56 @@ bool Floppy144RunStateInitialiseArchiveServices
 
     return true;
 }
+
+
+bool Floppy144RunStateRecordOpened(
+    const Floppy144RunState *state,
+    Floppy144CollectionId collection,
+    uint32_t record_index
+)
+{
+    if(state==NULL || (uint32_t)collection>=FLOPPY144_COLLECTION_COUNT ||
+       record_index>=FLOPPY144_RECORD_OPENED_SLOTS_PER_COLLECTION)
+        return false;
+    return Floppy144RunStateBitGet(
+        state->records_opened,
+        (uint32_t)collection*FLOPPY144_RECORD_OPENED_SLOTS_PER_COLLECTION+
+        record_index
+    );
+}
+
+bool Floppy144RunStateMarkRecordOpened(
+    Floppy144RunState *state,
+    Floppy144CollectionId collection,
+    uint32_t record_index
+)
+{
+    if(state==NULL || (uint32_t)collection>=FLOPPY144_COLLECTION_COUNT ||
+       record_index>=FLOPPY144_RECORD_OPENED_SLOTS_PER_COLLECTION)
+        return false;
+    if(!Floppy144RunStateBitSet(
+        state->records_opened,
+        (uint32_t)collection*FLOPPY144_RECORD_OPENED_SLOTS_PER_COLLECTION+
+        record_index
+    ))return false;
+    state->dirty=1U;
+    return true;
+}
+
+bool Floppy144RunStateAppendDocumentNote(
+    Floppy144RunState *state,
+    uint32_t authored_ordinal
+)
+{
+    uint16_t i;
+    if(state==NULL ||
+       authored_ordinal>=FLOPPY144_DOCUMENT_NOTE_CAPACITY ||
+       state->document_note_count>=FLOPPY144_DOCUMENT_NOTE_CAPACITY)
+        return false;
+    for(i=0U;i<state->document_note_count;++i)
+        if(state->document_note_order[i]==(uint16_t)authored_ordinal)
+            return false;
+    state->document_note_order[state->document_note_count++]=(uint16_t)authored_ordinal;
+    state->dirty=1U;
+    return true;
+}

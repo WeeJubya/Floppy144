@@ -2735,6 +2735,11 @@ static bool Floppy144HandleTextInput(
                                 global_terminal.requested_collection,
                                 global_terminal.requested_record_index
                             );
+                            (void)Floppy144GameDataRecordOpened(
+                                &global_run_state,
+                                global_terminal.requested_collection,
+                                global_terminal.requested_record_index
+                            );
 
                             /*
                              * Refresh the objective from resulting persistent
@@ -4000,6 +4005,11 @@ static bool Floppy144HandleActionEvent(
                                  */
                                 Floppy144DocumentApplyEffects(
                                     &global_world,
+                                    &global_run_state,
+                                    global_catalogue.collection,
+                                    global_catalogue.selected_index
+                                );
+                                (void)Floppy144GameDataRecordOpened(
                                     &global_run_state,
                                     global_catalogue.collection,
                                     global_catalogue.selected_index

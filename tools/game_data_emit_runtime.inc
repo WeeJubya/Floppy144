@@ -19,5 +19,25 @@ static void emit_flat_runtime(JsonValue *pRoot,const char *pszOutputDirectory){
  pArray=get(pRoot,"drawing_definitions");for(i=0;i<count(pArray);++i){JsonValue*pEntry=at(pArray,i),*pPr=get(pEntry,"primitives");emit_flat_record(pFile,"FLOPPY144_DATA_DRAWING",strv(pEntry,"id"),strv(pEntry,"element_type"),strv(pEntry,"coordinate_space"),strv(pEntry,"default_colour"),NULL,NULL,NULL,(long)count(pPr),0,0,0,0,0,0);for(j=0;j<count(pPr);++j){JsonValue*p=at(pPr,j);const char*op=strv(p,"op");long n0=0,n1=0,n2=0,n3=0;if(op&&strcmp(op,"line")==0){n0=intv(p,"x1",0);n1=intv(p,"y1",0);n2=intv(p,"x2",0);n3=intv(p,"y2",0);}else if(op&&strcmp(op,"circle")==0){n0=intv(p,"cx",0);n1=intv(p,"cy",0);n2=intv(p,"r",0);}else{n0=intv(p,"x",0);n1=intv(p,"y",0);n2=intv(p,"w",0);n3=intv(p,"h",0);}emit_flat_record(pFile,"FLOPPY144_DATA_DRAWING_PRIMITIVE",strv(pEntry,"id"),op,strv(p,"colour"),NULL,NULL,NULL,NULL,n0,n1,n2,n3,0,0,0);}}
  pArray=get(pRoot,"relationships");for(i=0;i<count(pArray);++i){JsonValue*pEntry=at(pArray,i);emit_flat_record(pFile,"FLOPPY144_DATA_RELATIONSHIP",strv(pEntry,"parent_id"),strv(pEntry,"child_id"),strv(pEntry,"relation"),NULL,NULL,NULL,NULL,0,0,0,0,0,0,0);}
  pArray=get(pRoot,"ambient_interactions");for(i=0;i<count(pArray);++i){JsonValue*pEntry=at(pArray,i),*pConditions=get(pEntry,"conditions"),*pRanges=pConditions?get(pConditions,"month_day_ranges"):NULL;emit_flat_record(pFile,"FLOPPY144_DATA_AMBIENT",strv(pEntry,"id"),strv(pEntry,"type"),strv(pEntry,"target_id"),strv(pEntry,"room_id"),strv(pEntry,"season"),strv(pEntry,"title"),strv(pEntry,"text"),intv(pEntry,"priority",0),0,0,0,0,0,0);for(j=0;j<count(pRanges);++j){JsonValue*pRange=at(pRanges,j);emit_flat_record(pFile,"FLOPPY144_DATA_AMBIENT_RANGE",strv(pEntry,"id"),array_string(pRange,0),array_string(pRange,1),NULL,NULL,NULL,NULL,0,0,0,0,0,0,0);}}
+
+ /* BF18: content-reviewed Notebook summaries for each authored document. */
+ pArray=get(pRoot,"documents");
+ for(i=0;i<count(pArray);++i)
+ {
+  JsonValue*pEntry=at(pArray,i);
+  const char*id=strv(pEntry,"id");
+  const char*summary=strv(pEntry,"notebook_summary");
+  const char*body=strv(pEntry,"body");
+  char note[512];
+  int size;
+  if(!id||!summary||!summary[0]||!body||!body[0])
+   die("authored document missing content-based Notebook summary");
+  size=snprintf(note,sizeof(note),"%s: %s",id,summary);
+  if(size<0||(size_t)size>=sizeof(note))
+   die("authored document Notebook summary exceeds buffer");
+  emit_flat_record(pFile,"FLOPPY144_DATA_NOTEBOOK",
+   id,note,"DOCUMENT",strv(pEntry,"title"),NULL,NULL,NULL,
+   (long)i,0,0,0,0,0,0,0);
+ }
  fclose(pFile);
 }
