@@ -2,9 +2,8 @@
  * FLOPPY//144 Stage 4D pseudo-isometric Inspection presentation regression.
  */
 
-#include "floppy144_cabinet_25d.h"
-
 #define _CRT_SECURE_NO_WARNINGS 1
+#include "floppy144_cabinet_25d.h"
 
 #include <stdbool.h>
 #include <stdlib.h>
