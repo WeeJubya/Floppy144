@@ -37,7 +37,7 @@ static void emit_flat_runtime(JsonValue *pRoot,const char *pszOutputDirectory){
    die("authored document Notebook summary exceeds buffer");
   emit_flat_record(pFile,"FLOPPY144_DATA_NOTEBOOK",
    id,note,"DOCUMENT",strv(pEntry,"title"),NULL,NULL,NULL,
-   (long)i,0,0,0,0,0,0,0);
+   (long)i,0,0,0,0,0,0);
  }
  fclose(pFile);
 }
