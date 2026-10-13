@@ -75,6 +75,7 @@ static void emit_collections(JsonValue*root,const char*outdir)
 {
     JsonValue*a=get(root,"collections"),*docs=get(root,"documents");size_t i;FILE*f=openout(outdir,"floppy144_collections.generated.def");
     fputs("/* Generated from floppy144_game_data.json. Do not edit. */\n",f);
+    fputs("/* Generated authored Notebook summaries with player-facing document IDs. */\n",notes);
     for(i=0;i<count(a);i++){
         JsonValue*c=at(a,i),*b=get(c,"content_budget");const char*id=strv(c,"id"),*name=strv(c,"name"),*domain=strv(c,"domain");
         long size_kb=intv(c,"size_kb",0),records=0;int required=boolv(c,"required_for_completion",false)?1:0;size_t ac=authored_count_for(docs,id);
@@ -274,7 +275,7 @@ static void player_record_id(
 
 static void emit_documents(JsonValue*root,const char*outdir)
 {
-    JsonValue*collections=get(root,"collections"),*docs=get(root,"documents");size_t ci,di;FILE*f=openout(outdir,"floppy144_documents.generated.inc");
+    JsonValue*collections=get(root,"collections"),*docs=get(root,"documents");size_t ci,di,global_ordinal=0U;FILE*f=openout(outdir,"floppy144_documents.generated.inc");FILE*notes=openout(outdir,"floppy144_document_notebook.generated.inc");
     fputs("/* Generated from floppy144_game_data.json. Do not edit. */\n",f);
     for(ci=0;ci<count(collections);++ci){
         JsonValue*c=at(collections,ci);const char*cid=strv(c,"id");long records=collection_record_count(root,cid);unsigned char *used;size_t authored_total,authored_ordinal=0U;
@@ -327,6 +328,25 @@ static void emit_documents(JsonValue*root,const char*outdir)
                 ci,
                 records
             );
+
+            {
+                const char *summary=strv(d,"notebook_summary");
+                char note[512];
+                int n;
+                if(summary==NULL || summary[0]=='\0' || body==NULL || body[0]=='\0')
+                    die("BF18 each authored body requires a Notebook sentence");
+                n=snprintf(note,sizeof(note),"%s: %s",player_id,summary);
+                if(n<0 || (size_t)n>=sizeof(note))
+                    die("BF18 Notebook sentence too large");
+                fputs("FLOPPY144_DATA_RECORD(FLOPPY144_DATA_NOTEBOOK, ",notes);
+                cstr(notes,player_id);
+                fputs(", ",notes);
+                cstr(notes,note);
+                fputs(", \"DOCUMENT\", ",notes);
+                cstr(notes,title);
+                fprintf(notes,", NULL, NULL, NULL, %lu, 0, 0, 0, 0, 0, 0)\n",
+                    (unsigned long)global_ordinal++);
+            }
             fprintf(f,"    { FLOPPY144_COLLECTION_");sym(f,cid);fprintf(f,", %ldU, ",idx);cstr(f,player_id);fprintf(f,", ");cstr(f,title);
             if(title && strcmp(title,"Suppression Control Panel Service Note")==0) fputs(", FLOPPY144_DOCUMENT_VIEW_FM13_SUPPRESSION_SERVICE, ",f);
             else if(title && strcmp(title,"Temporary Desk Reallocation Notice")==0) fputs(", FLOPPY144_DOCUMENT_VIEW_HR01_DESK_REALLOCATION, ",f);
@@ -344,6 +364,7 @@ static void emit_documents(JsonValue*root,const char*outdir)
         free(used);
     }
     fclose(f);
+    fclose(notes);
 }
 static void emit_physical(JsonValue*root,const char*outdir){JsonValue*a=get(root,"physical_items");size_t i;FILE*f=openout(outdir,"floppy144_physical_items.generated.inc");fputs("/* id, name, room, parent, drawing */\n",f);for(i=0;i<count(a);i++){JsonValue*p=at(a,i);fprintf(f,"FLOPPY144_PHYSICAL_ITEM(%lu, ",(unsigned long)i);cstr(f,strv(p,"id"));fputs(", ",f);cstr(f,strv(p,"name"));fputs(", ",f);cstr(f,strv(p,"room_id"));fputs(", ",f);cstr(f,strv(p,"parent_id"));fputs(", ",f);cstr(f,strv(p,"drawing_definition_id"));fputs(")\n",f);}fclose(f);}
 static void emit_ambient(JsonValue*root,const char*outdir){JsonValue*a=get(root,"ambient_interactions");size_t i;FILE*f=openout(outdir,"floppy144_ambient.generated.inc");fputs("/* Generated ambient text. */\n",f);for(i=0;i<count(a);i++){JsonValue*x=at(a,i);fprintf(f,"FLOPPY144_AMBIENT(");cstr(f,strv(x,"id"));fputs(", ",f);cstr(f,strv(x,"target_id"));fputs(", ",f);cstr(f,strv(x,"title"));fputs(", ",f);cstr(f,strv(x,"text"));fputs(")\n",f);}fclose(f);}

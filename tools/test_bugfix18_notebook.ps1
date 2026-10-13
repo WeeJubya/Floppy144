@@ -25,7 +25,7 @@ foreach($doc in $docs) {
     if($summaries.ContainsKey($summary)) { throw "BF18 duplicate summary: $($doc.id)" }
     $summaries[$summary] = 1
 }
-$lines = @(Get-Content -LiteralPath (Join-Path $root 'game\src\floppy144_game_data.generated.inc') |
+$lines = @(Get-Content -LiteralPath (Join-Path $root 'game\src\floppy144_document_notebook.generated.inc') |
     Where-Object { $_ -match '^FLOPPY144_DATA_RECORD\(FLOPPY144_DATA_NOTEBOOK, "[^"]+-RS-[^"]+", ' -and
                    $_ -match ', "DOCUMENT", ' })
 if($lines.Count -ne $docs.Count) {

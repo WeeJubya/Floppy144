@@ -77,3 +77,11 @@ predates Stage 4 archive expansion.
 - Manual Windows acceptance: read records through terminal and catalogue,
   check Notebook scrolling and save/reinstate; automated tests do not establish
   visual sign-off.
+
+## Stage 4E catalogue-ID mapping
+
+Authored JSON IDs are authoring references; Stage 4E disperses records and
+assigns player-facing IDs during the document compiler pass. The Notebook
+compiler emits a parallel document Notebook registry from those exact
+player-facing IDs and slots. The displayed ID, Notebook prefix, and actual
+OPENed state therefore remain consistent even if seeded record order changes.

@@ -22,6 +22,7 @@ jobs:
         run: |
           .\tools\build_game_data.ps1
           git diff --exit-code -- game/src/floppy144_game_data.generated.inc
+          git diff --exit-code -- game/src/floppy144_document_notebook.generated.inc
       - name: BF18 full summary coverage
         shell: pwsh
         run: .\tools\test_bugfix18_notebook.ps1

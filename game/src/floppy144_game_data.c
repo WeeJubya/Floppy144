@@ -15,6 +15,7 @@
 #define FLOPPY144_DATA_RECORD(kind,id,a,b,c,d,e,f,n0,n1,n2,n3,n4,n5,b0) {kind,id,a,b,c,d,e,f,n0,n1,n2,n3,n4,n5,(uint8_t)(b0)},
 static const Floppy144DataRecord g_asGameData[]={
 #include "floppy144_game_data.generated.inc"
+#include "floppy144_document_notebook.generated.inc"
 };
 #undef FLOPPY144_DATA_RECORD
 
