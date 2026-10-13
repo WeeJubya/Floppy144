@@ -4,7 +4,10 @@
 
 #include "floppy144_cabinet_25d.h"
 
+#define _CRT_SECURE_NO_WARNINGS 1
+
 #include <stdbool.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -478,6 +481,94 @@ static void TestDeskAndDoorChildSurfaces(void)
     }
 }
 
+/*
+ * Optional deterministic framebuffer captures for comparing projected
+ * geometry. These are test outputs only, never shipped/stored game assets.
+ * The actual Windows executable must still be visually accepted separately.
+ */
+static void BF10Capture(const char *name)
+{
+    const char *dir=getenv("F144_BF10_CAPTURE_DIR");
+    char path[512];
+    FILE *out;
+    uint32_t i;
+    int size;
+
+    if(dir==NULL||dir[0]=='\0')return;
+    size=snprintf(path,sizeof(path),"%s/%s.ppm",dir,name);
+    CHECK(size>0 && (size_t)size<sizeof(path),"BF10 capture path fits");
+    if(size<=0||(size_t)size>=sizeof(path))return;
+
+    out=fopen(path,"wb");
+    CHECK(out!=NULL,"BF10 visual regression frame opens");
+    if(out==NULL)return;
+    fprintf(out,"P6\n%u %u\n255\n",TEST_WIDTH,TEST_HEIGHT);
+    for(i=0U;i<TEST_PIXEL_COUNT;++i)
+    {
+        uint32_t colour=g_pixels[i];
+        fputc((int)((colour>>16)&255U),out);
+        fputc((int)((colour>>8)&255U),out);
+        fputc((int)(colour&255U),out);
+    }
+    fclose(out);
+}
+
+static void TestBF10NamedVisualCases(void)
+{
+    const Floppy144DataRecord *terminal=
+        FindParent("RECEPTION_TERMINAL_DESK");
+    const Floppy144DataRecord *shelf=
+        FindParent("MAIN_OFFICE_BOOKSHELF_03");
+    const Floppy144DataRecord *desk=
+        FindParent("MAIN_OFFICE_DESK_06");
+    const Floppy144DataRecord *door=
+        FindParent("COR_REC");
+    uint32_t empty,filled;
+
+    CHECK(terminal!=NULL && shelf!=NULL && desk!=NULL && door!=NULL,
+          "BF10 has all four authored Windows visual-acceptance fixtures");
+    CHECK(shelf!=NULL && shelf->pszC!=NULL && shelf->pszB!=NULL &&
+          strcmp(shelf->pszC,"BOOKCASE")==0 &&
+          strcmp(shelf->pszB,"BOOKCASE")==0,
+          "Bookshelf 03 uses canonical BOOKCASE furniture/variant");
+    {
+        const Floppy144DataRecord *sibling1=FindParent("MAIN_OFFICE_BOOKSHELF_01");
+        const Floppy144DataRecord *sibling2=FindParent("MAIN_OFFICE_BOOKSHELF_02");
+        CHECK(sibling1!=NULL && sibling2!=NULL &&
+              strcmp(sibling1->pszC,"BOOKCASE")==0 &&
+              strcmp(sibling2->pszC,"BOOKCASE")==0,
+              "all three Main Office bookshelves share BOOKCASE classification");
+    }
+    if(terminal==NULL||shelf==NULL||desk==NULL||door==NULL)return;
+
+    empty=DrawParent(terminal,0,0U,0U,NULL);
+    filled=DrawParent(terminal,0,1U,0U,NULL);
+    CHECK(empty!=filled,"Reception Terminal Desk contents appear on desktop");
+    BF10Capture("reception_terminal_desk");
+
+    empty=DrawParent(shelf,0,0U,0U,NULL);
+    memcpy(g_child_baseline,g_pixels,sizeof(g_pixels));
+    filled=DrawParent(shelf,0,2U,1U,NULL);
+    CHECK(empty!=filled,"Main Office Bookshelf 03 shows two shelf items");
+    {
+        uint32_t outside=0U,i;
+        for(i=0U;i<TEST_PIXEL_COUNT;++i)
+        {
+            if(g_pixels[i]!=0U && g_child_baseline[i]==0U)++outside;
+        }
+        CHECK(outside==0U,"Bookshelf 03 children stay within furniture silhouette");
+    }
+    CHECK(RegionPixelCount(306U,0U,TEST_WIDTH,TEST_HEIGHT)==0U,
+          "Bookshelf 03 construction is panel-clipped");
+    BF10Capture("main_office_bookshelf_03");
+
+    (void)DrawParent(desk,0,10U,3U,NULL);
+    BF10Capture("main_office_desk_06");
+
+    (void)DrawParent(door,0,3U,0U,NULL);
+    BF10Capture("corridor_records_door");
+}
+
 static void TestUnknownFallback(void)
 {
     Floppy144DataRecord future_parent;
@@ -521,6 +612,7 @@ int main(void)
     TestContentMarkerStates();
     TestAllAuthoredPhysicalItemParents();
     TestDeskAndDoorChildSurfaces();
+    TestBF10NamedVisualCases();
     TestUnknownFallback();
 
     if(g_failures!=0)

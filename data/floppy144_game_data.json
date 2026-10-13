@@ -471,8 +471,8 @@
           },
           {
             "id": "MAIN_OFFICE_BOOKSHELF_01",
-            "type": "NONSECURE_CABINET",
-            "variant": "NONSECURE_CABINET",
+            "type": "BOOKCASE",
+            "variant": "BOOKCASE",
             "object": "MAIN_OFFICE_BOOKSHELF_01",
             "x": 97,
             "y": 74,
@@ -481,8 +481,8 @@
           },
           {
             "id": "MAIN_OFFICE_BOOKSHELF_02",
-            "type": "NONSECURE_CABINET",
-            "variant": "NONSECURE_CABINET",
+            "type": "BOOKCASE",
+            "variant": "BOOKCASE",
             "object": "MAIN_OFFICE_BOOKSHELF_02",
             "x": 74,
             "y": 97,
@@ -491,8 +491,8 @@
           },
           {
             "id": "MAIN_OFFICE_BOOKSHELF_03",
-            "type": "NONSECURE_CABINET",
-            "variant": "NONSECURE_CABINET",
+            "type": "BOOKCASE",
+            "variant": "BOOKCASE",
             "object": "MAIN_OFFICE_BOOKSHELF_03",
             "x": 67,
             "y": 97,

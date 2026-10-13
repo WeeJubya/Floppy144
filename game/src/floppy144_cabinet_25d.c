@@ -701,80 +701,26 @@ static void Floppy144Cabinet25DDrawSurfaceMarker(
     Floppy144Cabinet25DOutlineQuad(surface,p0,p1,p2,p3,edge);
 }
 
-static void Floppy144Cabinet25DDrawSurfaceChildren(
+static void Floppy144Cabinet25DDrawFaceChildren(
     Floppy144Surface *surface,
-    const Floppy144DataRecord *parent,
-    int32_t width,int32_t depth,bool mirror,
-    uint32_t count,uint32_t selected
+    const Floppy144Cabinet25DPoint face[4],
+    uint32_t count,
+    uint32_t selected
 )
 {
     const uint32_t muted=F144_25D_RGB(115,132,122);
     const uint32_t bright=F144_25D_RGB(216,239,220);
     const uint32_t trim=F144_25D_RGB(39,53,48);
-    Floppy144Cabinet25DChildFace plane;
-    Floppy144Cabinet25DBox box;
-    Floppy144Cabinet25DPoint face[4];
     uint32_t columns,rows,i;
 
-    if(surface==NULL||parent==NULL||count==0U)return;
-    plane=Floppy144Cabinet25DChildSurface(parent);
-    box=Floppy144Cabinet25DMakeBox(width,depth,26,mirror);
-    if(plane==F144_25D_CHILD_FRONT || plane==F144_25D_CHILD_SHELF)
-    {
-        if(Floppy144Cabinet25DStringEqual(parent->pszC,"DOOR"))box.height=138;
-        else if(Floppy144Cabinet25DStringEqual(parent->pszC,"SERVER") ||
-                Floppy144Cabinet25DStringEqual(parent->pszC,"FRIDGE"))
-            box.height=112;
-        else if(Floppy144Cabinet25DStringEqual(parent->pszC,"COFFEE_MAKER"))
-            box.height=82;
-        else box.height=92;
-    }
-    Floppy144Cabinet25DFaceCorners(parent,&box,face,plane,width,depth);
-
-    if(plane==F144_25D_CHILD_SHELF)
-    {
-        /*
-         * The storage-family renderer draws four shelf lips at c.y+14+n*19.
-         * Each child sits on a copy of the top plane lowered to its shelf,
-         * with the front edge coincident with that lip. Never paste items
-         * onto the cabinet's vertical front face or float them in screen Y.
-         */
-        for(i=0U;i<count;++i)
-        {
-            uint32_t shelf=i%4U,slot=i/4U;
-            uint32_t group=(count+3U-shelf)/4U;
-            Floppy144Cabinet25DPoint shelf_face[4];
-            uint32_t corner;
-            int32_t u0,u1;
-            if(group==0U)continue;
-            for(corner=0U;corner<4U;++corner)
-            {
-                shelf_face[corner]=face[corner];
-                shelf_face[corner].y+=14+(int32_t)shelf*19;
-            }
-            {
-                int32_t centre=100+(int32_t)((slot*2U+1U)*824U/
-                    (2U*group));
-                int32_t half=(int32_t)(824U/(2U*group));
-                if(half>75)half=75;
-                u0=centre-half;
-                u1=centre+half;
-            }
-            Floppy144Cabinet25DDrawSurfaceMarker(
-                surface,shelf_face,u0,670,u1,850,
-                i==selected?bright:muted,trim
-            );
-        }
-        return;
-    }
-
-    /*
-     * Use a bounded, evenly distributed surface grid, not marker coordinates
-     * in screen pixels. Every visible item is represented regardless of count.
-     */
+    if(count==0U)return;
     columns=count<5U?count:5U;
     rows=(count+columns-1U)/columns;
-    if(rows>14U)columns=(count+13U)/14U,rows=(count+columns-1U)/columns;
+    if(rows>14U)
+    {
+        columns=(count+13U)/14U;
+        rows=(count+columns-1U)/columns;
+    }
     for(i=0U;i<count;++i)
     {
         uint32_t row=i/columns,column=i%columns;
@@ -796,6 +742,36 @@ static void Floppy144Cabinet25DDrawSurfaceChildren(
             i==selected?bright:muted,trim
         );
     }
+}
+
+static void Floppy144Cabinet25DDrawSurfaceChildren(
+    Floppy144Surface *surface,
+    const Floppy144DataRecord *parent,
+    int32_t width,int32_t depth,bool mirror,
+    uint32_t count,uint32_t selected
+)
+{
+    Floppy144Cabinet25DChildFace plane;
+    Floppy144Cabinet25DBox box;
+    Floppy144Cabinet25DPoint face[4];
+    if(surface==NULL||parent==NULL||count==0U)return;
+    plane=Floppy144Cabinet25DChildSurface(parent);
+    box=Floppy144Cabinet25DMakeBox(width,depth,26,mirror);
+    if(plane==F144_25D_CHILD_FRONT || plane==F144_25D_CHILD_SHELF)
+    {
+        if(Floppy144Cabinet25DStringEqual(parent->pszC,"DOOR"))box.height=138;
+        else if(Floppy144Cabinet25DStringEqual(parent->pszC,"SERVER") ||
+                Floppy144Cabinet25DStringEqual(parent->pszC,"FRIDGE"))
+            box.height=112;
+        else if(Floppy144Cabinet25DStringEqual(parent->pszC,"COFFEE_MAKER"))
+            box.height=82;
+        else box.height=92;
+    }
+    Floppy144Cabinet25DFaceCorners(parent,&box,face,plane,width,depth);
+
+    Floppy144Cabinet25DDrawFaceChildren(
+        surface,face,count,selected
+    );
 }
 
 static void Floppy144Cabinet25DDrawOrientationTick(
@@ -879,13 +855,77 @@ static void Floppy144Cabinet25DDrawLegs(
     }
 }
 
+/*
+ * The screen is upright in the world, not upright in camera pixels: its
+ * horizontal edges follow the parent's projected desk-width axis. Its stand
+ * and foot are anchored to points on exactly the same top face as loose items.
+ */
+static void Floppy144Cabinet25DDrawTerminalMonitor(
+    Floppy144Surface *surface,
+    const Floppy144Cabinet25DBox *box,
+    uint32_t edge
+)
+{
+    Floppy144Cabinet25DPoint face[4]={box->a,box->b,box->c,box->d};
+    Floppy144Cabinet25DPoint left=
+        Floppy144Cabinet25DOnFace(face,270,305);
+    Floppy144Cabinet25DPoint right=
+        Floppy144Cabinet25DOnFace(face,730,305);
+    Floppy144Cabinet25DPoint upper_left=left;
+    Floppy144Cabinet25DPoint upper_right=right;
+    Floppy144Cabinet25DPoint back_left=
+        Floppy144Cabinet25DOnFace(face,270,380);
+    Floppy144Cabinet25DPoint back_right=
+        Floppy144Cabinet25DOnFace(face,730,380);
+    Floppy144Cabinet25DPoint screen_face[4];
+    Floppy144Cabinet25DPoint stem=
+        Floppy144Cabinet25DOnFace(face,500,450);
+    Floppy144Cabinet25DPoint mount=
+        Floppy144Cabinet25DOnFace(face,500,305);
+
+    upper_left.y-=43;
+    upper_right.y-=43;
+    back_left.y-=43;
+    back_right.y-=43;
+
+    Floppy144Cabinet25DDrawSurfaceMarker(
+        surface,face,395,435,605,595,
+        F144_25D_RGB(74,84,78),edge
+    );
+    Floppy144Cabinet25DLine(
+        surface,stem.x,stem.y,mount.x,mount.y-3,edge
+    );
+    Floppy144Cabinet25DFillQuad(
+        surface,upper_left,upper_right,back_right,back_left,
+        F144_25D_RGB(48,60,57)
+    );
+    Floppy144Cabinet25DFillQuad(
+        surface,upper_left,upper_right,right,left,
+        F144_25D_RGB(31,40,42)
+    );
+    Floppy144Cabinet25DOutlineQuad(
+        surface,upper_left,upper_right,right,left,edge
+    );
+
+    screen_face[0]=upper_left;
+    screen_face[1]=upper_right;
+    screen_face[2]=right;
+    screen_face[3]=left;
+    Floppy144Cabinet25DDrawSurfaceMarker(
+        surface,screen_face,85,105,915,865,
+        F144_25D_RGB(26,44,45),F144_25D_RGB(65,91,84)
+    );
+}
+
 static void Floppy144Cabinet25DDrawDeskFamily(
     Floppy144Surface *surface,
     const Floppy144DataRecord *parent,
     int32_t width,
     int32_t depth,
     bool mirror,
-    uint32_t octant
+    uint32_t octant,
+    uint32_t count,
+    uint32_t selected
 )
 {
     const uint32_t top=F144_25D_RGB(103,116,108);
@@ -894,105 +934,60 @@ static void Floppy144Cabinet25DDrawDeskFamily(
     const uint32_t edge=F144_25D_RGB(145,160,151);
     Floppy144Cabinet25DBox box=
         Floppy144Cabinet25DMakeBox(width,depth,14,mirror);
-    int32_t min_x;
-    int32_t max_x;
-    int32_t bottom;
+    Floppy144Cabinet25DPoint front_face[4];
 
     Floppy144Cabinet25DDrawBox(surface,&box,top,front,side,edge);
     Floppy144Cabinet25DDrawLegs(surface,&box,46,edge);
     Floppy144Cabinet25DDrawOrientationTick(surface,&box,octant);
+    Floppy144Cabinet25DFaceCorners(
+        parent,&box,front_face,F144_25D_CHILD_FRONT,width,depth
+    );
 
-    min_x=Floppy144Cabinet25DMinX(&box);
-    max_x=Floppy144Cabinet25DMaxX(&box);
-    bottom=Floppy144Cabinet25DBottomY(&box);
-
-    if(
-        parent != NULL &&
-        (
-            Floppy144Cabinet25DStringEqual(parent->pszC,"GDR_TERMINAL") ||
-            Floppy144Cabinet25DStringEqual(parent->pszC,"IT_TERMINAL")
-        )
-    )
+    /* Face detail is coplanar with the desk, not below its screen silhouette. */
+    if(parent!=NULL &&
+       Floppy144Cabinet25DStringEqual(parent->pszC,"WORKBENCH"))
     {
-        int32_t monitor_w=(max_x-min_x)/3;
-        int32_t monitor_x=(min_x+max_x)/2-monitor_w/2;
-
-        if(monitor_w<30)monitor_w=30;
-
-        Floppy144Cabinet25DFillRect(
-            surface,
-            (uint32_t)monitor_x,
-            (uint32_t)(box.a.y+18),
-            (uint32_t)monitor_w,
-            42U,
-            F144_25D_RGB(31,40,42)
+        Floppy144Cabinet25DDrawSurfaceMarker(
+            surface,front_face,90,120,910,820,front,edge
         );
-        Floppy144Cabinet25DRect(
-            surface,
-            (uint32_t)monitor_x,
-            (uint32_t)(box.a.y+18),
-            (uint32_t)monitor_w,
-            42U,
-            edge
-        );
-        Floppy144Cabinet25DFillRect(
-            surface,
-            (uint32_t)(monitor_x+monitor_w/2-2),
-            (uint32_t)(box.a.y+60),
-            4U,
-            12U,
-            edge
-        );
-        Floppy144Cabinet25DFillRect(
-            surface,
-            (uint32_t)(monitor_x+monitor_w/4),
-            (uint32_t)(box.a.y+72),
-            (uint32_t)(monitor_w/2),
-            3U,
-            edge
-        );
-    }
-    else if(
-        parent != NULL &&
-        Floppy144Cabinet25DStringEqual(parent->pszC,"WORKBENCH")
-    )
-    {
-        uint32_t i;
-        for(i=0U;i<4U;++i)
-        {
-            int32_t x=min_x+18+(int32_t)i*(max_x-min_x-36)/4;
-            Floppy144Cabinet25DRect(
-                surface,
-                (uint32_t)x,
-                (uint32_t)(bottom+8),
-                20U,
-                18U,
-                edge
-            );
-        }
     }
     else
     {
-        int32_t drawer_w=(max_x-min_x)/5;
-        if(drawer_w<18)drawer_w=18;
-
-        Floppy144Cabinet25DRect(
-            surface,
-            (uint32_t)(min_x+8),
-            (uint32_t)(bottom+8),
-            (uint32_t)drawer_w,
-            24U,
-            edge
+        Floppy144Cabinet25DDrawSurfaceMarker(
+            surface,front_face,90,160,390,860,front,edge
         );
-        Floppy144Cabinet25DRect(
-            surface,
-            (uint32_t)(max_x-drawer_w-8),
-            (uint32_t)(bottom+8),
-            (uint32_t)drawer_w,
-            24U,
-            edge
+        Floppy144Cabinet25DDrawSurfaceMarker(
+            surface,front_face,610,160,910,860,front,edge
         );
     }
+
+    /* Furniture overlays (especially the monitor) must occlude desk items. */
+    Floppy144Cabinet25DDrawSurfaceChildren(
+        surface,parent,width,depth,mirror,count,selected
+    );
+    if(parent!=NULL &&
+       (Floppy144Cabinet25DStringEqual(parent->pszC,"GDR_TERMINAL") ||
+        Floppy144Cabinet25DStringEqual(parent->pszC,"IT_TERMINAL")))
+    {
+        Floppy144Cabinet25DDrawTerminalMonitor(surface,&box,edge);
+    }
+}
+
+/*
+ * A storage fixture has a front opening on its broad visible side. The
+ * catalogue's NONSECURE_CABINET class is also used for objects named
+ * BOOKSHELF; choose the opening from canonical geometry/semantics, never a
+ * per-object screen offset. Everything, including shelf lips and contents,
+ * is drawn in the same face's integer UV coordinates.
+ */
+static bool Floppy144Cabinet25DIsBookShelf(
+    const Floppy144DataRecord *parent
+)
+{
+    const char *v=parent!=NULL?parent->pszC:NULL;
+    return Floppy144Cabinet25DStringEqual(v,"BOOKCASE") ||
+        Floppy144Cabinet25DStringEqual(v,"SHELVING") ||
+        Floppy144Cabinet25DStringEqual(v,"SHELVING_FULL");
 }
 
 static void Floppy144Cabinet25DDrawStorageFamily(
@@ -1001,97 +996,129 @@ static void Floppy144Cabinet25DDrawStorageFamily(
     int32_t width,
     int32_t depth,
     bool mirror,
-    uint32_t octant
+    uint32_t octant,
+    uint32_t count,
+    uint32_t selected
 )
 {
     const uint32_t top=F144_25D_RGB(94,108,101);
     const uint32_t front=F144_25D_RGB(62,75,69);
     const uint32_t side=F144_25D_RGB(45,56,52);
     const uint32_t edge=F144_25D_RGB(145,160,151);
+    const uint32_t cavity=F144_25D_RGB(24,34,32);
+    const uint32_t shelf=F144_25D_RGB(101,116,107);
     Floppy144Cabinet25DBox box=
         Floppy144Cabinet25DMakeBox(width,depth,92,mirror);
-    int32_t min_x;
-    int32_t max_x;
-    int32_t front_y;
-    bool shelves=
-        parent != NULL &&
-        (
-            Floppy144Cabinet25DStringEqual(parent->pszC,"BOOKCASE") ||
-            Floppy144Cabinet25DStringEqual(parent->pszC,"SHELVING_FULL") ||
-            Floppy144Cabinet25DStringEqual(parent->pszC,"SHELVING")
-        );
-    uint32_t i;
+    Floppy144Cabinet25DPoint face[4];
+    Floppy144Cabinet25DChildFace front_plane=
+        width>=depth?F144_25D_CHILD_FRONT:F144_25D_CHILD_SIDE;
+    bool open=Floppy144Cabinet25DIsBookShelf(parent);
+    uint32_t row;
 
     Floppy144Cabinet25DDrawBox(surface,&box,top,front,side,edge);
-    Floppy144Cabinet25DDrawOrientationTick(surface,&box,octant);
+    Floppy144Cabinet25DFaceCorners(
+        parent,&box,face,front_plane,width,depth
+    );
 
-    min_x=Floppy144Cabinet25DMinX(&box);
-    max_x=Floppy144Cabinet25DMaxX(&box);
-    front_y=box.c.y+14;
-
-    if(shelves)
+    if(!open)
     {
-        for(i=0U;i<4U;++i)
-        {
-            int32_t y=front_y+(int32_t)i*19;
-
-            Floppy144Cabinet25DFillRect(
-                surface,
-                (uint32_t)(min_x+10),
-                (uint32_t)y,
-                (uint32_t)(max_x-min_x-20),
-                3U,
-                edge
-            );
-        }
-
-        Floppy144Cabinet25DRect(
-            surface,
-            (uint32_t)(min_x+7),
-            (uint32_t)(front_y-6),
-            (uint32_t)(max_x-min_x-14),
-            78U,
-            edge
+        Floppy144Cabinet25DDrawSurfaceMarker(
+            surface,face,70,70,490,935,front,edge
         );
+        Floppy144Cabinet25DDrawSurfaceMarker(
+            surface,face,510,70,930,935,front,edge
+        );
+        Floppy144Cabinet25DDrawSurfaceMarker(
+            surface,face,450,495,480,545,edge,edge
+        );
+        Floppy144Cabinet25DDrawSurfaceMarker(
+            surface,face,520,495,550,545,edge,edge
+        );
+        Floppy144Cabinet25DDrawFaceChildren(
+            surface,face,count,selected
+        );
+        Floppy144Cabinet25DDrawOrientationTick(surface,&box,octant);
+        return;
     }
-    else
+
+    /* Dark, bounded cavity. No construction line escapes the facade quad. */
+    Floppy144Cabinet25DDrawSurfaceMarker(
+        surface,face,55,55,945,945,cavity,F144_25D_RGB(49,65,59)
+    );
+    Floppy144Cabinet25DDrawSurfaceMarker(
+        surface,face,95,95,905,905,F144_25D_RGB(34,46,42),cavity
+    );
+
+    for(row=0U;row<4U;++row)
     {
-        int32_t centre=(min_x+max_x)/2;
-
-        Floppy144Cabinet25DLine(
-            surface,
-            centre,
-            box.c.y+6,
-            centre,
-            box.c.y+84,
-            edge
-        );
-
-        for(i=1U;i<4U;++i)
+        int32_t level=260+(int32_t)row*215;
+        uint32_t i;
+        /*
+         * Upper bays are painted before lower bays. All child rectangles
+         * lie behind the shelf front lip, and the casing is painted last.
+         * Shelf assignment remains stable under selection/reveal changes.
+         */
+        for(i=row;i<count;i+=4U)
         {
-            int32_t y=box.c.y+(int32_t)i*22;
+            uint32_t group=(count+3U-row)/4U;
+            uint32_t slot=i/4U;
+            int32_t centre;
+            int32_t half;
+            int32_t u0,u1;
+            Floppy144Cabinet25DPoint foot_l,foot_r,head_l,head_r;
+            uint32_t fill=i==selected?
+                F144_25D_RGB(216,239,220):
+                F144_25D_RGB(115,132,122);
 
+            if(group==0U)continue;
+            centre=120+(int32_t)((slot*2U+1U)*784U/(2U*group));
+            half=(int32_t)(784U/(3U*group));
+            if(half>78)half=78;
+            if(half<3)half=3;
+            u0=centre-half;
+            u1=centre+half;
+            /* Upright volumes rest immediately behind their projected lip. */
+            foot_l=Floppy144Cabinet25DOnFace(face,u0,level-25);
+            foot_r=Floppy144Cabinet25DOnFace(face,u1,level-25);
+            head_l=Floppy144Cabinet25DOnFace(face,u0,level-151);
+            head_r=Floppy144Cabinet25DOnFace(face,u1,level-151);
+            Floppy144Cabinet25DFillQuad(
+                surface,head_l,head_r,foot_r,foot_l,fill
+            );
+            Floppy144Cabinet25DOutlineQuad(
+                surface,head_l,head_r,foot_r,foot_l,
+                F144_25D_RGB(39,53,48)
+            );
+            /* A shallow projected spine gives even one-page items volume. */
             Floppy144Cabinet25DLine(
-                surface,
-                min_x+8,y,
-                max_x-8,y,
-                edge
+                surface,(head_l.x*3+head_r.x)/4,
+                (head_l.y*3+head_r.y)/4,
+                (foot_l.x*3+foot_r.x)/4,
+                (foot_l.y*3+foot_r.y)/4,
+                F144_25D_RGB(65,86,77)
             );
         }
 
-        Floppy144Cabinet25DFillRect(
-            surface,
-            (uint32_t)(centre-12),
-            (uint32_t)(box.c.y+42),
-            5U,3U,edge
-        );
-        Floppy144Cabinet25DFillRect(
-            surface,
-            (uint32_t)(centre+7),
-            (uint32_t)(box.c.y+42),
-            5U,3U,edge
+        /* The projecting plank occludes the bottom of each item. */
+        Floppy144Cabinet25DDrawSurfaceMarker(
+            surface,face,82,level-8,918,level+29,shelf,edge
         );
     }
+
+    /* Projected structural jambs hide item edges instead of leaking pixels. */
+    Floppy144Cabinet25DDrawSurfaceMarker(
+        surface,face,15,0,92,1024,side,edge
+    );
+    Floppy144Cabinet25DDrawSurfaceMarker(
+        surface,face,908,0,985,1024,front,edge
+    );
+    Floppy144Cabinet25DDrawSurfaceMarker(
+        surface,face,15,0,985,72,top,edge
+    );
+    Floppy144Cabinet25DDrawSurfaceMarker(
+        surface,face,15,928,985,1024,front,edge
+    );
+    Floppy144Cabinet25DDrawOrientationTick(surface,&box,octant);
 }
 
 static void Floppy144Cabinet25DDrawTableFamily(
@@ -1624,6 +1651,7 @@ bool Floppy144Cabinet25DDraw(
     bool mirror;
     uint32_t octant;
     bool recognized=true;
+    bool children_drawn=false;
 
     if(
         surface == NULL ||
@@ -1678,8 +1706,10 @@ bool Floppy144Cabinet25DDraw(
     )
     {
         Floppy144Cabinet25DDrawDeskFamily(
-            surface,parent,width,depth,mirror,octant
+            surface,parent,width,depth,mirror,octant,
+            content_count,selected_content
         );
+        children_drawn=true;
     }
     else if(
         Floppy144Cabinet25DStringEqual(variant,"SECURE_CABINET") ||
@@ -1690,8 +1720,10 @@ bool Floppy144Cabinet25DDraw(
     )
     {
         Floppy144Cabinet25DDrawStorageFamily(
-            surface,parent,width,depth,mirror,octant
+            surface,parent,width,depth,mirror,octant,
+            content_count,selected_content
         );
+        children_drawn=true;
     }
     else if(
         Floppy144Cabinet25DStringEqual(variant,"BOARDROOM_TABLE") ||
@@ -1767,12 +1799,15 @@ bool Floppy144Cabinet25DDraw(
     }
 
     /*
-     * Only projection-mapped child quads are permitted after drawing the
-     * parent's geometry. Content selection still comes from CabinetState.
+     * Occlusion-sensitive desks and storage paint their children in-depth.
+     * Remaining families use the common projected surface helper.
      */
-    Floppy144Cabinet25DDrawSurfaceChildren(
-        surface,parent,width,depth,mirror,content_count,selected_content
-    );
+    if(!children_drawn)
+    {
+        Floppy144Cabinet25DDrawSurfaceChildren(
+            surface,parent,width,depth,mirror,content_count,selected_content
+        );
+    }
 
     return recognized;
 }

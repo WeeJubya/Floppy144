@@ -244,3 +244,32 @@ Stage 3B Cabinet regression additionally retains coverage for:
 S4D-04 is code-only and adds no binary art assets. Shared box/face geometry and
 parameterised families are intentionally used to keep the executable impact
 small compared with a per-object sprite or bitmap approach.
+
+
+## BF10 reopened: shared facade and occlusion correction (pending Windows sign-off)
+
+The prior BF10 UV-marker patch passed pixel-bound checks but failed visual
+acceptance. Terminal monitors were still screen-axis-aligned rectangles; storage
+family detailing used screen-space bounding rectangles spanning beyond the
+actual projected facade; MAIN_OFFICE_BOOKSHELF_01 through _03 were catalogued as
+NONSECURE_CABINET, so its bookshelf interior was never generated.
+
+The revised shared renderer projects terminal screen/stand from the desk top,
+paints desk contents before monitor occlusion, derives shelving openings and
+construction from a single projected front/side facade, paints item volumes
+behind projected shelf lips and structural jambs, and projects cabinet-door
+panels rather than using screen-space horizontal lines. The semantic BOOKSHELF
+name applies to the whole structural family, not a single object ID. The
+restoration/ownership/save model is unchanged. No stored artwork is added.
+
+Windows screenshot captures produced by the native regression harness use the
+optional F144_BF10_CAPTURE_DIR environment variable. Review the four PPMs:
+reception_terminal_desk, main_office_bookshelf_03, main_office_desk_06,
+and corridor_records_door. These fixtures supplement, and do not replace,
+visual inspection of Recovered Contents in the Windows executable. BF10
+remains reopened until that separate visual acceptance is signed off.
+
+Canonical family correction: all three Main Office bookshelves now use
+BOOKCASE for type and variant in data/floppy144_game_data.json, aligned with
+the existing root site_layout.jsonc. Generated runtime and Site records are
+updated from that source; parent IDs and physical ownership remain stable.
