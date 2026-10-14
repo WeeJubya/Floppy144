@@ -13,7 +13,9 @@ Write-Host "=== S4F-03 WHOLE-GAME PRESENTATION JOURNEY AUDIT ==="
 # BF20: startup remains one intro + one canonical menu opener, but its
 # four mandatory storyboard stages cannot be skipped before real LOGIN.
 foreach($required in @(
-    "Floppy144IntroDrawWithLogin",
+    "Floppy144IntroDrawForProfile",
+    "Floppy144IntroAutoLoginReady",
+    "Floppy144DiscoveryProfileHasOperatorName",
     "Floppy144IntroLoginReady",
     "Floppy144CommitIntroLogin",
     "Floppy144TimingStopSplash",
