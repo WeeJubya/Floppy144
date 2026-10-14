@@ -3162,11 +3162,17 @@ static void Floppy144Site2DDrawSiteRect(
         return;
     }
 
+    /* BF26: Wall hangings are offset onto their mounting plane after
+     * projection. Their drawing function clips against that final visual
+     * rectangle. Never cull them against the original collision footprint. */
     if(
-        screen_rect.x >= FLOPPY144_SITE_2D_VIEWPORT_X + FLOPPY144_SITE_2D_VIEWPORT_WIDTH ||
-        screen_rect.y >= FLOPPY144_SITE_2D_VIEWPORT_Y + FLOPPY144_SITE_2D_VIEWPORT_HEIGHT ||
-        screen_rect.x + screen_rect.width <= FLOPPY144_SITE_2D_VIEWPORT_X ||
-        screen_rect.y + screen_rect.height <= FLOPPY144_SITE_2D_VIEWPORT_Y
+        rect->type != (uint8_t)FLOPPY144_SITE_WALL_MOUNTED_ITEM &&
+        (
+            screen_rect.x >= FLOPPY144_SITE_2D_VIEWPORT_X + FLOPPY144_SITE_2D_VIEWPORT_WIDTH ||
+            screen_rect.y >= FLOPPY144_SITE_2D_VIEWPORT_Y + FLOPPY144_SITE_2D_VIEWPORT_HEIGHT ||
+            screen_rect.x + screen_rect.width <= FLOPPY144_SITE_2D_VIEWPORT_X ||
+            screen_rect.y + screen_rect.height <= FLOPPY144_SITE_2D_VIEWPORT_Y
+        )
     )
     {
         return;
