@@ -3414,7 +3414,7 @@ static void Floppy144Site2DInspectionOverlay(
            !Floppy144Site2DRectVisibleInRoom(state,room,r)||
            !Floppy144Site2DProjectRect(camera,r,&projected))
             continue;
-        chosen=r==selected;
+        chosen=r==selected && Floppy144SiteAvailableActions(state)!=0U;
         mark=show_indicators &&
              Floppy144SiteFurnitureInspectionIndicator(state,r);
         if(!chosen&&!mark)continue;

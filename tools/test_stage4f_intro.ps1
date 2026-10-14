@@ -63,7 +63,7 @@ foreach($forbidden in @(
 }
 
 foreach($required in @(
-    "Floppy144IntroDrawWithLogin",
+    "Floppy144IntroDrawForProfile",
     "Floppy144IntroLoginReady",
     "Floppy144CommitIntroLogin",
     "Floppy144TimingStartSplash",
@@ -79,7 +79,7 @@ foreach($required in @(
 }
 if($main -match 'intro_elapsed_ms\s*>=\s*FLOPPY144_INTRO_DURATION_MS[\s\S]{0,150}Floppy144OpenMainMenu')
 {
-    throw "BF20 automatic menu transition bypasses required LOGIN"
+    throw "BF20 unguarded menu transition bypasses first-time LOGIN"
 }
 if($intro -notmatch 'return false;' -or
    $intro -notmatch 'Floppy144IntroActionSkips')

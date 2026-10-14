@@ -5,8 +5,8 @@ $main=Get-Content (Join-Path $root 'game\src\floppy144_main.c') -Raw
 $intro=Get-Content (Join-Path $root 'game\src\floppy144_intro.c') -Raw
 $header=Get-Content (Join-Path $root 'game\src\floppy144_intro.h') -Raw
 $profile=Get-Content (Join-Path $root 'game\src\floppy144_profile.c') -Raw
-$need=@('Floppy144CommitIntroLogin','Floppy144IntroDrawWithLogin',
-'Floppy144IntroLoginReady','Floppy144DiscoveryProfileSetOperatorName',
+$need=@('Floppy144CommitIntroLogin','Floppy144IntroDrawForProfile',
+'Floppy144IntroLoginReady','Floppy144IntroAutoLoginReady','Floppy144DiscoveryProfileHasOperatorName','Floppy144DiscoveryProfileSetOperatorName',
 'Floppy144DiscoveryProfileOperatorNameValid',
 'Floppy144DiscoveryProfileOperatorNameCharacterSupported',
 'Floppy144PersistenceSaveProfile','FLOPPY144_AUDIO_FLOPPY_INSERT')

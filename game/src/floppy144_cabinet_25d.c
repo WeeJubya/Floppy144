@@ -756,8 +756,10 @@ static void Floppy144Cabinet25DDrawSurfaceChildren(
     Floppy144Cabinet25DPoint face[4];
     if(surface==NULL||parent==NULL||count==0U)return;
     plane=Floppy144Cabinet25DChildSurface(parent);
+    if(Floppy144Cabinet25DStringEqual(parent->pszC,"DOOR") && width<depth)
+        plane=F144_25D_CHILD_SIDE;
     box=Floppy144Cabinet25DMakeBox(width,depth,26,mirror);
-    if(plane==F144_25D_CHILD_FRONT || plane==F144_25D_CHILD_SHELF)
+    if(plane==F144_25D_CHILD_FRONT || plane==F144_25D_CHILD_SIDE || plane==F144_25D_CHILD_SHELF)
     {
         if(Floppy144Cabinet25DStringEqual(parent->pszC,"DOOR"))box.height=138;
         else if(Floppy144Cabinet25DStringEqual(parent->pszC,"SERVER") ||
@@ -1533,21 +1535,7 @@ static void Floppy144Cabinet25DDrawWallFixture(
             edge
         );
 
-        if(
-            parent != NULL &&
-            Floppy144Cabinet25DStringEqual(parent->pszC,"SUPPRESSION_PANEL")
-        )
-        {
-            for(i=0U;i<4U;++i)
-            {
-                Floppy144Cabinet25DFillRect(
-                    surface,
-                    (uint32_t)(x+28+(int32_t)i*28),
-                    (uint32_t)(y+panel_height-38),
-                    10U,10U,edge
-                );
-            }
-        }
+
     }
 }
 
@@ -1578,7 +1566,7 @@ static void Floppy144Cabinet25DDrawDoor(
      * surface instead of using front-facing axis-aligned screen rectangles.
      */
     Floppy144Cabinet25DFaceCorners(
-        NULL,&box,face,F144_25D_CHILD_FRONT,width,depth
+        NULL,&box,face,width>=depth?F144_25D_CHILD_FRONT:F144_25D_CHILD_SIDE,width,depth
     );
     Floppy144Cabinet25DDrawSurfaceMarker(
         surface,face,130,100,870,360,

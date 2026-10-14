@@ -337,15 +337,17 @@ static void Floppy144Redraw(
                     )
                 );
 
-            Floppy144IntroDrawWithLogin(
+            Floppy144IntroDrawForProfile(
                 pSurface,
                 elapsed_milliseconds,
                 Floppy144SettingsTextElapsedMs(
                     &global_settings,
                     1U
                 ),
-                global_intro_login,
-                global_intro_login_save_failed
+                Floppy144DiscoveryProfileHasOperatorName(&global_profile)?
+                    Floppy144DiscoveryProfileOperatorName(&global_profile):global_intro_login,
+                global_intro_login_save_failed,
+                Floppy144DiscoveryProfileHasOperatorName(&global_profile)
             );
 
             break;
@@ -821,6 +823,12 @@ static void Floppy144UpdateTiming(
             global_intro_sound_stage=3U;
         }
 
+        if(Floppy144IntroAutoLoginReady(intro_elapsed_ms,
+            Floppy144DiscoveryProfileHasOperatorName(&global_profile)))
+        {
+            Floppy144TimingStopSplash(&global_timing);
+            Floppy144OpenMainMenu(window);
+        }
         redraw =
             true;
     }
@@ -2498,6 +2506,7 @@ static bool Floppy144HandleTextInput(
     /* BF20: LOGIN is the only editable field during the staged introduction. */
     if(global_screen==FLOPPY144_SCREEN_SPLASH)
     {
+        if(Floppy144DiscoveryProfileHasOperatorName(&global_profile))return;
         if(Floppy144IntroLoginReady(
             Floppy144TimingSplashElapsedMs(
                 &global_timing,f144PlatformMonotonicMs(&global_platform))))
@@ -3111,6 +3120,7 @@ static bool Floppy144HandleActionEvent(
             if(global_screen==FLOPPY144_SCREEN_SPLASH)
             {
                 if(eAction==F144_ACTION_CONFIRM &&
+                   !Floppy144DiscoveryProfileHasOperatorName(&global_profile) &&
                    Floppy144IntroLoginReady(
                        Floppy144TimingSplashElapsedMs(
                            &global_timing,

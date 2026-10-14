@@ -440,6 +440,16 @@ static void TestDeskAndDoorChildSurfaces(void)
     CHECK(inside>0U && outside==0U,
           "Desk 06 child documents lie only on its 2.5D desktop plane");
 
+    {
+        const Floppy144DataRecord *panel=FindParent("MAIN_OFFICE_SUPPRESSION_PANEL");
+        CHECK(panel!=NULL,"suppression panel exists");
+        if(panel!=NULL) {
+            (void)DrawParent(panel,0,0U,0U,NULL);
+            CHECK(RegionPixelCount(230U,96U,305U,255U)==0U,
+                  "suppression panel has no legacy blocks beyond its silhouette");
+        }
+    }
+
     /* Signed authored orientation still maps children to a rotated top. */
     (void)DrawParent(rotated,90,0U,0U,NULL);
     memcpy(g_child_baseline,g_pixels,sizeof(g_pixels));
@@ -451,9 +461,9 @@ static void TestDeskAndDoorChildSurfaces(void)
     (void)DrawParent(door,0,0U,0U,NULL);
     memcpy(g_child_baseline,g_pixels,sizeof(g_pixels));
     (void)DrawParent(door,0,3U,0U,NULL);
-    inside=TestNewChildColourInBounds(42U,143U,75U,303U,&outside);
+    inside=TestNewChildColourInBounds(75U,110U,195U,290U,&outside);
     CHECK(inside>0U && outside==0U,
-          "corridor door children stay on the projected vertical door face");
+          "corridor door children stay on the broad vertical door face");
 
     /* Four shelving levels are copies of the top plane at authored lips. */
     CHECK(bookcase!=NULL && wall!=NULL,

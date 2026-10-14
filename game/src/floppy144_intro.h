@@ -32,3 +32,11 @@ void Floppy144IntroDrawWithLogin(
     Floppy144Surface *surface,uint32_t elapsed_ms,uint32_t text_rate,
     const char *login_name,bool save_failed
 );
+
+/* Existing identity is displayed for a short pause, without rewriting it. */
+#define FLOPPY144_INTRO_AUTO_LOGIN_PAUSE_MS 250U
+bool Floppy144IntroAutoLoginReady(uint32_t elapsed_ms,bool has_profile);
+void Floppy144IntroDrawForProfile(
+    Floppy144Surface *surface,uint32_t elapsed_ms,uint32_t text_rate,
+    const char *login_name,bool save_failed,bool has_profile
+);
