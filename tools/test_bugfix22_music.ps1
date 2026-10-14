@@ -31,7 +31,8 @@ if($midi -match '(?i)\.wav|\.mp3|\.ogg|\.mid"') {
 # Exercise generated MIDI events without an actual sound card.
 $tempDir = if($env:RUNNER_TEMP) { $env:RUNNER_TEMP } else { [IO.Path]::GetTempPath() }
 $exe = Join-Path $tempDir 'bf22_menu_midi_tests.exe'
-& cl.exe /nologo /TC /std:c11 /W4 /WX /utf-8 /I(Join-Path $root 'src') `
+$include = '/I' + (Join-Path $root 'src')
+& cl.exe /nologo /TC /std:c11 /W4 /WX /utf-8 $include `
     (Join-Path $root 'tools\bf22_menu_midi_tests.c') "/Fe$exe" /link winmm.lib
 if($LASTEXITCODE -ne 0) { throw 'BF22 native MIDI event test failed to compile' }
 & $exe

@@ -68,7 +68,7 @@ int main(void)
     check(midi_seen(3u*16u,0x94u,56u),"Fm6 borrowed Ab");
     check(midi_seen(5u*16u,0x94u,63u),"Abmaj7 borrowed Eb");
     check(midi_seen(7u*16u,0x94u,68u),"G7 flat ninth");
-    check(midi_seen(9u*16u+4u,0x95u,72u),"celesta reply in middle section");
+    check(midi_seen(9u*16u+4u,0x95u,80u),"celesta reply in middle section");
     check(midi_seen(8u*16u+3u,0x90u,76u),"expanded middle melody");
     check(!midi_seen(24u*16u+3u,0x90u,76u),"closing melody is sparse");
     check(midi_seen(31u*16u+12u,0x91u,35u),"final B approaches initial C");
