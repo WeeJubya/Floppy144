@@ -70,6 +70,7 @@ typedef enum Floppy144Screen
 {
     FLOPPY144_SCREEN_SPLASH,
     FLOPPY144_SCREEN_MAIN_MENU,
+    FLOPPY144_SCREEN_DIFFICULTY,
     FLOPPY144_SCREEN_PROFILE,
     FLOPPY144_SCREEN_SETTINGS,
     FLOPPY144_SCREEN_CREDITS,
@@ -188,6 +189,7 @@ static Floppy144Screen global_credits_return_screen;
 
 static Floppy144MainMenuOption
     global_main_menu_option;
+static Floppy144Difficulty global_pending_difficulty;
 
 static Floppy144SettingsOption
     global_settings_option;
@@ -370,6 +372,11 @@ static void Floppy144Redraw(
             break;
         }
 
+        case FLOPPY144_SCREEN_DIFFICULTY:
+        {
+            Floppy144DifficultyDraw(pSurface,global_pending_difficulty);
+            break;
+        }
         case FLOPPY144_SCREEN_PROFILE:
         {
             Floppy144ProfileViewDraw(
@@ -499,6 +506,7 @@ static void Floppy144Redraw(
 
         case FLOPPY144_SCREEN_CATALOGUE:
         {
+            global_catalogue.run_state = &global_run_state;
             Floppy144CatalogueDraw(
                 pSurface,
                 &global_catalogue
@@ -975,9 +983,9 @@ static void Floppy144ConfigureTerminalSession(
 
     Floppy144TerminalConfigureSession(
         &global_terminal,
-        f144StartupConfigDebugEnabled(
-            &global_config
-        ),
+        f144StartupConfigDebugEnabled(&global_config) ||
+            global_run_state.difficulty ==
+                (uint8_t)FLOPPY144_DIFFICULTY_REALLY_SUPER_EASY,
         global_profile.recovery_sessions_begun <= 1U,
         true
     );
@@ -1731,6 +1739,13 @@ static void Floppy144MainMenuActivate(
     {
         case FLOPPY144_MAIN_MENU_INITIATE_SESSION:
         {
+            if(global_screen != FLOPPY144_SCREEN_DIFFICULTY)
+            {
+                global_pending_difficulty=FLOPPY144_DIFFICULTY_EASY;
+                global_screen=FLOPPY144_SCREEN_DIFFICULTY;
+                Floppy144Redraw(window);
+                return;
+            }
             Floppy144UpdateDiscoveryProfile();
 
             Floppy144WorldReset(
@@ -1768,6 +1783,7 @@ static void Floppy144MainMenuActivate(
                     &global_run_state,
                     recovery_seed
                 );
+                global_run_state.difficulty=(uint8_t)global_pending_difficulty;
                 if(Floppy144HathawayMode())
                 {
                     Floppy144RunStateEnableHathawayInspection(
@@ -3243,6 +3259,29 @@ static bool Floppy144HandleActionEvent(
                 /*
                  * Persistent environment settings use stepped controls.
                  */
+                case FLOPPY144_SCREEN_DIFFICULTY:
+                {
+                    switch(eAction)
+                    {
+                        case F144_ACTION_MOVE_UP:
+                        case F144_ACTION_NAV_UP:
+                            global_pending_difficulty=(Floppy144Difficulty)(
+                                ((uint32_t)global_pending_difficulty+2U)%3U);
+                            Floppy144Redraw(window); return true;
+                        case F144_ACTION_MOVE_DOWN:
+                        case F144_ACTION_NAV_DOWN:
+                            global_pending_difficulty=(Floppy144Difficulty)(
+                                ((uint32_t)global_pending_difficulty+1U)%3U);
+                            Floppy144Redraw(window); return true;
+                        case F144_ACTION_CONFIRM:
+                            Floppy144MainMenuActivate(window); return true;
+                        case F144_ACTION_BACK:
+                            global_screen=FLOPPY144_SCREEN_MAIN_MENU;
+                            Floppy144Redraw(window); return true;
+                        default: break;
+                    }
+                    break;
+                }
                 case FLOPPY144_SCREEN_SETTINGS:
                 {
                     switch(eAction)

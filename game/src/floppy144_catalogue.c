@@ -11,6 +11,7 @@
 #include "floppy144_collection_registry.h"
 #include "floppy144_document.h"
 
+#include <ctype.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
@@ -159,6 +160,88 @@ static uint32_t Floppy144CatalogueOrderedRecordNumber(
     return definition->record_number_base + index + 1U;
 }
 
+
+/*
+ * BF29: test the entire proposed title, not just its two component strings.
+ * Word comparison is ASCII case-insensitive, with punctuation as separators.
+ * The bounded form search retains stable identities and cannot loop forever.
+ */
+static bool Floppy144CatalogueTitleHasRepeatedWord(const char *text)
+{
+    const unsigned char *first = (const unsigned char *)text;
+    while(*first != 0U)
+    {
+        const unsigned char *first_end;
+        const unsigned char *second;
+        while(*first != 0U && !isalnum(*first)) ++first;
+        if(*first == 0U) break;
+        first_end = first;
+        while(*first_end != 0U && isalnum(*first_end)) ++first_end;
+        second = first_end;
+        while(*second != 0U)
+        {
+            const unsigned char *second_end;
+            const unsigned char *a;
+            const unsigned char *b;
+            while(*second != 0U && !isalnum(*second)) ++second;
+            if(*second == 0U) break;
+            second_end = second;
+            while(*second_end != 0U && isalnum(*second_end)) ++second_end;
+            if((size_t)(first_end-first) == (size_t)(second_end-second))
+            {
+                a = first; b = second;
+                while(a < first_end && tolower(*a) == tolower(*b))
+                {
+                    ++a; ++b;
+                }
+                if(a == first_end) return true;
+            }
+            second = second_end;
+        }
+        first = first_end;
+    }
+    return false;
+}
+
+/*
+ * BF31: a display allocation only; real collection capacity remains size_kb.
+ * Prefix-floor apportionment avoids missing remainder bytes and produces stable
+ * nonnegative per-row sizes without a second viewer-specific calculation.
+ */
+uint32_t Floppy144CatalogueDocumentSizeBytes(
+    const Floppy144RunState *run_state,
+    Floppy144CollectionId collection,
+    uint32_t record_index
+)
+{
+    const Floppy144CollectionDefinition *definition;
+    uint32_t total_weight = 0U, prefix_weight = 0U, previous_weight = 0U;
+    uint32_t i, total_bytes;
+    Floppy144Difficulty difficulty;
+    if(run_state == NULL || (uint32_t)collection >= FLOPPY144_COLLECTION_COUNT)
+        return 0U;
+    difficulty = (Floppy144Difficulty)run_state->difficulty;
+    if(difficulty == FLOPPY144_DIFFICULTY_NORMAL ||
+       difficulty >= FLOPPY144_DIFFICULTY_COUNT) return 0U;
+    definition = Floppy144CollectionGet(collection);
+    if(record_index >= definition->catalogue.record_count) return 0U;
+    total_bytes = definition->size_kb * 1024U;
+    for(i = 0U; i < definition->catalogue.record_count; ++i)
+    {
+        uint32_t weight;
+        bool authored = Floppy144DocumentGet(collection,i) != NULL;
+        weight = difficulty == FLOPPY144_DIFFICULTY_EASY ?
+            (authored ? 13U : 10U) : (authored ? 0U : 10U);
+        total_weight += weight;
+        if(i < record_index) previous_weight += weight;
+        if(i <= record_index) prefix_weight += weight;
+    }
+    /* A collection with no eligible rows cannot display an allocation. */
+    if(total_weight == 0U) return 0U;
+    return (uint32_t)(((uint64_t)total_bytes * prefix_weight)/total_weight -
+                      ((uint64_t)total_bytes * previous_weight)/total_weight);
+}
+
 /*
  * Build a deterministic record ID and title
  *
@@ -273,13 +356,20 @@ void Floppy144CatalogueBuildRecordForSeed(
     }
     else
     {
-        snprintf(
-            title,
-            title_size,
-            "%s %s",
-            definition->subjects[subject_index],
-            floppy144_record_forms[form_index]
-        );
+        uint32_t offset;
+        char proposed[192];
+        for(offset=0U; offset<FLOPPY144_RECORD_FORM_COUNT; ++offset)
+        {
+            uint32_t candidate=(form_index+offset)%FLOPPY144_RECORD_FORM_COUNT;
+            (void)snprintf(proposed,sizeof(proposed),"%s %s",
+                definition->subjects[subject_index],
+                floppy144_record_forms[candidate]);
+            if(!Floppy144CatalogueTitleHasRepeatedWord(proposed)) break;
+        }
+        if(offset == FLOPPY144_RECORD_FORM_COUNT)
+            (void)snprintf(proposed,sizeof(proposed),"%s ENTRY-%u",
+                definition->subjects[subject_index],(unsigned)(index+1U));
+        (void)snprintf(title,title_size,"%s",proposed);
     }
 
     authored_document =
@@ -434,6 +524,8 @@ static void Floppy144CatalogueDrawRow(
     uint32_t y,
     uint32_t recovery_seed,
     bool selected,
+    bool opened,
+    uint32_t display_bytes,
     uint32_t background,
     uint32_t selected_background,
     uint32_t border,
@@ -503,6 +595,17 @@ static void Floppy144CatalogueDrawRow(
         1,
         text
     );
+    Floppy144DrawText(surface, 480U, y+5U, opened ? "YES" : "-",
+        1U, opened ? text : muted);
+    if(display_bytes != 0U)
+    {
+        char size_text[20];
+        uint32_t width;
+        (void)snprintf(size_text,sizeof(size_text),"%u",
+            (unsigned)display_bytes);
+        width=Floppy144DrawTextWidth(size_text,1U);
+        Floppy144DrawText(surface,585U-width,y+5U,size_text,1U,muted);
+    }
 }
 
 /*
@@ -669,6 +772,13 @@ static void Floppy144CatalogueDrawList(
         border
     );
 
+    Floppy144DrawText(surface,66U,82U,"DOCUMENT ID",1U,muted);
+    Floppy144DrawText(surface,172U,82U,"INFORMATION",1U,muted);
+    Floppy144DrawText(surface,480U,82U,"OPENED",1U,muted);
+    if(catalogue->run_state != NULL &&
+       catalogue->run_state->difficulty != FLOPPY144_DIFFICULTY_NORMAL)
+        Floppy144DrawText(surface,550U,82U,"SIZE",1U,muted);
+
     /* Render only the ten rows in the current viewport. */
     for(
         visible_row = 0;
@@ -691,6 +801,10 @@ static void Floppy144CatalogueDrawList(
             98U + visible_row * 19U,
             catalogue->recovery_seed,
             record_index == catalogue->selected_index,
+            Floppy144RunStateRecordOpened(catalogue->run_state,
+                catalogue->collection, record_index),
+            Floppy144CatalogueDocumentSizeBytes(catalogue->run_state,
+                catalogue->collection, record_index),
             row,
             selected_row,
             border,
@@ -1506,6 +1620,18 @@ static void Floppy144CatalogueDrawDocument(
         border
     );
 
+    {
+        uint32_t bytes = Floppy144CatalogueDocumentSizeBytes(
+            catalogue->run_state,catalogue->collection,catalogue->selected_index);
+        if(bytes != 0U)
+        {
+            char metadata[40];
+            (void)snprintf(metadata,sizeof(metadata),"SIZE: %u BYTES",
+                (unsigned)bytes);
+            Floppy144DrawText(surface,35U,316U,metadata,1U,muted);
+        }
+    }
+
     Floppy144CatalogueTextCentred(
         surface,
         316,
@@ -1534,6 +1660,7 @@ void Floppy144CatalogueReset(
 {
     catalogue->collection = collection;
     catalogue->recovery_seed = 0U;
+    catalogue->run_state = NULL;
     catalogue->selected_index = 0;
     catalogue->top_index = 0;
     catalogue->document_scroll_line = 0U;

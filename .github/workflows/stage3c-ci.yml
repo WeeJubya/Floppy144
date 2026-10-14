@@ -100,6 +100,10 @@ jobs:
         shell: pwsh
         run: .\tools\test_stage4_input.ps1
 
+      - name: BF29/31/32/34 document and difficulty integration
+        shell: pwsh
+        run: .\tools\test_documents_difficulty.ps1
+
       - name: Stage 4 persistence paths
         shell: pwsh
         run: .\tools\test_stage4_persistence.ps1

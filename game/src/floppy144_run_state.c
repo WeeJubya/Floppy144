@@ -1283,6 +1283,18 @@ void Floppy144RunStateEnableHathawayInspection(Floppy144RunState *state)
     state->dirty=0U;
 }
 
+const char *Floppy144DifficultyName(Floppy144Difficulty difficulty)
+{
+    switch(difficulty)
+    {
+        case FLOPPY144_DIFFICULTY_NORMAL: return "NORMAL";
+        case FLOPPY144_DIFFICULTY_EASY: return "EASY";
+        case FLOPPY144_DIFFICULTY_REALLY_SUPER_EASY:
+            return "REALLY SUPER EASY (I MEAN REALLY STUPIDLY EASY)";
+        default: return "NORMAL";
+    }
+}
+
 void Floppy144RunStateReset
 (
     Floppy144RunState *state

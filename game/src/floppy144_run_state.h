@@ -38,6 +38,17 @@
 #define FLOPPY144_RUN_WORD_COUNT(capacity) \
 (((capacity) + FLOPPY144_RUN_WORD_BITS - 1) / FLOPPY144_RUN_WORD_BITS)
 
+/* BF31/BF32: zero safely migrates legacy saves. */
+typedef enum Floppy144Difficulty
+{
+    FLOPPY144_DIFFICULTY_NORMAL = 0,
+    FLOPPY144_DIFFICULTY_EASY = 1,
+    FLOPPY144_DIFFICULTY_REALLY_SUPER_EASY = 2,
+    FLOPPY144_DIFFICULTY_COUNT
+} Floppy144Difficulty;
+
+const char *Floppy144DifficultyName(Floppy144Difficulty difficulty);
+
 typedef enum Floppy144RunAct
 {
     FLOPPY144_RUN_ACT_PROLOGUE = 0,
@@ -85,6 +96,7 @@ typedef struct Floppy144RunState
     uint8_t opening_recovery_step; /* per-run tutorial; persisted in V4 */
     uint8_t grey_door_state; /* S4G per-run save field */
     uint8_t hathaway_inspection; /* S4H: RAM-only, never encoded */
+    uint8_t difficulty; /* BF31/BF32: persisted in save V6 */
 
     int32_t player_site_x;
     int32_t player_site_y;

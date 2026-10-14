@@ -674,3 +674,40 @@ void Floppy144MainMenuDraw(
         );
     }
 }
+
+/* BF31: full-length choices have their own screen at normal font scale. */
+void Floppy144DifficultyDraw(
+    Floppy144Surface *surface, Floppy144Difficulty selected
+)
+{
+    uint32_t i;
+    const uint32_t background=FLOPPY144_RGB(17,23,28);
+    const uint32_t panel=FLOPPY144_RGB(24,33,39);
+    const uint32_t text=FLOPPY144_RGB(202,211,205);
+    const uint32_t muted=FLOPPY144_RGB(118,133,132);
+    const uint32_t amber=FLOPPY144_RGB(194,153,76);
+    if(surface == NULL || surface->pixels == NULL) return;
+    Floppy144DrawClear(surface,background);
+    Floppy144DrawText(surface,10U,5U,"GDR SESSION CONTROL SYSTEM",1U,muted);
+    Floppy144DrawFillRect(surface,24U,28U,592U,306U,panel);
+    Floppy144DrawRect(surface,24U,28U,592U,306U,muted);
+    Floppy144RecoveryTextCentred(surface,48U,"SELECT RECOVERY DIFFICULTY",2U,text);
+    Floppy144RecoveryTextCentred(surface,79U,
+        "THIS CHOICE WILL BE SAVED WITH YOUR RECOVERY SESSION",1U,muted);
+    for(i=0U;i<(uint32_t)FLOPPY144_DIFFICULTY_COUNT;++i)
+    {
+        const char *name=Floppy144DifficultyName((Floppy144Difficulty)i);
+        uint32_t y=127U+i*41U;
+        uint32_t width=Floppy144DrawTextWidth(name,1U);
+        uint32_t x=(surface->width-width)/2U;
+        if(i==(uint32_t)selected)
+        {
+            Floppy144DrawFillRect(surface,42U,y-7U,556U,23U,background);
+            Floppy144DrawText(surface,49U,y,">",1U,amber);
+        }
+        Floppy144DrawText(surface,x,y,name,1U,
+            i==(uint32_t)selected ? amber : text);
+    }
+    Floppy144RecoveryTextCentred(surface,280U,
+        "UP/DOWN SELECT   ENTER BEGIN   BACKSPACE CANCEL",1U,muted);
+}

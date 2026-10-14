@@ -10,6 +10,7 @@
 #include "floppy144_draw.h"
 
 #include "floppy144_collection.h"
+#include "floppy144_run_state.h"
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -27,6 +28,7 @@ typedef struct Floppy144CatalogueState
 {
     Floppy144CollectionId collection;
     uint32_t recovery_seed; /* transient presentation seed */
+    const Floppy144RunState *run_state; /* transient BF34 view binding */
     uint32_t selected_index;
     uint32_t top_index;
 
@@ -71,6 +73,12 @@ bool Floppy144CatalogueFindRecord(
     Floppy144CollectionId *collection,
     uint32_t *record_index
 );
+/* BF31: authoritative display-only allocation, zero when size is hidden. */
+uint32_t Floppy144CatalogueDocumentSizeBytes(
+    const Floppy144RunState *run_state, Floppy144CollectionId collection,
+    uint32_t record_index
+);
+
 void Floppy144CatalogueReset(
     Floppy144CatalogueState *catalogue,
     Floppy144CollectionId collection

@@ -52,6 +52,9 @@ void Floppy144RecoveryFormatCapacity(
     uint32_t uBufferCapacity
 );
 
+void Floppy144DifficultyDraw(Floppy144Surface *surface,
+    Floppy144Difficulty selected);
+
 void Floppy144MainMenuDraw(
     Floppy144Surface *runtime,
     Floppy144MainMenuOption selected_option,
