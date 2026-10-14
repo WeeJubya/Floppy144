@@ -20,7 +20,7 @@ if($sfx -match '(?i)\\.wav|\\.mp3|\\.ogg'){throw 'BF21 introduced asset dependen
 $tmp=if($env:RUNNER_TEMP){Join-Path $env:RUNNER_TEMP 'bf21-test'}else{Join-Path ([IO.Path]::GetTempPath()) 'bf21-test'}
 New-Item -ItemType Directory -Force -Path $tmp|Out-Null
 $exe=Join-Path $tmp 'bf21_sfx_tests.exe'
-& cl.exe /nologo /W4 /WX /TC /std:c11 /utf-8 (Join-Path $root 'tools\bf21_sfx_tests.c') "/I$(Join-Path $root 'src')" "/Fe$exe" winmm.lib
+& cl.exe /nologo /W4 /WX /TC /std:c11 /utf-8 (Join-Path $root 'tools\bf21_sfx_tests.c') "/I$(Join-Path $root 'src')" "/Fe$exe" /link winmm.lib
 if($LASTEXITCODE -ne 0){throw 'BF21 native synthesis test build failed'}
 & $exe
 if($LASTEXITCODE -ne 0){throw 'BF21 native synthesis test failed'}
