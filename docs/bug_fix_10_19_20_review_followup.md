@@ -49,7 +49,7 @@ python tools/compile_intro_vectors.py /path/to/Intro.pptx
 The runtime does not load the deck or use python-pptx.
 
 Existing named profiles display their stored LOGIN name and enter the Main Menu
-250 ms after boot finishes. They do not accept replacement text, require Enter,
+1500 ms after boot finishes. They do not accept replacement text, require Enter,
 or rewrite the profile. An unassigned profile still waits for explicit LOGIN,
 with the existing validation, GUEST and failed-save retry behaviour. Credits
 replay follows the same profile policy.

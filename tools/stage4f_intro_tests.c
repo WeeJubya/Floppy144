@@ -124,8 +124,8 @@ int main(void)
     if(!require_true(!Floppy144IntroLoginReady(22799U) &&
         Floppy144IntroLoginReady(22800U),"LOGIN is gated until full boot"))return 27;
 
-    if(!require_true(!Floppy144IntroAutoLoginReady(23049U,true) &&
-        Floppy144IntroAutoLoginReady(23050U,true),"existing profile waits 250ms after boot"))return 28;
+    if(!require_true(!Floppy144IntroAutoLoginReady(24299U,true) &&
+        Floppy144IntroAutoLoginReady(24300U,true),"existing profile waits 1500ms after boot"))return 28;
     if(!require_true(!Floppy144IntroAutoLoginReady(99999U,false),
         "first profile still waits for explicit LOGIN"))return 29;
     puts("S4F-02 INTRO VECTORS: PASS");
