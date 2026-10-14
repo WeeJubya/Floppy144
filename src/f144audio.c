@@ -694,8 +694,12 @@ static void menu_scene_step(unsigned absolute_step)
         /* Release the previous chord before forming the next office drone. */
         channel_silence(CH_PAD);
         for(voice=0u;voice<(busy?4u:3u);++voice)
-            send_raw((uint8_t)(0x90u|CH_PAD),menu_chord[chord][voice],
+        {
+            /* In the sparse G7(b9), keep the b9 in place of its fifth. */
+            unsigned chord_tone=(!busy&&chord==7u&&voice==2u)?3u:voice;
+            send_raw((uint8_t)(0x90u|CH_PAD),menu_chord[chord][chord_tone],
                      (uint8_t)(voice==0u?23u:18u));
+        }
     }
     /* Four clipped quarter-note conveyor pulses, resolving G -> B -> C
        across bars 32 and 1. */
