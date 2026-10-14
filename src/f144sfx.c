@@ -854,11 +854,27 @@ static unsigned make_floppy_insert(F144Voice *v)
     return n;
 }
 
+static unsigned make_restore_tick(F144Voice *v,unsigned freq)
+{
+    unsigned i,n=ms_samples(14U);
+    uint32_t phase=0U;
+    int filtered=0;
+    for(i=0U;i<n;i++) {
+        float e=env_attack_release(i,n,ms_samples(2U));
+        filtered+=(noise_signed()-filtered)/5;
+        v->samples[i]=clamp16(scaled((int)((filtered/10+
+            triangle_sample(&phase,freq,2400))*e),0.45f));
+    }
+    return n;
+}
+
 static unsigned generate(F144Voice *v, F144SFX effect)
 {
     clear_voice(v);
 
     switch (effect) {
+        case F144_SFX_RESTORE_TICK: return make_restore_tick(v,320U);
+        case F144_SFX_RESTORE_TICK_HIGH: return make_restore_tick(v,380U);
         case F144_SFX_TERMINAL_KEY:
             return make_terminal_key(v);
         case F144_SFX_TERMINAL_BACKSPACE:
@@ -916,6 +932,10 @@ static unsigned generate(F144Voice *v, F144SFX effect)
             return 0u;
     }
 }
+
+#ifdef F144_SFX_REVIEW
+#include "f144sfx_review.inc"
+#endif
 
 static F144Voice *find_voice(void)
 {
@@ -1021,7 +1041,14 @@ void F144_SFXPlay(F144SFX effect)
     if (!v)
         return;
 
+#ifdef F144_SFX_REVIEW
+    /* Same seed for fair A/B replay; alternate only the two feet. */
+    g_noise=0xF14451F1U;
+    samples=generate_review(v,effect,g_review_variant,g_review_foot);
+    if(effect==F144_SFX_FOOTSTEP)g_review_foot^=1U;
+#else
     samples = generate(v, effect);
+#endif
 
     if (!samples)
         return;

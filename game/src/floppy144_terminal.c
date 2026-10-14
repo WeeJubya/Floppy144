@@ -16,7 +16,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#define FLOPPY144_TERMINAL_RESTORE_BASE_MS      300U
+#include "floppy144_restore_presentation.h"
+#define FLOPPY144_TERMINAL_RESTORE_BASE_MS      1500U
 #define FLOPPY144_TERMINAL_RESTORE_MS_PER_KB     18U
 
 /*
@@ -3593,11 +3594,8 @@ uint32_t Floppy144TerminalRestoreProgressPercent(
     }
 
     return
-        (
-            terminal->restoration_elapsed_ms *
-            100U
-        ) /
-        terminal->restoration_duration_ms;
+        Floppy144RestoreProgress(terminal->restoration_elapsed_ms,
+                                 terminal->restoration_duration_ms);
 }
 
 void Floppy144TerminalAdvanceRestore(

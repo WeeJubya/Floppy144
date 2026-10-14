@@ -29,6 +29,8 @@ typedef enum F144SFX {
     F144_SFX_COFFEE_MACHINE,
     F144_SFX_FLOPPY_INSERT,
     F144_SFX_TERMINAL_BACKSPACE,
+    F144_SFX_RESTORE_TICK,
+    F144_SFX_RESTORE_TICK_HIGH,
     F144_SFX_COUNT
 } F144SFX;
 
@@ -41,6 +43,10 @@ void  F144_SFXSetVolume(float volume);
 float F144_SFXGetVolume(void);
 
 int F144_SFXIsAvailable(void);
+#ifdef F144_SFX_REVIEW
+void F144_SFXReviewVariant(unsigned variant);
+const char *F144_SFXReviewName(F144SFX effect);
+#endif
 
 #ifdef __cplusplus
 }

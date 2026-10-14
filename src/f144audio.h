@@ -33,6 +33,8 @@ void F144_MusicSetRestoration(unsigned percent);
 unsigned F144_MusicGetRestoration(void);
 unsigned F144_MusicGetDistortion(void);
 void F144_AudioUpdate(double dt_seconds);
+void F144_MusicSetTempoPercent(unsigned percent);
+float F144_MusicGetTempoScale(void);
 
 void  F144_MusicSetVolume(float volume);
 float F144_MusicGetVolume(void);

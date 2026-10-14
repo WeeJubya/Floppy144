@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "f144audio.h"
 #include "f144sfx.h"
+#include "floppy144_restore_presentation.h"
 
 static int pressed(int vk,int *previous)
 {
@@ -20,7 +21,10 @@ int main(void)
     int number_keys[4]={0},seek_keys[7]={0};
     int nextkey=0,prevkey=0,playkey=0,up=0,down=0,svup=0,svdown=0;
     int rkey=0,ekey=0,menu_key=0,ending_key=0,game_key=0;
-    unsigned cue=0U,i;
+    int original=0,authentic=0,retro=0,restore_key=0,cancel_key=0;
+    unsigned cue=0U,i,variant=0U,restore_ms=0U,restore_progress=0U;
+    int restoring=0;
+    double restore_accum=0.0;
     int midi=F144_AudioInit(),sfx=F144_SFXInit();
     if(!midi && !sfx) { puts("No MIDI or waveOut device available."); return 1; }
     F144_MusicSetRestoration(0U);
@@ -30,6 +34,9 @@ int main(void)
     puts("Restoration corruption: R increase by 10, E decrease by 10");
     puts("BF22 REVIEW: M = PLEASE HOLD (menu), C = YOUR CONTRIBUTION HAS BEEN NOTED (ending), G = gameplay");
     printf("Current cue %u/%u (see src/f144sfx.h for names)\n",cue,F144_SFX_COUNT-1U);
+    puts("BF24: O ORIGINAL | A REVISED A: PHYSICALLY AUTHENTIC | S REVISED B: STYLISED RETRO");
+    puts("T: BF23 3-second restoration demonstration | X: interrupt and restore tempo");
+    printf("Cue: %s / ORIGINAL\n",F144_SFXReviewName((F144SFX)cue));
     QueryPerformanceFrequency(&freq);
     QueryPerformanceCounter(&last);
     for(;;) {
@@ -37,6 +44,26 @@ int main(void)
         QueryPerformanceCounter(&now);
         dt=(double)(now.QuadPart-last.QuadPart)/(double)freq.QuadPart;
         last=now;
+        if(pressed('T',&restore_key)) {
+            restoring=1;restore_ms=0U;restore_progress=0U;restore_accum=0.0;
+            F144_MusicSetScene(F144_MUSIC_GAMEPLAY);
+            puts("RESTORING...");
+        }
+        if(pressed('X',&cancel_key)) {restoring=0;F144_MusicSetTempoPercent(100U);puts("Interrupted / tempo returning to normal");}
+        if(restoring) {
+            unsigned next;
+            restore_accum+=dt*1000.0;
+            restore_ms=(unsigned)restore_accum;
+            next=Floppy144RestoreProgress(restore_ms,3000U);
+            F144_MusicSetTempoPercent(Floppy144RestoreTempo(next));
+            if(next!=restore_progress) {
+                printf("Restoration %u%% / tempo %u%%\n",next,Floppy144RestoreTempo(next));
+                F144_SFXPlay(next==100U?F144_SFX_FILE_RESTORE:
+                    (next>=97U?F144_SFX_RESTORE_TICK_HIGH:F144_SFX_RESTORE_TICK));
+                restore_progress=next;
+            }
+            if(next==100U)restoring=0;
+        }
         F144_AudioUpdate(dt);
         for(i=0;i<4;i++) {
             if(pressed('1'+(int)i,&number_keys[i])) {
@@ -63,8 +90,12 @@ int main(void)
             F144_MusicSetScene(F144_MUSIC_GAMEPLAY);
             puts("BF22 GAMEPLAY: original approved 80 BPM composition");
         }
-        if(pressed('N',&nextkey)) { cue=(cue+1U)%F144_SFX_COUNT; printf("SFX %u\n",cue); }
-        if(pressed('B',&prevkey)) { cue=(cue+F144_SFX_COUNT-1U)%F144_SFX_COUNT; printf("SFX %u\n",cue); }
+        if(pressed('O',&original)){variant=0U;puts("ORIGINAL");}
+        if(pressed('A',&authentic)){variant=1U;puts("REVISED A: PHYSICALLY AUTHENTIC / awaiting review");}
+        if(pressed('S',&retro)){variant=2U;puts("REVISED B: STYLISED RETRO / awaiting review");}
+        F144_SFXReviewVariant(variant);
+        if(pressed('N',&nextkey)) { cue=(cue+1U)%F144_SFX_COUNT; printf("SFX %u: %s\n",cue,F144_SFXReviewName((F144SFX)cue)); }
+        if(pressed('B',&prevkey)) { cue=(cue+F144_SFX_COUNT-1U)%F144_SFX_COUNT; printf("SFX %u: %s\n",cue,F144_SFXReviewName((F144SFX)cue)); }
         if(pressed(VK_SPACE,&playkey)) F144_SFXPlay((F144SFX)cue);
         if(pressed(VK_UP,&up)) F144_MusicSetVolume(F144_MusicGetVolume()+0.1f);
         if(pressed(VK_DOWN,&down)) F144_MusicSetVolume(F144_MusicGetVolume()-0.1f);

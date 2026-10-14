@@ -14,6 +14,8 @@ bool f144Win32AudioInit(F144Platform *platform)
     midi_ready=F144_AudioInit();
     sfx_ready=F144_SFXInit();
     previous_update_ms=0U;
+    platform->music_tempo_percent=100U;
+    F144_MusicSetTempoPercent(100U);
     music_cue=0U;
     return midi_ready!=0 || sfx_ready!=0;
 }
@@ -51,6 +53,8 @@ void f144Win32AudioStopMusic(F144Platform *platform)
     (void)platform;
     if(midi_ready) F144_MusicStop();
     music_cue=0U;
+    platform->music_tempo_percent=100U;
+    F144_MusicSetTempoPercent(100U);
 }
 
 void f144Win32AudioPlaySfx(F144Platform *platform,F144SfxCueId cue)
@@ -77,6 +81,7 @@ void f144Win32AudioUpdate(F144Platform *platform,
     double dt=0.0;
     (void)platform;
     F144_MusicSetRestoration((unsigned)recovered_percent);
+    F144_MusicSetTempoPercent(platform->music_tempo_percent);
     if(previous_update_ms!=0U && monotonic_ms>=previous_update_ms)
         dt=(double)(monotonic_ms-previous_update_ms)/1000.0;
     previous_update_ms=monotonic_ms;

@@ -10,6 +10,8 @@ $argsList = @(
     "/nologo",
     "/TC",
     "/O1",
+    "/DF144_SFX_REVIEW",
+    ("/I" + (Join-Path $root "game\src")),
     "/MT",
     "/utf-8",
     ("/I" + (Join-Path $root "src")),
@@ -24,4 +26,4 @@ $argsList = @(
 & cl.exe @argsList
 if($LASTEXITCODE -ne 0) { throw "Audio review harness failed to build." }
 Write-Host "Ready: $out\f144_audio_review.exe"
-Write-Host "Run the executable manually to audition all 22 SFX and 30-minute sections."
+Write-Host "Run the executable manually to audition all registered ORIGINAL/A/B SFX and 30-minute sections."

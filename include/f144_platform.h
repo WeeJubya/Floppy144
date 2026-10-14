@@ -199,6 +199,7 @@ struct F144Platform
     void *state;
     Floppy144Surface surface;
 
+    uint8_t music_tempo_percent; /* transient: zero/default means 100% */
     uint8_t audio_initialized;
     uint8_t music_volume;
     uint8_t sfx_volume;

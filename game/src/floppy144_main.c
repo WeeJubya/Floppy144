@@ -3549,100 +3549,1440 @@ static bool Floppy144HandleActionEvent(
                                 if(
                                     (
                                         Floppy144SiteAvailableActions(&global_run_state) &
- …60942 tokens truncated…;
-    LARGE_INTEGER freq,last,now;
-    int number_keys[4]={0},seek_keys[7]={0};
-    int nextkey=0,prevkey=0,playkey=0,up=0,down=0,svup=0,svdown=0;
-    int rkey=0,ekey=0,menu_key=0,ending_key=0,game_key=0;
-    int original=0,authentic=0,retro=0,restore_key=0,cancel_key=0;
-    unsigned cue=0U,i,variant=0U,restore_ms=0U,restore_progress=0U;
-    int restoring=0;
-    double restore_accum=0.0;
-    int midi=F144_AudioInit(),sfx=F144_SFXInit();
-    if(!midi && !sfx) { puts("No MIDI or waveOut device available."); return 1; }
-    F144_MusicSetRestoration(0U);
-    if(midi) F144_MusicRestart();
-    puts("F144 original-sound review: ESC quit | 1-4 Acts | F1-F7: 0,5,10,15,20,25,29m");
-    puts("N/B next/previous SFX | SPACE play cue | UP/DOWN music | LEFT/RIGHT SFX");
-    puts("Restoration corruption: R increase by 10, E decrease by 10");
-    puts("BF22 REVIEW: M = PLEASE HOLD (menu), C = YOUR CONTRIBUTION HAS BEEN NOTED (ending), G = gameplay");
-    printf("Current cue %u/%u (see src/f144sfx.h for names)\n",cue,F144_SFX_COUNT-1U);
-    puts("BF24: O ORIGINAL | A REVISED A: PHYSICALLY AUTHENTIC | S REVISED B: STYLISED RETRO");
-    puts("T: BF23 3-second restoration demonstration | X: interrupt and restore tempo");
-    printf("Cue: %s / ORIGINAL\n",F144_SFXReviewName((F144SFX)cue));
-    QueryPerformanceFrequency(&freq);
-    QueryPerformanceCounter(&last);
-    for(;;) {
-        double dt;
-        QueryPerformanceCounter(&now);
-        dt=(double)(now.QuadPart-last.QuadPart)/(double)freq.QuadPart;
-        last=now;
-        if(pressed('T',&restore_key)) {
-            restoring=1;restore_ms=0U;restore_progress=0U;restore_accum=0.0;
-            F144_MusicSetScene(F144_MUSIC_GAMEPLAY);
-            puts("RESTORING...");
-        }
-        if(pressed('X',&cancel_key)) {restoring=0;F144_MusicSetTempoPercent(100U);puts("Interrupted / tempo returning to normal");}
-        if(restoring) {
-            unsigned next;
-            restore_accum+=dt*1000.0;
-            restore_ms=(unsigned)restore_accum;
-            next=Floppy144RestoreProgress(restore_ms,3000U);
-            F144_MusicSetTempoPercent(Floppy144RestoreTempo(next));
-            if(next!=restore_progress) {
-                printf("Restoration %u%% / tempo %u%%\n",next,Floppy144RestoreTempo(next));
-                F144_SFXPlay(next==100U?F144_SFX_FILE_RESTORE:
-                    (next>=97U?F144_SFX_RESTORE_TICK_HIGH:F144_SFX_RESTORE_TICK));
-                restore_progress=next;
+                                        FLOPPY144_SITE_ACTION_ACCESS
+                                    ) == 0U &&
+                                    Floppy144CabinetOpenNearby(
+                                        &global_cabinet,
+                                        &global_run_state
+                                    )
+                                )
+                                {
+                                    global_office_notice = NULL;
+                                    global_resume_screen = FLOPPY144_SCREEN_CABINET;
+                                    global_screen = FLOPPY144_SCREEN_CABINET;
+                                    Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_CABINET);
+                                    Floppy144Redraw(window);
+                                    return true;
+                                }
+                            }
+
+                            Floppy144InteractOffice(
+                                window,
+                                FLOPPY144_OFFICE_INTERACTION_ACCESS
+                            );
+
+                            return true;
+                        }
+
+                        case F144_ACTION_INSPECT:
+                        {
+                            Floppy144InteractOffice(
+                                window,
+                                FLOPPY144_OFFICE_INTERACTION_INSPECT
+                            );
+
+                            return true;
+                        }
+
+                        case F144_ACTION_NOTEBOOK:
+                        {
+                            global_screen =
+                                FLOPPY144_SCREEN_NOTEBOOK;
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                    }
+
+                    break;
+                }
+
+                /*
+                 * Notebook: browse recovered persistent knowledge. Up/Down
+                 * moves one entry, Page Up/Page Down jumps five entries, and
+                 * N or Backspace returns to Site exploration.
+                 */
+                /* STAGE 3B.5 CABINET KEY ROUTING
+                 *
+                 * Keypad and Interior share one reusable screen state.
+                 * Escape remains the universal Session Control route.
+                 */
+                case FLOPPY144_SCREEN_CABINET:
+                {
+                    switch(eAction)
+                    {
+                        case F144_ACTION_MOVE_UP:
+                        {
+                            Floppy144CabinetMoveSelection(
+                                &global_cabinet,
+                                &global_run_state,
+                                -1
+                            );
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_MOVE_DOWN:
+                        {
+                            Floppy144CabinetMoveSelection(
+                                &global_cabinet,
+                                &global_run_state,
+                                1
+                            );
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_CONFIRM:
+                        {
+                            if(Floppy144CabinetInteriorOpen(&global_cabinet))
+                            {
+                                (void)Floppy144CabinetInspectSelected(
+                                    &global_cabinet,
+                                    &global_world,
+                                    &global_run_state
+                                );
+                            }
+                            else
+                            {
+                                bool accepted=Floppy144CabinetSubmitCode(
+                                    &global_cabinet,
+                                    &global_world,
+                                    &global_run_state
+                                );
+                                Floppy144AudioPlay(&global_platform,
+                                    accepted ? FLOPPY144_AUDIO_CABINET
+                                             : FLOPPY144_AUDIO_ERROR);
+                            }
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_INSPECT:
+                        {
+                            if(Floppy144CabinetInteriorOpen(&global_cabinet))
+                            {
+                                (void)Floppy144CabinetInspectSelected(
+                                    &global_cabinet,
+                                    &global_world,
+                                    &global_run_state
+                                );
+                                Floppy144Redraw(window);
+                            }
+                            return true;
+                        }
+
+                        case F144_ACTION_BACK:
+                        {
+                            if(!Floppy144CabinetBackspace(&global_cabinet))
+                            {
+                                global_resume_screen = FLOPPY144_SCREEN_OFFICE;
+                                global_screen = FLOPPY144_SCREEN_OFFICE;
+                            }
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+                    }
+
+                    break;
+                }
+
+                case FLOPPY144_SCREEN_COMPLETION:
+                {
+                    if(
+                        Floppy144CompletionViewFinalNoteOpen(
+                            &global_completion_view
+                        )
+                    )
+                    {
+                        switch(eAction)
+                        {
+                            case F144_ACTION_MOVE_UP:
+                            case F144_ACTION_NAV_UP:
+                            {
+                                Floppy144CompletionViewScrollFinalNote(
+                                    &global_completion_view,
+                                    &global_run_state,
+                                    -1
+                                );
+                                break;
+                            }
+
+                            case F144_ACTION_MOVE_DOWN:
+                            case F144_ACTION_NAV_DOWN:
+                            {
+                                Floppy144CompletionViewScrollFinalNote(
+                                    &global_completion_view,
+                                    &global_run_state,
+                                    1
+                                );
+                                break;
+                            }
+
+                            case F144_ACTION_PAGE_UP:
+                            {
+                                Floppy144CompletionViewScrollFinalNote(
+                                    &global_completion_view,
+                                    &global_run_state,
+                                    -12
+                                );
+                                break;
+                            }
+
+                            case F144_ACTION_PAGE_DOWN:
+                            {
+                                Floppy144CompletionViewScrollFinalNote(
+                                    &global_completion_view,
+                                    &global_run_state,
+                                    12
+                                );
+                                break;
+                            }
+
+                            case F144_ACTION_BACK:
+                            case F144_ACTION_CONFIRM:
+                            {
+                                Floppy144CompletionViewCloseFinalNote(
+                                    &global_completion_view
+                                );
+                                break;
+                            }
+
+                            default:
+                            {
+                                return true;
+                            }
+                        }
+
+                        Floppy144Redraw(window);
+                        return true;
+                    }
+
+                    switch(eAction)
+                    {
+                        case F144_ACTION_MOVE_UP:
+                        case F144_ACTION_NAV_UP:
+                        {
+                            Floppy144CompletionViewMoveSelection(
+                                &global_completion_view,
+                                -1
+                            );
+                            break;
+                        }
+
+                        case F144_ACTION_MOVE_DOWN:
+                        case F144_ACTION_NAV_DOWN:
+                        {
+                            Floppy144CompletionViewMoveSelection(
+                                &global_completion_view,
+                                1
+                            );
+                            break;
+                        }
+
+                        case F144_ACTION_CONFIRM:
+                        {
+                            switch(
+                                Floppy144CompletionViewSelectedOption(
+                                    &global_completion_view
+                                )
+                            )
+                            {
+                                case FLOPPY144_COMPLETION_OPTION_FINAL_NOTE:
+                                {
+                                    Floppy144CompletionViewOpenFinalNote(
+                                        &global_completion_view
+                                    );
+                                    break;
+                                }
+
+                                case FLOPPY144_COMPLETION_OPTION_CREDITS:
+                                {
+                                    global_credits_return_screen =
+                                        FLOPPY144_SCREEN_COMPLETION;
+                                    global_screen =
+                                        FLOPPY144_SCREEN_CREDITS;
+                                    break;
+                                }
+
+                                case FLOPPY144_COMPLETION_OPTION_MAIN_MENU:
+                                {
+                                    global_office_notice =
+                                        NULL;
+
+                                    Floppy144OpenMainMenu(
+                                        window
+                                    );
+
+                                    return true;
+                                }
+
+                                case FLOPPY144_COMPLETION_OPTION_COUNT:
+                                {
+                                    break;
+                                }
+                            }
+
+                            break;
+                        }
+
+                        case F144_ACTION_BACK:
+                        {
+                            /*
+                             * Summary owns an explicit Return to Main Menu
+                             * action. Backspace cannot accidentally bypass
+                             * the completed-session record.
+                             */
+                            return true;
+                        }
+
+                        default:
+                        {
+                            return true;
+                        }
+                    }
+
+                    Floppy144Redraw(window);
+                    return true;
+                }
+
+                case FLOPPY144_SCREEN_NOTEBOOK:
+                {
+                    switch(eAction)
+                    {
+                        case F144_ACTION_MOVE_UP:
+                        {
+                            Floppy144NotebookViewMove(
+                                &global_notebook,
+                                &global_run_state,
+                                -1
+                            );
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_MOVE_DOWN:
+                        {
+                            Floppy144NotebookViewMove(
+                                &global_notebook,
+                                &global_run_state,
+                                1
+                            );
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_PAGE_UP:
+                        {
+                            Floppy144NotebookViewMove(
+                                &global_notebook,
+                                &global_run_state,
+                                -12
+                            );
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_PAGE_DOWN:
+                        {
+                            Floppy144NotebookViewMove(
+                                &global_notebook,
+                                &global_run_state,
+                                12
+                            );
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_NOTEBOOK:
+                        case F144_ACTION_BACK:
+                        {
+                            global_screen =
+                                FLOPPY144_SCREEN_OFFICE;
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+                    }
+
+                    break;
+                }
+
+                /*
+                 * Terminal: printable input arrives through WM_CHAR. Arrow
+                 * keys are reserved for session-local command history while
+                 * the help/record pagers are not active.
+                 */
+                case FLOPPY144_SCREEN_TERMINAL:
+                {
+                    if(
+                        !Floppy144TerminalHelpPagerActive(
+                            &global_terminal
+                        ) &&
+                        !Floppy144TerminalRecordPagerActive(
+                            &global_terminal
+                        )
+                    )
+                    {
+                        switch(eAction)
+                        {
+                            case F144_ACTION_MOVE_UP:
+                            {
+                                Floppy144TerminalMoveHistory(
+                                    &global_terminal,
+                                    -1
+                                );
+
+                                Floppy144Redraw(window);
+                                return true;
+                            }
+
+                            case F144_ACTION_MOVE_DOWN:
+                            {
+                                Floppy144TerminalMoveHistory(
+                                    &global_terminal,
+                                    1
+                                );
+
+                                Floppy144Redraw(window);
+                                return true;
+                            }
+                        }
+                    }
+
+                    break;
+                }
+                /* Catalogue: move or page through records, open a document, or back out. */
+                case FLOPPY144_SCREEN_CATALOGUE:
+                {
+                    switch(eAction)
+                    {
+                        case F144_ACTION_MOVE_UP:
+                        {
+                            if(
+                                Floppy144CatalogueDocumentOpen(
+                                    &global_catalogue
+                                )
+                            )
+                            {
+                                Floppy144CatalogueScrollDocument(
+                                    &global_catalogue,
+                                    -1
+                                );
+                            }
+                            else
+                            {
+                                Floppy144CatalogueMove(
+                                    &global_catalogue,
+                                    -1
+                                );
+                            }
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_NAV_UP:
+                        {
+                            Floppy144CatalogueMove(
+                                &global_catalogue,
+                                -1
+                            );
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_MOVE_DOWN:
+                        {
+                            if(
+                                Floppy144CatalogueDocumentOpen(
+                                    &global_catalogue
+                                )
+                            )
+                            {
+                                Floppy144CatalogueScrollDocument(
+                                    &global_catalogue,
+                                    1
+                                );
+                            }
+                            else
+                            {
+                                Floppy144CatalogueMove(
+                                    &global_catalogue,
+                                    1
+                                );
+                            }
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_NAV_DOWN:
+                        {
+                            Floppy144CatalogueMove(
+                                &global_catalogue,
+                                1
+                            );
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_PAGE_UP:
+                        {
+                            Floppy144CataloguePage(
+                                &global_catalogue,
+                                -1
+                            );
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_PAGE_DOWN:
+                        {
+                            Floppy144CataloguePage(
+                                &global_catalogue,
+                                1
+                            );
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_CONFIRM:
+                        {
+                            /*
+                             * Enter opens a record only from catalogue-list view.
+                             *
+                             * Once a document is already open, further Enter
+                             * presses must not re-apply its effects or append the
+                             * same data-derived next-action guidance again.
+                             */
+                            if(
+                                !Floppy144CatalogueDocumentOpen(
+                                    &global_catalogue
+                                )
+                            )
+                            {
+                                /*
+                                 * Do not let the graphical catalogue bypass a
+                                 * trigger gate which would defer the same record
+                                 * through terminal OPEN.
+                                 */
+                                if(
+                                    !Floppy144DocumentAccessible(
+                                        &global_run_state,
+                                        global_catalogue.collection,
+                                        global_catalogue.selected_index
+                                    )
+                                )
+                                {
+                                    Floppy144Redraw(window);
+                                    return true;
+                                }
+
+                                Floppy144CatalogueOpenDocument(
+                                    &global_catalogue
+                                );
+
+                                /*
+                                 * Authored records declare their own effects.
+                                 * Index-only records have no registered effects.
+                                 */
+                                Floppy144DocumentApplyEffects(
+                                    &global_world,
+                                    &global_run_state,
+                                    global_catalogue.collection,
+                                    global_catalogue.selected_index
+                                );
+                                (void)Floppy144GameDataRecordOpened(
+                                    &global_run_state,
+                                    global_catalogue.collection,
+                                    global_catalogue.selected_index
+                                );
+
+                                Floppy144TerminalPrintPostOpenAction(
+                                    &global_terminal,
+                                    &global_run_state,
+                                    global_catalogue.collection,
+                                    global_catalogue.selected_index
+                                );
+                            }
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        /*
+                         * Backspace returns through the archive-view hierarchy.
+                         *
+                         * Direct OPEN commands return straight to the terminal.
+                         * Catalogue documents return to their record list first.
+                         */
+
+                        case F144_ACTION_BACK:
+                        {
+                            if(global_catalogue_direct_document)
+                            {
+                                if(
+                                    Floppy144CatalogueDocumentOpen(
+                                        &global_catalogue
+                                    )
+                                )
+                                {
+                                    Floppy144CatalogueCloseDocument(
+                                        &global_catalogue
+                                    );
+                                }
+
+                                global_catalogue_direct_document =
+                                    false;
+
+                                global_screen =
+                                    FLOPPY144_SCREEN_TERMINAL;
+                            }
+                            else
+                            {
+                                switch(
+                                    Floppy144CatalogueDocumentOpen(
+                                        &global_catalogue
+                                    )
+                                )
+                                {
+                                    case true:
+                                    {
+                                        Floppy144CatalogueCloseDocument(
+                                            &global_catalogue
+                                        );
+
+                                        break;
+                                    }
+
+                                    case false:
+                                    {
+                                        global_screen =
+                                            FLOPPY144_SCREEN_TERMINAL;
+
+                                        break;
+                                    }
+                                }
+                            }
+
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+                    }
+
+                    break;
+                }
             }
-            if(next==100U)restoring=0;
-        }
-        F144_AudioUpdate(dt);
-        for(i=0;i<4;i++) {
-            if(pressed('1'+(int)i,&number_keys[i])) {
-                F144_MusicSetScene(F144_MUSIC_GAMEPLAY);
-                F144_MusicSetAct((F144Act)i);
-                printf("Act %u\n",i);
+
+
+    return true;
+}
+
+static LRESULT CALLBACK Floppy144WindowProc(
+    HWND window,
+    UINT message,
+    WPARAM w_param,
+    LPARAM l_param
+)
+{
+    (void)l_param;
+
+    {
+        F144LifecycleEvent lifecycle_event;
+
+        if(
+            f144Win32TranslateLifecycleEvent(
+                (uint32_t)message,
+                (uintptr_t)w_param,
+                &lifecycle_event
+            )
+        )
+        {
+            Floppy144HandleLifecycleEvent(
+                window,
+                &lifecycle_event
+            );
+
+            /*
+             * Activation remains a native window notification as well as a
+             * game lifecycle notification. Preserve DefWindowProc handling.
+             * Orderly close/destroy are consumed by the lifecycle path.
+             */
+            if(
+                lifecycle_event.type != F144_LIFECYCLE_ACTIVE &&
+                lifecycle_event.type != F144_LIFECYCLE_INACTIVE
+            )
+            {
+                return 0;
             }
         }
-        for(i=0;i<7;i++) {
-            if(pressed(VK_F1+(int)i,&seek_keys[i])) {
-                F144_MusicSeekBar(seek_bars[i]);
-                printf("Seek %u:00\n",seek_bars[i]/20U);
-            }
-        }
-        if(pressed('M',&menu_key)){
-            F144_MusicSetScene(F144_MUSIC_MENU);
-            puts("BF22 MENU: PLEASE HOLD / 70 BPM / looping");
-        }
-        if(pressed('C',&ending_key)){
-            F144_MusicSetScene(F144_MUSIC_COMPLETION);
-            puts("BF22 COMPLETION: YOUR CONTRIBUTION HAS BEEN NOTED / 65 BPM / looping");
-        }
-        if(pressed('G',&game_key)){
-            F144_MusicSetScene(F144_MUSIC_GAMEPLAY);
-            puts("BF22 GAMEPLAY: original approved 80 BPM composition");
-        }
-        if(pressed('O',&original)){variant=0U;puts("ORIGINAL");}
-        if(pressed('A',&authentic)){variant=1U;puts("REVISED A: PHYSICALLY AUTHENTIC / awaiting review");}
-        if(pressed('S',&retro)){variant=2U;puts("REVISED B: STYLISED RETRO / awaiting review");}
-        F144_SFXReviewVariant(variant);
-        if(pressed('N',&nextkey)) { cue=(cue+1U)%F144_SFX_COUNT; printf("SFX %u: %s\n",cue,F144_SFXReviewName((F144SFX)cue)); }
-        if(pressed('B',&prevkey)) { cue=(cue+F144_SFX_COUNT-1U)%F144_SFX_COUNT; printf("SFX %u: %s\n",cue,F144_SFXReviewName((F144SFX)cue)); }
-        if(pressed(VK_SPACE,&playkey)) F144_SFXPlay((F144SFX)cue);
-        if(pressed(VK_UP,&up)) F144_MusicSetVolume(F144_MusicGetVolume()+0.1f);
-        if(pressed(VK_DOWN,&down)) F144_MusicSetVolume(F144_MusicGetVolume()-0.1f);
-        if(pressed(VK_RIGHT,&svup)) F144_SFXSetVolume(F144_SFXGetVolume()+0.1f);
-        if(pressed(VK_LEFT,&svdown)) F144_SFXSetVolume(F144_SFXGetVolume()-0.1f);
-        if(pressed('R',&rkey)) F144_MusicSetRestoration(F144_MusicGetRestoration()+10U);
-        if(pressed('E',&ekey)) {
-            unsigned restoration=F144_MusicGetRestoration();
-            F144_MusicSetRestoration(restoration>10U?restoration-10U:0U);
-        }
-        if(GetAsyncKeyState(VK_ESCAPE)&0x8000) break;
-        Sleep(4);
     }
-    F144_SFXShutdown();
-    F144_AudioShutdown();
-    return 0;
+
+    if(
+        f144Win32TimingIsWakeMessage(
+            (uint32_t)message,
+            (uintptr_t)w_param
+        )
+    )
+    {
+        Floppy144UpdateTiming(
+            window
+        );
+
+        return 0;
+    }
+
+    switch(message)
+    {
+        /*
+         * Native input adapter
+         *
+         * Win32 messages end here. Physical keys become logical action events;
+         * WM_CHAR becomes a separate text event before game policy sees either.
+         */
+
+        case WM_CHAR:
+        {
+            F144TextInputEvent sTextEvent;
+
+            f144Win32TranslateTextEvent(
+                (uint32_t)w_param,
+                &sTextEvent
+            );
+
+            if(Floppy144HandleTextInput(window,&sTextEvent))
+            {
+                return 0;
+            }
+
+            break;
+        }
+        case WM_KEYUP:
+        {
+            F144ActionEvent sEvent;
+
+            f144Win32TranslateKeyEvent(
+                (uint32_t)w_param,
+                F144_ACTION_EVENT_UP,
+                &sEvent
+            );
+
+            if(Floppy144HandleActionEvent(window,&sEvent))
+            {
+                return 0;
+            }
+
+            break;
+        }
+
+        case WM_KEYDOWN:
+        {
+            F144ActionEvent sEvent;
+
+            f144Win32TranslateKeyEvent(
+                (uint32_t)w_param,
+                F144_ACTION_EVENT_DOWN,
+                &sEvent
+            );
+
+            (void)Floppy144HandleActionEvent(
+                window,
+                &sEvent
+            );
+
+            return 0;
+        }
+
+        /*
+         * Window painting
+         *
+         * Suppress Windows background erasing to avoid flicker. WM_PAINT asks Floppy144
+         * to scale and copy the logical backbuffer into the window.
+         */
+
+        case WM_ERASEBKGND:
+        {
+            return 1;
+        }
+
+        case WM_SIZE:
+        {
+            InvalidateRect(
+                window,
+                0,
+                FALSE
+            );
+
+            return 0;
+        }
+
+        case WM_PAINT:
+        {
+            PAINTSTRUCT paint = {0};
+
+            HDC device_context =
+                BeginPaint(window, &paint);
+
+            if(
+                global_runtime &&
+                global_runtime->backbuffer.data
+            )
+            {
+                global_runtime->context =
+                    device_context;
+
+                f144PlatformPresent(
+                    &global_platform
+                );
+            }
+
+            EndPaint(
+                window,
+                &paint
+            );
+
+            return 0;
+        }
+    }
+
+    return DefWindowProcA(
+        window,
+        message,
+        w_param,
+        l_param
+    );
+}
+
+
+/*
+ * Application entry point
+ *
+ * Creates the Win32 window, configures the 640x360 logical canvas inside a
+ * 1280x720 window, initialises game state and runs the Windows message loop.
+ */
+
+int CALLBACK WinMain(
+    HINSTANCE instance,
+    HINSTANCE previous_instance,
+    LPSTR command_line,
+    int show_command
+)
+{
+    /*
+     * Local Win32 and Floppy144 objects
+     *
+     * All runtime storage lives for the duration of WinMain. global_runtime points to
+     * this runtime only while the application is running.
+     */
+
+    const char *class_name =
+        "Floppy144WindowClass";
+
+    F144Runtime runtime = {0};
+
+    F144Win32SingleInstance single_instance =
+    {
+        NULL
+    };
+
+    F144Image planes[
+        F144_MAX_PLANES
+    ] = {0};
+
+    WNDCLASSA window_class = {0};
+
+    RECT window_rect =
+    {
+        0,
+        0,
+        1280,
+        720
+    };
+
+    MSG message = {0};
+
+    (void)previous_instance;
+
+    /*
+     * Acquire platform-specific ownership before creating a window, resolving
+     * persistence, loading settings/profile data, or parsing developer mode.
+     * -GDR-CinderEllie and -GDR-Hathaway obey the same ownership protection.
+     */
+    {
+        F144Win32SingleInstanceResult instance_result =
+            f144Win32SingleInstanceAcquire(
+                &single_instance
+            );
+
+        if(
+            instance_result ==
+            F144_WIN32_SINGLE_INSTANCE_ALREADY_RUNNING
+        )
+        {
+            MessageBoxA(
+                NULL,
+                "FLOPPY//144 is already running for this Windows profile.",
+                "Floppy//144",
+                MB_OK | MB_ICONINFORMATION
+            );
+
+            return 0;
+        }
+
+        if(
+            instance_result !=
+            F144_WIN32_SINGLE_INSTANCE_ACQUIRED
+        )
+        {
+            MessageBoxA(
+                NULL,
+                "FLOPPY//144 could not establish single-instance protection and will not start.",
+                "Floppy//144",
+                MB_OK | MB_ICONERROR
+            );
+
+            return 4;
+        }
+    }
+
+    /*
+     * The Win32 launcher owns raw argument parsing. Game systems receive only
+     * the portable semantic configuration produced by that adapter.
+     */
+    if(
+        !f144Win32StartupConfigFromCommandLine(
+            command_line,
+            &global_config
+        )
+    )
+    {
+        f144Win32SingleInstanceRelease(
+            &single_instance
+        );
+
+        return 5;
+    }
+
+    /*
+     * Configure Floppy144
+     *
+     * Static-canvas mode preserves a crisp 640x360 internal image while the window
+     * is twice that size.
+     */
+
+    runtime.instance = instance;
+    runtime.windowName = "Floppy//144";
+
+    runtime.config.static_canvas = 1;
+
+    runtime.config.window_width = 1280;
+    runtime.config.window_height = 720;
+    runtime.config.canvas_width = 640;
+    runtime.config.canvas_height = 360;
+
+    Floppy144BindStaticRenderer(
+        &runtime
+    );
+
+    f144Win32PlatformBind(
+        &global_platform,
+        &runtime
+    );
+
+    /*
+     * Register and create the native Win32 window
+     *
+     * AdjustWindowRect expands the requested client area to include borders and the
+     * title bar before CreateWindowExA is called.
+     */
+
+    window_class.style =
+        CS_HREDRAW | CS_VREDRAW;
+
+    window_class.lpfnWndProc =
+        Floppy144WindowProc;
+
+    window_class.hInstance =
+        instance;
+
+    window_class.hIcon =
+        LoadIconA(
+            instance,
+            MAKEINTRESOURCEA(
+                IDI_FLOPPY144_APP_ICON
+            )
+        );
+
+    if(window_class.hIcon == NULL)
+    {
+        window_class.hIcon =
+            LoadIconW(
+                NULL,
+                IDI_APPLICATION
+            );
+    }
+
+    window_class.hCursor =
+        LoadCursorW(0, IDC_ARROW);
+
+    window_class.lpszClassName =
+        class_name;
+
+    if(!RegisterClassA(&window_class))
+    {
+        f144Win32SingleInstanceRelease(
+            &single_instance
+        );
+
+        return 1;
+    }
+
+    AdjustWindowRect(
+        &window_rect,
+        WS_OVERLAPPEDWINDOW,
+        FALSE
+    );
+
+    runtime.window = CreateWindowExA(
+        0,
+        class_name,
+        runtime.windowName,
+        WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT,
+        CW_USEDEFAULT,
+        window_rect.right - window_rect.left,
+        window_rect.bottom - window_rect.top,
+        0,
+        0,
+        instance,
+        0
+    );
+
+    if(!runtime.window)
+    {
+        f144Win32SingleInstanceRelease(
+            &single_instance
+        );
+
+        return 2;
+    }
+
+    /*
+     * Initialise game state
+     *
+     * Every subsystem is reset before the renderer is asked to allocate its backbuffer.
+     */
+
+    global_runtime = &runtime;
+
+    global_screen =
+        FLOPPY144_SCREEN_SPLASH;
+
+    global_persistence_warnings =
+        FLOPPY144_PERSISTENCE_WARNING_NONE;
+
+    {
+        uint32_t migration_failures;
+
+        if(
+            Floppy144StorageResolve(
+                &global_platform,
+                &global_storage_paths
+            )
+        )
+        {
+            migration_failures = Floppy144HathawayMode()
+                ? 0U : Floppy144StorageMigrateLegacy(
+                    &global_platform,
+                    &global_storage_paths
+                );
+        }
+        else
+        {
+            migration_failures =
+                (1U << (uint32_t)F144_PERSISTENCE_FILE_COUNT) - 1U;
+        }
+
+        global_recorded_session_available =
+            Floppy144RecordedSessionAvailable();
+
+        /*
+         * Recorded-session availability clears its own load warning while it
+         * probes the new paths, so migration/path failures are applied after
+         * that check. Profile/settings failures remain independent warnings.
+         */
+        if(
+            (
+                migration_failures &
+                (
+                    (1U << (uint32_t)F144_PERSISTENCE_MANUAL_SAVE) |
+                    (1U << (uint32_t)F144_PERSISTENCE_AUTOSAVE)
+                )
+            ) != 0U
+        )
+        {
+            global_persistence_warnings |=
+                FLOPPY144_PERSISTENCE_WARNING_SAVE;
+        }
+
+        if(
+            (
+                migration_failures &
+                (1U << (uint32_t)F144_PERSISTENCE_PROFILE)
+            ) != 0U
+        )
+        {
+            global_persistence_warnings |=
+                FLOPPY144_PERSISTENCE_WARNING_PROFILE;
+        }
+
+        if(
+            (
+                migration_failures &
+                (1U << (uint32_t)F144_PERSISTENCE_SETTINGS)
+            ) != 0U
+        )
+        {
+            global_persistence_warnings |=
+                FLOPPY144_PERSISTENCE_WARNING_SETTINGS;
+        }
+    }
+
+    global_main_menu_option =
+        FLOPPY144_MAIN_MENU_INITIATE_SESSION;
+
+    global_resume_screen =
+        FLOPPY144_SCREEN_TERMINAL;
+
+    Floppy144WorldReset(
+        &global_world
+    );
+
+    Floppy144RunStateReset(
+        &global_run_state
+    );
+
+    Floppy144MovementInputReset(
+        &global_movement_input
+    );
+
+    Floppy144PlayerVisualReset(
+        &global_player_visual
+    );
+
+    {
+        bool profile_file_exists =
+        Floppy144PersistenceFileExists(
+            Floppy144StoragePath(&global_storage_paths,F144_PERSISTENCE_PROFILE)
+        );
+
+        if(
+            !Floppy144PersistenceLoadProfile(
+                Floppy144StoragePath(&global_storage_paths,F144_PERSISTENCE_PROFILE),
+                &global_profile
+            )
+        )
+        {
+            Floppy144DiscoveryProfileReset(
+                &global_profile
+            );
+
+            if(profile_file_exists)
+            {
+                global_persistence_warnings |=
+                FLOPPY144_PERSISTENCE_WARNING_PROFILE;
+            }
+        }
+        else if(global_profile.dirty != 0U)
+        {
+            /*
+             * A valid V1 profile with an invalid body-style byte is repaired
+             * in memory by the decoder. Persist that safe default immediately
+             * without treating the historical profile as corrupt.
+             */
+            if(
+                !Floppy144PersistenceSaveProfile(
+                    Floppy144StoragePath(
+                        &global_storage_paths,
+                        F144_PERSISTENCE_PROFILE
+                    ),
+                    &global_profile
+                )
+            )
+            {
+                global_persistence_warnings |=
+                    FLOPPY144_PERSISTENCE_WARNING_PROFILE;
+            }
+        }
+    }
+
+    Floppy144ProfileNameEditReset(
+        &global_profile_name_edit
+    );
+
+    {
+        bool settings_file_exists =
+        Floppy144PersistenceFileExists(
+            Floppy144StoragePath(&global_storage_paths,F144_PERSISTENCE_SETTINGS)
+        );
+
+        if(
+            !Floppy144PersistenceLoadSettings(
+                Floppy144StoragePath(&global_storage_paths,F144_PERSISTENCE_SETTINGS),
+                &global_settings
+            )
+        )
+        {
+            Floppy144SettingsReset(
+                &global_settings
+            );
+
+            if(settings_file_exists)
+            {
+                global_persistence_warnings |=
+                FLOPPY144_PERSISTENCE_WARNING_SETTINGS;
+            }
+
+            if(
+                !Floppy144PersistenceSaveSettings(
+                    Floppy144StoragePath(
+                        &global_storage_paths,
+                        F144_PERSISTENCE_SETTINGS
+                    ),
+                    &global_settings
+                )
+            )
+            {
+                global_persistence_warnings |=
+                    FLOPPY144_PERSISTENCE_WARNING_SETTINGS;
+            }
+        }
+        else if(global_settings.dirty != 0U)
+        {
+            /*
+             * A checksum-valid V1 file may contain an out-of-range field.
+             * The decoder repairs only that field; persist the normalized V1
+             * payload immediately so future launches are clean.
+             */
+            if(
+                !Floppy144PersistenceSaveSettings(
+                    Floppy144StoragePath(
+                        &global_storage_paths,
+                        F144_PERSISTENCE_SETTINGS
+                    ),
+                    &global_settings
+                )
+            )
+            {
+                global_persistence_warnings |=
+                    FLOPPY144_PERSISTENCE_WARNING_SETTINGS;
+            }
+        }
+    }
+
+    global_terminal_authentication_complete =
+        false;
+
+    Floppy144TerminalReset(
+        &global_terminal,
+        &global_world
+    );
+
+    Floppy144ConfigureTerminalSession(
+        false
+    );
+
+    Floppy144CatalogueReset(
+        &global_catalogue,
+        FLOPPY144_COLLECTION_DR01
+    );
+
+    Floppy144NotebookViewReset(
+        &global_notebook
+    );
+
+    /*
+     * Initialise rendering and show the first frame
+     *
+     * A missing backbuffer is fatal because every screen draws directly into it.
+     */
+
+    runtime.init(
+        &runtime,
+        planes
+    );
+
+    if(!runtime.backbuffer.data)
+    {
+        MessageBoxA(
+            runtime.window,
+            "Floppy144 could not create the software framebuffer.",
+            "Floppy//144",
+            MB_OK | MB_ICONERROR
+        );
+
+        DestroyWindow(
+            runtime.window
+        );
+
+        f144Win32SingleInstanceRelease(
+            &single_instance
+        );
+
+        return 3;
+    }
+
+    /*
+     * Audio is a platform service. Failure is deliberately non-fatal: the
+     * verified Stage 4 baseline is silent and the game remains fully playable
+     * when no audio backend/device is available.
+     */
+    if(
+        f144PlatformAudioInit(
+            &global_platform
+        )
+    )
+    {
+        (void)f144PlatformSetMusicVolume(
+            &global_platform,
+            global_settings.music_volume
+        );
+
+        (void)f144PlatformSetSfxVolume(
+            &global_platform,
+            global_settings.sfx_volume
+        );
+        Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_CRT_WAKE);
+    }
+
+    Floppy144IntroDraw(
+        f144PlatformFramebuffer(&global_platform),
+        0U,
+        Floppy144SettingsTextElapsedMs(
+            &global_settings,
+            1U
+        )
+    );
+
+    Floppy144SettingsApplyCrtFilter(
+        f144PlatformFramebuffer(&global_platform),
+        &global_settings
+    );
+
+    ShowWindow(
+        runtime.window,
+        show_command
+    );
+
+    Floppy144TimingReset(
+        &global_timing,
+        f144PlatformMonotonicMs(
+            &global_platform
+        ),
+        Floppy144SettingsAutosaveIntervalMs(
+            &global_settings
+        )
+    );
+
+    Floppy144LifecycleReset(
+        &global_lifecycle
+    );
+
+    {
+        F144LifecycleEvent start_event =
+        {
+            F144_LIFECYCLE_START,
+            0U
+        };
+
+        Floppy144HandleLifecycleEvent(
+            runtime.window,
+            &start_event
+        );
+    }
+
+    Floppy144IntroDraw(
+        f144PlatformFramebuffer(&global_platform),
+        0U,
+        Floppy144SettingsTextElapsedMs(
+            &global_settings,
+            1U
+        )
+    );
+
+    Floppy144SettingsApplyCrtFilter(
+        f144PlatformFramebuffer(&global_platform),
+        &global_settings
+    );
+
+    (void)f144Win32TimingStartWake(
+        &global_platform,
+        FLOPPY144_SPLASH_FRAME_MS
+    );
+
+    UpdateWindow(
+        runtime.window
+    );
+
+    /*
+     * Standard Windows message loop
+     *
+     * GetMessage waits for input, TranslateMessage handles key translation and
+     * DispatchMessage sends each event to Floppy144WindowProc.
+     */
+
+    while(
+        GetMessageA(
+            &message,
+            0,
+            0,
+            0
+        ) > 0
+    )
+    {
+        TranslateMessage(
+            &message
+        );
+
+        DispatchMessageA(
+            &message
+        );
+    }
+
+    /*
+     * Shutdown
+     *
+     * Clear the callback-visible pointer, then let the renderer release its resources.
+     */
+
+    f144PlatformAudioShutdown(
+        &global_platform
+    );
+
+    global_runtime = 0;
+
+    {
+        int32_t shutdown_result =
+            runtime.shutdown(
+                &runtime
+            );
+
+        f144Win32SingleInstanceRelease(
+            &single_instance
+        );
+
+        return shutdown_result;
+    }
 }

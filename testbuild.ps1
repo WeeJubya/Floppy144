@@ -64,6 +64,7 @@ try {
         [pscustomobject]@{ Label = 'Bug fix 20 four-screen storyboard and login'; Script = 'test_bugfix20_intro.ps1'; Parameters = @{} },
         [pscustomobject]@{ Label = 'Bug fix 21 reversed Backspace audio'; Script = 'test_bugfix21_backspace.ps1'; Parameters = @{} },
         [pscustomobject]@{ Label = 'Bug fix 22 menu/completion music'; Script = 'test_bugfix22_music.ps1'; Parameters = @{} },
+        [pscustomobject]@{ Label = 'Bug fixes 23-24 restoration/audio review'; Script = 'test_bugfix23_24_audio.ps1'; Parameters = @{} },
         [pscustomobject]@{ Label = 'Stage 4F whole-game presentation journey'; Script = 'test_stage4f_presentation_journey.ps1'; Parameters = @{} },
         [pscustomobject]@{ Label = 'Stage 4G isolated Grey Door discovery'; Script = 'test_stage4g_grey_door.ps1'; Parameters = @{} }
     )

@@ -828,18 +828,39 @@ void F144_MusicStop(void)
     all_notes_off();
 }
 
+static float g_tempo_scale=1.0f;
+static float g_tempo_target=1.0f;
+void F144_MusicSetTempoPercent(unsigned percent)
+{
+    if(percent==0U)percent=100U;
+    if(percent<40U)percent=40U;
+    if(percent>100U)percent=100U;
+    g_tempo_target=(float)percent/100.0f;
+}
+float F144_MusicGetTempoScale(void){return g_tempo_scale;}
+
 void F144_AudioUpdate(double dt_seconds)
 {
-    if (!g_available || !g_playing)
-        return;
-
     if (dt_seconds < 0.0)
         return;
 
     if (dt_seconds > 0.5)
         dt_seconds = 0.5;
 
-    g_accum += dt_seconds;
+    /* Slew the scheduler, leaving notes, composition and Act corruption intact. */
+    {
+        float target=g_scene==F144_MUSIC_GAMEPLAY?g_tempo_target:1.0f;
+        float delta=(float)dt_seconds*2.0f;
+        if(g_tempo_scale<target) {
+            g_tempo_scale+=delta;
+            if(g_tempo_scale>target)g_tempo_scale=target;
+        } else if(g_tempo_scale>target) {
+            g_tempo_scale-=delta;
+            if(g_tempo_scale<target)g_tempo_scale=target;
+        }
+    }
+    if (!g_available || !g_playing)return;
+    g_accum += dt_seconds*(g_scene==F144_MUSIC_GAMEPLAY?g_tempo_scale:1.0f);
 
     /* The gameplay cadence remains exactly the approved 80 BPM. */
     {
