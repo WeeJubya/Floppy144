@@ -5,7 +5,7 @@ Set-StrictMode -Version Latest
 $root = Split-Path -Parent $PSScriptRoot
 $catalogue = Get-Content (Join-Path $root 'game/src/floppy144_catalogue.c') -Raw
 $main = Get-Content (Join-Path $root 'game/src/floppy144_main.c') -Raw
-$run = Get-Content (Join-Path $root 'game/src/floppy144_run_state.c') -Raw
+$run = Get-Content (Join-Path $root 'game/src/floppy144_run_state.h') -Raw
 $recovery = Get-Content (Join-Path $root 'game/src/floppy144_recovery.c') -Raw
 $codec = Get-Content (Join-Path $root 'game/src/floppy144_persistence.c') -Raw
 $tests = Get-Content (Join-Path $root 'tools/stage4_persistence_paths_tests.c') -Raw

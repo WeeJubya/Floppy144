@@ -47,7 +47,18 @@ typedef enum Floppy144Difficulty
     FLOPPY144_DIFFICULTY_COUNT
 } Floppy144Difficulty;
 
-const char *Floppy144DifficultyName(Floppy144Difficulty difficulty);
+/* Inline avoids coupling renderer-only tests to the gameplay runtime. */
+static inline const char *Floppy144DifficultyName(Floppy144Difficulty difficulty)
+{
+    switch(difficulty)
+    {
+        case FLOPPY144_DIFFICULTY_NORMAL: return "NORMAL";
+        case FLOPPY144_DIFFICULTY_EASY: return "EASY";
+        case FLOPPY144_DIFFICULTY_REALLY_SUPER_EASY:
+            return "REALLY SUPER EASY (I MEAN REALLY STUPIDLY EASY)";
+        default: return "NORMAL";
+    }
+}
 
 typedef enum Floppy144RunAct
 {
