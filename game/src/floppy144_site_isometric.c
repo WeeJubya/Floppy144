@@ -1626,7 +1626,6 @@ static const char *Floppy144IsometricInteractionPrompt(
 )
 {
     uint32_t uActions;
-    Floppy144CabinetState sCabinetProbe;
 
     if(pRunState == NULL)
     {
@@ -1639,8 +1638,7 @@ static const char *Floppy144IsometricInteractionPrompt(
         );
 
     /* STAGE 3B.5 SECURE CABINET ACCESS PROMPT */
-    Floppy144CabinetReset(&sCabinetProbe);
-    if(Floppy144CabinetOpenNearby(&sCabinetProbe, pRunState))
+    if(Floppy144CabinetAccessAvailable(pRunState))
     {
         uActions |= FLOPPY144_SITE_ACTION_ACCESS;
     }
