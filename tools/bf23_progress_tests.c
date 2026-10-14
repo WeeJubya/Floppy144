@@ -21,6 +21,13 @@ int main(void)
     CHECK(arrivals[94]-arrivals[93]>arrivals[90]-arrivals[89]);
     CHECK(arrivals[99]-arrivals[98]>arrivals[96]-arrivals[95]);
     CHECK(arrivals[100]-arrivals[99]>arrivals[99]-arrivals[98]);
+    CHECK(!Floppy144RestoreTickDue(0U,3U));
+    CHECK(Floppy144RestoreTickDue(0U,4U));
+    CHECK(!Floppy144RestoreTickDue(70U,71U));
+    CHECK(Floppy144RestoreTickDue(88U,89U));
+    CHECK(Floppy144RestoreTickDue(98U,99U));
+    CHECK(!Floppy144RestoreTickDue(99U,100U));
+    CHECK(!Floppy144RestoreTickDue(60U,0U));
     CHECK(Floppy144RestoreTempo(89U)==100U);
     CHECK(Floppy144RestoreTempo(99U)<Floppy144RestoreTempo(95U));
     CHECK(Floppy144RestoreTempo(100U)==100U);

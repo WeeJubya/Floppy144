@@ -17,7 +17,10 @@ base instead of 300 ms to make the crawl audible. Capacity, collection costs,
 authoritative collection commit, save formats and restoration rules are unchanged.
 Only the existing completion method commits a collection at 100%.
 
-Ticks follow observed progress changes, with one short cue per update rather
+Ticks follow visible progress checkpoints: every four percent initially,
+then increasingly dense checkpoints approaching 90%, then each final percent.
+This makes acceleration audible even at the established 50 ms update quantum.
+There is at most one short cue per update rather
 than replaying skipped percentages after a stall. The last three percentages
 use a subtly higher tick. Music scheduler tempo falls from 100% at 90% to 46%
 at 99%; it slews back over at most 270 ms. Scene exit/stop requests normal tempo.

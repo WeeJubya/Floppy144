@@ -3555,6 +3555,7 @@ static void Floppy144TerminalRestoreCollection(
         collection;
     terminal->restoration_elapsed_ms =
         0U;
+    terminal->restoration_tick_percent=0U;
     terminal->restoration_duration_ms =
         FLOPPY144_TERMINAL_RESTORE_BASE_MS +
         definition->size_kb *
@@ -4258,6 +4259,7 @@ void Floppy144TerminalReset(
         FLOPPY144_COLLECTION_DR01;
     terminal->restoration_elapsed_ms =
         0U;
+    terminal->restoration_tick_percent=0U;
     terminal->restoration_duration_ms =
         0U;
 

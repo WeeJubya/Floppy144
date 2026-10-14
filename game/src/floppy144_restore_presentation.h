@@ -25,3 +25,14 @@ static inline unsigned Floppy144RestoreTempo(unsigned progress)
 {
     return progress<90U?100U:(progress>=100U?100U:100U-(progress-90U)*6U);
 }
+/* Tick checkpoints follow visible updates, with denser checkpoints as the
+   loader accelerates. This avoids a fixed 50 ms audio cadence in early phases. */
+static inline unsigned Floppy144RestoreTickStep(unsigned progress)
+{
+    return progress<70U?4U:(progress<90U?4U-(progress-70U)*3U/19U:1U);
+}
+static inline int Floppy144RestoreTickDue(unsigned previous,unsigned progress)
+{
+    return progress<100U && progress>previous &&
+        progress-previous>=Floppy144RestoreTickStep(progress);
+}

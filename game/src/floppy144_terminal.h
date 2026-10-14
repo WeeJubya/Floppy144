@@ -66,6 +66,7 @@ typedef struct Floppy144TerminalState
     Floppy144CollectionId restoration_collection;
     uint32_t restoration_elapsed_ms;
     uint32_t restoration_duration_ms;
+    uint32_t restoration_tick_percent; /* transient presentation checkpoint */
 
     /*
      * Terminal capability and contextual-record state.

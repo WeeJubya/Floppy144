@@ -24,6 +24,21 @@ int main(void)
     g_noise=0xF14451F1U;
     m=generate_review(&b,F144_SFX_FOOTSTEP,1U,1U);
     if(n!=m||!memcmp(a.samples,b.samples,n*sizeof(int16_t)))return 5;
+    /* Synthesis gain is independent; no global device gain cross-talk. */
+    g_volume=0.8f;g_noise=0xF14451F1U;
+    n=generate_review(&a,F144_SFX_FOOTSTEP,1U,0U);
+    g_volume=0.4f;g_noise=0xF14451F1U;
+    m=generate_review(&b,F144_SFX_FOOTSTEP,1U,0U);
+    if(n!=m)return 6;
+    for(i=0U;i<n;i++) {
+        int difference=(int)a.samples[i]-2*(int)b.samples[i];
+        if(difference>2||difference<-2)return 7;
+    }
+    /* Saturated playback retains the established bounded drop policy. */
+    for(i=0U;i<F144_VOICES;i++){g_voice[i].prepared=1;g_voice[i].hdr.dwFlags=0;}
+    if(find_voice()!=NULL)return 8;
+    for(i=0U;i<F144_VOICES;i++)g_voice[i].prepared=0;
+    if(find_voice()==NULL)return 9;
     puts("BF24 all ORIGINAL/A/B cues deterministic, bounded, unclipped, muted; alternating feet PASS");
     return 0;
 }

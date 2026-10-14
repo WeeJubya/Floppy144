@@ -905,7 +905,6 @@ static void Floppy144UpdateTiming(
     )
     {
         {
-            uint32_t progress_before=Floppy144TerminalRestoreProgressPercent(&global_terminal);
             uint32_t recovered_before=Floppy144RunStateRecoveredKb(&global_run_state);
             Floppy144TerminalAdvanceRestore(
                 &global_terminal,&global_world,&global_run_state,
@@ -914,10 +913,15 @@ static void Floppy144UpdateTiming(
             if(Floppy144RunStateRecoveredKb(&global_run_state)>recovered_before)
                 Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_FILE_RESTORE);
             else if(Floppy144TerminalRestoreInProgress(&global_terminal) &&
-                    Floppy144TerminalRestoreProgressPercent(&global_terminal)>progress_before)
+                    Floppy144RestoreTickDue(global_terminal.restoration_tick_percent,
+                        Floppy144TerminalRestoreProgressPercent(&global_terminal)))
+            {
+                global_terminal.restoration_tick_percent=
+                    Floppy144TerminalRestoreProgressPercent(&global_terminal);
                 Floppy144AudioPlay(&global_platform,
-                    Floppy144TerminalRestoreProgressPercent(&global_terminal)>=97U?
+                    global_terminal.restoration_tick_percent>=97U?
                     FLOPPY144_AUDIO_RESTORE_TICK_HIGH:FLOPPY144_AUDIO_RESTORE_TICK);
+            }
         }
 
         redraw =

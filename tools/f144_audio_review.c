@@ -22,7 +22,7 @@ int main(void)
     int nextkey=0,prevkey=0,playkey=0,up=0,down=0,svup=0,svdown=0;
     int rkey=0,ekey=0,menu_key=0,ending_key=0,game_key=0;
     int original=0,authentic=0,retro=0,restore_key=0,cancel_key=0;
-    unsigned cue=0U,i,variant=0U,restore_ms=0U,restore_progress=0U;
+    unsigned cue=0U,i,variant=0U,restore_ms=0U,restore_progress=0U,restore_tick=0U;
     int restoring=0;
     double restore_accum=0.0;
     int midi=F144_AudioInit(),sfx=F144_SFXInit();
@@ -45,7 +45,7 @@ int main(void)
         dt=(double)(now.QuadPart-last.QuadPart)/(double)freq.QuadPart;
         last=now;
         if(pressed('T',&restore_key)) {
-            restoring=1;restore_ms=0U;restore_progress=0U;restore_accum=0.0;
+            restoring=1;restore_ms=0U;restore_progress=0U;restore_tick=0U;restore_accum=0.0;
             F144_MusicSetScene(F144_MUSIC_GAMEPLAY);
             puts("RESTORING...");
         }
@@ -58,8 +58,11 @@ int main(void)
             F144_MusicSetTempoPercent(Floppy144RestoreTempo(next));
             if(next!=restore_progress) {
                 printf("Restoration %u%% / tempo %u%%\n",next,Floppy144RestoreTempo(next));
-                F144_SFXPlay(next==100U?F144_SFX_FILE_RESTORE:
-                    (next>=97U?F144_SFX_RESTORE_TICK_HIGH:F144_SFX_RESTORE_TICK));
+                if(next==100U)F144_SFXPlay(F144_SFX_FILE_RESTORE);
+                else if(Floppy144RestoreTickDue(restore_tick,next)) {
+                    F144_SFXPlay(next>=97U?F144_SFX_RESTORE_TICK_HIGH:F144_SFX_RESTORE_TICK);
+                    restore_tick=next;
+                }
                 restore_progress=next;
             }
             if(next==100U)restoring=0;
