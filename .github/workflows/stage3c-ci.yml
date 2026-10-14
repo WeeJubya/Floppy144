@@ -443,6 +443,13 @@ jobs:
         shell: pwsh
         run: .\tools\test_stage4_audio.ps1
 
+      - name: BF21-24 focused audio regressions
+        shell: pwsh
+        run: |
+          .\tools\test_bugfix21_backspace.ps1
+          .\tools\test_bugfix22_music.ps1
+          .\tools\test_bugfix23_24_audio.ps1
+
       - name: Platform/source ownership audit
         shell: pwsh
         run: .\tools\test_stage4_build_architecture.ps1
@@ -479,3 +486,9 @@ jobs:
           if($exe.Length -gt 1474560) {
             throw "Release executable exceeds 1,474,560 byte limit"
           }
+
+      - name: Upload audio comparison harness
+        uses: actions/upload-artifact@v4
+        with:
+          name: bf21-24-audio-review
+          path: build/audio-review/f144_audio_review.exe

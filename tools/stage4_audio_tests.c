@@ -273,7 +273,7 @@ static void TestOriginalGeneratedAudio(void)
 {
     Expect(F144_SFX_FLOPPY_INSERT==21 &&
            F144_SFX_TERMINAL_BACKSPACE==22 &&
-           F144_SFX_COUNT==23,
+           F144_SFX_COUNT==25,
            "original 22 approved SFX retain IDs; BF21 reverse typing is appended");
     F144_MusicSetAct(F144_ACT_I);
     Expect(F144_MusicGetAct()==F144_ACT_I,"Act I selection retains original API");

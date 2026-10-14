@@ -215,7 +215,7 @@ static void Floppy144TestRestoreProgress(void)
     F144_CHECK(
         pDefinition != NULL &&
         sTerminal.restoration_duration_ms ==
-            300U + pDefinition->size_kb * 18U,
+            1500U + pDefinition->size_kb * 18U,
         "restore duration scales from the collection size"
     );
 
@@ -237,11 +237,11 @@ static void Floppy144TestRestoreProgress(void)
     F144_CHECK(
         Floppy144TerminalRestoreProgressPercent(
             &sTerminal
-        ) >= 49U &&
+        ) > 50U &&
         Floppy144TerminalRestoreProgressPercent(
             &sTerminal
-        ) <= 50U,
-        "restore progress tracks elapsed size-weighted duration"
+        ) < 90U,
+        "BF23 restore progress uses nonlinear presentation timing"
     );
 
     Floppy144TerminalAdvanceRestore(

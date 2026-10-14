@@ -3,7 +3,7 @@
 
 void Floppy144AudioPlay(F144Platform *platform,Floppy144AudioSound effect)
 {
-    if ((unsigned)effect<1U || (unsigned)effect>(unsigned)FLOPPY144_AUDIO_TERMINAL_BACKSPACE) return;
+    if ((unsigned)effect<1U || (unsigned)effect>(unsigned)FLOPPY144_AUDIO_RESTORE_TICK_HIGH) return;
     /* The semantic registry order matches the approved original F144SFX
        entries followed by additional procedural game cues, including reversed Backspace. */
     (void)f144PlatformPlaySfx(platform,(F144SfxCueId)((unsigned)effect-1U));
