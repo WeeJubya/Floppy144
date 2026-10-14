@@ -19,7 +19,8 @@ fixture projection tests remain active.
 ## BF19
 
 Selection alone previously enabled glow. Require the existing
-Floppy144SiteAvailableActions result to expose Inspect or Access before the
+Floppy144SiteAvailableActions result, plus the shared read-only secure-cabinet
+Access eligibility, to expose Inspect or Access before the
 selected object is highlighted. Reuse gameplay eligibility rather than changing
 focus, proximity, visibility or interactions. The optional fixed inspection
 symbols retain their established eligibility and setting.

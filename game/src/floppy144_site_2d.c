@@ -3414,7 +3414,8 @@ static void Floppy144Site2DInspectionOverlay(
            !Floppy144Site2DRectVisibleInRoom(state,room,r)||
            !Floppy144Site2DProjectRect(camera,r,&projected))
             continue;
-        chosen=r==selected && Floppy144SiteAvailableActions(state)!=0U;
+        chosen=r==selected && (Floppy144SiteAvailableActions(state)!=0U ||
+            Floppy144CabinetAccessAvailable(state));
         mark=show_indicators &&
              Floppy144SiteFurnitureInspectionIndicator(state,r);
         if(!chosen&&!mark)continue;
@@ -3573,7 +3574,6 @@ static const char *Floppy144Site2DInteractionPrompt(
 )
 {
     uint32_t uActions;
-    Floppy144CabinetState sCabinetProbe;
 
     if(run_state == NULL)
     {
@@ -3589,8 +3589,7 @@ static const char *Floppy144Site2DInteractionPrompt(
                     FLOPPY144_SITE_ACTION_INSPECT;
 
     /* STAGE 3B.5 SECURE CABINET ACCESS PROMPT */
-    Floppy144CabinetReset(&sCabinetProbe);
-    if(Floppy144CabinetOpenNearby(&sCabinetProbe, run_state))
+    if(Floppy144CabinetAccessAvailable(run_state))
     {
         uActions |= FLOPPY144_SITE_ACTION_ACCESS;
     }

@@ -215,3 +215,6 @@ void Floppy144CabinetDraw(
     const Floppy144CabinetState *pCabinet,
     const Floppy144RunState *pRunState
 );
+
+/* Read-only eligibility shared by selected glow and the actual Access path. */
+bool Floppy144CabinetAccessAvailable(const Floppy144RunState *pRunState);

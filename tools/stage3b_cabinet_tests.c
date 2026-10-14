@@ -188,6 +188,13 @@ static void Floppy144TestGeneratedCabinetDiscovery(void)
     Floppy144TestReset(&sWorld, &sState, &sCabinet);
     Floppy144TestPlaceAtCabinet(&sState, "MAIN_OFFICE_SECURE_CABINET");
 
+    {
+        Floppy144RunState before=sState;
+        F144_CHECK(Floppy144CabinetAccessAvailable(&sState),
+            "BF19 focused secure cabinet qualifies for Access glow");
+        F144_CHECK(memcmp(&before,&sState,sizeof(sState))==0,
+            "BF19 glow eligibility does not mutate progression");
+    }
     F144_CHECK(
         Floppy144CabinetOpenNearby(&sCabinet, &sState),
         "A-access resolver finds nearby generated secure cabinet"
@@ -1253,8 +1260,9 @@ static void Floppy144TestFocusedCabinetAccess(void)
     F144_CHECK(
         pszFocusedParentId != NULL &&
         strcmp(pszFocusedParentId, "RECORDS_OFFICE_TROLLEY") == 0 &&
-        !Floppy144CabinetOpenNearby(&sCabinet, &sState),
-        "Cabinet 06 cannot leak Access while trolley owns Site focus"
+        !Floppy144CabinetOpenNearby(&sCabinet, &sState) &&
+        !Floppy144CabinetAccessAvailable(&sState),
+        "Cabinet 06 cannot leak Access/glow while trolley owns Site focus"
     );
 
     Floppy144TestPlaceAtCabinet(

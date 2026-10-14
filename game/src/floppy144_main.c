@@ -2506,7 +2506,7 @@ static bool Floppy144HandleTextInput(
     /* BF20: LOGIN is the only editable field during the staged introduction. */
     if(global_screen==FLOPPY144_SCREEN_SPLASH)
     {
-        if(Floppy144DiscoveryProfileHasOperatorName(&global_profile))return;
+        if(Floppy144DiscoveryProfileHasOperatorName(&global_profile))return true;
         if(Floppy144IntroLoginReady(
             Floppy144TimingSplashElapsedMs(
                 &global_timing,f144PlatformMonotonicMs(&global_platform))))

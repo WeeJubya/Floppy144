@@ -74,7 +74,8 @@ static void reveal(Floppy144Surface *s,uint32_t phase)
     Floppy144DrawClear(s,C_BG);
     for(i=0U;i<sizeof(g_intro_scene2)/sizeof(g_intro_scene2[0]);i++) {
         IntroVector v=g_intro_scene2[i];
-        const IntroVector *a=&g_intro_scene1[i];
+        const IntroVector *a=i<sizeof(g_intro_scene1)/sizeof(g_intro_scene1[0])?
+            &g_intro_scene1[i]:&g_intro_scene2[i];
         v.x=a->x+(v.x-a->x)*(int32_t)t/3150;
         v.y=a->y+(v.y-a->y)*(int32_t)t/3150;
         v.w=a->w+(v.w-a->w)*(int32_t)t/3150;

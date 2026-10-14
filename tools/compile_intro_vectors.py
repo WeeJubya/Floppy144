@@ -48,6 +48,7 @@ def flatten(shapes,m=(1,1,0,0)):
    yield (*vals,c,kind,s.shape_id)
 a=[]
 for i in range(3):a.append(list(flatten(p.slides[i].shapes)))
+assert [row[-1] for row in a[0]]==[row[-1] for row in a[1]], 'Discovery/reveal vector correspondence changed'
 q=Path(args.output)
 with q.open('w') as f:
  f.write('/* Procedural vector geometry flattened from authored Intro.pptx.\n * No stored image/media. Coordinates target the logical 640x360 surface. */\n')

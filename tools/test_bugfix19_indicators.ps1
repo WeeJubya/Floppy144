@@ -6,7 +6,7 @@ $site=Get-Content (Join-Path $root 'game\src\floppy144_site_object.c') -Raw
 $main=Get-Content (Join-Path $root 'game\src\floppy144_main.c') -Raw
 $settings=Get-Content (Join-Path $root 'game\src\floppy144_settings_view.c') -Raw
 $persistence=Get-Content (Join-Path $root 'game\src\floppy144_persistence.c') -Raw
-foreach($term in @('Floppy144SiteFocusedParentId','Floppy144SiteRectForParentId','Floppy144Site2DDiagonalAxes','Floppy144Site2DOutlineQuad','Floppy144SiteFurnitureInspectionIndicator','show_indicators','Floppy144SiteAvailableActions(state)!=0U')){
+foreach($term in @('Floppy144SiteFocusedParentId','Floppy144SiteRectForParentId','Floppy144Site2DDiagonalAxes','Floppy144Site2DOutlineQuad','Floppy144SiteFurnitureInspectionIndicator','show_indicators','Floppy144SiteAvailableActions(state)!=0U','Floppy144CabinetAccessAvailable')){
     if($renderer -notmatch [regex]::Escape($term)){throw "BF19 presentation contract missing: $term"}
 }
 if($renderer -notmatch 'Floppy144Site2DPixel' -or

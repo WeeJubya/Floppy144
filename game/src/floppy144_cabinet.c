@@ -389,9 +389,8 @@ bool Floppy144CabinetEnhancedPresentationUnlocked(
 }
 
 
-bool Floppy144CabinetOpenNearby(
-    Floppy144CabinetState *pCabinet,
-    const Floppy144RunState *pRunState
+static const Floppy144DataRecord *Floppy144CabinetAccessibleParent(
+    const Floppy144RunState *pRunState,int32_t *ordinal
 )
 {
     Floppy144RoomId eRoom;
@@ -399,8 +398,8 @@ bool Floppy144CabinetOpenNearby(
     const Floppy144DataRecord *pBest;
     int32_t nOrdinal;
 
-    if(pCabinet == NULL || pRunState == NULL)
-        return false;
+    if(pRunState == NULL || ordinal == NULL)
+        return NULL;
 
     eRoom = Floppy144SiteRoomAtPosition(
         pRunState->player_site_x,
@@ -412,7 +411,7 @@ bool Floppy144CabinetOpenNearby(
         !Floppy144RunStateRoomReconstructed(pRunState, eRoom)
     )
     {
-        return false;
+        return NULL;
     }
 
     /*
@@ -423,7 +422,7 @@ bool Floppy144CabinetOpenNearby(
      */
     pszFocusedParentId = Floppy144SiteFocusedParentId(pRunState);
     if(pszFocusedParentId == NULL)
-        return false;
+        return NULL;
 
     pBest = Floppy144GameDataFind(
         FLOPPY144_DATA_FURNITURE,
@@ -436,12 +435,33 @@ bool Floppy144CabinetOpenNearby(
         pBest->pszId == NULL
     )
     {
-        return false;
+        return NULL;
     }
 
     nOrdinal = Floppy144CabinetOrdinalForId(pBest->pszId);
     if(nOrdinal < 0 || nOrdinal >= (int32_t)FLOPPY144_SECURE_CABINET_MAX)
-        return false;
+        return NULL;
+
+    *ordinal=nOrdinal;
+    return pBest;
+}
+
+bool Floppy144CabinetAccessAvailable(const Floppy144RunState *pRunState)
+{
+    int32_t ordinal;
+    return Floppy144CabinetAccessibleParent(pRunState,&ordinal)!=NULL;
+}
+
+bool Floppy144CabinetOpenNearby(
+    Floppy144CabinetState *pCabinet,
+    const Floppy144RunState *pRunState
+)
+{
+    const Floppy144DataRecord *pBest;
+    int32_t nOrdinal;
+    if(pCabinet==NULL)return false;
+    pBest=Floppy144CabinetAccessibleParent(pRunState,&nOrdinal);
+    if(pBest==NULL)return false;
 
     Floppy144CabinetReset(pCabinet);
 

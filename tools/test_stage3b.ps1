@@ -571,7 +571,7 @@ function Test-Stage3B5CoordinatorWiring {
     }
 
     foreach($Renderer in @($Site2DSource, $SiteIsoSource)) {
-        if($Renderer -notmatch 'Floppy144CabinetOpenNearby') {
+        if($Renderer -notmatch 'Floppy144CabinetAccessAvailable') {
             throw "Stage 3B.5 Site prompt does not advertise A=Access near secure cabinets."
         }
     }
