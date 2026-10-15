@@ -11,6 +11,7 @@
 #include "floppy144_draw.h"
 #include "floppy144_game_data.h"
 #include "floppy144_persistence.h"
+#include "floppy144_recovery.h"
 #include "floppy144_run_state.h"
 #include "floppy144_terminal.h"
 #include "floppy144_world.h"
