@@ -20,7 +20,7 @@ jobs:
       - name: Generate canonical data
         shell: pwsh
         run: .\tools\build_game_data.ps1
-      - name: Inspect 2.5D and capture four visual fixtures
+      - name: Inspect 2.5D and capture BF10/BF30 visual fixtures
         shell: pwsh
         run: |
           $dir = Join-Path $env:RUNNER_TEMP "bf10-captures"
@@ -31,7 +31,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: bf10-inspection-reference-frames
+          name: bf10-bf30-inspection-reference-frames
           path: ${{ runner.temp }}/bf10-captures/*.ppm
           if-no-files-found: ignore
       - name: Cabinet interaction and door regressions

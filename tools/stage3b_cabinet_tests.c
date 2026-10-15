@@ -16,6 +16,7 @@
 #include "floppy144_run_state.h"
 #include "floppy144_grey_door.h"
 #include "floppy144_site_2d.h"
+#include "floppy144_site_2d_camera.h"
 #include "floppy144_site_directory.h"
 #include "floppy144_site.h"
 #include "floppy144_site_object.h"
@@ -2366,6 +2367,127 @@ static void Floppy144TestGreyDoorNoScar(void)
     puts("S4G-04 visual lifecycle: UNSEEN == COMPLETED; AVAILABLE differs; directory unchanged");
 }
 
+
+/* BF30: nonphysical double doors use the canonical parent view with no
+ * invented physical item. Interaction/collision/save state must be untouched. */
+static void Floppy144TestDoubleDoorContents(void)
+{
+    static const char *const leaves[]={
+        "ENTRY_01","ENTRY_02","EMER_01","EMER_02"
+    };
+    static const char *const canonical[]={
+        "ENTRY_01","ENTRY_01","EMER_01","EMER_01"
+    };
+    static const char *const labels[]={
+        "MAIN ENTRANCE","MAIN ENTRANCE",
+        "EMERGENCY EXIT","EMERGENCY EXIT"
+    };
+    Floppy144RunState state,prior;
+    Floppy144CabinetState cabinet;
+    uint32_t i;
+    Floppy144RunStateBegin(&state,144U);
+    F144_CHECK(Floppy144RunStateReconstructRoom(
+        &state,FLOPPY144_ROOM_RECEPTION),
+        "BF30 initialise Reception for the main entrance");
+    F144_CHECK(Floppy144RunStateReconstructRoom(
+        &state,FLOPPY144_ROOM_CORRIDOR),
+        "BF30 initialise Corridor for emergency exits");
+    prior=state;
+    for(i=0U;i<4U;++i)
+    {
+        const Floppy144DataRecord *fixture=
+            Floppy144GameDataFind(FLOPPY144_DATA_FIXTURE,leaves[i]);
+        F144_CHECK(fixture!=NULL && fixture->pszB!=NULL &&
+            strcmp(fixture->pszB,"DOOR")==0,
+            "BF30 paired leaves are existing physical door fixtures");
+        F144_CHECK(Floppy144CabinetOpenParent(&cabinet,&state,leaves[i]),
+            "BF30 empty double door opens as a genuine inspection container");
+        F144_CHECK(strcmp(cabinet.szCabinetId,canonical[i])==0 &&
+            strcmp(cabinet.szDisplayName,labels[i])==0,
+            "BF30 either leaf normalises to shared name and container ID");
+        F144_CHECK(cabinet.bInteriorOpen && !cabinet.bSecureContainer &&
+            Floppy144CabinetVisibleContentCount(&cabinet,&state)==0U,
+            "BF30 door inspection has no fictitious contents or keypad");
+        F144_CHECK(memcmp(&state,&prior,sizeof(state))==0,
+            "BF30 inspection leaves traversal and persistent gameplay unchanged");
+    }
+    puts("BF30: four leaves, two parent containers, no invented physical items PASS");
+}
+
+
+/* BF26: prove that viewport culling does not own fixture lifetime.
+ * Round-trip from the mounting face to off-screen and back, including a save.
+ */
+static void Floppy144TestDirectoryCameraRoundTrip(void)
+{
+    Floppy144RunState run,loaded;
+    Floppy144Surface image;
+    const Floppy144SiteRect *directory=
+        Floppy144SiteRectForParentId("RECEPTION_SITE_DIRECTORY");
+    Floppy144SiteCamera2D camera;
+    Floppy144SiteScreenRect projected;
+    uint8_t bytes[FLOPPY144_SAVE_PAYLOAD_V6_SIZE];
+    uint32_t *baseline=NULL,*pixels=NULL;
+    int32_t anchor_x=0,anchor_y=0,x,y;
+    bool found=false;
+    Floppy144RunStateBegin(&run,2626U);
+    (void)Floppy144RunStateReconstructRoom(&run,FLOPPY144_ROOM_RECEPTION);
+    F144_CHECK(directory!=NULL &&
+        Floppy144SiteRectRuntimeVisible(&run,directory),
+        "BF26 Reception Directory remains registered in the world");
+    if(directory==NULL)return;
+    /* Resolve a real east-facing stand point through production focus logic. */
+    for(y=40*16;y<=46*16 && !found;y+=8)
+        for(x=78*16;x<=82*16 && !found;x+=8)
+        {
+            Floppy144RunStateSetPlayerSitePosition(&run,x,y);
+            if(Floppy144SiteDirectoryNearby(&run))
+            {anchor_x=run.player_site_x;anchor_y=run.player_site_y;found=true;}
+        }
+    F144_CHECK(found,"BF26 Reception Directory remains inspectable");
+    if(!found)return;
+    baseline=(uint32_t*)malloc(640U*360U*sizeof(uint32_t));
+    pixels=(uint32_t*)malloc(640U*360U*sizeof(uint32_t));
+    F144_CHECK(baseline!=NULL && pixels!=NULL,"BF26 comparison buffers exist");
+    if(baseline==NULL||pixels==NULL){free(baseline);free(pixels);return;}
+    image.pixels=baseline;image.width=640U;image.height=360U;
+    memset(baseline,0,640U*360U*sizeof(uint32_t));
+    Floppy144Site2DDrawForPlayerState(
+        &image,&run,NULL,FLOPPY144_OPERATOR_BODY_STYLE_A,NULL);
+    F144_CHECK(Floppy144Site2DBuildCamera(
+        FLOPPY144_ROOM_RECEPTION,&run,&image,&camera) &&
+        Floppy144Site2DProjectRect(&camera,directory,&projected) &&
+        projected.y+projected.height>FLOPPY144_SITE_2D_VIEWPORT_Y,
+        "BF26 near camera includes the Reception Directory");
+
+    Floppy144RunStateSetPlayerSitePosition(&run,95*16,63*16);
+    image.pixels=pixels;
+    Floppy144Site2DDrawForPlayerState(
+        &image,&run,NULL,FLOPPY144_OPERATOR_BODY_STYLE_A,NULL);
+    F144_CHECK(Floppy144SiteRectRuntimeVisible(&run,directory),
+        "BF26 camera movement does not deregister the fixture");
+    F144_CHECK(Floppy144Site2DBuildCamera(
+        FLOPPY144_ROOM_RECEPTION,&run,&image,&camera) &&
+        Floppy144Site2DProjectRect(&camera,directory,&projected) &&
+        projected.y+projected.height<=FLOPPY144_SITE_2D_VIEWPORT_Y,
+        "BF26 directory leaves the viewport while off-screen");
+    F144_CHECK(Floppy144PersistenceEncodeRunState(
+        &run,bytes,FLOPPY144_SAVE_PAYLOAD_V6_SIZE) &&
+        Floppy144PersistenceDecodeRunState(
+        &loaded,bytes,FLOPPY144_SAVE_PAYLOAD_V6_SIZE),
+        "BF26 V6 save/load survives without changing directory registration");
+    Floppy144RunStateSetPlayerSitePosition(&loaded,anchor_x,anchor_y);
+    F144_CHECK(Floppy144SiteDirectoryNearby(&loaded),
+        "BF26 Directory is inspectable after the return journey");
+    image.pixels=pixels;
+    memset(pixels,0,640U*360U*sizeof(uint32_t));
+    Floppy144Site2DDrawForPlayerState(
+        &image,&loaded,NULL,FLOPPY144_OPERATOR_BODY_STYLE_A,NULL);
+    F144_CHECK(memcmp(baseline,pixels,640U*360U*sizeof(uint32_t))==0,
+        "BF26 restored Reception Directory is pixel-identical to prior view");
+    free(baseline);free(pixels);
+}
+
 int main(void)
 {
     Floppy144TestGeneratedCabinetDiscovery();
@@ -2375,6 +2497,8 @@ int main(void)
     Floppy144TestSeededContainerOrdering();
     Floppy144TestShelvingPresentationAndRecoveredOrder();
     Floppy144TestAllCorridorDoorContainers();
+    Floppy144TestDoubleDoorContents();
+    Floppy144TestDirectoryCameraRoundTrip();
     Floppy144TestDoorParentDisplayName();
     Floppy144TestInspectionPresentationProgression();
     Floppy144TestRecoveredChildRevealsCabinetCode();

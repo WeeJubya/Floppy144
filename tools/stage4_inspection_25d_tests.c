@@ -578,6 +578,51 @@ static void TestBF10NamedVisualCases(void)
     BF10Capture("corridor_records_door");
 }
 
+
+/* BF30: both existing leaves of each physical pair must yield one identical
+ * image. Two types have distinct single plaques and no PI markers. */
+static void TestDoubleDoorAssemblies(void)
+{
+    const Floppy144DataRecord *entry_a=FindParent("ENTRY_01");
+    const Floppy144DataRecord *entry_b=FindParent("ENTRY_02");
+    const Floppy144DataRecord *emergency_a=FindParent("EMER_01");
+    const Floppy144DataRecord *emergency_b=FindParent("EMER_02");
+    uint32_t entry_first,entry_second,emergency_first,emergency_second;
+    bool recognized=false;
+
+    CHECK(entry_a!=NULL && entry_b!=NULL &&
+          emergency_a!=NULL && emergency_b!=NULL,
+          "BF30 all four authored external door leaves exist");
+    if(entry_a==NULL||entry_b==NULL||emergency_a==NULL||emergency_b==NULL)
+        return;
+    entry_first=DrawParent(entry_a,0,0U,0U,&recognized);
+    CHECK(recognized,"BF30 main entrance has a specialised shared container");
+    CHECK(RegionPixelCount(70U,45U,260U,80U)>0U,
+          "BF30 one main entrance sign occupies the header");
+    CHECK(RegionPixelCount(306U,0U,640U,360U)==0U,
+          "BF30 entrance geometry remains in the left-hand frame");
+    BF10Capture("main_entrance_double_door");
+    entry_second=DrawParent(entry_b,0,0U,0U,&recognized);
+    CHECK(recognized && entry_first==entry_second,
+          "BF30 either entrance leaf paints exactly the same assembly");
+
+    emergency_first=DrawParent(emergency_a,0,0U,0U,&recognized);
+    CHECK(recognized,"BF30 emergency exit has a specialised shared container");
+    CHECK(RegionPixelCount(70U,45U,260U,80U)>0U,
+          "BF30 one emergency exit sign occupies the header");
+    BF10Capture("emergency_exit_double_door");
+    emergency_second=DrawParent(emergency_b,0,0U,0U,&recognized);
+    CHECK(recognized && emergency_first==emergency_second,
+          "BF30 either emergency leaf paints exactly the same assembly");
+    CHECK(entry_first!=emergency_first,
+          "BF30 entrance and emergency signs differ visibly");
+    CHECK(RegionPixelCount(306U,0U,640U,360U)==0U,
+          "BF30 emergency construction cannot bleed into Contents");
+    (void)DrawParent(emergency_a,90,0U,0U,&recognized);
+    CHECK(recognized && RegionPixelCount(306U,0U,640U,360U)==0U,
+          "BF30 rotated pair respects framebuffer clipping");
+}
+
 static void TestUnknownFallback(void)
 {
     Floppy144DataRecord future_parent;
@@ -622,6 +667,7 @@ int main(void)
     TestAllAuthoredPhysicalItemParents();
     TestDeskAndDoorChildSurfaces();
     TestBF10NamedVisualCases();
+    TestDoubleDoorAssemblies();
     TestUnknownFallback();
 
     if(g_failures!=0)

@@ -7,6 +7,7 @@
  */
 
 #include "floppy144_cabinet_25d.h"
+#include "floppy144_double_door.h"
 
 #include <stddef.h>
 #include <string.h>
@@ -423,6 +424,24 @@ static Floppy144Cabinet25DBox Floppy144Cabinet25DMakeBox(
 
     if(step<8)step=8;
     if(step>24)step=24;
+
+    /*
+     * BF10/BF30: constrain the common world-width projection to its actual
+     * 2.5D panel. A long paired threshold must not bleed beyond the furniture
+     * frame just because its long axis happens to point towards the gutter.
+     * This is shared geometry, not per-object corrective offsets.
+     */
+    {
+        int32_t right_units=mirror?depth_units:width_units;
+        int32_t left_units=mirror?width_units:depth_units;
+        int32_t left_available=centre_x-20;
+        int32_t right_available=(int32_t)F144_25D_PANEL_RIGHT-12-centre_x;
+        if(right_units>0 && step>right_available/right_units)
+            step=right_available/right_units;
+        if(left_units>0 && step>left_available/left_units)
+            step=left_available/left_units;
+        if(step<1)step=1;
+    }
 
     box.a.x=centre_x;
     box.a.y=top_y;
@@ -1583,6 +1602,82 @@ static void Floppy144Cabinet25DDrawDoor(
     Floppy144Cabinet25DDrawOrientationTick(surface,&box,octant);
 }
 
+
+/*
+ * BF30 paired threshold. One projected frame encloses two full leaves,
+ * separated at the centre joint. Both leaf IDs are normalised by the shared
+ * double-door identity header and therefore render identically. The plaque
+ * is drawn exactly once per container, not once per leaf. The sign text is
+ * presentation configuration, never a physical item or connection effect.
+ */
+static void Floppy144Cabinet25DDrawDoubleDoor(
+    Floppy144Surface *surface, const char *sign, bool mirror
+)
+{
+    const uint32_t edge=F144_25D_RGB(161,176,166);
+    const uint32_t frame=F144_25D_RGB(77,88,82);
+    const uint32_t leaf=F144_25D_RGB(66,80,73);
+    const uint32_t lower=F144_25D_RGB(51,65,60);
+    Floppy144Cabinet25DBox box=Floppy144Cabinet25DMakeBox(9,1,124,mirror);
+    Floppy144Cabinet25DPoint face[4];
+    uint32_t word_width;
+    uint32_t plaque_x=81U;
+    uint32_t plaque_y=49U;
+    uint32_t plaque_width=170U;
+
+    Floppy144Cabinet25DDrawBox(
+        surface,&box,F144_25D_RGB(99,112,104),frame,lower,edge
+    );
+    Floppy144Cabinet25DFaceCorners(
+        NULL,&box,face,F144_25D_CHILD_FRONT,9,1
+    );
+
+    /* Single deep portal opening with two separate hinged leaves. */
+    Floppy144Cabinet25DDrawSurfaceMarker(
+        surface,face,25,25,999,1000,frame,edge
+    );
+    Floppy144Cabinet25DDrawSurfaceMarker(
+        surface,face,65,72,498,955,leaf,edge
+    );
+    Floppy144Cabinet25DDrawSurfaceMarker(
+        surface,face,502,72,935,955,lower,edge
+    );
+
+    /* Matching inset rails and distinct handles on the centre stile. */
+    Floppy144Cabinet25DDrawSurfaceMarker(
+        surface,face,115,145,440,395,lower,edge
+    );
+    Floppy144Cabinet25DDrawSurfaceMarker(
+        surface,face,560,145,885,395,leaf,edge
+    );
+    Floppy144Cabinet25DDrawSurfaceMarker(
+        surface,face,115,625,440,875,lower,edge
+    );
+    Floppy144Cabinet25DDrawSurfaceMarker(
+        surface,face,560,625,885,875,leaf,edge
+    );
+    Floppy144Cabinet25DDrawSurfaceMarker(
+        surface,face,447,505,476,575,edge,edge
+    );
+    Floppy144Cabinet25DDrawSurfaceMarker(
+        surface,face,524,505,553,575,edge,edge
+    );
+
+    /* One overhead sign spanning the pair, outside either leaf's face. */
+    Floppy144Cabinet25DFillRect(
+        surface,plaque_x,plaque_y,plaque_width,23U,frame
+    );
+    Floppy144Cabinet25DRect(
+        surface,plaque_x,plaque_y,plaque_width,23U,edge
+    );
+    word_width=Floppy144DrawTextWidth(sign,1U);
+    Floppy144DrawText(surface,
+        plaque_x+(plaque_width>word_width?
+            (plaque_width-word_width)/2U:0U),
+        plaque_y+9U,sign,1U,F144_25D_RGB(222,237,223)
+    );
+}
+
 static void Floppy144Cabinet25DDrawFallback(
     Floppy144Surface *surface,
     int32_t width,
@@ -1673,6 +1768,13 @@ bool Floppy144Cabinet25DDraw(
         Floppy144Cabinet25DDrawWallFixture(
             surface,parent,width,depth,mirror,octant
         );
+    }
+    else if(Floppy144DoubleDoorIsPair(parent->pszId))
+    {
+        Floppy144Cabinet25DDrawDoubleDoor(
+            surface,Floppy144DoubleDoorSign(parent->pszId),mirror
+        );
+        children_drawn=true;
     }
     else if(Floppy144Cabinet25DStringEqual(variant,"DOOR"))
     {

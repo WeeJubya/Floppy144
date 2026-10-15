@@ -4,6 +4,7 @@
 
 #include "floppy144_cabinet.h"
 #include "floppy144_cabinet_25d.h"
+#include "floppy144_double_door.h"
 #include "floppy144_crossword.h"
 #include "floppy144_noticeboard.h"
 #include "floppy144_paperback.h"
@@ -515,6 +516,16 @@ bool Floppy144CabinetOpenParent(
         return false;
     }
 
+    /*
+     * BF30: either physical leaf opens the same presentation container.
+     * Do not alter the focused Site door, world collision or connection ID.
+     * This remapping exists only for the transient Inspection screen.
+     */
+    {
+        const char *canonical=Floppy144DoubleDoorCanonicalId(pszParentId);
+        if(canonical!=NULL)pszParentId=canonical;
+    }
+
     pParent =
         Floppy144CabinetParentRecord(
             pszParentId
@@ -567,7 +578,8 @@ bool Floppy144CabinetOpenParent(
                 strcmp(pParent->pszB, "NONSECURE_CABINET") == 0 ||
                 strcmp(pParent->pszB, "SHELVING_FULL") == 0
             )
-        )
+        ) &&
+        !Floppy144DoubleDoorIsPair(pszParentId)
     )
     {
         return false;
@@ -587,7 +599,15 @@ bool Floppy144CabinetOpenParent(
         pszParentId
     );
 
-    if(
+    if(Floppy144DoubleDoorIsPair(pszParentId))
+    {
+        (void)snprintf(
+            pCabinet->szDisplayName,
+            sizeof(pCabinet->szDisplayName),
+            "%s", Floppy144DoubleDoorSign(pszParentId)
+        );
+    }
+    else if(
         pParent->pszB != NULL &&
         strcmp(pParent->pszB, "DOOR") == 0
     )
@@ -609,9 +629,9 @@ bool Floppy144CabinetOpenParent(
     pCabinet->bDetailOpen = false;
     pCabinet->uSelectedContent = 0U;
     pCabinet->pszStatus =
-        bHasVisibleContent
-            ? "RECOVERED CONTENTS"
-            : "EMPTY STORAGE";
+        Floppy144DoubleDoorIsPair(pszParentId)
+            ? "DOUBLE-DOOR INSPECTION"
+            : (bHasVisibleContent ? "RECOVERED CONTENTS" : "EMPTY STORAGE");
 
     /*
      * Only the canonical Staff Room P-330 may show a variable menu. Keep the
@@ -2285,7 +2305,8 @@ static void Floppy144CabinetDrawInterior(
             pRunState
         );
 
-    if(Floppy144CabinetEnhancedPresentationUnlocked(pRunState))
+    if(Floppy144DoubleDoorIsPair(pCabinet->szCabinetId) ||
+       Floppy144CabinetEnhancedPresentationUnlocked(pRunState))
     {
         const Floppy144DataRecord *pParent =
             Floppy144CabinetParentRecord(

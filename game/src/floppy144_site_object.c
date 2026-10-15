@@ -4,6 +4,7 @@
 
 #include "floppy144_site_object.h"
 #include "floppy144_site_rooms.h"
+#include "floppy144_double_door.h"
 
 #include "floppy144_object_registry.h"
 #include "floppy144_interaction_engine.h"
@@ -2548,6 +2549,17 @@ static const Floppy144SiteRect *Floppy144SiteFocusedRect(
             )
             {
                 pszLabel = "LOCKED DOOR";
+            }
+            /*
+             * BF30: unlocked exterior entrance leaves must also be focusable
+             * from Reception. No collision/door-lock state is modified.
+             */
+            if(pszLabel == NULL)
+            {
+                const Floppy144DataRecord *door=
+                    Floppy144SiteParentRecordForRect(pRect);
+                if(door!=NULL)
+                    pszLabel=Floppy144DoubleDoorSign(door->pszId);
             }
         }
         else if(
