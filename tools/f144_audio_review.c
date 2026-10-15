@@ -51,7 +51,7 @@ int main(int argc,char **argv)
     puts("F144 original-sound review: ESC quit | 1-4 Acts | F1-F7: 0,5,10,15,20,25,29m");
     puts("N/B next/previous SFX | SPACE play cue | UP/DOWN music | LEFT/RIGHT SFX");
     puts("Restoration corruption: R increase by 10, E decrease by 10");
-    puts("BF22 REVIEW: M = THE WHIMSICAL ASSEMBLY LINE (menu), C = YOUR CONTRIBUTION HAS BEEN NOTED (ending), G = gameplay");
+    puts("BF22 REVIEW: M = THE WHIMSICAL ASSEMBLY LINE (menu), C = A COMPLETED PRODUCT HAS BEEN DELIVERED (ending), G = gameplay");
     printf("Current cue %u/%u (see src/f144sfx.h for names)\n",cue,F144_SFX_COUNT-1U);
     puts("BF24: O ORIGINAL | A REVISED A: PHYSICALLY AUTHENTIC | S REVISED B: STYLISED RETRO");
     puts("T: BF23 3-second restoration demonstration | X: interrupt and restore tempo");
@@ -106,7 +106,7 @@ int main(int argc,char **argv)
         }
         if(pressed('C',&ending_key)){
             F144_MusicSetScene(F144_MUSIC_COMPLETION);
-            puts("BF22 COMPLETION: YOUR CONTRIBUTION HAS BEEN NOTED / 65 BPM / looping");
+            puts("BF22 COMPLETION: A COMPLETED PRODUCT HAS BEEN DELIVERED / 110 BPM / 32 bars (69.82 seconds)");
         }
         if(pressed('G',&game_key)){
             F144_MusicSetScene(F144_MUSIC_GAMEPLAY);

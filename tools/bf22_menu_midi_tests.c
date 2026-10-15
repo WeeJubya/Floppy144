@@ -103,9 +103,9 @@ int main(void)
     F144_MusicSeekBar(601u);
     check(g_step==16u,"gameplay still seeks modulo 600 bars");
     F144_MusicSetScene(F144_MUSIC_COMPLETION);
-    F144_MusicSeekBar(17u);
-    check(g_step==16u,"completion still seeks modulo 16 bars");
-    check(midi_seen(513u,0xc0u,0u),"completion acoustic piano unchanged");
+    F144_MusicSeekBar(33u);
+    check(g_step==16u,"completion now seeks modulo 32 bars");
+    check(midi_seen(513u,0xc0u,4u),"completion electric piano patch");
     g_playing=0;
     g_available=0;
     g_out=NULL;

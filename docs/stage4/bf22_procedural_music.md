@@ -1,13 +1,14 @@
-# BF22: The Whimsical Assembly Line (main menu)
+# BF22: The Whimsical Assembly Line / A Completed Product Has Been Delivered
 
 A 110 BPM, 4/4, 32-bar (69.818 s) General MIDI menu theme, generated
 procedurally through the existing WinMM output. There are **no stored
 MIDI, recorded sounds or sample assets**.
 
 This supersedes the earlier **PLEASE HOLD** 70 BPM / 16-bar menu cue.
-The approved 80 BPM, 600-bar gameplay composition and the independent
-65 BPM, 16-bar **YOUR CONTRIBUTION HAS BEEN NOTED** completion music
-are unchanged. Scene switching restores each cue's own GM patches,
+The approved 80 BPM, 600-bar gameplay composition remains unchanged.
+The completion scene is now the independent 110 BPM, 32-bar
+**A COMPLETED PRODUCT HAS BEEN DELIVERED**, with a perceived half-time pulse.
+Both cues share a clock but retain their own harmonic and emotional character. Scene switching restores each cue's own GM patches,
 ends previous notes and starts the appropriate loop; gameplay Act and
 restoration-driven corruption remain gameplay-only. Music volume/mute
 and existing scene routing remain shared and unchanged.
@@ -96,7 +97,7 @@ alternating bars during 9–24 only; short releases on steps 6/14.
 
 Use `tools/build_audio_review.ps1` and
 `build/audio-review/f144_audio_review.exe` on Windows.
-Press M for this new theme, C for the unchanged completion theme,
+Press M for the menu theme, C for the new completion theme,
 G for the original gameplay cue. Up/down adjusts music volume.
 Pressing M after another scene restarts the main-menu loop from bar 1.
 
@@ -111,3 +112,57 @@ and `testbuild.ps1` on Windows, plus the Release executable size
 gate of 1,474,560 bytes. Automated checks cannot establish musical
 quality: audition transitions, the 31/32/1 turnaround and long-running
 loop continuity on a General MIDI device before approving the cue.
+
+## Completion companion: A Completed Product Has Been Delivered
+
+The completion screen and its Credits continue to select the existing
+completion scene through the unchanged game/audio façade. The new cue shares
+110 BPM, 4/4, 16 steps/bar, 32 bars (69.818 s) with the menu, but is
+perceived at 55 BPM through its two bass/tick beats per bar.
+
+Zero-based GM patches on the original WinMM channels: ch1 Electric Piano 1
+(#5, program 4), ch2 Acoustic Bass (#33, program 32), ch3 Pizzicato Strings
+(#46, program 45), ch4 Music Box (#11, program 10), ch5 String Ensemble 1
+(#49, program 48), ch6 Celesta (#9, program 8), ch7 Marimba (#13,
+program 12). Ch10 has GM drums with low-velocity closed hi-hat (42),
+side-stick (37) and a closing woodblock (76).
+
+The four-part eight-bar harmonic phrase (four repetitions) is:
+Cmaj9 / E7 over G# / Am9 / Fm6 / C over G / Abmaj7 /
+Dm7 moving to G7sus4 halfway through the bar / C6/9.
+Cmaj9 and C6/9 are voiced with explicit ninths; Fm6, Am9,
+Abmaj7 and the secondary dominant retain their identity.
+C6/9 resolves each phrase before the next Cmaj9 without stopping time.
+
+**Bars 1–8: Your Work Has Been Recognised.** Strings underpin long
+piano phrases derived from the menu's C-E-G-E-C, but with a final
+homeward C. Two quiet bass pulses, sparse pizzicato offbeats and soft
+clockwork support the melody. The intro *once per entry* uses piano C5
+and E5, celesta G5 and music-box C6, followed by a soft side-stick
+rubber-stamp cue in the first bar.
+
+**Bars 9–24: A Proud Moment for the Department.** A fuller five-note
+string chord, quicker piano interjections and alternating marimba,
+music-box and celesta replies add warmth, without changing clock rate
+or overwhelming UI sounds. The offbeat pizzicato continues to reference
+the menu's typing rhythm.
+
+**Bars 25–32: The Department Thanks You.** String chords and bass
+soften, piano returns to spacious melody, with only occasional
+celesta replies and muted machinery. In bar 32 the music box climbs
+G5-A5-B5-C6 under a restrained final approval stamp. The C6/9 chord
+flows into the next Cmaj9; gentle ticking continues across the loop.
+
+The flourish is armed on completion-scene entry or a new playback
+start after Stop, not rearmed on ordinary 32-bar wrap or seek.
+All scene transitions use All Notes Off and restore scene-specific GM
+programs. Act/restoration corruption, original gameplay pitch events,
+save formats, and shared volume/mute settings are unaffected.
+
+The BF22 PowerShell test compiles both the menu and completion native
+MIDI-capture regressions; the latter explicitly checks intro-once
+behaviour, sparse and rich sections, harmony, 110 BPM step cadence,
+the 32-bar wrap, seek and return to gameplay. Musical approval is
+subject to listening on a real GM device. Run
+`tools/build_audio_review.ps1` and press **M/C/G** to compare the
+menu/completion/gameplay tracks.

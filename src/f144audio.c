@@ -40,6 +40,10 @@
 #define F144_MENU_BPM           110.0
 #define F144_MENU_BARS          32u
 #define F144_MENU_TOTAL_STEPS   (F144_MENU_BARS * F144_STEPS_PER_BAR)
+/* Both office scenes share one clock but retain independent arrangement state. */
+#define F144_COMPLETION_BPM         F144_MENU_BPM
+#define F144_COMPLETION_BARS        32u
+#define F144_COMPLETION_TOTAL_STEPS (F144_COMPLETION_BARS * F144_STEPS_PER_BAR)
 
 #define CH_MARIMBA  0u
 #define CH_BASS     1u
@@ -66,6 +70,8 @@ static double   g_accum = 0.0;
 
 static uint8_t g_last_note[16];
 static uint8_t g_note_active[16];
+/* Plays once on entering the completion scene, never on ordinary loop wrap. */
+static uint8_t g_completion_intro_pending=0u;
 
 static char g_device_name[128] = "Unavailable";
 
@@ -146,6 +152,7 @@ void F144_MusicSetScene(F144MusicScene scene)
         scene=F144_MUSIC_GAMEPLAY;
     if(scene==g_scene)return;
     g_scene=scene;
+    g_completion_intro_pending=(uint8_t)(scene==F144_MUSIC_COMPLETION);
     if(!g_available)return;
     if(scene==F144_MUSIC_GAMEPLAY)
     {
@@ -170,10 +177,15 @@ void F144_MusicSetScene(F144MusicScene scene)
     }
     else
     {
-        program(CH_MARIMBA,0u);  /* acoustic piano */
-        program(CH_BASS,48u);   /* mellow string ensemble */
-        program(CH_PIZZ,11u);   /* vibraphone */
-        program(CH_PAD,89u);
+        /* A Completed Product Has Been Delivered: familiar office timbres
+           in a restrained, half-time miniature. Zero-based GM programs. */
+        program(CH_MARIMBA,4u);     /* #5 electric piano lead */
+        program(CH_BASS,32u);       /* #33 acoustic bass */
+        program(CH_PIZZ,45u);       /* #46 pizzicato typing */
+        program(CH_CLARINET,10u);   /* #11 music box */
+        program(CH_PAD,48u);        /* #49 string ensemble */
+        program(CH_COUNTER,8u);     /* #9 celesta */
+        program(CH_EXTRA_PIZZ,12u); /* #13 marimba echo */
     }
     if(g_playing)F144_MusicRestart();
 }
@@ -646,9 +658,8 @@ static void evolving_layers(unsigned bar,unsigned step)
         send_raw(0x99u,76u,19u); /* occasional soft office woodblock */
 }
 
-/* BF22: menu is a 32-bar, 110 BPM GM assembly line. The independent
- * 16-bar completion scene and approved 600-bar gameplay are unchanged.
- * Scene notes intentionally bypass gameplay Act/restoration corruption. */
+/* BF22: independent 32-bar, 110 BPM menu/completion scenes. Approved
+ * 600-bar gameplay and its Act/restoration corruption remain unchanged. */
 static void scene_note(uint8_t channel,uint8_t pitch,uint8_t velocity)
 {
     if(g_note_active[channel])note_off(channel,g_last_note[channel]);
@@ -753,27 +764,148 @@ static void menu_scene_step(unsigned absolute_step)
     if(step==14u&&(bar%4u)==3u)
         send_raw(0x99u,76u,(uint8_t)(bar==31u?38u:25u));
 }
+/* Eight-bar progression, repeated four times:
+ * Cmaj9 | E7/G# | Am9 | Fm6 | C/G | Abmaj7 | Dm7 > G7sus4 | C6/9.
+ * Sparse voicings always retain each chord's identifying extension. */
+static const uint8_t completion_bass[8]=
+    {36u,44u,45u,41u,43u,44u,38u,36u};
+static const uint8_t completion_chords[8][5]={
+    {60u,64u,71u,74u,67u}, /* Cmaj9 */
+    {56u,59u,62u,64u,68u}, /* E7/G# */
+    {57u,60u,67u,71u,64u}, /* Am9 */
+    {53u,56u,60u,62u,65u}, /* Fm6 */
+    {55u,60u,64u,67u,72u}, /* C/G */
+    {56u,60u,63u,67u,72u}, /* Abmaj7 */
+    {50u,53u,60u,57u,65u}, /* Dm7 */
+    {60u,64u,69u,74u,67u}  /* C6/9 */
+};
+static const uint8_t completion_sus[5]=
+    {55u,60u,65u,62u,67u}; /* G7sus4, second half of seventh bar */
+static const uint8_t completion_motif[8][4]={
+    {72u,76u,79u,72u}, /* Main-menu C-E-G-E-C transformed into resolution */
+    {71u,74u,80u,71u},
+    {72u,76u,79u,72u},
+    {72u,77u,80u,72u},
+    {72u,76u,79u,72u},
+    {72u,75u,79u,72u},
+    {74u,77u,81u,74u},
+    {72u,76u,79u,72u}
+};
 static void completion_scene_step(unsigned absolute_step)
 {
-    static const uint8_t melody[16]={
-        76u,74u,72u,69u,72u,71u,67u,69u,
-        71u,72u,76u,74u,72u,69u,68u,69u
-    };
-    unsigned bar=(absolute_step/16u)%16u;
-    unsigned step=absolute_step%16u;
-    uint8_t base=(bar%4u==2u)?41u:45u;
-    if(step==0u)
+    unsigned bar=(absolute_step/F144_STEPS_PER_BAR)%F144_COMPLETION_BARS;
+    unsigned step=absolute_step%F144_STEPS_PER_BAR;
+    unsigned chord=bar%8u;
+    unsigned voice;
+    int rich=(bar>=8u&&bar<24u);
+    int closing=(bar>=24u);
+    const uint8_t *voicing=(chord==6u&&step>=8u)?
+        completion_sus:completion_chords[chord];
+
+    /* Slowly breathing string harmony, with a mid-bar ii -> V suspension.
+       At the final eighth bar the C6/9 resolves rather than hanging. */
+    if(step==0u||(chord==6u&&step==8u))
     {
-        scene_note(CH_BASS,(uint8_t)(base-12u),26u);
-        scene_note(CH_PAD,(uint8_t)(base+12u),21u);
+        channel_silence(CH_PAD);
+        for(voice=0u;voice<(rich?5u:4u);++voice)
+            send_raw((uint8_t)(0x90u|CH_PAD),voicing[voice],
+                     (uint8_t)(voice==0u?
+                        (closing?17u:rich?25u:21u):
+                        (closing?12u:rich?19u:15u)));
     }
-    if(step==0u)
-        scene_note(CH_MARIMBA,melody[bar],37u);
-    if(step==9u)mono_silence(CH_MARIMBA);
-    if(step==10u&&bar%4u==3u)
-        scene_note(CH_PIZZ,(uint8_t)(melody[bar]-1u),16u); /* uncertain dissonance */
-    if(step==14u)mono_silence(CH_PIZZ);
-    if(step==12u&&bar%4u==1u)send_raw(0x99u,42u,11u);
+
+    /* Half-time roots and fifths: two gentle beats per bar, not a march. */
+    if(step==0u||step==8u)
+    {
+        uint8_t pitch=step==0u?completion_bass[chord]:
+            (chord==6u?43u:(uint8_t)(completion_bass[chord]+7u));
+        scene_note(CH_BASS,pitch,(uint8_t)(closing?27u:rich?36u:30u));
+        send_raw(0x99u,42u,(uint8_t)(closing?9u:rich?15u:11u));
+    }
+    if(step==6u||step==14u)mono_silence(CH_BASS);
+
+    /* The old typing mechanism survives, but its offbeats are sparse. */
+    if((step==6u||step==14u)||
+       (rich&&(step==2u||step==10u)))
+    {
+        if(!closing||(bar&1u)==0u||step==14u)
+        {
+            voice=step==2u?1u:(step==6u?2u:(step==10u?3u:0u));
+            scene_note(CH_PIZZ,
+                       (uint8_t)(completion_chords[chord][voice]+12u),
+                       (uint8_t)(closing?15u:rich?24u:18u));
+        }
+    }
+    if(step==3u||step==7u||step==11u||step==15u)
+        mono_silence(CH_PIZZ);
+
+    /* Entry-only approval: C5 / E5 / G5 / C6 / rubber stamp.
+       The flourish occupies the first bar, leaving the next 31 bars and
+       every repeat to follow the ordinary, gently resolved arrangement. */
+    if(bar==0u&&g_completion_intro_pending)
+    {
+        if(step==0u)scene_note(CH_MARIMBA,72u,39u);
+        if(step==2u)scene_note(CH_MARIMBA,76u,36u);
+        if(step==4u)
+        {
+            mono_silence(CH_MARIMBA);
+            scene_note(CH_COUNTER,79u,30u);
+        }
+        if(step==6u)scene_note(CH_CLARINET,84u,30u);
+        if(step==7u)mono_silence(CH_COUNTER);
+        if(step==8u)send_raw(0x99u,37u,30u);
+        if(step==10u)mono_silence(CH_CLARINET);
+        if(step==15u)g_completion_intro_pending=0u;
+    }
+    else
+    {
+        /* Quieter, slower restatement of the menu tune, expanded in
+           bars 9-24 and returning to a simple phrase in bars 25-32. */
+        if(step==0u||step==8u||step==12u||(rich&&step==4u))
+        {
+            voice=step==0u?0u:(step==4u?1u:(step==8u?2u:3u));
+            scene_note(CH_MARIMBA,completion_motif[chord][voice],
+                       (uint8_t)(closing?30u:rich?41u:35u));
+        }
+        if(step==7u||step==15u)mono_silence(CH_MARIMBA);
+    }
+
+    if(rich)
+    {
+        if((bar&1u)==0u&&step==4u)
+            scene_note(CH_EXTRA_PIZZ,menu_motif[chord][0],19u);
+        if(step==7u)mono_silence(CH_EXTRA_PIZZ);
+        if((bar&1u)==1u&&(step==4u||step==12u))
+            scene_note(CH_CLARINET,
+                       (uint8_t)(completion_motif[chord][step==4u?1u:2u]+12u),
+                       24u);
+        if(step==7u||step==15u)mono_silence(CH_CLARINET);
+        if((bar&1u)==0u&&step==12u)
+            scene_note(CH_COUNTER,
+                       (uint8_t)(completion_motif[chord][2]+12u),17u);
+        if(step==15u)mono_silence(CH_COUNTER);
+    }
+    else if(closing)
+    {
+        /* Last four bars recall the empty office after hours. The final
+           music-box ascent G5 A5 B5 C6 settles before the next Cmaj9. */
+        if(bar==31u&&(step==1u||step==5u||step==9u||step==12u))
+        {
+            uint8_t note=step==1u?79u:(step==5u?81u:
+                         (step==9u?83u:84u));
+            scene_note(CH_CLARINET,note,25u);
+        }
+        if(bar==28u&&step==8u)
+            scene_note(CH_COUNTER,79u,17u);
+        if(step==11u)mono_silence(CH_COUNTER);
+    }
+
+    /* End of each completed eight-bar form; one restrained final stamp.
+       A tiny woodblock punctuates the last bar without another big fanfare. */
+    if(chord==7u&&step==12u)
+        send_raw(0x99u,37u,(uint8_t)(closing?15u:rich?23u:18u));
+    if(bar==31u&&step==13u)
+        send_raw(0x99u,76u,15u);
 }
 
 static void process_step(unsigned absolute_step)
@@ -885,6 +1017,8 @@ void F144_MusicRestart(void)
     if (!g_available)
         return;
 
+    if(g_scene==F144_MUSIC_COMPLETION&&!g_playing)
+        g_completion_intro_pending=1u;
     all_notes_off();
     apply_master_volume();
 
@@ -902,8 +1036,10 @@ void F144_MusicSeekBar(unsigned bar)
     /* Seek within the selected cue's own loop, never the gameplay period. */
     {
         unsigned bars=g_scene==F144_MUSIC_MENU?F144_MENU_BARS:
-            (g_scene==F144_MUSIC_COMPLETION?16u:600u);
+            (g_scene==F144_MUSIC_COMPLETION?F144_COMPLETION_BARS:600u);
         g_step=(bar%bars)*F144_STEPS_PER_BAR;
+        /* Seeking is a debug transport action, not a new completion. */
+        g_completion_intro_pending=0u;
     }
     g_accum = 0.0;
     g_playing = 1;
@@ -913,6 +1049,7 @@ void F144_MusicSeekBar(unsigned bar)
 void F144_MusicStop(void)
 {
     g_playing = 0;
+    g_completion_intro_pending=0u;
     all_notes_off();
 }
 
@@ -954,7 +1091,7 @@ void F144_AudioUpdate(double dt_seconds)
     {
         double seconds_per_step=g_scene==F144_MUSIC_MENU
             ?(60.0/F144_MENU_BPM/4.0):
-            (g_scene==F144_MUSIC_COMPLETION?(60.0/65.0/4.0):
+            (g_scene==F144_MUSIC_COMPLETION?(60.0/F144_COMPLETION_BPM/4.0):
                 F144_STEP_SECONDS);
         while (g_accum >= seconds_per_step) {
         g_accum -= seconds_per_step;
@@ -963,7 +1100,7 @@ void F144_AudioUpdate(double dt_seconds)
 
         if (g_step >= (g_scene==F144_MUSIC_MENU?F144_MENU_TOTAL_STEPS:
                        (g_scene==F144_MUSIC_COMPLETION?
-                        16u*F144_STEPS_PER_BAR:F144_TOTAL_STEPS))) {
+                        F144_COMPLETION_TOTAL_STEPS:F144_TOTAL_STEPS))) {
             all_notes_off();
             apply_master_volume();
             g_step = 0u;

@@ -7,7 +7,9 @@ $coordinator=Get-Content (Join-Path $root 'game\src\floppy144_main.c') -Raw
 $review=Get-Content (Join-Path $root 'tools\f144_audio_review.c') -Raw
 foreach($name in @('F144_MUSIC_MENU','F144_MUSIC_COMPLETION','menu_scene_step',
 'completion_scene_step','F144_MENU_BPM','110.0','F144_MENU_BARS',
-'F144_MENU_TOTAL_STEPS','65.0','scene_note','F144_MusicSetScene')){
+'F144_MENU_TOTAL_STEPS','F144_COMPLETION_BPM',
+'F144_COMPLETION_BARS','F144_COMPLETION_TOTAL_STEPS',
+'completion_motif','scene_note','F144_MusicSetScene')){
     if($midi -notmatch [regex]::Escape($name)){throw "BF22 MIDI engine contract missing: $name"}
 }
 foreach($name in @('FLOPPY144_AUDIO_MUSIC_MENU',
@@ -19,7 +21,7 @@ if($native -notmatch 'cue==5U' -or $native -notmatch 'F144_MUSIC_MENU' -or
    $native -notmatch 'F144_MUSIC_COMPLETION'){
     throw 'BF22 WinMM cannot address standalone compositions'
 }
-foreach($name in @('THE WHIMSICAL ASSEMBLY LINE','YOUR CONTRIBUTION HAS BEEN NOTED',
+foreach($name in @('THE WHIMSICAL ASSEMBLY LINE','A COMPLETED PRODUCT HAS BEEN DELIVERED',
 'F144_MUSIC_GAMEPLAY','F144_MUSIC_MENU','F144_MUSIC_COMPLETION')){
     if($review -notmatch [regex]::Escape($name)){
         throw "BF22 original/menu/ending review harness missing: $name"
@@ -30,11 +32,13 @@ if($midi -match '(?i)\.wav|\.mp3|\.ogg|\.mid"') {
 }
 # Exercise generated MIDI events without an actual sound card.
 $tempDir = if($env:RUNNER_TEMP) { $env:RUNNER_TEMP } else { [IO.Path]::GetTempPath() }
-$exe = Join-Path $tempDir 'bf22_menu_midi_tests.exe'
 $include = '/I' + (Join-Path $root 'src')
-& cl.exe /nologo /TC /std:c11 /W4 /WX /utf-8 $include `
-    (Join-Path $root 'tools\bf22_menu_midi_tests.c') "/Fe$exe" /link winmm.lib
-if($LASTEXITCODE -ne 0) { throw 'BF22 native MIDI event test failed to compile' }
-& $exe
-if($LASTEXITCODE -ne 0) { throw 'BF22 native MIDI event test failed' }
-Write-Host 'BF22 MIDI PATCHES / 110 BPM / 32-BAR LOOP / ROUTING: PASS'
+foreach($test in @('bf22_menu_midi_tests','bf22_completion_midi_tests')) {
+    $exe = Join-Path $tempDir ($test + '.exe')
+    & cl.exe /nologo /TC /std:c11 /W4 /WX /utf-8 $include `
+        (Join-Path $root ('tools\' + $test + '.c')) "/Fe$exe" /link winmm.lib
+    if($LASTEXITCODE -ne 0) { throw "BF22 native MIDI event test $test failed to compile" }
+    & $exe
+    if($LASTEXITCODE -ne 0) { throw "BF22 native MIDI event test $test failed" }
+}
+Write-Host 'BF22 MENU + COMPLETION GM / 110 BPM / 32-BAR LOOPS / ROUTING: PASS'
