@@ -65,6 +65,15 @@ static uint64_t render(
     return checksum(pixels,WIDTH*HEIGHT);
 }
 
+/* Exercise the same profile-aware drawing entry point used by Windows. */
+static uint64_t render_login(uint32_t elapsed_ms,const char *name,bool has_profile)
+{
+    Floppy144Surface surface={pixels,WIDTH,HEIGHT};
+    memset(pixels,0,sizeof(pixels));
+    Floppy144IntroDrawForProfile(&surface,elapsed_ms,1U,name,false,has_profile);
+    return checksum(pixels,WIDTH*HEIGHT);
+}
+
 int main(void)
 {
     Floppy144TimingState timing;
@@ -95,7 +104,7 @@ int main(void)
     if(!require_true(render(1400U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U)!=0U,"discovery renders")) return 14;
     if(!require_true(render(5200U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U)!=0U,"insertion renders")) return 15;
     if(!require_true(render(12150U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U)!=0U,"program renders")) return 16;
-    if(!require_true(render(18000U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U)!=0U,"network renders")) return 17;
+    if(!require_true(render(17000U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U)!=0U,"network renders")) return 17;
 
     /* BF20: discovery disk and grey foreground both meet the wall/floor line.
      * Pixel assertions exercise the actual renderer rather than only vector data.
@@ -147,6 +156,25 @@ int main(void)
                 if(pixels[y*WIDTH+x]==0xc19c59U)++amber;
         if(!require_true(amber>0U,
             "spaced INITIALISING dots are printed in amber"))return 38;
+    }
+
+    if(!require_true(render_login(FLOPPY144_INTRO_DURATION_MS,
+            "OPERATOR TWELVE",true)!=
+        render_login(FLOPPY144_INTRO_DURATION_MS+2200U,
+            "OPERATOR TWELVE",true),
+        "persisted profile name types in instead of appearing at once"))return 39;
+    if(!require_true(
+        render_login(FLOPPY144_INTRO_DURATION_MS+800U,"",false)!=
+        render_login(FLOPPY144_INTRO_DURATION_MS+1180U,"",false),
+        "guest login cursor flashes while awaiting operator input"))return 40;
+    (void)render_login(FLOPPY144_INTRO_DURATION_MS+800U,"",false);
+    {
+        uint32_t x,y,green=0U;
+        for(y=302U;y<311U;++y)
+            for(x=30U;x<260U;++x)
+                if(pixels[y*WIDTH+x]==0x84d399U)++green;
+        if(!require_true(green>0U,
+            "guest access guidance appears with empty operator profile"))return 41;
     }
 
     normal_program=render(12550U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U);
