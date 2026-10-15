@@ -39,7 +39,7 @@ int main(void)
             uint32_t x,y;
             FILE *out;
             (void)snprintf(path,sizeof(path),"%s/bf33_credits.ppm",dir);
-            out=fopen(path,"wb");
+            (void)fopen_s(&out,path,"wb");
             Expect(out!=NULL,"Credits screenshot can be opened");
             if(out!=NULL)
             {

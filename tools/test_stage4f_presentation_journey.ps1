@@ -43,13 +43,12 @@ if($menuIfCount -ne 1 -or $menuCaseCount -ne 0)
     throw "Duplicate screen-specific MENU transition paths remain: if=$menuIfCount case=$menuCaseCount"
 }
 
-# Session Control remains compact. Credits stays beneath Settings because an
-# eighth row would collide with the established status/divider geometry.
+# BF28 restores the original five-row Session Control screen, with Profile
+# and Settings replacing the two former manual save/load menu entries.
+# Credits remains beneath Settings.
 foreach($label in @(
     '"INITIATE NEW RECOVERY SESSION"',
     '"RETURN TO ACTIVE SITE"',
-    '"RECORD CURRENT SESSION"',
-    '"REINSTATE RECORDED SESSION"',
     '"OPERATOR PROFILE"',
     '"SETTINGS"',
     '"TERMINATE RECOVERY ENVIRONMENT"'
@@ -61,6 +60,9 @@ foreach($label in @(
     }
 }
 
+if($recovery -match '"RECORD CURRENT SESSION"|"REINSTATE RECORDED SESSION"'){
+    throw "BF28 old dedicated manual save/reinstate menu entries still appear."
+}
 if($recovery -match '"CREDITS"')
 {
     throw "Credits unexpectedly moved onto the already-full Session Control option stack."
@@ -71,7 +73,7 @@ if(
     $recovery -notmatch '48U,\s*\r?\n\s*252U,\s*\r?\n\s*544U'
 )
 {
-    throw "Session Control geometry changed; re-evaluate the seven-row hierarchy decision."
+    throw "BF28 canonical Session Control panel or row geometry changed."
 }
 
 # Settings/Profile child routes deliberately restore their parent selection.
@@ -204,5 +206,5 @@ foreach($required in @(
 }
 
 Write-Host "S4F-03 WHOLE-GAME PRESENTATION JOURNEY AUDIT: PASS"
-Write-Host "menu=7-row-session-control credits=settings-owned-replay completion-owned-back-only"
+Write-Host "menu=5-row-original-session-control credits=settings-owned-replay completion-owned-back-only"
 Write-Host "completion=canonical-menu-reset audio=silent-platform-boundary state=transient-resets-verified"

@@ -3260,7 +3260,7 @@ static void CaptureTerminalAndMenu(void)
             char path[512];
             FILE *out;
             (void)snprintf(path,sizeof(path),"%s/%s.ppm",dir,names[frame_number]);
-            out=fopen(path,"wb");
+            (void)fopen_s(&out,path,"wb");
             F144_CHECK(out!=NULL,"BF27/28 visual fixture file opens");
             if(out!=NULL)
             {

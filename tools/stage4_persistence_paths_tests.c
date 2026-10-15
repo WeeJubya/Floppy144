@@ -2602,7 +2602,7 @@ static void CaptureGreyDoorStudioMark(void)
     Floppy144PlayerVisualReset(&scene.player_visual);
     Floppy144GreyEncounterDraw(&surface,&scene);
     (void)snprintf(path,sizeof(path),"%s/bf33_grey_door.ppm",dir);
-    out=fopen(path,"wb");
+    (void)fopen_s(&out,path,"wb");
     Expect(out!=NULL,"BF33 Grey Door screenshot opens");
     if(out==NULL)return;
     (void)fprintf(out,"P6\n640 360\n255\n");

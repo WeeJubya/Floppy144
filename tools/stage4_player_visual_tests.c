@@ -618,7 +618,7 @@ static void CaptureReferenceDirections(void)
                 (void)snprintf(path,sizeof(path),"%s/bf25_type_%c_%s_%s.ppm",
                     dir,body==0U?'a':'b',labels[facing],
                     moving!=0U?"walk":"idle");
-                out=fopen(path,"wb");
+                (void)fopen_s(&out,path,"wb");
                 if(out==NULL){EXPECT(false,"open BF25 capture");continue;}
                 (void)fprintf(out,"P6\n640 360\n255\n");
                 for(y=0U;y<360U;++y)for(x=0U;x<640U;++x)

@@ -1,6 +1,6 @@
 /*
  * FLOPPY//144 public Credits. The original drawing of the studio mark is
- * shared with Grey Door; detailed River2D / GPL notices remain in the
+ * shared with the Developer office; detailed River2D / GPL notices remain in the
  * distributed LICENSE and project source/provenance documentation.
  */
 #include "floppy144_credits_view.h"
