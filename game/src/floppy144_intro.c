@@ -53,7 +53,8 @@ static void vector_draw(Floppy144Surface *s,const IntroVector *v)
          * the label reveals more detail, rather than spawning all the ink. */
         if(v->x>=0&&v->y>=0&&v->w>=40) {
             Floppy144DrawText(s,(uint32_t)v->x+3U,(uint32_t)v->y+3U,"GDR",1U,v->colour);
-            Floppy144DrawText(s,(uint32_t)v->x+3U,(uint32_t)v->y+18U,"144/233",1U,v->colour);
+            Floppy144DrawText(s,(uint32_t)v->x+3U,(uint32_t)v->y+18U,
+                v->w>=120?"DISK 144/233":"144/233",1U,v->colour);
             if(v->w>=120)
                 Floppy144DrawText(s,(uint32_t)v->x+3U,(uint32_t)v->y+33U,
                     "SITE RECOVERY DISK",1U,v->colour);
