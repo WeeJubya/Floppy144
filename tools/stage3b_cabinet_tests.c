@@ -2460,8 +2460,32 @@ static void Floppy144TestDirectoryCameraRoundTrip(void)
         projected.y+projected.height>FLOPPY144_SITE_2D_VIEWPORT_Y,
         "BF26 near camera includes the Reception Directory");
 
-    Floppy144RunStateSetPlayerSitePosition(&run,95*16,63*16);
-    image.pixels=pixels;
+    /*
+     * A raw far coordinate may occupy a sofa/table and be rejected by the
+     * strict save decoder. Search actual walkable Reception coordinates and
+     * require that the mounted fixture truly lies above the far viewport.
+     */
+    {
+        bool offscreen=false;
+        image.pixels=pixels;
+        for(y=63*16;y>=55*16 && !offscreen;y-=8)
+            for(x=97*16;x>=83*16 && !offscreen;x-=8)
+            {
+                if(Floppy144SitePositionBlocked(x,y) ||
+                   Floppy144SiteRoomAtPosition(x,y)!=FLOPPY144_ROOM_RECEPTION)
+                    continue;
+                Floppy144RunStateSetPlayerSitePosition(&run,x,y);
+                if(!Floppy144Site2DBuildCamera(
+                    FLOPPY144_ROOM_RECEPTION,&run,&image,&camera) ||
+                   !Floppy144Site2DProjectRect(&camera,directory,&projected))
+                    continue;
+                if(projected.y+projected.height<=FLOPPY144_SITE_2D_VIEWPORT_Y)
+                    offscreen=true;
+            }
+        F144_CHECK(offscreen,
+            "BF26 walkable Reception position can put Directory off-screen");
+        if(!offscreen){free(baseline);free(pixels);return;}
+    }
     Floppy144Site2DDrawForPlayerState(
         &image,&run,NULL,FLOPPY144_OPERATOR_BODY_STYLE_A,NULL);
     F144_CHECK(Floppy144SiteRectRuntimeVisible(&run,directory),
