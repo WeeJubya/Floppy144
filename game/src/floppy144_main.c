@@ -371,7 +371,10 @@ static void Floppy144Redraw(
                 global_main_menu_notice,
                 global_main_menu_notice_is_warning,
                 global_reinstate_confirmation_pending,
-                &global_main_menu_slide
+                &global_main_menu_slide,
+                Floppy144DiscoveryProfileHasOperatorName(&global_profile)
+                    ? Floppy144DiscoveryProfileOperatorName(&global_profile)
+                    : NULL
             );
 
             break;

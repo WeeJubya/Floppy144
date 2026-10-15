@@ -105,5 +105,6 @@ void Floppy144MainMenuDrawSliding(
     const char *menu_notice,
     bool menu_notice_is_warning,
     bool reinstate_confirmation,
-    const Floppy144MainMenuSlide *slide
+    const Floppy144MainMenuSlide *slide,
+    const char *operator_name
 );

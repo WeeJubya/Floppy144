@@ -132,7 +132,7 @@ static uint32_t SlideFrame(Floppy144MainMenuSlide *slide,
     memset(screen,0,sizeof(screen));
     Floppy144MainMenuDrawSliding(&surface,
         FLOPPY144_MAIN_MENU_OPERATOR_PROFILE,
-        true,true,NULL,NULL,NULL,NULL,false,false,slide);
+        true,true,NULL,NULL,NULL,NULL,false,false,slide,NULL);
     result=PixelHash(screen,TEST_PIXEL_COUNT);
     if(filename!=NULL&&dir!=NULL&&dir[0]!='\0')
     {
@@ -196,6 +196,50 @@ static void TestMenuSlide(void)
     Expect(!slide.animating&&!slide.save_load_visible,
         "new menu session resets to original five rows");
 }
+/* Verify the ACCOUNT field renders guest when no persisted operator is
+ * assigned, changes for a named profile, and uses the same main panel. */
+static uint32_t AccountFrame(const char *operator_name,
+    const char *file_name)
+{
+    static uint32_t pixels[TEST_PIXEL_COUNT];
+    Floppy144Surface surface={pixels,TEST_WIDTH,TEST_HEIGHT};
+    const char *capture=getenv("F144_BF28_SLIDE_CAPTURE_DIR");
+    uint32_t x,y;
+    Floppy144MainMenuSlide slide;
+    Floppy144MainMenuSlideReset(&slide);
+    Floppy144MainMenuDrawSliding(&surface,
+        FLOPPY144_MAIN_MENU_INITIATE_SESSION,false,false,
+        NULL,NULL,NULL,NULL,false,false,&slide,operator_name);
+    if(capture!=NULL&&capture[0]!='\0')
+    {
+        char path[512];
+        FILE *out=NULL;
+        (void)snprintf(path,sizeof(path),"%s/%s.ppm",capture,file_name);
+        if(fopen_s(&out,path,"wb")!=0||out==NULL)
+            Expect(0,"BF28 account capture opened");
+        else
+        {
+            (void)fprintf(out,"P6\n640 360\n255\n");
+            for(y=0U;y<360U;++y)for(x=0U;x<640U;++x)
+            {
+                uint32_t pixel=pixels[y*640U+x];
+                (void)fputc((int)((pixel>>16U)&255U),out);
+                (void)fputc((int)((pixel>>8U)&255U),out);
+                (void)fputc((int)(pixel&255U),out);
+            }
+            (void)fclose(out);
+        }
+    }
+    return PixelHash(pixels,TEST_PIXEL_COUNT);
+}
+static void TestMenuAccount(void)
+{
+    uint32_t guest=AccountFrame(NULL,"bf28_guest_account");
+    uint32_t empty=AccountFrame("","bf28_blank_account");
+    uint32_t named=AccountFrame("WEEJUBYA","bf28_named_account");
+    Expect(guest==empty,"missing or empty operator uses GUEST");
+    Expect(guest!=named,"persistent name changes menu ACCOUNT presentation");
+}
 int main(void)
 {
     Floppy144RunState restored;
@@ -255,6 +299,7 @@ int main(void)
         FLOPPY144_MAIN_MENU_TERMINATE,
         "Terminate never changes on slide");
     TestMenuSlide();
+    TestMenuAccount();
 
     no_save_hash=DrawMenu(
         false,

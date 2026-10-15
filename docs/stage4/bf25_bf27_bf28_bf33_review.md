@@ -67,3 +67,25 @@ checks pixel-perfect restoration of the default five-row frame, eligibility
 and action mapping; Stage 4F input-flow audit verifies real routing and that
 obsolete shortcut code was removed. Windows capture workflow records
 four static/intermediate animation frames for manual visual sign-off.
+
+## BF28 final screenshot alignment and identity
+
+The supplied 1280×752 screenshot establishes the visual spacing at 2× game
+resolution (excluding the native title bar). Main menu rows now begin at
+Y=187 (formerly 170) with a 17px pitch (formerly 12), leaving the five
+selection positions and Left/Right animation mapping unchanged. A fourth
+metadata line `ACCOUNT:` is drawn at Y=158 directly after the existing
+`PROTOCOL` line, with the current named operator from persistent discovery
+profile or `GUEST` when no name is assigned. This field is presentation-only;
+it never modifies or stores profile data.
+
+The metadata divider moves to Y=180, the menu/status divider to Y=266,
+status to Y=280, capacity to Y=298 and progress bar to Y=316. The outer panel
+extends to Y=350, so the instruction footer at Y=340 (common formal footer
+minus 6px) sits inside the panel's bottom border. These are intentional
+screenshot-layout corrections; unchanged parts keep their original positions.
+
+Disabled choices use only the original muted colour and continue to be skipped
+by normal Up/Down navigation. The redundant right-aligned `UNAVAILABLE`
+suffix was removed, including from Save/Load slide states. The existing
+confirmation overlay and restore progress behaviours remain in place.

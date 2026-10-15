@@ -213,7 +213,8 @@ void Floppy144MainMenuDrawSliding(
     const char *menu_notice,
     bool menu_notice_is_warning,
     bool reinstate_confirmation,
-    const Floppy144MainMenuSlide *slide
+    const Floppy144MainMenuSlide *slide,
+    const char *operator_name
 )
 {
     const uint32_t background =
@@ -261,6 +262,9 @@ void Floppy144MainMenuDrawSliding(
 
         char session_status[80];
         char reconstruction_text[64];
+        const char *account_name =
+            operator_name != NULL && operator_name[0] != '\0'
+                ? operator_name : "GUEST";
 
     const char *status_text;
     uint32_t status_colour;
@@ -396,7 +400,7 @@ void Floppy144MainMenuDrawSliding(
         24U,
         28U,
         592U,
-        306U,
+        322U,
         panel
     );
 
@@ -405,7 +409,7 @@ void Floppy144MainMenuDrawSliding(
         24U,
         28U,
         592U,
-        306U,
+        322U,
         border
     );
 
@@ -488,10 +492,28 @@ void Floppy144MainMenuDrawSliding(
         amber
     );
 
+    Floppy144DrawText(
+        &surface,
+        56U,
+        158U,
+        "ACCOUNT:",
+        1U,
+        muted
+    );
+
+    Floppy144DrawText(
+        &surface,
+        196U,
+        158U,
+        account_name,
+        1U,
+        text
+    );
+
     Floppy144DrawFillRect(
         &surface,
         48U,
-        160U,
+        180U,
         544U,
         1U,
         border
@@ -500,7 +522,7 @@ void Floppy144MainMenuDrawSliding(
     Floppy144DrawText(
         &surface,
         56U,
-        264U,
+        280U,
         status_text,
         1U,
         status_colour
@@ -509,7 +531,7 @@ void Floppy144MainMenuDrawSliding(
     Floppy144DrawText(
         &surface,
         56U,
-        282U,
+        298U,
         reconstruction_text,
         1U,
         text
@@ -518,7 +540,7 @@ void Floppy144MainMenuDrawSliding(
     Floppy144DrawFillRect(
         &surface,
         56U,
-        300U,
+        316U,
         528U,
         14U,
         panel_dark
@@ -527,7 +549,7 @@ void Floppy144MainMenuDrawSliding(
     Floppy144DrawRect(
         &surface,
         56U,
-        300U,
+        316U,
         528U,
         14U,
         border
@@ -536,7 +558,7 @@ void Floppy144MainMenuDrawSliding(
     Floppy144DrawFillRect(
         &surface,
         59U,
-        303U,
+        319U,
         progress_width,
         8U,
         green
@@ -545,7 +567,7 @@ void Floppy144MainMenuDrawSliding(
     Floppy144DrawFillRect(
         &surface,
         48U,
-        252U,
+        266U,
         544U,
         1U,
         border
@@ -576,8 +598,8 @@ void Floppy144MainMenuDrawSliding(
             option == selected_option;
 
         uint32_t row_y =
-            170U +
-            option_index * 12U;
+            187U +
+            option_index * 17U;
 
         uint32_t label_width =
             Floppy144DrawTextWidth(
@@ -641,22 +663,13 @@ void Floppy144MainMenuDrawSliding(
             );
         }
 
-        if(!enabled && (slide==NULL || !slide->animating))
-        {
-            Floppy144DrawText(
-                &surface,
-                514U,
-                row_y,
-                "UNAVAILABLE",
-                1U,
-                muted
-            );
-        }
+        /* Disabled options remain grey and unselectable; no redundant
+         * text is appended, including while the two rows slide. */
     }
 
     Floppy144RecoveryTextCentred(
         &surface,
-        FLOPPY144_UI_FORMAL_FOOTER_Y,
+        FLOPPY144_UI_FORMAL_FOOTER_Y - 6U,
         "UP/DOWN SELECT   LEFT/RIGHT SWITCH   ENTER CONFIRM",
         1U,
         muted
@@ -838,5 +851,5 @@ void Floppy144MainMenuDraw(
     Floppy144MainMenuDrawSliding(runtime,selected_option,active_session,
         recorded_session_available,run_state,recorded_run_state,
         persistence_warning,menu_notice,menu_notice_is_warning,
-        reinstate_confirmation,NULL);
+        reinstate_confirmation,NULL,NULL);
 }

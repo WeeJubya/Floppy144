@@ -73,8 +73,8 @@ if($recovery -match '"CREDITS"')
 }
 
 if(
-    $recovery -notmatch '170U\s*\+\s*\r?\n\s*option_index\s*\*\s*12U' -or
-    $recovery -notmatch '48U,\s*\r?\n\s*252U,\s*\r?\n\s*544U'
+    $recovery -notmatch '187U\s*\+\s*\r?\n\s*option_index\s*\*\s*17U' -or
+    $recovery -notmatch '48U,\s*\r?\n\s*266U,\s*\r?\n\s*544U'
 )
 {
     throw "BF28 canonical Session Control panel or row geometry changed."
@@ -116,7 +116,7 @@ foreach($required in @(
     }
 }
 if($recovery -notmatch 'LEFT/RIGHT SWITCH' -or
-   $recovery -notmatch 'option_index\s*\*\s*12U' -or
+   $recovery -notmatch 'option_index\s*\*\s*17U' -or
    $recovery -notmatch 'option_index==2U\|\|option_index==3U'){
     throw "BF28 carousel leaked beyond two existing fixed row slots"
 }
@@ -125,6 +125,20 @@ if($main -match 'global_main_menu_shortcut'){
 }
 if($main -notmatch 'Floppy144MainMenuActivate\(window,global_main_menu_option\)'){
     throw "BF28 difficulty Initiate route no longer executes the active menu action"
+}
+
+# BF28 screenshot geometry: room for ACCOUNT plus 17px menu row pitch;
+# the footer sits within the expanded outer panel. Disabled labels are grey.
+foreach($required in @('"ACCOUNT:"', '"GUEST"', 'FLOPPY144_UI_FORMAL_FOOTER_Y - 6U')){
+    if($recovery -notmatch [regex]::Escape($required)){
+        throw "BF28 requested account/footer presentation missing: $required"
+    }
+}
+if($recovery -match '"UNAVAILABLE"'){
+    throw "BF28 no longer displays UNAVAILABLE after disabled choices."
+}
+if($main -notmatch 'Floppy144DiscoveryProfileOperatorName\(&global_profile\)'){
+    throw "BF28 ACCOUNT no longer receives the live operator profile."
 }
 
 # Settings/Profile child routes deliberately restore their parent selection.
