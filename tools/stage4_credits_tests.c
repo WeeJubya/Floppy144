@@ -58,17 +58,12 @@ int main(void)
     for(i=0U;i<640U*360U;++i){if(pixels[i]!=0U){nonzero=1;break;}}
 
     Expect(nonzero,"credits screen renders");
-    Expect(Floppy144CreditsViewLineCount()==10U,"credits remain one compact page");
-    Expect(Floppy144CreditsViewMaxLineWidth()<=504U,"credit lines fit panel");
-    Expect(Contains("GREY DOOR REPUBLIK"),"company credit");
-    Expect(!Contains("GREY DOOR REPUBLIC"),"obsolete Grey Door spelling absent");
-    Expect(Contains("WEEJUBYA"),"designer/developer credit");
-    Expect(Contains("RIVER2D-DERIVED"),"River2D lineage");
-    Expect(Contains("BADACRONYM"),"River2D copyright holder");
-    Expect(Contains("GNU GENERAL PUBLIC LICENSE VERSION 3"),"GPLv3 notice");
-    Expect(Contains("REDISTRIBUTED UNDER GNU GPL V3 TERMS"),"redistribution notice");
-    Expect(Contains("LICENSE"),"full licence reference");
-    Expect(Contains("NO WARRANTY"),"no-warranty notice");
+    Expect(Floppy144CreditsViewLineCount()==1U,"copyright-only public credits");
+    Expect(Floppy144CreditsViewMaxLineWidth()<=504U,"copyright line fits");
+    Expect(Contains("(C) MMXXVI"),"Roman numeral copyright");
+    Expect(!Contains("RUNTIME ACKNOWLEDGEMENT"),"no runtime exposition");
+    Expect(!Contains("GAME DESIGN COMPANY"),"no old studio tag");
+    Expect(!Contains("MAIN DESIGNER"),"no old designer tag");
     Expect(
         strcmp(
             Floppy144CreditsViewFooter(true),
