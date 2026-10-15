@@ -2582,6 +2582,40 @@ static void TestBF19InspectionSettings(const char *root)
         "BF19 malformed toggle normalizes to OFF");
 }
 
+
+/* BF33: capture actual secret-office framebuffer, including the same GDR
+ * procedural logo renderer as the standard Credits. */
+static void CaptureGreyDoorStudioMark(void)
+{
+    const char *dir=getenv("F144_BF33_CAPTURE_DIR");
+    static uint32_t pixels[640U*360U];
+    Floppy144Surface surface={pixels,640U,360U};
+    Floppy144GreyEncounter scene;
+    char path[512];
+    FILE *out;
+    uint32_t x,y;
+    if(dir==NULL||dir[0]=='\0')return;
+    memset(&scene,0,sizeof(scene));
+    scene.phase=(uint8_t)FLOPPY144_GREY_EXPLORE;
+    scene.local_x=115;scene.local_y=264;
+    scene.body_style=FLOPPY144_OPERATOR_BODY_STYLE_A;
+    Floppy144PlayerVisualReset(&scene.player_visual);
+    Floppy144GreyEncounterDraw(&surface,&scene);
+    (void)snprintf(path,sizeof(path),"%s/bf33_grey_door.ppm",dir);
+    out=fopen(path,"wb");
+    Expect(out!=NULL,"BF33 Grey Door screenshot opens");
+    if(out==NULL)return;
+    (void)fprintf(out,"P6\n640 360\n255\n");
+    for(y=0U;y<360U;++y)for(x=0U;x<640U;++x)
+    {
+        uint32_t pixel=pixels[y*640U+x];
+        (void)fputc((int)((pixel>>16U)&255U),out);
+        (void)fputc((int)((pixel>>8U)&255U),out);
+        (void)fputc((int)(pixel&255U),out);
+    }
+    (void)fclose(out);
+}
+
 int main(void)
 {
     const char *root=getenv("F144_TEST_ROOT");
@@ -2618,6 +2652,7 @@ int main(void)
     TestGreyDoorDiscovery(root);
     TestGreyDoorPlacement(root);
     TestGreyEncounter(root);
+    CaptureGreyDoorStudioMark();
     TestGreyDoorOneShotLifecycle(root);
     TestStage4GCompleteJourney(root);
     TestStage4HInspection(root);

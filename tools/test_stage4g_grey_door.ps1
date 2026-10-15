@@ -43,7 +43,7 @@ Require $main 'FLOPPY144_SCREEN_GREY_ENCOUNTER' 'Transient encounter screen miss
 Require $main 'Floppy144GreyEncounterBegin' 'Access does not open the encounter.'
 Require $main 'Floppy144GreyEncounterFinished' 'Return cleanup missing.'
 Require $main 'global_screen == FLOPPY144_SCREEN_GREY_ENCOUNTER' 'Autosave suppression missing.'
-Require $encounter '"GREY DOOR REPUBLIK"' 'Office sign missing.'
+Require $encounter 'Floppy144BrandLogoDraw(' 'Shared procedural studio sign missing.'
 Require $encounter 'DEVELOPER_INSPECT_RADIUS 24' 'Developer inspection must use close range.'
 Require $encounter 'Floppy144PlayerVisualDraw(' 'Shared player renderer not used.'
 Require $encounter 'Floppy144PlayerVisualDrawDeveloper(' 'Developer does not share the vector character construction.'

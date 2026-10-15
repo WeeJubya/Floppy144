@@ -1,5 +1,7 @@
 #include "floppy144_credits_view.h"
+#define _CRT_SECURE_NO_WARNINGS 1
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 static int failures;
@@ -29,6 +31,30 @@ int main(void)
 
     memset(pixels,0,sizeof(pixels));
     Floppy144CreditsViewDraw(&surface,true);
+    {
+        const char *dir=getenv("F144_BF33_CAPTURE_DIR");
+        if(dir!=NULL&&dir[0]!='\0')
+        {
+            char path[512];
+            uint32_t x,y;
+            FILE *out;
+            (void)snprintf(path,sizeof(path),"%s/bf33_credits.ppm",dir);
+            out=fopen(path,"wb");
+            Expect(out!=NULL,"Credits screenshot can be opened");
+            if(out!=NULL)
+            {
+                (void)fprintf(out,"P6\n640 360\n255\n");
+                for(y=0U;y<360U;++y)for(x=0U;x<640U;++x)
+                {
+                    uint32_t pixel=pixels[y*640U+x];
+                    (void)fputc((int)((pixel>>16U)&255U),out);
+                    (void)fputc((int)((pixel>>8U)&255U),out);
+                    (void)fputc((int)(pixel&255U),out);
+                }
+                (void)fclose(out);
+            }
+        }
+    }
     for(i=0U;i<640U*360U;++i){if(pixels[i]!=0U){nonzero=1;break;}}
 
     Expect(nonzero,"credits screen renders");

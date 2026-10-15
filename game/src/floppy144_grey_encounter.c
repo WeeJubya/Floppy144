@@ -5,6 +5,7 @@
 #include "floppy144_grey_encounter.h"
 #include "floppy144_grey_door.h"
 #include "floppy144_player_visual.h"
+#include "floppy144_brand_logo.h"
 #include "floppy144_site.h"
 #include "floppy144_site_2d_camera.h"
 #include <stddef.h>
@@ -281,7 +282,8 @@ static void Office(Floppy144Surface *s,const Floppy144GreyEncounter *scene)
         FILL(s,0,i,640,1,RGB(166,178,184));
     FILL(s,25,26,590,56,RGB(242,246,243));
     Floppy144DrawRect(s,25,26,590,56,RGB(179,193,196));
-    Floppy144DrawText(s,94,41,"GREY DOOR REPUBLIK",2U,RGB(35,61,73));
+    /* Same reference-accurate vector studio mark as the Credits screen. */
+    Floppy144BrandLogoDraw(s,178U,29U,285U,49U);
     FILL(s,74,76,491,2,RGB(73,151,166));
     /* Windows glow, architectural light bands. */
     FILL(s,34,97,178,97,RGB(121,185,199));

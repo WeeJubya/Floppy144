@@ -10,7 +10,9 @@
 #include "floppy144_site.h"
 #include "floppy144_site_2d_camera.h"
 
+#define _CRT_SECURE_NO_WARNINGS 1
 #include <stdbool.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -582,8 +584,56 @@ static void TestViewportClipping(void)
     );
 }
 
+
+/* Real framebuffer fixtures for direct comparison against both user-supplied
+ * Characters(1).pptx slide images, never substitute artwork. */
+static void CaptureReferenceDirections(void)
+{
+    const char *dir=getenv("F144_BF25_CAPTURE_DIR");
+    const char *labels[]={"front","right","rear","left"};
+    uint32_t body,facing,moving,y,x;
+    if(dir==NULL||dir[0]=='\0')return;
+    for(body=0U;body<2U;++body)
+        for(facing=0U;facing<4U;++facing)
+            for(moving=0U;moving<2U;++moving)
+            {
+                Floppy144PlayerVisualState state;
+                Floppy144Surface surface={g_pixels,TEST_WIDTH,TEST_HEIGHT};
+                char path[512];
+                FILE *out;
+                Floppy144PlayerVisualReset(&state);
+                state.facing=(uint8_t)(facing==0U?
+                    FLOPPY144_PLAYER_FACING_DOWN:facing==1U?
+                    FLOPPY144_PLAYER_FACING_RIGHT:facing==2U?
+                    FLOPPY144_PLAYER_FACING_UP:FLOPPY144_PLAYER_FACING_LEFT);
+                state.moving=(uint8_t)moving;
+                state.walk_frame=(uint8_t)moving;
+                Floppy144DrawClear(&surface,FLOPPY144_RGB(249,249,248));
+                Floppy144PlayerVisualDraw(
+                    &surface,320,310,122,260,36,
+                    body==0U?FLOPPY144_OPERATOR_BODY_STYLE_A:
+                        FLOPPY144_OPERATOR_BODY_STYLE_B,
+                    &state,0,0,640,360
+                );
+                (void)snprintf(path,sizeof(path),"%s/bf25_type_%c_%s_%s.ppm",
+                    dir,body==0U?'a':'b',labels[facing],
+                    moving!=0U?"walk":"idle");
+                out=fopen(path,"wb");
+                if(out==NULL){EXPECT(false,"open BF25 capture");continue;}
+                (void)fprintf(out,"P6\n640 360\n255\n");
+                for(y=0U;y<360U;++y)for(x=0U;x<640U;++x)
+                {
+                    uint32_t pixel=g_pixels[y*640U+x];
+                    (void)fputc((int)((pixel>>16U)&255U),out);
+                    (void)fputc((int)((pixel>>8U)&255U),out);
+                    (void)fputc((int)(pixel&255U),out);
+                }
+                (void)fclose(out);
+            }
+}
 int main(void)
 {
+    CaptureReferenceDirections();
     TestDirectionAndIdle();
     TestQuickDirectionTransitions();
     TestAnimation();

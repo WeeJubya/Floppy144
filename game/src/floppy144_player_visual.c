@@ -365,9 +365,9 @@ static F144Costume f144OfficeCostume(Floppy144OperatorBodyStyle style) {
     return c;
 }
 static void f144DrawLeg(RenderBuffer *b, float hipx, float hipy,
-                        float stride, float lift, float scale, const F144Costume *c) {
+                        float stride, float lift, float bob, float scale, const F144Costume *c) {
     float kneeX=hipx+stride*.45f, footX=hipx+stride;
-    float kneeY=hipy+scale*12.f-lift*.4f, footY=hipy+scale*25.f-lift;
+    float kneeY=hipy+scale*12.f-lift*.4f, footY=hipy+scale*25.f-lift-bob;
     /* The skirt figure uses visible skin-coloured calves, not black trousers. */
     f144CapsuleAdd(b,hipx,hipy,kneeX,kneeY,scale*4.8f,c->trousers);
     f144CapsuleAdd(b,kneeX,kneeY,footX,footY,scale*4.4f,c->trousers);
@@ -375,8 +375,8 @@ static void f144DrawLeg(RenderBuffer *b, float hipx, float hipy,
 }
 static void f144DrawArm(RenderBuffer *b, float sx, float sy, float swing,
                         float scale, const F144Costume *c) {
-    float elbowX=sx+swing*.55f, elbowY=sy+scale*9.f;
-    float handX=sx+swing, handY=sy+scale*18.f-f144Positive(-swing)*.12f;
+    float elbowX=sx+swing*1.05f, elbowY=sy+scale*8.f;
+    float handX=sx+swing*.78f, handY=sy+scale*18.f;
     f144CapsuleAdd(b,sx,sy,elbowX,elbowY,scale*4.5f,c->cloth);
     f144CapsuleAdd(b,elbowX,elbowY,handX,handY-scale*2.f,scale*3.5f,c->cloth);
     f144AddCircle(b,f144Vec(handX,handY),scale*2.f,c->skin);
@@ -417,9 +417,9 @@ static void f144BuildOfficeCharacter(RenderBuffer *b, float cx, float footY,
          */
         float rearShoulderX=cx-direction*scale*2.f;
         float nearShoulderX=cx+direction*scale*2.f;
-        f144DrawLeg(b,hipX-direction*scale,hip,-stride,liftB,scale,c);
-        f144DrawLeg(b,hipX+direction*scale,hip,stride,liftA,scale,c);
-        f144DrawArm(b,rearShoulderX,shoulders,-hand,scale,c);
+        f144DrawLeg(b,hipX-direction*scale,hip,-stride,liftB,bob,scale,c);
+        f144DrawLeg(b,hipX+direction*scale,hip,stride,liftA,bob,scale,c);
+        f144DrawArm(b,rearShoulderX,shoulders,-direction*scale*5.f-hand,scale,c);
         f144CapsuleAdd(b,cx,shoulders,cx+sway*.3f,hip,torsoDiameter*.72f,c->cloth);
         f144CapsuleAdd(b,cx,hip,cx,hip+scale*2.f,scale*8.f,c->cloth);
         if(c->flags&F144_COSTUME_SKIRT) {
@@ -428,15 +428,15 @@ static void f144BuildOfficeCharacter(RenderBuffer *b, float cx, float footY,
             f144CapsuleAdd(b,cx,hip+scale*9.f,cx,hip+scale*11.f,scale*14.f,c->cloth);
         }
         /* The sleeve begins within the torso silhouette: no shoulder patch. */
-        f144DrawArm(b,nearShoulderX,shoulders,hand,scale,c);
+        f144DrawArm(b,nearShoulderX,shoulders,direction*scale*5.f+hand,scale,c);
     } else {
         float leftShoulder=cx-shoulderWidth;
         float rightShoulder=cx+shoulderWidth;
-        f144DrawLeg(b,hipX-scale*3.f,hip,stride*.42f,liftA,scale,c);
-        f144DrawLeg(b,hipX+scale*3.f,hip,-stride*.42f,liftB,scale,c);
+        f144DrawLeg(b,hipX-scale*3.f,hip,stride*.42f,liftA,bob,scale,c);
+        f144DrawLeg(b,hipX+scale*3.f,hip,-stride*.42f,liftB,bob,scale,c);
         /* Direct, overlapping sleeve-to-torso joints for both body styles. */
-        f144DrawArm(b,leftShoulder,shoulders,-scale*1.5f+hand*.22f,scale,c);
-        f144DrawArm(b,rightShoulder,shoulders,scale*1.5f-hand*.22f,scale,c);
+        f144DrawArm(b,leftShoulder,shoulders,-scale*6.f+hand*.22f,scale,c);
+        f144DrawArm(b,rightShoulder,shoulders,scale*6.f-hand*.22f,scale,c);
         f144CapsuleAdd(b,cx,shoulders,cx+sway*.3f,hip,torsoDiameter,c->cloth);
         if(c->flags&F144_COSTUME_SKIRT)
             f144CapsuleAdd(b,cx,hip,cx,hip+scale*10.f,scale*15.f,c->cloth);
@@ -469,8 +469,9 @@ static void f144BuildOfficeCharacter(RenderBuffer *b, float cx, float footY,
                        cx-scale*8.f,headY+scale*9.f,scale*2.f,c->hair);
     }
     f144AddCircle(b,f144Vec(cx,headY),scale*8.f,c->skin);
-    if((c->flags&F144_COSTUME_LONG_HAIR) && !back) {
-        /* Bright-blue scarf follows the neck, with one loose pointed end. */
+    if((c->flags&F144_COSTUME_LONG_HAIR) && !profile) {
+        /* Both front and rear have the reference's bright cyan scarf.
+         * It stays behind the silhouette in the side projections. */
         f144CapsuleAdd(b,cx-scale*5.f,headY+scale*9.f,
                        cx+scale*5.f,headY+scale*9.f,scale*4.5f,c->accent);
         f144CapsuleAdd(b,cx+scale*4.f,headY+scale*9.f,

@@ -4935,7 +4935,7 @@ void Floppy144TerminalDraw(
     Floppy144DrawRect(&surface, 10U, 18U, 620U, 280U, border);
     Floppy144TerminalTextCentred(
         &surface,
-        42U,
+        35U,
         "GDR ARCHIVE RECOVERY TERMINAL",
         2U,
         bright
@@ -5069,6 +5069,37 @@ void Floppy144TerminalDraw(
                 5U,
                 8U,
                 bright
+            );
+        }
+
+        /*
+         * BF27: show the actual current default on the opposite lower edge.
+         * It belongs to terminal state, not a guessed collection code. Use a
+         * separate text baseline from command input/cursor: even a full 80
+         * character command can never visually overwrite the indicator.
+         */
+        {
+            char default_text[48];
+            const Floppy144CollectionDefinition *default_collection=NULL;
+            if(terminal->default_record_collection_valid &&
+               (uint32_t)terminal->default_record_collection <
+                   (uint32_t)FLOPPY144_COLLECTION_COUNT)
+            {
+                default_collection=Floppy144CollectionGet(
+                    terminal->default_record_collection
+                );
+            }
+            (void)snprintf(
+                default_text,sizeof(default_text),
+                "DEFAULT: %s",
+                default_collection!=NULL && default_collection->code!=NULL
+                    ? default_collection->code : "NONE"
+            );
+            Floppy144DrawText(
+                &surface,
+                608U-Floppy144DrawTextWidth(default_text,1U),
+                uPromptY == 274U ? 287U : 255U,
+                default_text,1U,muted
             );
         }
     }

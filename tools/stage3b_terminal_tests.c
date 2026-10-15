@@ -15,7 +15,9 @@
 #include "floppy144_terminal.h"
 #include "floppy144_world.h"
 
+#define _CRT_SECURE_NO_WARNINGS 1
 #include <stdbool.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -3214,8 +3216,79 @@ static void Floppy144TestGreyDoorOrphanTerminalRoute(void)
         "the normal document-open event enables the door without capacity cost");
 }
 
+
+/* BF27/BF28: actual renderer pixels prove that the authoritative collection
+ * controls its footer and cannot disturb the opposite command input area. */
+static void CaptureTerminalAndMenu(void)
+{
+    Floppy144WorldState world;
+    Floppy144RunState run;
+    Floppy144TerminalState terminal;
+    Floppy144Surface surface;
+    static uint32_t frame[640U*360U];
+    uint32_t x,y,none_hash=2166136261U,default_hash=2166136261U;
+    const char *dir=getenv("F144_BF27_BF28_CAPTURE_DIR");
+    const char *names[]={"bf27_terminal_none","bf27_terminal_dr01","bf28_main_menu"};
+    uint32_t frame_number;
+    Floppy144WorldReset(&world);
+    Floppy144RunStateBegin(&run,123U);
+    (void)Floppy144WorldInitialiseArchiveServices(&world);
+    (void)Floppy144RunStateInitialiseArchiveServices(&run);
+    Floppy144TerminalReset(&terminal,&world);
+    surface.pixels=frame;surface.width=640U;surface.height=360U;
+    for(frame_number=0U;frame_number<3U;++frame_number)
+    {
+        if(frame_number==0U)terminal.default_record_collection_valid=false;
+        if(frame_number==1U)
+        {
+            terminal.default_record_collection=FLOPPY144_COLLECTION_DR01;
+            terminal.default_record_collection_valid=true;
+        }
+        if(frame_number!=2U)
+            Floppy144TerminalDraw(&surface,&terminal,&run);
+        else
+            Floppy144MainMenuDraw(&surface,FLOPPY144_MAIN_MENU_OPERATOR_PROFILE,
+                false,false,&run,NULL,NULL,NULL,false,false);
+        if(frame_number<2U)
+            for(y=276U;y<296U;++y)for(x=515U;x<608U;++x)
+            {
+                if(frame_number==0U){none_hash^=frame[y*640U+x];none_hash*=16777619U;}
+                else {default_hash^=frame[y*640U+x];default_hash*=16777619U;}
+            }
+        if(dir!=NULL&&dir[0]!='\0')
+        {
+            char path[512];
+            FILE *out;
+            (void)snprintf(path,sizeof(path),"%s/%s.ppm",dir,names[frame_number]);
+            out=fopen(path,"wb");
+            F144_CHECK(out!=NULL,"BF27/28 visual fixture file opens");
+            if(out!=NULL)
+            {
+                (void)fprintf(out,"P6\n640 360\n255\n");
+                for(y=0U;y<360U;++y)for(x=0U;x<640U;++x)
+                {
+                    uint32_t pixel=frame[y*640U+x];
+                    (void)fputc((int)((pixel>>16U)&255U),out);
+                    (void)fputc((int)((pixel>>8U)&255U),out);
+                    (void)fputc((int)(pixel&255U),out);
+                }
+                (void)fclose(out);
+            }
+        }
+    }
+    F144_CHECK(none_hash!=default_hash,
+        "BF27 active default DR-01 visibly differs from NONE");
+    F144_CHECK(Floppy144MainMenuOptionEnabled(
+        FLOPPY144_MAIN_MENU_OPERATOR_PROFILE,false,false) &&
+        Floppy144MainMenuOptionEnabled(
+        FLOPPY144_MAIN_MENU_SETTINGS,false,false) &&
+        FLOPPY144_MAIN_MENU_OPTION_COUNT==5,
+        "BF28 exactly five original menu rows and existing Profile/Settings actions");
+}
+
 int main(void)
 {
+    CaptureTerminalAndMenu();
     Floppy144TestFm18SuppressionRecordRestoresServerPanel();
     Floppy144TestAvailableRecoveryAndAutomaticCompletion();
     Floppy144TestStaleEvidenceSaveRecovery();

@@ -1,0 +1,54 @@
+name: BF25 BF27 BF28 BF33 Characters and Interfaces
+
+on:
+  push:
+    branches:
+      - development/Stage-4
+  workflow_dispatch:
+
+jobs:
+  visual-and-behavioural-regression:
+    runs-on: windows-2022
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure MSVC x64
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Regenerate canonical runtime tables
+        shell: pwsh
+        run: .\tools\build_game_data.ps1
+      - name: Export Type A/B directional character reference frames
+        shell: pwsh
+        run: |
+          $dir=Join-Path $env:RUNNER_TEMP "bf25-33-captures"
+          New-Item -ItemType Directory -Force -Path $dir | Out-Null
+          $env:F144_BF25_CAPTURE_DIR=$dir
+          .\tools\test_stage4_player_visual.ps1
+      - name: Verify terminal/default, menu and complete Stage 3B regressions
+        shell: pwsh
+        run: |
+          $env:F144_BF27_BF28_CAPTURE_DIR=Join-Path $env:RUNNER_TEMP "bf25-33-captures"
+          .\tools\test_stage3b.ps1
+      - name: Verify Credits render, intro controls and licensing audit
+        shell: pwsh
+        run: |
+          $env:F144_BF33_CAPTURE_DIR=Join-Path $env:RUNNER_TEMP "bf25-33-captures"
+          .\tools\test_stage4_credits.ps1
+          .\tools\test_stage4c_integration.ps1
+          .\tools\test_stage4f_presentation_journey.ps1
+      - name: Verify secret Developer office, save schema and shared logo
+        shell: pwsh
+        run: |
+          $env:F144_BF33_CAPTURE_DIR=Join-Path $env:RUNNER_TEMP "bf25-33-captures"
+          .\tools\test_stage4_persistence.ps1
+          .\tools\test_stage4g_grey_door.ps1
+      - name: Upload authentic software-rendered screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bf25-bf27-bf28-bf33-visual-reference-frames
+          path: ${{ runner.temp }}/bf25-33-captures/*.ppm
+          if-no-files-found: ignore

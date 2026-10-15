@@ -164,10 +164,8 @@ if(
 
 foreach($required in @(
     'BACKSPACE BACK',
-    'GREY DOOR REPUBLIK',
-    'WEEJUBYA',
-    'RIVER2D-DERIVED',
-    'GNU GENERAL PUBLIC LICENSE VERSION 3'
+    '(C) MMXXVI',
+    'Floppy144BrandLogoDraw'
 ))
 {
     if($credits -notmatch [regex]::Escape($required))
@@ -317,6 +315,7 @@ $sources = @(
     (Join-Path $sourceDir "floppy144_settings_view.c"),
     (Join-Path $sourceDir "floppy144_timing.c"),
     (Join-Path $sourceDir "floppy144_credits_view.c"),
+    (Join-Path $sourceDir "floppy144_brand_logo.c"),
     (Join-Path $sourceDir "floppy144_completion_view.c")
 )
 
