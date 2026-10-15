@@ -90,6 +90,35 @@ Compare ORIGINAL/A/B at 0.3, 0.6 and 1.0 SFX levels, with both music playing
 and muted. Check rapid playback under the four bounded waveOut buffers; no
 queue enlargement is proposed.
 
+### Actual Windows-generated waveform snapshot
+
+These numbers were produced from the existing procedural C generator at a fixed
+80% SFX output level and reference seed, **not** from a listening session.
+`difference-energy ratio` is a unitless adjacent-sample roughness proxy.
+
+| Footstep variant | Duration | Peak dBFS | RMS dBFS | Difference-energy ratio | Heel 0–32 ms | Sole 32–72 ms | Tail 72–end |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Original | 107.94 ms | -24.67 | -36.24 | 0.201863 | -32.88 dBFS | -36.87 dBFS | -45.52 dBFS |
+| A / heel 0 | 104.94 ms | -24.86 | -35.86 | 0.001587 | -31.75 dBFS | -38.49 dBFS | -50.84 dBFS |
+| A / heel 1 | 104.94 ms | -24.55 | -36.03 | 0.001677 | -31.83 dBFS | -39.10 dBFS | -50.93 dBFS |
+| B / heel 0 | 104.94 ms | -25.81 | -36.99 | 0.004299 | -32.86 dBFS | -39.66 dBFS | -53.19 dBFS |
+| B / heel 1 | 104.94 ms | -25.39 | -37.15 | 0.004241 | -32.91 dBFS | -40.32 dBFS | -52.91 dBFS |
+
+A's early heel is **6.7 dB** stronger than the subsequent sole RMS window
+and the tail is another **12.4 dB** down. Its difference-energy ratio is
+approximately **127 times lower** than Original. Both feet differ subtly while
+remaining similar in overall level. These objectively support a dark
+heel-first cue, but the unusually large loss of high-frequency activity
+could make A resemble *two low musical notes* rather than a footfall.
+**First choice A remains explicitly provisional** pending listening. B is
+a fallback if a little more retro texture is needed; request a new revision
+if neither has a convincing heel-toe physical impression.
+
+Other audible-risk clues in the CSV: the keyboard A RMS drops from
+-24.95 to -32.06 dBFS, paper from -34.0 to -41.0 dBFS and CRT wake from
+-33.6 to -41.3 dBFS. Rebalance only if developer listening confirms the
+proposals are too quiet; no overall replacement gain was raised here.
+
 ### Priority footstep listening checklist
 
 Reference heel/toe construction in the current A candidate: a damped **64 Hz**

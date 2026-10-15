@@ -43,6 +43,22 @@ for($cue=0;$cue -lt 25;$cue++){
         }
     }
 }
+# Verify current movement coupling still uses actual displacement, the shared
+# 160 ms animation contact, and clears the pending foot when blocked.
+$main=Get-Content -LiteralPath (Join-Path $root 'game\src\floppy144_main.c') -Raw
+foreach($required in @(
+    'Floppy144RunStateMovePlayerSite(',
+    'before_x!=global_run_state.player_site_x',
+    'global_footstep_pending=true',
+    'global_footstep_pending=false',
+    'Floppy144PlayerVisualAdvance(',
+    'FLOPPY144_PLAYER_WALK_FRAME_MS',
+    'FLOPPY144_AUDIO_FOOTSTEP'
+)){
+    if(-not $main.Contains($required)){
+        throw "BF24 footstep must remain coupled to actual movement: $required"
+    }
+}
 $src=Get-Content -LiteralPath (Join-Path $root 'src\f144sfx.c') -Raw
 if($src -notmatch '#ifdef F144_SFX_REVIEW' -or
    $src -notmatch 'samples = generate\(v, effect\)'){
