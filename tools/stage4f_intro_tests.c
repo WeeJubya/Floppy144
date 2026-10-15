@@ -78,14 +78,14 @@ int main(void)
     uint64_t off_crt;
 
     if(!require_true(Floppy144IntroBeatAt(0U)==FLOPPY144_INTRO_DISCOVERY,"0 ms discovery")) return 1;
-    if(!require_true(Floppy144IntroBeatAt(3799U)==FLOPPY144_INTRO_DISCOVERY,"discovery end")) return 2;
-    if(!require_true(Floppy144IntroBeatAt(3800U)==FLOPPY144_INTRO_INSERTION,"insertion start")) return 3;
-    if(!require_true(Floppy144IntroBeatAt(7599U)==FLOPPY144_INTRO_INSERTION,"insertion end")) return 4;
-    if(!require_true(Floppy144IntroBeatAt(7600U)==FLOPPY144_INTRO_PROGRAM_START,"program start")) return 5;
-    if(!require_true(Floppy144IntroBeatAt(14999U)==FLOPPY144_INTRO_PROGRAM_START,"program end")) return 6;
-    if(!require_true(Floppy144IntroBeatAt(15000U)==FLOPPY144_INTRO_GDR_CONNECTION,"network start")) return 7;
-    if(!require_true(Floppy144IntroBeatAt(22799U)==FLOPPY144_INTRO_GDR_CONNECTION,"network end")) return 8;
-    if(!require_true(Floppy144IntroBeatAt(22800U)==FLOPPY144_INTRO_COMPLETE,"intro completion")) return 9;
+    if(!require_true(Floppy144IntroBeatAt(2599U)==FLOPPY144_INTRO_DISCOVERY,"discovery end")) return 2;
+    if(!require_true(Floppy144IntroBeatAt(2600U)==FLOPPY144_INTRO_INSERTION,"insertion start")) return 3;
+    if(!require_true(Floppy144IntroBeatAt(6399U)==FLOPPY144_INTRO_INSERTION,"insertion end")) return 4;
+    if(!require_true(Floppy144IntroBeatAt(6400U)==FLOPPY144_INTRO_PROGRAM_START,"program start")) return 5;
+    if(!require_true(Floppy144IntroBeatAt(14299U)==FLOPPY144_INTRO_PROGRAM_START,"program end")) return 6;
+    if(!require_true(Floppy144IntroBeatAt(14300U)==FLOPPY144_INTRO_GDR_CONNECTION,"network start")) return 7;
+    if(!require_true(Floppy144IntroBeatAt(17999U)==FLOPPY144_INTRO_GDR_CONNECTION,"network end")) return 8;
+    if(!require_true(Floppy144IntroBeatAt(18000U)==FLOPPY144_INTRO_COMPLETE,"intro completion")) return 9;
 
     if(!require_true(!Floppy144IntroActionSkips(F144_ACTION_CONFIRM),"confirm cannot skip essential intro")) return 10;
     if(!require_true(!Floppy144IntroActionSkips(F144_ACTION_BACK),"back cannot skip")) return 11;
@@ -101,8 +101,8 @@ int main(void)
      * Pixel assertions exercise the actual renderer rather than only vector data.
      * Reveal at t=0 must reproduce discovery exactly: no first-frame jump. */
     if(!require_true(
-        render(3799U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U)==
-        render(3800U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U),
+        render(2599U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U)==
+        render(2600U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U),
         "discovery-to-reveal alignment has no frame jump")) return 30;
     (void)render(1400U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U);
     if(!require_true(
@@ -117,6 +117,37 @@ int main(void)
         pixels[307U*WIDTH+250U]==0xa6a6a6U &&
         pixels[308U*WIDTH+250U]==0x5d452eU,
         "discovery grey panel touches the dark floor strip")) return 33;
+
+    /* New credits print progressively, then leave with the zoom. */
+    if(!require_true(render(50U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U)!=
+        render(2000U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U),
+        "GDR/PRESENTS title is typed, not immediately complete")) return 34;
+    if(!require_true(render(2600U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U)!=
+        render(3350U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U),
+        "GDR credits leave during animation")) return 35;
+    /* A black vector-guide stroke used to cross the drive at (460,174). */
+    (void)render(6400U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U);
+    if(!require_true(pixels[174U*WIDTH+460U]==0xd2ceb6U,
+        "motion guide strokes are not rendered into computer scene"))return 36;
+
+    /* The grey cabinet base follows the moving wall/floor seam mid-zoom. */
+    (void)render(FLOPPY144_INTRO_DISCOVERY_END_MS+1000U,
+        FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U);
+    if(!require_true(
+        pixels[336U*WIDTH+450U]==0xa6a6a6U &&
+        pixels[337U*WIDTH+450U]==0x5d452eU,
+        "grey cabinet stays anchored to the zooming floor"))return 37;
+    /* Initialising is amber even after later lines become active. */
+    (void)render(FLOPPY144_INTRO_PROGRAM_END_MS+50U,
+        FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U);
+    {
+        uint32_t x,y,amber=0U;
+        for(y=135U;y<143U;++y)
+            for(x=30U;x<320U;++x)
+                if(pixels[y*WIDTH+x]==0xc19c59U)++amber;
+        if(!require_true(amber>0U,
+            "spaced INITIALISING dots are printed in amber"))return 38;
+    }
 
     normal_program=render(12550U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U);
     fast_program=render(12550U,FLOPPY144_TEXT_SPEED_FAST,FLOPPY144_CRT_OFF,10U);
@@ -142,15 +173,15 @@ int main(void)
     if(!require_true(Floppy144TimingSplashElapsedMs(&timing,5250U)==250U,"replay restarts elapsed")) return 25;
     if(!require_true(timing.next_autosave_ms==301000U,"replay preserves autosave deadline")) return 26;
 
-    if(!require_true(!Floppy144IntroLoginReady(22799U) &&
-        Floppy144IntroLoginReady(22800U),"LOGIN is gated until full boot"))return 27;
+    if(!require_true(!Floppy144IntroLoginReady(17999U) &&
+        Floppy144IntroLoginReady(18000U),"LOGIN is gated until full boot"))return 27;
 
-    if(!require_true(!Floppy144IntroAutoLoginReady(24299U,true) &&
-        Floppy144IntroAutoLoginReady(24300U,true),"existing profile waits 1500ms after boot"))return 28;
+    if(!require_true(!Floppy144IntroAutoLoginReady(20499U,true) &&
+        Floppy144IntroAutoLoginReady(20500U,true),"existing profile waits for typewriter completion"))return 28;
     if(!require_true(!Floppy144IntroAutoLoginReady(99999U,false),
         "first profile still waits for explicit LOGIN"))return 29;
     puts("S4F-02 INTRO VECTORS: PASS");
-    puts("beats=cabinet,disk-reveal,computer-crt,full-terminal duration=22800ms");
+    puts("beats=cabinet,disk-reveal,computer-crt,full-terminal duration=18000ms");
     puts("no intro skip; persisted LOGIN when ready; replay=timing-rearm");
     return 0;
 }

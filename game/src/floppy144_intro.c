@@ -19,11 +19,11 @@ static const char *const g_boot[]={
     "BOOTSTRAP ......................... FOUND",
     "MEDIA HEADER ...................... VALID",
     "RECOVERY EXECUTABLE .............. FOUND",
-    "INITIALISING ...........................",
+    "INITIALISING. . . .",
     "SYSTEM READY",
     "NETWORK INTERFACE ................ ONLINE",
     "SEARCHING ..............................",
-    "REMOTE SESSION ACCEPTED"
+    "REMOTE SESSION ESTABLISHED"
 };
 
 /* The source PowerPoint uses flat, layered vector shapes and a fixed camera.
@@ -49,24 +49,62 @@ static void vector_rect(Floppy144Surface *s,int32_t x,int32_t y,int32_t w,int32_
 static void vector_draw(Floppy144Surface *s,const IntroVector *v)
 {
     if(v->kind==4U) {
-        if(v->x>=0&&v->y>=0&&v->w>=75) {
-            Floppy144DrawText(s,(uint32_t)v->x+4U,(uint32_t)v->y+4U,"GDR",1U,v->colour);
-            if(v->w>=120) {
-                Floppy144DrawText(s,(uint32_t)v->x+4U,(uint32_t)v->y+19U,"SITE RECOVERY DISK",1U,v->colour);
-                Floppy144DrawText(s,(uint32_t)v->x+4U,(uint32_t)v->y+48U,"DISK 144/233",1U,v->colour);
-            }
+        /* The recovered disk is already labelled at discovery size. Enlarging
+         * the label reveals more detail, rather than spawning all the ink. */
+        if(v->x>=0&&v->y>=0&&v->w>=40) {
+            Floppy144DrawText(s,(uint32_t)v->x+3U,(uint32_t)v->y+3U,"GDR",1U,v->colour);
+            Floppy144DrawText(s,(uint32_t)v->x+3U,(uint32_t)v->y+18U,"144/233",1U,v->colour);
+            if(v->w>=120)
+                Floppy144DrawText(s,(uint32_t)v->x+3U,(uint32_t)v->y+33U,
+                    "SITE RECOVERY DISK",1U,v->colour);
         }
         return;
     }
     vector_rect(s,v->x,v->y,v->w,v->h,v->colour);
 }
+
+/* Fixed-position typewriter credits on discovery, then an animated exit
+ * during reveal. Pure rendering: no additional state or stored artwork. */
+static void intro_title_line(Floppy144Surface *s,const char *full,
+    uint32_t shown,uint32_t y,uint32_t scale,int32_t offset_x,int32_t offset_y,
+    uint32_t colour)
+{
+    char buffer[32];
+    uint32_t count=(uint32_t)strlen(full);
+    int32_t x=(int32_t)(s->width-Floppy144DrawTextWidth(full,scale))/2+offset_x;
+    int32_t top=(int32_t)y+offset_y;
+    if(shown<count)count=shown;
+    if(count==0U||x<0||top<0||(uint32_t)x>=s->width||
+       (uint32_t)top>=s->height)return;
+    memcpy(buffer,full,count);
+    buffer[count]='\0';
+    Floppy144DrawText(s,(uint32_t)x+1U,(uint32_t)top+1U,buffer,scale,C_DARK);
+    Floppy144DrawText(s,(uint32_t)x,(uint32_t)top,buffer,scale,colour);
+}
+static void intro_discovery_credit(Floppy144Surface *s,uint32_t elapsed,bool leaving)
+{
+    static const char studio[]="GREY DOOR REPUBLIK";
+    static const char presents[]="PRESENTS...";
+    uint32_t count=leaving?UINT32_MAX:elapsed/60U+1U;
+    uint32_t lead=(uint32_t)strlen(studio);
+    int32_t dx=0,dy=0;
+    if(leaving) {
+        uint32_t t=elapsed>800U?800U:elapsed;
+        /* Whisk out along the same animated scene transition, not a cut. */
+        dx=(int32_t)(t*t/1250U);
+        dy=-(int32_t)(t*t/4400U);
+    }
+    intro_title_line(s,studio,count,67U,2U,dx,dy,C_LABEL);
+    intro_title_line(s,presents,count>lead+3U?count-lead-3U:0U,
+        100U,2U,dx,dy,C_AMBER);
+}
 static void discovery(Floppy144Surface *s,uint32_t phase)
 {
     uint32_t i;
-    (void)phase;
     Floppy144DrawClear(s,C_BG);
     for(i=0U;i<sizeof(g_intro_scene1)/sizeof(g_intro_scene1[0]);i++)
         vector_draw(s,&g_intro_scene1[i]);
+    intro_discovery_credit(s,phase,false);
 }
 static void reveal(Floppy144Surface *s,uint32_t phase)
 {
@@ -74,14 +112,28 @@ static void reveal(Floppy144Surface *s,uint32_t phase)
     Floppy144DrawClear(s,C_BG);
     for(i=0U;i<sizeof(g_intro_scene2)/sizeof(g_intro_scene2[0]);i++) {
         IntroVector v=g_intro_scene2[i];
-        const IntroVector *a=i<sizeof(g_intro_scene1)/sizeof(g_intro_scene1[0])?
-            &g_intro_scene1[i]:&g_intro_scene2[i];
+        const IntroVector *a=&g_intro_scene1[i];
         v.x=a->x+(v.x-a->x)*(int32_t)t/3150;
         v.y=a->y+(v.y-a->y)*(int32_t)t/3150;
         v.w=a->w+(v.w-a->w)*(int32_t)t/3150;
         v.h=a->h+(v.h-a->h)*(int32_t)t/3150;
-        if(i==13U&&phase>3150U)v.x+=(int32_t)((phase-3150U)*70U/650U);
+        if(i==13U) {
+            /* Keep the cabinet's grey base one pixel into the floor while
+             * zooming. Its original scene-2 bottom ended 59px above it. */
+            int32_t floor_start=g_intro_scene1[1].y+g_intro_scene1[1].h;
+            int32_t floor_end=g_intro_scene2[1].y+g_intro_scene2[1].h;
+            int32_t floor_y=floor_start+(floor_end-floor_start)*(int32_t)t/3150;
+            v.h=floor_y+1-v.y;
+            if(phase>3150U)v.x+=(int32_t)((phase-3150U)*70U/650U);
+        }
         vector_draw(s,&v);
+    }
+    if(phase<=800U)intro_discovery_credit(s,phase,true);
+    /* Final reveal title: appears above the disk, disappears on scene cut. */
+    if(phase>=2600U) {
+        static const char title[]="FLOPPY//144";
+        uint32_t n=(phase-2600U)/55U+1U;
+        intro_title_line(s,title,n,77U,2U,-110,0,C_AMBER);
     }
 }
 static void computer(Floppy144Surface *s,uint32_t phase)
@@ -91,6 +143,9 @@ static void computer(Floppy144Surface *s,uint32_t phase)
     for(i=0U;i<sizeof(g_intro_scene3)/sizeof(g_intro_scene3[0]);i++) {
         IntroVector v=g_intro_scene3[i];
         if(i==3U) {v.kind=1U;v.colour=phase>=3400U?FLOPPY144_RGB(13,30,23):C_DARK;}
+        /* These last two authored strokes were movement-guide lines.
+         * They must never render across the disk and computer tower. */
+        if(i==25U||i==26U)continue;
         if(i>=14U) {
             if(phase>=2650U)continue;
             /* Label upward, shutter leading into the tower's authored slot. */
@@ -123,17 +178,22 @@ static void terminal_lines(
 )
 {
     uint32_t i,available=boot_budget(elapsed_ms,rate);
-    uint32_t lengths[8],first=0U,lines_shown=0U;
+    uint32_t lengths[8]={0U},first=0U,lines_shown=0U;
     uint32_t total_lines=sizeof(g_boot)/sizeof(g_boot[0]);
     char buffer[90];
     for(i=0U;i<total_lines;++i)
     {
-        uint32_t length=(uint32_t)strlen(g_boot[i]);
-        lengths[i]=available>length?length:available;
-        if(available>=length)available-=length;
-        else available=0U;
-        if(available>0U)available-=1U; /* natural inter-line pause */
-        if(lengths[i]>0U)lines_shown=i+1U;
+        uint32_t length=(uint32_t)strlen(g_boot[i]),j;
+        for(j=0U;j<length;++j) {
+            /* The spaced amber INITIALISING dots are deliberate beats. */
+            uint32_t cost=(i==3U&&g_boot[i][j]=='.')?7U:1U;
+            if(available<cost)break;
+            available-=cost;
+        }
+        lengths[i]=j;
+        if(j>0U)lines_shown=i+1U;
+        if(j<length)break;
+        if(available>0U)--available; /* natural inter-line pause */
     }
     if(lines_shown>max_lines)first=lines_shown-max_lines;
     for(i=first;i<lines_shown;++i)
@@ -142,7 +202,7 @@ static void terminal_lines(
         if(n>=sizeof(buffer))n=(uint32_t)sizeof(buffer)-1U;
         memcpy(buffer,g_boot[i],n);buffer[n]='\0';
         Floppy144DrawText(s,left,top+(i-first)*20U,buffer,1U,
-            i==lines_shown-1U?C_GREEN:C_DIM);
+            i==3U?C_AMBER:(i==lines_shown-1U?C_GREEN:C_DIM));
     }
 }
 
@@ -174,16 +234,27 @@ static void full_terminal(
     terminal_lines(s,elapsed,rate,30U,75U,10U);
     if(elapsed>=FLOPPY144_INTRO_DURATION_MS)
     {
+        uint32_t budget=(elapsed-FLOPPY144_INTRO_DURATION_MS)/60U+1U;
         length=login_name!=NULL?(uint32_t)strlen(login_name):0U;
         if(length>30U)length=30U;
         memcpy(prompt,"LOGIN: ",7U);
         if(length)memcpy(prompt+7U,login_name,length);
-        prompt[7U+length]=has_profile?'\0':'_';prompt[8U+length]='\0';
+        if(budget>7U+length)budget=7U+length;
+        prompt[budget]='\0';
         Floppy144DrawText(s,30U,270U,prompt,1U,C_GREEN);
-        if(!has_profile)Floppy144DrawText(s,30U,302U,
-            save_failed?"PROFILE WRITE FAILED - PRESS ENTER TO RETRY":
-                "ENTER CONFIRM   BACKSPACE DELETE   EMPTY NAME = GUEST",
-            1U,save_failed?C_AMBER:C_DIM);
+        if(!has_profile&&budget>=7U) {
+            /* Real keystrokes are accepted as before; only display is typed.
+             * A no-profile prompt waits with a blinking terminal cursor. */
+            if(((elapsed-FLOPPY144_INTRO_DURATION_MS)/380U)%2U==0U)
+                Floppy144DrawText(s,30U+Floppy144DrawTextWidth(prompt,1U),
+                    270U,"_",1U,C_GREEN);
+            Floppy144DrawText(s,30U,302U,
+                save_failed?"PROFILE WRITE FAILED - PRESS ENTER TO RETRY":
+                    "PRESS ENTER FOR GUEST ACCESS",
+                1U,save_failed?C_AMBER:C_GREEN);
+            Floppy144DrawText(s,30U,320U,
+                "OR TYPE AN OPERATOR NAME AND PRESS ENTER",1U,C_DIM);
+        }
     }
 }
 

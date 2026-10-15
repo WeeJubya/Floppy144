@@ -16,7 +16,7 @@ foreach($term in $need){
 foreach($term in @('SITE RECOVERY DISK','DISK 144/233',
 'BOOTSTRAP','MEDIA HEADER','RECOVERY EXECUTABLE','INITIALISING',
 'SYSTEM READY','NETWORK INTERFACE','SEARCHING',
-'REMOTE SESSION ACCEPTED','LOGIN:')){
+'REMOTE SESSION ESTABLISHED','LOGIN:', 'GREY DOOR REPUBLIK', 'PRESENTS...', 'PRESS ENTER FOR GUEST ACCESS')){
  if($intro -notmatch [regex]::Escape($term)){throw "BF20 missing storyboard content: $term"}
 }
 foreach($term in @('FLOPPY144_INTRO_DISCOVERY_END_MS',
