@@ -58,6 +58,11 @@ void Floppy144CreditsViewDraw(
         72U,"CREDITS",1U,amber);
     Floppy144DrawFillRect(surface,64U,88U,512U,1U,border);
 
+    /* The reference mark has dark letterforms on pale paper. Give both the
+     * architectural symbol and its wordmark an intentional light substrate,
+     * rather than allowing black text to disappear into the dark Credits UI. */
+    Floppy144DrawFillRect(surface,205U,92U,230U,188U,
+        FLOPPY144_RGB(244,241,233));
     Floppy144BrandLogoDraw(surface,215U,94U,210U,186U);
     line_width=Floppy144CreditsViewMaxLineWidth();
     Floppy144DrawText(surface,320U-line_width/2U,286U,
