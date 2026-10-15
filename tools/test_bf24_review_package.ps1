@@ -66,7 +66,10 @@ if($src -notmatch '#ifdef F144_SFX_REVIEW' -or
 }
 $music=Get-Content -LiteralPath (Join-Path $root 'src\f144audio.c') -Raw
 foreach($marker in @('F144_MENU_BPM           110.0',
-    'F144_MENU_BARS          32u','F144_BPM           80.0','65.0')){
+    'F144_MENU_BARS          32u',
+    'F144_COMPLETION_BPM         F144_MENU_BPM',
+    'F144_COMPLETION_BARS        32u',
+    'F144_BPM           80.0')){
     if($music -notmatch [regex]::Escape($marker)){
         throw "Approved BF22 scene or gameplay tempo changed: $marker"
     }
