@@ -20,6 +20,9 @@ jobs:
       - name: Generate canonical data
         shell: pwsh
         run: .\tools\build_game_data.ps1
+      - name: BF19 glow and inspection indicator source audit
+        shell: pwsh
+        run: .\tools\test_bugfix19_indicators.ps1
       - name: Inspect 2.5D and capture BF10/BF30 visual fixtures
         shell: pwsh
         run: |
