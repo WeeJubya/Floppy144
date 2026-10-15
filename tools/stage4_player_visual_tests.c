@@ -465,7 +465,7 @@ static void TestBodyStylesAndRoundHead(void)
     uint32_t type_a_hash;
     uint32_t type_b_hash;
     int32_t head_centre_x = 320;
-    int32_t head_centre_y = 157;
+    int32_t head_centre_y = 160;
     int32_t head_radius = 8;
 
     Floppy144PlayerVisualReset(
@@ -490,8 +490,9 @@ static void TestBodyStylesAndRoundHead(void)
     );
 
     /*
-     * The round head occupies the top centre of the historical 42x72 Site
-     * footprint. A square head would paint its corner; the circle does not.
+     * The fitted hair cap occupies the round skull inside the canonical
+     * 42x72 Site footprint. A square head would paint its corner, unlike
+     * the supplied circular hair/face silhouette.
      */
     (void)DrawHash(
         &state,
