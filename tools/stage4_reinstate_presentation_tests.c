@@ -151,6 +151,45 @@ int main(void)
         "reinstate remains available when a recorded session exists"
     );
 
+    /* BF28 follow-up: left arrow restores, right arrow records.
+     * Neither changes the five visible options, save preference or format.
+     * A missing save or active game must be rejected before confirmation. */
+    Expect(
+        FLOPPY144_MAIN_MENU_OPTION_COUNT==5,
+        "original five-row menu remains unchanged"
+    );
+    Expect(
+        Floppy144MainMenuShortcutForDirection(-1,false,true)==
+            FLOPPY144_MAIN_MENU_REINSTATE_SESSION &&
+        Floppy144MainMenuShortcutForDirection(-1,true,true)==
+            FLOPPY144_MAIN_MENU_REINSTATE_SESSION,
+        "Left maps to load when a saved session exists"
+    );
+    Expect(
+        Floppy144MainMenuShortcutForDirection(-1,false,false)==
+            FLOPPY144_MAIN_MENU_OPTION_COUNT,
+        "Left cannot load when no saved session exists"
+    );
+    Expect(
+        Floppy144MainMenuShortcutForDirection(1,true,false)==
+            FLOPPY144_MAIN_MENU_RECORD_SESSION &&
+        Floppy144MainMenuShortcutForDirection(1,true,true)==
+            FLOPPY144_MAIN_MENU_RECORD_SESSION,
+        "Right maps to manual save only with an active session"
+    );
+    Expect(
+        Floppy144MainMenuShortcutForDirection(1,false,true)==
+            FLOPPY144_MAIN_MENU_OPTION_COUNT &&
+        Floppy144MainMenuShortcutForDirection(0,true,true)==
+            FLOPPY144_MAIN_MENU_OPTION_COUNT,
+        "Right is unavailable without an active session; neutral is ignored"
+    );
+    Expect(
+        !Floppy144MainMenuOptionEnabled(
+            FLOPPY144_MAIN_MENU_REINSTATE_SESSION,true,false),
+        "Left availability cannot bypass existing manual-first/autosave load policy"
+    );
+
     no_save_hash=DrawMenu(
         false,
         false,

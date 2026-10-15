@@ -180,6 +180,11 @@ static bool global_catalogue_direct_document;
 static const char *global_main_menu_notice;
 static bool global_main_menu_notice_is_warning;
 static bool global_reinstate_confirmation_pending;
+/* A transient arrow-key save/load choice, never added to menu rows or saves. */
+static Floppy144MainMenuOption global_main_menu_shortcut =
+    FLOPPY144_MAIN_MENU_OPTION_COUNT;
+static bool global_main_menu_shortcut_unavailable;
+
 static bool global_reinstate_continue_on_keyup;
 static uint32_t global_reinstate_continue_key;
 static Floppy144CompletionViewState global_completion_view;
@@ -1060,6 +1065,11 @@ static void Floppy144OpenMainMenu(
     global_reinstate_confirmation_pending =
         false;
 
+    global_main_menu_shortcut =
+        FLOPPY144_MAIN_MENU_OPTION_COUNT;
+
+    global_main_menu_shortcut_unavailable=false;
+
     global_reinstate_continue_on_keyup =
         false;
 
@@ -1100,6 +1110,10 @@ static void Floppy144MainMenuMoveSelection(
 
     global_main_menu_notice_is_warning =
         false;
+
+    global_main_menu_shortcut =
+        FLOPPY144_MAIN_MENU_OPTION_COUNT;
+    global_main_menu_shortcut_unavailable=false;
 
     next_option =
         (int32_t)global_main_menu_option;
@@ -1732,10 +1746,11 @@ static void Floppy144CommitSettingsAdjustment(
  */
 
 static void Floppy144MainMenuActivate(
-    HWND window
+    HWND window,
+    Floppy144MainMenuOption option
 )
 {
-    switch(global_main_menu_option)
+    switch(option)
     {
         case FLOPPY144_MAIN_MENU_INITIATE_SESSION:
         {
@@ -3192,6 +3207,18 @@ static bool Floppy144HandleActionEvent(
                         window
                     );
                 }
+                else if(global_main_menu_shortcut!=
+                        FLOPPY144_MAIN_MENU_OPTION_COUNT ||
+                        global_main_menu_shortcut_unavailable)
+                {
+                    /* Escape cancels an unconfirmed save/load shortcut. */
+                    global_main_menu_shortcut=
+                        FLOPPY144_MAIN_MENU_OPTION_COUNT;
+                    global_main_menu_shortcut_unavailable=false;
+                    global_main_menu_notice=NULL;
+                    global_main_menu_notice_is_warning=false;
+                    Floppy144Redraw(window);
+                }
 
                 return true;
             }
@@ -3215,6 +3242,59 @@ static bool Floppy144HandleActionEvent(
                 {
                     switch(eAction)
                     {
+                        case F144_ACTION_MOVE_LEFT:
+                        case F144_ACTION_MOVE_RIGHT:
+                        {
+                            const bool wants_load =
+                                eAction==F144_ACTION_MOVE_LEFT;
+                            global_main_menu_shortcut =
+                                Floppy144MainMenuShortcutForDirection(
+                                    wants_load?-1:1,
+                                    global_session_active,
+                                    global_recorded_session_available
+                                );
+                            global_main_menu_shortcut_unavailable =
+                                global_main_menu_shortcut ==
+                                    FLOPPY144_MAIN_MENU_OPTION_COUNT;
+                            if(!wants_load && Floppy144HathawayMode())
+                            {
+                                global_main_menu_shortcut_unavailable=true;
+                                global_main_menu_shortcut =
+                                    FLOPPY144_MAIN_MENU_OPTION_COUNT;
+                                global_main_menu_notice =
+                                    "INSPECTION MODE - SAVING DISABLED";
+                                global_main_menu_notice_is_warning=false;
+                            }
+                            else if(global_main_menu_shortcut ==
+                                    FLOPPY144_MAIN_MENU_OPTION_COUNT)
+                            {
+                                global_main_menu_notice=wants_load
+                                    ? "NO RECORDED SESSION TO REINSTATE"
+                                    : "NO ACTIVE SESSION TO RECORD";
+                                global_main_menu_notice_is_warning=true;
+                            }
+                            else
+                            {
+                                global_main_menu_notice=wants_load
+                                    ? "LOAD RECORDED SESSION? ENTER CONFIRM / BACK CANCEL"
+                                    : "SAVE CURRENT SESSION? ENTER CONFIRM / BACK CANCEL";
+                                global_main_menu_notice_is_warning=false;
+                            }
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
+                        case F144_ACTION_BACK:
+                        {
+                            global_main_menu_shortcut =
+                                FLOPPY144_MAIN_MENU_OPTION_COUNT;
+                            global_main_menu_shortcut_unavailable=false;
+                            global_main_menu_notice=NULL;
+                            global_main_menu_notice_is_warning=false;
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
                         case F144_ACTION_MOVE_UP:
                         case F144_ACTION_NAV_UP:
                         {
@@ -3245,10 +3325,21 @@ static bool Floppy144HandleActionEvent(
 
                         case F144_ACTION_CONFIRM:
                         {
-                            Floppy144MainMenuActivate(
-                                window
-                            );
-
+                            /* A failed arrow shortcut must not accidentally
+                             * execute the currently highlighted menu row. */
+                            Floppy144MainMenuOption option;
+                            if(global_main_menu_shortcut_unavailable)
+                            {
+                                return true;
+                            }
+                            option=global_main_menu_shortcut!=
+                                FLOPPY144_MAIN_MENU_OPTION_COUNT
+                                ?global_main_menu_shortcut
+                                :global_main_menu_option;
+                            global_main_menu_shortcut =
+                                FLOPPY144_MAIN_MENU_OPTION_COUNT;
+                            global_main_menu_shortcut_unavailable=false;
+                            Floppy144MainMenuActivate(window,option);
                             return true;
                         }
                     }
@@ -3274,7 +3365,7 @@ static bool Floppy144HandleActionEvent(
                                 ((uint32_t)global_pending_difficulty+1U)%3U);
                             Floppy144Redraw(window); return true;
                         case F144_ACTION_CONFIRM:
-                            Floppy144MainMenuActivate(window); return true;
+                            Floppy144MainMenuActivate(window,global_main_menu_option); return true;
                         case F144_ACTION_BACK:
                             global_screen=FLOPPY144_SCREEN_MAIN_MENU;
                             Floppy144Redraw(window); return true;

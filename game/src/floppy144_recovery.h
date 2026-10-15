@@ -17,8 +17,9 @@
 /*
  * Main-menu options
  *
- * Save and load remain represented from the beginning, even while their
- * implementation is unavailable.
+ * The five visible entries are the original menu layout. Save and Load are
+ * reachable through Right and Left arrow confirmation shortcuts, respectively;
+ * their existing handlers and persistence codecs remain in place.
  */
 
 typedef enum Floppy144MainMenuOption
@@ -41,6 +42,14 @@ typedef enum Floppy144MainMenuOption
 
 bool Floppy144MainMenuOptionEnabled(
     Floppy144MainMenuOption option,
+    bool active_session,
+    bool recorded_session_available
+);
+
+/* Left = Load, Right = Save. Unavailable returns OPTION_COUNT. These
+ * shortcuts do not add rows/pages or modify the manual save format. */
+Floppy144MainMenuOption Floppy144MainMenuShortcutForDirection(
+    int32_t direction,
     bool active_session,
     bool recorded_session_available
 );

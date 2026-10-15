@@ -104,6 +104,30 @@ bool Floppy144MainMenuOptionEnabled(
 }
 
 /*
+ * BF28 follow-up: keep the original five visible rows while providing
+ * quick access to retained manual restore/record actions with Left/Right.
+ * Eligibility is the same canonical policy used by the former menu rows.
+ */
+Floppy144MainMenuOption Floppy144MainMenuShortcutForDirection(
+    int32_t direction,
+    bool active_session,
+    bool recorded_session_available
+)
+{
+    Floppy144MainMenuOption option;
+    if(direction == 0)
+        return FLOPPY144_MAIN_MENU_OPTION_COUNT;
+
+    option=direction<0
+        ? FLOPPY144_MAIN_MENU_REINSTATE_SESSION
+        : FLOPPY144_MAIN_MENU_RECORD_SESSION;
+
+    return Floppy144MainMenuOptionEnabled(
+        option,active_session,recorded_session_available
+    ) ? option : FLOPPY144_MAIN_MENU_OPTION_COUNT;
+}
+
+/*
  * Draw the GDR session-control menu.
  */
 
@@ -547,7 +571,7 @@ void Floppy144MainMenuDraw(
     Floppy144RecoveryTextCentred(
         &surface,
         FLOPPY144_UI_FORMAL_FOOTER_Y,
-        "UP/DOWN SELECT   ENTER CONFIRM",
+        "UP/DOWN SELECT   LEFT LOAD   RIGHT SAVE   ENTER CONFIRM",
         1U,
         muted
     );

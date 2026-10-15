@@ -28,3 +28,28 @@ One vector logo function draws the pale circle, grey architectural facade, black
 ## Manual acceptance still required
 
 A build/automated pixel test does not prove visual equivalence with the PowerPoint characters, original screenshot, or supplied logo. Compare the exact user reference originals to corresponding 640x360 captures, especially side profiles, Type B's scarf and hair, Main Menu row spacing and alignment, and the architectural symbol proportions. Check the actual CRT-presented build for header alignment, command indicator overlap during long input, the Credits intro replay and the entire Grey Door sequence. Keep manual visual approval separate from CI.
+
+## BF28 follow-up: original Left/Right save/load access
+
+The original five visible rows still provide Initiate, Return to Site,
+Operator Profile, Settings and Terminate. The retained manual persistence
+actions are available **from any highlighted Main Menu row**, without pages:
+
+- **Left**: load/reinstate the recorded session (manual checkpoint first,
+  autosave fallback and existing Grey Door completion rule).
+- **Right**: record the active session to the manual checkpoint.
+- Each arrow previews the action in the existing status text area. **Enter**
+  confirms; **Backspace** or **Escape** cancels; **Up/Down** also cancel the
+  pending action and continue ordinary row selection.
+- Unavailable actions show a notice without creating a pending command.
+- A successful load retains the existing restoration acknowledgement and
+  key-down/key-up handshake. A successful save retains the established
+  "CURRENT SESSION RECORDED" notice.
+- Only the footer's keyboard hint was extended to identify these shortcuts;
+  existing boxes, row count, placement, spacing, title, progress percentage,
+  manual save serialization and autosave policy remain unchanged.
+
+Automated checks: S4C restored-session renderer's direction/eligibility
+assertions and S4F input-dispatch route audit; full Stage 4 regression and
+Release size checks. Interactive acceptance is required for key repeat,
+cancellation, stale/corrupted saves and loaded-terminal first key.

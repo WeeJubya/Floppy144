@@ -76,6 +76,53 @@ if(
     throw "BF28 canonical Session Control panel or row geometry changed."
 }
 
+# BF28 follow-up: the five-option original main menu contains hidden
+# left/right shortcuts for the *existing* manual record/reinstate operations.
+# Pressing an arrow only opens a prompt; Enter executes, Back cancels.
+$recoveryHeader = Get-Content -LiteralPath (Join-Path $root "game\src\floppy144_recovery.h") -Raw
+$menuStart = $main.IndexOf("case FLOPPY144_SCREEN_MAIN_MENU:",$main.IndexOf("switch(global_screen)",$main.IndexOf("switch(global_screen)")+1))
+# Test the actual logical-action case instead of the display-only renderer.
+$inputMenuStart = $main.LastIndexOf("case FLOPPY144_SCREEN_MAIN_MENU:")
+$inputMenuEnd = $main.IndexOf("case FLOPPY144_SCREEN_DIFFICULTY:",$inputMenuStart)
+if($inputMenuStart -lt 0 -or $inputMenuEnd -le $inputMenuStart){
+    throw "BF28 could not isolate the main menu logical-action handler."
+}
+$inputMenu = $main.Substring($inputMenuStart,$inputMenuEnd-$inputMenuStart)
+foreach($required in @(
+    "case F144_ACTION_MOVE_LEFT:",
+    "case F144_ACTION_MOVE_RIGHT:",
+    "case F144_ACTION_BACK:",
+    "Floppy144MainMenuShortcutForDirection(",
+    "FLOPPY144_MAIN_MENU_OPTION_COUNT",
+    "global_main_menu_shortcut_unavailable",
+    "Floppy144MainMenuActivate(window,option)"
+)){
+    if($inputMenu -notmatch [regex]::Escape($required)){
+        throw "BF28 left/right save/load and confirmation route missing: $required"
+    }
+}
+foreach($required in @(
+    'Floppy144MainMenuShortcutForDirection',
+    'FLOPPY144_MAIN_MENU_RECORD_SESSION',
+    'FLOPPY144_MAIN_MENU_REINSTATE_SESSION'
+)){
+    if($recovery -notmatch [regex]::Escape($required) -and
+        $recoveryHeader -notmatch [regex]::Escape($required)){
+        throw "BF28 save/load shortcut definition absent: $required"
+    }
+}
+if($recovery -notmatch 'LEFT LOAD   RIGHT SAVE' -or
+   $recovery -notmatch 'option_index\s*\*\s*12U'){
+    throw "BF28 main menu shortcut hint/unchanged row spacing missing"
+}
+if($main -notmatch 'Escape cancels an unconfirmed save/load shortcut' -or
+   $main -notmatch 'global_main_menu_shortcut_unavailable=false'){
+    throw "BF28 arrow action is not cancelled by Escape / reset"
+}
+if($main -notmatch 'Floppy144MainMenuActivate\(window,global_main_menu_option\)'){
+    throw "BF28 difficulty Initiate flow no longer activates selected menu action"
+}
+
 # Settings/Profile child routes deliberately restore their parent selection.
 foreach($required in @(
     'global_main_menu_option =\s*\r?\n\s*FLOPPY144_MAIN_MENU_SETTINGS',
