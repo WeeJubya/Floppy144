@@ -97,6 +97,27 @@ int main(void)
     if(!require_true(render(12150U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U)!=0U,"program renders")) return 16;
     if(!require_true(render(18000U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U)!=0U,"network renders")) return 17;
 
+    /* BF20: discovery disk and grey foreground both meet the wall/floor line.
+     * Pixel assertions exercise the actual renderer rather than only vector data.
+     * Reveal at t=0 must reproduce discovery exactly: no first-frame jump. */
+    if(!require_true(
+        render(3799U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U)==
+        render(3800U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U),
+        "discovery-to-reveal alignment has no frame jump")) return 30;
+    (void)render(1400U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U);
+    if(!require_true(
+        pixels[306U*WIDTH+100U]==0xb09d8bU &&
+        pixels[307U*WIDTH+100U]==0x5d452eU,
+        "rear wall terminates at the floor baseline")) return 31;
+    if(!require_true(
+        pixels[307U*WIDTH+176U]==0x131313U &&
+        pixels[308U*WIDTH+176U]==0x5d452eU,
+        "discovery disk touches the dark floor strip")) return 32;
+    if(!require_true(
+        pixels[307U*WIDTH+250U]==0xa6a6a6U &&
+        pixels[308U*WIDTH+250U]==0x5d452eU,
+        "discovery grey panel touches the dark floor strip")) return 33;
+
     normal_program=render(12550U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U);
     fast_program=render(12550U,FLOPPY144_TEXT_SPEED_FAST,FLOPPY144_CRT_OFF,10U);
     instant_program=render(12550U,FLOPPY144_TEXT_SPEED_INSTANT,FLOPPY144_CRT_OFF,10U);

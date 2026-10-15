@@ -49,6 +49,21 @@ def flatten(shapes,m=(1,1,0,0)):
 a=[]
 for i in range(3):a.append(list(flatten(p.slides[i].shapes)))
 assert [row[-1] for row in a[0]]==[row[-1] for row in a[1]], 'Discovery/reveal vector correspondence changed'
+# BF20: Seat the discovery cabinet and grey foreground panel against the
+# rear wall's bottom edge, with a one-pixel floor overlap. This is an export
+# adjustment: the original PowerPoint vectors and all later scenes stay intact.
+assert [a[0][i][-1] for i in (1, 2, 13)] == [10, 28, 13], 'Discovery anchors changed'
+wall_bottom = a[0][1][1] + a[0][1][3]
+disk_drop = wall_bottom + 1 - (a[0][2][1] + a[0][2][3])
+panel_drop = wall_bottom + 1 - (a[0][13][1] + a[0][13][3])
+aligned = []
+for index, (x, y, w, h, colour, kind, shape_id) in enumerate(a[0]):
+    if 2 <= index <= 12:
+        y += disk_drop
+    elif index == 13:
+        y += panel_drop
+    aligned.append((x, y, w, h, colour, kind, shape_id))
+a[0] = aligned
 q=Path(args.output)
 with q.open('w') as f:
  f.write('/* Procedural vector geometry flattened from authored Intro.pptx.\n * No stored image/media. Coordinates target the logical 640x360 surface. */\n')
