@@ -247,11 +247,12 @@ typedef struct { uint8_t r, g, b, a; } F144RGBA;
 typedef struct { F144Vec2 a, b; float width; } F144Segment;
 typedef struct { F144Vec2 centre; float radius; } F144Circle;
 typedef struct { F144Segment axis; } F144Capsule;
-typedef enum { F144_VEC_LINE, F144_VEC_CIRCLE, F144_VEC_CAPSULE } F144PrimitiveType;
+typedef struct { F144Vec2 corner, size; } F144Rect;
+typedef enum { F144_VEC_LINE, F144_VEC_CIRCLE, F144_VEC_CAPSULE, F144_VEC_RECT } F144PrimitiveType;
 typedef struct {
     F144PrimitiveType type;
     F144RGBA colour;
-    union { F144Segment line; F144Circle circle; F144Capsule capsule; } shape;
+    union { F144Segment line; F144Circle circle; F144Capsule capsule; F144Rect rect; } shape;
 } F144Primitive;
 typedef struct {
     F144Primitive primitives[F144_CHARACTER_MAX_PRIMITIVES];
@@ -285,6 +286,15 @@ static void f144AddCircle(RenderBuffer *b, F144Vec2 centre, float radius, F144RG
 }
 static void f144CapsuleAdd(RenderBuffer *b, float x0, float y0, float x1, float y1, float width, F144RGBA c) {
     f144AddLine(b, f144Vec(x0,y0), f144Vec(x1,y1), width, c, F144_VEC_CAPSULE);
+}
+/* Sharp garment hems are part of the authored silhouettes, not round strokes. */
+static void f144AddRect(RenderBuffer *b,float x,float y,float w,float h,F144RGBA c) {
+    F144Primitive *p;
+    if(b->count>=F144_CHARACTER_MAX_PRIMITIVES||w<=0.f||h<=0.f)return;
+    p=&b->primitives[b->count++];
+    p->type=F144_VEC_RECT;p->colour=c;
+    p->shape.rect.corner=f144Vec(x,y);
+    p->shape.rect.size=f144Vec(w,h);
 }
 static void f144Pixel(const F144Raster *r, int32_t x, int32_t y, F144RGBA c) {
     if(x >= r->x0 && x < r->x1 && y >= r->y0 && y < r->y1) {
@@ -332,6 +342,21 @@ static void f144Rasterize(const RenderBuffer *b, const F144Raster *r) {
             f144Disk(r,f144Round(p->shape.circle.centre.x),
                 f144Round(p->shape.circle.centre.y),
                 f144Round(p->shape.circle.radius),p->colour);
+        else if(p->type==F144_VEC_RECT)
+        {
+            int32_t x0=f144Round(p->shape.rect.corner.x);
+            int32_t y0=f144Round(p->shape.rect.corner.y);
+            int32_t x1=f144Round(p->shape.rect.corner.x+p->shape.rect.size.x);
+            int32_t y1=f144Round(p->shape.rect.corner.y+p->shape.rect.size.y);
+            if(x0<r->x0)x0=r->x0;
+            if(y0<r->y0)y0=r->y0;
+            if(x1>r->x1)x1=r->x1;
+            if(y1>r->y1)y1=r->y1;
+            if(x1>x0&&y1>y0)
+                Floppy144DrawFillRect(r->surface,(uint32_t)x0,(uint32_t)y0,
+                    (uint32_t)(x1-x0),(uint32_t)(y1-y0),
+                    FLOPPY144_RGB(p->colour.r,p->colour.g,p->colour.b));
+        }
         else f144Stroke(r,p->shape.line,p->colour);
     }
 }
@@ -424,22 +449,23 @@ static void f144BuildOfficeCharacter(RenderBuffer *b, float cx, float footY,
         f144CapsuleAdd(b,cx,hip,cx,hip+scale*2.f,scale*8.f,c->cloth);
         if(c->flags&F144_COSTUME_SKIRT) {
             /* The hem covers both thighs, including the near-side leg. */
-            f144CapsuleAdd(b,cx,hip+scale*2.f,cx,hip+scale*10.f,scale*13.f,c->cloth);
-            f144CapsuleAdd(b,cx,hip+scale*9.f,cx,hip+scale*11.f,scale*14.f,c->cloth);
+            f144AddRect(b,cx-scale*5.f,hip-scale*.5f,
+                        scale*10.f,scale*13.f,c->cloth);
         }
         /* The sleeve begins within the torso silhouette: no shoulder patch. */
         f144DrawArm(b,nearShoulderX,shoulders,direction*scale*5.f+hand,scale,c);
     } else {
         float leftShoulder=cx-shoulderWidth;
         float rightShoulder=cx+shoulderWidth;
-        f144DrawLeg(b,hipX-scale*3.f,hip,stride*.42f,liftA,bob,scale,c);
-        f144DrawLeg(b,hipX+scale*3.f,hip,-stride*.42f,liftB,bob,scale,c);
+        f144DrawLeg(b,hipX-scale*4.f,hip,stride*.42f,liftA,bob,scale,c);
+        f144DrawLeg(b,hipX+scale*4.f,hip,-stride*.42f,liftB,bob,scale,c);
         /* Direct, overlapping sleeve-to-torso joints for both body styles. */
         f144DrawArm(b,leftShoulder,shoulders,-scale*6.f+hand*.22f,scale,c);
         f144DrawArm(b,rightShoulder,shoulders,scale*6.f-hand*.22f,scale,c);
         f144CapsuleAdd(b,cx,shoulders,cx+sway*.3f,hip,torsoDiameter,c->cloth);
         if(c->flags&F144_COSTUME_SKIRT)
-            f144CapsuleAdd(b,cx,hip,cx,hip+scale*10.f,scale*15.f,c->cloth);
+            f144AddRect(b,cx-scale*7.5f,hip-scale*.5f,
+                        scale*15.f,scale*12.5f,c->cloth);
         if(front) {
             if(c->flags&F144_COSTUME_TIE) {
                 /* White V-shaped lapels and crimson tie from the blue suit. */
@@ -450,49 +476,51 @@ static void f144BuildOfficeCharacter(RenderBuffer *b, float cx, float footY,
             }
         }
     }
-    /* A short, skin-coloured neck belongs to the head, not the jacket. */
-    f144CapsuleAdd(b,cx,headY+scale*6.f,cx,shoulders+scale*1.5f,
-                   scale*4.f,c->skin);
-    if(profile) {
-        /*
-         * Hair silhouette is independent of skin paint. Cover the trailing
-         * half of the head after the face disk is drawn below.
-         */
-        float rearX=cx-direction*scale*5.f;
-        if(c->flags&F144_COSTUME_LONG_HAIR) {
-            f144CapsuleAdd(b,rearX,headY-scale*5.f,rearX,headY+scale*9.f,
-                           scale*10.f,c->hair);
+    /*
+     * BF25: the later two-slide artwork uses a shallow brown cap across
+     * the *same* round skull, not a separate topknot. The profiles show a
+     * rear brown hemisphere and the exposed face towards the travel axis.
+     * Type B has a single asymmetrical front lock but no long side ponytail.
+     */
+    if(profile)
+    {
+        if(!(c->flags&F144_COSTUME_SKIRT))
+            f144CapsuleAdd(b,cx,headY+scale*6.f,
+                           cx,shoulders+scale*1.5f,scale*3.f,c->skin);
+        f144AddCircle(b,f144Vec(cx,headY),scale*8.f,c->hair);
+        f144AddCircle(b,f144Vec(cx+direction*scale*3.3f,headY+scale*.7f),
+                      scale*6.5f,c->skin);
+    }
+    else if(back)
+    {
+        if(c->flags&F144_COSTUME_LONG_HAIR)
+        {
+            /* The back of the blue scarf peeks below the brown head. */
+            f144CapsuleAdd(b,cx-scale*5.f,headY+scale*9.f,
+                           cx+scale*5.f,headY+scale*9.f,
+                           scale*4.4f,c->accent);
         }
-    } else if(c->flags&F144_COSTUME_LONG_HAIR) {
-        f144CapsuleAdd(b,cx,headY-scale*3.f,cx,headY+scale*7.f,scale*12.f,c->hair);
-        f144CapsuleAdd(b,cx-scale*8.f,headY-scale*3.f,
-                       cx-scale*8.f,headY+scale*9.f,scale*2.f,c->hair);
+        f144AddCircle(b,f144Vec(cx,headY),scale*8.f,c->hair);
     }
-    f144AddCircle(b,f144Vec(cx,headY),scale*8.f,c->skin);
-    if((c->flags&F144_COSTUME_LONG_HAIR) && !profile) {
-        /* Both front and rear have the reference's bright cyan scarf.
-         * It stays behind the silhouette in the side projections. */
-        f144CapsuleAdd(b,cx-scale*5.f,headY+scale*9.f,
-                       cx+scale*5.f,headY+scale*9.f,scale*4.5f,c->accent);
-        f144CapsuleAdd(b,cx+scale*4.f,headY+scale*9.f,
-                       cx+scale*7.f,headY+scale*13.f,scale*2.5f,c->accent);
-    }
-    if(profile) {
-        /* Type A short hair, or Type B rear fringe, drawn over the skull. */
-        float rearX=cx-direction*scale*5.f;
-        f144CapsuleAdd(b,rearX,headY-scale*5.f,
-                       rearX,headY-scale*1.f,
-                       scale*5.f,c->hair);
-        f144CapsuleAdd(b,cx-direction*scale*3.f,headY-scale*7.f,
-                       cx+direction*scale*3.f,headY-scale*7.f,
-                       scale*4.f,c->hair);
-    }
-    if(back) {
-        f144CapsuleAdd(b,cx,headY-scale*3.f,cx,headY+scale*3.f,scale*14.f,c->hair);
-    } else {
-        f144CapsuleAdd(b,cx,headY-scale*6.f,cx,headY-scale*7.f,scale*10.f,c->hair);
-        /* The supplied character designs deliberately have blank faces. */
-        (void)direction;
+    else
+    {
+        f144CapsuleAdd(b,cx,headY+scale*6.f,
+                       cx,shoulders+scale*1.f,scale*3.f,c->skin);
+        f144AddCircle(b,f144Vec(cx,headY),scale*8.f,c->hair);
+        f144AddCircle(b,f144Vec(cx,headY+scale*1.7f),scale*7.5f,c->skin);
+        if(c->flags&F144_COSTUME_LONG_HAIR)
+        {
+            /* Front-left thin fringe, plus the reference's cyan neck loop. */
+            f144CapsuleAdd(b,cx-scale*7.f,headY-scale*1.f,
+                           cx-scale*7.f,headY+scale*9.f,
+                           scale*1.5f,c->hair);
+            f144CapsuleAdd(b,cx-scale*5.f,headY+scale*9.f,
+                           cx+scale*5.f,headY+scale*9.f,
+                           scale*4.4f,c->accent);
+            f144CapsuleAdd(b,cx+scale*4.f,headY+scale*9.f,
+                           cx+scale*6.f,headY+scale*12.f,
+                           scale*2.5f,c->accent);
+        }
     }
 }
 static void f144PlayerVisualDrawCostume(
