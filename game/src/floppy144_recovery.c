@@ -50,6 +50,11 @@ static const char *const floppy144_main_menu_labels[] =
     "TERMINATE RECOVERY ENVIRONMENT"
 };
 
+static const char *const floppy144_save_load_labels[2]={
+    "RECORD CURRENT SESSION",
+    "REINSTATE RECORDED SESSION"
+};
+
 /*
  * Report whether one session-control option is available.
  */
@@ -104,34 +109,100 @@ bool Floppy144MainMenuOptionEnabled(
 }
 
 /*
- * BF28 follow-up: keep the original five visible rows while providing
- * quick access to retained manual restore/record actions with Left/Right.
- * Eligibility is the same canonical policy used by the former menu rows.
+ * BF28: a five-row menu with a small horizontal two-row carousel.
+ * The flags and animation progress live only in coordinator UI state.
  */
-Floppy144MainMenuOption Floppy144MainMenuShortcutForDirection(
-    int32_t direction,
-    bool active_session,
-    bool recorded_session_available
+Floppy144MainMenuOption Floppy144MainMenuVisibleOption(
+    Floppy144MainMenuOption row,bool save_load_visible
 )
 {
-    Floppy144MainMenuOption option;
-    if(direction == 0)
-        return FLOPPY144_MAIN_MENU_OPTION_COUNT;
-
-    option=direction<0
-        ? FLOPPY144_MAIN_MENU_REINSTATE_SESSION
-        : FLOPPY144_MAIN_MENU_RECORD_SESSION;
-
-    return Floppy144MainMenuOptionEnabled(
-        option,active_session,recorded_session_available
-    ) ? option : FLOPPY144_MAIN_MENU_OPTION_COUNT;
+    if(!save_load_visible)return row;
+    if(row==FLOPPY144_MAIN_MENU_OPERATOR_PROFILE)
+        return FLOPPY144_MAIN_MENU_RECORD_SESSION;
+    if(row==FLOPPY144_MAIN_MENU_SETTINGS)
+        return FLOPPY144_MAIN_MENU_REINSTATE_SESSION;
+    return row;
+}
+void Floppy144MainMenuSlideReset(Floppy144MainMenuSlide *slide)
+{
+    if(slide==NULL)return;
+    slide->save_load_visible=false;
+    slide->previous_save_load_visible=false;
+    slide->animating=false;
+    slide->direction=0;
+    slide->elapsed_ms=0U;
+}
+bool Floppy144MainMenuSlideStart(Floppy144MainMenuSlide *slide,
+    int32_t direction)
+{
+    if(slide==NULL||direction==0||slide->animating)return false;
+    slide->previous_save_load_visible=slide->save_load_visible;
+    slide->save_load_visible=!slide->save_load_visible;
+    slide->direction=direction<0?-1:1;
+    slide->elapsed_ms=0U;
+    slide->animating=true;
+    return true;
+}
+bool Floppy144MainMenuSlideAdvance(Floppy144MainMenuSlide *slide,
+    uint32_t elapsed_ms)
+{
+    if(slide==NULL||!slide->animating||elapsed_ms==0U)return false;
+    if(elapsed_ms>=FLOPPY144_MAIN_MENU_SLIDE_MS-slide->elapsed_ms)
+    {
+        slide->elapsed_ms=FLOPPY144_MAIN_MENU_SLIDE_MS;
+        slide->animating=false;
+    }
+    else slide->elapsed_ms+=elapsed_ms;
+    return true;
+}
+static const char *Floppy144MainMenuRowLabel(
+    uint32_t row,bool save_load_visible)
+{
+    if(save_load_visible && (row==2U||row==3U))
+        return floppy144_save_load_labels[row-2U];
+    return floppy144_main_menu_labels[row];
 }
 
+/* Offscreen text is clipped at the framebuffer edge. Draw into a tiny
+ * scratch strip with the *existing* bitmap text primitive, then blit only
+ * coloured glyph pixels with signed offsets. This avoids unsigned-coordinate
+ * overflow for labels travelling left of x=0, and adds no stored sprites. */
+static void Floppy144RecoverySlideText(
+    Floppy144Surface *surface,int32_t offset,uint32_t y,
+    const char *label,uint32_t colour)
+{
+    uint32_t scratch_pixels[640U*8U];
+    Floppy144Surface strip={scratch_pixels,640U,8U};
+    uint32_t x,dy,w=Floppy144DrawTextWidth(label,1U);
+    if(surface==NULL||surface->pixels==NULL||w>640U)return;
+    Floppy144DrawClear(&strip,0U);
+    Floppy144DrawText(&strip,(640U-w)/2U,0U,label,1U,colour);
+    for(dy=0U;dy<7U;++dy)
+        for(x=0U;x<640U;++x)
+        {
+            int32_t destination=(int32_t)x+offset;
+            uint32_t colour_at=scratch_pixels[dy*640U+x];
+            if(colour_at && destination>=0 && y+dy<surface->height &&
+                (uint32_t)destination<surface->width)
+                surface->pixels[(y+dy)*surface->width+
+                    (uint32_t)destination]=colour_at;
+        }
+}
+static uint32_t Floppy144MainMenuSlideDistance(
+    const Floppy144MainMenuSlide *slide)
+{
+    uint32_t t,smoothed;
+    if(slide==NULL||!slide->animating)return 640U;
+    /* Cubic ease-in/out: quick middle travel, no jarring terminal bounce. */
+    t=(slide->elapsed_ms*1000U)/FLOPPY144_MAIN_MENU_SLIDE_MS;
+    smoothed=(t*t*(3000U-2U*t))/1000000U;
+    return (640U*smoothed)/1000U;
+}
 /*
  * Draw the GDR session-control menu.
  */
 
-void Floppy144MainMenuDraw(
+void Floppy144MainMenuDrawSliding(
     Floppy144Surface *pSurface,
     Floppy144MainMenuOption selected_option,
     bool active_session,
@@ -141,7 +212,8 @@ void Floppy144MainMenuDraw(
     const char *persistence_warning,
     const char *menu_notice,
     bool menu_notice_is_warning,
-    bool reinstate_confirmation
+    bool reinstate_confirmation,
+    const Floppy144MainMenuSlide *slide
 )
 {
     const uint32_t background =
@@ -489,12 +561,13 @@ void Floppy144MainMenuDraw(
         Floppy144MainMenuOption option =
             (Floppy144MainMenuOption)option_index;
 
+        bool swapped=slide!=NULL && slide->save_load_visible;
         const char *label =
-            floppy144_main_menu_labels[option_index];
+            Floppy144MainMenuRowLabel(option_index,swapped);
 
         bool enabled =
             Floppy144MainMenuOptionEnabled(
-                option,
+                Floppy144MainMenuVisibleOption(option,swapped),
                 active_session,
                 recorded_session_available
             );
@@ -540,22 +613,35 @@ void Floppy144MainMenuDraw(
             );
         }
 
-        Floppy144DrawText(
-            &surface,
-            label_x,
-            row_y,
-            label,
-            1U,
-            enabled
-                ? (
-                    selected
-                        ? amber
-                        : text
-                  )
-                : muted
-        );
+        if(slide!=NULL && slide->animating &&
+           (option_index==2U||option_index==3U))
+        {
+            uint32_t distance=Floppy144MainMenuSlideDistance(slide);
+            uint32_t colour=selected?amber:text;
+            int32_t direction=slide->direction;
+            const char *old_label=Floppy144MainMenuRowLabel(option_index,
+                slide->previous_save_load_visible);
+            const char *new_label=Floppy144MainMenuRowLabel(option_index,
+                slide->save_load_visible);
+            Floppy144RecoverySlideText(&surface,direction*(int32_t)distance,
+                row_y,old_label,colour);
+            Floppy144RecoverySlideText(&surface,
+                -direction*(int32_t)(640U-distance),
+                row_y,new_label,enabled?colour:muted);
+        }
+        else
+        {
+            Floppy144DrawText(
+                &surface,
+                label_x,
+                row_y,
+                label,
+                1U,
+                enabled ? (selected ? amber : text) : muted
+            );
+        }
 
-        if(!enabled)
+        if(!enabled && (slide==NULL || !slide->animating))
         {
             Floppy144DrawText(
                 &surface,
@@ -571,7 +657,7 @@ void Floppy144MainMenuDraw(
     Floppy144RecoveryTextCentred(
         &surface,
         FLOPPY144_UI_FORMAL_FOOTER_Y,
-        "UP/DOWN SELECT   LEFT LOAD   RIGHT SAVE   ENTER CONFIRM",
+        "UP/DOWN SELECT   LEFT/RIGHT SWITCH   ENTER CONFIRM",
         1U,
         muted
     );
@@ -732,4 +818,25 @@ void Floppy144DifficultyDraw(
     }
     Floppy144RecoveryTextCentred(surface,280U,
         "UP/DOWN SELECT   ENTER BEGIN   BACKSPACE CANCEL",1U,muted);
+}
+
+/* Preserve the established renderer signature for existing focused tests
+ * and non-animated clients. The game uses DrawSliding for live state. */
+void Floppy144MainMenuDraw(
+    Floppy144Surface *runtime,
+    Floppy144MainMenuOption selected_option,
+    bool active_session,
+    bool recorded_session_available,
+    const Floppy144RunState *run_state,
+    const Floppy144RunState *recorded_run_state,
+    const char *persistence_warning,
+    const char *menu_notice,
+    bool menu_notice_is_warning,
+    bool reinstate_confirmation
+)
+{
+    Floppy144MainMenuDrawSliding(runtime,selected_option,active_session,
+        recorded_session_available,run_state,recorded_run_state,
+        persistence_warning,menu_notice,menu_notice_is_warning,
+        reinstate_confirmation,NULL);
 }

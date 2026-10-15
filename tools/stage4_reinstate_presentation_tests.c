@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS 1
 /*
  * FLOPPY//144 S4C-07 restored-session presentation regression.
  *
@@ -9,6 +10,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define TEST_WIDTH 640U
@@ -116,6 +118,84 @@ static uint32_t DrawMenu(
     );
 }
 
+
+/* BF28 animated row test with real 640x360 renderer pixels. Unlike a
+ * source-pattern audit, this verifies the in-between frame and invariant
+ * pixel rows outside the two moving entries. */
+static uint32_t SlideFrame(Floppy144MainMenuSlide *slide,
+    const char *filename)
+{
+    static uint32_t screen[TEST_PIXEL_COUNT];
+    Floppy144Surface surface={screen,640U,360U};
+    uint32_t result,y,x;
+    const char *dir=getenv("F144_BF28_SLIDE_CAPTURE_DIR");
+    memset(screen,0,sizeof(screen));
+    Floppy144MainMenuDrawSliding(&surface,
+        FLOPPY144_MAIN_MENU_OPERATOR_PROFILE,
+        true,true,NULL,NULL,NULL,NULL,false,false,slide);
+    result=PixelHash(screen,TEST_PIXEL_COUNT);
+    if(filename!=NULL&&dir!=NULL&&dir[0]!='\0')
+    {
+        char path[512];
+        FILE *file=NULL;
+        (void)snprintf(path,sizeof(path),"%s/%s.ppm",dir,filename);
+        if(fopen_s(&file,path,"wb")!=0||file==NULL)
+            Expect(0,"BF28 frame capture opens");
+        else
+        {
+            (void)fprintf(file,"P6\n640 360\n255\n");
+            for(y=0U;y<360U;++y)
+                for(x=0U;x<640U;++x)
+                {
+                    uint32_t pixel=screen[y*640U+x];
+                    (void)fputc((int)((pixel>>16U)&255U),file);
+                    (void)fputc((int)((pixel>>8U)&255U),file);
+                    (void)fputc((int)(pixel&255U),file);
+                }
+            (void)fclose(file);
+        }
+    }
+    return result;
+}
+static void TestMenuSlide(void)
+{
+    Floppy144MainMenuSlide slide;
+    uint32_t base,half,complete,reverse_half,returned;
+    Floppy144MainMenuSlideReset(&slide);
+    base=SlideFrame(&slide,"bf28_default_profile_settings");
+    Expect(!Floppy144MainMenuSlideStart(&slide,0),
+        "neutral horizontal input does nothing");
+    Expect(Floppy144MainMenuSlideStart(&slide,1),
+        "Right begins outward rightward slide");
+    Expect(!Floppy144MainMenuSlideStart(&slide,-1),
+        "cannot double-toggle during animation");
+    Expect(slide.direction==1&&slide.save_load_visible,
+        "Right switches to Save / Load and exits right");
+    Expect(Floppy144MainMenuSlideAdvance(&slide,120U),
+        "half animation tick advances");
+    half=SlideFrame(&slide,"bf28_switch_right_halfway");
+    Expect(half!=base,"middle labels differ at 50% slide");
+    Expect(Floppy144MainMenuSlideAdvance(&slide,120U)&&!slide.animating,
+        "240ms animation completes");
+    complete=SlideFrame(&slide,"bf28_save_load");
+    Expect(complete!=base&&complete!=half,
+        "Save / Load labels arrive at original two row positions");
+    Expect(!Floppy144MainMenuSlideAdvance(&slide,10U),
+        "completed slide cannot animate again");
+    Expect(Floppy144MainMenuSlideStart(&slide,-1)&&
+        slide.direction==-1&&!slide.save_load_visible,
+        "Left makes Save / Load exit left and Profile / Settings enter");
+    (void)Floppy144MainMenuSlideAdvance(&slide,120U);
+    reverse_half=SlideFrame(&slide,"bf28_switch_left_halfway");
+    Expect(reverse_half!=complete,"reverse transition is not static");
+    (void)Floppy144MainMenuSlideAdvance(&slide,150U);
+    returned=SlideFrame(&slide,"bf28_profile_settings_restored");
+    Expect(returned==base,
+        "original Profile / Settings frame restored pixel-identically");
+    Floppy144MainMenuSlideReset(&slide);
+    Expect(!slide.animating&&!slide.save_load_visible,
+        "new menu session resets to original five rows");
+}
 int main(void)
 {
     Floppy144RunState restored;
@@ -151,44 +231,30 @@ int main(void)
         "reinstate remains available when a recorded session exists"
     );
 
-    /* BF28 follow-up: left arrow restores, right arrow records.
-     * Neither changes the five visible options, save preference or format.
-     * A missing save or active game must be rejected before confirmation. */
-    Expect(
-        FLOPPY144_MAIN_MENU_OPTION_COUNT==5,
-        "original five-row menu remains unchanged"
-    );
-    Expect(
-        Floppy144MainMenuShortcutForDirection(-1,false,true)==
-            FLOPPY144_MAIN_MENU_REINSTATE_SESSION &&
-        Floppy144MainMenuShortcutForDirection(-1,true,true)==
-            FLOPPY144_MAIN_MENU_REINSTATE_SESSION,
-        "Left maps to load when a saved session exists"
-    );
-    Expect(
-        Floppy144MainMenuShortcutForDirection(-1,false,false)==
-            FLOPPY144_MAIN_MENU_OPTION_COUNT,
-        "Left cannot load when no saved session exists"
-    );
-    Expect(
-        Floppy144MainMenuShortcutForDirection(1,true,false)==
-            FLOPPY144_MAIN_MENU_RECORD_SESSION &&
-        Floppy144MainMenuShortcutForDirection(1,true,true)==
-            FLOPPY144_MAIN_MENU_RECORD_SESSION,
-        "Right maps to manual save only with an active session"
-    );
-    Expect(
-        Floppy144MainMenuShortcutForDirection(1,false,true)==
-            FLOPPY144_MAIN_MENU_OPTION_COUNT &&
-        Floppy144MainMenuShortcutForDirection(0,true,true)==
-            FLOPPY144_MAIN_MENU_OPTION_COUNT,
-        "Right is unavailable without an active session; neutral is ignored"
-    );
-    Expect(
-        !Floppy144MainMenuOptionEnabled(
-            FLOPPY144_MAIN_MENU_REINSTATE_SESSION,true,false),
-        "Left availability cannot bypass existing manual-first/autosave load policy"
-    );
+    /* The two centre rows are a carousel, not direct save/load arrows. */
+    Expect(FLOPPY144_MAIN_MENU_OPTION_COUNT==5,
+        "five visible menu rows retained");
+    Expect(Floppy144MainMenuVisibleOption(
+        FLOPPY144_MAIN_MENU_OPERATOR_PROFILE,false)==
+        FLOPPY144_MAIN_MENU_OPERATOR_PROFILE,
+        "default third row opens Profile");
+    Expect(Floppy144MainMenuVisibleOption(
+        FLOPPY144_MAIN_MENU_SETTINGS,false)==
+        FLOPPY144_MAIN_MENU_SETTINGS,
+        "default fourth row opens Settings");
+    Expect(Floppy144MainMenuVisibleOption(
+        FLOPPY144_MAIN_MENU_OPERATOR_PROFILE,true)==
+        FLOPPY144_MAIN_MENU_RECORD_SESSION,
+        "switched third row opens manual Save");
+    Expect(Floppy144MainMenuVisibleOption(
+        FLOPPY144_MAIN_MENU_SETTINGS,true)==
+        FLOPPY144_MAIN_MENU_REINSTATE_SESSION,
+        "switched fourth row opens recorded-session Load");
+    Expect(Floppy144MainMenuVisibleOption(
+        FLOPPY144_MAIN_MENU_TERMINATE,true)==
+        FLOPPY144_MAIN_MENU_TERMINATE,
+        "Terminate never changes on slide");
+    TestMenuSlide();
 
     no_save_hash=DrawMenu(
         false,

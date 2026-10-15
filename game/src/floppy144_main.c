@@ -180,10 +180,9 @@ static bool global_catalogue_direct_document;
 static const char *global_main_menu_notice;
 static bool global_main_menu_notice_is_warning;
 static bool global_reinstate_confirmation_pending;
-/* A transient arrow-key save/load choice, never added to menu rows or saves. */
-static Floppy144MainMenuOption global_main_menu_shortcut =
-    FLOPPY144_MAIN_MENU_OPTION_COUNT;
-static bool global_main_menu_shortcut_unavailable;
+/* Five fixed rows; only the middle two slide between Profile/Settings
+ * and the existing manual Save/Load actions. Never enters persistence. */
+static Floppy144MainMenuSlide global_main_menu_slide;
 
 static bool global_reinstate_continue_on_keyup;
 static uint32_t global_reinstate_continue_key;
@@ -361,7 +360,7 @@ static void Floppy144Redraw(
         }
         case FLOPPY144_SCREEN_MAIN_MENU:
         {
-            Floppy144MainMenuDraw(
+            Floppy144MainMenuDrawSliding(
                 pSurface,
                 global_main_menu_option,
                 global_session_active,
@@ -371,7 +370,8 @@ static void Floppy144Redraw(
                 Floppy144PersistenceWarningText(),
                 global_main_menu_notice,
                 global_main_menu_notice_is_warning,
-                global_reinstate_confirmation_pending
+                global_reinstate_confirmation_pending,
+                &global_main_menu_slide
             );
 
             break;
@@ -804,6 +804,11 @@ static void Floppy144UpdateTiming(
 
     Floppy144UpdateAudio(f144PlatformMonotonicMs(&global_platform));
 
+    if(global_screen==FLOPPY144_SCREEN_MAIN_MENU &&
+       Floppy144MainMenuSlideAdvance(&global_main_menu_slide,
+           events.presentation_elapsed_ms))
+        redraw=true;
+
     if(
         events.splash_frame_due != 0U &&
         global_screen == FLOPPY144_SCREEN_SPLASH
@@ -1065,10 +1070,7 @@ static void Floppy144OpenMainMenu(
     global_reinstate_confirmation_pending =
         false;
 
-    global_main_menu_shortcut =
-        FLOPPY144_MAIN_MENU_OPTION_COUNT;
-
-    global_main_menu_shortcut_unavailable=false;
+    Floppy144MainMenuSlideReset(&global_main_menu_slide);
 
     global_reinstate_continue_on_keyup =
         false;
@@ -1110,10 +1112,6 @@ static void Floppy144MainMenuMoveSelection(
 
     global_main_menu_notice_is_warning =
         false;
-
-    global_main_menu_shortcut =
-        FLOPPY144_MAIN_MENU_OPTION_COUNT;
-    global_main_menu_shortcut_unavailable=false;
 
     next_option =
         (int32_t)global_main_menu_option;
@@ -3207,18 +3205,6 @@ static bool Floppy144HandleActionEvent(
                         window
                     );
                 }
-                else if(global_main_menu_shortcut!=
-                        FLOPPY144_MAIN_MENU_OPTION_COUNT ||
-                        global_main_menu_shortcut_unavailable)
-                {
-                    /* Escape cancels an unconfirmed save/load shortcut. */
-                    global_main_menu_shortcut=
-                        FLOPPY144_MAIN_MENU_OPTION_COUNT;
-                    global_main_menu_shortcut_unavailable=false;
-                    global_main_menu_notice=NULL;
-                    global_main_menu_notice_is_warning=false;
-                    Floppy144Redraw(window);
-                }
 
                 return true;
             }
@@ -3245,53 +3231,20 @@ static bool Floppy144HandleActionEvent(
                         case F144_ACTION_MOVE_LEFT:
                         case F144_ACTION_MOVE_RIGHT:
                         {
-                            const bool wants_load =
-                                eAction==F144_ACTION_MOVE_LEFT;
-                            global_main_menu_shortcut =
-                                Floppy144MainMenuShortcutForDirection(
-                                    wants_load?-1:1,
-                                    global_session_active,
-                                    global_recorded_session_available
-                                );
-                            global_main_menu_shortcut_unavailable =
-                                global_main_menu_shortcut ==
-                                    FLOPPY144_MAIN_MENU_OPTION_COUNT;
-                            if(!wants_load && Floppy144HathawayMode())
+                            if(Floppy144MainMenuSlideStart(
+                                   &global_main_menu_slide,
+                                   eAction==F144_ACTION_MOVE_LEFT?-1:1))
                             {
-                                global_main_menu_shortcut_unavailable=true;
-                                global_main_menu_shortcut =
-                                    FLOPPY144_MAIN_MENU_OPTION_COUNT;
-                                global_main_menu_notice =
-                                    "INSPECTION MODE - SAVING DISABLED";
+                                global_main_menu_notice=NULL;
                                 global_main_menu_notice_is_warning=false;
+                                Floppy144Redraw(window);
                             }
-                            else if(global_main_menu_shortcut ==
-                                    FLOPPY144_MAIN_MENU_OPTION_COUNT)
-                            {
-                                global_main_menu_notice=wants_load
-                                    ? "NO RECORDED SESSION TO REINSTATE"
-                                    : "NO ACTIVE SESSION TO RECORD";
-                                global_main_menu_notice_is_warning=true;
-                            }
-                            else
-                            {
-                                global_main_menu_notice=wants_load
-                                    ? "LOAD RECORDED SESSION? ENTER CONFIRM / BACK CANCEL"
-                                    : "SAVE CURRENT SESSION? ENTER CONFIRM / BACK CANCEL";
-                                global_main_menu_notice_is_warning=false;
-                            }
-                            Floppy144Redraw(window);
                             return true;
                         }
 
                         case F144_ACTION_BACK:
                         {
-                            global_main_menu_shortcut =
-                                FLOPPY144_MAIN_MENU_OPTION_COUNT;
-                            global_main_menu_shortcut_unavailable=false;
-                            global_main_menu_notice=NULL;
-                            global_main_menu_notice_is_warning=false;
-                            Floppy144Redraw(window);
+                            /* No confirmation modal exists in this design. */
                             return true;
                         }
 
@@ -3325,20 +3278,37 @@ static bool Floppy144HandleActionEvent(
 
                         case F144_ACTION_CONFIRM:
                         {
-                            /* A failed arrow shortcut must not accidentally
-                             * execute the currently highlighted menu row. */
                             Floppy144MainMenuOption option;
-                            if(global_main_menu_shortcut_unavailable)
+                            /* Finish the label animation before activation.
+                             * Row selection stays on exactly the same slot. */
+                            if(global_main_menu_slide.animating)
+                                (void)Floppy144MainMenuSlideAdvance(
+                                    &global_main_menu_slide,
+                                    FLOPPY144_MAIN_MENU_SLIDE_MS);
+                            option=Floppy144MainMenuVisibleOption(
+                                global_main_menu_option,
+                                global_main_menu_slide.save_load_visible);
+                            if(!Floppy144MainMenuOptionEnabled(option,
+                                global_session_active,
+                                global_recorded_session_available))
                             {
+                                global_main_menu_notice =
+                                    option==FLOPPY144_MAIN_MENU_RECORD_SESSION
+                                    ? "NO ACTIVE SESSION TO RECORD"
+                                    : "NO RECORDED SESSION TO REINSTATE";
+                                global_main_menu_notice_is_warning=true;
+                                Floppy144Redraw(window);
                                 return true;
                             }
-                            option=global_main_menu_shortcut!=
-                                FLOPPY144_MAIN_MENU_OPTION_COUNT
-                                ?global_main_menu_shortcut
-                                :global_main_menu_option;
-                            global_main_menu_shortcut =
-                                FLOPPY144_MAIN_MENU_OPTION_COUNT;
-                            global_main_menu_shortcut_unavailable=false;
+                            if(option==FLOPPY144_MAIN_MENU_RECORD_SESSION &&
+                               Floppy144HathawayMode())
+                            {
+                                global_main_menu_notice =
+                                    "INSPECTION MODE - SAVING DISABLED";
+                                global_main_menu_notice_is_warning=false;
+                                Floppy144Redraw(window);
+                                return true;
+                            }
                             Floppy144MainMenuActivate(window,option);
                             return true;
                         }

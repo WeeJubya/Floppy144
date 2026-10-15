@@ -1,0 +1,35 @@
+name: BF28 Main Menu Carousel
+
+on:
+  push:
+    branches:
+      - development/Stage-4
+  workflow_dispatch:
+
+jobs:
+  bf28-menu-animation:
+    runs-on: windows-2022
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure MSVC x64
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Verify carousel pixels and save/load action mapping
+        shell: pwsh
+        run: |
+          $folder=Join-Path $env:RUNNER_TEMP "bf28-sliding-menu"
+          New-Item -ItemType Directory -Force -Path $folder | Out-Null
+          $env:F144_BF28_SLIDE_CAPTURE_DIR=$folder
+          .\tools\test_stage4_reinstate_presentation.ps1
+          .\tools\test_stage4f_presentation_journey.ps1
+          .\tools\test_stage4_profile_screen.ps1
+      - name: Upload actual carousel animation framebuffers
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bf28-original-menu-sliding-frames
+          path: ${{ runner.temp }}/bf28-sliding-menu/*.ppm
+          if-no-files-found: ignore

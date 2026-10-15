@@ -60,8 +60,12 @@ foreach($label in @(
     }
 }
 
-if($recovery -match '"RECORD CURRENT SESSION"|"REINSTATE RECORDED SESSION"'){
-    throw "BF28 old dedicated manual save/reinstate menu entries still appear."
+# The two old manual actions are visible *only when the middle rows
+# slide*, and must not add to the original static five-row label list.
+if($recovery -notmatch '"RECORD CURRENT SESSION"' -or
+   $recovery -notmatch '"REINSTATE RECORDED SESSION"' -or
+   $recovery -notmatch 'floppy144_save_load_labels\[2\]'){
+    throw "BF28 alternate Save/Load labels are not in the slide pair."
 }
 if($recovery -match '"CREDITS"')
 {
@@ -76,51 +80,51 @@ if(
     throw "BF28 canonical Session Control panel or row geometry changed."
 }
 
-# BF28 follow-up: the five-option original main menu contains hidden
-# left/right shortcuts for the *existing* manual record/reinstate operations.
-# Pressing an arrow only opens a prompt; Enter executes, Back cancels.
-$recoveryHeader = Get-Content -LiteralPath (Join-Path $root "game\src\floppy144_recovery.h") -Raw
-$menuStart = $main.IndexOf("case FLOPPY144_SCREEN_MAIN_MENU:",$main.IndexOf("switch(global_screen)",$main.IndexOf("switch(global_screen)")+1))
-# Test the actual logical-action case instead of the display-only renderer.
-$inputMenuStart = $main.LastIndexOf("case FLOPPY144_SCREEN_MAIN_MENU:")
-$inputMenuEnd = $main.IndexOf("case FLOPPY144_SCREEN_DIFFICULTY:",$inputMenuStart)
+# BF28 carousel: Left/Right animates only the two middle rows. No new
+# selectable menu pages, no extra rows, and no confirmation shortcut.
+$recoveryHeader=Get-Content -LiteralPath (Join-Path $root "game\src\floppy144_recovery.h") -Raw
+$inputMenuStart=$main.LastIndexOf("case FLOPPY144_SCREEN_MAIN_MENU:")
+$inputMenuEnd=$main.IndexOf("case FLOPPY144_SCREEN_DIFFICULTY:",$inputMenuStart)
 if($inputMenuStart -lt 0 -or $inputMenuEnd -le $inputMenuStart){
-    throw "BF28 could not isolate the main menu logical-action handler."
+    throw "BF28 cannot isolate Main Menu input dispatch"
 }
-$inputMenu = $main.Substring($inputMenuStart,$inputMenuEnd-$inputMenuStart)
+$inputMenu=$main.Substring($inputMenuStart,$inputMenuEnd-$inputMenuStart)
 foreach($required in @(
-    "case F144_ACTION_MOVE_LEFT:",
-    "case F144_ACTION_MOVE_RIGHT:",
-    "case F144_ACTION_BACK:",
-    "Floppy144MainMenuShortcutForDirection(",
-    "FLOPPY144_MAIN_MENU_OPTION_COUNT",
-    "global_main_menu_shortcut_unavailable",
-    "Floppy144MainMenuActivate(window,option)"
+    'case F144_ACTION_MOVE_LEFT:',
+    'case F144_ACTION_MOVE_RIGHT:',
+    'Floppy144MainMenuSlideStart(',
+    'Floppy144MainMenuVisibleOption(',
+    'Floppy144MainMenuOptionEnabled(',
+    'Floppy144MainMenuActivate(window,option)'
 )){
     if($inputMenu -notmatch [regex]::Escape($required)){
-        throw "BF28 left/right save/load and confirmation route missing: $required"
+        throw "BF28 missing carousel input / real action mapping: $required"
     }
 }
 foreach($required in @(
-    'Floppy144MainMenuShortcutForDirection',
-    'FLOPPY144_MAIN_MENU_RECORD_SESSION',
-    'FLOPPY144_MAIN_MENU_REINSTATE_SESSION'
+    'FLOPPY144_MAIN_MENU_SLIDE_MS',
+    'Floppy144MainMenuSlideReset',
+    'Floppy144MainMenuSlideAdvance',
+    'Floppy144MainMenuSlideStart',
+    'Floppy144MainMenuVisibleOption',
+    'Floppy144MainMenuDrawSliding'
 )){
     if($recovery -notmatch [regex]::Escape($required) -and
-        $recoveryHeader -notmatch [regex]::Escape($required)){
-        throw "BF28 save/load shortcut definition absent: $required"
+       $recoveryHeader -notmatch [regex]::Escape($required) -and
+       $main -notmatch [regex]::Escape($required)){
+       throw "BF28 missing slide primitive: $required"
     }
 }
-if($recovery -notmatch 'LEFT LOAD   RIGHT SAVE' -or
-   $recovery -notmatch 'option_index\s*\*\s*12U'){
-    throw "BF28 main menu shortcut hint/unchanged row spacing missing"
+if($recovery -notmatch 'LEFT/RIGHT SWITCH' -or
+   $recovery -notmatch 'option_index\s*\*\s*12U' -or
+   $recovery -notmatch 'option_index==2U\|\|option_index==3U'){
+    throw "BF28 carousel leaked beyond two existing fixed row slots"
 }
-if($main -notmatch 'Escape cancels an unconfirmed save/load shortcut' -or
-   $main -notmatch 'global_main_menu_shortcut_unavailable=false'){
-    throw "BF28 arrow action is not cancelled by Escape / reset"
+if($main -match 'global_main_menu_shortcut'){
+    throw "BF28 obsolete direct save/load shortcut is still present"
 }
 if($main -notmatch 'Floppy144MainMenuActivate\(window,global_main_menu_option\)'){
-    throw "BF28 difficulty Initiate flow no longer activates selected menu action"
+    throw "BF28 difficulty Initiate route no longer executes the active menu action"
 }
 
 # Settings/Profile child routes deliberately restore their parent selection.
