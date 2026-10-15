@@ -458,9 +458,11 @@ jobs:
         shell: pwsh
         run: .\tools\test_stage4_build_architecture.ps1
 
-      - name: Build standalone audio listening harness
+      - name: Build standalone audio listening harness and waveform evidence
         shell: pwsh
-        run: .\tools\build_audio_review.ps1
+        run: |
+          .\tools\build_audio_review.ps1
+          .\tools\test_bf24_review_package.ps1
 
       - name: Install Premake
         shell: pwsh
@@ -495,4 +497,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bf21-24-audio-review
-          path: build/audio-review/f144_audio_review.exe
+          path: build/audio-review/
+          if-no-files-found: error

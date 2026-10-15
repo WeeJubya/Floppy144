@@ -4,10 +4,11 @@ Branch: development/Stage-4. Baseline: b455b05.
 
 ## Root causes and scope
 
-BF21's previous native-test failure was a linker argument error, corrected in
-b455b05. Its Windows run 38538739071 succeeded. BF22 already has independent
-70 BPM menu and 65 BPM completion compositions. Neither approved gameplay
-notes nor Act-based corruption are changed here.
+BF21's earlier linker issue was corrected in b455b05. BF22's initially
+proposed 70 BPM menu cue was **superseded** by the later approved 110 BPM,
+32-bar **Whimsical Assembly Line** (`docs/stage4/bf22_procedural_music.md`).
+The 80 BPM gameplay composition and its Act-driven corruption are unchanged;
+the independent 65 BPM completion music remains intact.
 
 BF23 previously used linear elapsed-time presentation, without progress ticks
 or temporary music tempo. It now uses per-percent presentation weights: constant
@@ -64,7 +65,10 @@ no unbounded sound queue or new mixing is introduced.
 ## Complete registry / review status
 
 All ORIGINAL cues retained. Both candidate variants exist for every row; all
-await user listening approval. File/collection restored candidates provide the
+await user listening approval. Current recommendations and reproducible waveform
+measurement instructions are in `docs/stage4/bf24_foley_review.md`, shipped
+alongside the existing Windows harness by `tools/build_audio_review.ps1`.
+File/collection restored candidates provide the
 alternative completion cue comparison; there is no separate registered
 endgame-only SFX in this baseline.
 
@@ -134,7 +138,9 @@ gain, mute and foot alternation; native device behaviour requires listening.
 ```
 
 Windows CI runs focused checks, the complete regression workflow, Release
-rebuilds and the 1,474,560-byte gate. It uploads the standalone review executable
-as `bf21-24-audio-review`. Inspect the run associated with the final commit for
+rebuilds and the 1,474,560-byte gate. It uploads the **existing** standalone
+review executable, waveform metrics CSV and detailed listening/approval guide
+as `bf21-24-audio-review`. No comparison candidate enters gameplay without
+specific developer approval. Inspect the run associated with the final commit for
 actual results. Linux portable BF23 curve tests pass; Linux cannot run MSVC,
 WinMM or the Windows executable and is not Windows acceptance.

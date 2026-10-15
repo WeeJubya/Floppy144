@@ -2,6 +2,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <stdio.h>
+#include <string.h>
 #include "f144audio.h"
 #include "f144sfx.h"
 #include "floppy144_restore_presentation.h"
@@ -14,7 +15,7 @@ static int pressed(int vk,int *previous)
     return next;
 }
 
-int main(void)
+int main(int argc,char **argv)
 {
     static const unsigned seek_bars[]={0U,100U,200U,300U,400U,500U,580U};
     LARGE_INTEGER freq,last,now;
@@ -25,7 +26,25 @@ int main(void)
     unsigned cue=0U,i,variant=0U,restore_ms=0U,restore_progress=0U,restore_tick=0U;
     int restoring=0;
     double restore_accum=0.0;
-    int midi=F144_AudioInit(),sfx=F144_SFXInit();
+    int midi,sfx;
+    /* Machine-readable, no-device registry check for Windows CI and reviewers.
+     * Normal interactive playback is unchanged; no second harness exists. */
+    if(argc==2&&strcmp(argv[1],"--list")==0)
+    {
+        puts("F144 AUDIO REVIEW: 25 EFFECTS / ORIGINAL | REVISED A | REVISED B");
+        for(i=0U;i<F144_SFX_COUNT;++i)
+            printf("%2u: %s\n",i,F144_SFXReviewName((F144SFX)i));
+        return 0;
+    }
+    if(argc==2&&strcmp(argv[1],"--help")==0)
+    {
+        puts("BF24 WinMM review (build: .\\tools\\build_audio_review.ps1)");
+        puts("N/B cue | O/A/S variant | SPACE replay | LEFT/RIGHT SFX volume");
+        puts("UP/DOWN music volume | M/C/G scene | 1-4 Act | T restore | X interrupt");
+        puts("R/E corruption | F1-F7 gameplay seek | ESC quit | --list registry");
+        return 0;
+    }
+    midi=F144_AudioInit();sfx=F144_SFXInit();
     if(!midi && !sfx) { puts("No MIDI or waveOut device available."); return 1; }
     F144_MusicSetRestoration(0U);
     if(midi) F144_MusicRestart();
