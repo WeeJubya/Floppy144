@@ -112,6 +112,12 @@ foreach($relative in $noMention) {
             "GAME DESIGN COMPANY: GREY DOOR REPUBLIK", ""
         )
     }
+    if($relative -eq "game\src\floppy144_intro.c") {
+        # BF20 explicitly credits the established studio at launch.
+        # Only the exact studio name is exempt; Grey Door narrative,
+        # record IDs and game-state acknowledgements remain forbidden.
+        $text = $text.Replace('"GREY DOOR REPUBLIK"', '')
+    }
     if($text -match '(?i)(GREY[ _]DOOR|DR-00-RS-0144|GreyDoor)') {
         throw "Grey Door acknowledgement has leaked into ordinary player-facing content: $relative"
     }
