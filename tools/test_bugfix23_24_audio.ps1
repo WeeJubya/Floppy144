@@ -14,4 +14,4 @@ try {
     & .\bf24.exe
     if($LASTEXITCODE -ne 0){throw 'BF24 waveform regression failed'}
 } finally {Pop-Location}
-Write-Host 'BF23 / BF24 AUDIO REGRESSION: PASS (listening approval remains outstanding)'
+Write-Host 'BF23 / BF24 AUDIO REGRESSION: PASS (footstep Revised A approved, remaining candidates unapproved)'
