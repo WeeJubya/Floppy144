@@ -104,7 +104,7 @@ const $=s=>document.querySelector(s);
 const dropdown=$("#effect"),state=$("#review-state"),details=$("#effect-detail"),info=$("#provenance");
 effects.forEach((e,i)=>{const o=document.createElement("option");o.value=i;o.textContent=String(i).padStart(2,"0")+" / "+e[0];dropdown.appendChild(o);});
 const SR=11025,duration=5.70,times=[.26,.87,1.50,2.12,2.82,3.41,4.15,4.64,5.20];
-let ctx=null,active=null,selected=14;
+let ctx=null,active=[],selected=14;
 const files=new Map(),decoded=new Map(),reviewKey="f144-bf24-review-v2";
 let reviews={};
 try{reviews=JSON.parse(localStorage.getItem(reviewKey)||"{}");if(!reviews||typeof reviews!=="object")reviews={};}catch(e){reviews={};}
@@ -159,7 +159,7 @@ const recipes={14:{original:()=>synthFootsteps("original"),A:()=>synthFootsteps(
 function name(id){return effects[id][0];}
 function slotKey(id,slot){return id+":"+slot;}
 function available(slot){return files.has(slotKey(selected,slot))||Boolean(recipes[selected]&&recipes[selected][slot]);}
-function stop(){if(active){try{active.stop();}catch(e){}active=null;}}
+function stop(){for(const source of active){try{source.stop();}catch(e){}}active=[];}
 async function context(){if(!ctx)ctx=new (window.AudioContext||window.webkitAudioContext)();await ctx.resume();}
 async function buffer(slot){
  const key=slotKey(selected,slot);
@@ -170,7 +170,7 @@ async function buffer(slot){
  if(recipes[selected]&&recipes[selected][slot])return recipes[selected][slot]();
  throw new Error("No "+slot+" recording or procedural recipe for "+name(selected)+".");
 }
-function activate(src,status){stop();src.connect(ctx.destination);src.start();active=src;$("#status").textContent=status;src.onended=()=>{if(active===src){active=null;$("#status").textContent="READY.";}};}
+function activate(src,status){stop();src.connect(ctx.destination);src.start();active=[src];$("#status").textContent=status;src.onended=()=>{if(active.includes(src)){active=[];$("#status").textContent="READY.";}};}
 async function play(slot){
  try{await context();const audio=await buffer(slot);const src=ctx.createBufferSource();src.buffer=audio;activate(src,"PLAYING "+name(selected).toUpperCase()+" / "+slot.toUpperCase());}
  catch(e){$("#status").textContent="NOT AVAILABLE: "+e.message;}
@@ -178,16 +178,15 @@ async function play(slot){
 async function compare(){
  try{
   await context();const a=await buffer("A"),b=await buffer("B"),gap=.55;
-  const total=a.duration+b.duration+gap;
   /* Play separate buffers in sequence at matching output gain; never repeat
      the source waveform or add a stored media dependency. */
   stop();const sa=ctx.createBufferSource(),sb=ctx.createBufferSource();
   sa.buffer=a;sb.buffer=b;
   sa.connect(ctx.destination);sb.connect(ctx.destination);
   const now=ctx.currentTime+.04;
-  sa.start(now);sb.start(now+a.duration+gap);active=sb;
+  sa.start(now);sb.start(now+a.duration+gap);active=[sa,sb];
   $("#status").textContent="PLAYING "+name(selected).toUpperCase()+" / A THEN B";
-  sb.onended=()=>{if(active===sb){active=null;$("#status").textContent="READY.";}}
+  sb.onended=()=>{if(active.includes(sb)){active=[];$("#status").textContent="READY.";}}
  }catch(e){$("#status").textContent="NOT AVAILABLE: "+e.message;}
 }
 function refresh(){
@@ -205,9 +204,10 @@ function refresh(){
 }
 function save(){
  reviews[selected]={decision:$("#decision").value,notes:$("#notes").value.trim(),effect:name(selected)};
- try{localStorage.setItem(reviewKey,JSON.stringify(reviews));$("#status").textContent="REVIEW SAVED LOCALLY. Export JSON to share.";}
- catch(e){$("#status").textContent="Browser storage unavailable; use EXPORT REVIEW JSON.";}
- refresh();
+ let message="REVIEW SAVED LOCALLY. Export JSON to share.";
+ try{localStorage.setItem(reviewKey,JSON.stringify(reviews));}
+ catch(e){message="Browser storage unavailable; use EXPORT REVIEW JSON.";}
+ refresh();$("#status").textContent=message;
 }
 dropdown.addEventListener("change",()=>{selected=Number(dropdown.value);refresh();});
 document.querySelectorAll("[data-play]").forEach(b=>b.addEventListener("click",()=>play(b.dataset.play)));
