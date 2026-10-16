@@ -24,6 +24,24 @@ int main(void)
     g_noise=0xF14451F1U;
     m=generate_review(&b,F144_SFX_FOOTSTEP,1U,1U);
     if(n!=m||!memcmp(a.samples,b.samples,n*sizeof(int16_t)))return 5;
+    /* Shipping footstep is exactly the approved Revised A review generator. */
+    g_volume=0.8f;g_noise=0xF14451F1U;g_footstep_side=0U;
+    n=generate(&a,F144_SFX_FOOTSTEP);
+    g_noise=0xF14451F1U;
+    m=generate_review(&b,F144_SFX_FOOTSTEP,1U,0U);
+    if(n!=m||memcmp(a.samples,b.samples,n*sizeof(int16_t)))return 10;
+    /* The historic ORIGINAL must remain available in the comparison tool. */
+    g_noise=0xF14451F1U;
+    n=make_footstep_original(&a);
+    g_noise=0xF14451F1U;
+    m=generate_review(&b,F144_SFX_FOOTSTEP,0U,0U);
+    if(n!=m||memcmp(a.samples,b.samples,n*sizeof(int16_t)))return 11;
+    /* Original and approved footfalls must not alias one another. */
+    g_noise=0xF14451F1U;
+    n=generate(&a,F144_SFX_FOOTSTEP);
+    g_noise=0xF14451F1U;
+    m=generate_review(&b,F144_SFX_FOOTSTEP,0U,0U);
+    if(n==m&&!memcmp(a.samples,b.samples,n*sizeof(int16_t)))return 12;
     /* Synthesis gain is independent; no global device gain cross-talk. */
     g_volume=0.8f;g_noise=0xF14451F1U;
     n=generate_review(&a,F144_SFX_FOOTSTEP,1U,0U);
@@ -39,6 +57,6 @@ int main(void)
     if(find_voice()!=NULL)return 8;
     for(i=0U;i<F144_VOICES;i++)g_voice[i].prepared=0;
     if(find_voice()==NULL)return 9;
-    puts("BF24 all ORIGINAL/A/B cues deterministic, bounded, unclipped, muted; alternating feet PASS");
+    puts("BF24 25 cues deterministic, bounded, unclipped and muted; approved footstep A matches gameplay, original retained, alternating feet PASS");
     return 0;
 }
