@@ -47,7 +47,14 @@ for($cue=0;$cue -lt 25;$cue++){
 $lab=Join-Path $root 'tools\bf24_footsteps_listening_lab.html'
 if(-not(Test-Path -LiteralPath $lab -PathType Leaf)){throw 'BF24 browser lab missing'}
 $labText=Get-Content -LiteralPath $lab -Raw
-$labEntries=[regex]::Matches($labText,'(?m)^ \["[^"]+","[^"]+","[^"]+"\],?
+$labEntries=@($labText -split "`r?`n" | Where-Object { $_ -match '^ \[' })
+if($labEntries.Count -ne 25){throw "Browser lab must enumerate all 25 effects; got $($labEntries.Count)"}
+foreach($required in @('const recipes={14:', 'F144 SOUND LABORATORY',
+    'BF24_SFX_review_decisions.json', 'PLAY REVISED A', 'PLAY REVISED B',
+    'original-file', 'ref-file', 'a-file', 'b-file')){
+    if(-not $labText.Contains($required)){throw "Browser lab missing $required"}
+}
+# Verify current movement coupling still uses actual displacement, the shared
 # 160 ms animation contact, and clears the pending foot when blocked.
 $main=Get-Content -LiteralPath (Join-Path $root 'game\src\floppy144_main.c') -Raw
 foreach($required in @(
