@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F144 | BF24 Footsteps Listening Lab</title>
+<style>
+:root{color-scheme:dark;font-family:Consolas,"Courier New",monospace;background:#111610;color:#d8ddc7}
+*{box-sizing:border-box}body{margin:0;padding:2rem 1rem;display:flex;justify-content:center}
+main{width:min(750px,100%);border:2px solid #718263;padding:1.5rem;background:#1a2119;box-shadow:8px 8px 0 #090e09}
+h1{font-size:clamp(1.2rem,4vw,1.8rem);letter-spacing:.04em;margin:.15rem 0 .5rem;color:#e2dba4}
+h2{font-size:1rem;color:#c2c99b;margin:1.5rem 0 .6rem}
+small,.muted{color:#aab49d}p{line-height:1.5}
+button{font:inherit;color:#e9eccd;background:#303e2a;border:1px solid #8ba17e;padding:.75rem 1rem;cursor:pointer}
+button:hover,button:focus{background:#4d603e;outline:2px solid #aabc88}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.65rem}
+a{color:#cbdc92}input{margin:.6rem 0;max-width:100%}
+hr{border:0;border-top:1px solid #63735b;margin:1.4rem 0}
+#status{min-height:1.5em;color:#e4d38e}
+.note{font-size:.86rem;color:#bfcbb2}
+</style></head><body><main>
+<p class="muted">GDR AUDIO RESEARCH · BF24 · DEV-ONLY PREVIEW</p>
+<h1>FOOTSTEPS / 014</h1>
+<p>Listen using ordinary browser audio. Nothing here is embedded in ChatGPT. The three sounds below are <strong>procedurally generated locally in your browser</strong>, with no stored audio or external synthesis service.</p>
+<h2>PLAY INDIVIDUAL VERSIONS</h2>
+<div class="controls">
+<button data-variant="original">PLAY ORIGINAL</button>
+<button data-variant="A">PLAY REVISED A<br><small>Rounded / physical</small></button>
+<button data-variant="B">PLAY REVISED B<br><small>Stylised / retro</small></button>
+<button id="compare">PLAY A → B</button>
+</div>
+<p id="status" role="status">READY. Select an effect.</p>
+<hr>
+<h2>LISTEN TO THE REFERENCE</h2>
+<p>The source remains at <a href="https://audio.com/decibelphantomx/audio/footsteps-sounds-on-laminate-flooring-001" target="_blank" rel="noopener noreferrer">Footsteps on laminate flooring 001</a>. The chosen nine-step passage was approximately 9.4–15.0 seconds.</p>
+<p>Alternatively, select a reference recording already on your computer. It stays in this browser tab and is never uploaded:</p>
+<input id="file" type="file" accept="audio/*" aria-label="Choose local reference audio">
+<audio id="reference" controls preload="none" style="display:none;width:100%"></audio>
+<hr>
+<h2>WHAT YOU'RE HEARING</h2>
+<p class="note"><strong>Original:</strong> approximate port of the game's 108-ms, 78-Hz triangle/noise footfall at the reference cadence.<br>
+<strong>A:</strong> rounded damped heel resonance, filtered impact noise and a delayed quieter sole contact.<br>
+<strong>B:</strong> compact low-frequency triangle impacts, restrained texture and quantisation.</p>
+<p class="note">The A/B algorithms here are browser implementations of the BF24 exploration concept, not byte-for-byte copies of the earlier MP3 prototypes or the Windows F144SFX harness. The game and its approved sounds remain unchanged. All variants are played using the same nine footfall times, roughly 0.62 seconds apart.</p>
+</main><script>
+"use strict";
+let audioContext=null,active=null;
+const SR=11025;
+const times=[.26,.87,1.50,2.12,2.82,3.41,4.15,4.64,5.20];
+const duration=5.70;
+function noise(seed){let x=seed>>>0;return ()=>{x^=x<<13;x^=x>>>17;x^=x<<5;return ((x>>>0)/4294967296)*2-1;};}
+function lowpass(cut){const a=1-Math.exp(-2*Math.PI*cut/SR);let z=0;return v=>(z+=a*(v-z));}
+function bandpass(lo,hi){const lp=lowpass(hi),low=lowpass(lo);return v=>{let a=lp(v);return a-low(a);};}
+function triangle(phase){return 2/Math.PI*Math.asin(Math.sin(phase));}
+function env(t,atk,tau){return (1-Math.exp(-t/atk))*Math.exp(-t/tau);}
+function step(kind,side,idx){
+ const n=Math.round(.175*SR),v=new Float32Array(n);
+ const rnd=noise((0xF1442026+(idx*827)+(kind==="B"?17:0))>>>0);
+ const l=(side?1.045:.965), shift=(side?1.032:.978);
+ const heelBand=bandpass(65,680),soleBand=bandpass(95,1000),shfl=lowpass(450);
+ const retroNoise=lowpass(660),retroToe=lowpass(810);
+ for(let i=0;i<n;i++){
+  const t=i/SR, delay=kind==="A"?(side?.084:.078):(side?.068:.064);
+  const raw=rnd(),e=env(t,kind==="B"?.005:.0036,kind==="B"?.018:.027);
+  let s=0;
+  if(kind==="original"){
+   const fr=78+((idx*3)&15);
+   s=(triangle(2*Math.PI*fr*t)*.33+raw*.24)*(1-t/.108)*.46;
+   if(t>.108)s=0;
+  }else if(kind==="A"){
+   const body=.78*Math.sin(2*Math.PI*131*shift*t+.6)*Math.exp(-t/.038);
+   const floor=.30*Math.sin(2*Math.PI*350*shift*t+.4)*Math.exp(-t/.020);
+   s=e*(1.25*heelBand(raw)+body+floor);
+   if(t>=delay){const u=t-delay;
+    const sole=.17*Math.sin(2*Math.PI*183*shift*u+.7)*Math.exp(-u/.028);
+    s+=.38*env(u,.003,.022)*(soleBand(rnd())+sole);
+   }
+   s+=.10*shfl(rnd())*env(t,.011,.057);
+  }else{
+   s=e*(.48*triangle(2*Math.PI*104*shift*t)+.36*retroNoise(raw));
+   if(t>=delay){const u=t-delay;
+    s+=.18*env(u,.004,.016)*(.55*triangle(2*Math.PI*138*shift*u)+.40*retroToe(rnd()));
+   }
+   s=Math.round(s*256)/256;
+  }
+  v[i]=Math.max(-.85,Math.min(.85,s*l*(kind==="A"?.16:kind==="B"?.18:1)));
+ }
+ return v;
+}
+function makeBuffer(ctx,kind){
+ const y=ctx.createBuffer(1,Math.ceil(duration*SR),SR),data=y.getChannelData(0);
+ times.forEach((when,i)=>{const a=step(kind,i&1,i),at=Math.round(when*SR);
+ for(let j=0;j<a.length && at+j<data.length;j++)data[at+j]+=a[j];});
+ return y;
+}
+function stop(){if(active){try{active.stop()}catch(e){}active=null;}}
+async function play(kind){
+ try{
+  if(!audioContext)audioContext=new (window.AudioContext||window.webkitAudioContext)();
+  await audioContext.resume(); stop();
+  const src=audioContext.createBufferSource();
+  src.buffer=makeBuffer(audioContext,kind);
+  const gain=audioContext.createGain();gain.gain.value=.9;
+  src.connect(gain).connect(audioContext.destination);
+  src.start();active=src;
+  document.querySelector("#status").textContent="PLAYING: "+(kind==="original"?"ORIGINAL":kind==="A"?"REVISED A · PHYSICAL":"REVISED B · RETRO");
+  src.onended=()=>{if(active===src){active=null;document.querySelector("#status").textContent="READY. Choose another version.";}}
+ }catch(e){document.querySelector("#status").textContent="Audio failed: "+e.message;}
+}
+document.querySelectorAll("[data-variant]").forEach(b=>b.addEventListener("click",()=>play(b.dataset.variant)));
+document.querySelector("#compare").addEventListener("click",async()=>{
+ try{
+  if(!audioContext)audioContext=new (window.AudioContext||window.webkitAudioContext)();
+  await audioContext.resume();stop();
+  const gap=.6,buf=audioContext.createBuffer(1,Math.ceil((duration*2+gap)*SR),SR),out=buf.getChannelData(0);
+  ["A","B"].forEach((v,i)=>{const a=makeBuffer(audioContext,v).getChannelData(0),at=Math.round(i*(duration+gap)*SR);out.set(a,at);});
+  const src=audioContext.createBufferSource();src.buffer=buf;
+  const gain=audioContext.createGain();gain.gain.value=.9;
+  src.connect(gain).connect(audioContext.destination);src.start();active=src;
+  document.querySelector("#status").textContent="PLAYING: A → B (0–5.7s A; 6.3–12.0s B)";
+  src.onended=()=>{if(active===src){active=null;document.querySelector("#status").textContent="READY.";}}
+ }catch(e){document.querySelector("#status").textContent="Audio failed: "+e.message;}
+});
+document.querySelector("#file").addEventListener("change",e=>{
+ const el=document.querySelector("#reference");
+ if(el.dataset.url)URL.revokeObjectURL(el.dataset.url);
+ const f=e.target.files?.[0];if(!f)return;
+ const url=URL.createObjectURL(f);el.dataset.url=url;el.src=url;el.style.display="block";
+});
+</script></body></html>
