@@ -1,50 +1,114 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>F144 | BF24 Footsteps Listening Lab</title>
+<title>F144 | Sound Laboratory</title>
 <style>
 :root{color-scheme:dark;font-family:Consolas,"Courier New",monospace;background:#111610;color:#d8ddc7}
 *{box-sizing:border-box}body{margin:0;padding:2rem 1rem;display:flex;justify-content:center}
-main{width:min(750px,100%);border:2px solid #718263;padding:1.5rem;background:#1a2119;box-shadow:8px 8px 0 #090e09}
-h1{font-size:clamp(1.2rem,4vw,1.8rem);letter-spacing:.04em;margin:.15rem 0 .5rem;color:#e2dba4}
+main{width:min(780px,100%);border:2px solid #718263;padding:1.5rem;background:#1a2119;box-shadow:8px 8px 0 #090e09}
+h1{font-size:clamp(1.25rem,4vw,1.9rem);letter-spacing:.04em;margin:.15rem 0 .5rem;color:#e2dba4}
 h2{font-size:1rem;color:#c2c99b;margin:1.5rem 0 .6rem}
 small,.muted{color:#aab49d}p{line-height:1.5}
-button{font:inherit;color:#e9eccd;background:#303e2a;border:1px solid #8ba17e;padding:.75rem 1rem;cursor:pointer}
-button:hover,button:focus{background:#4d603e;outline:2px solid #aabc88}
-.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.65rem}
-a{color:#cbdc92}input{margin:.6rem 0;max-width:100%}
+button,select,textarea{font:inherit;color:#e9eccd;background:#303e2a;border:1px solid #8ba17e;padding:.7rem}
+button{cursor:pointer}button:hover,button:focus,select:focus,textarea:focus{background:#4d603e;outline:2px solid #aabc88}
+button:disabled{cursor:not-allowed;opacity:.42}
+button[aria-pressed="true"]{border:2px solid #d1d98d}
+select,textarea{width:100%;margin-top:.3rem}
+textarea{min-height:5rem;resize:vertical}
+label{display:block;margin:.8rem 0 .4rem;color:#cdd6c3}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:.6rem}
+a{color:#cbdc92}input[type=file]{max-width:100%;font:inherit;font-size:.8rem}
 hr{border:0;border-top:1px solid #63735b;margin:1.4rem 0}
-#status{min-height:1.5em;color:#e4d38e}
+#status{min-height:1.7em;color:#e4d38e}
 .note{font-size:.86rem;color:#bfcbb2}
+.status{font-weight:bold;color:#d2dc99}
+.slot{display:grid;grid-template-columns:110px 1fr;gap:.8rem;align-items:center;padding:.5rem 0;border-bottom:1px dotted #52664a}
+@media(max-width:500px){.slot{grid-template-columns:1fr}}
+#external{display:none}
 </style></head><body><main>
-<p class="muted">GDR AUDIO RESEARCH · BF24 · DEV-ONLY PREVIEW</p>
-<h1>FOOTSTEPS / 014</h1>
-<p>Listen using ordinary browser audio. Nothing here is embedded in ChatGPT. The three sounds below are <strong>procedurally generated locally in your browser</strong>, with no stored audio or external synthesis service.</p>
-<h2>PLAY INDIVIDUAL VERSIONS</h2>
+<p class="muted">GREY DOOR REPUBLIK / DEVELOPMENT UTILITIES / BF24+</p>
+<h1>F144 SOUND LABORATORY</h1>
+<p>Standalone procedural Foley comparison, separate from Floppy//144.exe. Select any of the <strong>25 registered effects</strong>. Candidate algorithms can be added without changing this review workflow.</p>
+<label for="effect">Registered effect</label>
+<select id="effect"></select>
+<p id="effect-detail" class="note"></p>
+<p id="review-state" class="status"></p>
+<h2>LISTENING DESK</h2>
 <div class="controls">
-<button data-variant="original">PLAY ORIGINAL</button>
-<button data-variant="A">PLAY REVISED A<br><small>Rounded / physical</small></button>
-<button data-variant="B">PLAY REVISED B<br><small>Stylised / retro</small></button>
+<button data-play="reference">PLAY REFERENCE</button>
+<button data-play="original">PLAY ORIGINAL</button>
+<button data-play="A">PLAY REVISED A</button>
+<button data-play="B">PLAY REVISED B</button>
 <button id="compare">PLAY A → B</button>
+<button id="stop">STOP</button>
 </div>
-<p id="status" role="status">READY. Select an effect.</p>
+<p id="status" role="status">READY.</p>
+<p id="foot-note" class="note"></p>
+<div id="external" class="note">Footstep reference: <a href="https://audio.com/decibelphantomx/audio/footsteps-sounds-on-laminate-flooring-001" target="_blank" rel="noopener noreferrer">Laminate floor recording (external)</a>. To hear the actual recording alongside the candidates, select its local MP3 below.</div>
 <hr>
-<h2>LISTEN TO THE REFERENCE</h2>
-<p>The source remains at <a href="https://audio.com/decibelphantomx/audio/footsteps-sounds-on-laminate-flooring-001" target="_blank" rel="noopener noreferrer">Footsteps on laminate flooring 001</a>. The chosen nine-step passage was approximately 9.4–15.0 seconds.</p>
-<p>Alternatively, select a reference recording already on your computer. It stays in this browser tab and is never uploaded:</p>
-<input id="file" type="file" accept="audio/*" aria-label="Choose local reference audio">
-<audio id="reference" controls preload="none" style="display:none;width:100%"></audio>
+<h2>LOAD REFERENCE OR COMPARISON AUDIO</h2>
+<p class="note">Select audio files from your computer for the current effect. The files stay in your browser session and are not uploaded. A local recording takes priority over a built-in lab prototype for that slot. For exact engine comparisons, use recordings captured from the Windows review harness.</p>
+<div class="slot"><label for="ref-file">Reference</label><input id="ref-file" data-slot="reference" type="file" accept="audio/*"></div>
+<div class="slot"><label for="original-file">Original</label><input id="original-file" data-slot="original" type="file" accept="audio/*"></div>
+<div class="slot"><label for="a-file">Revised A</label><input id="a-file" data-slot="A" type="file" accept="audio/*"></div>
+<div class="slot"><label for="b-file">Revised B</label><input id="b-file" data-slot="B" type="file" accept="audio/*"></div>
+<p class="note">References and recordings are never committed with this utility. File selections are not retained after closing the page.</p>
 <hr>
-<h2>WHAT YOU'RE HEARING</h2>
-<p class="note"><strong>Original:</strong> approximate port of the game's 108-ms, 78-Hz triangle/noise footfall at the reference cadence.<br>
-<strong>A:</strong> rounded damped heel resonance, filtered impact noise and a delayed quieter sole contact.<br>
-<strong>B:</strong> compact low-frequency triangle impacts, restrained texture and quantisation.</p>
-<p class="note">The A/B algorithms here are browser implementations of the BF24 exploration concept, not byte-for-byte copies of the earlier MP3 prototypes or the Windows F144SFX harness. The game and its approved sounds remain unchanged. All variants are played using the same nine footfall times, roughly 0.62 seconds apart.</p>
+<h2>REVIEW RECORD</h2>
+<label for="decision">Decision</label>
+<select id="decision">
+<option value="pending">Awaiting listening review</option>
+<option value="refine">Requires changes</option>
+<option value="original">Retain original</option>
+<option value="A">Approve Revised A</option>
+<option value="B">Approve Revised B</option>
+</select>
+<label for="notes">Listening notes</label>
+<textarea id="notes" placeholder="Too bright, lower the impact, make the cabinet latch more metallic..."></textarea>
+<div class="controls"><button id="save">SAVE REVIEW LOCALLY</button><button id="export">EXPORT REVIEW JSON</button></div>
+<p class="note">Review notes and choices are saved to this browser's local storage only. Export the JSON for project tracking. A choice here does not change the game's code; a verified integration is required separately.</p>
+<hr>
+<h2>SOUND SOURCE & STATUS</h2>
+<p id="provenance" class="note"></p>
+<p class="note">Technical baseline: 11,025 Hz mono procedural sound. Footstep variants reproduce the standalone browser prototypes, while gameplay Revised A is separately implemented in C. Other cues are deliberately left without fabricated browser previews until their individual procedural recipes have been prepared or audio captures are loaded. All existing native ORIGINAL/A/B cues remain available in the Windows review executable.</p>
 </main><script>
 "use strict";
-let audioContext=null,active=null;
-const SR=11025;
-const times=[.26,.87,1.50,2.12,2.82,3.41,4.15,4.64,5.20];
-const duration=5.70;
+/* Exact ordinal order of enum F144SFX in src/f144sfx.h. */
+const effects=[
+ ["Terminal key","Mechanical","Original C variants awaiting browser recipe"],
+ ["Terminal OK / acceptance","Electronic","Awaiting reference"],
+ ["Terminal error / buzzer","Electronic","Awaiting reference"],
+ ["Typewriter","Mechanical","Awaiting reference"],
+ ["Stapler","Mechanical","Awaiting reference"],
+ ["Printer","Mechanical","Awaiting reference"],
+ ["Paper","Foley","Awaiting reference"],
+ ["Relay","Mechanical","Awaiting reference"],
+ ["Rubber stamp","Foley","Awaiting reference"],
+ ["Filing cabinet / cupboard","Mechanical","Awaiting reference"],
+ ["Door close","Foley","Awaiting reference"],
+ ["CRT wake","Electronic","Awaiting reference"],
+ ["Telephone","Mechanical","Awaiting reference"],
+ ["Power failure","Electronic","Awaiting reference"],
+ ["Footstep","Foley","Revised A selected 16 October 2026; C implementation approved for integration"],
+ ["File / collection restored","Electronic","Awaiting reference"],
+ ["Door blocked","Foley","Awaiting reference"],
+ ["Evidence discovered","Electronic","Awaiting reference"],
+ ["Door open","Foley","Awaiting reference"],
+ ["Fridge","Foley","Awaiting reference"],
+ ["Coffee machine","Mechanical","Awaiting reference"],
+ ["Floppy insertion","Mechanical","Awaiting reference"],
+ ["Backspace","Mechanical","Awaiting reference"],
+ ["Restoration tick","Electronic","Awaiting reference"],
+ ["Final restoration tick","Electronic","Awaiting reference"]
+];
+const $=s=>document.querySelector(s);
+const dropdown=$("#effect"),state=$("#review-state"),details=$("#effect-detail"),info=$("#provenance");
+effects.forEach((e,i)=>{const o=document.createElement("option");o.value=i;o.textContent=String(i).padStart(2,"0")+" / "+e[0];dropdown.appendChild(o);});
+const SR=11025,duration=5.70,times=[.26,.87,1.50,2.12,2.82,3.41,4.15,4.64,5.20];
+let ctx=null,active=null,selected=14;
+const files=new Map(),decoded=new Map(),reviewKey="f144-bf24-review-v2";
+let reviews={};
+try{reviews=JSON.parse(localStorage.getItem(reviewKey)||"{}");if(!reviews||typeof reviews!=="object")reviews={};}catch(e){reviews={};}
+if(!reviews[14])reviews[14]={decision:"A",notes:"Approved browser Revised A (rounded authentic footsteps), 16 October 2026. C integration must be verified separately."};
 function noise(seed){let x=seed>>>0;return ()=>{x^=x<<13;x^=x>>>17;x^=x<<5;return ((x>>>0)/4294967296)*2-1;};}
 function lowpass(cut){const a=1-Math.exp(-2*Math.PI*cut/SR);let z=0;return v=>(z+=a*(v-z));}
 function bandpass(lo,hi){const lp=lowpass(hi),low=lowpass(lo);return v=>{let a=lp(v);return a-low(a);};}
@@ -53,11 +117,11 @@ function env(t,atk,tau){return (1-Math.exp(-t/atk))*Math.exp(-t/tau);}
 function step(kind,side,idx){
  const n=Math.round(.175*SR),v=new Float32Array(n);
  const rnd=noise((0xF1442026+(idx*827)+(kind==="B"?17:0))>>>0);
- const l=(side?1.045:.965), shift=(side?1.032:.978);
+ const l=(side?1.045:.965),shift=(side?1.032:.978);
  const heelBand=bandpass(65,680),soleBand=bandpass(95,1000),shfl=lowpass(450);
  const retroNoise=lowpass(660),retroToe=lowpass(810);
  for(let i=0;i<n;i++){
-  const t=i/SR, delay=kind==="A"?(side?.084:.078):(side?.068:.064);
+  const t=i/SR,delay=kind==="A"?(side?.084:.078):(side?.068:.064);
   const raw=rnd(),e=env(t,kind==="B"?.005:.0036,kind==="B"?.018:.027);
   let s=0;
   if(kind==="original"){
@@ -84,44 +148,81 @@ function step(kind,side,idx){
  }
  return v;
 }
-function makeBuffer(ctx,kind){
+function synthFootsteps(kind){
  const y=ctx.createBuffer(1,Math.ceil(duration*SR),SR),data=y.getChannelData(0);
- times.forEach((when,i)=>{const a=step(kind,i&1,i),at=Math.round(when*SR);
- for(let j=0;j<a.length && at+j<data.length;j++)data[at+j]+=a[j];});
+ times.forEach((when,i)=>{const a=step(kind,i&1,i),at=Math.round(when*SR);for(let j=0;j<a.length&&at+j<data.length;j++)data[at+j]+=a[j];});
  return y;
 }
-function stop(){if(active){try{active.stop()}catch(e){}active=null;}}
-async function play(kind){
- try{
-  if(!audioContext)audioContext=new (window.AudioContext||window.webkitAudioContext)();
-  await audioContext.resume(); stop();
-  const src=audioContext.createBufferSource();
-  src.buffer=makeBuffer(audioContext,kind);
-  const gain=audioContext.createGain();gain.gain.value=.9;
-  src.connect(gain).connect(audioContext.destination);
-  src.start();active=src;
-  document.querySelector("#status").textContent="PLAYING: "+(kind==="original"?"ORIGINAL":kind==="A"?"REVISED A · PHYSICAL":"REVISED B · RETRO");
-  src.onended=()=>{if(active===src){active=null;document.querySelector("#status").textContent="READY. Choose another version.";}}
- }catch(e){document.querySelector("#status").textContent="Audio failed: "+e.message;}
+/* Future synthesis registrations live here; missing cues are intentionally
+   silent until a real recipe exists, rather than impersonating gameplay. */
+const recipes={14:{original:()=>synthFootsteps("original"),A:()=>synthFootsteps("A"),B:()=>synthFootsteps("B")}};
+function name(id){return effects[id][0];}
+function slotKey(id,slot){return id+":"+slot;}
+function available(slot){return files.has(slotKey(selected,slot))||Boolean(recipes[selected]&&recipes[selected][slot]);}
+function stop(){if(active){try{active.stop();}catch(e){}active=null;}}
+async function context(){if(!ctx)ctx=new (window.AudioContext||window.webkitAudioContext)();await ctx.resume();}
+async function buffer(slot){
+ const key=slotKey(selected,slot);
+ if(files.has(key)){
+  if(!decoded.has(key)){const file=files.get(key);decoded.set(key,await ctx.decodeAudioData(await file.arrayBuffer()));}
+  return decoded.get(key);
+ }
+ if(recipes[selected]&&recipes[selected][slot])return recipes[selected][slot]();
+ throw new Error("No "+slot+" recording or procedural recipe for "+name(selected)+".");
 }
-document.querySelectorAll("[data-variant]").forEach(b=>b.addEventListener("click",()=>play(b.dataset.variant)));
-document.querySelector("#compare").addEventListener("click",async()=>{
+function activate(src,status){stop();src.connect(ctx.destination);src.start();active=src;$("#status").textContent=status;src.onended=()=>{if(active===src){active=null;$("#status").textContent="READY.";}};}
+async function play(slot){
+ try{await context();const audio=await buffer(slot);const src=ctx.createBufferSource();src.buffer=audio;activate(src,"PLAYING "+name(selected).toUpperCase()+" / "+slot.toUpperCase());}
+ catch(e){$("#status").textContent="NOT AVAILABLE: "+e.message;}
+}
+async function compare(){
  try{
-  if(!audioContext)audioContext=new (window.AudioContext||window.webkitAudioContext)();
-  await audioContext.resume();stop();
-  const gap=.6,buf=audioContext.createBuffer(1,Math.ceil((duration*2+gap)*SR),SR),out=buf.getChannelData(0);
-  ["A","B"].forEach((v,i)=>{const a=makeBuffer(audioContext,v).getChannelData(0),at=Math.round(i*(duration+gap)*SR);out.set(a,at);});
-  const src=audioContext.createBufferSource();src.buffer=buf;
-  const gain=audioContext.createGain();gain.gain.value=.9;
-  src.connect(gain).connect(audioContext.destination);src.start();active=src;
-  document.querySelector("#status").textContent="PLAYING: A → B (0–5.7s A; 6.3–12.0s B)";
-  src.onended=()=>{if(active===src){active=null;document.querySelector("#status").textContent="READY.";}}
- }catch(e){document.querySelector("#status").textContent="Audio failed: "+e.message;}
+  await context();const a=await buffer("A"),b=await buffer("B"),gap=.55;
+  const total=a.duration+b.duration+gap;
+  /* Play separate buffers in sequence at matching output gain; never repeat
+     the source waveform or add a stored media dependency. */
+  stop();const sa=ctx.createBufferSource(),sb=ctx.createBufferSource();
+  sa.buffer=a;sb.buffer=b;
+  sa.connect(ctx.destination);sb.connect(ctx.destination);
+  const now=ctx.currentTime+.04;
+  sa.start(now);sb.start(now+a.duration+gap);active=sb;
+  $("#status").textContent="PLAYING "+name(selected).toUpperCase()+" / A THEN B";
+  sb.onended=()=>{if(active===sb){active=null;$("#status").textContent="READY.";}}
+ }catch(e){$("#status").textContent="NOT AVAILABLE: "+e.message;}
+}
+function refresh(){
+ stop();$("#status").textContent="READY.";details.textContent=effects[selected][1]+" / REGISTERED EFFECT "+String(selected).padStart(2,"0")+" OF 24";
+ const r=reviews[selected]||{decision:"pending",notes:""};
+ $("#decision").value=r.decision||"pending";$("#notes").value=r.notes||"";
+ state.textContent=r.decision==="A"?"REVIEW: REVISED A SELECTED":r.decision==="B"?"REVIEW: REVISED B SELECTED":r.decision==="original"?"REVIEW: ORIGINAL RETAINED":r.decision==="refine"?"REVIEW: REVISIONS REQUESTED":"REVIEW: AWAITING REFERENCE / APPROVAL";
+ const built=recipes[selected]?"Procedural browser preview supplied.":"No browser synthesis recipe yet. Import recordings to compare.";
+ info.textContent=effects[selected][2]+". "+built+" The in-game F144SFX implementation remains authoritative; prototypes here are not byte-identical engine renders.";
+ $("#foot-note").textContent=selected===14?"Footsteps: nine successive contacts at ~0.62 s average spacing. Original is an approximate browser model. Revised A is the approved, rounded heel/sole design.":"Select local files to listen, or implement a procedural recipe for this effect in the development lab.";
+ $("#external").style.display=selected===14?"block":"none";
+ for(const slot of ["reference","original","A","B"]){const input=$('input[data-slot="'+slot+'"]');input.value="";const f=files.get(slotKey(selected,slot));input.title=f?f.name:"No local recording chosen";}
+ document.querySelectorAll("[data-play]").forEach(b=>{b.disabled=!available(b.dataset.play);});
+ $("#compare").disabled=!(available("A")&&available("B"));
+}
+function save(){
+ reviews[selected]={decision:$("#decision").value,notes:$("#notes").value.trim(),effect:name(selected)};
+ try{localStorage.setItem(reviewKey,JSON.stringify(reviews));$("#status").textContent="REVIEW SAVED LOCALLY. Export JSON to share.";}
+ catch(e){$("#status").textContent="Browser storage unavailable; use EXPORT REVIEW JSON.";}
+ refresh();
+}
+dropdown.addEventListener("change",()=>{selected=Number(dropdown.value);refresh();});
+document.querySelectorAll("[data-play]").forEach(b=>b.addEventListener("click",()=>play(b.dataset.play)));
+$("#compare").addEventListener("click",compare);
+$("#stop").addEventListener("click",()=>{stop();$("#status").textContent="STOPPED.";});
+document.querySelectorAll("input[data-slot]").forEach(input=>input.addEventListener("change",()=>{
+ const file=input.files&&input.files[0],key=slotKey(selected,input.dataset.slot);
+ if(file){files.set(key,file);decoded.delete(key);} else{files.delete(key);decoded.delete(key);}
+ refresh();$("#status").textContent=file?"LOCAL RECORDING LOADED: "+file.name:"FILE SELECTION CLEARED.";
+}));
+$("#save").addEventListener("click",save);
+$("#export").addEventListener("click",()=>{
+ const payload={format:"F144-SFX-REVIEWS",version:2,branch:"development/Stage-4",registry:effects.map((e,id)=>({id,name:e[0],category:e[1],review:reviews[id]||{decision:"pending",notes:""}}))};
+ const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+ const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="BF24_SFX_review_decisions.json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
 });
-document.querySelector("#file").addEventListener("change",e=>{
- const el=document.querySelector("#reference");
- if(el.dataset.url)URL.revokeObjectURL(el.dataset.url);
- const f=e.target.files?.[0];if(!f)return;
- const url=URL.createObjectURL(f);el.dataset.url=url;el.src=url;el.style.display="block";
-});
+dropdown.value="14";refresh();
 </script></body></html>
