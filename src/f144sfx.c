@@ -3,6 +3,7 @@
 #include <mmsystem.h>
 #include <stdint.h>
 #include <string.h>
+#include <math.h>
 #include "f144sfx.h"
 
 #pragma comment(lib, "winmm.lib")
@@ -22,6 +23,7 @@ static F144Voice g_voice[F144_VOICES];
 static int g_available = 0;
 static float g_volume = 0.80f;
 static uint32_t g_noise = 0xF14451F1u;
+static unsigned g_footstep_side = 0u;
 
 static int16_t clamp16(int v)
 {
@@ -733,7 +735,7 @@ static unsigned make_power_fail(F144Voice *v)
 /* Original F144SFX v0.9 core above is intentionally unmodified.
    Additional gameplay cues are small synthesis variations, not stored data. */
 
-static unsigned make_footstep(F144Voice *v)
+static unsigned make_footstep_original(F144Voice *v)
 {
     unsigned n=ms_samples(108),i;
     uint32_t low=0u;
@@ -743,6 +745,53 @@ static unsigned make_footstep(F144Voice *v)
         int texture=noise_signed()/12;
         int impact=triangle_sample(&low,78u+offset,3000);
         v->samples[i]=clamp16(scaled((int)((texture+impact)*e),0.46f));
+    }
+    return n;
+}
+
+/*
+ * BF24: approved Sound Laboratory "Revised A" footfalls.
+ * Port of the browser audition's 11,025 Hz rounded heel + quiet sole profile.
+ * Reference audio is NOT embedded. Two subtly different shoes alternate at
+ * successful playback, independently of collision/movement gating in main.c.
+ */
+static unsigned make_footstep_approved(F144Voice *v,unsigned side)
+{
+    const float heel_high_alpha=0.3213f,heel_low_alpha=0.03636f;
+    const float sole_high_alpha=0.4344f,sole_low_alpha=0.05270f;
+    const float shuffle_alpha=0.2262f;
+    const double tau=6.2831853071795864769;
+    unsigned n=ms_samples(175U),i;
+    double shift=side?1.032:0.978;
+    float level=side?1.045f:0.965f;
+    double delay=side?0.084:0.078;
+    float heel_hi=0.f,heel_lo=0.f,sole_hi=0.f,sole_lo=0.f,shuffle=0.f;
+    for(i=0U;i<n;i++)
+    {
+        double t=(double)i/(double)F144_RATE;
+        float raw=(float)noise_signed()/32768.0f;
+        float heel,body,floor_body,signal;
+        heel_hi+=heel_high_alpha*(raw-heel_hi);
+        heel_lo+=heel_low_alpha*(raw-heel_lo);
+        heel=(float)((1.0-exp(-t/0.0036))*exp(-t/0.027));
+        body=(float)(0.78*sin(tau*131.0*shift*t+0.6)*exp(-t/0.038));
+        floor_body=(float)(0.30*sin(tau*350.0*shift*t+0.4)*exp(-t/0.020));
+        signal=heel*(1.25f*(heel_hi-heel_lo)+body+floor_body);
+        if(t>=delay)
+        {
+            double u=t-delay;
+            float raw_sole=(float)noise_signed()/32768.0f;
+            float sole,sole_body;
+            sole_hi+=sole_high_alpha*(raw_sole-sole_hi);
+            sole_lo+=sole_low_alpha*(raw_sole-sole_lo);
+            sole=(float)((1.0-exp(-u/0.003))*exp(-u/0.022));
+            sole_body=(float)(0.17*sin(tau*183.0*shift*u+0.7)*exp(-u/0.028));
+            signal+=0.38f*sole*((sole_hi-sole_lo)+sole_body);
+        }
+        raw=(float)noise_signed()/32768.0f;
+        shuffle+=shuffle_alpha*(raw-shuffle);
+        signal+=0.10f*shuffle*(float)((1.0-exp(-t/0.011))*exp(-t/0.057));
+        v->samples[i]=clamp16(scaled((int)(signal*32767.0f),0.16f*level));
     }
     return n;
 }
@@ -919,7 +968,7 @@ static unsigned generate(F144Voice *v, F144SFX effect)
         case F144_SFX_POWER_FAIL:
             return make_power_fail(v);
 
-        case F144_SFX_FOOTSTEP: return make_footstep(v);
+        case F144_SFX_FOOTSTEP: return make_footstep_approved(v,g_footstep_side);
         case F144_SFX_FILE_RESTORE: return make_file_restore(v);
         case F144_SFX_DOOR_BLOCKED: return make_door_blocked(v);
         case F144_SFX_EVIDENCE_FOUND: return make_evidence_found(v);
@@ -973,6 +1022,7 @@ int F144_SFXInit(void)
 
     memset(&fmt, 0, sizeof(fmt));
     memset(g_voice, 0, sizeof(g_voice));
+    g_footstep_side = 0u;
 
     fmt.wFormatTag = WAVE_FORMAT_PCM;
     fmt.nChannels = 1;
@@ -1080,6 +1130,9 @@ void F144_SFXPlay(F144SFX effect)
             sizeof(v->hdr));
 
         v->prepared = 0;
+    }
+    else if(effect == F144_SFX_FOOTSTEP) {
+        g_footstep_side ^= 1u;
     }
 }
 
