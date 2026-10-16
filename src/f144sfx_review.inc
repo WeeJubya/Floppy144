@@ -20,6 +20,11 @@ static unsigned generate_review(F144Voice *v,F144SFX effect,unsigned variant,uns
     unsigned i,n;
     uint32_t phase=0U;
     int filtered=0,held=0;
+    /* Original footstep stays auditionable even though gameplay uses A. */
+    if(effect==F144_SFX_FOOTSTEP && variant==0U)
+        return make_footstep_original(v);
+    if(effect==F144_SFX_FOOTSTEP && variant==1U)
+        return make_footstep_approved(v,foot);
     if(variant==0U)return generate(v,effect);
     if(effect==F144_SFX_TERMINAL_BACKSPACE) {
         n=generate_review(v,F144_SFX_TERMINAL_KEY,variant,foot);
@@ -30,6 +35,7 @@ static unsigned generate_review(F144Voice *v,F144SFX effect,unsigned variant,uns
         return n;
     }
     if(effect==F144_SFX_FOOTSTEP) {
+        /* Only the unapproved retro B prototype reaches this recipe. */
         uint32_t toe=0U;
         n=ms_samples(105U);clear_voice(v);
         for(i=0U;i<n;i++) {
