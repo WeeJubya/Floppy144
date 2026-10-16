@@ -61,8 +61,15 @@ foreach($required in @(
 }
 $src=Get-Content -LiteralPath (Join-Path $root 'src\f144sfx.c') -Raw
 if($src -notmatch '#ifdef F144_SFX_REVIEW' -or
-   $src -notmatch 'samples = generate\(v, effect\)'){
-    throw "Unapproved BF24 replacements may have entered gameplay"
+   $src -notmatch 'samples = generate\(v, effect\)' -or
+   -not $src.Contains('case F144_SFX_FOOTSTEP: return make_footstep_approved(v,g_footstep_side);')){
+    throw "Only the approved Revised A footstep may replace a gameplay SFX"
+}
+$reviewSource=Get-Content -LiteralPath (Join-Path $root 'src\f144sfx_review.inc') -Raw
+foreach($required in @('make_footstep_original(v)','make_footstep_approved(v,foot)')){
+    if(-not $reviewSource.Contains($required)){
+        throw "Original/A footstep comparison is not preserved: $required"
+    }
 }
 $music=Get-Content -LiteralPath (Join-Path $root 'src\f144audio.c') -Raw
 foreach($marker in @('F144_MENU_BPM           110.0',
@@ -74,5 +81,5 @@ foreach($marker in @('F144_MENU_BPM           110.0',
         throw "Approved BF22 scene or gameplay tempo changed: $marker"
     }
 }
-Write-Host "BF24 REVIEW PACKAGE: PASS (25 cues x 3 + alternate feet, shipping ORIGINAL unchanged)"
+Write-Host "BF24 REVIEW PACKAGE: PASS (25 cues x 3; footstep A approved, remaining original effects retained)"
 Write-Host "NOTE: Headless smoke checks never claim subjective listening approval."
