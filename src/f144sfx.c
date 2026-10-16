@@ -735,6 +735,8 @@ static unsigned make_power_fail(F144Voice *v)
 /* Original F144SFX v0.9 core above is intentionally unmodified.
    Additional gameplay cues are small synthesis variations, not stored data. */
 
+
+#ifdef F144_SFX_REVIEW
 static unsigned make_footstep_original(F144Voice *v)
 {
     unsigned n=ms_samples(108),i;
@@ -748,6 +750,7 @@ static unsigned make_footstep_original(F144Voice *v)
     }
     return n;
 }
+#endif /* F144_SFX_REVIEW: original footstep remains harness-only. */
 
 /*
  * BF24: approved Sound Laboratory "Revised A" footfalls.
