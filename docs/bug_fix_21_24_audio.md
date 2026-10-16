@@ -31,8 +31,12 @@ composition events or corruption seed are changed by the slowdown.
 BF24 footsteps used broadband noise with no low-pass treatment and a separate
 180 ms movement timer. Playback now follows the established 160 ms gait frame
 changes, gated by actual displacement and recent movement; blocked movement
-clears the pending contact. Rendering and collision stay unchanged. **Original
-footstep synthesis remains active pending listening approval.**
+clears the pending contact. Rendering and collision stay unchanged. **On 16 October 2026 the developer
+approved browser Sound Lab Revised A. Gameplay footstep synthesis now uses
+a C port of that authentic heel/sole design.** The old original remains
+available through the review harness. Gameplay still uses the established
+160 ms animation contact and displacement gate; the browser lab's
+reference-paced 0.62 s demonstration is not yet the gameplay cadence.
 
 ## Review harness
 
@@ -57,15 +61,17 @@ quantisation/sample-and-hold. Footsteps have separate rounded heel and quieter
 sole events. Backspace reverses the chosen variant's keyboard PCM. No downloaded
 recordings, stored audio, or external sample dependencies are used.
 
-`F144_SFX_REVIEW` enables candidates only in the standalone harness/tests. The
-game executable retains original object sounds; only BF23's two new ticks are
-appended. Four bounded waveOut buffers retain the existing busy-buffer policy;
+The game executable now uses **approved Revised A for footsteps only**.
+`F144_SFX_REVIEW` enables all other unapproved candidates only in the
+standalone harness/tests. The game retains original object sounds for the
+other 24 effects; BF23's two new ticks remain unchanged. Four bounded waveOut buffers retain the existing busy-buffer policy;
 no unbounded sound queue or new mixing is introduced.
 
 ## Complete registry / review status
 
-All ORIGINAL cues retained. Both candidate variants exist for every row; all
-await user listening approval. Current recommendations and reproducible waveform
+All ORIGINAL cues retained in the review harness. Both candidate variants
+exist for every row. **Footstep A is approved for gameplay; all remaining
+effects await user listening approval.** Current recommendations and reproducible waveform
 measurement instructions are in `docs/stage4/bf24_foley_review.md`, shipped
 alongside the existing Windows harness by `tools/build_audio_review.ps1`.
 File/collection restored candidates provide the
@@ -88,7 +94,7 @@ endgame-only SFX in this baseline.
 | 11 | CRT wake | electrical startup chirp/whine; quantised electronic ramp | A/B awaiting review |
 | 12 | Telephone | two ringing bands and striker/body; restrained retro chirrup | A/B awaiting review |
 | 13 | Power fail | relay chatter, collapsing hum, switch click; coarse collapse | A/B awaiting review |
-| 14 | Footstep | filtered 64/69 Hz heel, quieter 105/112 Hz sole, short decay; quantised paired impacts | A/B awaiting review; original gameplay retained |
+| 14 | Footstep | approved browser lab 131/350 Hz damped heel body, 183 Hz delayed sole, low-pass surface noise; B remains quantised prototype | **A APPROVED; installed in C; native listening pending** |
 | 15 | File / collection restored | softened relay and rising confirmation; compact stepped restoration | A/B awaiting review, including completion alternative |
 | 16 | Door blocked | panel impact and latch rattle; low failed clunk | A/B awaiting review |
 | 17 | Evidence found | softened rising discovery phrase; quantised clue cue | A/B awaiting review |
@@ -144,3 +150,19 @@ as `bf21-24-audio-review`. No comparison candidate enters gameplay without
 specific developer approval. Inspect the run associated with the final commit for
 actual results. Linux portable BF23 curve tests pass; Linux cannot run MSVC,
 WinMM or the Windows executable and is not Windows acceptance.
+
+
+## Browser Foley laboratory, 16 October 2026
+
+Reusable tool: `tools/bf24_footsteps_listening_lab.html`, containing a
+complete 25-effect registry, local audio imports for reference/original/A/B,
+sequential listening, per-effect review notes, local decision storage and
+JSON export. Footstep A is preselected. Other sounds remain pending and do not
+have invented browser prototypes; use the existing Windows harness or import
+recordings to compare them. The browser's authentic A was selected by the
+developer, not the older generic filtered Revised A. The C port models the
+same audible character rather than embedding any third-party MP3 or WAV.
+
+The selected 0.62 s reference cadence is a **lab demonstration**, not proof
+of the running game's 160 ms gait timing being correct. Windows native
+listening, regression/build and size-gate results must be checked per commit.
