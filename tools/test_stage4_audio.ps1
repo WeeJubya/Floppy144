@@ -117,11 +117,18 @@ if($midiSource -notmatch 'F144_TOTAL_STEPS\s+9600u' -or
 {
     throw "30-minute MIDI duration, restoration corruption or final minute is missing."
 }
-if($sfxSource -notmatch 'make_telephone' -or
-   $sfxSource -notmatch '640u' -or
-   $sfxSource -notmatch '790u')
+# Only the 16 actively triggered SFX generators should remain.
+$retiredGenerators=@(
+    'make_typewriter', 'make_stapler', 'make_printer', 'make_paper',
+    'make_stamp', 'make_door', 'make_telephone', 'make_fridge_open',
+    'make_coffee_machine'
+)
+foreach($generator in $retiredGenerators)
 {
-    throw "Approved v0.9 lower telephone chirrup is missing."
+    if($sfxSource -match [regex]::Escape($generator + '('))
+    {
+        throw "Retired, untriggered SFX generator remains: $generator"
+    }
 }
 foreach($pattern in $forbiddenPatterns)
 {
