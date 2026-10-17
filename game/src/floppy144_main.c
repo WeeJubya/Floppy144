@@ -32,6 +32,7 @@
 #include "floppy144_audio.h"
 #include "floppy144_restore_presentation.h"
 #include "floppy144_player_visual.h"
+#include "floppy144_footstep_contact.h"
 #include "floppy144_profile_edit.h"
 #include "floppy144_profile_view.h"
 #include "floppy144_terminal.h"
@@ -114,6 +115,7 @@ static bool global_intro_login_save_failed;
 static uint64_t global_last_footstep;
 static uint64_t global_last_movement_ms;
 static bool global_footstep_pending;
+static Floppy144FootstepContactState global_footstep_contact;
 static uint32_t global_known_evidence[FLOPPY144_RUN_WORD_COUNT(FLOPPY144_EVIDENCE_COUNT)];
 static bool global_audio_evidence_snapshot_valid;
 static uint32_t global_audio_evidence_seed;
@@ -2201,12 +2203,19 @@ static void Floppy144MovePlayer(
         if(before_x!=global_run_state.player_site_x ||
            before_y!=global_run_state.player_site_y)
         {
+            /* The first real movement has an immediate heel contact.
+             * Subsequent steps retain the established animation cadence. */
+            if(Floppy144FootstepContactOnAttempt(
+                   &global_footstep_contact,true))
+                Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_FOOTSTEP);
             global_footstep_pending=true;
             global_last_movement_ms=now;
         }
         else
         {
             bool locked=false;
+            (void)Floppy144FootstepContactOnAttempt(
+                &global_footstep_contact,false);
             global_footstep_pending=false;
             const char *door=Floppy144SiteCorridorDoorLabelNearby(
                 &global_run_state,&locked);
@@ -2978,6 +2987,13 @@ static bool Floppy144HandleActionEvent(
                 &movement_y
             );
 
+            /* End the initial-contact sequence on the final key release. */
+            if(movement_x==0 && movement_y==0)
+            {
+                Floppy144FootstepContactReset(&global_footstep_contact);
+                global_footstep_pending=false;
+            }
+
             if(global_screen==FLOPPY144_SCREEN_GREY_ENCOUNTER)
             {
                 /* Same held-key release and gait semantics as Site movement. */
@@ -3637,12 +3653,24 @@ static bool Floppy144HandleActionEvent(
                                 &movement_y
                             );
 
+                            /* Idle-to-walk starts a new shoe-contact run;
+                             * direction changes during held motion do not. */
+                            if(global_player_visual.moving==0U)
+                                Floppy144FootstepContactReset(
+                                    &global_footstep_contact);
+
                             (void)Floppy144PlayerVisualSetMovement(
                                 &global_player_visual,
                                 movement_x,
                                 movement_y,
                                 eAction
                             );
+                            if(movement_x==0 && movement_y==0)
+                            {
+                                Floppy144FootstepContactReset(
+                                    &global_footstep_contact);
+                                global_footstep_pending=false;
+                            }
 
                             if(
                                 movement_x != 0 ||

@@ -212,3 +212,21 @@ compatibility. Do not remove test-only gating on unapproved effects.
   replay, A/B comparison, review notes and export for all 25 effects.
 - Verify the Windows Release build/size gate and native listening separately;
   code inspection and waveform metrics are not evidence of playback quality.
+
+## 17 October 2026 BF24 follow-up: immediate first step
+
+The developer confirmed the existing 160 ms gait-driven footfall sequence is
+correct. **Do not change gait cadence or walking animation.** Only the first
+contact was missing when a movement key was initially pressed.
+
+The Site now plays an immediate approved footstep on the **first successful
+world displacement**. Subsequent footfalls still use the existing 160 ms
+PlayerVisualAdvance() contact, with its existing displacement/time gate.
+Repeated key-downs and direction changes while moving cannot replay the
+initial contact. Final movement-key release, collision, and idle-to-moving
+restart reset the initial-contact latch. Blocked movement is silent; the
+impossible-office encounter's previous movement behaviour is unchanged.
+
+`tools/bf24_first_step_tests.c` tests first displacement, held repeats,
+direction change, collision and restart; the existing native BF24 test script
+builds and runs it. Listening in the Windows game is still a separate gate.

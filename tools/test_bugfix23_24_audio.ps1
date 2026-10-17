@@ -13,5 +13,9 @@ try {
     if($LASTEXITCODE -ne 0){throw 'BF24 native test build failed'}
     & .\bf24.exe
     if($LASTEXITCODE -ne 0){throw 'BF24 waveform regression failed'}
+    & cl.exe /nologo /TC /std:c11 /W4 /WX /utf-8 "/I$root\game\src" "$root\tools\bf24_first_step_tests.c" /Febf24_initial.exe
+    if($LASTEXITCODE -ne 0){throw 'BF24 first-footstep test build failed'}
+    & .\bf24_initial.exe
+    if($LASTEXITCODE -ne 0){throw 'BF24 initial footstep regression failed'}
 } finally {Pop-Location}
 Write-Host 'BF23 / BF24 AUDIO REGRESSION: PASS (footstep Revised A approved, remaining candidates unapproved)'

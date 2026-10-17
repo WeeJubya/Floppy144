@@ -54,8 +54,8 @@ foreach($required in @('const recipes={14:', 'F144 SOUND LABORATORY',
     'original-file', 'ref-file', 'a-file', 'b-file')){
     if(-not $labText.Contains($required)){throw "Browser lab missing $required"}
 }
-# Verify current movement coupling still uses actual displacement, the shared
-# 160 ms animation contact, and clears the pending foot when blocked.
+# Verify immediate initial contact only on real displacement while subsequent
+# contacts retain the existing gait, collision and release semantics.
 $main=Get-Content -LiteralPath (Join-Path $root 'game\src\floppy144_main.c') -Raw
 foreach($required in @(
     'Floppy144RunStateMovePlayerSite(',
@@ -64,6 +64,8 @@ foreach($required in @(
     'global_footstep_pending=false',
     'Floppy144PlayerVisualAdvance(',
     'FLOPPY144_PLAYER_WALK_FRAME_MS',
+    'Floppy144FootstepContactOnAttempt(',
+    'Floppy144FootstepContactReset(',
     'FLOPPY144_AUDIO_FOOTSTEP'
 )){
     if(-not $main.Contains($required)){
