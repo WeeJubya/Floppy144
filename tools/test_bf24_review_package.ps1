@@ -47,7 +47,8 @@ for($cue=0;$cue -lt 16;$cue++){
 $engineH=Get-Content -LiteralPath (Join-Path $root 'src\f144sfx.h') -Raw
 $gameH=Get-Content -LiteralPath (Join-Path $root 'game\src\floppy144_audio.h') -Raw
 $engineNames=@([regex]::Matches($engineH,'F144_SFX_[A-Z_]+(?=\s*[,=])') | ForEach-Object Value | Where-Object {$_ -ne 'F144_SFX_COUNT'})
-$gameNames=@([regex]::Matches($gameH,'FLOPPY144_AUDIO_[A-Z_]+(?=\s*[,=])') | ForEach-Object Value)
+$soundEnum=($gameH -split 'typedef enum Floppy144AudioSound')[1]
+$gameNames=@([regex]::Matches($soundEnum,'FLOPPY144_AUDIO_[A-Z_]+(?=\s*[,=])') | ForEach-Object Value)
 if($engineNames.Count -ne 16 -or $gameNames.Count -ne 16){
     throw "SFX registry mismatch: engine $($engineNames.Count), game $($gameNames.Count), expected 16"
 }
