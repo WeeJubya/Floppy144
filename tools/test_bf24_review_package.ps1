@@ -29,7 +29,7 @@ for($cue=0;$cue -lt 16;$cue++){
         $found=@($rows | Where-Object {
             [int]$_.effect_id -eq $cue -and $_.variant -eq $variant
         })
-        $expected=if($cue -eq 14){2}else{1}
+        $expected=if($cue -eq 7){2}else{1}
         if($found.Count -ne $expected){
             throw "Missing Original/A/B waveforms for cue $cue $variant"
         }
