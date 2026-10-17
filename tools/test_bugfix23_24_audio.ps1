@@ -9,7 +9,7 @@ try {
     if($LASTEXITCODE -ne 0){throw 'BF23 native test build failed'}
     & .\bf23.exe
     if($LASTEXITCODE -ne 0){throw 'BF23 timing/tempo regression failed'}
-    & cl.exe /nologo /TC /std:c11 /W4 /WX /utf-8 "/I$root\src" "$root\tools\bf24_sfx_tests.c" /Febf24.exe /link winmm.lib
+    & cl.exe /nologo /TC /std:c11 /W4 /WX /utf-8 "/I$root\src" "/I$root\include" "/I$root\game\src" "$root\tools\bf24_sfx_tests.c" /Febf24.exe /link winmm.lib
     if($LASTEXITCODE -ne 0){throw 'BF24 native test build failed'}
     & .\bf24.exe
     if($LASTEXITCODE -ne 0){throw 'BF24 waveform regression failed'}
