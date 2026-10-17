@@ -27,7 +27,7 @@ hr{border:0;border-top:1px solid #63735b;margin:1.4rem 0}
 </style></head><body><main>
 <p class="muted">GREY DOOR REPUBLIK / DEVELOPMENT UTILITIES / BF24+</p>
 <h1>F144 SOUND LABORATORY</h1>
-<p>Standalone procedural Foley comparison, separate from Floppy//144.exe. Select any of the <strong>25 registered effects</strong>. Candidate algorithms can be added without changing this review workflow.</p>
+<p>Standalone procedural Foley comparison, separate from Floppy//144.exe. Select any of the <strong>16 active effects</strong>. Candidate algorithms can be added without changing this review workflow.</p>
 <label for="effect">Registered effect</label>
 <select id="effect"></select>
 <p id="effect-detail" class="note"></p>
@@ -77,24 +77,15 @@ const effects=[
  ["Terminal key","Mechanical","Original C variants awaiting browser recipe"],
  ["Terminal OK / acceptance","Electronic","Awaiting reference"],
  ["Terminal error / buzzer","Electronic","Awaiting reference"],
- ["Typewriter","Mechanical","Awaiting reference"],
- ["Stapler","Mechanical","Awaiting reference"],
- ["Printer","Mechanical","Awaiting reference"],
- ["Paper","Foley","Awaiting reference"],
  ["Relay","Mechanical","Awaiting reference"],
- ["Rubber stamp","Foley","Awaiting reference"],
  ["Filing cabinet / cupboard","Mechanical","Awaiting reference"],
- ["Door close","Foley","Awaiting reference"],
  ["CRT wake","Electronic","Awaiting reference"],
- ["Telephone","Mechanical","Awaiting reference"],
  ["Power failure","Electronic","Awaiting reference"],
  ["Footstep","Foley","Revised A selected 16 October 2026; C implementation approved for integration"],
  ["File / collection restored","Electronic","Awaiting reference"],
  ["Door blocked","Foley","Awaiting reference"],
  ["Evidence discovered","Electronic","Awaiting reference"],
  ["Door open","Foley","Awaiting reference"],
- ["Fridge","Foley","Awaiting reference"],
- ["Coffee machine","Mechanical","Awaiting reference"],
  ["Floppy insertion","Mechanical","Awaiting reference"],
  ["Backspace","Mechanical","Awaiting reference"],
  ["Restoration tick","Electronic","Awaiting reference"],
@@ -104,11 +95,22 @@ const $=s=>document.querySelector(s);
 const dropdown=$("#effect"),state=$("#review-state"),details=$("#effect-detail"),info=$("#provenance");
 effects.forEach((e,i)=>{const o=document.createElement("option");o.value=i;o.textContent=String(i).padStart(2,"0")+" / "+e[0];dropdown.appendChild(o);});
 const SR=11025,duration=5.70,times=[.26,.87,1.50,2.12,2.82,3.41,4.15,4.64,5.20];
-let ctx=null,active=[],selected=14;
-const files=new Map(),decoded=new Map(),reviewKey="f144-bf24-review-v2";
+let ctx=null,active=[],selected=7;
+const files=new Map(),decoded=new Map(),reviewKey="f144-bf24-review-v3";
 let reviews={};
 try{reviews=JSON.parse(localStorage.getItem(reviewKey)||"{}");if(!reviews||typeof reviews!=="object")reviews={};}catch(e){reviews={};}
-if(!reviews[14])reviews[14]={decision:"A",notes:"Approved browser Revised A (rounded authentic footsteps), 16 October 2026. C integration must be verified separately."};
+/* Migrate legacy 25-cue approval data to active 16-cue indices.
+   Previous footstep decision (old 14) becomes active cue 7. */
+if(Object.keys(reviews).length===0) {
+ try {
+  const old=JSON.parse(localStorage.getItem("f144-bf24-review-v2")||"{}");
+  const fromOld=[0,1,2,7,9,11,13,14,15,16,17,18,21,22,23,24];
+  if(old&&typeof old==="object")fromOld.forEach((id,index)=>{
+   if(Object.prototype.hasOwnProperty.call(old,id))reviews[index]=old[id];
+  });
+ } catch(e) {}
+}
+if(!reviews[7])reviews[7]={decision:"A",notes:"Approved browser Revised A (rounded authentic footsteps), 16 October 2026. C integration must be verified separately."};
 function noise(seed){let x=seed>>>0;return ()=>{x^=x<<13;x^=x>>>17;x^=x<<5;return ((x>>>0)/4294967296)*2-1;};}
 function lowpass(cut){const a=1-Math.exp(-2*Math.PI*cut/SR);let z=0;return v=>(z+=a*(v-z));}
 function bandpass(lo,hi){const lp=lowpass(hi),low=lowpass(lo);return v=>{let a=lp(v);return a-low(a);};}
@@ -155,7 +157,7 @@ function synthFootsteps(kind){
 }
 /* Future synthesis registrations live here; missing cues are intentionally
    silent until a real recipe exists, rather than impersonating gameplay. */
-const recipes={14:{original:()=>synthFootsteps("original"),A:()=>synthFootsteps("A"),B:()=>synthFootsteps("B")}};
+const recipes={7:{original:()=>synthFootsteps("original"),A:()=>synthFootsteps("A"),B:()=>synthFootsteps("B")}};
 function name(id){return effects[id][0];}
 function slotKey(id,slot){return id+":"+slot;}
 function available(slot){return files.has(slotKey(selected,slot))||Boolean(recipes[selected]&&recipes[selected][slot]);}
@@ -190,14 +192,14 @@ async function compare(){
  }catch(e){$("#status").textContent="NOT AVAILABLE: "+e.message;}
 }
 function refresh(){
- stop();$("#status").textContent="READY.";details.textContent=effects[selected][1]+" / REGISTERED EFFECT "+String(selected).padStart(2,"0")+" OF 24";
+ stop();$("#status").textContent="READY.";details.textContent=effects[selected][1]+" / REGISTERED EFFECT "+String(selected).padStart(2,"0")+" OF 15";
  const r=reviews[selected]||{decision:"pending",notes:""};
  $("#decision").value=r.decision||"pending";$("#notes").value=r.notes||"";
  state.textContent=r.decision==="A"?"REVIEW: REVISED A SELECTED":r.decision==="B"?"REVIEW: REVISED B SELECTED":r.decision==="original"?"REVIEW: ORIGINAL RETAINED":r.decision==="refine"?"REVIEW: REVISIONS REQUESTED":"REVIEW: AWAITING REFERENCE / APPROVAL";
  const built=recipes[selected]?"Procedural browser preview supplied.":"No browser synthesis recipe yet. Import recordings to compare.";
  info.textContent=effects[selected][2]+". "+built+" The in-game F144SFX implementation remains authoritative; prototypes here are not byte-identical engine renders.";
- $("#foot-note").textContent=selected===14?"Footsteps: nine successive contacts at ~0.62 s average spacing. Original is an approximate browser model. Revised A is the approved, rounded heel/sole design.":"Select local files to listen, or implement a procedural recipe for this effect in the development lab.";
- $("#external").style.display=selected===14?"block":"none";
+ $("#foot-note").textContent=selected===7?"Footsteps: nine successive contacts at ~0.62 s average spacing. Original is an approximate browser model. Revised A is the approved, rounded heel/sole design.":"Select local files to listen, or implement a procedural recipe for this effect in the development lab.";
+ $("#external").style.display=selected===7?"block":"none";
  for(const slot of ["reference","original","A","B"]){const input=$('input[data-slot="'+slot+'"]');input.value="";const f=files.get(slotKey(selected,slot));input.title=f?f.name:"No local recording chosen";}
  document.querySelectorAll("[data-play]").forEach(b=>{b.disabled=!available(b.dataset.play);});
  $("#compare").disabled=!(available("A")&&available("B"));
@@ -220,9 +222,9 @@ document.querySelectorAll("input[data-slot]").forEach(input=>input.addEventListe
 }));
 $("#save").addEventListener("click",save);
 $("#export").addEventListener("click",()=>{
- const payload={format:"F144-SFX-REVIEWS",version:2,branch:"development/Stage-4",registry:effects.map((e,id)=>({id,name:e[0],category:e[1],review:reviews[id]||{decision:"pending",notes:""}}))};
+ const payload={format:"F144-SFX-REVIEWS",version:3,branch:"development/Stage-4",registry:effects.map((e,id)=>({id,name:e[0],category:e[1],review:reviews[id]||{decision:"pending",notes:""}}))};
  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
  const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="BF24_SFX_review_decisions.json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
 });
-dropdown.value="14";refresh();
+dropdown.value="7";refresh();
 </script></body></html>

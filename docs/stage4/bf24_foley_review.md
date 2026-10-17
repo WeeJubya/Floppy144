@@ -1,232 +1,84 @@
-# BF24 procedural Foley: listening and approval pack
+# BF24: active procedural SFX and approval laboratory
 
 **Branch:** `development/Stage-4`  
-**Decision status:** Footstep **Revised A** was selected by the developer on 16 October 2026 using the browser Sound Laboratory. Only footstep A is approved; all other candidate effects remain unapproved. Native gameplay listening and Release verification are still required.
+**Current scope:** 16 effects with direct game triggers. Nine dormant/unused
+generators, semantic IDs and review entries were retired on 17 October 2026.
+They remain recoverable through Git history, not as silent runtime placeholders.
 
-This guide accompanies the existing `tools/f144_audio_review.c` interactive WinMM
-review harness, browser-based `tools/bf24_footsteps_listening_lab.html`,
-and the generated `BF24_original_A_B_waveform_metrics.csv`.
-The approved **Whimsical Assembly Line** menu (110 BPM/32 bars), original 80 BPM
-gameplay score with Act/corruption, 65 BPM ending score, BF21 reversed Backspace
-and BF23 recovery slowdown are outside this Foley approval request and remain untouched.
+The standalone Windows review harness is `tools/f144_audio_review.c`;
+the browser laboratory is `tools/bf24_footsteps_listening_lab.html`.
+Both list only **16 active effects**. All gameplay audio remains procedural
+at 11,025 Hz mono, without stored samples or external audio dependencies.
 
-## Start the existing harness
+## Current 16-effect catalogue
 
-Open **Visual Studio Developer PowerShell** in the checkout on Windows:
+| ID | Effect | Game trigger | Foley status |
+|---:|---|---|---|
+| 0 | Terminal keyboard | Typing, login, profile | Original; re-Foley pending |
+| 1 | Acceptance | Intro, successful commands | Original; pending |
+| 2 | Error / buzzer | Invalid commands / cabinet code | Original; pending |
+| 3 | Relay | Terminal restoration begins | Original; pending |
+| 4 | Filing cabinet / cupboard | Secure cabinet access/keypad | Original; pending |
+| 5 | CRT wake | Startup, terminal access | Original; pending |
+| 6 | Power failure | Grey Door encounter | Original; pending |
+| 7 | Footstep | First actual displacement and later gait | **Revised A approved** |
+| 8 | File / collection restored | Successful recovery | Original; pending |
+| 9 | Door blocked | Locked-door collision | Original; pending |
+| 10 | Evidence discovered | New evidence | Original; pending |
+| 11 | Door opening | Successful access | Original; pending |
+| 12 | Floppy insertion | Intro floppy drive | Original; pending |
+| 13 | Backspace | Actual text deletion | Original; pending |
+| 14 | Restoration tick | Recovery progress | Original; pending |
+| 15 | Final restoration tick | Late recovery progress | Original; pending |
+
+**Remaining Foley work: 15 individually approved effects.**
+Find a reference, prepare physically inspired Revised A and stylised Revised B,
+audition against ORIGINAL in the Sound Laboratory, record a decision, integrate
+approved changes one at a time and verify in a Release build. Merely showing a
+sound in the review harness is not approval. The keyboard/Backspace relationship
+must remain exact when either is later revised.
+
+## Removed from runtime and review
+
+- Typewriter
+- Stapler
+- Printer
+- Paper
+- Rubber stamp
+- Door closing
+- Telephone
+- Fridge opening
+- Coffee machine
+
+Seven were only referenced by name-matching fallback notices that the active
+Contents-screen inspection flow bypasses. Typewriter and door closing had no
+gameplay call sites. All nine sound generators, dispatch cases and enum entries
+are removed, without deleting any authored furniture/content or game logic.
+
+## Verification commands
+
+In a Visual Studio Developer PowerShell checkout:
 
 ```powershell
+.\tools\test_bugfix23_24_audio.ps1
 .\tools\build_audio_review.ps1
-.\build\audio-review\f144_audio_review.exe --list
-.\build\audio-review\f144_audio_review.exe
+.\tools\test_bf24_review_package.ps1
+.\tools\test_stage4_audio.ps1
 ```
 
-The `--list` diagnostic displays all 25 names **without opening an audio
-device**. Interactive launch requires Windows WinMM waveOut and a General MIDI
-output device for music. **No actual speaker/device listening occurs in CI.**
+Native review: `build/audio-review/f144_audio_review.exe --list` enumerates
+16 effects without opening audio hardware. Press N/B to choose, O/A/S for
+Original/Revised A/Revised B, Space to play. The CSV contains **51 rows**:
+16 effects x 3 candidates, plus three extra alternate-foot rows.
 
-Inside the interactive program: **N/B** next/previous sound; **O** Original,
-**A** Revised A, **S** Revised B, **Space** replay; **Left/Right** SFX volume
-and **Up/Down** music volume. **M/C/G** choose Menu/Completion/Gameplay.
-**1–4** choose gameplay Act; **F1–F7** seek 0/5/10/15/20/25/29 min;
-**R/E** increase/decrease recovery corruption. **T** previews BF23 progress
-and tempo slowdown, **X** interrupts it, **Esc** shuts down MIDI and waveOut.
+Footstep Revised A uses an initial successful movement contact and the
+unchanged 160 ms gait for subsequent footsteps. No footfall occurs against
+an obstruction. Browser Revised A and C share the sound design rather
+than byte-identical synthesis.
 
-The bundled CSV is reproducible from the same C generator and fixed 0.8 output
-gain/seed. A is **physically inspired** (low-pass plus body resonance), not a
-measured recording of the actual prop. B is constrained-retro (sample/hold and
-step quantisation). Both retain the original sound order and event timing except
-for the purpose-built footstep candidate. All three versions exist for **every**
-effect in the native harness. Footsteps are a deliberate exception to the
-originally unapproved state: the selected browser A was ported to C, and
-the original 108 ms synthesis remains accessible in the harness as ORIGINAL.
+Music is separate, with approved menu, gameplay and completion tracks.
+The sound review tests do not prove perceptual acoustic quality; normal
+Windows gameplay listening remains an independent acceptance check.
 
-## Browser Sound Laboratory (ongoing BF24+ reviews)
-
-Open `tools/bf24_footsteps_listening_lab.html` in a browser, or use its
-raw.githack.com static preview. All **25** enum-ordered effects appear in the
-selector; no assets, waveforms or reference recordings are checked into the
-repository. Effects 0–13 and 15–24 show **unprepared** browser recipes by
-design; import comparison audio from the native harness (or later add a real
-procedural browser recipe) to audition them. Never present generic stand-ins as
-completed sounds.
-
-The existing footsteps (effect 14) have built-in ORIGINAL/REVISED A/REVISED B
-browser previews. These are not sample-identical to Windows harness renders.
-Upload reference/other audio files locally for replay. Nothing uploaded leaves
-the browser. Review decisions and notes are local-browser state; export the
-JSON to preserve/share the developer's decisions. Recording an approval in
-the page does **not** automatically update the game.
-
-**Specific approved sound:** Revised A in the 16 October 2026 browser lab,
-based on the selected laminate-floor reference. The native C implementation
-uses the same design (filtered rounded heel, damped low/mid body, quieter
-delayed sole and subtle alternating left/right shifts), but the resulting
-waveform is not byte-identical to the browser synthesiser. The original
-C footstep remains reviewable as ORIGINAL. Auditory sign-off in the running
-Windows game, at the existing movement-driven gait timing, remains outstanding.
-
-An approval preference for any other row is **not** a change to game audio.
-
-## SFX catalogue and proposed *listening order*
-
-"First choice" identifies a **candidate to audition first**, NOT a decision
-to deploy. It is inferred from physical gesture, intended game era and
-candidate synthesis, not claimed to be heard or professionally mixed. The
-decision column must remain unapproved until the developer listens.
-
-| ID | Effect | First choice | Intended character / reason | Particular listening risk |
-|---:|---|---|---|---|
-| 0 | Terminal key | A | Short damped key-switch/body, less electronic snap | May be too soft in rapid typing |
-| 1 | Terminal OK | B | Crisp but restrained retro acknowledgement | Pitch/chime must not dominate music |
-| 2 | Terminal error / buzzer | A | Low controlled buzzer rather than piercing alert | Still distinct at low SFX volume |
-| 3 | Typewriter | A | Mechanical striker with brief carriage/body | Avoid a brittle bright click |
-| 4 | Stapler | A | Dense lever impact and metal mechanism tail | Audible double-stage action |
-| 5 | Printer | A | Motor plus muted pins/carriage texture | Must not turn into featureless hum |
-| 6 | Paper | A | Light broadband friction, low rustle | A's filter might remove too much detail |
-| 7 | Relay | A | Two damped armature clicks | Both contacts must remain separated |
-| 8 | Rubber stamp | A | Rounded rubber/wood desk impact and release | Avoid an exaggerated bass thump |
-| 9 | Filing cabinet / cupboard | A | Latch, runner friction, stop and body resonance | Preserve duration and slide motion |
-| 10 | Door close | A | Weighty panel thud followed by latch | No overlong resonance |
-| 11 | CRT wake | B | Expressive stepped startup electronics, period-correct | Avoid harsh whistle at loud volume |
-| 12 | Telephone | A | Dual-band metal bell with restrained resonance | Two rings must remain recognisable |
-| 13 | Power failure | A | Falling motor/mains body and click sequence | Don't obscure final shut-off |
-| 14 | Footstep | **A, APPROVED** | Low-frequency heel, delayed quieter sole, damped floor contact | Compare to original's slap; ensure not a musical hum |
-| 15 | File / collection restored | B | Economical retro mechanical/confirmation flourish | Avoid sounding like evidence cue |
-| 16 | Door blocked | A | Blunt panel impact and rattling latch | Clearly different from door close |
-| 17 | Evidence discovered | B | Short discovery motif, game-first rather than literal Foley | Not too triumphant or too similar to restore |
-| 18 | Door open | A | Latch release, hinge friction/body | Preserve approach/action clarity |
-| 19 | Fridge open | A | Soft seal drag, hinge and low motor | Ensure seal remains identifiable |
-| 20 | Coffee machine | A | Pump/motor with little bubbling pulses | Avoid continuous appliance drone |
-| 21 | Floppy insertion | A | Drive rail, insertion click and end-stop | Must read as a 3.5-inch drive, not a door |
-| 22 | Backspace | **Original** | Exact reverse of the active, approved original keyboard PCM | If key later changes, approve mirrored reverse together |
-| 23 | Restoration tick | **Original** | Already integrated BF23 percent tick | Consistency with its final/high variant |
-| 24 | Final restoration tick | **Original** | Same cue, subtly elevated pitch | Must remain distinct without brightness spike |
-
-**Current shipping status for all 25 effects: ORIGINAL ONLY.** BF23 tick IDs
-23 and 24 exist in normal gameplay, but **their candidate A/B waveforms are
-review-only**. No candidate-selection flags are stored in saves or preferences.
-
-## How the generated measurements are interpreted
-
-CSV columns are duration, peak/rms in dBFS, crest factor, an adjacent-sample
-difference-energy ratio (rough **high-frequency/roughness proxy**, **not** a
-frequency-response measurement), zero-crossing count, and three local RMS
-windows. Footstep has both alternating-foot rows for each candidate;
-other effects have one row each. **78 data rows** = 25 × 3 + 3 additional feet.
-
-Use measured changes to **prioritise listening**, not to prove acoustic realism.
-Unclipped, quiet or spectrally dull audio can still sound inappropriate.
-Compare ORIGINAL/A/B at 0.3, 0.6 and 1.0 SFX levels, with both music playing
-and muted. Check rapid playback under the four bounded waveOut buffers; no
-queue enlargement is proposed.
-
-### Actual Windows-generated waveform snapshot
-
-These numbers were produced from the existing procedural C generator at a fixed
-80% SFX output level and reference seed, **not** from a listening session.
-`difference-energy ratio` is a unitless adjacent-sample roughness proxy.
-
-| Footstep variant | Duration | Peak dBFS | RMS dBFS | Difference-energy ratio | Heel 0–32 ms | Sole 32–72 ms | Tail 72–end |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| Original | 107.94 ms | -24.67 | -36.24 | 0.201863 | -32.88 dBFS | -36.87 dBFS | -45.52 dBFS |
-| A / heel 0 | 104.94 ms | -24.86 | -35.86 | 0.001587 | -31.75 dBFS | -38.49 dBFS | -50.84 dBFS |
-| A / heel 1 | 104.94 ms | -24.55 | -36.03 | 0.001677 | -31.83 dBFS | -39.10 dBFS | -50.93 dBFS |
-| B / heel 0 | 104.94 ms | -25.81 | -36.99 | 0.004299 | -32.86 dBFS | -39.66 dBFS | -53.19 dBFS |
-| B / heel 1 | 104.94 ms | -25.39 | -37.15 | 0.004241 | -32.91 dBFS | -40.32 dBFS | -52.91 dBFS |
-
-A's early heel is **6.7 dB** stronger than the subsequent sole RMS window
-and the tail is another **12.4 dB** down. Its difference-energy ratio is
-approximately **127 times lower** than Original. Both feet differ subtly while
-remaining similar in overall level. These objectively support a dark
-heel-first cue, but the unusually large loss of high-frequency activity
-could make A resemble *two low musical notes* rather than a footfall.
-**First choice A remains explicitly provisional** pending listening. B is
-a fallback if a little more retro texture is needed; request a new revision
-if neither has a convincing heel-toe physical impression.
-
-Other audible-risk clues in the CSV: the keyboard A RMS drops from
--24.95 to -32.06 dBFS, paper from -34.0 to -41.0 dBFS and CRT wake from
--33.6 to -41.3 dBFS. Rebalance only if developer listening confirms the
-proposals are too quiet; no overall replacement gain was raised here.
-
-### Priority footstep listening checklist
-
-Reference heel/toe construction in the current A candidate: a damped **64 Hz**
-triangle heel (opposite foot 69 Hz), a lower-gain **105 Hz** sole/toe (opposite
-112 Hz) starting ~32 ms later, with a low-pass/attenuated noise component and
-a short ~105 ms total decay. B uses the same two contacts with stronger noise
-and stepped quantisation. Original has a 78–93 Hz triangle body plus independent
-broadband impact noise and a 108 ms linear decay: its higher-frequency slap was
-the reason for reassessment.
-
-- Walk at a slow rate on the institutional floor: does A sound like a shoe
-  with an initial **heel** and a quieter **sole**, not a synth blip?
-- Walk quickly, turn 90°, stop abruptly and walk against a wall: the step
-  must only occur when real displacement/gait contact occurs and must not
-  loop on blocked/stationary movement.
-- Compare the alternating feet; the difference should be noticeable on
-  attentive listening, never distracting.
-- Repeat at low volume beneath the gameplay music and at SFX-only volume.
-- Check no unwanted clicks at onset/end, no clipping, no lingering hum.
-
-If A still sounds like two musical tones, **request a new footstep revision**
-before approving. Do not lower the original's pitch indiscriminately or
-replace the original based solely on lower difference-energy measurements.
-
-## Recording the actual approval
-
-For each cue, the developer should respond with one of:
-`APPROVE ORIGINAL`, `APPROVE A`, `APPROVE B`, or `REWORK`. Until then,
-**each item remains pending**. Prefer explicit approval of *each* changed cue,
-not blanket approval of the library. If footwear and flooring differ between
-areas, scope any future footstep material switch explicitly first.
-
-After approval, integrate only named effects into the normal `F144_SFXPlay`
-path and add regression checks for fallback/volume/seed; preserve IDs and save
-compatibility. Do not remove test-only gating on unapproved effects.
-
-## Current non-listening validation
-
-- BF21 exact reversed PCM, text-delete-only activation and mute.
-- BF22 110 BPM, 32 bars, patch mapping, scene/loop/Act integrity.
-- BF23 90%/final 10% progress and temporary music tempo/cancellation.
-- BF24 25 × 3 deterministic, bounded, unclipped, muted waveforms, alternating
-  foot seed, waveOut voice policy.
-- Stage 4 platform/audio, complete Release, standalone review harness build,
-  reproducible CSV and device-free `--list` smoke.
-- WinMM device and perceived acoustic quality **not listened to by automation**.
-
-
-## 16 October 2026 BF24 update
-
-- Gameplay F144SFX effect 14 uses the approved, sample-free Revised A
-  procedural heel/sole recipe. It is not a stored sample of the recording.
-- The old footstep is available as ORIGINAL in the standalone Windows harness.
-  The unapproved retro B remains a review candidate only.
-- All other gameplay effects remain at the pre-approval baseline.
-- Physical collision gating, movement input and the 160 ms character animation
-  phase are untouched. The lab's reference-paced 0.62 s step interval is
-  **not** currently matched by the gameplay gait. This requires listening
-  and potentially separate gait-timing approval.
-- Browser sound lab now provides per-effect reference/Original/A/B inputs,
-  replay, A/B comparison, review notes and export for all 25 effects.
-- Verify the Windows Release build/size gate and native listening separately;
-  code inspection and waveform metrics are not evidence of playback quality.
-
-## 17 October 2026 BF24 follow-up: immediate first step
-
-The developer confirmed the existing 160 ms gait-driven footfall sequence is
-correct. **Do not change gait cadence or walking animation.** Only the first
-contact was missing when a movement key was initially pressed.
-
-The Site now plays an immediate approved footstep on the **first successful
-world displacement**. Subsequent footfalls still use the existing 160 ms
-PlayerVisualAdvance() contact, with its existing displacement/time gate.
-Repeated key-downs and direction changes while moving cannot replay the
-initial contact. Final movement-key release, collision, and idle-to-moving
-restart reset the initial-contact latch. Blocked movement is silent; the
-impossible-office encounter's previous movement behaviour is unchanged.
-
-`tools/bf24_first_step_tests.c` tests first displacement, held repeats,
-direction change, collision and restart; the existing native BF24 test script
-builds and runs it. Listening in the Windows game is still a separate gate.
+Historical 25-effect inventories and 78-row snapshots are recoverable in
+the repository's prior commit history, not the current registry.

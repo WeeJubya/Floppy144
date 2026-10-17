@@ -194,128 +194,9 @@ static unsigned make_terminal_error(F144Voice *v)
     return total;
 }
 
-static unsigned make_typewriter(F144Voice *v)
-{
-    unsigned n = ms_samples(55), i;
-    uint32_t phase = 0u;
 
-    for (i = 0; i < n; ++i) {
-        float e = env_linear(i, n);
-        int body = noise_signed() / 3;
-        int metal = triangle_sample(&phase, 2100u, 7000);
 
-        if (i > ms_samples(18)) {
-            body /= 3;
-            metal /= 2;
-        }
 
-        v->samples[i] =
-            clamp16(scaled((int)((body + metal) * e), 0.88f));
-    }
-
-    return n;
-}
-
-static unsigned make_stapler(F144Voice *v)
-{
-    unsigned n = ms_samples(145), i;
-    uint32_t p_low = 0u, p_mid = 0u, p_hi = 0u;
-
-    for (i = 0; i < n; ++i) {
-        int s = 0;
-
-        if (i < ms_samples(55)) {
-            float e = env_linear(i, ms_samples(55));
-            s += (int)(triangle_sample(&p_low, 72u, 17500) * e);
-            s += (int)((noise_signed() / 7) * e);
-        }
-
-        if (i >= ms_samples(16) && i < ms_samples(42)) {
-            unsigned j = i - ms_samples(16);
-            float e = env_linear(j, ms_samples(26));
-            s += (int)(triangle_sample(&p_hi, 2350u, 10500) * e);
-        }
-
-        if (i >= ms_samples(32)) {
-            unsigned j = i - ms_samples(32);
-            unsigned rem = n - ms_samples(32);
-            float e = env_linear(j, rem);
-            s += (int)(triangle_sample(&p_mid, 118u, 7000) * e);
-        }
-
-        v->samples[i] = clamp16(scaled(s, 0.98f));
-    }
-
-    return n;
-}
-
-static unsigned make_printer(F144Voice *v)
-{
-    unsigned n = ms_samples(1100), i;
-    uint32_t motor = 0u, tick = 0u, carriage = 0u;
-
-    if (n > F144_MAX_SAMPLES)
-        n = F144_MAX_SAMPLES;
-
-    for (i = 0; i < n; ++i) {
-        float global =
-            env_attack_release(i, n, ms_samples(55));
-
-        int m = square_sample(&motor, 68u, 2600);
-        int hiss = noise_signed() / 15;
-        int chatter =
-            ((i % 175u) < 28u)
-            ? triangle_sample(&tick, 1750u, 7600)
-            : 0;
-
-        int c =
-            ((i % 3000u) < 120u)
-            ? triangle_sample(&carriage, 145u, 5200)
-            : 0;
-
-        if (i > n / 2u - ms_samples(50) &&
-            i < n / 2u + ms_samples(35)) {
-            chatter /= 4;
-            m /= 2;
-        }
-
-        v->samples[i] =
-            clamp16(scaled(
-                m + hiss + chatter + c,
-                0.72f * (0.40f + 0.60f * global)));
-    }
-
-    return n;
-}
-
-static unsigned make_paper(F144Voice *v)
-{
-    unsigned n = ms_samples(380), i;
-    int s1 = 0, s2 = 0, s3 = 0, s4 = 0, s5 = 0;
-
-    for (i = 0; i < n; ++i) {
-        int raw = noise_signed();
-        int smooth;
-        float e, flutter;
-
-        s5 = s4;
-        s4 = s3;
-        s3 = s2;
-        s2 = s1;
-        s1 = raw;
-
-        smooth = (s1 + s2 + s3 + s4 + s5) / 5;
-        e = env_attack_release(i, n, ms_samples(90));
-        flutter = ((i / 170u) & 1u) ? 0.86f : 1.0f;
-
-        v->samples[i] =
-            clamp16(scaled(
-                smooth,
-                0.18f * e * flutter));
-    }
-
-    return n;
-}
 
 static unsigned make_relay(F144Voice *v)
 {
@@ -363,68 +244,6 @@ static unsigned make_relay(F144Voice *v)
       fuller low-mid impact,
       slightly longer "body".
 */
-static unsigned make_stamp(F144Voice *v)
-{
-    unsigned n = ms_samples(180), i;
-    uint32_t p_drop = 0u;
-    uint32_t p_body = 0u;
-    uint32_t p_res = 0u;
-
-    unsigned hit_start = ms_samples(28);
-    unsigned hit_len = ms_samples(58);
-    unsigned lift_start = ms_samples(125);
-
-    for (i = 0; i < n; ++i) {
-        int s = 0;
-
-        /* Handle moving down. */
-        if (i < hit_start) {
-            float e = env_linear(i, hit_start);
-            s += (int)(triangle_sample(&p_drop, 310u, 4200) * e);
-            s += noise_signed() / 28;
-        }
-
-        /* Main rubber/paper impact. */
-        if (i >= hit_start && i < hit_start + hit_len) {
-            unsigned j = i - hit_start;
-            float e = env_linear(j, hit_len);
-
-            s += (int)(triangle_sample(&p_body, 92u, 17500) * e);
-            s += (int)((noise_signed() / 9) * e);
-        }
-
-        /* Desk resonance after the stamp lands. */
-        if (i >= hit_start + ms_samples(18) &&
-            i < lift_start) {
-
-            unsigned j =
-                i - (hit_start + ms_samples(18));
-
-            unsigned rem =
-                lift_start - (hit_start + ms_samples(18));
-
-            float e = env_linear(j, rem);
-
-            s += (int)(
-                triangle_sample(&p_res, 138u, 6200) * e);
-        }
-
-        /* Tiny tacky lift-off at the end. */
-        if (i >= lift_start &&
-            i < lift_start + ms_samples(22)) {
-
-            unsigned j = i - lift_start;
-            float e = env_linear(j, ms_samples(22));
-
-            s += (int)((noise_signed() / 10) * e);
-        }
-
-        v->samples[i] =
-            clamp16(scaled(s, 0.94f));
-    }
-
-    return n;
-}
 
 
 /*
@@ -501,64 +320,6 @@ static unsigned make_filing_cabinet(F144Voice *v)
 
     It is intentionally not a horror-film creak.
 */
-static unsigned make_door(F144Voice *v)
-{
-    unsigned n = ms_samples(470), i;
-    uint32_t p_latch = 0u;
-    uint32_t p_move = 0u;
-    uint32_t p_thud = 0u;
-    uint32_t p_room = 0u;
-
-    unsigned move_start = ms_samples(45);
-    unsigned thud_start = ms_samples(305);
-
-    for (i = 0; i < n; ++i) {
-        int s = 0;
-
-        /* Latch release. */
-        if (i < ms_samples(45)) {
-            float e = env_linear(i, ms_samples(45));
-            s += (int)(triangle_sample(&p_latch, 1200u, 6200) * e);
-            s += (int)((noise_signed() / 12) * e);
-        }
-
-        /* Short heavy movement, more body than squeak. */
-        if (i >= move_start && i < thud_start) {
-            unsigned j = i - move_start;
-            unsigned len = thud_start - move_start;
-            float e = env_attack_release(j, len, ms_samples(65));
-
-            int body = triangle_sample(&p_move, 63u, 3600);
-            int texture = noise_signed() / 24;
-
-            s += (int)((body + texture) * e);
-        }
-
-        /* Door meets frame. */
-        if (i >= thud_start && i < thud_start + ms_samples(105)) {
-            unsigned j = i - thud_start;
-            float e = env_linear(j, ms_samples(105));
-
-            s += (int)(triangle_sample(&p_thud, 58u, 18500) * e);
-            s += (int)(triangle_sample(&p_room, 102u, 5200) * e);
-            s += (int)((noise_signed() / 10) * e);
-        }
-
-        /* Small latch settle after the main impact. */
-        if (i >= thud_start + ms_samples(80) &&
-            i < thud_start + ms_samples(120)) {
-
-            unsigned j = i - (thud_start + ms_samples(80));
-            float e = env_linear(j, ms_samples(40));
-
-            s += (int)(triangle_sample(&p_latch, 620u, 2800) * e);
-        }
-
-        v->samples[i] = clamp16(scaled(s, 0.88f));
-    }
-
-    return n;
-}
 
 
 /* CRT / terminal wake-up: relay click, chirp, fading whine. */
@@ -599,90 +360,6 @@ static unsigned make_crt_wake(F144Voice *v)
 }
 
 /* Old office telephone: classic mechanical double ring. */
-static unsigned make_telephone(F144Voice *v)
-{
-    unsigned n = ms_samples(1120), i;
-    uint32_t p_low = 0u;
-    uint32_t p_high = 0u;
-    uint32_t p_body = 0u;
-
-    /*
-        v0.9 telephone:
-        lower electromechanical chirrup / warble.
-
-        No continuous pitch sweep.
-        Instead, two fixed bell tones alternate rapidly inside
-        each chirrup, with a low metallic body underneath.
-
-        Goal: "brrip-brrip", not whistle, not bird.
-    */
-
-    unsigned c1_start = 0u;
-    unsigned c1_len   = ms_samples(280);
-    unsigned c2_start = ms_samples(500);
-    unsigned c2_len   = ms_samples(300);
-
-    for (i = 0; i < n; ++i) {
-        int s = 0;
-        int active = 0;
-        unsigned j = 0u;
-        unsigned len = 1u;
-
-        if (i >= c1_start && i < c1_start + c1_len) {
-            active = 1;
-            j = i - c1_start;
-            len = c1_len;
-        }
-        else if (i >= c2_start && i < c2_start + c2_len) {
-            active = 1;
-            j = i - c2_start;
-            len = c2_len;
-        }
-
-        if (active) {
-            float attack;
-            float release;
-            float e;
-            int tone;
-            int body;
-            unsigned gate;
-
-            attack =
-                (j < ms_samples(14))
-                ? (float)j / (float)ms_samples(14)
-                : 1.0f;
-
-            release = env_linear(j, len);
-            e = attack * (0.62f + 0.38f * release);
-
-            /*
-                Alternate the two tones every ~32 ms.
-                This creates the chirrup without animal-like glissando.
-            */
-            gate = (j / ms_samples(32)) & 1u;
-
-            if (gate == 0u)
-                tone = triangle_sample(&p_low, 640u, 9000);
-            else
-                tone = triangle_sample(&p_high, 790u, 8200);
-
-            /* Low metallic body keeps it feeling like a desk phone. */
-            body = triangle_sample(&p_body, 165u, 2300);
-
-            s += (int)((tone + body) * e);
-
-            /* Brief striker click at the start of each chirrup. */
-            if (j < ms_samples(11)) {
-                float ce = env_linear(j, ms_samples(11));
-                s += (int)((noise_signed() / 8) * ce);
-            }
-        }
-
-        v->samples[i] = clamp16(scaled(s, 0.76f));
-    }
-
-    return n;
-}
 
 static unsigned make_power_fail(F144Voice *v)
 {
@@ -864,33 +541,7 @@ static unsigned make_door_open(F144Voice *v)
     return n;
 }
 
-static unsigned make_fridge_open(F144Voice *v)
-{
-    unsigned n=ms_samples(515),i,seal=ms_samples(72);
-    uint32_t hum=0u,hinge=0u;
-    for(i=0u;i<n;i++) {
-        float e=env_linear(i,n);
-        int sample=triangle_sample(&hum,77u,2350);
-        if(i<seal) sample+=noise_signed()/6;
-        if(i>=seal) sample+=triangle_sample(&hinge,235u,2800);
-        v->samples[i]=clamp16(scaled((int)(sample*e),0.59f));
-    }
-    return n;
-}
 
-static unsigned make_coffee_machine(F144Voice *v)
-{
-    unsigned n=ms_samples(1650),i;
-    uint32_t motor=0u,bubble=0u;
-    for(i=0u;i<n;i++) {
-        float e=env_attack_release(i,n,ms_samples(160));
-        int sample=triangle_sample(&motor,64u,2400)+noise_signed()/27;
-        unsigned pulse=((i/330u)+(i/600u))%7u;
-        if(pulse<2u) sample+=triangle_sample(&bubble,90u+(i%300u),4800);
-        v->samples[i]=clamp16(scaled((int)(sample*e),0.60f));
-    }
-    return n;
-}
 
 static unsigned make_floppy_insert(F144Voice *v)
 {
@@ -938,35 +589,21 @@ static unsigned generate(F144Voice *v, F144SFX effect)
         case F144_SFX_TERMINAL_ERROR:
             return make_terminal_error(v);
 
-        case F144_SFX_TYPEWRITER:
-            return make_typewriter(v);
 
-        case F144_SFX_STAPLER:
-            return make_stapler(v);
 
-        case F144_SFX_PRINTER:
-            return make_printer(v);
 
-        case F144_SFX_PAPER:
-            return make_paper(v);
 
         case F144_SFX_RELAY:
             return make_relay(v);
 
-        case F144_SFX_STAMP:
-            return make_stamp(v);
 
         case F144_SFX_FILING_CABINET:
             return make_filing_cabinet(v);
 
-        case F144_SFX_DOOR:
-            return make_door(v);
 
         case F144_SFX_CRT_WAKE:
             return make_crt_wake(v);
 
-        case F144_SFX_TELEPHONE:
-            return make_telephone(v);
 
         case F144_SFX_POWER_FAIL:
             return make_power_fail(v);
@@ -976,8 +613,6 @@ static unsigned generate(F144Voice *v, F144SFX effect)
         case F144_SFX_DOOR_BLOCKED: return make_door_blocked(v);
         case F144_SFX_EVIDENCE_FOUND: return make_evidence_found(v);
         case F144_SFX_DOOR_OPEN: return make_door_open(v);
-        case F144_SFX_FRIDGE_OPEN: return make_fridge_open(v);
-        case F144_SFX_COFFEE_MACHINE: return make_coffee_machine(v);
         case F144_SFX_FLOPPY_INSERT: return make_floppy_insert(v);
 
         default:

@@ -31,7 +31,7 @@ int main(int argc,char **argv)
      * Normal interactive playback is unchanged; no second harness exists. */
     if(argc==2&&strcmp(argv[1],"--list")==0)
     {
-        puts("F144 AUDIO REVIEW: 25 EFFECTS / ORIGINAL | REVISED A | REVISED B");
+        puts("F144 AUDIO REVIEW: 16 EFFECTS / ORIGINAL | REVISED A | REVISED B");
         for(i=0U;i<F144_SFX_COUNT;++i)
             printf("%2u: %s\n",i,F144_SFXReviewName((F144SFX)i));
         return 0;

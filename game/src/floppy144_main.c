@@ -2264,22 +2264,8 @@ static void Floppy144OfficeSetItemNotice(
     global_office_notice =
         global_office_notice_buffer;
 
-    /* Physical-object names are data-driven. No action is synthesized unless
-       inspection actually resolves to an authored nearby object. */
-    if(strstr(pszItemName,"Fridge") || strstr(pszItemName,"FRIDGE"))
-        Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_FRIDGE_OPEN);
-    else if(strstr(pszItemName,"Coffee") || strstr(pszItemName,"COFFEE"))
-        Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_COFFEE_MACHINE);
-    else if(strstr(pszItemName,"Phone") || strstr(pszItemName,"PHONE"))
-        Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_TELEPHONE);
-    else if(strstr(pszItemName,"Printer") || strstr(pszItemName,"PRINTER"))
-        Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_PRINTER);
-    else if(strstr(pszItemName,"Stapler") || strstr(pszItemName,"STAPLER"))
-        Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_STAPLER);
-    else if(strstr(pszItemName,"Paper") || strstr(pszItemName,"PAPER"))
-        Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_PAPER);
-    else if(strstr(pszItemName,"Stamp") || strstr(pszItemName,"STAMP"))
-        Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_STAMP);
+    /* No SFX from inspection notices: name-matched Foley triggers were
+     * bypassed by the Contents screen and have been retired. */
 }
 
 /*

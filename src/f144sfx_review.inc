@@ -4,18 +4,16 @@
 static unsigned g_review_variant;
 static unsigned g_review_foot;
 static const char *const g_review_names[F144_SFX_COUNT]={
-    "Keyboard", "Acceptance", "Error / buzzer", "Typewriter", "Stapler",
-    "Printer", "Paper", "Relay", "Rubber stamp", "Filing cabinet / cupboard",
-    "Door close", "CRT wake", "Telephone", "Power failure", "Footstep",
-    "File / collection restored", "Door blocked", "Evidence discovered",
-    "Door open", "Fridge", "Coffee machine", "Floppy insertion", "Backspace",
-    "Restoration tick", "Final restoration tick"
+    "Keyboard", "Acceptance", "Error / buzzer", "Relay",
+    "Filing cabinet / cupboard", "CRT wake", "Power failure",
+    "Footstep", "File / collection restored", "Door blocked",
+    "Evidence discovered", "Door open", "Floppy insertion",
+    "Backspace", "Restoration tick", "Final restoration tick"
 };
 static unsigned generate_review(F144Voice *v,F144SFX effect,unsigned variant,unsigned foot)
 {
     static const unsigned body_hz[F144_SFX_COUNT]={
-        340,660,165,420,118,68,0,220,92,84,74,310,165,70,66,
-        294,68,392,84,77,64,190,340,320,380
+        340,660,165,220,84,310,70,66,294,68,392,84,190,340,320,380
     };
     unsigned i,n;
     uint32_t phase=0U;
@@ -55,7 +53,7 @@ static unsigned generate_review(F144Voice *v,F144SFX effect,unsigned variant,uns
     for(i=0U;i<n;i++) {
         int original=v->samples[i];
         float e=env_attack_release(i,n,ms_samples(2U));
-        unsigned divisor=(effect==F144_SFX_PAPER||effect==F144_SFX_FRIDGE_OPEN)?7U:3U;
+        unsigned divisor=3U;
         filtered+=(original-filtered)/(int)divisor;
         if(variant==1U) {
             int resonance=body_hz[effect]?triangle_sample(&phase,body_hz[effect],1000):0;

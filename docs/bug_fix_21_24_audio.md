@@ -64,47 +64,20 @@ recordings, stored audio, or external sample dependencies are used.
 The game executable now uses **approved Revised A for footsteps only**.
 `F144_SFX_REVIEW` enables all other unapproved candidates only in the
 standalone harness/tests. The game retains original object sounds for the
-other 24 effects; BF23's two new ticks remain unchanged. Four bounded waveOut buffers retain the existing busy-buffer policy;
+other 15 effects; BF23's two new ticks remain unchanged. Four bounded waveOut buffers retain the existing busy-buffer policy;
 no unbounded sound queue or new mixing is introduced.
 
-## Complete registry / review status
+## Active procedural SFX after 17 October 2026
 
-All ORIGINAL cues retained in the review harness. Both candidate variants
-exist for every row. **Footstep A is approved for gameplay; all remaining
-effects await user listening approval.** Current recommendations and reproducible waveform
-measurement instructions are in `docs/stage4/bf24_foley_review.md`, shipped
-alongside the existing Windows harness by `tools/build_audio_review.ps1`.
-File/collection restored candidates provide the
-alternative completion cue comparison; there is no separate registered
-endgame-only SFX in this baseline.
+The earlier 25-effect inventory has been superseded by **16 sounds with
+direct gameplay triggers**, listed and reviewed in
+`docs/stage4/bf24_foley_review.md`. Nine dormant/unused effects are
+removed from the synthesiser, game audio IDs and review tools.
 
-| ID | Registered effect | Acoustic intent for A; retro treatment for B | Status |
-|---:|---|---|---|
-| 0 | Terminal key | switch impact, damped key body; compact quantised click | A/B awaiting review |
-| 1 | Terminal OK | restrained two-tone acceptance; stepped digital chime | A/B awaiting review |
-| 2 | Terminal error / buzzer | low sustained buzz with pauses; coarse digital alarm | A/B awaiting review |
-| 3 | Typewriter | striker and mechanism resonance; short mechanical click | A/B awaiting review |
-| 4 | Stapler | body impact followed by metal mechanism; compact low clack | A/B awaiting review |
-| 5 | Printer | motor, pin chatter, carriage motion; patterned machine pulses | A/B awaiting review |
-| 6 | Paper | filtered friction/flutter; restrained noisy rustle | A/B awaiting review |
-| 7 | Relay | paired armature impacts; paired digital clicks | A/B awaiting review |
-| 8 | Stamp | rounded rubber impact, desk resonance and lift; soft low thud | A/B awaiting review |
-| 9 | Cabinet / cupboard | latch, runner scrape, stop clunk; low mechanical sequence | A/B awaiting review |
-| 10 | Door close | damped panel/latch impact; short low clunk | A/B awaiting review |
-| 11 | CRT wake | electrical startup chirp/whine; quantised electronic ramp | A/B awaiting review |
-| 12 | Telephone | two ringing bands and striker/body; restrained retro chirrup | A/B awaiting review |
-| 13 | Power fail | relay chatter, collapsing hum, switch click; coarse collapse | A/B awaiting review |
-| 14 | Footstep | approved browser lab 131/350 Hz damped heel body, 183 Hz delayed sole, low-pass surface noise; B remains quantised prototype | **A APPROVED; installed in C; native listening pending** |
-| 15 | File / collection restored | softened relay and rising confirmation; compact stepped restoration | A/B awaiting review, including completion alternative |
-| 16 | Door blocked | panel impact and latch rattle; low failed clunk | A/B awaiting review |
-| 17 | Evidence found | softened rising discovery phrase; quantised clue cue | A/B awaiting review |
-| 18 | Door open | latch release, hinge/body; compact mechanical motion | A/B awaiting review |
-| 19 | Fridge open | seal friction, hinge, motor body; softened electronic movement | A/B awaiting review |
-| 20 | Coffee machine | motor/pump and bubbling; patterned low machine noise | A/B awaiting review |
-| 21 | Floppy insert | rail friction, latch/stop; short drive clack | A/B awaiting review |
-| 22 | Backspace | exact time reversal of selected key variant | A/B awaiting review |
-| 23 | Restore tick | short filtered mechanical-electronic click | New BF23 cue; A/B awaiting review |
-| 24 | Final restore tick | same click with subtly higher pitch | New BF23 cue; A/B awaiting review |
+Only Revised A footsteps are approved for gameplay; the remaining
+**15 active sounds** retain their established synthesiser recipes.
+The native review harness includes 16 x 3 candidates, 51 metrics
+rows including the alternate-foot rows.
 
 ## Research and limitations
 

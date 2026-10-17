@@ -138,7 +138,7 @@ foreach($required in @('midiOutOpen','midiOutShortMsg'))
     }
 }
 foreach($required in @('waveOutOpen','waveOutWrite','F144_SFX_FOOTSTEP',
-                       'F144_SFX_COFFEE_MACHINE'))
+                       'F144_SFX_COUNT'))
 {
     $combined = $sfxSource + (Get-Content -LiteralPath (Join-Path $root "src\f144sfx.h") -Raw)
     if($combined -notmatch [regex]::Escape($required))

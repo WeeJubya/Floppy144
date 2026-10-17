@@ -2,10 +2,22 @@
 #define F144_SFX_REVIEW
 #include "../src/f144sfx.c"
 #include <stdio.h>
+#include "../game/src/floppy144_audio.h"
 int main(void)
 {
     static F144Voice a,b;
     unsigned effect,variant,i,n,m;
+    static const unsigned semantic_ids[16]={
+        FLOPPY144_AUDIO_TERMINAL_TYPE,FLOPPY144_AUDIO_ACCEPT,FLOPPY144_AUDIO_ERROR,
+        FLOPPY144_AUDIO_RELAY,FLOPPY144_AUDIO_CABINET,FLOPPY144_AUDIO_CRT_WAKE,
+        FLOPPY144_AUDIO_POWER_FAIL,FLOPPY144_AUDIO_FOOTSTEP,
+        FLOPPY144_AUDIO_FILE_RESTORE,FLOPPY144_AUDIO_DOOR_BLOCKED,
+        FLOPPY144_AUDIO_EVIDENCE_FOUND,FLOPPY144_AUDIO_DOOR_OPEN,
+        FLOPPY144_AUDIO_FLOPPY_INSERT,FLOPPY144_AUDIO_TERMINAL_BACKSPACE,
+        FLOPPY144_AUDIO_RESTORE_TICK,FLOPPY144_AUDIO_RESTORE_TICK_HIGH
+    };
+    if(F144_SFX_COUNT!=16U)return 13;
+    for(i=0U;i<F144_SFX_COUNT;++i)if(semantic_ids[i]!=i+1U)return 14;
     for(effect=0U;effect<F144_SFX_COUNT;effect++)
         for(variant=0U;variant<3U;variant++) {
             g_volume=0.8f;g_noise=0xF14451F1U;
@@ -57,6 +69,6 @@ int main(void)
     if(find_voice()!=NULL)return 8;
     for(i=0U;i<F144_VOICES;i++)g_voice[i].prepared=0;
     if(find_voice()==NULL)return 9;
-    puts("BF24 25 cues deterministic, bounded, unclipped and muted; approved footstep A matches gameplay, original retained, alternating feet PASS");
+    puts("BF24 16 active cues deterministic, bounded, unclipped and muted; approved footstep A matches gameplay, original retained, alternating feet PASS");
     return 0;
 }

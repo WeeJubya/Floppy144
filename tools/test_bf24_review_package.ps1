@@ -13,18 +13,18 @@ if(-not(Test-Path -LiteralPath $guide -PathType Leaf)){throw "BF24 listening gui
 # The --list pathway never initialises WinMM and can run on headless CI.
 $catalogue=@(& $exe --list)
 if($LASTEXITCODE -ne 0){throw "Audio-review executable failed no-device startup"}
-if($catalogue.Count -ne 26){throw "Expected 25 registered cues plus header; got $($catalogue.Count)"}
-if($catalogue[0] -notmatch '25 EFFECTS.*ORIGINAL.*REVISED A.*REVISED B'){
+if($catalogue.Count -ne 17){throw "Expected 16 registered cues plus header; got $($catalogue.Count)"}
+if($catalogue[0] -notmatch '16 EFFECTS.*ORIGINAL.*REVISED A.*REVISED B'){
     throw "Review UI does not advertise all three candidates"
 }
-for($cue=0;$cue -lt 25;$cue++){
+for($cue=0;$cue -lt 16;$cue++){
     if($catalogue[$cue+1] -notmatch ('^\s*' + $cue + ':\s+\S')){
         throw "Cue registry gap/mismatch at $cue"
     }
 }
 $rows=@(Import-Csv -LiteralPath $csv)
-if($rows.Count -ne 78){throw "BF24 metrics expected 78 waveform records; found $($rows.Count)"}
-for($cue=0;$cue -lt 25;$cue++){
+if($rows.Count -ne 51){throw "BF24 metrics expected 51 waveform records; found $($rows.Count)"}
+for($cue=0;$cue -lt 16;$cue++){
     foreach($variant in @('ORIGINAL','REVISED_A','REVISED_B')){
         $found=@($rows | Where-Object {
             [int]$_.effect_id -eq $cue -and $_.variant -eq $variant
@@ -43,13 +43,24 @@ for($cue=0;$cue -lt 25;$cue++){
         }
     }
 }
+# The engine and game registries must remain exactly aligned after pruning.
+$engineH=Get-Content -LiteralPath (Join-Path $root 'src\f144sfx.h') -Raw
+$gameH=Get-Content -LiteralPath (Join-Path $root 'game\src\floppy144_audio.h') -Raw
+$engineNames=@([regex]::Matches($engineH,'F144_SFX_[A-Z_]+(?=\s*[,=])') | ForEach-Object Value | Where-Object {$_ -ne 'F144_SFX_COUNT'})
+$gameNames=@([regex]::Matches($gameH,'FLOPPY144_AUDIO_[A-Z_]+(?=\s*[,=])') | ForEach-Object Value)
+if($engineNames.Count -ne 16 -or $gameNames.Count -ne 16){
+    throw "SFX registry mismatch: engine $($engineNames.Count), game $($gameNames.Count), expected 16"
+}
+foreach($retired in @('TYPEWRITER','STAPLER','PRINTER','PAPER','STAMP','DOOR_CLOSE','TELEPHONE','FRIDGE_OPEN','COFFEE_MACHINE')){
+    if($gameH.Contains("FLOPPY144_AUDIO_$retired")){throw "Retired game SFX still registered: $retired"}
+}
 # Browser sound laboratory is reusable for the exact 25-effect registry.
 $lab=Join-Path $root 'tools\bf24_footsteps_listening_lab.html'
 if(-not(Test-Path -LiteralPath $lab -PathType Leaf)){throw 'BF24 browser lab missing'}
 $labText=Get-Content -LiteralPath $lab -Raw
 $labEntries=@($labText -split "`r?`n" | Where-Object { $_ -match '^ \[' })
-if($labEntries.Count -ne 25){throw "Browser lab must enumerate all 25 effects; got $($labEntries.Count)"}
-foreach($required in @('const recipes={14:', 'F144 SOUND LABORATORY',
+if($labEntries.Count -ne 16){throw "Browser lab must enumerate all 16 effects; got $($labEntries.Count)"}
+foreach($required in @('const recipes={7:', 'F144 SOUND LABORATORY',
     'BF24_SFX_review_decisions.json', 'PLAY REVISED A', 'PLAY REVISED B',
     'original-file', 'ref-file', 'a-file', 'b-file')){
     if(-not $labText.Contains($required)){throw "Browser lab missing $required"}
@@ -94,5 +105,5 @@ foreach($marker in @('F144_MENU_BPM           110.0',
         throw "Approved BF22 scene or gameplay tempo changed: $marker"
     }
 }
-Write-Host "BF24 REVIEW PACKAGE: PASS (25 cues x 3; footstep A approved, remaining original effects retained)"
+Write-Host "BF24 REVIEW PACKAGE: PASS (16 cues x 3; footstep A approved, remaining original effects retained)"
 Write-Host "NOTE: Headless smoke checks never claim subjective listening approval."

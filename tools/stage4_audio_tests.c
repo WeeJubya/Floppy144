@@ -271,10 +271,10 @@ static void TestPersistedDefaultVolumes(void)
 
 static void TestOriginalGeneratedAudio(void)
 {
-    Expect(F144_SFX_FLOPPY_INSERT==21 &&
-           F144_SFX_TERMINAL_BACKSPACE==22 &&
-           F144_SFX_COUNT==25,
-           "original 22 approved SFX retain IDs; BF21 reverse typing is appended");
+    Expect(F144_SFX_FLOPPY_INSERT==12 &&
+           F144_SFX_TERMINAL_BACKSPACE==13 &&
+           F144_SFX_FOOTSTEP==7 && F144_SFX_COUNT==16,
+           "only 16 actively triggered procedural cues retain compact IDs");
     F144_MusicSetAct(F144_ACT_I);
     Expect(F144_MusicGetAct()==F144_ACT_I,"Act I selection retains original API");
     F144_MusicSetAct(F144_ACT_III);
@@ -327,8 +327,8 @@ static void TestWin32Backend(void)
                f144PlatformSetSfxVolume(&platform,3U),
                "original backend accepts separate persisted volumes");
         Expect(f144PlatformPlayMusic(&platform,1U) &&
-               f144PlatformPlaySfx(&platform,F144_SFX_TELEPHONE),
-               "original v0.9 phone and WinMIDI requests are accepted");
+               f144PlatformPlaySfx(&platform,F144_SFX_FOOTSTEP),
+               "active footstep and WinMIDI requests are accepted");
         f144PlatformAudioUpdate(&platform,1000U,35U);
         f144PlatformAudioUpdate(&platform,1230U,62U);
         Expect(f144PlatformSetMusicVolume(&platform,0U) &&
