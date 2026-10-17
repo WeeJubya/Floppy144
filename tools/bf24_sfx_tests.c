@@ -16,7 +16,7 @@ int main(void)
         FLOPPY144_AUDIO_FLOPPY_INSERT,FLOPPY144_AUDIO_TERMINAL_BACKSPACE,
         FLOPPY144_AUDIO_RESTORE_TICK,FLOPPY144_AUDIO_RESTORE_TICK_HIGH
     };
-    if(F144_SFX_COUNT!=16U)return 13;
+    _Static_assert(F144_SFX_COUNT==16, "BF24 must retain exactly 16 active SFX");
     for(i=0U;i<F144_SFX_COUNT;++i)if(semantic_ids[i]!=i+1U)return 14;
     for(effect=0U;effect<F144_SFX_COUNT;effect++)
         for(variant=0U;variant<3U;variant++) {
