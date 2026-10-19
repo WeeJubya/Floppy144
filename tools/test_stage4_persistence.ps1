@@ -87,6 +87,7 @@ New-Item -ItemType Directory -Force -Path $testObjDir | Out-Null
 $sources = @(
     $testSource,
     "src\f144_platform.c",
+    "src\f144_calendar.c",
     "src\f144_win32_storage.c",
     "game\src\floppy144_storage.c",
     "game\src\floppy144_game_data.c",
