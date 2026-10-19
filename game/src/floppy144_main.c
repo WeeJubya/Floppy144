@@ -3698,6 +3698,7 @@ static bool Floppy144HandleActionEvent(
 
                         case F144_ACTION_NOTEBOOK:
                         {
+                            Floppy144NotebookViewOpen(&global_notebook);
                             global_screen =
                                 FLOPPY144_SCREEN_NOTEBOOK;
 
@@ -3711,8 +3712,8 @@ static bool Floppy144HandleActionEvent(
                 }
 
                 /*
-                 * Notebook: browse recovered persistent knowledge. Up/Down
-                 * moves one entry, Page Up/Page Down jumps five entries, and
+                 * Notebook: Up/Down and PgUp/PgDn scroll the current page.
+                 * Left/Right switches findings and BF18's Document Ledger.
                  * N or Backspace returns to Site exploration.
                  */
                 /* STAGE 3B.5 CABINET KEY ROUTING
@@ -3965,6 +3966,17 @@ static bool Floppy144HandleActionEvent(
                 {
                     switch(eAction)
                     {
+                        case F144_ACTION_MOVE_LEFT:
+                        case F144_ACTION_MOVE_RIGHT:
+                        {
+                            Floppy144NotebookViewSwitchPage(
+                                &global_notebook,
+                                eAction==F144_ACTION_MOVE_RIGHT?1:-1
+                            );
+                            Floppy144Redraw(window);
+                            return true;
+                        }
+
                         case F144_ACTION_MOVE_UP:
                         {
                             Floppy144NotebookViewMove(

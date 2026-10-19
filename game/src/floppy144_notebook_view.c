@@ -1,4 +1,4 @@
-/* Floppy//144 - chronological continuous Notebook screen. */
+/* Floppy//144 - evidence Notebook and BF18 Document Ledger pages. */
 #include "floppy144_notebook_view.h"
 #include "floppy144_draw.h"
 #include "floppy144_game_data.h"
@@ -52,23 +52,48 @@ static void Floppy144NotebookAppendWrapped(
 
 static void Floppy144NotebookBuild(
     const Floppy144RunState *pRunState,
+    const Floppy144NotebookViewState *pNotebook,
     Floppy144NotebookRenderBuffer *pBuffer
 )
 {
-    uint32_t u,count;
+    uint32_t u,count,first;
     if(pBuffer==NULL)return;pBuffer->count=0U;
-    if(pRunState==NULL)return;
-    count=Floppy144GameDataNotebookOrderedCount(pRunState);
+    if(pRunState==NULL||pNotebook==NULL)return;
+    /* Original findings and BF18 document notes already occupy independent
+     * persistent histories. Only the view's selected range changes. */
+    first=pNotebook->page==FLOPPY144_NOTEBOOK_PAGE_DOCUMENT_LEDGER
+        ? (uint32_t)pRunState->notebook_order_count : 0U;
+    count=pNotebook->page==FLOPPY144_NOTEBOOK_PAGE_DOCUMENT_LEDGER
+        ? (uint32_t)pRunState->document_note_count
+        : (uint32_t)pRunState->notebook_order_count;
     for(u=0U;u<count&&pBuffer->count<FLOPPY144_NOTEBOOK_RENDER_LINES;++u)
     {
-        const Floppy144DataRecord *pEntry=Floppy144GameDataNotebookOrderedEntryAt(pRunState,u);
+        const Floppy144DataRecord *pEntry=Floppy144GameDataNotebookOrderedEntryAt(pRunState,first+u);
         if(pEntry!=NULL&&pEntry->pszA!=NULL)Floppy144NotebookAppendWrapped(pBuffer,pEntry->pszA);
     }
 }
 
 void Floppy144NotebookViewReset(Floppy144NotebookViewState *pNotebook)
 {
-    if(pNotebook!=NULL)pNotebook->top_line=0U;
+    if(pNotebook==NULL)return;
+    pNotebook->top_line=0U;
+    pNotebook->document_top_line=0U;
+    pNotebook->page=FLOPPY144_NOTEBOOK_PAGE_EVIDENCE;
+}
+
+/* Reopen on the original page without discarding either scroll offset. */
+void Floppy144NotebookViewOpen(Floppy144NotebookViewState *pNotebook)
+{
+    if(pNotebook!=NULL)pNotebook->page=FLOPPY144_NOTEBOOK_PAGE_EVIDENCE;
+}
+
+void Floppy144NotebookViewSwitchPage(Floppy144NotebookViewState *pNotebook,int32_t nDirection)
+{
+    if(pNotebook==NULL)return;
+    if(nDirection>0&&pNotebook->page==FLOPPY144_NOTEBOOK_PAGE_EVIDENCE)
+        pNotebook->page=FLOPPY144_NOTEBOOK_PAGE_DOCUMENT_LEDGER;
+    else if(nDirection<0&&pNotebook->page==FLOPPY144_NOTEBOOK_PAGE_DOCUMENT_LEDGER)
+        pNotebook->page=FLOPPY144_NOTEBOOK_PAGE_EVIDENCE;
 }
 
 void Floppy144NotebookViewMove(
@@ -77,11 +102,13 @@ void Floppy144NotebookViewMove(
     int32_t nDirection
 )
 {
-    Floppy144NotebookRenderBuffer b;int32_t next,maxTop;
+    Floppy144NotebookRenderBuffer b;int32_t next,maxTop;uint32_t *pTop;
     if(pNotebook==NULL||pRunState==NULL||nDirection==0)return;
-    Floppy144NotebookBuild(pRunState,&b);
+    Floppy144NotebookBuild(pRunState,pNotebook,&b);
+    pTop=pNotebook->page==FLOPPY144_NOTEBOOK_PAGE_DOCUMENT_LEDGER
+        ? &pNotebook->document_top_line : &pNotebook->top_line;
     maxTop=b.count>FLOPPY144_NOTEBOOK_VISIBLE_LINES?(int32_t)(b.count-FLOPPY144_NOTEBOOK_VISIBLE_LINES):0;
-    next=(int32_t)pNotebook->top_line+nDirection;if(next<0)next=0;if(next>maxTop)next=maxTop;pNotebook->top_line=(uint32_t)next;
+    next=(int32_t)*pTop+nDirection;if(next<0)next=0;if(next>maxTop)next=maxTop;*pTop=(uint32_t)next;
 }
 
 void Floppy144NotebookViewDraw(
@@ -94,18 +121,32 @@ void Floppy144NotebookViewDraw(
     Floppy144Surface s;Floppy144NotebookRenderBuffer b;uint32_t top,u,count;char status[64];
     if(pSurface==NULL||pNotebook==NULL||pRunState==NULL||pSurface->pixels==NULL)return;
     s=*pSurface;
-    Floppy144NotebookBuild(pRunState,&b);count=Floppy144GameDataNotebookOrderedCount(pRunState);top=pNotebook->top_line;
+    Floppy144NotebookBuild(pRunState,pNotebook,&b);
+    count=pNotebook->page==FLOPPY144_NOTEBOOK_PAGE_DOCUMENT_LEDGER
+        ? (uint32_t)pRunState->document_note_count
+        : (uint32_t)pRunState->notebook_order_count;
+    top=pNotebook->page==FLOPPY144_NOTEBOOK_PAGE_DOCUMENT_LEDGER
+        ? pNotebook->document_top_line : pNotebook->top_line;
     if(b.count<=FLOPPY144_NOTEBOOK_VISIBLE_LINES)top=0U;else if(top>b.count-FLOPPY144_NOTEBOOK_VISIBLE_LINES)top=b.count-FLOPPY144_NOTEBOOK_VISIBLE_LINES;
-    (void)snprintf(status,sizeof(status),"%u NOTES  LINE %u/%u",(unsigned)count,(unsigned)(b.count?top+1U:0U),(unsigned)b.count);
+    (void)snprintf(status,sizeof(status),"%u %s  LINE %u/%u",(unsigned)count,
+        pNotebook->page==FLOPPY144_NOTEBOOK_PAGE_DOCUMENT_LEDGER?"DOCUMENTS":"NOTES",
+        (unsigned)(b.count?top+1U:0U),(unsigned)b.count);
     Floppy144DrawClear(&s,bg);
-    Floppy144DrawText(&s,10U,5U,"RECOVERY NOTEBOOK",1U,muted);
+    Floppy144DrawText(&s,10U,5U,
+        pNotebook->page==FLOPPY144_NOTEBOOK_PAGE_DOCUMENT_LEDGER
+            ? "DOCUMENT LEDGER" : "RECOVERY NOTEBOOK",1U,muted);
     Floppy144DrawText(&s,630U-Floppy144DrawTextWidth(status,1U),5U,status,1U,amber);
     Floppy144DrawFillRect(&s,10U,18U,620U,280U,panel);Floppy144DrawRect(&s,10U,18U,620U,280U,border);
     Floppy144DrawFillRect(&s,24U,32U,592U,252U,page);Floppy144DrawRect(&s,24U,32U,592U,252U,border);
     if(b.count==0U)
     {
-        Floppy144DrawText(&s,34U,54U,"NO NOTES RECORDED.",1U,amber);
-        Floppy144DrawText(&s,34U,78U,"RECOVERED FINDINGS WILL ACCUMULATE HERE.",1U,muted);
+        Floppy144DrawText(&s,34U,54U,
+            pNotebook->page==FLOPPY144_NOTEBOOK_PAGE_DOCUMENT_LEDGER
+                ? "NO DOCUMENT SUMMARIES RECORDED." : "NO NOTES RECORDED.",1U,amber);
+        Floppy144DrawText(&s,34U,78U,
+            pNotebook->page==FLOPPY144_NOTEBOOK_PAGE_DOCUMENT_LEDGER
+                ? "OPEN DOCUMENTS TO RECORD THEIR SUMMARIES."
+                : "RECOVERED FINDINGS WILL ACCUMULATE HERE.",1U,muted);
     }
     else
     {
@@ -127,5 +168,9 @@ void Floppy144NotebookViewDraw(
         );
     }
     Floppy144DrawFillRect(&s,10U,306U,620U,28U,bg);Floppy144DrawRect(&s,10U,306U,620U,28U,border);
-    Floppy144DrawText(&s,22U,316U,"UP/DOWN SCROLL   PGUP/PGDN PAGE   N/BACKSPACE BACK",1U,text);
+    Floppy144DrawText(&s,22U,316U,
+        pNotebook->page==FLOPPY144_NOTEBOOK_PAGE_DOCUMENT_LEDGER
+            ? "UP/DOWN SCROLL  PGUP/PGDN PAGE  < PREVIOUS  N/BACKSPACE BACK"
+            : "UP/DOWN SCROLL  PGUP/PGDN PAGE  > DOCUMENT LEDGER  N/BACKSPACE BACK",
+        1U,text);
 }

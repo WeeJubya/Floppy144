@@ -26,6 +26,9 @@ jobs:
       - name: BF18 full summary coverage
         shell: pwsh
         run: .\tools\test_bugfix18_notebook.ps1
+      - name: BF38 Notebook page navigation and rendering
+        shell: pwsh
+        run: .\tools\test_bugfix38_notebook.ps1
       - name: BF18 persistence and duplicate-open cases
         shell: pwsh
         run: .\tools\test_stage4_persistence.ps1
