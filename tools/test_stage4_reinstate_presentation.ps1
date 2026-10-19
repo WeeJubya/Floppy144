@@ -120,6 +120,28 @@ if(
     throw "Presentation renderer has acquired persistence/game-state mutation responsibilities."
 }
 
+# BF37: keyboard dispatch must share visible-row availability with drawing.
+# Confirm performs a safety check before using the mapped action.
+$navStart = $main.IndexOf('static void Floppy144MainMenuMoveSelection(')
+$navEnd = $main.IndexOf('static void Floppy144OpenOperatorProfile(',$navStart)
+$menuStart = $main.LastIndexOf('case FLOPPY144_SCREEN_MAIN_MENU:')
+$menuEnd = $main.IndexOf('case FLOPPY144_SCREEN_DIFFICULTY:',$menuStart)
+if($navStart -lt 0 -or $navEnd -le $navStart -or
+   $menuStart -lt 0 -or $menuEnd -le $menuStart)
+{
+    throw "BF37 cannot isolate menu selection and input routes."
+}
+$nav = $main.Substring($navStart,$navEnd-$navStart)
+$menu = $main.Substring($menuStart,$menuEnd-$menuStart)
+if($nav -notmatch 'Floppy144MainMenuSelectRow\(' -or
+   $nav -match 'Floppy144MainMenuOptionEnabled\(' -or
+   ([regex]::Matches($menu,'Floppy144MainMenuSelectRow\(')).Count -lt 2 -or
+   $menu -notmatch 'Floppy144MainMenuRowSelectable\(' -or
+   $menu -notmatch 'Floppy144MainMenuVisibleOption\(')
+{
+    throw "BF37 keyboard navigation, switching, and activation diverged from visible-row policy."
+}
+
 Write-Host "STAGE 4C RESTORED-SESSION PRESENTATION AUDIT: PASS"
 Write-Host ""
 Write-Host "=== BUILD STAGE 4C RESTORED-SESSION RENDERER REGRESSION ==="

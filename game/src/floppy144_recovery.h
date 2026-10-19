@@ -66,6 +66,25 @@ bool Floppy144MainMenuSlideAdvance(Floppy144MainMenuSlide *slide,
 Floppy144MainMenuOption Floppy144MainMenuVisibleOption(
     Floppy144MainMenuOption row, bool save_load_visible);
 
+/* Row indices remain fixed at five positions. Availability, focus and
+ * activation must all resolve their action through the current carousel. */
+bool Floppy144MainMenuRowSelectable(
+    Floppy144MainMenuOption row,
+    bool save_load_visible,
+    bool active_session,
+    bool recorded_session_available
+);
+
+/* direction -1/+1 moves with wrapping; 0 preserves a valid row or
+ * repairs an invalid/disabled selection by scanning forwards. */
+Floppy144MainMenuOption Floppy144MainMenuSelectRow(
+    Floppy144MainMenuOption selected_row,
+    int32_t direction,
+    bool save_load_visible,
+    bool active_session,
+    bool recorded_session_available
+);
+
 /*
  * GDR session-control menu renderer.
  */

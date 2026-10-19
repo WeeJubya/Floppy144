@@ -1104,65 +1104,23 @@ static void Floppy144MainMenuMoveSelection(
     int32_t direction
 )
 {
-    int32_t next_option;
-    uint32_t attempts;
-
     if(direction == 0)
     {
         return;
     }
 
-    global_main_menu_notice =
-        NULL;
+    global_main_menu_notice = NULL;
+    global_main_menu_notice_is_warning = false;
 
-    global_main_menu_notice_is_warning =
-        false;
-
-    next_option =
-        (int32_t)global_main_menu_option;
-
-    for(
-        attempts = 0U;
-        attempts <
-            (uint32_t)FLOPPY144_MAIN_MENU_OPTION_COUNT;
-        ++attempts
-    )
-    {
-        next_option +=
-            direction;
-
-        if(next_option < 0)
-        {
-            next_option =
-                (int32_t)
-                    FLOPPY144_MAIN_MENU_OPTION_COUNT -
-                1;
-        }
-
-        if(
-            next_option >=
-                (int32_t)
-                    FLOPPY144_MAIN_MENU_OPTION_COUNT
-        )
-        {
-            next_option =
-                0;
-        }
-
-        if(
-            Floppy144MainMenuOptionEnabled(
-                (Floppy144MainMenuOption)next_option,
-                global_session_active,
-                global_recorded_session_available
-            )
-        )
-        {
-            global_main_menu_option =
-                (Floppy144MainMenuOption)next_option;
-
-            return;
-        }
-    }
+    /* The current carousel chooses the action at each row. Do not test
+     * the unswapped Profile/Settings enum values when Save/Load is shown. */
+    global_main_menu_option = Floppy144MainMenuSelectRow(
+        global_main_menu_option,
+        direction,
+        global_main_menu_slide.save_load_visible,
+        global_session_active,
+        global_recorded_session_available
+    );
 }
 
 /*
@@ -3240,6 +3198,13 @@ static bool Floppy144HandleActionEvent(
                                    &global_main_menu_slide,
                                    eAction==F144_ACTION_MOVE_LEFT?-1:1))
                             {
+                                /* The target labels become the active options at
+                                 * slide start. Keep focus on a selectable row. */
+                                global_main_menu_option = Floppy144MainMenuSelectRow(
+                                    global_main_menu_option,0,
+                                    global_main_menu_slide.save_load_visible,
+                                    global_session_active,
+                                    global_recorded_session_available);
                                 global_main_menu_notice=NULL;
                                 global_main_menu_notice_is_warning=false;
                                 Floppy144Redraw(window);
@@ -3290,6 +3255,22 @@ static bool Floppy144HandleActionEvent(
                                 (void)Floppy144MainMenuSlideAdvance(
                                     &global_main_menu_slide,
                                     FLOPPY144_MAIN_MENU_SLIDE_MS);
+                            /* A stale or disabled row must never be activated
+                             * by Enter. Repair focus without issuing an action. */
+                            if(!Floppy144MainMenuRowSelectable(
+                                global_main_menu_option,
+                                global_main_menu_slide.save_load_visible,
+                                global_session_active,
+                                global_recorded_session_available))
+                            {
+                                global_main_menu_option = Floppy144MainMenuSelectRow(
+                                    global_main_menu_option,0,
+                                    global_main_menu_slide.save_load_visible,
+                                    global_session_active,
+                                    global_recorded_session_available);
+                                Floppy144Redraw(window);
+                                return true;
+                            }
                             option=Floppy144MainMenuVisibleOption(
                                 global_main_menu_option,
                                 global_main_menu_slide.save_load_visible);

@@ -240,6 +240,139 @@ static void TestMenuAccount(void)
     Expect(guest==empty,"missing or empty operator uses GUEST");
     Expect(guest!=named,"persistent name changes menu ACCOUNT presentation");
 }
+/* BF37: focus, disabled-row filtering, wrapping and switching all
+ * follow the same visible-action mapping used by the renderer. */
+static void TestMenuNavigation(void)
+{
+    Floppy144MainMenuSlide slide;
+    Floppy144MainMenuOption row;
+    uint32_t i;
+    int active,recorded,swapped;
+
+    /* In every availability/configuration combination, no step or repair
+     * may land on a disabled row or on the non-row action enum values. */
+    for(active=0;active<=1;++active)
+    {
+        for(recorded=0;recorded<=1;++recorded)
+        {
+            for(swapped=0;swapped<=1;++swapped)
+            {
+                for(i=0U;i<(uint32_t)FLOPPY144_MAIN_MENU_OPTION_COUNT;++i)
+                {
+                    int direction;
+                    for(direction=-1;direction<=1;++direction)
+                    {
+                        row=Floppy144MainMenuSelectRow(
+                            (Floppy144MainMenuOption)i,direction,
+                            swapped!=0,active!=0,recorded!=0);
+                        Expect(Floppy144MainMenuRowSelectable(row,
+                            swapped!=0,active!=0,recorded!=0),
+                            "BF37 navigation never lands on a disabled row");
+                        if(direction==0 &&
+                           Floppy144MainMenuRowSelectable(
+                               (Floppy144MainMenuOption)i,
+                               swapped!=0,active!=0,recorded!=0))
+                        {
+                            Expect(row==(Floppy144MainMenuOption)i,
+                                "BF37 valid focus survives configuration sync");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Expect(Floppy144MainMenuSelectRow(
+        FLOPPY144_MAIN_MENU_INITIATE_SESSION,1,false,false,false)==
+        FLOPPY144_MAIN_MENU_OPERATOR_PROFILE,
+        "BF37 default configuration skips disabled Return");
+    Expect(Floppy144MainMenuSelectRow(
+        FLOPPY144_MAIN_MENU_TERMINATE,1,false,false,false)==
+        FLOPPY144_MAIN_MENU_INITIATE_SESSION,
+        "BF37 default Down wraps to Initiate");
+    Expect(Floppy144MainMenuSelectRow(
+        FLOPPY144_MAIN_MENU_INITIATE_SESSION,-1,false,false,false)==
+        FLOPPY144_MAIN_MENU_TERMINATE,
+        "BF37 default Up wraps to Terminate");
+
+    Expect(!Floppy144MainMenuRowSelectable(
+        FLOPPY144_MAIN_MENU_OPERATOR_PROFILE,true,false,false) &&
+        !Floppy144MainMenuRowSelectable(
+        FLOPPY144_MAIN_MENU_SETTINGS,true,false,false),
+        "BF37 Save and Load rows disabled when neither prerequisite exists");
+    Expect(!Floppy144MainMenuRowSelectable(
+        FLOPPY144_MAIN_MENU_RECORD_SESSION,false,true,true) &&
+        !Floppy144MainMenuRowSelectable(
+        FLOPPY144_MAIN_MENU_REINSTATE_SESSION,true,true,true),
+        "BF37 action enum values cannot masquerade as row indices");
+    Expect(Floppy144MainMenuSelectRow(
+        FLOPPY144_MAIN_MENU_INITIATE_SESSION,1,true,false,false)==
+        FLOPPY144_MAIN_MENU_TERMINATE,
+        "BF37 disabled Save/Load skipped rather than hidden Profile/Settings");
+    Expect(Floppy144MainMenuSelectRow(
+        FLOPPY144_MAIN_MENU_TERMINATE,-1,true,false,false)==
+        FLOPPY144_MAIN_MENU_INITIATE_SESSION,
+        "BF37 Save/Load Up skips both disabled centre rows");
+    Expect(Floppy144MainMenuSelectRow(
+        FLOPPY144_MAIN_MENU_OPERATOR_PROFILE,0,true,false,false)==
+        FLOPPY144_MAIN_MENU_TERMINATE,
+        "BF37 switching off Profile repairs invalid row");
+    Expect(Floppy144MainMenuSelectRow(
+        FLOPPY144_MAIN_MENU_SETTINGS,0,true,false,false)==
+        FLOPPY144_MAIN_MENU_TERMINATE,
+        "BF37 switching off Settings repairs invalid row");
+
+    Expect(Floppy144MainMenuSelectRow(
+        FLOPPY144_MAIN_MENU_RETURN_TO_SITE,1,true,true,false)==
+        FLOPPY144_MAIN_MENU_OPERATOR_PROFILE,
+        "BF37 active session makes visible Save selectable");
+    Expect(Floppy144MainMenuSelectRow(
+        FLOPPY144_MAIN_MENU_OPERATOR_PROFILE,1,true,true,false)==
+        FLOPPY144_MAIN_MENU_TERMINATE,
+        "BF37 disabled Load skipped when only Save is allowed");
+    Expect(Floppy144MainMenuSelectRow(
+        FLOPPY144_MAIN_MENU_INITIATE_SESSION,1,true,false,true)==
+        FLOPPY144_MAIN_MENU_SETTINGS,
+        "BF37 recorded session makes Load selectable without Save");
+    Expect(Floppy144MainMenuSelectRow(
+        FLOPPY144_MAIN_MENU_OPERATOR_PROFILE,1,true,true,true)==
+        FLOPPY144_MAIN_MENU_SETTINGS,
+        "BF37 both Save and Load available participate in order");
+    Expect(Floppy144MainMenuSelectRow(
+        FLOPPY144_MAIN_MENU_SETTINGS,-1,true,true,true)==
+        FLOPPY144_MAIN_MENU_OPERATOR_PROFILE,
+        "BF37 both Save and Load available participate in reverse order");
+
+    /* Rapid Up/Down while whisking, repeated blocked Left/Right, Enter's
+     * completion of the animation, and later switches cannot desynchronise
+     * the highlight from the selected visible action. */
+    Floppy144MainMenuSlideReset(&slide);
+    row=FLOPPY144_MAIN_MENU_OPERATOR_PROFILE;
+    for(i=0U;i<128U;++i)
+    {
+        int32_t direction=(i&1U)!=0U?-1:1;
+        Expect(Floppy144MainMenuSlideStart(&slide,direction),
+            "BF37 switch begins from a settled menu");
+        row=Floppy144MainMenuSelectRow(row,0,slide.save_load_visible,
+            false,false);
+        Expect(!Floppy144MainMenuSlideStart(&slide,-direction),
+            "BF37 repeated switching blocked until animation completes");
+        row=Floppy144MainMenuSelectRow(row,1,slide.save_load_visible,
+            false,false);
+        row=Floppy144MainMenuSelectRow(row,-1,slide.save_load_visible,
+            false,false);
+        Expect(Floppy144MainMenuRowSelectable(row,
+            slide.save_load_visible,false,false),
+            "BF37 movement during slide follows destination labels");
+        (void)Floppy144MainMenuSlideAdvance(&slide,240U);
+        Expect(!slide.animating &&
+            Floppy144MainMenuOptionEnabled(
+                Floppy144MainMenuVisibleOption(row,slide.save_load_visible),
+                false,false),
+            "BF37 Enter after slide cannot activate hidden or disabled option");
+    }
+}
+
 int main(void)
 {
     Floppy144RunState restored;
@@ -300,6 +433,7 @@ int main(void)
         "Terminate never changes on slide");
     TestMenuSlide();
     TestMenuAccount();
+    TestMenuNavigation();
 
     no_save_hash=DrawMenu(
         false,

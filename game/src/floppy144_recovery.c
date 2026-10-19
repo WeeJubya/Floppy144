@@ -123,6 +123,66 @@ Floppy144MainMenuOption Floppy144MainMenuVisibleOption(
         return FLOPPY144_MAIN_MENU_REINSTATE_SESSION;
     return row;
 }
+bool Floppy144MainMenuRowSelectable(
+    Floppy144MainMenuOption row,
+    bool save_load_visible,
+    bool active_session,
+    bool recorded_session_available
+)
+{
+    /* The extra action enum values are not menu rows. */
+    if((int32_t)row < 0 ||
+       row >= FLOPPY144_MAIN_MENU_OPTION_COUNT)
+    {
+        return false;
+    }
+
+    return Floppy144MainMenuOptionEnabled(
+        Floppy144MainMenuVisibleOption(row,save_load_visible),
+        active_session,
+        recorded_session_available
+    );
+}
+
+Floppy144MainMenuOption Floppy144MainMenuSelectRow(
+    Floppy144MainMenuOption selected_row,
+    int32_t direction,
+    bool save_load_visible,
+    bool active_session,
+    bool recorded_session_available
+)
+{
+    int32_t row=(int32_t)selected_row;
+    int32_t step=direction<0?-1:1;
+    uint32_t attempts;
+
+    if(direction==0 &&
+       Floppy144MainMenuRowSelectable(selected_row,save_load_visible,
+           active_session,recorded_session_available))
+    {
+        return selected_row;
+    }
+
+    if(row<0 || row>=(int32_t)FLOPPY144_MAIN_MENU_OPTION_COUNT)
+    {
+        row=step>0?(int32_t)FLOPPY144_MAIN_MENU_OPTION_COUNT-1:0;
+    }
+
+    for(attempts=0U;attempts<(uint32_t)FLOPPY144_MAIN_MENU_OPTION_COUNT;
+        ++attempts)
+    {
+        row=(row+(int32_t)FLOPPY144_MAIN_MENU_OPTION_COUNT+step)%
+            (int32_t)FLOPPY144_MAIN_MENU_OPTION_COUNT;
+        if(Floppy144MainMenuRowSelectable((Floppy144MainMenuOption)row,
+            save_load_visible,active_session,recorded_session_available))
+        {
+            return (Floppy144MainMenuOption)row;
+        }
+    }
+
+    /* Initiate is always available; this is a defensive fallback. */
+    return FLOPPY144_MAIN_MENU_INITIATE_SESSION;
+}
 void Floppy144MainMenuSlideReset(Floppy144MainMenuSlide *slide)
 {
     if(slide==NULL)return;
@@ -588,8 +648,8 @@ void Floppy144MainMenuDrawSliding(
             Floppy144MainMenuRowLabel(option_index,swapped);
 
         bool enabled =
-            Floppy144MainMenuOptionEnabled(
-                Floppy144MainMenuVisibleOption(option,swapped),
+            Floppy144MainMenuRowSelectable(
+                option,swapped,
                 active_session,
                 recorded_session_available
             );
