@@ -568,6 +568,137 @@ static void TestNecklessHeadAttachment(void)
     }
 }
 
+/*
+ * BF36 canonical reference: Type A has only a short hair cap; Type B adds
+ * one front-left lock and slightly fuller rear/side coverage. Both must
+ * remain visible with the stationary pose and both walking gait phases.
+ * Count hair-coloured framebuffer pixels instead of relying on image hashes,
+ * which do not establish which direction the new hair coverage extends.
+ */
+static uint32_t CountReferenceHair(
+    uint32_t x0,
+    uint32_t y0,
+    uint32_t x1,
+    uint32_t y1
+)
+{
+    uint32_t x;
+    uint32_t y;
+    uint32_t count = 0U;
+    const uint32_t hair = FLOPPY144_RGB(133, 52, 13);
+
+    for(y = y0; y < y1; ++y)
+    {
+        for(x = x0; x < x1; ++x)
+        {
+            if(g_pixels[y * TEST_WIDTH + x] == hair)
+            {
+                ++count;
+            }
+        }
+    }
+    return count;
+}
+
+static uint32_t ReferenceHairAtFacing(
+    Floppy144OperatorBodyStyle style,
+    Floppy144PlayerFacing facing,
+    uint32_t gait,
+    uint32_t x0,
+    uint32_t y0,
+    uint32_t x1,
+    uint32_t y1
+)
+{
+    Floppy144PlayerVisualState state;
+    Floppy144PlayerVisualReset(&state);
+    state.facing = (uint8_t)facing;
+    state.moving = (uint8_t)(gait != 0U);
+    state.walk_frame = (uint8_t)(gait == 2U);
+    (void)DrawHash(&state,style);
+    return CountReferenceHair(x0,y0,x1,y1);
+}
+
+static void TestReferenceMatchedHairCoverage(void)
+{
+    uint32_t gait;
+    uint32_t facing;
+    uint32_t baseHair;
+    uint32_t longHair;
+    const Floppy144PlayerFacing profiles[] =
+    {
+        FLOPPY144_PLAYER_FACING_RIGHT,
+        FLOPPY144_PLAYER_FACING_LEFT
+    };
+
+    for(gait = 0U; gait < 3U; ++gait)
+    {
+        /* Type B's left-front lock runs below the cheek. Type A does not. */
+        baseHair = ReferenceHairAtFacing(
+            FLOPPY144_OPERATOR_BODY_STYLE_A,
+            FLOPPY144_PLAYER_FACING_DOWN,gait,311U,166U,315U,172U
+        );
+        longHair = ReferenceHairAtFacing(
+            FLOPPY144_OPERATOR_BODY_STYLE_B,
+            FLOPPY144_PLAYER_FACING_DOWN,gait,311U,166U,315U,172U
+        );
+        EXPECT(longHair > baseHair,
+               "BF36 Type B front-left hair lock is longer than Type A cap");
+
+        /* The opposite front side must not gain a matching second lock. */
+        baseHair = ReferenceHairAtFacing(
+            FLOPPY144_OPERATOR_BODY_STYLE_A,
+            FLOPPY144_PLAYER_FACING_DOWN,gait,325U,166U,329U,172U
+        );
+        longHair = ReferenceHairAtFacing(
+            FLOPPY144_OPERATOR_BODY_STYLE_B,
+            FLOPPY144_PLAYER_FACING_DOWN,gait,325U,166U,329U,172U
+        );
+        EXPECT(longHair <= baseHair,
+               "BF36 Type B hair keeps the reference's asymmetric front");
+
+        /* Both rear lower corners retain hair beyond the Type A round cap. */
+        baseHair = ReferenceHairAtFacing(
+            FLOPPY144_OPERATOR_BODY_STYLE_A,
+            FLOPPY144_PLAYER_FACING_UP,gait,313U,166U,317U,173U
+        );
+        longHair = ReferenceHairAtFacing(
+            FLOPPY144_OPERATOR_BODY_STYLE_B,
+            FLOPPY144_PLAYER_FACING_UP,gait,313U,166U,317U,173U
+        );
+        EXPECT(longHair > baseHair,
+               "BF36 Type B rear hair covers the lower left side");
+
+        baseHair = ReferenceHairAtFacing(
+            FLOPPY144_OPERATOR_BODY_STYLE_A,
+            FLOPPY144_PLAYER_FACING_UP,gait,323U,166U,327U,173U
+        );
+        longHair = ReferenceHairAtFacing(
+            FLOPPY144_OPERATOR_BODY_STYLE_B,
+            FLOPPY144_PLAYER_FACING_UP,gait,323U,166U,327U,173U
+        );
+        EXPECT(longHair > baseHair,
+               "BF36 Type B rear hair covers the lower right side");
+
+        /* Both profiles have a rounded rear cap; only B extends below it. */
+        for(facing = 0U; facing < 2U; ++facing)
+        {
+            uint32_t x0 = facing == 0U ? 312U : 324U;
+            uint32_t x1 = facing == 0U ? 317U : 329U;
+            baseHair = ReferenceHairAtFacing(
+                FLOPPY144_OPERATOR_BODY_STYLE_A,
+                profiles[facing],gait,x0,166U,x1,173U
+            );
+            longHair = ReferenceHairAtFacing(
+                FLOPPY144_OPERATOR_BODY_STYLE_B,
+                profiles[facing],gait,x0,166U,x1,173U
+            );
+            EXPECT(longHair > baseHair,
+                   "BF36 Type B profile has fuller hair at the back");
+        }
+    }
+}
+
 static void TestViewportClipping(void)
 {
     Floppy144PlayerVisualState state;
@@ -690,6 +821,7 @@ int main(void)
     TestAnimation();
     TestBodyStylesAndRoundHead();
     TestNecklessHeadAttachment();
+    TestReferenceMatchedHairCoverage();
     TestViewportClipping();
 
     if(g_failures != 0)

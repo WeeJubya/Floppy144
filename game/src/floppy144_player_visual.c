@@ -477,15 +477,23 @@ static void f144BuildOfficeCharacter(RenderBuffer *b, float cx, float footY,
         }
     }
     /*
-     * BF25: the later two-slide artwork uses a shallow brown cap across
-     * the *same* round skull, not a separate topknot. The profiles show a
-     * rear brown hemisphere and the exposed face towards the travel axis.
-     * Type B has a single asymmetrical front lock but no long side ponytail.
+     * BF36: the supplied front, rear and opposing profile artwork is the
+     * authority for both hair silhouettes. Draw the hair beneath the face,
+     * then add Type B's visible left-side lock in the front view. Keep the
+     * short Type A cap and the Developer's short hair free of trailing tufts.
+     * Neither style has a separate neck: face and jacket meet directly.
      */
-    /* The skull and face meet the jacket directly: no neck primitive. */
     if(profile)
     {
+        /* The face points along the existing four-way facing axis. */
         f144AddCircle(b,f144Vec(cx,headY),scale*8.f,c->hair);
+        if(c->flags&F144_COSTUME_LONG_HAIR)
+        {
+            /* A shallow continuation of the rear hemisphere, not a ponytail. */
+            float rearX=cx-direction*scale*5.6f;
+            f144CapsuleAdd(b,rearX,headY+scale*3.f,
+                           rearX,headY+scale*9.f,scale*2.5f,c->hair);
+        }
         f144AddCircle(b,f144Vec(cx+direction*scale*3.3f,headY+scale*.7f),
                       scale*6.5f,c->skin);
     }
@@ -493,23 +501,35 @@ static void f144BuildOfficeCharacter(RenderBuffer *b, float cx, float footY,
     {
         if(c->flags&F144_COSTUME_LONG_HAIR)
         {
-            /* The back of the blue scarf peeks below the brown head. */
+            /* The reference's cyan collar remains visible below the hair. */
             f144CapsuleAdd(b,cx-scale*5.f,headY+scale*9.f,
                            cx+scale*5.f,headY+scale*9.f,
                            scale*4.4f,c->accent);
         }
         f144AddCircle(b,f144Vec(cx,headY),scale*8.f,c->hair);
+        if(c->flags&F144_COSTUME_LONG_HAIR)
+        {
+            /* Slightly fuller lower corners of Type B's back-of-head. */
+            f144CapsuleAdd(b,cx-scale*5.2f,headY+scale*4.f,
+                           cx-scale*5.2f,headY+scale*8.5f,
+                           scale*2.5f,c->hair);
+            f144CapsuleAdd(b,cx+scale*5.2f,headY+scale*4.f,
+                           cx+scale*5.2f,headY+scale*8.5f,
+                           scale*2.5f,c->hair);
+        }
     }
     else
     {
+        /* Both styles have the same shallow cap over a round face. */
         f144AddCircle(b,f144Vec(cx,headY),scale*8.f,c->hair);
         f144AddCircle(b,f144Vec(cx,headY+scale*1.7f),scale*7.5f,c->skin);
         if(c->flags&F144_COSTUME_LONG_HAIR)
         {
-            /* Front-left thin fringe, plus the reference's cyan neck loop. */
-            f144CapsuleAdd(b,cx-scale*7.f,headY-scale*1.f,
-                           cx-scale*7.f,headY+scale*9.f,
-                           scale*1.5f,c->hair);
+            /* Type B: one slim, attached lock down the character's left. */
+            f144CapsuleAdd(b,cx-scale*6.9f,headY-scale*.8f,
+                           cx-scale*6.9f,headY+scale*10.5f,
+                           scale*2.2f,c->hair);
+            /* Keep the blue scarf separate from the brown hair. */
             f144CapsuleAdd(b,cx-scale*5.f,headY+scale*9.f,
                            cx+scale*5.f,headY+scale*9.f,
                            scale*4.4f,c->accent);

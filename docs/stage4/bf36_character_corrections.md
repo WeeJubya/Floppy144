@@ -1,44 +1,54 @@
-# BF36: playable character geometry corrections
+# BF36: Character Model Corrections
 
-## Scope and status
+## Canonical references
 
-The latest Stage 4 branch at commencement was `bed1b7e71cb44e1eccc44d9629c7596d11cb8065`.
-This commit is **partial BF36 implementation**, not final visual acceptance.
+User-supplied `Characters(2).pptx` and the exported `Slide1(1).PNG`
+(Character A) and `Slide2(1).PNG` (Character B), received 19 October 2026,
+show the front, rear, left and right orthographic character silhouettes.
+These supersede the earlier inaccessible attachment. They were inspected
+directly before updating the character renderer.
 
-### Applied: remove separate neck primitives
+## Geometry changes
 
-The shared vector renderer previously painted thin skin-coloured capsules
-from the lower head into the upper jacket after rendering the torso. These
-were visible as unwanted neck extensions, particularly in Type A profiles and
-front-facing characters. Both separate capsules are removed; the existing
-head/face discs and jacket upper stroke already overlap directly.
+Both characters' separate skin-coloured neck capsules were removed in the
+earlier BF36 commit. The head and torso remain connected using the original
+round skull, face and overlapping jacket strokes. No extra neck primitive is
+introduced.
 
-No adjustments were made to body sizes, hair, clothing, palettes, facing,
-walking cadence, movement, saved body-style identity, ISO projection, or the
-shared Developer/Easter Egg character entry point.
+Type A keeps the simple brown short cap in front, a round brown back of head,
+and one rear hemisphere in each profile. There is no dangling hair or
+ponytail.
 
-### Regression
+Type B keeps the same head proportions but gains a single thin side lock
+down the left of the face in front view. The rear hair has two small,
+continuous lower-corner extensions framing the blue scarf. Both profiles
+continue the round brown rear hemisphere down slightly, without adding a
+large fringe or ponytail. The cyan scarf and existing dark outfit are
+unchanged.
 
-`tools/stage4_player_visual_tests.c` now samples the head/torso boundary for
-both body styles, four directions and idle plus both walking frames. It
-checks that the centreline contains no skin-coloured neck segment or gap.
-The existing directional, gait, silhouette, viewport and Easter Egg tests
-should also be run.
+The same `f144BuildOfficeCharacter` renderer still handles Site play,
+Profile previews and the larger Developer variant used by the Grey Door
+Easter Egg. The Developer retains short silver hair and receives no Type B
+hair geometry. No changes to body-style storage, movement, collision, foot
+position, directional tie-breaking, gait or platform dependencies.
 
-### Blocked: source-art-accurate hairstyles
+## Automated verification
 
-`Characters(1).pptx` was located in the original user uploads. Its two
-visual slide images were **not available to inspect** in the current
-environment: the file service returned text only and raw-byte materialisation
-failed. Existing BF25 documentation describes general shapes but is not a
-substitute for the canonical artwork. In accordance with BF36, hairstyle
-geometry was **not guessed or modified**.
+`tools/stage4_player_visual_tests.c` extends the existing direction, idle,
+movement, clipping and neck tests with colour-specific coverage probes for:
 
-Before final BF36 sign-off:
-1. Obtain viewable original Character A and B slide artwork.
-2. Compare each type to all directional renderer captures, including walking.
-3. Adjust only reference-supported hair geometry, including rear/side coverage.
-4. Repeat visual tests and Release / size verification.
-5. Obtain manual visual approval.
+- Type B's front-left hair lock and absence of a matching front-right lock.
+- Both lower rear corners of Type B's head.
+- Type B rear hair coverage in the two mirrored profile views.
+- Every check in idle and both two-frame walking phases.
 
-This status does not claim visual comparison or Release verification.
+The existing `F144_BF25_CAPTURE_DIR` test output generates 16 actual
+640x360 PPM captures (both styles x four directions x idle/walking) for
+reference comparison. Those captures are not stored as runtime bitmap assets.
+User visual acceptance of the character render remains a separate check.
+
+## Status
+
+Reference-grounded hairstyle corrections implemented. The on-branch Windows
+build and regressions determine the technical verification status; do not
+treat any unaudited image captures as automatic proof of exact visual match.
