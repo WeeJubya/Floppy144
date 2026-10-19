@@ -699,6 +699,60 @@ static void TestReferenceMatchedHairCoverage(void)
     }
 }
 
+
+/*
+ * BF36 follow-up: the old side face was a second circle displaced along
+ * the direction of travel. That made the front/rear head look centred but
+ * pushed the entire side face beyond the round hair silhouette.
+ *
+ * The profile's hair and face now share the *same* rounded skull footprint
+ * (centre x=320, radius=8 at the canonical 72px test size).
+ */
+static void TestCentredProfileFaces(void)
+{
+    static const Floppy144PlayerFacing profiles[] =
+    {
+        FLOPPY144_PLAYER_FACING_RIGHT,
+        FLOPPY144_PLAYER_FACING_LEFT
+    };
+    const uint32_t skin=FLOPPY144_RGB(208,166,157);
+    const uint32_t hair=FLOPPY144_RGB(133,52,13);
+    uint32_t style,face,gait;
+
+    for(style=0U;style<2U;++style)
+        for(face=0U;face<2U;++face)
+            for(gait=0U;gait<3U;++gait)
+            {
+                Floppy144PlayerVisualState state;
+                uint32_t cy;
+                uint32_t towards=face==0U?328U:312U;
+                uint32_t behind=face==0U?312U:328U;
+                uint32_t outside=face==0U?329U:311U;
+                uint32_t otherOutside=face==0U?311U:329U;
+
+                Floppy144PlayerVisualReset(&state);
+                state.facing=(uint8_t)profiles[face];
+                state.moving=(uint8_t)(gait!=0U);
+                state.walk_frame=(uint8_t)(gait==2U);
+                (void)DrawHash(&state,
+                    style==0U?FLOPPY144_OPERATOR_BODY_STYLE_A:
+                              FLOPPY144_OPERATOR_BODY_STYLE_B);
+
+                cy=160U+(gait!=0U?2U:0U);
+
+                EXPECT(g_pixels[cy*TEST_WIDTH+towards]==skin,
+                       "BF36 profile face reaches the centred forward skull edge");
+                EXPECT(g_pixels[cy*TEST_WIDTH+behind]==hair,
+                       "BF36 profile hair covers the centred rear skull edge");
+                EXPECT(g_pixels[cy*TEST_WIDTH+320U]==skin,
+                       "BF36 profile face fills the forward half from centre");
+                EXPECT(g_pixels[cy*TEST_WIDTH+outside]==0U,
+                       "BF36 profile face cannot protrude beyond skull radius");
+                EXPECT(g_pixels[cy*TEST_WIDTH+otherOutside]==0U,
+                       "BF36 profile rear edge stays within centred skull radius");
+            }
+}
+
 static void TestViewportClipping(void)
 {
     Floppy144PlayerVisualState state;
@@ -822,6 +876,7 @@ int main(void)
     TestBodyStylesAndRoundHead();
     TestNecklessHeadAttachment();
     TestReferenceMatchedHairCoverage();
+    TestCentredProfileFaces();
     TestViewportClipping();
 
     if(g_failures != 0)

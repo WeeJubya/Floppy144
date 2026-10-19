@@ -248,7 +248,8 @@ typedef struct { F144Vec2 a, b; float width; } F144Segment;
 typedef struct { F144Vec2 centre; float radius; } F144Circle;
 typedef struct { F144Segment axis; } F144Capsule;
 typedef struct { F144Vec2 corner, size; } F144Rect;
-typedef enum { F144_VEC_LINE, F144_VEC_CIRCLE, F144_VEC_CAPSULE, F144_VEC_RECT } F144PrimitiveType;
+typedef enum { F144_VEC_LINE, F144_VEC_CIRCLE, F144_VEC_CAPSULE, F144_VEC_RECT,
+               F144_VEC_PROFILE_LEFT, F144_VEC_PROFILE_RIGHT } F144PrimitiveType;
 typedef struct {
     F144PrimitiveType type;
     F144RGBA colour;
@@ -284,6 +285,18 @@ static void f144AddCircle(RenderBuffer *b, F144Vec2 centre, float radius, F144RG
     p->type = F144_VEC_CIRCLE; p->colour = c;
     p->shape.circle.centre = centre; p->shape.circle.radius = radius;
 }
+/*
+ * The profile face is one half of the *same* circular skull as the hair,
+ * rather than a second disc shifted forwards in the travel direction.
+ */
+static void f144AddProfileFace(RenderBuffer *b, F144Vec2 centre,
+                               float radius, float direction, F144RGBA c) {
+    unsigned count=b->count;
+    f144AddCircle(b,centre,radius,c);
+    if(b->count>count)
+        b->primitives[count].type=direction<0.f
+            ? F144_VEC_PROFILE_LEFT : F144_VEC_PROFILE_RIGHT;
+}
 static void f144CapsuleAdd(RenderBuffer *b, float x0, float y0, float x1, float y1, float width, F144RGBA c) {
     f144AddLine(b, f144Vec(x0,y0), f144Vec(x1,y1), width, c, F144_VEC_CAPSULE);
 }
@@ -302,7 +315,7 @@ static void f144Pixel(const F144Raster *r, int32_t x, int32_t y, F144RGBA c) {
             FLOPPY144_RGB(c.r,c.g,c.b));
     }
 }
-static void f144Disk(const F144Raster *r, int32_t cx, int32_t cy, int32_t radius, F144RGBA c) {
+static void f144Disk(const F144Raster *r, int32_t cx, int32_t cy, int32_t radius, F144RGBA c, int32_t half) {
     int32_t x, y;
     if(radius < 0) return;
     /* Bound iterations even for malformed scale or off-screen geometry. */
@@ -310,7 +323,8 @@ static void f144Disk(const F144Raster *r, int32_t cx, int32_t cy, int32_t radius
     for(y = -radius; y <= radius; ++y) {
         if(cy+y < r->y0 || cy+y >= r->y1) continue;
         for(x = -radius; x <= radius; ++x)
-            if(x*x+y*y <= radius*radius) f144Pixel(r,cx+x,cy+y,c);
+            if((half==0 || x*half>=0) && x*x+y*y <= radius*radius)
+                f144Pixel(r,cx+x,cy+y,c);
     }
 }
 /* Integer Bresenham centreline, with a circular pen for configurable thickness. */
@@ -324,7 +338,7 @@ static void f144Stroke(const F144Raster *r, F144Segment s, F144RGBA c) {
     /* Reject absurd coordinates rather than allowing an unbounded loop. */
     if(dx > 8192 || -dy > 8192 || radius > 256) return;
     for(;;) {
-        f144Disk(r,x0,y0,radius,c);
+        f144Disk(r,x0,y0,radius,c,0);
         if(x0==x1 && y0==y1) break;
         if(++steps > 8193) break;
         {
@@ -338,10 +352,13 @@ static void f144Rasterize(const RenderBuffer *b, const F144Raster *r) {
     unsigned i;
     for(i=0;i<b->count;++i) {
         const F144Primitive *p=&b->primitives[i];
-        if(p->type==F144_VEC_CIRCLE)
+        if(p->type==F144_VEC_CIRCLE ||
+           p->type==F144_VEC_PROFILE_LEFT || p->type==F144_VEC_PROFILE_RIGHT)
             f144Disk(r,f144Round(p->shape.circle.centre.x),
                 f144Round(p->shape.circle.centre.y),
-                f144Round(p->shape.circle.radius),p->colour);
+                f144Round(p->shape.circle.radius),p->colour,
+                p->type==F144_VEC_PROFILE_LEFT?-1:
+                p->type==F144_VEC_PROFILE_RIGHT?1:0);
         else if(p->type==F144_VEC_RECT)
         {
             int32_t x0=f144Round(p->shape.rect.corner.x);
@@ -494,8 +511,8 @@ static void f144BuildOfficeCharacter(RenderBuffer *b, float cx, float footY,
             f144CapsuleAdd(b,rearX,headY+scale*3.f,
                            rearX,headY+scale*9.f,scale*2.5f,c->hair);
         }
-        f144AddCircle(b,f144Vec(cx+direction*scale*3.3f,headY+scale*.7f),
-                      scale*6.5f,c->skin);
+        /* Face and hair share the centred head disc in both side views. */
+        f144AddProfileFace(b,f144Vec(cx,headY),scale*8.f,direction,c->skin);
     }
     else if(back)
     {

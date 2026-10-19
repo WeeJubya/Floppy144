@@ -52,3 +52,27 @@ User visual acceptance of the character render remains a separate check.
 Reference-grounded hairstyle corrections implemented. The on-branch Windows
 build and regressions determine the technical verification status; do not
 treat any unaudited image captures as automatic proof of exact visual match.
+
+## BF36 follow-up: centred side-view heads
+
+The subsequent in-game visual review found both left and right profiles had
+a displaced face disc. The original implementation centred hair on the
+character's existing head position but placed the pink face at
+`cx + direction * scale * 3.3`, so the front of the skull protruded past the
+front/rear head footprint.
+
+Both side views now render a painter-ordered **half-disc of face within the
+original hair-disc radius and centre**. The face is the travel-facing half,
+with the hair in the rear half; the outer round silhouette, height and
+centre are identical to the front and rear orientations. Type B's existing
+rear hair coverage is drawn behind the centred head as before. The new
+half-disc uses the existing circle primitive payload and software rasterizer;
+no bitmap, model or external asset has been added.
+
+The `TestCentredProfileFaces` regression asserts exact leading and trailing
+radius bounds, expected pink/brown halves and no protruding side pixels for
+both styles, both profiles and idle/two walking phases. The existing BF36
+hair-coverage, no-neck, movement and clip regressions remain in place.
+
+The user's in-game visual sign-off remains outstanding until the new
+capture sheet and actual executable have been reviewed.
