@@ -112,6 +112,7 @@ $sources = @(
     "game\src\floppy144_site_object.c",
     "game\src\floppy144_grey_door.c",
     "game\src\floppy144_grey_encounter.c",
+    "game\src\floppy144_site_isometric.c",
     "game\src\floppy144_brand_logo.c",
     "game\src\floppy144_object_registry.c",
     "game\src\floppy144_collection_registry.c"
@@ -146,6 +147,7 @@ try
             "/WX",
             "/wd4505",
             "/O2",
+            "/Gy",
             "/Iinclude",
             "/Igame\src",
             "/Fo:$object",
@@ -165,6 +167,7 @@ try
 
     $linkArgs = @(
         "/nologo",
+        "/OPT:REF",
         "/OUT:$testExe"
     ) + $objects + @(
         "user32.lib",
