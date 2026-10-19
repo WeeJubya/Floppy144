@@ -518,6 +518,56 @@ static void TestBodyStylesAndRoundHead(void)
     );
 }
 
+/*
+ * BF36: the head and jacket must touch without a separately rendered
+ * skin-coloured neck at the upper torso. The sample is below the round
+ * face and above the chest, including both phases of the existing gait.
+ * These checks deliberately cover both body styles and all four facings.
+ */
+static void TestNecklessHeadAttachment(void)
+{
+    uint32_t style;
+    uint32_t facing;
+    uint32_t frame;
+    const uint32_t skin = FLOPPY144_RGB(208, 166, 157);
+
+    for(style = 0U; style < 2U; ++style)
+    {
+        for(facing = 0U; facing < FLOPPY144_PLAYER_FACING_COUNT; ++facing)
+        {
+            for(frame = 0U; frame < 3U; ++frame)
+            {
+                Floppy144PlayerVisualState state;
+                uint32_t band_y;
+                uint32_t centre;
+
+                Floppy144PlayerVisualReset(&state);
+                state.facing = (uint8_t)facing;
+                state.moving = (uint8_t)(frame != 0U);
+                state.walk_frame = (uint8_t)(frame == 2U);
+                (void)DrawHash(
+                    &state,
+                    style == 0U ? FLOPPY144_OPERATOR_BODY_STYLE_A :
+                                  FLOPPY144_OPERATOR_BODY_STYLE_B
+                );
+
+                /* The walking phase has a two-pixel presentation bob. */
+                band_y = 172U + (frame != 0U ? 2U : 0U);
+                centre = g_pixels[band_y * TEST_WIDTH + 320U];
+
+                EXPECT(
+                    centre != skin,
+                    "BF36 upper torso has no exposed neck-coloured stalk"
+                );
+                EXPECT(
+                    centre != 0U,
+                    "BF36 head and jacket meet without a centreline gap"
+                );
+            }
+        }
+    }
+}
+
 static void TestViewportClipping(void)
 {
     Floppy144PlayerVisualState state;
@@ -639,6 +689,7 @@ int main(void)
     TestQuickDirectionTransitions();
     TestAnimation();
     TestBodyStylesAndRoundHead();
+    TestNecklessHeadAttachment();
     TestViewportClipping();
 
     if(g_failures != 0)

@@ -482,11 +482,9 @@ static void f144BuildOfficeCharacter(RenderBuffer *b, float cx, float footY,
      * rear brown hemisphere and the exposed face towards the travel axis.
      * Type B has a single asymmetrical front lock but no long side ponytail.
      */
+    /* The skull and face meet the jacket directly: no neck primitive. */
     if(profile)
     {
-        if(!(c->flags&F144_COSTUME_SKIRT))
-            f144CapsuleAdd(b,cx,headY+scale*6.f,
-                           cx,shoulders+scale*1.5f,scale*3.f,c->skin);
         f144AddCircle(b,f144Vec(cx,headY),scale*8.f,c->hair);
         f144AddCircle(b,f144Vec(cx+direction*scale*3.3f,headY+scale*.7f),
                       scale*6.5f,c->skin);
@@ -504,8 +502,6 @@ static void f144BuildOfficeCharacter(RenderBuffer *b, float cx, float footY,
     }
     else
     {
-        f144CapsuleAdd(b,cx,headY+scale*6.f,
-                       cx,shoulders+scale*1.f,scale*3.f,c->skin);
         f144AddCircle(b,f144Vec(cx,headY),scale*8.f,c->hair);
         f144AddCircle(b,f144Vec(cx,headY+scale*1.7f),scale*7.5f,c->skin);
         if(c->flags&F144_COSTUME_LONG_HAIR)
