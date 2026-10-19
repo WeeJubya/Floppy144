@@ -113,6 +113,7 @@ $sources = @(
     "game\src\floppy144_grey_door.c",
     "game\src\floppy144_grey_encounter.c",
     "game\src\floppy144_site_isometric.c",
+    "game\src\floppy144_cabinet.c",
     "game\src\floppy144_brand_logo.c",
     "game\src\floppy144_object_registry.c",
     "game\src\floppy144_collection_registry.c"
