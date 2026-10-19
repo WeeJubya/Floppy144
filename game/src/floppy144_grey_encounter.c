@@ -8,6 +8,7 @@
 #include "floppy144_brand_logo.h"
 #include "floppy144_site.h"
 #include "floppy144_site_2d_camera.h"
+#include "floppy144_site_isometric.h"
 #include <stddef.h>
 #include <string.h>
 
@@ -29,8 +30,8 @@ static uint32_t SceneLength(uint8_t phase)
         case FLOPPY144_GREY_IDENTIFY: return 1050U;
         case FLOPPY144_GREY_TURN: return 1900U;
         case FLOPPY144_GREY_DIALOGUE: return 3200U;
-        case FLOPPY144_GREY_CAPACITY: return 1800U;
-        case FLOPPY144_GREY_GLITCH: return 950U;
+        case FLOPPY144_GREY_CAPACITY: return 2200U;
+        case FLOPPY144_GREY_GLITCH: return 1400U;
         case FLOPPY144_GREY_BLACKOUT: return 2000U;
         default: return 0U;
     }
@@ -66,7 +67,15 @@ bool Floppy144GreyEncounterMove(
     if(x<65) x=65;
     if(x>548) x=548;
     if(y<235) y=235;
-    if(y>292) y=292;
+    if(y>280) y=280;
+    /* Keep the screen-space feet inside the projected ISO floor diamond.
+       At an edge the ordinary movement is blocked, not teleported. */
+    {
+        int32_t fx=x-320,fy=y-234;
+        if(fx<0) fx=-fx;
+        if(fy<0) fy=-fy;
+        if(fx*110+fy*308>33880) return false;
+    }
     if(x==scene->local_x && y==scene->local_y) return false;
     scene->local_x=x;
     scene->local_y=y;
@@ -92,8 +101,18 @@ bool Floppy144GreyEncounterAdvance(
        visiting the intended ordered presentation states. */
     if(elapsed_ms>100U) elapsed_ms=100U;
     if(scene->phase==(uint8_t)FLOPPY144_GREY_EXPLORE) {
-        /* The exact shared player gait continues to animate in free roam. */
-        return Floppy144PlayerVisualAdvance(&scene->player_visual,elapsed_ms);
+        /* Five seconds without a player-initiated Inspect makes the
+           occupied Developer notice the player and turn. */
+        bool gait=Floppy144PlayerVisualAdvance(&scene->player_visual,elapsed_ms);
+        if(scene->elapsed_ms<5000U) {
+            scene->elapsed_ms+=elapsed_ms;
+            if(scene->elapsed_ms>=5000U && !scene->developer_inspected) {
+                scene->phase=(uint8_t)FLOPPY144_GREY_TURN;
+                scene->elapsed_ms=0U;
+                return true;
+            }
+        }
+        return gait;
     }
     scene->elapsed_ms+=elapsed_ms;
     if(scene->phase==(uint8_t)FLOPPY144_GREY_ENTERING ||
@@ -121,19 +140,20 @@ bool Floppy144GreyEncounterSaveAllowed(const Floppy144GreyEncounter *scene)
 }
 uint32_t Floppy144GreyEncounterDisplayPercent(const Floppy144GreyEncounter *scene)
 {
-    uint32_t t,elapsed,span=3200U+1800U,delta;
+    /* Dialogue is completed before the false restoration can climb. The
+       final 300 ms visibly holds exactly 144% before the hard blackout. */
+    const uint32_t capacity=2200U, span=3300U;
+    uint32_t t,delta,elapsed;
     uint64_t cube;
     if(scene==NULL) return 0U;
-    if(scene->phase<(uint8_t)FLOPPY144_GREY_DIALOGUE)
+    if(scene->phase<(uint8_t)FLOPPY144_GREY_CAPACITY)
         return scene->restoration_start;
-    if(scene->phase>=(uint8_t)FLOPPY144_GREY_GLITCH)
+    if(scene->phase>=(uint8_t)FLOPPY144_GREY_BLACKOUT)
         return 144U;
-    t=scene->phase==(uint8_t)FLOPPY144_GREY_DIALOGUE
-        ?scene->elapsed_ms:3200U+scene->elapsed_ms;
+    t=scene->phase==(uint8_t)FLOPPY144_GREY_CAPACITY
+        ?scene->elapsed_ms:capacity+scene->elapsed_ms;
     if(t>span) t=span;
     delta=144U-scene->restoration_start;
-    /* A monotonic cubic curve: slow recognition, increasingly fast escalation.
-       64-bit intermediate prevents overflow; no RunState capacity is touched. */
     cube=(uint64_t)t*t*t;
     elapsed=(uint32_t)((cube*delta)/((uint64_t)span*span*span));
     return scene->restoration_start+elapsed;
@@ -157,14 +177,10 @@ bool Floppy144GreyEncounterInspectNearby(const Floppy144GreyEncounter *scene)
     return dx*dx+dy*dy<=DEVELOPER_INSPECT_RADIUS*DEVELOPER_INSPECT_RADIUS;
 }
 
-static void ModernDesk(Floppy144Surface *s,uint32_t x,uint32_t y,uint32_t w)
-{
-    FILL(s,x+9,y+17,9,48,RGB(79,88,104));
-    FILL(s,x+w-19,y+17,9,48,RGB(79,88,104));
-    FILL(s,x,y,w,18,RGB(205,198,183));
-    FILL(s,x,y,w,3,RGB(240,235,225));
-    FILL(s,x,y+18,w,3,RGB(131,137,146));
-}
+/* The same ISO camera scale and fixed-point convention as normal Site. */
+static const Floppy144SiteIsoScene room_iso={
+    320,234,11*FLOPPY144_SITE_FIXED_ONE,11*FLOPPY144_SITE_FIXED_ONE,14,5,8
+};
 static void Poster(Floppy144Surface *s,uint32_t x,uint32_t y,uint32_t kind)
 {
     uint32_t a=kind==0?RGB(56,97,134):kind==1?RGB(110,64,105):RGB(50,111,92);
@@ -265,44 +281,50 @@ static void Developer(Floppy144Surface *s,const Floppy144GreyEncounter *scene)
     figure.facing=facing;
     /* The same vector skeleton drives the player and Developer. Only the
        outfit differs; seated legs are naturally occluded by the desk edge. */
-    Floppy144PlayerVisualDrawDeveloper(s,x,255+bob,35,54,&figure,
+    Floppy144PlayerVisualDrawDeveloper(s,x,264+bob,62,91,&figure,
         32,85,576,215);
 }
 static void Office(Floppy144Surface *s,const Floppy144GreyEncounter *scene)
 {
     uint32_t i;
-    Floppy144DrawClear(s,RGB(236,239,239));
-    /* Crisp contemporary office panels and cool ambient lighting. */
-    FILL(s,0,0,640,196,RGB(223,234,236));
-    FILL(s,0,196,640,164,RGB(177,187,194));
-    FILL(s,0,198,640,4,RGB(111,137,149));
-    for(i=0U;i<640U;i+=40U)
-        FILL(s,i,199,1,161,RGB(161,174,181));
-    for(i=232U;i<360U;i+=28U)
-        FILL(s,0,i,640,1,RGB(166,178,184));
-    FILL(s,25,26,590,56,RGB(242,246,243));
-    Floppy144DrawRect(s,25,26,590,56,RGB(179,193,196));
-    /* Same reference-accurate vector studio mark as the Credits screen. */
+#define BOX(x,y,w,d,base,top,c) Floppy144SiteIsoScenePrism(s,&room_iso,\
+        (x)*FLOPPY144_SITE_FIXED_ONE,(y)*FLOPPY144_SITE_FIXED_ONE,\
+        (w)*FLOPPY144_SITE_FIXED_ONE,(d)*FLOPPY144_SITE_FIXED_ONE,\
+        (base)*FLOPPY144_SITE_FIXED_ONE,(top)*FLOPPY144_SITE_FIXED_ONE,(c))
+    Floppy144DrawClear(s,RGB(24,32,45));
+    /* North and west walls only. Never insert real room geometry. */
+    BOX(0,0,22,22,0,0,RGB(129,224,206));
+    for(i=2U;i<22U;i+=2U) {
+        Floppy144SiteIsoSceneLine(s,&room_iso,(int32_t)i*16,0,0,
+                                  (int32_t)i*16,22*16,0,RGB(66,147,155));
+        Floppy144SiteIsoSceneLine(s,&room_iso,0,(int32_t)i*16,0,
+                                  22*16,(int32_t)i*16,0,RGB(66,147,155));
+    }
+    BOX(0,0,22,1,0,11,RGB(252,128,173));
+    BOX(0,0,1,22,0,11,RGB(125,164,253));
+    BOX(3,0,5,1,3,8,RGB(252,233,134));
+    BOX(0,4,1,6,3,9,RGB(74,221,240));
+    BOX(0,15,1,4,3,9,RGB(246,203,108));
+    /* Painter-ordered rear-to-front ISO furniture. */
+    BOX(5,4,3,2,0,7,RGB(165,104,202));
+    BOX(14,3,5,3,0,3,RGB(64,136,202));
+    BOX(16,6,4,3,0,2,RGB(242,197,81));
+    BOX(16,6,4,3,2,3,RGB(250,227,132));
+    BOX(18,8,2,2,0,1,RGB(65,81,108));
+    BOX(18,8,1,2,1,5,RGB(50,93,156));
+    BOX(18,9,2,2,2,3,RGB(89,143,211));
+    BOX(7,10,5,3,0,2,RGB(129,72,140));
+    BOX(7,10,5,3,2,3,RGB(229,133,189));
+    BOX(6,15,5,3,0,2,RGB(87,112,170));
+    BOX(6,15,5,3,2,3,RGB(235,226,164));
+#undef BOX
     Floppy144BrandLogoDraw(s,178U,29U,285U,49U);
-    FILL(s,74,76,491,2,RGB(73,151,166));
-    /* Windows glow, architectural light bands. */
-    FILL(s,34,97,178,97,RGB(121,185,199));
-    FILL(s,40,103,166,84,RGB(190,221,221));
-    FILL(s,119,103,4,84,RGB(238,248,245));
-    FILL(s,40,145,166,3,RGB(236,248,246));
-    ModernDesk(s,226,214,202);
-    ModernDesk(s,55,241,158);
-    ModernDesk(s,445,229,151);
-    SourceMonitor(s);
-    /* The first two miniature concept boards are scattered across the
-       near desk rather than hung as GDR-style wall notices. */
-    Poster(s,60,245,0U);
-    Poster(s,135,245,1U);
+    Poster(s,70,118,0U);
+    Poster(s,152,118,1U);
     Poster(s,501,107,2U);
+    SourceMonitor(s);
     Sandwich(s);
     Developer(s,scene);
-    /* Shared game character renderer, with the vignette's transient movement
-       state; this does not mutate the actual Site player. */
     Floppy144PlayerVisualDraw(s,scene->local_x,scene->local_y,
         FLOPPY144_SITE_PLAYER_VISUAL_WIDTH_X16*
             FLOPPY144_SITE_2D_PIXELS_PER_UNIT/FLOPPY144_SITE_FIXED_ONE,
@@ -310,7 +332,6 @@ static void Office(Floppy144Surface *s,const Floppy144GreyEncounter *scene)
         FLOPPY144_SITE_PLAYER_COLLISION_WIDTH_X16*
             FLOPPY144_SITE_2D_PIXELS_PER_UNIT/FLOPPY144_SITE_FIXED_ONE,
         scene->body_style,&scene->player_visual,32,85,576,215);
-    /* Exactly the Site HUD footer position and grammar. */
     FILL(s,20,312,600,28,RGB(12,17,21));
     Floppy144DrawRect(s,20,312,600,28,RGB(113,124,120));
     if(scene->phase==(uint8_t)FLOPPY144_GREY_EXPLORE)
@@ -319,57 +340,83 @@ static void Office(Floppy144Surface *s,const Floppy144GreyEncounter *scene)
     else if(scene->phase>=(uint8_t)FLOPPY144_GREY_IDENTIFY &&
             scene->phase<=(uint8_t)FLOPPY144_GREY_TURN)
         TXT(s,32,322,"DEVELOPER",RGB(201,210,203));
-
     if(scene->phase==(uint8_t)FLOPPY144_GREY_DIALOGUE) {
-        /* Spatial speech bubble centred above the Developer's head,
-           never masquerading as footer/system or restoration text. */
-        FILL(s,306,153,291,40,RGB(32,51,62));
-        Floppy144DrawRect(s,306,153,291,40,RGB(97,174,181));
-        TXT(s,318,160,"You're not supposed to",RGB(255,255,255));
-        TXT(s,318,174,"be able to get in here.",RGB(255,255,255));
-        FILL(s,453,193,4,8,RGB(32,51,62));
+        FILL(s,306,113,291,40,RGB(32,51,62));
+        Floppy144DrawRect(s,306,113,291,40,RGB(97,174,181));
+        TXT(s,318,120,"You're not supposed to",RGB(255,255,255));
+        TXT(s,318,134,"be able to get in here.",RGB(255,255,255));
+        FILL(s,453,153,4,8,RGB(32,51,62));
     }
 }
 static void Glitch(Floppy144Surface *s,uint32_t t)
 {
-    uint32_t stripe,y,count;
-    uint32_t buffer[640];
-    if(s==NULL || s->pixels==NULL || s->width!=640U || s->height!=360U)
-        return;
-    /* Deterministic build-up: light scanline instability, then displaced
-       image slices, sync loss, then isolated channel corruption. No fast
-       full-screen flashes; the final catastrophic failure is a hard blackout. */
-    count=2U+t/78U;
-    if(count>14U) count=14U;
-    for(stripe=0U;stripe<count;++stripe)
-    {
-        uint32_t start=(stripe*47U+t/17U)%315U+20U;
-        uint32_t offset=((stripe*11U+t/41U)%19U)+2U;
-        uint32_t height=1U+((t/240U+stripe)%5U);
-        for(y=start;y<start+height && y<312U;++y)
-        {
-            uint32_t x,*row=&s->pixels[(uint64_t)y*640U];
-            memcpy(buffer,row,sizeof(buffer));
-            for(x=24U;x<615U;++x)
-            {
-                uint32_t v=buffer[(x+offset)%640U];
-                if(t>500U && stripe%5U==0U)
-                    v=((v&0x00f0f0f0U)>>1U)|0x000a1824U;
-                row[x]=v;
+    uint32_t frame,stripe,count,strength;
+    uint32_t line[640];
+    if(s==NULL || s->pixels==NULL || s->width!=640U || s->height!=360U ||
+       t<700U) return;
+    /* Escalating, deterministic 50 ms corruption frames; no global RNG. */
+    frame=t/50U;
+    strength=(t-700U)/250U+1U;
+    if(strength>12U) strength=12U;
+    count=2U+strength*2U;
+    for(stripe=0U;stripe<count;++stripe) {
+        uint32_t seed=frame*2654435761U+stripe*1013904223U;
+        uint32_t y=53U+(seed%243U),height=1U+((seed>>13U)%5U);
+        int32_t shift=(int32_t)((seed>>8U)%(strength*5U+2U))-
+                      (int32_t)(strength*5U/2U);
+        uint32_t row,x;
+        for(row=y;row<y+height && row<309U;++row) {
+            uint32_t *dst=&s->pixels[row*640U];
+            memcpy(line,dst,sizeof(line));
+            for(x=32U;x<608U;++x) {
+                int32_t source=(int32_t)x+shift;
+                if(source<32) source=32;
+                if(source>607) source=607;
+                dst[x]=line[(uint32_t)source];
+            }
+        }
+        if(strength>3U && (stripe&3U)==0U) {
+            uint32_t x0=40U+((seed>>16U)%480U),width=4U+strength*3U,dy;
+            for(dy=y;dy<y+height+2U && dy<309U;++dy) {
+                for(x=x0;x<608U && x<x0+width;++x) {
+                    uint32_t *p=&s->pixels[dy*640U+x],v=*p;
+                    *p=((v&0x0000ff00U)<<8U)|((v&0x00ff0000U)>>8U)|
+                       (v&0x000000ffU);
+                }
             }
         }
     }
-    if(t>360U)
-    {
-        for(y=55U+(t/31U)%27U;y<300U;y+=31U)
-            FILL(s,32,y,576,1,RGB(47,70,81));
+    if(strength>=5U) {
+        uint32_t band;
+        for(band=0U;band<strength/3U;++band) {
+            uint32_t seed=frame*2246822519U+band*3266489917U;
+            uint32_t x=45U+seed%540U,y;
+            int32_t offset=(int32_t)(seed%19U)-9;
+            for(y=60U;y<307U;++y)
+                line[y]=s->pixels[y*640U+x];
+            for(y=60U;y<307U;++y) {
+                int32_t source=(int32_t)y+offset;
+                if(source<60) source=60;
+                if(source>306) source=306;
+                s->pixels[y*640U+x]=line[(uint32_t)source];
+            }
+        }
     }
-    if(t>720U)
-    {
-        uint32_t jump=(t/67U)%12U;
-        FILL(s,32,122+jump,576,4,RGB(6,11,15));
-        TXT(s,76,141+jump,"SIGNAL LOST / RECOVERY INVALID",RGB(235,186,180));
-    }
+    if(strength>=10U && ((frame/2U)&1U)!=0U)
+        TXT(s,75,189,"SIGNAL LOST / RECOVERY INVALID",RGB(255,124,141));
+}
+void Floppy144GreyEncounterDrawInterference(
+    Floppy144Surface *surface,const Floppy144GreyEncounter *scene
+)
+{
+    uint32_t t;
+    if(scene==NULL) return;
+    if(scene->phase==(uint8_t)FLOPPY144_GREY_CAPACITY)
+        t=scene->elapsed_ms;
+    else if(scene->phase==(uint8_t)FLOPPY144_GREY_GLITCH)
+        t=2200U+scene->elapsed_ms;
+    else return;
+    Glitch(surface,t);
 }
 void Floppy144GreyEncounterDraw(
     Floppy144Surface *surface,const Floppy144GreyEncounter *scene
@@ -391,6 +438,4 @@ void Floppy144GreyEncounterDraw(
         return;
     }
     Office(surface,scene);
-    if(scene->phase==(uint8_t)FLOPPY144_GREY_GLITCH)
-        Glitch(surface,scene->elapsed_ms);
 }

@@ -454,6 +454,7 @@ static void Floppy144Redraw(
                     Floppy144GreyEncounterDisplayPercent(&global_grey_encounter),
                     Floppy144GreyEncounterPercentFlash(&global_grey_encounter));
             }
+            Floppy144GreyEncounterDrawInterference(pSurface,&global_grey_encounter);
             break;
         }
 

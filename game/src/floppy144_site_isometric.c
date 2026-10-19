@@ -2943,3 +2943,54 @@ void Floppy144SiteIsometricDraw(
         uMuted
     );
 }
+
+/* BF35: reuse canonical ISO primitives with a transient, restored camera. */
+void Floppy144SiteIsoSceneProject(
+    const Floppy144SiteIsoScene *scene, int32_t x16, int32_t y16,
+    int32_t height16, int32_t *screen_x, int32_t *screen_y
+)
+{
+    if(scene==NULL) return;
+    if(screen_x!=NULL)
+        *screen_x=scene->origin_x+
+            ((x16-scene->centre_x16-y16+scene->centre_y16)*
+             scene->half_tile_x)/FLOPPY144_SITE_FIXED_ONE;
+    if(screen_y!=NULL)
+        *screen_y=scene->origin_y+
+            ((x16-scene->centre_x16+y16-scene->centre_y16)*
+             scene->half_tile_y-height16*scene->height_scale)/
+                FLOPPY144_SITE_FIXED_ONE;
+}
+void Floppy144SiteIsoSceneLine(
+    Floppy144Surface *surface, const Floppy144SiteIsoScene *scene,
+    int32_t x0, int32_t y0, int32_t z0,
+    int32_t x1, int32_t y1, int32_t z1, uint32_t colour
+)
+{
+    int32_t ax=0,ay=0,bx=0,by=0;
+    if(surface==NULL || scene==NULL) return;
+    Floppy144SiteIsoSceneProject(scene,x0,y0,z0,&ax,&ay);
+    Floppy144SiteIsoSceneProject(scene,x1,y1,z1,&bx,&by);
+    Floppy144IsometricLine(surface,ax,ay,bx,by,colour);
+}
+void Floppy144SiteIsoScenePrism(
+    Floppy144Surface *surface, const Floppy144SiteIsoScene *scene,
+    int32_t x16, int32_t y16, int32_t width16, int32_t depth16,
+    int32_t bottom16, int32_t top16, uint32_t colour
+)
+{
+    int32_t ox,oy,cx,cy,hx,hy,hz;
+    if(surface==NULL || scene==NULL) return;
+    ox=g_nIsoOriginX; oy=g_nIsoOriginY;
+    cx=g_nIsoCentreX16; cy=g_nIsoCentreY16;
+    hx=g_nIsoHalfTileX; hy=g_nIsoHalfTileY; hz=g_nIsoHeightScale;
+    g_nIsoOriginX=scene->origin_x; g_nIsoOriginY=scene->origin_y;
+    g_nIsoCentreX16=scene->centre_x16; g_nIsoCentreY16=scene->centre_y16;
+    g_nIsoHalfTileX=scene->half_tile_x; g_nIsoHalfTileY=scene->half_tile_y;
+    g_nIsoHeightScale=scene->height_scale;
+    Floppy144IsometricDrawPrismX16(surface,x16,y16,width16,depth16,
+                                   bottom16,top16,colour);
+    g_nIsoOriginX=ox; g_nIsoOriginY=oy;
+    g_nIsoCentreX16=cx; g_nIsoCentreY16=cy;
+    g_nIsoHalfTileX=hx; g_nIsoHalfTileY=hy; g_nIsoHeightScale=hz;
+}

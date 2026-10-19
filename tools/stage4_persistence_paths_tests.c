@@ -1608,12 +1608,70 @@ static void TestGreyDoorPlacement(const char *root)
 }
 
 
+/* BF35 focused timing and accelerated 144% contract. */
+static void TestBF35EncounterTiming(void)
+{
+    Floppy144GreyEncounter scene={0},manual={0};
+    uint32_t k,early,middle,late;
+    scene.phase=(uint8_t)FLOPPY144_GREY_EXPLORE;
+    scene.restoration_start=27U;
+    scene.local_x=115;
+    scene.local_y=264;
+    Floppy144PlayerVisualReset(&scene.player_visual);
+    for(k=0U;k<49U;++k) (void)Floppy144GreyEncounterAdvance(&scene,100U);
+    Expect(scene.phase==(uint8_t)FLOPPY144_GREY_EXPLORE &&
+        scene.elapsed_ms==4900U &&
+        Floppy144GreyEncounterDisplayPercent(&scene)==27U,
+        "BF35 no auto-turn before five seconds");
+    (void)Floppy144GreyEncounterAdvance(&scene,100U);
+    Expect(scene.phase==(uint8_t)FLOPPY144_GREY_TURN &&
+        !scene.developer_inspected,
+        "BF35 automatic turn exactly after five seconds");
+    for(k=0U;k<19U;++k) (void)Floppy144GreyEncounterAdvance(&scene,100U);
+    Expect(scene.phase==(uint8_t)FLOPPY144_GREY_DIALOGUE &&
+        Floppy144GreyEncounterDisplayPercent(&scene)==27U,
+        "BF35 dialogue starts with original true percentage");
+    for(k=0U;k<31U;++k) {
+        (void)Floppy144GreyEncounterAdvance(&scene,100U);
+        Expect(Floppy144GreyEncounterDisplayPercent(&scene)==27U,
+            "BF35 no recovery increase while developer speaks");
+    }
+    (void)Floppy144GreyEncounterAdvance(&scene,100U);
+    Expect(scene.phase==(uint8_t)FLOPPY144_GREY_CAPACITY &&
+        Floppy144GreyEncounterDisplayPercent(&scene)==27U,
+        "BF35 recovery starts strictly after full dialogue");
+    for(k=0U;k<10U;++k) (void)Floppy144GreyEncounterAdvance(&scene,100U);
+    early=Floppy144GreyEncounterDisplayPercent(&scene);
+    for(k=0U;k<10U;++k) (void)Floppy144GreyEncounterAdvance(&scene,100U);
+    middle=Floppy144GreyEncounterDisplayPercent(&scene);
+    for(k=0U;k<10U;++k) (void)Floppy144GreyEncounterAdvance(&scene,100U);
+    late=Floppy144GreyEncounterDisplayPercent(&scene);
+    Expect(scene.phase==(uint8_t)FLOPPY144_GREY_GLITCH &&
+        early>=27U && middle>early && late>middle &&
+        (late-middle)>(middle-early),
+        "BF35 recovery increment accelerates instead of moving linearly");
+    for(k=0U;k<3U;++k) (void)Floppy144GreyEncounterAdvance(&scene,100U);
+    Expect(Floppy144GreyEncounterDisplayPercent(&scene)==144U &&
+        scene.phase==(uint8_t)FLOPPY144_GREY_GLITCH,
+        "BF35 exactly 144 percent is visible before blackout");
+    /* The original I/Inspect route remains separate from the idle timer. */
+    manual.phase=(uint8_t)FLOPPY144_GREY_EXPLORE;
+    manual.local_x=431; manual.local_y=264;
+    Expect(Floppy144GreyEncounterInspect(&manual) &&
+        manual.developer_inspected &&
+        manual.phase==(uint8_t)FLOPPY144_GREY_IDENTIFY &&
+        manual.elapsed_ms==0U,
+        "BF35 approaching and inspecting first keeps identify phase");
+    puts("BF35 Developer reaction and accelerating recovery timing PASS");
+}
+
 /* S4G-03: exhaustively enter from all candidate orientations, inspect the
    Developer and run through the full temporary scene without touching any
    permanent progress field. */
 static void TestGreyEncounter(const char *root)
 {
     static uint32_t pixels[640U*360U];
+    static uint32_t bf35_snapshot[640U*360U];
     Floppy144Surface surface;
     Floppy144DiscoveryProfile profile, profile_before;
     Floppy144RunState run, before, restored;
@@ -1625,6 +1683,7 @@ static void TestGreyEncounter(const char *root)
     uint32_t count=Floppy144GreyDoorCandidateCount();
     char path[F144_PLATFORM_PATH_CAPACITY];
 
+    TestBF35EncounterTiming();
     memset(&surface,0,sizeof(surface));
     surface.width=640U;
     surface.height=360U;
@@ -1679,6 +1738,26 @@ static void TestGreyEncounter(const char *root)
         Expect(scene.phase==(uint8_t)FLOPPY144_GREY_EXPLORE,
             "S4G-03 transition reaches clean modern office");
         Floppy144GreyEncounterDraw(&surface,&scene);
+        /* BF35: passive reaction occurs at exactly 5000 ms. */
+        {
+            Floppy144GreyEncounter idle=scene;
+            for(k=0U;k<49U;++k)
+                (void)Floppy144GreyEncounterAdvance(&idle,100U);
+            Expect(idle.phase==(uint8_t)FLOPPY144_GREY_EXPLORE &&
+                idle.elapsed_ms==4900U &&
+                Floppy144GreyEncounterDisplayPercent(&idle)==idle.restoration_start,
+                "BF35 Developer remains occupied for the first 4900 ms");
+            (void)Floppy144GreyEncounterAdvance(&idle,100U);
+            Expect(idle.phase==(uint8_t)FLOPPY144_GREY_TURN &&
+                idle.elapsed_ms==0U && idle.developer_inspected==0U,
+                "BF35 automatic turn begins at 5000 ms without Inspect");
+            for(k=0U;k<19U;++k)
+                (void)Floppy144GreyEncounterAdvance(&idle,100U);
+            Expect(idle.phase==(uint8_t)FLOPPY144_GREY_DIALOGUE &&
+                Floppy144GreyEncounterDisplayPercent(&idle)==
+                    idle.restoration_start,
+                "BF35 idle Developer turn preserves original dialogue");
+        }
         render_checksum=0U;
         for(k=0U;k<640U*360U;k+=113U)
             render_checksum=(render_checksum*33U)^pixels[k];
@@ -1714,6 +1793,9 @@ static void TestGreyEncounter(const char *root)
         for(k=0U;k<200U&&!Floppy144GreyEncounterFinished(&scene);++k)
         {
             uint32_t percent=Floppy144GreyEncounterDisplayPercent(&scene);
+            if(scene.phase<=(uint8_t)FLOPPY144_GREY_DIALOGUE)
+                Expect(percent==scene.restoration_start,
+                    "BF35 recovery percentage is frozen until dialogue ends");
             phase_visited|=1U<<scene.phase;
             Expect(percent>=scene.restoration_start && percent<=144U &&
                 percent>=last_percent,
@@ -1732,6 +1814,20 @@ static void TestGreyEncounter(const char *root)
             Expect(!Floppy144GreyEncounterSaveAllowed(&scene),
                 "S4G-03 no temporary scene phase permits save/autosave");
             Floppy144GreyEncounterDraw(&surface,&scene);
+            if(scene.phase==(uint8_t)FLOPPY144_GREY_CAPACITY &&
+               scene.elapsed_ms==1000U)
+                memcpy(bf35_snapshot,pixels,sizeof(bf35_snapshot));
+            Floppy144GreyEncounterDrawInterference(&surface,&scene);
+            if(scene.phase==(uint8_t)FLOPPY144_GREY_CAPACITY &&
+               scene.elapsed_ms==1000U) {
+                Expect(memcmp(bf35_snapshot,pixels,sizeof(bf35_snapshot))!=0,
+                    "BF35 interference begins while recovery is rising");
+                memcpy(bf35_snapshot,pixels,sizeof(bf35_snapshot));
+                Floppy144GreyEncounterDraw(&surface,&scene);
+                Floppy144GreyEncounterDrawInterference(&surface,&scene);
+                Expect(memcmp(bf35_snapshot,pixels,sizeof(bf35_snapshot))==0,
+                    "BF35 corruption is deterministic and frame-local");
+            }
             if(scene.phase==(uint8_t)FLOPPY144_GREY_BLACKOUT)
             {
                 uint32_t pixel;

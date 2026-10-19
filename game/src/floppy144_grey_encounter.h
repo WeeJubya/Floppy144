@@ -47,6 +47,10 @@ bool Floppy144GreyEncounterAdvance(
 );
 bool Floppy144GreyEncounterFinished(const Floppy144GreyEncounter *scene);
 bool Floppy144GreyEncounterSaveAllowed(const Floppy144GreyEncounter *scene);
+/* Apply frame interference after the normal Site HUD, including its counter. */
+void Floppy144GreyEncounterDrawInterference(
+    Floppy144Surface *surface, const Floppy144GreyEncounter *scene
+);
 void Floppy144GreyEncounterDraw(
     Floppy144Surface *surface, const Floppy144GreyEncounter *scene
 );
