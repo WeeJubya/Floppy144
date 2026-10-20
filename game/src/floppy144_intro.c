@@ -147,6 +147,9 @@ static void computer(Floppy144Surface *s,uint32_t phase)
         /* These last two authored strokes were movement-guide lines.
          * They must never render across the disk and computer tower. */
         if(i==25U||i==26U)continue;
+        /* The label is blank during insertion, but remains lettered in
+         * the discovery and reveal scenes. */
+        if(v.kind==4U)continue;
         if(i>=14U) {
             if(phase>=2650U)continue;
             /* Label upward, shutter leading into the tower's authored slot. */
@@ -272,6 +275,12 @@ bool Floppy144IntroActionSkips(F144Action action)
 {
     (void)action;
     return false; /* No key may skip the introduction or LOGIN. */
+}
+
+bool Floppy144IntroHasPersonalLogin(const char *operator_name)
+{
+    return operator_name != NULL && operator_name[0] != '\0' &&
+        strcmp(operator_name, "GUEST") != 0;
 }
 
 bool Floppy144IntroLoginReady(uint32_t elapsed_ms)
