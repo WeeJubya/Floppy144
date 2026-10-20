@@ -1,6 +1,8 @@
 # B2-01: Beta.1 baseline and verification
 Audit date: 20 October 2026. Documentation-only source/provenance baseline. No executable, gameplay, runtime or licence changes.
 
+**Beta.1 licence clarification (project owner, 20 October 2026):** GPLv3 is the intended licence for Beta.1. The public release repository's absent root `LICENSE` was an accidental omission and is planned to be corrected on 21 October 2026. For migration-planning purposes, treat Beta.1 as a GPLv3-intended release; do not claim the missing file was actually supplied at publication, the correction has already occurred, or redistribution compliance has been verified.
+
 ## Repository ownership and immutable points
 - Development repository: https://github.com/WeeJubya/Floppy144
 - Migration branch: `development/Beta-2-runtime`, initially created at `46c2a81e097abf69734a4b2f0b7bc91f9142c256`, from `development/Stage-4` (not WeeJubya/main).

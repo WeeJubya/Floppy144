@@ -7,6 +7,7 @@ Last updated: 2026-10-20. Project: Floppy//144. Stage: **B2-01 investigation and
 - Branch was created from the latest `development/Stage-4` commit `46c2a81e097abf69734a4b2f0b7bc91f9142c256`, not from obsolete WeeJubya/main.
 - Published immutable Beta.1 reference: https://github.com/GreyDoorRepublik/Floppy144-beta, `main` / tag `Floppy144` at `0981e4ab3694a1cdb5b6338c199e0262a6ed14bf`. GDR is for releases and is **not** the development/write target.
 - Beta.1 published EXE: 822,272 bytes and GitHub-reported sha256 `7daf713c4cbe5103b3bc7b1316140581614b484c397ca5a83352ec96fa8de749`. Independent download hash pending.
+- **Licence clarification from project owner (20 October):** GPLv3 is the intended Beta.1 licence. Its root `LICENSE` was accidentally omitted from the GDR public repository and is due to be added on 21 October 2026. Treat GPLv3 as intended in B2-01; publication of the missing file and any package/compliance verification remain outstanding. Do not modify the GDR repository in this stage.
 - Starting Stage-4 HEAD Windows Actions: main RC regression fails intro floppy-label assertion; independent audio/Release job succeeds with **0 warnings, 0 errors**, EXE 822,272 bytes. This is **not** a clean full regression pass and was built from Stage-4, not Beta.1.
 
 ## Deliverables
@@ -18,10 +19,10 @@ Last updated: 2026-10-20. Project: Floppy//144. Stage: **B2-01 investigation and
 ## Verification and blockers
 - Completed: direct inspection of both repository trees and SHA comparisons; confirmed public Beta.1 release/tag/asset metadata; inspected current build, runtime, adapters and original historical audit; reviewed existing Windows Actions steps/logs for exact Stage-4 source base.
 - Not performed: local Windows regression run, fresh Beta.2-branch CI, independently downloaded EXE hash, desktop launch, framebuffer/screenshots, human visual/audio acceptance. Do not claim any of these as complete.
-- **Urgent rights/compliance review**: demonstrably derived River2D GPLv3 runtime still ships, root LICENSE missing from published Beta source and only an EXE is listed in release assets. No separate redistribution waiver/rights identified.
+- **Rights/compliance review:** River2D GPLv3-derived runtime still ships and GPLv3 is the owner-confirmed intended licence for Beta.1; no separate non-GPL relicensing permission has been evidenced. Root `LICENSE` is actually absent from the inspected GDR public source tree but is an acknowledged accidental omission scheduled for correction on 21 October; confirm completion and actual package notices/corresponding source, without recasting Beta.1 as unlicensed.
 - **Regression mismatch**: existing GDR floppy-label assertion fails on Stage-4; verify expected unlettered floppy scene and repair test/implementation separately after human sign-off.
 - **Source drift**: Beta.1 source and Stage-4 base differ in seven files; check whether user expects Beta.2 to inherit post-release GUEST login changes.
 - Captures: protocol drafted in baseline, no image or framebuffer asset was generated.
 
 ## Next stage
-B2-02 is **not started / not yet cleared to implement**. Obtain human legal/rights guidance, independently hash the published EXE, establish labelled capture fixtures, resolve existing test expectation and explicitly approve a behavioural-only clean-room implementation brief. Future code changes must preserve procedural audio, save compatibility and the 1,474,560-byte size cap. Never use historical derived source as a copy template.
+B2-02 is **not started / not yet cleared to implement**. Verify the planned GPLv3 file correction and any relevant distribution obligations, clarify rights if a future non-GPL licence is intended, independently hash the published EXE, establish labelled capture fixtures, resolve the existing test expectation and explicitly approve a behavioural-only clean-room implementation brief. Future code changes must preserve procedural audio, save compatibility and the 1,474,560-byte size cap. Never use historical derived source as a copy template.
