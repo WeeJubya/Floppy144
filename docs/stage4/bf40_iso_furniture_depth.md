@@ -109,3 +109,15 @@ occlusion and physical-item highlights remain unchanged. The regression now
 requires a broad opaque face at each octant and explicitly forbids the colours
 associated with the previous exposed tall uprights. Visually confirm the final
 Reception and Director chair silhouettes against the supplied line drawing.
+
+## Chair rear-edge orientation correction
+
+Inspection backrest geometry must be based on the seat's *rear* projected
+edge. At 180 degrees the previous `(octant/2)%4` indexing attached the
+back to the near-right c-d edge instead, making the reference drawing
+impossible even with a solid backrest. The revised algorithm joins
+seat.a to seat.b (normal) or seat.d (mirrored). This preserves the rear
+location across the displayed orientations and keeps physical-item
+markers on the seat. The focused test explicitly samples the 180-degree
+Reception Chair 04 rear panel in addition to all eight rotations. Manual
+comparison against the supplied chair drawing remains required.

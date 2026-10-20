@@ -730,6 +730,23 @@ static void TestBF40ChairBackVolume(void)
             BF40CountColour(FLOPPY144_RGB(115,129,120))>2U,
             "BF40 full-width back has a projected solid top face"
         );
+        /*
+         * Reception Chair 04 is authored at 180 degrees. Its back must
+         * occupy the far (a) edge, not the nearer c->d edge. At this
+         * fixed model scale the upper part of that face crosses the
+         * rectangle directly above the seat's far corner.
+         */
+        if(rotation==180)
+        {
+            CHECK(
+                RegionPixelCount(163U,79U,180U,100U)>10U,
+                "BF40 Reception Chair 04 back rises above rear seat corner"
+            );
+            CHECK(
+                g_pixels[88U*TEST_WIDTH+173U]!=0U,
+                "BF40 180-degree backrest is on far seat edge"
+            );
+        }
         CHECK(
             BF40CountColour(FLOPPY144_RGB(100,118,108))==0U &&
             BF40CountColour(FLOPPY144_RGB(85,103,94))==0U,

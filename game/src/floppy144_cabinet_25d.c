@@ -1315,25 +1315,26 @@ static void Floppy144Cabinet25DDrawWorktop(
 static void Floppy144Cabinet25DDrawChairBack(
     Floppy144Surface *surface,
     const Floppy144Cabinet25DBox *seat,
-    uint32_t octant,
     uint32_t edge_colour
 )
 {
-    Floppy144Cabinet25DPoint corners[4]={
-        seat->a,seat->b,seat->c,seat->d
-    };
     Floppy144Cabinet25DPoint centre={
         (seat->a.x+seat->b.x+seat->c.x+seat->d.x)/4,
         (seat->a.y+seat->b.y+seat->c.y+seat->d.y)/4
     };
-    uint32_t edge_index=(octant/2U)%4U;
     Floppy144Cabinet25DPoint base[4];
     Floppy144Cabinet25DPoint upper[4];
     uint32_t i;
 
-    /* Edge 0..1 is the back; 2..3 is its inner, seat-facing face. */
-    base[0]=corners[edge_index];
-    base[1]=corners[(edge_index+1U)%4U];
+    /*
+     * In the inspection view, a is the rear corner of the seat.
+     * Its rear-right edge is a->b in the normal projection and a->d
+     * in the mirrored projection. Using the rotation-derived edge
+     * index used c->d at 180 degrees, putting the back on the front
+     * of Reception Chair 04 instead of where it belongs.
+     */
+    base[0]=seat->a;
+    base[1]=seat->b.x<seat->a.x?seat->d:seat->b;
     base[2].x=(base[1].x*7+centre.x)/8;
     base[2].y=(base[1].y*7+centre.y)/8;
     base[3].x=(base[0].x*7+centre.x)/8;
@@ -1429,7 +1430,7 @@ static void Floppy144Cabinet25DDrawChair(
         );
     }
 
-    Floppy144Cabinet25DDrawChairBack(surface,&seat,octant,edge);
+    Floppy144Cabinet25DDrawChairBack(surface,&seat,edge);
     Floppy144Cabinet25DDrawBox(surface,&seat,top,front,side,edge);
     Floppy144Cabinet25DDrawOrientationTick(surface,&seat,octant);
 }
