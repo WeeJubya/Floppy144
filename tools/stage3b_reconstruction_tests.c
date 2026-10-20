@@ -1809,7 +1809,7 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
             pRect->room ==
                 (uint8_t)FLOPPY144_ROOM_SERVER_ROOM &&
             pRect->x == 35U &&
-            pRect->y == 59U &&
+            pRect->y == 57U &&
             pRect->width == 6U &&
             pRect->height == 4U &&
             pRect->rotation == 90U
@@ -1823,9 +1823,9 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
                 (uint8_t)FLOPPY144_ROOM_SERVER_ROOM &&
             pRect->type ==
                 (uint8_t)FLOPPY144_SITE_WALL_MOUNTED_ITEM &&
-            pRect->x == 33U &&
+            pRect->x == 35U &&
             pRect->y == 56U &&
-            pRect->width == 10U &&
+            pRect->width == 6U &&
             pRect->height == 1U
         )
         {
