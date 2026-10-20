@@ -2472,7 +2472,6 @@ void Floppy144SiteIsometricDirectoryDraw(
         if(Floppy144IsometricIsFloor(eElement))continue;
 
         if(
-            eElement!=FLOPPY144_SITE_WALL &&
             eElement!=FLOPPY144_SITE_PARTITION_WALL &&
             eElement!=FLOPPY144_SITE_DOOR &&
             eElement!=FLOPPY144_SITE_WINDOW
