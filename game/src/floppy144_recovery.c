@@ -10,6 +10,7 @@
 #include "floppy144_draw.h"
 
 #include <stdio.h>
+#include <string.h>
 
 /*
  * Centred-text helper
@@ -878,16 +879,41 @@ void Floppy144DifficultyDraw(
     for(i=0U;i<(uint32_t)FLOPPY144_DIFFICULTY_COUNT;++i)
     {
         const char *name=Floppy144DifficultyName((Floppy144Difficulty)i);
+        const char *subtitle=strchr(name,'(');
+        char first_line[64];
         uint32_t y=127U+i*41U;
-        uint32_t width=Floppy144DrawTextWidth(name,1U);
-        uint32_t x=(surface->width-width)/2U;
-        if(i==(uint32_t)selected)
+        uint32_t width,x;
+        bool highlighted=i==(uint32_t)selected;
+
+        /* Wrap only the parenthetical display text. The canonical name
+         * and persisted difficulty value stay unchanged. */
+        if(subtitle!=NULL)
         {
-            Floppy144DrawFillRect(surface,42U,y-7U,556U,23U,background);
+            size_t length=(size_t)(subtitle-name);
+            while(length>0U && name[length-1U]==' ')--length;
+            if(length<sizeof(first_line))
+            {
+                memcpy(first_line,name,length);
+                first_line[length]='\0';
+                name=first_line;
+            }
+            else subtitle=NULL;
+        }
+
+        width=Floppy144DrawTextWidth(name,1U);
+        x=(surface->width-width)/2U;
+        if(highlighted)
+        {
+            Floppy144DrawFillRect(surface,42U,y-7U,556U,
+                subtitle!=NULL?40U:23U,background);
             Floppy144DrawText(surface,49U,y,">",1U,amber);
         }
-        Floppy144DrawText(surface,x,y,name,1U,
-            i==(uint32_t)selected ? amber : text);
+        Floppy144DrawText(surface,x,y,name,1U,highlighted?amber:text);
+        if(subtitle!=NULL)
+        {
+            Floppy144RecoveryTextCentred(surface,y+16U,subtitle,1U,
+                highlighted?amber:text);
+        }
     }
     Floppy144RecoveryTextCentred(surface,280U,
         "UP/DOWN SELECT   ENTER BEGIN   BACKSPACE CANCEL",1U,muted);

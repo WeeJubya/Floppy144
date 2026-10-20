@@ -32,5 +32,30 @@ foreach($check in $expect)
         throw "Document/difficulty source integration missing: $($check[1])"
     }
 }
+
+# Preserve the canonical difficulty label while drawing its parenthetical
+# suffix below the third option, in the same selected/unselected colour.
+$difficultyStart=$recovery.IndexOf('void Floppy144DifficultyDraw(')
+$difficultyEnd=$recovery.IndexOf('void Floppy144MainMenuDraw(',$difficultyStart)
+if($difficultyStart -lt 0 -or $difficultyEnd -le $difficultyStart)
+{
+    throw 'Cannot isolate New Game difficulty rendering.'
+}
+$difficultyDraw=$recovery.Substring($difficultyStart,
+    $difficultyEnd-$difficultyStart)
+foreach($required in @(
+    "strchr(name,'(')",
+    'memcpy(first_line,name,length)',
+    'subtitle!=NULL?40U:23U',
+    'Floppy144RecoveryTextCentred(surface,y+16U,subtitle,1U',
+    'highlighted?amber:text',
+    '127U+i*41U'
+))
+{
+    if(-not $difficultyDraw.Contains($required))
+    {
+        throw "Difficulty two-line layout regression: missing $required"
+    }
+}
 Write-Host 'BF29/BF31/BF32/BF34 SOURCE INTEGRATION: PASS'
 Write-Host 'Run tools/test_stage4_persistence.ps1 for executable generation, save and allocation cases.'
