@@ -799,6 +799,37 @@ static void TestBF40StaffRoomContainers(void)
     }
 }
 
+static void TestBF43ServerRackProjectedFaces(void)
+{
+    const Floppy144DataRecord *server=FindParent("SERVER_ROOM_SERVER_01");
+    Floppy144DataRecord synthetic;
+    uint32_t rotation;
+
+    if(server==NULL)
+    {
+        memset(&synthetic,0,sizeof(synthetic));
+        synthetic.eKind=FLOPPY144_DATA_FIXTURE;
+        synthetic.pszB="SERVER";
+        synthetic.pszC="SERVER";
+        synthetic.n2=4;
+        synthetic.n3=4;
+        server=&synthetic;
+    }
+    for(rotation=0U;rotation<4U;++rotation)
+    {
+        (void)DrawParent(server,(int16_t)(rotation*90U),0U,0U,NULL);
+        CHECK(BF40CountColour(FLOPPY144_RGB(60,77,77))>60U,
+              "Server racks have opaque projected bays, not loose horizontal lines");
+        CHECK(BF40CountColour(FLOPPY144_RGB(180,204,180))>0U,
+              "Server equipment LEDs render on the front plane");
+        CHECK(RegionPixelCount(306U,0U,TEST_WIDTH,TEST_HEIGHT)==0U,
+              "Server rack front stays inside the Inspection panel");
+        (void)DrawParent(server,(int16_t)(rotation*90U),9U,4U,NULL);
+        CHECK(BF40CountColour(FLOPPY144_RGB(216,239,220))>0U,
+              "Server rack content highlight remains in front of bays");
+    }
+}
+
 static void TestUnknownFallback(void)
 {
     Floppy144DataRecord future_parent;
@@ -848,6 +879,7 @@ int main(void)
     TestBF40ChairBackVolume();
     TestBF40TerminalMarkerForeground();
     TestBF40StaffRoomContainers();
+    TestBF43ServerRackProjectedFaces();
     TestUnknownFallback();
 
     if(g_failures!=0)

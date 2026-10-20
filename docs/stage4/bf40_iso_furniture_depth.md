@@ -72,3 +72,14 @@ full-height geometry and right-hand Contents gutter clipping.
 Visual sign-off remains required for the Worktop and Fridge in live Inspection
 at every supported screen scaling setting and for their ordinary Site/world
 models, which are deliberately not changed by this rendering-only work.
+
+## Follow-up: chair backs, server rack and FM-23
+
+The chair back's principal face is now opaque and taller, preserving its shallow
+2.5D end/top surfaces and existing seat/leg painter order. Server bays now
+project onto the front quad instead of drawing free-standing horizontal screen
+rectangles; the 4x4 footprint and content selection are preserved, while the
+rack height and child front mapping match at 156 pixels. FM-23 filters its
+isometric plan to structural partitions, doors, windows and floors, and centres
+the footprint of recovered rooms in the display. No furniture registry or
+interaction rule is modified by these rendering changes.

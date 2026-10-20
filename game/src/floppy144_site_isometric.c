@@ -2156,6 +2156,61 @@ static void Floppy144IsometricConfigureDirectoryProjection(void)
     g_nIsoHeightScale=2;
 }
 
+/*
+ * FM-23 is an accommodation plan rather than an asset inventory. Centre
+ * the visible recovered floor footprint after projection so partial
+ * reconstructions do not sit at an arbitrary corner of the screen.
+ */
+static void Floppy144IsometricCentreDirectoryFloorplan(
+    const Floppy144RunState *pRunState,uint32_t uCount
+)
+{
+    int32_t minX=0,maxX=0,minY=0,maxY=0;
+    bool found=false;
+    uint32_t i;
+
+    for(i=0U;i<uCount;++i)
+    {
+        const Floppy144SiteRect *r=Floppy144SiteRectAt(i);
+        int32_t x,y;
+        uint32_t c;
+        if(r==NULL ||
+           r->room>=(uint8_t)FLOPPY144_ROOM_COUNT ||
+           !Floppy144RunStateRoomReconstructed(
+               pRunState,(Floppy144RoomId)r->room) ||
+           !Floppy144SiteRectRuntimeVisible(pRunState,r) ||
+           !Floppy144IsometricIsFloor((Floppy144SiteElement)r->type))
+            continue;
+        for(c=0U;c<4U;++c)
+        {
+            int32_t wx=((int32_t)r->x+
+                ((c==1U||c==2U)?(int32_t)r->width:0))*
+                FLOPPY144_SITE_FIXED_ONE;
+            int32_t wy=((int32_t)r->y+
+                ((c>=2U)?(int32_t)r->height:0))*
+                FLOPPY144_SITE_FIXED_ONE;
+            Floppy144IsometricProjectX16(wx,wy,0,&x,&y);
+            if(!found)
+            {
+                minX=maxX=x;minY=maxY=y;found=true;
+            }
+            else
+            {
+                if(x<minX)minX=x;
+                if(x>maxX)maxX=x;
+                if(y<minY)minY=y;
+                if(y>maxY)maxY=y;
+            }
+        }
+    }
+
+    if(found)
+    {
+        g_nIsoOriginX+=320-(minX+(maxX-minX)/2);
+        g_nIsoOriginY+=178-(minY+(maxY-minY)/2);
+    }
+}
+
 static void Floppy144IsometricDrawPrismWireX16(
     Floppy144Surface *pSurface,
     int32_t nX16,
@@ -2329,7 +2384,7 @@ void Floppy144SiteIsometricDirectoryDraw(
 {
     const uint32_t uBackground=FLOPPY144_RGB(10,15,18);
     const uint32_t uFloor=FLOPPY144_RGB(62,72,72);
-    const uint32_t uFurniture=FLOPPY144_RGB(118,133,132);
+    const uint32_t uStructure=FLOPPY144_RGB(118,133,132);
     const uint32_t uDoor=FLOPPY144_RGB(194,153,76);
     const uint32_t uWindow=FLOPPY144_RGB(100,151,166);
     const uint32_t uMuted=FLOPPY144_RGB(118,133,132);
@@ -2362,6 +2417,7 @@ void Floppy144SiteIsometricDirectoryDraw(
     );
 
     uCount=Floppy144SiteRectCount();
+    Floppy144IsometricCentreDirectoryFloorplan(pRunState,uCount);
 
     /* Recovered floors establish the Site footprint. */
     for(uIndex=0U;uIndex<uCount;++uIndex)
@@ -2393,13 +2449,13 @@ void Floppy144SiteIsometricDirectoryDraw(
         );
     }
 
-    /* Major furniture, fixtures, partitions, doors and windows. */
+    /* Only structural boundaries and openings: no furniture or fixtures. */
     for(uIndex=0U;uIndex<uCount;++uIndex)
     {
         const Floppy144SiteRect *pRect=Floppy144SiteRectAt(uIndex);
         Floppy144SiteElement eElement;
         int32_t nHeight;
-        uint32_t uColour=uFurniture;
+        uint32_t uColour=uStructure;
 
         if(
             !Floppy144IsometricDirectoryRectVisible(
@@ -2414,6 +2470,13 @@ void Floppy144SiteIsometricDirectoryDraw(
         eElement=(Floppy144SiteElement)pRect->type;
 
         if(Floppy144IsometricIsFloor(eElement))continue;
+
+        if(
+            eElement!=FLOPPY144_SITE_WALL &&
+            eElement!=FLOPPY144_SITE_PARTITION_WALL &&
+            eElement!=FLOPPY144_SITE_DOOR &&
+            eElement!=FLOPPY144_SITE_WINDOW
+        )continue;
 
         if(eElement==FLOPPY144_SITE_DOOR)uColour=uDoor;
         else if(eElement==FLOPPY144_SITE_WINDOW)uColour=uWindow;

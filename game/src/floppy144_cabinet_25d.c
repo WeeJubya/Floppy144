@@ -782,7 +782,7 @@ static void Floppy144Cabinet25DDrawSurfaceChildren(
     {
         if(Floppy144Cabinet25DStringEqual(parent->pszC,"DOOR"))box.height=138;
         else if(Floppy144Cabinet25DStringEqual(parent->pszC,"SERVER"))
-            box.height=112;
+            box.height=156;
         else if(Floppy144Cabinet25DStringEqual(parent->pszC,"FRIDGE"))
             box.height=158;
         else if(Floppy144Cabinet25DStringEqual(parent->pszC,"COFFEE_MAKER"))
@@ -1338,12 +1338,13 @@ static void Floppy144Cabinet25DDrawChairBack(
     Floppy144Cabinet25DPoint high0=outer0,high1=outer1;
     Floppy144Cabinet25DPoint high_inner0=inner0,high_inner1=inner1;
 
-    high0.y-=42;high1.y-=42;
-    high_inner0.y-=42;high_inner1.y-=42;
+    /* A full-height, opaque back panel, not a diagonal line frame. */
+    high0.y-=55;high1.y-=55;
+    high_inner0.y-=55;high_inner1.y-=55;
 
     Floppy144Cabinet25DFillQuad(
         surface,high0,high1,outer1,outer0,
-        F144_25D_RGB(48,61,56)
+        F144_25D_RGB(78,93,85)
     );
     Floppy144Cabinet25DFillQuad(
         surface,high1,high_inner1,inner1,outer1,
@@ -1482,6 +1483,11 @@ static void Floppy144Cabinet25DDrawSofa(
     Floppy144Cabinet25DDrawOrientationTick(surface,&seat,octant);
 }
 
+/*
+ * Server rack: all vents and equipment bays are coplanar with its projected
+ * front, rather than framebuffer-horizontal rectangles outside the cabinet.
+ * The higher body keeps the canonical 4x4 footprint without a squat cube.
+ */
 static void Floppy144Cabinet25DDrawServer(
     Floppy144Surface *surface,
     int32_t width,
@@ -1492,9 +1498,12 @@ static void Floppy144Cabinet25DDrawServer(
 {
     const uint32_t edge=F144_25D_RGB(139,157,151);
     Floppy144Cabinet25DBox box=
-        Floppy144Cabinet25DMakeBox(width,depth,112,mirror);
-    int32_t min_x=Floppy144Cabinet25DMinX(&box);
-    int32_t max_x=Floppy144Cabinet25DMaxX(&box);
+        Floppy144Cabinet25DMakeBox(width,depth,156,mirror);
+    Floppy144Cabinet25DPoint front_face[4]={
+        box.d,box.c,
+        {box.c.x,box.c.y+box.height},
+        {box.d.x,box.d.y+box.height}
+    };
     uint32_t i;
 
     Floppy144Cabinet25DDrawBox(
@@ -1503,17 +1512,23 @@ static void Floppy144Cabinet25DDrawServer(
         F144_25D_RGB(49,61,57),
         F144_25D_RGB(37,48,44),edge
     );
-    Floppy144Cabinet25DDrawOrientationTick(surface,&box,octant);
+    Floppy144Cabinet25DDrawSurfaceMarker(
+        surface,front_face,70,35,930,960,
+        F144_25D_RGB(30,40,42),edge
+    );
     for(i=0U;i<7U;++i)
     {
-        Floppy144Cabinet25DRect(
-            surface,
-            (uint32_t)(min_x+10),
-            (uint32_t)(box.c.y+12+(int32_t)i*13),
-            (uint32_t)(max_x-min_x-20),
-            9U,edge
+        int32_t v=105+(int32_t)i*114;
+        Floppy144Cabinet25DDrawSurfaceMarker(
+            surface,front_face,120,v,880,v+77,
+            F144_25D_RGB(60,77,77),edge
+        );
+        Floppy144Cabinet25DDrawSurfaceMarker(
+            surface,front_face,155,v+26,191,v+52,
+            F144_25D_RGB(180,204,180),edge
         );
     }
+    Floppy144Cabinet25DDrawOrientationTick(surface,&box,octant);
 }
 
 /*
