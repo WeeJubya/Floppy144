@@ -781,9 +781,10 @@ static void Floppy144Cabinet25DDrawSurfaceChildren(
     if(plane==F144_25D_CHILD_FRONT || plane==F144_25D_CHILD_SIDE || plane==F144_25D_CHILD_SHELF)
     {
         if(Floppy144Cabinet25DStringEqual(parent->pszC,"DOOR"))box.height=138;
-        else if(Floppy144Cabinet25DStringEqual(parent->pszC,"SERVER") ||
-                Floppy144Cabinet25DStringEqual(parent->pszC,"FRIDGE"))
+        else if(Floppy144Cabinet25DStringEqual(parent->pszC,"SERVER"))
             box.height=112;
+        else if(Floppy144Cabinet25DStringEqual(parent->pszC,"FRIDGE"))
+            box.height=158;
         else if(Floppy144Cabinet25DStringEqual(parent->pszC,"COFFEE_MAKER"))
             box.height=82;
         else box.height=92;
@@ -1166,6 +1167,147 @@ static void Floppy144Cabinet25DDrawTableFamily(
 }
 
 /*
+ * BF40: a fitted Staff Room kitchen unit, not a table with long legs.
+ * Appliance silhouettes live on the projected countertop. The content
+ * markers occupy a dedicated middle band so they never paint over the sink
+ * basin or coffee machine, while remaining on the real top surface.
+ */
+static void Floppy144Cabinet25DDrawWorktop(
+    Floppy144Surface *surface,
+    int32_t width,
+    int32_t depth,
+    bool mirror,
+    uint32_t octant,
+    uint32_t count,
+    uint32_t selected
+)
+{
+    const uint32_t edge=F144_25D_RGB(147,161,151);
+    Floppy144Cabinet25DBox box=
+        Floppy144Cabinet25DMakeBox(width,depth,86,mirror);
+    Floppy144Cabinet25DPoint top_face[4]={
+        box.a,box.b,box.c,box.d
+    };
+    Floppy144Cabinet25DPoint front_face[4]={
+        box.d,box.c,
+        {box.c.x,box.c.y+box.height},
+        {box.d.x,box.d.y+box.height}
+    };
+    Floppy144Cabinet25DPoint base[4],upper[4],screen[4];
+    Floppy144Cabinet25DPoint tap,spout;
+    uint32_t i;
+
+    Floppy144Cabinet25DDrawBox(
+        surface,&box,
+        F144_25D_RGB(130,132,120),
+        F144_25D_RGB(75,90,81),
+        F144_25D_RGB(56,71,64),edge
+    );
+
+    /* Four inset cupboard doors follow the actual projected front plane. */
+    for(i=0U;i<4U;++i)
+    {
+        int32_t u=45+(int32_t)i*235;
+        Floppy144Cabinet25DPoint handle;
+        Floppy144Cabinet25DDrawSurfaceMarker(
+            surface,front_face,u,130,u+205,910,
+            F144_25D_RGB(93,108,99),edge
+        );
+        handle=Floppy144Cabinet25DOnFace(
+            front_face,u+167,370
+        );
+        Floppy144Cabinet25DLine(
+            surface,handle.x,handle.y,
+            handle.x,handle.y+9,
+            F144_25D_RGB(194,200,186)
+        );
+    }
+
+    /* Stainless sink: a rim, recessed basin, drain and raised tap. */
+    Floppy144Cabinet25DDrawSurfaceMarker(
+        surface,top_face,65,170,335,790,
+        F144_25D_RGB(170,180,174),edge
+    );
+    Floppy144Cabinet25DDrawSurfaceMarker(
+        surface,top_face,103,225,297,735,
+        F144_25D_RGB(28,49,53),F144_25D_RGB(108,128,127)
+    );
+    Floppy144Cabinet25DDrawSurfaceMarker(
+        surface,top_face,176,470,224,550,
+        F144_25D_RGB(91,108,109),F144_25D_RGB(28,49,53)
+    );
+    tap=Floppy144Cabinet25DOnFace(top_face,203,140);
+    spout=Floppy144Cabinet25DOnFace(top_face,203,350);
+    Floppy144Cabinet25DLine(
+        surface,tap.x,tap.y,tap.x,tap.y-22,edge
+    );
+    Floppy144Cabinet25DLine(
+        surface,tap.x,tap.y-22,spout.x,spout.y-22,edge
+    );
+    Floppy144Cabinet25DLine(
+        surface,spout.x,spout.y-22,spout.x,spout.y-15,edge
+    );
+
+    /* Upright coffee maker with front controls and a shallow top face. */
+    base[0]=Floppy144Cabinet25DOnFace(top_face,710,150);
+    base[1]=Floppy144Cabinet25DOnFace(top_face,930,150);
+    base[2]=Floppy144Cabinet25DOnFace(top_face,930,635);
+    base[3]=Floppy144Cabinet25DOnFace(top_face,710,635);
+    for(i=0U;i<4U;++i)
+    {
+        upper[i]=base[i];
+        upper[i].y-=38;
+    }
+    Floppy144Cabinet25DFillQuad(
+        surface,upper[0],upper[1],base[1],base[0],
+        F144_25D_RGB(47,66,64)
+    );
+    Floppy144Cabinet25DFillQuad(
+        surface,upper[1],upper[2],base[2],base[1],
+        F144_25D_RGB(38,54,54)
+    );
+    Floppy144Cabinet25DFillQuad(
+        surface,upper[0],upper[1],upper[2],upper[3],
+        F144_25D_RGB(104,122,115)
+    );
+    Floppy144Cabinet25DOutlineQuad(
+        surface,upper[0],upper[1],upper[2],upper[3],edge
+    );
+    screen[0]=upper[0];screen[1]=upper[1];
+    screen[2]=base[1];screen[3]=base[0];
+    Floppy144Cabinet25DDrawSurfaceMarker(
+        surface,screen,190,170,810,650,
+        F144_25D_RGB(24,35,37),edge
+    );
+    Floppy144Cabinet25DDrawOrientationTick(surface,&box,octant);
+
+    /* Contents belong on the clear middle countertop, not the appliances. */
+    if(count!=0U)
+    {
+        uint32_t columns=count<3U?count:3U;
+        uint32_t rows=(count+columns-1U)/columns;
+        for(i=0U;i<count;++i)
+        {
+            uint32_t column=i%columns,row=i/columns;
+            int32_t u=400+(int32_t)((column*2U+1U)*240U/
+                (2U*columns));
+            int32_t v=155+(int32_t)((row*2U+1U)*690U/
+                (2U*rows));
+            int32_t du=(int32_t)(240U/(3U*columns));
+            int32_t dv=(int32_t)(690U/(3U*rows));
+            if(du>42)du=42;
+            if(dv>75)dv=75;
+            Floppy144Cabinet25DDrawSurfaceMarker(
+                surface,top_face,u-du,v-dv,u+du,v+dv,
+                i==selected?F144_25D_RGB(216,239,220):
+                    F144_25D_RGB(115,132,122),
+                F144_25D_RGB(39,53,48)
+            );
+        }
+    }
+}
+
+/*
  * The chair back is a solid, shallow upright on the authored seat edge.
  * Four projected corners and a small inward extrusion give it front, end and
  * top faces. The seat is painted afterwards to hide the back's lower join.
@@ -1340,9 +1482,8 @@ static void Floppy144Cabinet25DDrawSofa(
     Floppy144Cabinet25DDrawOrientationTick(surface,&seat,octant);
 }
 
-static void Floppy144Cabinet25DDrawServerOrFridge(
+static void Floppy144Cabinet25DDrawServer(
     Floppy144Surface *surface,
-    const Floppy144DataRecord *parent,
     int32_t width,
     int32_t depth,
     bool mirror,
@@ -1352,64 +1493,91 @@ static void Floppy144Cabinet25DDrawServerOrFridge(
     const uint32_t edge=F144_25D_RGB(139,157,151);
     Floppy144Cabinet25DBox box=
         Floppy144Cabinet25DMakeBox(width,depth,112,mirror);
-    int32_t min_x;
-    int32_t max_x;
+    int32_t min_x=Floppy144Cabinet25DMinX(&box);
+    int32_t max_x=Floppy144Cabinet25DMaxX(&box);
     uint32_t i;
 
     Floppy144Cabinet25DDrawBox(
         surface,&box,
         F144_25D_RGB(83,96,91),
         F144_25D_RGB(49,61,57),
-        F144_25D_RGB(37,48,44),
-        edge
+        F144_25D_RGB(37,48,44),edge
+    );
+    Floppy144Cabinet25DDrawOrientationTick(surface,&box,octant);
+    for(i=0U;i<7U;++i)
+    {
+        Floppy144Cabinet25DRect(
+            surface,
+            (uint32_t)(min_x+10),
+            (uint32_t)(box.c.y+12+(int32_t)i*13),
+            (uint32_t)(max_x-min_x-20),
+            9U,edge
+        );
+    }
+}
+
+/*
+ * BF40: open fridge interior. All seals, liners, shelves and compartments
+ * share the projected front face; no screen-horizontal lines can detach from
+ * the box when the view is rotated or mirrored.
+ */
+static void Floppy144Cabinet25DDrawFridge(
+    Floppy144Surface *surface,
+    const Floppy144DataRecord *parent,
+    int32_t width,
+    int32_t depth,
+    bool mirror,
+    uint32_t octant
+)
+{
+    const uint32_t edge=F144_25D_RGB(150,174,169);
+    Floppy144Cabinet25DBox box=
+        Floppy144Cabinet25DMakeBox(width,depth,158,mirror);
+    Floppy144Cabinet25DPoint front_face[4];
+    uint32_t i;
+
+    Floppy144Cabinet25DDrawBox(
+        surface,&box,
+        F144_25D_RGB(143,159,155),
+        F144_25D_RGB(85,108,106),
+        F144_25D_RGB(63,84,83),edge
+    );
+    Floppy144Cabinet25DFaceCorners(
+        parent,&box,front_face,F144_25D_CHILD_FRONT,width,depth
     );
 
+    /* Door seal, dark cavity and receding side liners. */
+    Floppy144Cabinet25DDrawSurfaceMarker(
+        surface,front_face,70,55,930,960,
+        F144_25D_RGB(170,187,179),edge
+    );
+    Floppy144Cabinet25DDrawSurfaceMarker(
+        surface,front_face,112,104,888,916,
+        F144_25D_RGB(25,43,46),F144_25D_RGB(98,132,130)
+    );
+    Floppy144Cabinet25DDrawSurfaceMarker(
+        surface,front_face,120,115,178,905,
+        F144_25D_RGB(58,82,82),F144_25D_RGB(58,82,82)
+    );
+    Floppy144Cabinet25DDrawSurfaceMarker(
+        surface,front_face,822,115,880,905,
+        F144_25D_RGB(49,73,75),F144_25D_RGB(49,73,75)
+    );
+
+    for(i=0U;i<3U;++i)
+    {
+        int32_t shelf_v=320+(int32_t)i*200;
+        Floppy144Cabinet25DDrawSurfaceMarker(
+            surface,front_face,164,shelf_v,836,shelf_v+28,
+            F144_25D_RGB(115,147,145),edge
+        );
+    }
+    /* Transparent vegetable drawer beneath the last shelf. */
+    Floppy144Cabinet25DDrawSurfaceMarker(
+        surface,front_face,175,826,825,905,
+        F144_25D_RGB(59,92,93),edge
+    );
     Floppy144Cabinet25DDrawOrientationTick(surface,&box,octant);
-
-    min_x=Floppy144Cabinet25DMinX(&box);
-    max_x=Floppy144Cabinet25DMaxX(&box);
-
-    if(
-        parent != NULL &&
-        Floppy144Cabinet25DStringEqual(parent->pszC,"SERVER")
-    )
-    {
-        for(i=0U;i<7U;++i)
-        {
-            Floppy144Cabinet25DRect(
-                surface,
-                (uint32_t)(min_x+10),
-                (uint32_t)(box.c.y+12+(int32_t)i*13),
-                (uint32_t)(max_x-min_x-20),
-                9U,
-                edge
-            );
-        }
-    }
-    else
-    {
-        Floppy144Cabinet25DLine(
-            surface,
-            min_x+8,
-            box.c.y+42,
-            max_x-8,
-            box.c.y+42,
-            edge
-        );
-
-        Floppy144Cabinet25DFillRect(
-            surface,
-            (uint32_t)(max_x-18),
-            (uint32_t)(box.c.y+16),
-            4U,18U,edge
-        );
-        Floppy144Cabinet25DFillRect(
-            surface,
-            (uint32_t)(max_x-18),
-            (uint32_t)(box.c.y+55),
-            4U,32U,edge
-        );
-    }
 }
 
 static void Floppy144Cabinet25DDrawWallFixture(
@@ -1873,12 +2041,19 @@ bool Floppy144Cabinet25DDraw(
         );
         children_drawn=true;
     }
+    else if(Floppy144Cabinet25DStringEqual(variant,"WORKTOP"))
+    {
+        Floppy144Cabinet25DDrawWorktop(
+            surface,width,depth,mirror,octant,
+            content_count,selected_content
+        );
+        children_drawn=true;
+    }
     else if(
         Floppy144Cabinet25DStringEqual(variant,"BOARDROOM_TABLE") ||
         Floppy144Cabinet25DStringEqual(variant,"DINING_TABLE") ||
         Floppy144Cabinet25DStringEqual(variant,"COFFEE_TABLE") ||
         Floppy144Cabinet25DStringEqual(variant,"RECEPTION_TABLE") ||
-        Floppy144Cabinet25DStringEqual(variant,"WORKTOP") ||
         Floppy144Cabinet25DStringEqual(variant,"SINK")
     )
     {
@@ -1898,12 +2073,15 @@ bool Floppy144Cabinet25DDraw(
             surface,width,depth,mirror,octant
         );
     }
-    else if(
-        Floppy144Cabinet25DStringEqual(variant,"SERVER") ||
-        Floppy144Cabinet25DStringEqual(variant,"FRIDGE")
-    )
+    else if(Floppy144Cabinet25DStringEqual(variant,"SERVER"))
     {
-        Floppy144Cabinet25DDrawServerOrFridge(
+        Floppy144Cabinet25DDrawServer(
+            surface,width,depth,mirror,octant
+        );
+    }
+    else if(Floppy144Cabinet25DStringEqual(variant,"FRIDGE"))
+    {
+        Floppy144Cabinet25DDrawFridge(
             surface,parent,width,depth,mirror,octant
         );
     }

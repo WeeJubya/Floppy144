@@ -46,3 +46,29 @@ reconstructed world plus Inspection transition. Pay special attention to support
 visibility below the body, chair back thickness, monitor overlap and clipping.
 Automated pixels and CI captures are not a substitute for Windows gameplay
 visual confirmation.
+
+## BF40 Staff Room worktop and fridge continuation
+
+The initial shared BF40 fix already addressed rear-leg occlusion, solid chair
+backs and terminal-marker priority. This continuation replaces the remaining
+thin table-style WORKTOP inspection representation with a fitted 86-pixel-high
+cabinet unit, four projected cupboard doors, a recessed sink/tap and a raised
+coffee machine. The appliance meshes and physical-item highlights all use the
+same projected top quad. Contents are allocated a clear central strip, separate
+from the left-hand sink and right-hand coffee maker, without changing item data,
+selection, saving or ordinary Site geometry.
+
+The FRIDGE previously shared a short 112-pixel server silhouette and painted
+its door lines at raw framebuffer coordinates. It now has a dedicated 158-pixel
+open-fridge container. Recess, liner, three shelves and lower drawer are
+projected on the visible front face, and child-item markers inherit the same
+158-pixel projection. The server remains a separate unchanged family.
+
+The existing BF40 furniture tests remain intact. The Staff Room test now checks
+both appliances, no marker/appliance colour loss with twelve contents, selection
+changes, all four cardinal rotations, fridge shelf/cavity/drawer colours,
+full-height geometry and right-hand Contents gutter clipping.
+
+Visual sign-off remains required for the Worktop and Fridge in live Inspection
+at every supported screen scaling setting and for their ordinary Site/world
+models, which are deliberately not changed by this rendering-only work.

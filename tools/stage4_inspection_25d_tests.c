@@ -747,6 +747,58 @@ static void TestBF40TerminalMarkerForeground(void)
     }
 }
 
+/*
+ * BF40 Staff Room: silhouettes and physical-item highlights must coexist.
+ * Static appliance colours must survive arbitrary item count/selection.
+ */
+static void TestBF40StaffRoomContainers(void)
+{
+    const Floppy144DataRecord *worktop=
+        FindParent("STAFF_ROOM_WORKTOP");
+    const Floppy144DataRecord *fridge=
+        FindParent("STAFF_ROOM_FRIDGE");
+    int16_t rotation;
+
+    CHECK(worktop!=NULL && fridge!=NULL,
+          "BF40 canonical Staff Room containers exist");
+    if(worktop==NULL || fridge==NULL)return;
+
+    for(rotation=0;rotation<360;rotation+=90)
+    {
+        uint32_t sink,coffee,unselected,selected;
+        (void)DrawParent(worktop,rotation,0U,0U,NULL);
+        sink=BF40CountColour(FLOPPY144_RGB(28,49,53));
+        coffee=BF40CountColour(FLOPPY144_RGB(24,35,37));
+        CHECK(sink>0U && coffee>0U,
+              "BF40 worktop has a recessed sink and raised coffee maker");
+        (void)DrawParent(worktop,rotation,12U,0U,NULL);
+        unselected=SurfaceHash();
+        CHECK(BF40CountColour(FLOPPY144_RGB(28,49,53))==sink &&
+              BF40CountColour(FLOPPY144_RGB(24,35,37))==coffee,
+              "BF40 worktop markers never cover appliance faces");
+        (void)DrawParent(worktop,rotation,12U,7U,NULL);
+        selected=SurfaceHash();
+        CHECK(selected!=unselected &&
+              BF40CountColour(FLOPPY144_RGB(216,239,220))>0U,
+              "BF40 worktop contents remain selectable");
+        CHECK(RegionPixelCount(306U,0U,TEST_WIDTH,TEST_HEIGHT)==0U,
+              "BF40 worktop and appliances respect the Contents gutter");
+
+        (void)DrawParent(fridge,rotation,0U,0U,NULL);
+        CHECK(BF40CountColour(FLOPPY144_RGB(25,43,46))>0U &&
+              BF40CountColour(FLOPPY144_RGB(115,147,145))>0U &&
+              BF40CountColour(FLOPPY144_RGB(59,92,93))>0U,
+              "BF40 fridge has recessed cavity, shelves and lower drawer");
+        CHECK(RegionPixelCount(100U,280U,250U,330U)>0U,
+              "BF40 fridge retains full-height cabinet");
+        (void)DrawParent(fridge,rotation,8U,3U,NULL);
+        CHECK(BF40CountColour(FLOPPY144_RGB(216,239,220))>0U,
+              "BF40 fridge physical-item selection overlays shelf interior");
+        CHECK(RegionPixelCount(306U,0U,TEST_WIDTH,TEST_HEIGHT)==0U,
+              "BF40 fridge and children respect the Contents gutter");
+    }
+}
+
 static void TestUnknownFallback(void)
 {
     Floppy144DataRecord future_parent;
@@ -795,6 +847,7 @@ int main(void)
     TestBF40FurnitureDepth();
     TestBF40ChairBackVolume();
     TestBF40TerminalMarkerForeground();
+    TestBF40StaffRoomContainers();
     TestUnknownFallback();
 
     if(g_failures!=0)
