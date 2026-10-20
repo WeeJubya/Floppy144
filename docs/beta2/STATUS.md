@@ -1,5 +1,5 @@
 # Beta.2 runtime migration status
-Last updated: 2026-10-20. Project: Floppy//144. Stage: **B2-01 investigation and baseline documents**; no runtime implementation is authorised here.
+Last updated: 2026-10-21. Project: Floppy//144. **Current stage: B2-02 independent Windows runtime specification complete (documentation only).** B2-01 audit evidence is retained below; no replacement runtime implementation is authorised in this stage.
 
 ## Source of truth
 - Working repository: https://github.com/WeeJubya/Floppy144
@@ -24,5 +24,21 @@ Last updated: 2026-10-20. Project: Floppy//144. Stage: **B2-01 investigation and
 - **Source drift**: Beta.1 source and Stage-4 base differ in seven files; check whether user expects Beta.2 to inherit post-release GUEST login changes.
 - Captures: protocol drafted in baseline, no image or framebuffer asset was generated.
 
-## Next stage
-B2-02 is **not started / not yet cleared to implement**. Verify the planned GPLv3 file correction and any relevant distribution obligations, clarify rights if a future non-GPL licence is intended, independently hash the published EXE, establish labelled capture fixtures, resolve the existing test expectation and explicitly approve a behavioural-only clean-room implementation brief. Future code changes must preserve procedural audio, save compatibility and the 1,474,560-byte size cap. Never use historical derived source as a copy template.
+## B2-02 deliverables (2026-10-21)
+- `docs/beta2/02_runtime_specification.md`: Win32/GDI, fixed 640x360 top-down pixels, deterministic client fit, paint, memory, lifecycle, failure and native service requirements.
+- `docs/beta2/02_api_contract.md`: all **15** unmodified `F144PlatformApi` callback slots, game-owned data and native event service boundaries.
+- `docs/beta2/02_acceptance_matrix.md`: L0 pure, L1 Windows, L2 regression/Release and L3 human screenshot/audio checks, with MEM/PIX/GEO/RND/INP/LIFE/API/CLK/STO/INST/AUD/BUILD test IDs. All new tests are **unrun**.
+- `docs/beta2/02_implementation_handover.md`: self-contained clean-room brief, permitted public headers and project-owned service interfaces, forbidden River2D-derived files, independent implementer/integrator/reviewer division of responsibility.
+
+**B2-02 documentation review:** The four files were screened for inherited runtime function invocations, private F144 struct declarations, copied implementation statements and engine private-member accesses; none were detected. This is a limited textual screen, not independent source-code authorship certification. Public platform contract information and Win32 API semantics remain authorised.
+
+**Specification readiness:** READY FOR INDEPENDENT IMPLEMENTATION DESIGN, **not** approved for final parity or production replacement. A C99 native Windows developer can use B2-02 documents, permitted game-facing headers and Microsoft API references without consulting forbidden runtime source. No actual independent implementation build was performed at B2-02. B2-01 Beta.1 EXE hash and screenshot/audio acceptance **remain unverified**, the prior Stage-4 intro assertion fails, and no full new Windows regression was run on the Beta.2 branch.
+
+## Next stage: B2-03 (not started)
+- Verify the separately planned GPLv3 file correction in the **GDR release repository**, and review actual notice/source delivery. As last checked, the GDR public `main` tree was still missing `LICENSE`; the project owner identified an accidental omission, not a new licensing choice.
+- Independently download/hash the published Beta.1 EXE and capture reproducible client/framebuffer screenshots/audio evidence under a controlled Windows environment.
+- Investigate existing Stage-4 intro floppy-label regression against approved scene behaviour **in a separate authorised task**; do not weaken assertions to invent a pass.
+- Confirm explicit choices/compatibility for DPI awareness, minimum Windows version and any pixel-rounding reference discrepancy. Keep the 640x360, 0x00RRGGBB, unchanged ABI, procedural sound and save format as fixed requirements.
+- Only after approval, assign clean implementer/integrator/reviewer roles and develop wholly original native backend on `development/Beta-2-runtime` without accessing derived source. Require L0-L3 gate, strict Release, size ≤1,474,560, no derived link inputs, commit/push/report.
+
+**Repo discipline:** development in WeeJubya/Floppy144 on the existing Beta.2 branch. GreyDoorRepublik/Floppy144-beta is for public releases and was not modified by B2-01 or B2-02.
