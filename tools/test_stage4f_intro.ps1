@@ -80,6 +80,13 @@ foreach($required in @(
         throw "BF20 coordinator integration missing: $required"
     }
 }
+if($main -notmatch 'Floppy144IntroAutoLoginReady\(intro_elapsed_ms,\s*Floppy144IntroHasSavedOperator\(\)\)' -or
+   $main -notmatch 'if\(Floppy144IntroHasSavedOperator\(\)\)return true;' -or
+   $main -notmatch '!Floppy144IntroHasSavedOperator\(\) &&\s*Floppy144IntroLoginReady' -or
+   $main -notmatch 'global_intro_login_save_failed,\s*Floppy144IntroHasSavedOperator\(\)')
+{
+    throw "GUEST login prompt must be wired through drawing, text input, Enter and auto-login."
+}
 if($main -match 'intro_elapsed_ms\s*>=\s*FLOPPY144_INTRO_DURATION_MS[\s\S]{0,150}Floppy144OpenMainMenu')
 {
     throw "BF20 unguarded menu transition bypasses first-time LOGIN"
