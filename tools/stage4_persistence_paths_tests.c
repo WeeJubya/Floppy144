@@ -1738,6 +1738,16 @@ static void TestGreyEncounter(const char *root)
         Expect(scene.phase==(uint8_t)FLOPPY144_GREY_EXPLORE,
             "S4G-03 transition reaches clean modern office");
         Floppy144GreyEncounterDraw(&surface,&scene);
+        /* BF42: samples from the four projected rear-wall front faces,
+           rendered in Explore before the later Developer speech overlay. */
+        Expect(pixels[115U*640U+236U]==FLOPPY144_RGB(56,97,134),
+            "BF42 west poster one uses projected face and original palette");
+        Expect(pixels[153U*640U+96U]==FLOPPY144_RGB(110,64,105),
+            "BF42 west poster two uses projected wall slope");
+        Expect(pixels[163U*640U+579U]==FLOPPY144_RGB(50,111,92),
+            "BF42 north poster is mapped to wall-mounted artwork");
+        Expect(pixels[145U*640U+488U]==FLOPPY144_RGB(12,23,34),
+            "BF42 projected source screen retains interior colours");
         /* BF35: passive reaction occurs at exactly 5000 ms. */
         {
             Floppy144GreyEncounter idle=scene;

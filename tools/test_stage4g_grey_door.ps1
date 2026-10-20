@@ -63,9 +63,18 @@ Require $encounter '"be able to get in here."' 'Speech above the Developer is mi
 Require $encounter 'RGB(255,255,255)' 'Developer speech must remain white.'
 Require $encounter 'scene->restoration_start+elapsed' 'Restoration gag must rise from the actual saved percentage.'
 Require $main 'Floppy144GreyEncounterDisplayPercent(' 'Restore gag is not connected to the actual Site header.'
-Require $encounter 'Poster(s,70,118,0U)' 'Concept art must visibly sit on the near desk.'
-Require $encounter 'Poster(s,152,118,1U)' 'Second future-game concept sheet is missing.'
-Require $encounter 'SourceMonitor(s)' 'Source-code monitor is not composed.'
+Require $encounter 'WallPanel(' 'BF42 wall panel renderer is missing.'
+Require $encounter 'Floppy144SiteIsoSceneProject(&room_iso' 'BF42 wall panels must use the room ISO projection.'
+Require $encounter 'WallArtwork(s,false,4,6,3,9,0U)' 'First poster is not attached to the west wall.'
+Require $encounter 'WallArtwork(s,false,15,4,3,9,1U)' 'Second poster is not attached to the west wall.'
+Require $encounter 'WallArtwork(s,true,18,3,3,9,2U)' 'Third poster is not attached to the north wall.'
+Require $encounter 'WallArtwork(s,true,9,8,2,10,3U)' 'Source-code monitor is not attached to the north wall.'
+if($encounter.Contains('Poster(s,70,118,0U)') -or
+   $encounter.Contains('Poster(s,152,118,1U)') -or
+   $encounter.Contains('Poster(s,501,107,2U)') -or
+   $encounter.Contains('SourceMonitor(s)')) {
+    throw 'BF42 flat wall-object screen-space overlay was reintroduced.'
+}
 Require $encounter 'Sandwich(s)' 'Unexplained half-eaten sandwich is missing.'
 Require $encounter 'Developer(s,scene)' 'Seated Developer is missing.'
 Require $encounter 'static void Glitch(' 'CRT glitch renderer missing.'

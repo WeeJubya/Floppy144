@@ -214,16 +214,77 @@ static void Poster(Floppy144Surface *s,uint32_t x,uint32_t y,uint32_t kind)
 }
 static void SourceMonitor(Floppy144Surface *s)
 {
-    FILL(s,245,111,167,105,RGB(30,43,53));
-    FILL(s,250,115,157,94,RGB(12,23,34));
-    FILL(s,322,216,12,16,RGB(76,83,90));
-    FILL(s,305,232,46,4,RGB(80,88,97));
-    TXT(s,257,124,"floppy144_run_state.c",RGB(130,207,229));
-    TXT(s,257,141,"if (site->restored)",RGB(189,203,216));
-    TXT(s,263,154,"draw_world(site);",RGB(172,213,167));
-    TXT(s,257,170,"if (door->unseen)",RGB(189,203,216));
-    TXT(s,263,183,"return false;",RGB(222,174,121));
-    FILL(s,255,199,105,1,RGB(80,116,137));
+    /* Retain the BF35 code artwork, but draw it locally as a wall texture. */
+    FILL(s,0,0,167,105,RGB(30,43,53));
+    FILL(s,5,4,157,94,RGB(12,23,34));
+    TXT(s,12,13,"floppy144_run_state.c",RGB(130,207,229));
+    TXT(s,12,30,"if (site->restored)",RGB(189,203,216));
+    TXT(s,18,43,"draw_world(site);",RGB(172,213,167));
+    TXT(s,12,59,"if (door->unseen)",RGB(189,203,216));
+    TXT(s,18,72,"return false;",RGB(222,174,121));
+    FILL(s,10,88,105,1,RGB(80,116,137));
+}
+
+/* Rasterise an authored 2D panel on a projected rear-wall face instead
+   of painting a flat overlay above the scene. The same projection as the
+   floor, wall trim and furniture establishes its ISO slope and height. */
+static void WallPanel(
+    Floppy144Surface *dest,const Floppy144Surface *art,
+    bool north,int32_t along,int32_t length,int32_t bottom,int32_t top
+)
+{
+    int32_t x0,y0,x1,y1,x2,y2,minx,maxx,miny,maxy,x,y;
+    int32_t wall_x=north?along:1,wall_y=north?1:along;
+    int32_t end_x=north?along+length:1;
+    int32_t end_y=north?1:along+length;
+    int64_t dx,dy,vertical;
+    if(dest==NULL || dest->pixels==NULL || art==NULL ||
+       art->pixels==NULL || dest->width==0U || dest->height==0U ||
+       art->width==0U || art->height==0U) return;
+    Floppy144SiteIsoSceneProject(&room_iso,wall_x*16,wall_y*16,top*16,&x0,&y0);
+    Floppy144SiteIsoSceneProject(&room_iso,end_x*16,end_y*16,top*16,&x1,&y1);
+    Floppy144SiteIsoSceneProject(&room_iso,wall_x*16,wall_y*16,bottom*16,&x2,&y2);
+    dx=(int64_t)x1-x0;
+    dy=(int64_t)y1-y0;
+    vertical=(int64_t)y2-y0;
+    if(dx==0 || vertical<=0) return;
+    minx=x0<x1?x0:x1; maxx=x0>x1?x0:x1;
+    miny=y0<y1?y0:y1; maxy=y0>y1?y0:y1;
+    if(y2<miny) miny=y2;
+    if(y2+(int32_t)dy>maxy) maxy=y2+(int32_t)dy;
+    if(minx<0) minx=0;
+    if(miny<0) miny=0;
+    if(maxx>(int32_t)dest->width) maxx=(int32_t)dest->width;
+    if(maxy>(int32_t)dest->height) maxy=(int32_t)dest->height;
+    for(y=miny;y<maxy;++y) {
+        for(x=minx;x<maxx;++x) {
+            int64_t u=(int64_t)x-x0,ud=dx;
+            int64_t v=((int64_t)y-y0)*dx-u*dy,vd=dx*vertical;
+            uint32_t sx,sy;
+            if(ud<0) { u=-u; ud=-ud; }
+            if(vd<0) { v=-v; vd=-vd; }
+            if(u<0 || u>=ud || v<0 || v>=vd) continue;
+            sx=(uint32_t)(u*art->width/ud);
+            sy=(uint32_t)(v*art->height/vd);
+            dest->pixels[(uint32_t)y*dest->width+(uint32_t)x]=
+                art->pixels[sy*art->width+sx];
+        }
+    }
+}
+static void WallArtwork(
+    Floppy144Surface *dest,bool north,int32_t along,int32_t length,
+    int32_t bottom,int32_t top,uint32_t kind
+)
+{
+    uint32_t pixels[167U*105U];
+    Floppy144Surface art;
+    memset(&art,0,sizeof(art));
+    art.pixels=pixels;
+    art.width=kind==3U?167U:76U;
+    art.height=kind==3U?105U:64U;
+    if(kind==3U) SourceMonitor(&art);
+    else Poster(&art,0U,0U,kind);
+    WallPanel(dest,&art,north,along,length,bottom,top);
 }
 static void Sandwich(Floppy144Surface *s)
 {
@@ -305,6 +366,14 @@ static void Office(Floppy144Surface *s,const Floppy144GreyEncounter *scene)
     BOX(3,0,5,1,3,8,RGB(252,233,134));
     BOX(0,4,1,6,3,9,RGB(74,221,240));
     BOX(0,15,1,4,3,9,RGB(246,203,108));
+    /* Shallow ISO frames and front-facing wall artwork. Draw before the
+       furniture so nearer objects naturally obscure wall attachments. */
+    BOX(9,0,8,1,2,10,RGB(30,43,53));
+    BOX(18,0,3,1,3,9,RGB(245,245,236));
+    WallArtwork(s,false,4,6,3,9,0U);
+    WallArtwork(s,false,15,4,3,9,1U);
+    WallArtwork(s,true,18,3,3,9,2U);
+    WallArtwork(s,true,9,8,2,10,3U);
     /* Painter-ordered rear-to-front ISO furniture. */
     BOX(5,4,3,2,0,7,RGB(165,104,202));
     BOX(14,3,5,3,0,3,RGB(64,136,202));
@@ -319,10 +388,6 @@ static void Office(Floppy144Surface *s,const Floppy144GreyEncounter *scene)
     BOX(6,15,5,3,2,3,RGB(235,226,164));
 #undef BOX
     Floppy144BrandLogoDraw(s,178U,29U,285U,49U);
-    Poster(s,70,118,0U);
-    Poster(s,152,118,1U);
-    Poster(s,501,107,2U);
-    SourceMonitor(s);
     Sandwich(s);
     Developer(s,scene);
     Floppy144PlayerVisualDraw(s,scene->local_x,scene->local_y,
