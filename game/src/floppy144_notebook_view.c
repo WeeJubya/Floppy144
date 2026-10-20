@@ -170,7 +170,7 @@ void Floppy144NotebookViewDraw(
     Floppy144DrawFillRect(&s,10U,306U,620U,28U,bg);Floppy144DrawRect(&s,10U,306U,620U,28U,border);
     Floppy144DrawText(&s,22U,316U,
         pNotebook->page==FLOPPY144_NOTEBOOK_PAGE_DOCUMENT_LEDGER
-            ? "UP/DOWN SCROLL  PGUP/PGDN PAGE  < PREVIOUS  N/BACKSPACE BACK"
-            : "UP/DOWN SCROLL  PGUP/PGDN PAGE  > DOCUMENT LEDGER  N/BACKSPACE BACK",
+            ? "UP/DOWN SCROLL  PGUP/PGDN PAGE  < Recovery Notebook  N/BACKSPACE BACK"
+            : "UP/DOWN SCROLL  PGUP/PGDN PAGE  RIGHT > Document Ledger  N/BACKSPACE BACK",
         1U,text);
 }

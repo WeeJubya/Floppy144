@@ -8,7 +8,7 @@
 static Floppy144DataRecord evidence[32], documents[TEST_DOCUMENTS];
 static char evidence_text[32][64], document_text[TEST_DOCUMENTS][96];
 static char captured[64][160];
-static uint32_t shown, scroll_top, scroll_total, failures;
+static uint32_t shown, scroll_top, scroll_total, failures, footer_right;
 
 static void Assert(bool ok,const char *msg) {
     if(!ok){++failures;printf("FAIL: %s\n",msg);}
@@ -46,13 +46,14 @@ uint32_t Floppy144DrawTextWidth(const char *s,uint32_t scale){
 }
 void Floppy144DrawText(Floppy144Surface *s,uint32_t x,uint32_t y,
     const char *value,uint32_t scale,uint32_t colour) {
-    (void)s;(void)x;(void)y;(void)scale;(void)colour;
+    (void)s;(void)colour;
+    if(y==316U)footer_right=x+Floppy144DrawTextWidth(value,scale);
     if(shown<64U)(void)snprintf(captured[shown++],sizeof(captured[0]),"%s",value);
 }
 static void Draw(Floppy144NotebookViewState *view,Floppy144RunState *run) {
     static uint32_t pixel;
     Floppy144Surface s={&pixel,640U,360U};
-    shown=0U;scroll_top=0U;scroll_total=0U;
+    shown=0U;scroll_top=0U;scroll_total=0U;footer_right=0U;
     Floppy144NotebookViewDraw(&s,view,run);
 }
 int main(void) {
@@ -74,11 +75,14 @@ int main(void) {
     Assert(view.page==FLOPPY144_NOTEBOOK_PAGE_EVIDENCE&&
         Has("RECOVERY NOTEBOOK")&&Has("NO NOTES RECORDED."),
         "empty initial findings page");
-    Assert(Has("> DOCUMENT LEDGER"),"first-page navigation hint");
+    Assert(Has("RIGHT > Document Ledger")&&footer_right<=628U,
+        "BF41 first-page label and footer fit");
     Floppy144NotebookViewSwitchPage(&view,1);
     Draw(&view,&run);
     Assert(Has("DOCUMENT LEDGER")&&Has("NO DOCUMENT SUMMARIES RECORDED."),
         "empty ledger");
+    Assert(Has("< Recovery Notebook")&&footer_right<=628U,
+        "BF41 ledger return label and footer fit");
     Floppy144NotebookViewSwitchPage(&view,1);
     Assert(view.page==FLOPPY144_NOTEBOOK_PAGE_DOCUMENT_LEDGER,
         "right boundary");
