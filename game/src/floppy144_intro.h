@@ -26,6 +26,8 @@ typedef enum Floppy144IntroBeat {
 Floppy144IntroBeat Floppy144IntroBeatAt(uint32_t elapsed_ms);
 /* No action may skip the essential boot-to-login transitions. */
 bool Floppy144IntroActionSkips(F144Action action);
+/* GUEST is a saved fallback, not an assigned login for the intro. */
+bool Floppy144IntroHasPersonalLogin(const char *operator_name);
 bool Floppy144IntroLoginReady(uint32_t elapsed_ms);
 void Floppy144IntroDraw(Floppy144Surface *surface,uint32_t elapsed_ms,uint32_t text_rate);
 void Floppy144IntroDrawWithLogin(
