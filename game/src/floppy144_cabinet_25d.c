@@ -1357,12 +1357,14 @@ static void Floppy144Cabinet25DDrawChairBack(
     Floppy144Cabinet25DPoint low0=pad0,low1=pad1;
     Floppy144Cabinet25DPoint back_high0=depth0;
     Floppy144Cabinet25DPoint back_high1=depth1;
+    Floppy144Cabinet25DPoint back_low1=depth1;
     Floppy144Cabinet25DPoint upper0=outer0,upper1=outer1;
     Floppy144Cabinet25DPoint upper_post0=post0,upper_post1=post1;
 
     high0.y-=59;high1.y-=59;
     low0.y-=24;low1.y-=24;
     back_high0.y-=59;back_high1.y-=59;
+    back_low1.y-=24;
     upper0.y-=67;upper1.y-=67;
     upper_post0.y-=67;upper_post1.y-=67;
 
@@ -1372,7 +1374,7 @@ static void Floppy144Cabinet25DDrawChairBack(
         F144_25D_RGB(115,129,120)
     );
     Floppy144Cabinet25DFillQuad(
-        surface,high1,back_high1,depth1,low1,
+        surface,high1,back_high1,back_low1,low1,
         F144_25D_RGB(57,71,65)
     );
     Floppy144Cabinet25DFillQuad(
