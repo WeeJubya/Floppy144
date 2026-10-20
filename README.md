@@ -1,4 +1,12 @@
-# Floppy//144 - Stage 3A Prologue Vertical Slice
+# Floppy//144
+
+**Current development:** Stage 4, pre-beta audit. The Stage 3A package notes
+below are retained as historical context and do not describe the present
+Windows release. For the current module map see `game/src/CODE_TOUR.md`;
+for the build/test workflow see `docs/stage4/build_workflows.md` and
+`testbuild.ps1` / `run.ps1`.
+
+## Historical Stage 3A package notes
 
 This is the self-contained Stage 3A build of Floppy//144. It preserves the
 completed Stage 2 data-driven refactor and makes the complete Prologue route a

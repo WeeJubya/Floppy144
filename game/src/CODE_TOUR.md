@@ -69,11 +69,11 @@ play/replace/stop, SFX triggering, and independent music/SFX volume. Core/game
 code must not include Windows multimedia headers or know about MIDI devices,
 WinMM handles, wave buffers or platform callbacks.
 
-The current audited Stage 4 branch has no production audio generator or
-playback backend, so `src/f144_win32_audio.c` intentionally remains silent.
-When compact runtime-generated music/SFX is introduced, composition/event
-generation stays portable and outside the Win32 layer; only native playback
-belongs behind that adapter.
+The Win32 adapter in `src/f144_win32_audio.c` drives the active procedural
+audio implementations: `src/f144audio.c` schedules MIDI music, while
+`src/f144sfx.c` synthesises short waveform cues at runtime. Neither stores
+pre-recorded audio files. The Windows application links WinMM; the portable
+Core continues to depend only on semantic platform audio operations.
 
 ## Single-instance ownership
 

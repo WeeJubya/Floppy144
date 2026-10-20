@@ -1,5 +1,10 @@
 # FLOPPY//144 Stage 4B Final Build Architecture
 
+> Historical Stage 4B architecture record. Subsequent Stage 4 work added
+> procedural WinMM music and waveform SFX, plus the Windows application icon.
+> The current `premake5.lua` and `game/src/CODE_TOUR.md` describe the active
+> implementation; historical sign-off details below remain as originally scoped.
+
 ## Purpose
 
 S4B-08 aligns the generated Visual Studio/Premake build with the platform
@@ -95,7 +100,7 @@ implementation:
 - AppData/path resolution;
 - single-instance mutex implementation;
 - Win32 startup-command acquisition;
-- current silent audio adapter;
+- WinMM playback adapter for procedural MIDI music and generated waveform SFX;
 - the legacy F144 software-runtime support used by the Windows presenter.
 
 This target owns `BUILD_WINDOWS`.
@@ -126,8 +131,8 @@ gdi32
 shell32
 ```
 
-There is still no WinMM link because S4B-04 established a silent semantic audio
-boundary without introducing a native multimedia backend.
+The current Windows executable links WinMM for its procedural audio adapter.
+The portable Core does not link multimedia libraries.
 
 ## Dependency direction
 

@@ -53,6 +53,48 @@ static void TestDefaultsAndRanges(void)
     Expect(Floppy144SettingsSetAutosaveMode(&s,FLOPPY144_AUTOSAVE_OFF),"autosave off");
 }
 
+
+/* Setters must preserve the dirty/no-op contract used by settings persistence. */
+static void TestMutationContracts(void)
+{
+    Floppy144Settings s;
+    Floppy144SettingsReset(&s);
+    Expect(s.dirty==0U,"reset leaves settings clean");
+    Expect(!Floppy144SettingsSetCrtMode(&s,FLOPPY144_CRT_FULL),"no-op CRT");
+    Expect(!Floppy144SettingsSetTextSpeed(&s,FLOPPY144_TEXT_SPEED_NORMAL),"no-op speed");
+    Expect(!Floppy144SettingsSetMusicVolume(&s,10U),"no-op music");
+    Expect(!Floppy144SettingsSetSfxVolume(&s,10U),"no-op SFX");
+    Expect(!Floppy144SettingsSetAutosaveMode(&s,FLOPPY144_AUTOSAVE_5_MINUTES),"no-op autosave");
+    Expect(!Floppy144SettingsSetInspectionIndicators(&s,false),"no-op indicators");
+    Expect(s.dirty==0U,"no-op setters leave settings clean");
+
+    Expect(!Floppy144SettingsSetCrtMode(&s,FLOPPY144_CRT_COUNT),"reject CRT sentinel");
+    Expect(!Floppy144SettingsSetTextSpeed(&s,FLOPPY144_TEXT_SPEED_COUNT),"reject speed sentinel");
+    Expect(!Floppy144SettingsSetAutosaveMode(&s,FLOPPY144_AUTOSAVE_MODE_COUNT),"reject autosave sentinel");
+    Expect(!Floppy144SettingsSetCrtMode(&s,(Floppy144CrtMode)-1),"reject negative CRT");
+    Expect(!Floppy144SettingsSetMusicVolume(&s,11U),"reject music overflow");
+    Expect(!Floppy144SettingsSetSfxVolume(&s,11U),"reject SFX overflow");
+    Expect(s.dirty==0U,"invalid values do not dirty settings");
+
+    Expect(!Floppy144SettingsSetCrtMode(NULL,FLOPPY144_CRT_OFF),"null CRT");
+    Expect(!Floppy144SettingsSetTextSpeed(NULL,FLOPPY144_TEXT_SPEED_FAST),"null speed");
+    Expect(!Floppy144SettingsSetMusicVolume(NULL,0U),"null music");
+    Expect(!Floppy144SettingsSetSfxVolume(NULL,0U),"null SFX");
+    Expect(!Floppy144SettingsSetAutosaveMode(NULL,FLOPPY144_AUTOSAVE_OFF),"null autosave");
+    Expect(!Floppy144SettingsSetInspectionIndicators(NULL,true),"null indicators");
+    Floppy144SettingsReset(NULL);
+
+    Expect(Floppy144SettingsAutosaveIntervalMs(NULL)==300000U,"null autosave defaults to five minutes");
+    Expect(Floppy144SettingsAutosaveIntervalMs(&s)==300000U,"default autosave interval");
+    Expect(Floppy144SettingsSetAutosaveMode(&s,FLOPPY144_AUTOSAVE_10_MINUTES),"set ten-minute autosave");
+    Expect(Floppy144SettingsAutosaveIntervalMs(&s)==600000U,"ten-minute autosave interval");
+    Expect(Floppy144SettingsSetAutosaveMode(&s,FLOPPY144_AUTOSAVE_30_MINUTES),"set thirty-minute autosave");
+    Expect(Floppy144SettingsAutosaveIntervalMs(&s)==1800000U,"thirty-minute autosave interval");
+    Expect(Floppy144SettingsSetAutosaveMode(&s,FLOPPY144_AUTOSAVE_OFF),"disable autosave");
+    Expect(Floppy144SettingsAutosaveIntervalMs(&s)==0U,"disabled autosave interval");
+    Expect(s.dirty==1U,"successful changes mark settings dirty");
+}
+
 static void TestRuntime(void)
 {
     Floppy144Settings s;
@@ -108,6 +150,7 @@ static void TestView(void)
 int main(void)
 {
     TestDefaultsAndRanges();
+    TestMutationContracts();
     TestRuntime();
     TestView();
     if(failures!=0){printf("STAGE 4C SETTINGS TESTS: FAIL (%d)\n",failures);return 1;}
