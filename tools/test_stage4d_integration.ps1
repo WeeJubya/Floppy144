@@ -236,8 +236,8 @@ function Test-OrthogonalSiteFurniture {
     # BF43 desk, chair and shelving adjacency is pinned to the same
     # canonical layout and inspector owner registry.
     $Server = @($Data.site_layout_source.rooms | Where-Object { $_.id -eq 'SERVER_ROOM' })[0]
-    $Desk = @($Server.geometry | Where-Object { $_.id -eq 'SERVER_ROOM_DESK' })[0]
-    $Shelf = @($Server.geometry | Where-Object { $_.id -eq 'SERVER_ROOM_SHELVES' })[0]
+    $Desk = @($Server.geometry | Where-Object { ($_.PSObject.Properties.Name -contains 'id') -and $_.id -eq 'SERVER_ROOM_DESK' })[0]
+    $Shelf = @($Server.geometry | Where-Object { ($_.PSObject.Properties.Name -contains 'id') -and $_.id -eq 'SERVER_ROOM_SHELVES' })[0]
     $DeskParent = @($Data.furniture | Where-Object { $_.id -eq 'SERVER_ROOM_DESK' })[0]
     $ShelfParent = @($Data.fixtures | Where-Object { $_.id -eq 'SERVER_ROOM_SHELVES' })[0]
     if([int]$Desk.x -ne 35 -or [int]$Desk.y -ne 57 -or
