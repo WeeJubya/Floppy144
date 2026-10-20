@@ -687,32 +687,53 @@ static void TestBF40ChairBackVolume(void)
     Floppy144DataRecord chair;
     int16_t rotation;
     uint32_t first_hash=0U;
+
     memset(&chair,0,sizeof(chair));
     chair.eKind=FLOPPY144_DATA_FURNITURE;
     chair.pszB="CHAIR";
     chair.pszC="CHAIR";
-
-    /* Two-unit chairs are the actual Director/Staff Room screenshot case. */
     chair.n2=2;
     chair.n3=2;
+
     for(rotation=0;rotation<360;rotation+=45)
     {
+        uint32_t x,y,face_count=0U;
+        int32_t min_x=TEST_WIDTH,max_x=-1;
+        int32_t min_y=TEST_HEIGHT,max_y=-1;
         uint32_t hash;
+
         (void)DrawParent(&chair,rotation,0U,0U,NULL);
         hash=SurfaceHash();
         if(rotation==0)first_hash=hash;
+        for(y=0U;y<TEST_HEIGHT;++y)
+        {
+            for(x=0U;x<TEST_WIDTH;++x)
+            {
+                if(g_pixels[y*TEST_WIDTH+x]==
+                   FLOPPY144_RGB(78,93,85))
+                {
+                    ++face_count;
+                    if((int32_t)x<min_x)min_x=(int32_t)x;
+                    if((int32_t)x>max_x)max_x=(int32_t)x;
+                    if((int32_t)y<min_y)min_y=(int32_t)y;
+                    if((int32_t)y>max_y)max_y=(int32_t)y;
+                }
+            }
+        }
         CHECK(
-            BF40CountColour(FLOPPY144_RGB(78,93,85))>20U,
-            "BF40 chair back has a substantial opaque inset panel"
+            face_count>120U &&
+            max_x-min_x>=20 &&
+            max_y-min_y>=35,
+            "BF40 chair back is one full-width, full-height solid panel"
         );
         CHECK(
             BF40CountColour(FLOPPY144_RGB(115,129,120))>2U,
-            "BF40 back cushion has a solid projected upper face"
+            "BF40 full-width back has a projected solid top face"
         );
         CHECK(
-            BF40CountColour(FLOPPY144_RGB(100,118,108))>0U &&
-            BF40CountColour(FLOPPY144_RGB(85,103,94))>0U,
-            "BF40 chair back is supported by two separate uprights"
+            BF40CountColour(FLOPPY144_RGB(100,118,108))==0U &&
+            BF40CountColour(FLOPPY144_RGB(85,103,94))==0U,
+            "BF40 chair has no oversized posts behind a smaller cushion"
         );
         CHECK(
             BF40CountColour(FLOPPY144_RGB(69,84,76))>20U &&
@@ -722,19 +743,19 @@ static void TestBF40ChairBackVolume(void)
         CHECK(
             g_pixels[160U*TEST_WIDTH+166U]==
                 FLOPPY144_RGB(91,101,96),
-            "BF40 back supports are occluded behind an opaque seat"
+            "BF40 backrest joins behind the opaque seat"
         );
         CHECK(
             RegionPixelCount(306U,0U,TEST_WIDTH,TEST_HEIGHT)==0U,
-            "BF40 rotated chair stays within inspection panel"
+            "BF40 rotated chair stays within Inspection panel"
         );
-
         (void)DrawParent(&chair,rotation,1U,0U,NULL);
         CHECK(
             BF40CountColour(FLOPPY144_RGB(216,239,220))>0U,
             "BF40 chair contents remain selectable on seat"
         );
     }
+
     (void)DrawParent(&chair,180,0U,0U,NULL);
     CHECK(
         SurfaceHash()!=first_hash,

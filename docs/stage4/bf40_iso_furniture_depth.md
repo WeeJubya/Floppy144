@@ -97,3 +97,15 @@ BF40 inspection regression now covers real 2x2 chairs at eight rotations,
 framed-cushion colours, uprights, leg volume, the seat, item highlight and
 the Contents gutter. Live Windows screenshots remain the visual acceptance
 gate for Director and Staff Room chairs.
+
+## Follow-up: solid full-width chair back (user-supplied drawing)
+
+The reference drawing supersedes the inset-cushion and twin-upright proposal:
+a plain, full-width, full-height backrest meets the rear of the seat, with a
+shallow solid cap and end faces. The revised chair uses the same projected rear
+seat edge for all four slab corners; its small inward extrusion forms genuine
+depth without an independent wall-like frame. Solid four-legged geometry, seat
+occlusion and physical-item highlights remain unchanged. The regression now
+requires a broad opaque face at each octant and explicitly forbids the colours
+associated with the previous exposed tall uprights. Visually confirm the final
+Reception and Director chair silhouettes against the supplied line drawing.
