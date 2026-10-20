@@ -227,6 +227,14 @@ Floppy144PersistenceWarning;
 
 static uint8_t global_persistence_warnings;
 
+/* Guest access persists progress but must ask for a name on the next boot. */
+static bool Floppy144IntroHasSavedOperator(void)
+{
+    return Floppy144IntroHasPersonalLogin(
+        Floppy144DiscoveryProfileOperatorName(&global_profile)
+    );
+}
+
 static const char *Floppy144PersistenceWarningText(
     void
 );
@@ -352,10 +360,10 @@ static void Floppy144Redraw(
                     &global_settings,
                     1U
                 ),
-                Floppy144DiscoveryProfileHasOperatorName(&global_profile)?
+                Floppy144IntroHasSavedOperator()?
                     Floppy144DiscoveryProfileOperatorName(&global_profile):global_intro_login,
                 global_intro_login_save_failed,
-                Floppy144DiscoveryProfileHasOperatorName(&global_profile)
+                Floppy144IntroHasSavedOperator()
             );
 
             break;
@@ -848,7 +856,7 @@ static void Floppy144UpdateTiming(
         }
 
         if(Floppy144IntroAutoLoginReady(intro_elapsed_ms,
-            Floppy144DiscoveryProfileHasOperatorName(&global_profile)))
+            Floppy144IntroHasSavedOperator()))
         {
             Floppy144TimingStopSplash(&global_timing);
             Floppy144OpenMainMenu(window);
@@ -2492,7 +2500,7 @@ static bool Floppy144HandleTextInput(
     /* BF20: LOGIN is the only editable field during the staged introduction. */
     if(global_screen==FLOPPY144_SCREEN_SPLASH)
     {
-        if(Floppy144DiscoveryProfileHasOperatorName(&global_profile))return true;
+        if(Floppy144IntroHasSavedOperator())return true;
         if(Floppy144IntroLoginReady(
             Floppy144TimingSplashElapsedMs(
                 &global_timing,f144PlatformMonotonicMs(&global_platform))))
@@ -3113,7 +3121,7 @@ static bool Floppy144HandleActionEvent(
             if(global_screen==FLOPPY144_SCREEN_SPLASH)
             {
                 if(eAction==F144_ACTION_CONFIRM &&
-                   !Floppy144DiscoveryProfileHasOperatorName(&global_profile) &&
+                   !Floppy144IntroHasSavedOperator() &&
                    Floppy144IntroLoginReady(
                        Floppy144TimingSplashElapsedMs(
                            &global_timing,
