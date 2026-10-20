@@ -1713,8 +1713,8 @@
             "type": "STANDARD_DESK",
             "variant": "STANDARD_DESK",
             "object": "SECRETARY_OFFICE_DESK",
-            "x": 45,
-            "y": 36,
+            "x": 46,
+            "y": 38,
             "width": 6,
             "height": 4,
             "rotation": 0
@@ -1762,7 +1762,7 @@
           },
           {
             "type": "CHAIR",
-            "x": 47,
+            "x": 50,
             "y": 42,
             "width": 2,
             "height": 2,
@@ -1825,7 +1825,7 @@
             "type": "STANDARD_DESK",
             "variant": "STANDARD_DESK",
             "object": "DIRECTOR_OFFICE_DESK",
-            "x": 43,
+            "x": 44,
             "y": 8,
             "width": 8,
             "height": 4,
@@ -1924,16 +1924,16 @@
           },
           {
             "type": "CHAIR",
-            "x": 46,
-            "y": 4,
+            "x": 49,
+            "y": 6,
             "width": 2,
             "height": 2,
             "rotation": 0
           },
           {
             "type": "CHAIR",
-            "x": 43,
-            "y": 14,
+            "x": 44,
+            "y": 12,
             "width": 2,
             "height": 2,
             "rotation": 180
@@ -1941,18 +1941,18 @@
           {
             "type": "CHAIR",
             "x": 46,
-            "y": 14,
+            "y": 15,
             "width": 2,
             "height": 2,
             "rotation": 180
           },
           {
             "type": "CHAIR",
-            "x": 49,
-            "y": 14,
+            "x": 41,
+            "y": 9,
             "width": 2,
             "height": 2,
-            "rotation": 180
+            "rotation": 270
           },
           {
             "type": "CHAIR",
@@ -6057,8 +6057,8 @@
       "variant": "STANDARD_DESK",
       "object_id": "SECRETARY_OFFICE_DESK",
       "geometry": {
-        "x": 45,
-        "y": 36,
+        "x": 46,
+        "y": 38,
         "width": 6,
         "height": 4,
         "rotation": 0
@@ -6130,7 +6130,7 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "x": 47,
+        "x": 50,
         "y": 42,
         "width": 2,
         "height": 2,
@@ -6205,7 +6205,7 @@
       "variant": "STANDARD_DESK",
       "object_id": "DIRECTOR_OFFICE_DESK",
       "geometry": {
-        "x": 43,
+        "x": 44,
         "y": 8,
         "width": 8,
         "height": 4,
@@ -6348,8 +6348,8 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "x": 46,
-        "y": 4,
+        "x": 49,
+        "y": 6,
         "width": 2,
         "height": 2,
         "rotation": 0
@@ -6363,8 +6363,8 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "x": 43,
-        "y": 14,
+        "x": 44,
+        "y": 12,
         "width": 2,
         "height": 2,
         "rotation": 180
@@ -6379,7 +6379,7 @@
       "object_id": null,
       "geometry": {
         "x": 46,
-        "y": 14,
+        "y": 15,
         "width": 2,
         "height": 2,
         "rotation": 180
@@ -6393,11 +6393,11 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "x": 49,
-        "y": 14,
+        "x": 41,
+        "y": 9,
         "width": 2,
         "height": 2,
-        "rotation": 180
+        "rotation": 270
       },
       "drawing_definition_id": "DRAW_CHAIR"
     },

@@ -2066,8 +2066,8 @@
                     "type": "STANDARD_DESK",
                     "variant": "STANDARD_DESK",
                     "object": "SECRETARY_OFFICE_DESK",
-                    "x": 36,
-                    "y": 49,
+                    "x": 38,
+                    "y": 48,
                     "width": 4,
                     "height": 6,
                     "rotation": 270
@@ -2115,7 +2115,7 @@
                 {
                     "type": "CHAIR",
                     "x": 42,
-                    "y": 51,
+                    "y": 48,
                     "width": 2,
                     "height": 2,
                     "rotation": 90
@@ -2184,7 +2184,7 @@
                     "variant": "STANDARD_DESK",
                     "object": "DIRECTOR_OFFICE_DESK",
                     "x": 8,
-                    "y": 49,
+                    "y": 48,
                     "width": 4,
                     "height": 8,
                     "rotation": 270
@@ -2281,23 +2281,23 @@
                 },
                 {
                     "type": "CHAIR",
-                    "x": 4,
-                    "y": 52,
+                    "x": 6,
+                    "y": 49,
                     "width": 2,
                     "height": 2,
                     "rotation": 270
                 },
                 {
                     "type": "CHAIR",
-                    "x": 14,
-                    "y": 55,
+                    "x": 12,
+                    "y": 54,
                     "width": 2,
                     "height": 2,
                     "rotation": 90
                 },
                 {
                     "type": "CHAIR",
-                    "x": 14,
+                    "x": 15,
                     "y": 52,
                     "width": 2,
                     "height": 2,
@@ -2305,11 +2305,11 @@
                 },
                 {
                     "type": "CHAIR",
-                    "x": 14,
-                    "y": 49,
+                    "x": 9,
+                    "y": 57,
                     "width": 2,
                     "height": 2,
-                    "rotation": 90
+                    "rotation": 180
                 },
                 {
                     "type": "CHAIR",

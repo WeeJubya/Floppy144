@@ -199,6 +199,40 @@ function Test-OrthogonalSiteFurniture {
     }
     Write-Host 'BF39 DIRECTOR SOFA GEOMETRY: PASS'
 
+
+    # BF39: exact orthogonal footprints derived from the approved XLSX
+    # grouped-shape centres. Covers the canonical furniture registry and
+    # the Site placement index so inspection and gameplay cannot diverge.
+    $BF39Placements = @(
+        @{ Room='SECRETARY_OFFICE'; Index=1; Parent='SECRETARY_OFFICE_DESK'; X=46; Y=38; W=6; H=4; Rotation=0 }
+        @{ Room='SECRETARY_OFFICE'; Index=6; Parent='SECRETARY_OFFICE_CHAIR_01'; X=50; Y=42; W=2; H=2; Rotation=180 }
+        @{ Room='DIRECTOR_OFFICE'; Index=1; Parent='DIRECTOR_OFFICE_DESK'; X=44; Y=8; W=8; H=4; Rotation=0 }
+        @{ Room='DIRECTOR_OFFICE'; Index=11; Parent='DIRECTOR_OFFICE_CHAIR_01'; X=49; Y=6; W=2; H=2; Rotation=0 }
+        @{ Room='DIRECTOR_OFFICE'; Index=12; Parent='DIRECTOR_OFFICE_CHAIR_02'; X=44; Y=12; W=2; H=2; Rotation=180 }
+        @{ Room='DIRECTOR_OFFICE'; Index=13; Parent='DIRECTOR_OFFICE_CHAIR_03'; X=46; Y=15; W=2; H=2; Rotation=180 }
+        @{ Room='DIRECTOR_OFFICE'; Index=14; Parent='DIRECTOR_OFFICE_CHAIR_04'; X=41; Y=9; W=2; H=2; Rotation=270 }
+    )
+    foreach($ExpectedPlace in $BF39Placements) {
+        $Office = @($Data.site_layout_source.rooms |
+            Where-Object { $_.id -eq $ExpectedPlace.Room })[0]
+        $Placement = $Office.geometry[$ExpectedPlace.Index]
+        $Owner = @($Data.furniture |
+            Where-Object { $_.id -eq $ExpectedPlace.Parent })
+        if($Owner.Count -ne 1) {
+            throw "BF39 missing unique inspection parent $($ExpectedPlace.Parent)"
+        }
+        foreach($G in @($Placement,$Owner[0].geometry)) {
+            if([int]$G.x -ne $ExpectedPlace.X -or
+               [int]$G.y -ne $ExpectedPlace.Y -or
+               [int]$G.width -ne $ExpectedPlace.W -or
+               [int]$G.height -ne $ExpectedPlace.H -or
+               [int]$G.rotation -ne $ExpectedPlace.Rotation) {
+                throw "BF39 placement/inspection mismatch: $($ExpectedPlace.Parent)"
+            }
+        }
+    }
+    Write-Host 'BF39 OFFICE GEOMETRY: PASS - 7 workbook-derived placements'
+
     foreach($ParentId in @('DIRECTOR_OFFICE_DESK','SECRETARY_OFFICE_DESK',
                            'STAFF_ROOM_DINING_TABLE')) {
         $Parent = @($Data.furniture | Where-Object { $_.id -eq $ParentId })

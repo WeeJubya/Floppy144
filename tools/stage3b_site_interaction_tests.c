@@ -272,7 +272,7 @@ static void Floppy144TestCentredGeometryMetadata(void)
     F144_CHECK(
         pDirectorDesk != NULL &&
         pDirectorDesk->b0 == 0U &&
-        pDirectorDesk->n0 == 43 &&
+        pDirectorDesk->n0 == 44 &&
         pDirectorDesk->n1 == 8 &&
         pDirectorDesk->n2 == 8 &&
         pDirectorDesk->n3 == 4,
@@ -282,8 +282,8 @@ static void Floppy144TestCentredGeometryMetadata(void)
     F144_CHECK(
         pSecretaryDesk != NULL &&
         pSecretaryDesk->b0 == 0U &&
-        pSecretaryDesk->n0 == 45 &&
-        pSecretaryDesk->n1 == 36 &&
+        pSecretaryDesk->n0 == 46 &&
+        pSecretaryDesk->n1 == 38 &&
         pSecretaryDesk->n2 == 6 &&
         pSecretaryDesk->n3 == 4,
         "Secretary desk interaction geometry uses cardinal 6x4 footprint"
@@ -312,13 +312,13 @@ static void Floppy144TestOrthogonalSiteFurniture(void)
         int16_t facing;
     } expected[] =
     {
-        {FLOPPY144_ROOM_DIRECTOR_OFFICE, FLOPPY144_SITE_STANDARD_DESK,43,8,8,4,0},
-        {FLOPPY144_ROOM_DIRECTOR_OFFICE, FLOPPY144_SITE_CHAIR,46,4,2,2,0},
-        {FLOPPY144_ROOM_DIRECTOR_OFFICE, FLOPPY144_SITE_CHAIR,43,14,2,2,180},
-        {FLOPPY144_ROOM_DIRECTOR_OFFICE, FLOPPY144_SITE_CHAIR,46,14,2,2,180},
-        {FLOPPY144_ROOM_DIRECTOR_OFFICE, FLOPPY144_SITE_CHAIR,49,14,2,2,180},
-        {FLOPPY144_ROOM_SECRETARY_OFFICE, FLOPPY144_SITE_STANDARD_DESK,45,36,6,4,0},
-        {FLOPPY144_ROOM_SECRETARY_OFFICE, FLOPPY144_SITE_CHAIR,47,42,2,2,180},
+        {FLOPPY144_ROOM_DIRECTOR_OFFICE, FLOPPY144_SITE_STANDARD_DESK,44,8,8,4,0},
+        {FLOPPY144_ROOM_DIRECTOR_OFFICE, FLOPPY144_SITE_CHAIR,49,6,2,2,0},
+        {FLOPPY144_ROOM_DIRECTOR_OFFICE, FLOPPY144_SITE_CHAIR,44,12,2,2,180},
+        {FLOPPY144_ROOM_DIRECTOR_OFFICE, FLOPPY144_SITE_CHAIR,46,15,2,2,180},
+        {FLOPPY144_ROOM_DIRECTOR_OFFICE, FLOPPY144_SITE_CHAIR,41,9,2,2,270},
+        {FLOPPY144_ROOM_SECRETARY_OFFICE, FLOPPY144_SITE_STANDARD_DESK,46,38,6,4,0},
+        {FLOPPY144_ROOM_SECRETARY_OFFICE, FLOPPY144_SITE_CHAIR,50,42,2,2,180},
         {FLOPPY144_ROOM_STAFF_ROOM, FLOPPY144_SITE_TABLE,7,34,6,6,0},
         {FLOPPY144_ROOM_STAFF_ROOM, FLOPPY144_SITE_CHAIR,14,36,2,2,90},
         {FLOPPY144_ROOM_STAFF_ROOM, FLOPPY144_SITE_CHAIR,4,36,2,2,270},
