@@ -2369,10 +2369,10 @@
                 },
                 {
                     "type": "SOFA",
-                    "x": 27,
-                    "y": 57,
-                    "width": 3,
-                    "height": 6
+                    "x": 26,
+                    "y": 56,
+                    "width": 4,
+                    "height": 7
                 },
                 {
                     "type": "WINDOW",

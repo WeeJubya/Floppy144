@@ -2021,7 +2021,7 @@
           {
             "type": "SOFA",
             "x": 37,
-            "y": 27,
+            "y": 26,
             "width": 7,
             "height": 4
           }
@@ -6529,7 +6529,7 @@
       "object_id": null,
       "geometry": {
         "x": 37,
-        "y": 27,
+        "y": 26,
         "width": 7,
         "height": 4
       },

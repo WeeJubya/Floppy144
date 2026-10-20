@@ -148,6 +148,57 @@ function Test-OrthogonalSiteFurniture {
     }
     if($MovedCount -ne 12) { throw "Revised furniture count drifted." }
 
+    # BF39: verify the enlarged Director's sofa fits within the inner floor.
+    $Director = @($Data.site_layout_source.rooms | Where-Object { $_.id -eq 'DIRECTOR_OFFICE' })[0]
+    $Sofa = @($Director.geometry | Where-Object { $_.type -eq 'SOFA' })
+    $Floor = @($Director.geometry | Where-Object { $_.type -eq 'FLOOR_D' })
+    $Owner = @($Data.furniture | Where-Object { $_.id -eq 'DIRECTOR_OFFICE_SOFA_01' })
+    $LegacyDirector = @($Legacy.rooms | Where-Object { $_.id -eq 'DIRECTOR_OFFICE' })[0]
+    $Inverse = @($LegacyDirector.geometry | Where-Object { $_.type -eq 'SOFA' })
+    if($Sofa.Count -ne 1 -or $Floor.Count -ne 1 -or
+       $Owner.Count -ne 1 -or $Inverse.Count -ne 1) {
+        throw 'BF39 Director sofa records missing or duplicated.'
+    }
+    $Sofa = $Sofa[0]; $Floor = $Floor[0]
+    $Owner = $Owner[0].geometry; $Inverse = $Inverse[0]
+    if([int]$Sofa.x -ne 37 -or [int]$Sofa.y -ne 26 -or
+       [int]$Sofa.width -ne 7 -or [int]$Sofa.height -ne 4 -or
+       [int]$Owner.y -ne [int]$Sofa.y -or
+       [int]$Owner.x -ne [int]$Sofa.x -or
+       [int]$Owner.width -ne [int]$Sofa.width -or
+       [int]$Owner.height -ne [int]$Sofa.height -or
+       [int]$Sofa.x -lt [int]$Floor.x -or
+       [int]$Sofa.y -lt [int]$Floor.y -or
+       ([int]$Sofa.x+[int]$Sofa.width) -gt ([int]$Floor.x+[int]$Floor.width) -or
+       ([int]$Sofa.y+[int]$Sofa.height) -gt ([int]$Floor.y+[int]$Floor.height)) {
+        throw 'BF39 Director sofa crosses the wall or differs from owner.'
+    }
+    if([int]$Inverse.x -ne [int]$Sofa.y -or
+       [int]$Inverse.y -ne (100-[int]$Sofa.x-[int]$Sofa.width) -or
+       [int]$Inverse.width -ne [int]$Sofa.height -or
+       [int]$Inverse.height -ne [int]$Sofa.width) {
+        throw 'BF39 legacy sofa inverse transform is stale.'
+    }
+    if(-not $EmittedSite.Contains(
+        'SITE_GEOMETRY(FLOPPY144_ROOM_DIRECTOR_OFFICE, FLOPPY144_SITE_SOFA, 37U, 26U, 7U, 4U)') -or
+       -not $EmittedFurniture.Contains(
+        '"DIRECTOR_OFFICE_SOFA_01", "DIRECTOR_OFFICE", "SOFA", "SOFA", NULL, "DRAW_SOFA", NULL, 37, 26, 7, 4')) {
+        throw 'BF39 compiled Director sofa geometry is stale.'
+    }
+    foreach($Item in $Director.geometry) {
+        if($Item -eq $Sofa -or $Item.type -match '^FLOOR_' -or
+           $Item.type -in @('DOOR','WINDOW','PARTITION_WALL','WALL_MOUNTED_ITEM')) {
+            continue
+        }
+        if([int]$Sofa.x -lt ([int]$Item.x+[int]$Item.width) -and
+           [int]$Item.x -lt ([int]$Sofa.x+[int]$Sofa.width) -and
+           [int]$Sofa.y -lt ([int]$Item.y+[int]$Item.height) -and
+           [int]$Item.y -lt ([int]$Sofa.y+[int]$Sofa.height)) {
+            throw 'BF39 Director sofa intersects another solid object.'
+        }
+    }
+    Write-Host 'BF39 DIRECTOR SOFA GEOMETRY: PASS'
+
     foreach($ParentId in @('DIRECTOR_OFFICE_DESK','SECRETARY_OFFICE_DESK',
                            'STAFF_ROOM_DINING_TABLE')) {
         $Parent = @($Data.furniture | Where-Object { $_.id -eq $ParentId })
