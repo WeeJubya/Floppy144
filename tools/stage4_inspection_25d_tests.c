@@ -623,6 +623,130 @@ static void TestDoubleDoorAssemblies(void)
           "BF30 rotated pair respects framebuffer clipping");
 }
 
+/*
+ * BF40: cover the painter-order regression with pixel tests. Rear supports
+ * begin underneath a projected face and must never repaint its solid top.
+ * A synthetic 4x4 footprint keeps the sample points independent of authors'
+ * future changes to particular room furniture.
+ */
+static void TestBF40FurnitureDepth(void)
+{
+    Floppy144DataRecord parent;
+    uint32_t i;
+    static const char *variants[3]={
+        "STANDARD_DESK","BOARDROOM_TABLE","CHAIR"
+    };
+    static const uint32_t top_colours[3]={
+        FLOPPY144_RGB(103,116,108),
+        FLOPPY144_RGB(111,105,88),
+        FLOPPY144_RGB(91,101,96)
+    };
+
+    memset(&parent,0,sizeof(parent));
+    parent.eKind=FLOPPY144_DATA_FURNITURE;
+    parent.pszB="FURNITURE";
+    parent.n2=4;
+    parent.n3=4;
+    for(i=0U;i<3U;++i)
+    {
+        int16_t rotation;
+        parent.pszC=variants[i];
+        for(rotation=0;rotation<360;rotation+=90)
+        {
+            uint32_t y=i==2U?160U:120U;
+            (void)DrawParent(&parent,rotation,0U,0U,NULL);
+            CHECK(
+                g_pixels[y*TEST_WIDTH+166U]==top_colours[i],
+                "BF40 rear support cannot show through a solid top/seat"
+            );
+            CHECK(
+                RegionPixelCount(306U,0U,TEST_WIDTH,TEST_HEIGHT)==0U,
+                "BF40 rotated furniture remains inside the Inspection panel"
+            );
+        }
+    }
+
+    parent.pszC="GDR_TERMINAL";
+    (void)DrawParent(&parent,0,0U,0U,NULL);
+    CHECK(
+        g_pixels[147U*TEST_WIDTH+166U]==FLOPPY144_RGB(103,116,108),
+        "BF40 terminal rear leg stays behind the desktop"
+    );
+}
+
+static uint32_t BF40CountColour(uint32_t colour)
+{
+    uint32_t i,count=0U;
+    for(i=0U;i<TEST_PIXEL_COUNT;++i)
+        if(g_pixels[i]==colour)++count;
+    return count;
+}
+
+static void TestBF40ChairBackVolume(void)
+{
+    Floppy144DataRecord chair;
+    int16_t rotation;
+    memset(&chair,0,sizeof(chair));
+    chair.eKind=FLOPPY144_DATA_FURNITURE;
+    chair.pszB="CHAIR";
+    chair.pszC="CHAIR";
+    chair.n2=4;
+    chair.n3=4;
+    for(rotation=0;rotation<360;rotation+=90)
+    {
+        (void)DrawParent(&chair,rotation,0U,0U,NULL);
+        CHECK(
+            BF40CountColour(FLOPPY144_RGB(78,93,85))>25U,
+            "BF40 chair back has a filled vertical 2.5D face"
+        );
+        CHECK(
+            BF40CountColour(FLOPPY144_RGB(115,129,120))>5U,
+            "BF40 chair back has a projected solid top face"
+        );
+    }
+}
+
+static void TestBF40TerminalMarkerForeground(void)
+{
+    Floppy144DataRecord terminal;
+    uint32_t i,overlap;
+    static const char *variants[2]={"GDR_TERMINAL","IT_TERMINAL"};
+    uint32_t variant_index;
+
+    memset(&terminal,0,sizeof(terminal));
+    terminal.eKind=FLOPPY144_DATA_FURNITURE;
+    terminal.pszB="TERMINAL_DESK";
+    terminal.n2=4;
+    terminal.n3=4;
+
+    for(variant_index=0U;variant_index<2U;++variant_index)
+    {
+        terminal.pszC=variants[variant_index];
+        (void)DrawParent(&terminal,0,0U,0U,NULL);
+        memcpy(g_child_baseline,g_pixels,sizeof(g_pixels));
+        (void)DrawParent(&terminal,0,10U,2U,NULL);
+        overlap=0U;
+        for(i=0U;i<TEST_PIXEL_COUNT;++i)
+        {
+            if(
+                g_child_baseline[i]==FLOPPY144_RGB(26,44,45) &&
+                g_pixels[i]==FLOPPY144_RGB(216,239,220)
+            )
+            {
+                ++overlap;
+            }
+        }
+        CHECK(
+            overlap>0U,
+            "BF40 terminal inspection highlight is in front of monitor screen"
+        );
+        CHECK(
+            RegionPixelCount(306U,0U,TEST_WIDTH,TEST_HEIGHT)==0U,
+            "BF40 terminal highlight respects Contents gutter"
+        );
+    }
+}
+
 static void TestUnknownFallback(void)
 {
     Floppy144DataRecord future_parent;
@@ -668,6 +792,9 @@ int main(void)
     TestDeskAndDoorChildSurfaces();
     TestBF10NamedVisualCases();
     TestDoubleDoorAssemblies();
+    TestBF40FurnitureDepth();
+    TestBF40ChairBackVolume();
+    TestBF40TerminalMarkerForeground();
     TestUnknownFallback();
 
     if(g_failures!=0)
