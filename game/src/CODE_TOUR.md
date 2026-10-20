@@ -41,6 +41,11 @@ game/src/floppy144_site_generated.def
 
 `floppy144_site_generated.def` is generated build data. Do not hand-edit it. Change `site_layout.jsonc` and regenerate instead.
 
+The canonical archive generator is `tools/game_data_compiler.c`, invoked by
+`tools/build_game_data.ps1`. The obsolete root-level `game_data_compiler.c`
+was removed during BF43: it duplicated an earlier tool with superseded fixed
+record counts. Generated tables remain authored through the existing tools.
+
 Room rules:
 
 - `FLOOR_A` / `FLOOR_B` / `FLOOR_C` / `FLOOR_D` own walkable room membership.
