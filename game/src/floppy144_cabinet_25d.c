@@ -1308,9 +1308,9 @@ static void Floppy144Cabinet25DDrawWorktop(
 }
 
 /*
- * The chair back is a solid, shallow upright on the authored seat edge.
- * Four projected corners and a small inward extrusion give it front, end and
- * top faces. The seat is painted afterwards to hide the back's lower join.
+ * A chair needs an opening below its padded back and four substantial legs.
+ * Frame, panel and legs all follow the same oriented seat corners. The seat
+ * is rendered last so its opaque top hides posts and rear support joins.
  */
 static void Floppy144Cabinet25DDrawChairBack(
     Floppy144Surface *surface,
@@ -1329,47 +1329,86 @@ static void Floppy144Cabinet25DDrawChairBack(
     uint32_t edge_index=(octant/2U)%4U;
     Floppy144Cabinet25DPoint outer0=corners[edge_index];
     Floppy144Cabinet25DPoint outer1=corners[(edge_index+1U)%4U];
-    Floppy144Cabinet25DPoint inner0={
-        (outer0.x*7+centre.x)/8,(outer0.y*7+centre.y)/8
+    Floppy144Cabinet25DPoint post0={
+        (outer0.x*7+outer1.x)/8,
+        (outer0.y*7+outer1.y)/8
     };
-    Floppy144Cabinet25DPoint inner1={
-        (outer1.x*7+centre.x)/8,(outer1.y*7+centre.y)/8
+    Floppy144Cabinet25DPoint post1={
+        (outer0.x+outer1.x*7)/8,
+        (outer0.y+outer1.y*7)/8
     };
-    Floppy144Cabinet25DPoint high0=outer0,high1=outer1;
-    Floppy144Cabinet25DPoint high_inner0=inner0,high_inner1=inner1;
+    Floppy144Cabinet25DPoint pad0={
+        (outer0.x*6+outer1.x*2)/8,
+        (outer0.y*6+outer1.y*2)/8
+    };
+    Floppy144Cabinet25DPoint pad1={
+        (outer0.x*2+outer1.x*6)/8,
+        (outer0.y*2+outer1.y*6)/8
+    };
+    Floppy144Cabinet25DPoint depth0={
+        (pad0.x*7+centre.x)/8,
+        (pad0.y*7+centre.y)/8
+    };
+    Floppy144Cabinet25DPoint depth1={
+        (pad1.x*7+centre.x)/8,
+        (pad1.y*7+centre.y)/8
+    };
+    Floppy144Cabinet25DPoint high0=pad0,high1=pad1;
+    Floppy144Cabinet25DPoint low0=pad0,low1=pad1;
+    Floppy144Cabinet25DPoint back_high0=depth0;
+    Floppy144Cabinet25DPoint back_high1=depth1;
+    Floppy144Cabinet25DPoint upper0=outer0,upper1=outer1;
+    Floppy144Cabinet25DPoint upper_post0=post0,upper_post1=post1;
 
-    /* A full-height, opaque back panel, not a diagonal line frame. */
-    high0.y-=55;high1.y-=55;
-    high_inner0.y-=55;high_inner1.y-=55;
+    high0.y-=59;high1.y-=59;
+    low0.y-=24;low1.y-=24;
+    back_high0.y-=59;back_high1.y-=59;
+    upper0.y-=67;upper1.y-=67;
+    upper_post0.y-=67;upper_post1.y-=67;
 
+    /* Inset back cushion with visible thickness along its upper edge. */
     Floppy144Cabinet25DFillQuad(
-        surface,high0,high1,outer1,outer0,
-        F144_25D_RGB(78,93,85)
-    );
-    Floppy144Cabinet25DFillQuad(
-        surface,high1,high_inner1,inner1,outer1,
-        F144_25D_RGB(57,71,65)
-    );
-    Floppy144Cabinet25DFillQuad(
-        surface,high_inner0,high0,outer0,inner0,
-        F144_25D_RGB(57,71,65)
-    );
-    Floppy144Cabinet25DFillQuad(
-        surface,high_inner0,high_inner1,inner1,inner0,
-        F144_25D_RGB(78,93,85)
-    );
-    Floppy144Cabinet25DFillQuad(
-        surface,high0,high1,high_inner1,high_inner0,
+        surface,high0,high1,back_high1,back_high0,
         F144_25D_RGB(115,129,120)
     );
+    Floppy144Cabinet25DFillQuad(
+        surface,high1,back_high1,depth1,low1,
+        F144_25D_RGB(57,71,65)
+    );
+    Floppy144Cabinet25DFillQuad(
+        surface,high0,high1,low1,low0,
+        F144_25D_RGB(78,93,85)
+    );
     Floppy144Cabinet25DOutlineQuad(
-        surface,high0,high1,high_inner1,high_inner0,edge_colour
+        surface,high0,high1,low1,low0,edge_colour
+    );
+    /* An understated upholstery seam distinguishes it from a wall panel. */
+    Floppy144Cabinet25DLine(
+        surface,(high0.x*3+low0.x)/4,(high0.y*3+low0.y)/4,
+        (high1.x*3+low1.x)/4,(high1.y*3+low1.y)/4,
+        F144_25D_RGB(109,123,114)
+    );
+
+    /* Uprights continue into the frame behind the opaque seat. */
+    Floppy144Cabinet25DFillQuad(
+        surface,upper0,upper_post0,post0,outer0,
+        F144_25D_RGB(100,118,108)
+    );
+    Floppy144Cabinet25DFillQuad(
+        surface,upper_post1,upper1,outer1,post1,
+        F144_25D_RGB(85,103,94)
     );
     Floppy144Cabinet25DLine(
-        surface,high_inner0.x,high_inner0.y,inner0.x,inner0.y,edge_colour
+        surface,upper0.x,upper0.y,outer0.x,outer0.y,
+        edge_colour
     );
     Floppy144Cabinet25DLine(
-        surface,high_inner1.x,high_inner1.y,inner1.x,inner1.y,edge_colour
+        surface,upper1.x,upper1.y,outer1.x,outer1.y,
+        edge_colour
+    );
+    Floppy144Cabinet25DLine(
+        surface,upper0.x,upper0.y,upper1.x,upper1.y,
+        edge_colour
     );
 }
 
@@ -1386,15 +1425,40 @@ static void Floppy144Cabinet25DDrawChair(
     const uint32_t side=F144_25D_RGB(48,57,54);
     const uint32_t edge=F144_25D_RGB(154,169,160);
     Floppy144Cabinet25DBox seat=
-        Floppy144Cabinet25DMakeBox(width,depth,8,mirror);
+        Floppy144Cabinet25DMakeBox(width,depth,10,mirror);
+    Floppy144Cabinet25DPoint corners[4];
+    uint32_t i;
 
     seat.a.y+=44;
     seat.b.y+=44;
     seat.c.y+=44;
     seat.d.y+=44;
 
-    /* Back legs and backrest sit behind the seat, not on its surface. */
-    Floppy144Cabinet25DDrawLegs(surface,&seat,42,edge);
+    corners[0]=seat.a;corners[1]=seat.b;
+    corners[2]=seat.c;corners[3]=seat.d;
+    for(i=0U;i<4U;++i)
+    {
+        Floppy144Cabinet25DPoint start=corners[i];
+        Floppy144Cabinet25DPoint foot=start;
+        uint32_t frame=i<2U?
+            F144_25D_RGB(69,84,76):F144_25D_RGB(90,105,95);
+        start.y+=seat.height;
+        foot.y=start.y+43;
+        /* Solid 5-pixel legs, shaded on their visible right edge. */
+        Floppy144Cabinet25DFillQuad(
+            surface,
+            (Floppy144Cabinet25DPoint){start.x-2,start.y},
+            (Floppy144Cabinet25DPoint){start.x+3,start.y},
+            (Floppy144Cabinet25DPoint){foot.x+3,foot.y},
+            (Floppy144Cabinet25DPoint){foot.x-2,foot.y},
+            frame
+        );
+        Floppy144Cabinet25DLine(
+            surface,start.x+3,start.y,foot.x+3,foot.y,
+            F144_25D_RGB(42,56,50)
+        );
+    }
+
     Floppy144Cabinet25DDrawChairBack(surface,&seat,octant,edge);
     Floppy144Cabinet25DDrawBox(surface,&seat,top,front,side,edge);
     Floppy144Cabinet25DDrawOrientationTick(surface,&seat,octant);

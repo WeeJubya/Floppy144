@@ -686,24 +686,60 @@ static void TestBF40ChairBackVolume(void)
 {
     Floppy144DataRecord chair;
     int16_t rotation;
+    uint32_t first_hash=0U;
     memset(&chair,0,sizeof(chair));
     chair.eKind=FLOPPY144_DATA_FURNITURE;
     chair.pszB="CHAIR";
     chair.pszC="CHAIR";
-    chair.n2=4;
-    chair.n3=4;
-    for(rotation=0;rotation<360;rotation+=90)
+
+    /* Two-unit chairs are the actual Director/Staff Room screenshot case. */
+    chair.n2=2;
+    chair.n3=2;
+    for(rotation=0;rotation<360;rotation+=45)
     {
+        uint32_t hash;
         (void)DrawParent(&chair,rotation,0U,0U,NULL);
+        hash=SurfaceHash();
+        if(rotation==0)first_hash=hash;
         CHECK(
-            BF40CountColour(FLOPPY144_RGB(78,93,85))>25U,
-            "BF40 chair back has a filled vertical 2.5D face"
+            BF40CountColour(FLOPPY144_RGB(78,93,85))>20U,
+            "BF40 chair back has a substantial opaque inset panel"
         );
         CHECK(
-            BF40CountColour(FLOPPY144_RGB(115,129,120))>5U,
-            "BF40 chair back has a projected solid top face"
+            BF40CountColour(FLOPPY144_RGB(115,129,120))>2U,
+            "BF40 back cushion has a solid projected upper face"
+        );
+        CHECK(
+            BF40CountColour(FLOPPY144_RGB(100,118,108))>0U &&
+            BF40CountColour(FLOPPY144_RGB(85,103,94))>0U,
+            "BF40 chair back is supported by two separate uprights"
+        );
+        CHECK(
+            BF40CountColour(FLOPPY144_RGB(69,84,76))>20U &&
+            BF40CountColour(FLOPPY144_RGB(90,105,95))>20U,
+            "BF40 seat is supported by solid, shaded legs"
+        );
+        CHECK(
+            g_pixels[160U*TEST_WIDTH+166U]==
+                FLOPPY144_RGB(91,101,96),
+            "BF40 back supports are occluded behind an opaque seat"
+        );
+        CHECK(
+            RegionPixelCount(306U,0U,TEST_WIDTH,TEST_HEIGHT)==0U,
+            "BF40 rotated chair stays within inspection panel"
+        );
+
+        (void)DrawParent(&chair,rotation,1U,0U,NULL);
+        CHECK(
+            BF40CountColour(FLOPPY144_RGB(216,239,220))>0U,
+            "BF40 chair contents remain selectable on seat"
         );
     }
+    (void)DrawParent(&chair,180,0U,0U,NULL);
+    CHECK(
+        SurfaceHash()!=first_hash,
+        "BF40 opposite facing changes projected chair back orientation"
+    );
 }
 
 static void TestBF40TerminalMarkerForeground(void)

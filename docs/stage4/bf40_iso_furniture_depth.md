@@ -83,3 +83,17 @@ rack height and child front mapping match at 156 pixels. FM-23 filters its
 isometric plan to structural partitions, doors, windows and floors, and centres
 the footprint of recovered rooms in the display. No furniture registry or
 interaction rule is modified by these rendering changes.
+
+## Chair back redesign: October visual acceptance
+
+The earlier BF40 solid backrest was an uninterrupted upright quadrilateral, so
+the inspection view looked like a translucent partition attached to a stool.
+The replacement uses a shorter inset back cushion, an explicit gap over the
+seat, twin posts and solid five-pixel frame legs. All positions are derived
+from the same directional projected seat corners, rather than using screen
+rectangles or changing the canonical furniture geometry. The rear posts and
+legs are painted before the opaque 10-pixel seat, maintaining occlusion. The
+BF40 inspection regression now covers real 2x2 chairs at eight rotations,
+framed-cushion colours, uprights, leg volume, the seat, item highlight and
+the Contents gutter. Live Windows screenshots remain the visual acceptance
+gate for Director and Staff Room chairs.
