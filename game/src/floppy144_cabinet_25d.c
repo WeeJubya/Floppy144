@@ -1363,7 +1363,8 @@ static void Floppy144Cabinet25DDrawChairBack(
 
     high0.y-=59;high1.y-=59;
     low0.y-=24;low1.y-=24;
-    back_high0.y-=59;back_high1.y-=59;
+    /* Give the cap a readable projected top face at all rotations. */
+    back_high0.y-=65;back_high1.y-=65;
     back_low1.y-=24;
     upper0.y-=67;upper1.y-=67;
     upper_post0.y-=67;upper_post1.y-=67;
