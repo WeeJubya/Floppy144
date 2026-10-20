@@ -1838,10 +1838,10 @@
                     "type": "WALL_MOUNTED_ITEM",
                     "variant": "SHELVING",
                     "object": "SERVER_ROOM_SHELVES",
-                    "x": 57,
-                    "y": 57,
-                    "width": 2,
-                    "height": 10
+                    "x": 56,
+                    "y": 59,
+                    "width": 1,
+                    "height": 6
                 },
                 {
                     "type": "CHAIR",
@@ -2115,7 +2115,7 @@
                 {
                     "type": "CHAIR",
                     "x": 42,
-                    "y": 48,
+                    "y": 50,
                     "width": 2,
                     "height": 2,
                     "rotation": 90
@@ -2282,7 +2282,7 @@
                 {
                     "type": "CHAIR",
                     "x": 6,
-                    "y": 49,
+                    "y": 51,
                     "width": 2,
                     "height": 2,
                     "rotation": 270
@@ -2290,15 +2290,15 @@
                 {
                     "type": "CHAIR",
                     "x": 12,
-                    "y": 54,
+                    "y": 53,
                     "width": 2,
                     "height": 2,
                     "rotation": 90
                 },
                 {
                     "type": "CHAIR",
-                    "x": 15,
-                    "y": 52,
+                    "x": 12,
+                    "y": 49,
                     "width": 2,
                     "height": 2,
                     "rotation": 90
@@ -2306,7 +2306,7 @@
                 {
                     "type": "CHAIR",
                     "x": 9,
-                    "y": 57,
+                    "y": 56,
                     "width": 2,
                     "height": 2,
                     "rotation": 180

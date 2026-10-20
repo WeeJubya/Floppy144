@@ -205,12 +205,12 @@ function Test-OrthogonalSiteFurniture {
     # the Site placement index so inspection and gameplay cannot diverge.
     $BF39Placements = @(
         @{ Room='SECRETARY_OFFICE'; Index=1; Parent='SECRETARY_OFFICE_DESK'; X=46; Y=38; W=6; H=4; Rotation=0 }
-        @{ Room='SECRETARY_OFFICE'; Index=6; Parent='SECRETARY_OFFICE_CHAIR_01'; X=50; Y=42; W=2; H=2; Rotation=180 }
+        @{ Room='SECRETARY_OFFICE'; Index=6; Parent='SECRETARY_OFFICE_CHAIR_01'; X=48; Y=42; W=2; H=2; Rotation=180 }
         @{ Room='DIRECTOR_OFFICE'; Index=1; Parent='DIRECTOR_OFFICE_DESK'; X=44; Y=8; W=8; H=4; Rotation=0 }
-        @{ Room='DIRECTOR_OFFICE'; Index=11; Parent='DIRECTOR_OFFICE_CHAIR_01'; X=49; Y=6; W=2; H=2; Rotation=0 }
-        @{ Room='DIRECTOR_OFFICE'; Index=12; Parent='DIRECTOR_OFFICE_CHAIR_02'; X=44; Y=12; W=2; H=2; Rotation=180 }
-        @{ Room='DIRECTOR_OFFICE'; Index=13; Parent='DIRECTOR_OFFICE_CHAIR_03'; X=46; Y=15; W=2; H=2; Rotation=180 }
-        @{ Room='DIRECTOR_OFFICE'; Index=14; Parent='DIRECTOR_OFFICE_CHAIR_04'; X=41; Y=9; W=2; H=2; Rotation=270 }
+        @{ Room='DIRECTOR_OFFICE'; Index=11; Parent='DIRECTOR_OFFICE_CHAIR_01'; X=47; Y=6; W=2; H=2; Rotation=0 }
+        @{ Room='DIRECTOR_OFFICE'; Index=12; Parent='DIRECTOR_OFFICE_CHAIR_02'; X=45; Y=12; W=2; H=2; Rotation=180 }
+        @{ Room='DIRECTOR_OFFICE'; Index=13; Parent='DIRECTOR_OFFICE_CHAIR_03'; X=49; Y=12; W=2; H=2; Rotation=180 }
+        @{ Room='DIRECTOR_OFFICE'; Index=14; Parent='DIRECTOR_OFFICE_CHAIR_04'; X=42; Y=9; W=2; H=2; Rotation=270 }
     )
     foreach($ExpectedPlace in $BF39Placements) {
         $Office = @($Data.site_layout_source.rooms |
@@ -232,6 +232,22 @@ function Test-OrthogonalSiteFurniture {
         }
     }
     Write-Host 'BF39 OFFICE GEOMETRY: PASS - 7 workbook-derived placements'
+
+    # BF43 desk, chair and shelving adjacency is pinned to the same
+    # canonical layout and inspector owner registry.
+    $Server = @($Data.site_layout_source.rooms | Where-Object { $_.id -eq 'SERVER_ROOM' })[0]
+    $Desk = @($Server.geometry | Where-Object { $_.id -eq 'SERVER_ROOM_DESK' })[0]
+    $Shelf = @($Server.geometry | Where-Object { $_.id -eq 'SERVER_ROOM_SHELVES' })[0]
+    $DeskParent = @($Data.furniture | Where-Object { $_.id -eq 'SERVER_ROOM_DESK' })[0]
+    $ShelfParent = @($Data.fixtures | Where-Object { $_.id -eq 'SERVER_ROOM_SHELVES' })[0]
+    if([int]$Desk.x -ne 35 -or [int]$Desk.y -ne 57 -or
+       [int]$Shelf.x -ne 35 -or [int]$Shelf.y -ne 56 -or
+       [int]$Shelf.width -ne 6 -or [int]$Shelf.height -ne 1 -or
+       [int]$DeskParent.geometry.y -ne 57 -or
+       [int]$ShelfParent.geometry.width -ne 6) {
+        throw 'BF43 Server Room desk / full-unit shelving alignment drifted.'
+    }
+    Write-Host 'BF43 SERVER ROOM GEOMETRY: PASS'
 
     foreach($ParentId in @('DIRECTOR_OFFICE_DESK','SECRETARY_OFFICE_DESK',
                            'STAFF_ROOM_DINING_TABLE')) {

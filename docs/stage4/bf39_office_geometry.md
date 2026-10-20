@@ -33,3 +33,15 @@ Focused source-level geometry checks were performed before committing. Native Wi
 ## Full release-candidate regression follow-up
 
 The first full sequential Windows release-candidate run reported one Stage 3B.3 failure: an older reconstruction assertion still hard-coded the pre-BF39 Secretary and Director furniture coordinates. The assertion was updated to the new exact approved positions, retaining the same rectangle/rotation/authorised-aspect checks. The independent Stage 4D BF39 geometry regression and standalone Release build passed on that run; a new full CI run is required to confirm the corrected historical test.
+
+## BF43 screenshot-driven adjustment
+
+BF39's cardinal approximations to diagonal grouped furniture looked detached
+in subsequent player screenshots. The Secretary chair is now centred at (48,42)
+against the existing (46,38) desk. The Director chair is at (47,6); visitors
+at (45,12), (49,12) and (42,9) directly adjoin the unchanged (44,8) desk.
+Server Room desk moves north from (35,59) to (35,57), against the north inner
+wall, with a 6×1 shelf at (35,56) directly above it. The canonical model,
+compiled Site rectangles and parent records were updated together, alongside
+inverse source references and exact placement regressions. Verify live Windows
+rendering against the screenshots and original workbook group-shape plans.

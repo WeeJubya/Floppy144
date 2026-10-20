@@ -1710,7 +1710,7 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
                 (uint8_t)FLOPPY144_SITE_CHAIR &&
             pRect->room ==
                 (uint8_t)FLOPPY144_ROOM_SECRETARY_OFFICE &&
-            pRect->x == 50U &&
+            pRect->x == 48U &&
             pRect->y == 42U &&
             pRect->width == 2U &&
             pRect->height == 2U &&
