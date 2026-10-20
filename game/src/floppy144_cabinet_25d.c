@@ -1208,17 +1208,17 @@ static void Floppy144Cabinet25DDrawWorktop(
     for(i=0U;i<4U;++i)
     {
         int32_t u=45+(int32_t)i*235;
-        Floppy144Cabinet25DPoint handle;
+        Floppy144Cabinet25DPoint grip;
         Floppy144Cabinet25DDrawSurfaceMarker(
             surface,front_face,u,130,u+205,910,
             F144_25D_RGB(93,108,99),edge
         );
-        handle=Floppy144Cabinet25DOnFace(
+        grip=Floppy144Cabinet25DOnFace(
             front_face,u+167,370
         );
         Floppy144Cabinet25DLine(
-            surface,handle.x,handle.y,
-            handle.x,handle.y+9,
+            surface,grip.x,grip.y,
+            grip.x,grip.y+9,
             F144_25D_RGB(194,200,186)
         );
     }
