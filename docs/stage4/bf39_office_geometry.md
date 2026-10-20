@@ -29,3 +29,7 @@ The enlarged 7×4 sofa originally at (37,27) crossed the southern inner-floor li
 The BF12 native Site regression protects exact world rectangles and dimensions; the Stage 3B parent tests protect desk interaction geometry. The Stage 4D source audit now pins all seven desk/chair owners to their office geometry, additionally verifying cardinal rotations, mirrors, overlaps and floor boundaries, and retains the BF39 sofa regression.
 
 Focused source-level geometry checks were performed before committing. Native Windows tests, Release compilation and exact executable size must be reported from GitHub Actions once complete. Manual visual acceptance in normal gameplay, full Site ISO and 2.5D inspection remains required, including approaching the Secretary's desk, all Director chairs and the sofa.
+
+## Full release-candidate regression follow-up
+
+The first full sequential Windows release-candidate run reported one Stage 3B.3 failure: an older reconstruction assertion still hard-coded the pre-BF39 Secretary and Director furniture coordinates. The assertion was updated to the new exact approved positions, retaining the same rectangle/rotation/authorised-aspect checks. The independent Stage 4D BF39 geometry regression and standalone Release build passed on that run; a new full CI run is required to confirm the corrected historical test.

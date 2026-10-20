@@ -1689,8 +1689,8 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
                 (uint8_t)FLOPPY144_SITE_STANDARD_DESK &&
             pRect->room ==
                 (uint8_t)FLOPPY144_ROOM_SECRETARY_OFFICE &&
-            pRect->x == 45U &&
-            pRect->y == 36U &&
+            pRect->x == 46U &&
+            pRect->y == 38U &&
             pRect->width == 6U &&
             pRect->height == 4U &&
             pRect->rotation == 0
@@ -1701,7 +1701,7 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
             F144_CHECK(
                 pRect->authored_width16 == 96U &&
                 pRect->authored_height16 == 64U,
-                "Secretary desk keeps authored 6x4 footprint at transformed 135-degree angle"
+                "BF39 Secretary desk retains 6x4 orthogonal footprint"
             );
         }
 
@@ -1710,7 +1710,7 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
                 (uint8_t)FLOPPY144_SITE_CHAIR &&
             pRect->room ==
                 (uint8_t)FLOPPY144_ROOM_SECRETARY_OFFICE &&
-            pRect->x == 47U &&
+            pRect->x == 50U &&
             pRect->y == 42U &&
             pRect->width == 2U &&
             pRect->height == 2U &&
@@ -1725,7 +1725,7 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
                 (uint8_t)FLOPPY144_SITE_STANDARD_DESK &&
             pRect->room ==
                 (uint8_t)FLOPPY144_ROOM_DIRECTOR_OFFICE &&
-            pRect->x == 43U &&
+            pRect->x == 44U &&
             pRect->y == 8U &&
             pRect->width == 8U &&
             pRect->height == 4U &&
@@ -1737,7 +1737,7 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
             F144_CHECK(
                 pRect->authored_width16 == 128U &&
                 pRect->authored_height16 == 64U,
-                "Director desk keeps authored 8x4 footprint and -45-degree facing"
+                "BF39 Director desk retains 8x4 orthogonal footprint"
             );
         }
 
@@ -1881,7 +1881,7 @@ static void Floppy144TestFullSiteFurnitureGeometry(void)
         bSecretaryDesk &&
         bSecretaryDeskChair &&
         bDirectorDesk,
-        "diagonal offices preserve transformed desk/chair orientation and authored aspect ratios"
+        "BF39 Secretary and Director retain workbook-derived cardinal desk/chair geometry"
     );
 
     F144_CHECK(
