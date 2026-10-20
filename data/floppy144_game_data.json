@@ -1461,7 +1461,7 @@
             "variant": "STANDARD_DESK",
             "object": "SERVER_ROOM_DESK",
             "x": 35,
-            "y": 59,
+            "y": 57,
             "width": 6,
             "height": 4,
             "rotation": 90
@@ -1512,9 +1512,9 @@
             "type": "WALL_MOUNTED_ITEM",
             "variant": "SHELVING",
             "object": "SERVER_ROOM_SHELVES",
-            "x": 33,
+            "x": 35,
             "y": 56,
-            "width": 10,
+            "width": 6,
             "height": 1
           },
           {
@@ -1762,7 +1762,7 @@
           },
           {
             "type": "CHAIR",
-            "x": 50,
+            "x": 48,
             "y": 42,
             "width": 2,
             "height": 2,
@@ -1924,7 +1924,7 @@
           },
           {
             "type": "CHAIR",
-            "x": 49,
+            "x": 47,
             "y": 6,
             "width": 2,
             "height": 2,
@@ -1932,7 +1932,7 @@
           },
           {
             "type": "CHAIR",
-            "x": 44,
+            "x": 45,
             "y": 12,
             "width": 2,
             "height": 2,
@@ -1940,15 +1940,15 @@
           },
           {
             "type": "CHAIR",
-            "x": 46,
-            "y": 15,
+            "x": 49,
+            "y": 12,
             "width": 2,
             "height": 2,
             "rotation": 180
           },
           {
             "type": "CHAIR",
-            "x": 41,
+            "x": 42,
             "y": 9,
             "width": 2,
             "height": 2,
@@ -5970,7 +5970,7 @@
       "object_id": "SERVER_ROOM_DESK",
       "geometry": {
         "x": 35,
-        "y": 59,
+        "y": 57,
         "width": 6,
         "height": 4,
         "rotation": 90
@@ -6130,7 +6130,7 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "x": 50,
+        "x": 48,
         "y": 42,
         "width": 2,
         "height": 2,
@@ -6348,7 +6348,7 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "x": 49,
+        "x": 47,
         "y": 6,
         "width": 2,
         "height": 2,
@@ -6363,7 +6363,7 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "x": 44,
+        "x": 45,
         "y": 12,
         "width": 2,
         "height": 2,
@@ -6378,8 +6378,8 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "x": 46,
-        "y": 15,
+        "x": 49,
+        "y": 12,
         "width": 2,
         "height": 2,
         "rotation": 180
@@ -6393,7 +6393,7 @@
       "variant": "CHAIR",
       "object_id": null,
       "geometry": {
-        "x": 41,
+        "x": 42,
         "y": 9,
         "width": 2,
         "height": 2,
@@ -6844,9 +6844,9 @@
       "variant": "SHELVING",
       "object_id": "SERVER_ROOM_SHELVES",
       "geometry": {
-        "x": 33,
+        "x": 35,
         "y": 56,
-        "width": 10,
+        "width": 6,
         "height": 1
       },
       "drawing_definition_id": "DRAW_WALL_MOUNTED_ITEM"
