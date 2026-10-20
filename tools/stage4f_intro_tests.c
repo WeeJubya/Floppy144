@@ -139,6 +139,19 @@ int main(void)
     if(!require_true(pixels[174U*WIDTH+460U]==0xd2ceb6U,
         "motion guide strokes are not rendered into computer scene"))return 36;
 
+    /* During insertion, the floppy retains its blank paper label.
+     * Inspect pixels close to the drive, where lettering previously appeared. */
+    (void)render(FLOPPY144_INTRO_INSERTION_END_MS+1800U,
+        FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U);
+    {
+        uint32_t x,y,nonblank=0U;
+        for(y=171U;y<180U;++y)
+            for(x=325U;x<395U;++x)
+                if(pixels[y*WIDTH+x]!=0xf2f2f2U)++nonblank;
+        if(!require_true(nonblank==0U,
+            "floppy label is unlettered near the drive"))return 43;
+    }
+
     /* The grey cabinet base follows the moving wall/floor seam mid-zoom. */
     (void)render(FLOPPY144_INTRO_DISCOVERY_END_MS+1000U,
         FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U);
@@ -203,6 +216,12 @@ int main(void)
 
     if(!require_true(!Floppy144IntroLoginReady(17999U) &&
         Floppy144IntroLoginReady(18000U),"LOGIN is gated until full boot"))return 27;
+
+    if(!require_true(!Floppy144IntroHasPersonalLogin(NULL) &&
+        !Floppy144IntroHasPersonalLogin("") &&
+        !Floppy144IntroHasPersonalLogin("GUEST") &&
+        Floppy144IntroHasPersonalLogin("OPERATOR TWELVE"),
+        "GUEST fallback must prompt, while named operators can auto-login"))return 42;
 
     if(!require_true(!Floppy144IntroAutoLoginReady(20499U,true) &&
         Floppy144IntroAutoLoginReady(20500U,true),"existing profile waits for typewriter completion"))return 28;
