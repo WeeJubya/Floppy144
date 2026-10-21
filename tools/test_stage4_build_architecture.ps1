@@ -123,8 +123,8 @@ foreach($required in @(
     }
 }
 
-# The inherited runtime remains in the tree for B2-05 provenance only.
-# This is a positive production-source exclusion assertion, not a weakened test.
+# In B2-05 the superseded renderer was physically removed. Preserve the
+# stronger B2-04 linker exclusion check and also reject restored old files.
 foreach($forbidden in @(
     './src/f144_runtime.c',
     './src/f144_win32_runtime.c',
@@ -138,6 +138,10 @@ foreach($forbidden in @(
     if($platformBlock.Contains($forbidden))
     {
         throw "B2-04 derived/legacy source remains in production build: $forbidden"
+    }
+    if(Test-Path -LiteralPath (Join-Path $root $forbidden))
+    {
+        throw "B2-05 obsolete implementation file unexpectedly remains: $forbidden"
     }
 }
 

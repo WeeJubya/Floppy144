@@ -47,6 +47,10 @@ jobs:
           }
           Write-Host "B2-04 PRODUCTION MANIFEST: PASS"
 
+      - name: B2-05 removed-code and active-source provenance assertions
+        shell: pwsh
+        run: .\tools\test_beta2_provenance.ps1 -Phase Source
+
   production-release:
     runs-on: windows-2022
     steps:
@@ -100,6 +104,10 @@ jobs:
             throw "Unexpected engine or additional VC runtime DLL dependency."
           }
           Write-Host "B2-04 RELEASE / IMPORT CHECK: PASS"
+      - name: B2-05 linked object-manifest and import audit
+        shell: pwsh
+        run: .\tools\test_beta2_provenance.ps1 -Phase Linked
+
       - uses: actions/upload-artifact@v4
         with:
           name: Floppy144-Beta2-Cutover-Verification
