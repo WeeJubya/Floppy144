@@ -1,7 +1,20 @@
 # Beta.2 runtime migration status
-Last updated: 21 October 2026. **Current stage: B2-05 derived runtime cleanup technically verified; independent provenance/legal sign-off remains OPEN.**
+Last updated: 21 October 2026. **Current stage: B2-06 full automated regression and Windows clean Release VERIFIED. Public release approval remains ON HOLD pending mandatory manual/provenance/save-fixture gates.**
 
-## B2-05 current handover
+## B2-06 current handover
+
+- **Development:** `WeeJubya/Floppy144` / existing `development/Beta-2-runtime`. Public `GreyDoorRepublik/Floppy144-beta` unchanged.
+- **Full automated Windows B2-06 run:** [39579270827](https://github.com/WeeJubya/Floppy144/actions/runs/39579270827), code/test SHA `ba3674cc4f7e744e6b2c2c557955b09b9db77f50`, **all three jobs PASS**: actual Beta.1 baseline verification; full regression/cleanbuild; strict x64 Release/imports.
+- **Published Beta.1 baseline independently verified:** actual downloaded EXE **822,272 bytes** and SHA-256 `7daf713c4cbe5103b3bc7b1316140581614b484c397ca5a83352ec96fa8de749`; public source tag commit `0981e4ab3694a1cdb5b6338c199e0262a6ed14bf`; **13 unchanged game-owned source files** byte-for-byte match.
+- **Regressions and root builds:** all **46** canonical Stage 2/3/4/BF tests via `testbuild.ps1` **PASS**; Stage 4D+ sweep **15/15 PASS**; `cleanbuild.ps1` and contained `run.ps1 -build release` **PASS**, canonical game-data and Site generation clean with no tracked generated drift. B2-03 GDI **79 PASS**, B2-04 native host **25 PASS**, B2-05 source audit **212 files PASS**.
+- **Fixed historical intro assertion:** the old near-drive blank floppy test sampled beyond the actual moving white label and counted the disk's dark rim; the new test requires all **300 actual label pixels** to remain exact white, so a reintroduced glyph still fails. No game artwork or gameplay code changed.
+- **Strict Windows x64 Release:** 0 C compiler warnings/errors, **973,312 bytes** used of **1,474,560 max**, **501,248 remaining**; SHA-256 `E24B27EC4B4B97ACE9D5545001CC65C25BE2241490963CF9DDF7385BC751FFFB` for measured strict CI build. Imports only USER32, KERNEL32, GDI32, SHELL32 and WINMM system DLLs; no River2D objects/DLLs, correct application icon; verification artifact contains EXE + LICENSE.
+- **Legacy data distinction:** public Beta.1 has **no** checked-in manual/autosave/profile/settings save examples, thus actual public Beta.1-file round-trip remains **UNVERIFIED**. Old tracked development manual/auto V1 prototypes use payloads **64/68** versus Beta.1's accepted **72** and are intentionally rejected, not damaged, by the unchanged decoder; historical profile/settings samples load and round-trip. An explicit owner decision is needed if importing pre-Beta.1 prototype files is a new requirement.
+- **Deterministic visual evidence:** optional 640×360 PPM captures of intro and Grey Door created in Windows CI, [capture artefact](https://github.com/WeeJubya/Floppy144/actions/runs/39579270827/artifacts/12335268329). They **do not** replace real desktop Beta.1/Beta.2 matched-seed screenshots, flicker/video or audio listening.
+- **Mandatory OPEN gates:** human GUI inspection of all screens and resizing; human WinMM audio playback; real Beta.1-created saves/profiles/settings import; independent non-source-exposed provenance/legal review (embedded 5×7 glyph/icon ownership), and correcting the public Beta.1 GPLv3 LICENSE omission. Release authorisation **WITHHELD**.
+- **B2-06 deliverables:** `docs/beta2/06_test_results.md`, `docs/beta2/06_visual_acceptance.md` and `docs/beta2/06_release_candidate.md`. Documentation and tests only; production gameplay/content/audio/save implementation unchanged.
+
+## B2-05 historical handover (superseded regression status)
 
 - **Development repository/branch:** `WeeJubya/Floppy144` / `development/Beta-2-runtime`, not the public-release repository. `GreyDoorRepublik/Floppy144-beta` remains unchanged, and its intended GPLv3 `LICENSE` file is still missing from Beta.1 publication.
 - **Removed from the active Git tree:** derived `include/f144_runtime.h`, `src/f144_runtime.c`, `src/f144_win32_runtime.c`, `src/f144_win32_platform.c` and `include/f144_win32_platform.h`; uncertain/unused `src/string_view.c` and `include/string_view.h`; empty/stale `.gitmodules` for `vendor/puddle`, with no tracked Gitlinks. Git history, licence and original provenance documents retained.
