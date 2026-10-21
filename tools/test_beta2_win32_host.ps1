@@ -12,8 +12,13 @@ $sources = @(
     (Join-Path $root 'src\f144_platform.c'),
     (Join-Path $root 'src\f144_calendar.c')
 )
-$args = @('/nologo','/TC','/std:c11','/W4','/WX','/utf-8',('/I' + (Join-Path $root 'include'))) + $sources + @('/Fe:' + $exe,'/link','user32.lib','gdi32.lib')
-& cl.exe @args
+$compilerArgs = @('/nologo','/TC','/std:c11','/W4','/WX','/utf-8',('/I' + (Join-Path $root 'include')))
+$compilerArgs += $sources
+$compilerArgs += "/Fe:$exe"
+$compilerArgs += '/link'
+$compilerArgs += 'user32.lib'
+$compilerArgs += 'gdi32.lib'
+& cl.exe @compilerArgs
 if($LASTEXITCODE -ne 0) { throw "B2-04 host compile failed: $LASTEXITCODE" }
 & $exe
 if($LASTEXITCODE -ne 0) { throw "B2-04 host tests failed: $LASTEXITCODE" }
