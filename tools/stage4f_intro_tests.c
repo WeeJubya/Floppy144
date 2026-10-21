@@ -74,6 +74,48 @@ static uint64_t render_login(uint32_t elapsed_ms,const char *name,bool has_profi
     return checksum(pixels,WIDTH*HEIGHT);
 }
 
+/* Optional deterministic raw capture for manual Beta.2 review.
+ * PPM writes RGB bytes from our logical 0x00RRGGBB surface; no GUI window or
+ * desktop colour-management pipeline is involved. Not human visual sign-off.
+ */
+static bool capture_intro_frame(const char *dir,const char *leaf)
+{
+    char path[600];
+    FILE *file=NULL;
+    uint32_t pixel_index;
+    if(snprintf(path,sizeof(path),"%s\\%s",dir,leaf)<0 ||
+       strlen(path)>=sizeof(path))return false;
+    if(fopen_s(&file,path,"wb")!=0||file==NULL)return false;
+    if(fprintf(file,"P6\n640 360\n255\n")<0) {
+        (void)fclose(file);
+        return false;
+    }
+    for(pixel_index=0U;pixel_index<WIDTH*HEIGHT;++pixel_index) {
+        uint32_t colour=pixels[pixel_index];
+        if(fputc((int)((colour>>16U)&255U),file)==EOF ||
+           fputc((int)((colour>>8U)&255U),file)==EOF ||
+           fputc((int)(colour&255U),file)==EOF) {
+            (void)fclose(file);
+            return false;
+        }
+    }
+    return fclose(file)==0;
+}
+
+static bool capture_intro_examples(void)
+{
+    const char *dir=getenv("F144_BETA2_CAPTURE_DIR");
+    if(dir==NULL||dir[0]=='\0')return true;
+    (void)render(1400U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U);
+    if(!capture_intro_frame(dir,"intro_discovery_1400.ppm"))return false;
+    (void)render(8200U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U);
+    if(!capture_intro_frame(dir,"intro_disk_insertion_8200.ppm"))return false;
+    (void)render(17000U,FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U);
+    if(!capture_intro_frame(dir,"intro_network_17000.ppm"))return false;
+    (void)render_login(FLOPPY144_INTRO_DURATION_MS+800U,"",false);
+    return capture_intro_frame(dir,"intro_guest_login_18800.ppm");
+}
+
 int main(void)
 {
     Floppy144TimingState timing;
@@ -235,6 +277,8 @@ int main(void)
         Floppy144IntroAutoLoginReady(20500U,true),"existing profile waits for typewriter completion"))return 28;
     if(!require_true(!Floppy144IntroAutoLoginReady(99999U,false),
         "first profile still waits for explicit LOGIN"))return 29;
+    if(!require_true(capture_intro_examples(),
+        "B2-06 deterministic intro PPM captures are writable"))return 44;
     puts("S4F-02 INTRO VECTORS: PASS");
     puts("beats=cabinet,disk-reveal,computer-crt,full-terminal duration=18000ms");
     puts("no intro skip; persisted LOGIN when ready; replay=timing-rearm");

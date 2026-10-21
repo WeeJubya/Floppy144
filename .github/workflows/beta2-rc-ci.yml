@@ -1,0 +1,132 @@
+name: Beta.2 Release Candidate Verification
+
+on:
+  push:
+    branches: [development/Beta-2-runtime]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  beta1-baseline:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - name: Independently download and hash published Beta.1
+        shell: pwsh
+        run: .\tools\test_beta2_baseline_reference.ps1
+
+  full-regression-and-cleanbuild:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Install Premake 5.0.0-beta8
+        shell: pwsh
+        run: |
+          $zip = Join-Path $env:RUNNER_TEMP 'premake.zip'
+          $dir = Join-Path $env:RUNNER_TEMP 'premake'
+          Invoke-WebRequest 'https://github.com/premake/premake-core/releases/download/v5.0.0-beta8/premake-5.0.0-beta8-windows.zip' -OutFile $zip
+          Expand-Archive -LiteralPath $zip -DestinationPath $dir -Force
+          $exe = Get-ChildItem $dir -Recurse -Filter premake5.exe | Select-Object -First 1
+          if(-not $exe) { throw 'Pinned Premake missing.' }
+          $exe.Directory.FullName | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Set up deterministic frame captures
+        shell: pwsh
+        run: |
+          $dir = Join-Path $env:RUNNER_TEMP 'Beta2Captures'
+          New-Item -ItemType Directory -Force -Path $dir | Out-Null
+          "F144_BETA2_CAPTURE_DIR=$dir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "F144_BF33_CAPTURE_DIR=$dir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Canonical game-data and Site generation
+        shell: pwsh
+        run: .\tools\build_game_data.ps1
+      - name: Reject generated data drift
+        shell: pwsh
+        run: |
+          git diff --exit-code -- game/src data
+          if($LASTEXITCODE -ne 0) { throw 'Generated data drift.' }
+      - name: Full Stage 2/3/4 and bugfix regressions
+        shell: pwsh
+        run: .\testbuild.ps1
+      - name: Independent Stage 4D+ sweep
+        shell: pwsh
+        run: .\tools\test_stage4_post_bugfix.ps1
+      - name: Independent Beta.2 framebuffer and host regression
+        shell: pwsh
+        run: |
+          .\tools\test_beta2_win32_display.ps1
+          .\tools\test_beta2_win32_host.ps1
+          .\tools\test_beta2_provenance.ps1 -Phase Source
+      - name: Full canonical cleanbuild
+        shell: pwsh
+        run: .\cleanbuild.ps1
+      - name: Check clean Release and generated data
+        shell: pwsh
+        run: |
+          if(-not (Test-Path '.\bin\release\Floppy144.exe')) { throw 'Cleanbuild did not produce executable.' }
+          git diff --exit-code -- game/src data
+          if($LASTEXITCODE -ne 0) { throw 'Canonical output drift after cleanbuild.' }
+      - name: Preserve deterministic frame captures for manual review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Floppy144-Beta2-Deterministic-Frames
+          path: ${{ runner.temp }}/Beta2Captures/*.ppm
+          if-no-files-found: warn
+
+  strict-release-and-dependencies:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Canonical generation and drift check
+        shell: pwsh
+        run: |
+          .\tools\build_game_data.ps1
+          git diff --exit-code -- game/src data
+          if($LASTEXITCODE -ne 0) { throw 'Generated data drift.' }
+      - name: Install Premake 5.0.0-beta8
+        shell: pwsh
+        run: |
+          $zip = Join-Path $env:RUNNER_TEMP 'premake.zip'
+          $dir = Join-Path $env:RUNNER_TEMP 'premake'
+          Invoke-WebRequest 'https://github.com/premake/premake-core/releases/download/v5.0.0-beta8/premake-5.0.0-beta8-windows.zip' -OutFile $zip
+          Expand-Archive -LiteralPath $zip -DestinationPath $dir -Force
+          $exe = Get-ChildItem $dir -Recurse -Filter premake5.exe | Select-Object -First 1
+          if(-not $exe) { throw 'Pinned Premake missing.' }
+          $exe.Directory.FullName | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Premake VS2022 solution
+        shell: pwsh
+        run: premake5 vs2022
+      - name: Strict Windows x64 Release rebuild
+        shell: pwsh
+        run: |
+          msbuild .\build\Floppy144.sln /t:Rebuild /m /p:Configuration=release /p:Platform=windows /p:WarningLevel=Level4 /p:TreatWarningsAsErrors=true
+          if($LASTEXITCODE -ne 0) { throw 'MSVC strict Release failure.' }
+      - name: Application icon built into executable
+        shell: pwsh
+        run: .\tools\test_stage4f_application_icon.ps1 -Phase Built
+      - name: Actual object, import, size and SHA-256 checks
+        shell: pwsh
+        run: |
+          .\tools\test_beta2_provenance.ps1 -Phase Linked
+          $exe = Get-Item '.\bin\release\Floppy144.exe'
+          $remaining = 1474560 - $exe.Length
+          Write-Host "B2-06 RELEASE BYTES: $($exe.Length)"
+          Write-Host "B2-06 REMAINING BYTES: $remaining"
+          Write-Host "B2-06 RELEASE SHA256: $((Get-FileHash $exe.FullName -Algorithm SHA256).Hash)"
+          if($remaining -lt 0) { throw 'Executable too large.' }
+      - name: Archive Release Candidate (not public release)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Floppy144-Beta2-Windows-x64-Verification
+          path: |
+            bin/release/Floppy144.exe
+            bin/release/LICENSE
+          if-no-files-found: error
