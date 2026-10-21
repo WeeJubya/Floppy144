@@ -37,7 +37,7 @@ This is a **review-only** staging PR. Do not merge, tag or publish until the rel
 
 - [ ] Independent source-unexposed reviewer and rights/licensing specialist approve the remaining game code, contributors, font glyph patterns, icon and any historically entangled coordinator expression. Earlier assistant source exposure explicitly prevents a formal clean-room declaration.
 - [ ] Copyright holders approve the proposed **specific** licence for the **specific** candidate. An “All Rights Reserved” copyright notice is **not** assumed to replace GPLv3 obligations or prior licences.
-- [ ] Beta.1 GPLv3 public repository `LICENSE` omission is addressed separately, with advice on source/distribution obligations; preserve all old historical notices/rights.
+- [ ] Beta.1 historical GPLv3 distribution and source/notice obligations independently checked. A matching GPLv3 `LICENSE` was separately added to public `main` in `9640d287...`; this resolves the current missing-root-file symptom, **not necessarily prior package compliance**. Preserve all historical notices/rights.
 - [ ] Matched-seed Windows Beta.1/Beta.2 GUI screenshot/video walkthrough and black-flash/resize checks (VIS-01..11) are signed off.
 - [ ] Actual Windows WinMM audio playback/listening checks (AUD-H01..04) are signed off.
 - [ ] Genuine published Beta.1-created manual/autosave/profile/settings load/save/migration tested safely and signed off.

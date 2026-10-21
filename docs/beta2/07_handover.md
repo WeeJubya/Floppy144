@@ -5,7 +5,7 @@
 ## 1. Repository topology and Git state
 
 - **Developer:** `WeeJubya/Floppy144`, existing branch `development/Beta-2-runtime`. B2-06 verified commit: `514b159197bcf4e9e2f2289cbc5b645d2b9defb4`. B2-07 paperwork is committed on this same branch; refer to live Git HEAD after that documentation commit.
-- **Studio public release repository:** `GreyDoorRepublik/Floppy144-beta`, `main` = `0981e4ab3694a1cdb5b6338c199e0262a6ed14bf` (Beta.1). The repository is **not configured as a fork**. At audit it had one branch, `main`, and no open PR. The developer Beta.2 branch is **not present** in this public repository.
+- **Studio public release repository:** `GreyDoorRepublik/Floppy144-beta`, `main` = `9640d2873a0e3f38451d3e953a60f291a721b153` after a separately pushed GPLv3 `LICENSE` correction. The original Beta.1 tag remains `0981e4ab3694a1cdb5b6338c199e0262a6ed14bf`. The repository is **not configured as a fork**. At audit it had one branch, `main`, and no open PR. The developer Beta.2 branch is **not present** in this public repository.
 - A literal GitHub PR from `WeeJubya/Floppy144:development/Beta-2-runtime` into `GreyDoorRepublik/Floppy144-beta:main` is **not currently a normal same-repository/fork-network PR**. Do not invent a PR URL or assume the public main can be safely fast-forwarded. A curated public staging branch/PR would require a separate authorised repository import/publication step after rights clearance, performed through the release owner's accepted workflow.
 - **No B2-07 merge, public branch creation, tag, release asset upload or publication took place.** No historical commit, tag or licence was rewritten.
 
@@ -45,7 +45,7 @@ A direct tracked-blob comparison with Beta.1 found **95 developer-only additions
 
 Proposed gated publication steps, after written rights approval:
 1. Freeze the approved development SHA and binary identity; capture signed tests, desk-review video/audio and authentic Beta.1 migration fixtures.
-2. Decide and document precisely which **licence** legally applies to each code/asset/contribution and public source distribution. Resolve Beta.1 root GPLv3 licence omission **as a separate historical issue**, without rewriting the earlier release.
+2. Decide and document precisely which **licence** legally applies to each code/asset/contribution and public source distribution. Record that the GPLv3 root `LICENSE` was separately added to current public `main` in `9640d287...` and verify any remaining past-release notice/corresponding-source obligations, without rewriting the original Beta.1 tag.
 3. Prepare a **curated public source tree**: the required buildable game source, headers, canonical generation inputs, script/tool source as needed for corresponding-source obligations, resources, approved documentation and copyright/licence notices. Verify legal source-distribution obligations before deciding if full/partial source is public.
 4. Exclude **user save/profile/settings instances**, temporary binaries/objects, diagnostic PPMs, unreleased source notes and internal audit reports unless explicitly required by law or approved for publication. Do not exclude licence-required material on the pretext of tidiness.
 5. Stage player-facing README and drafted release notes from `07_public_readme_draft.md` and `07_release_notes_draft.md`; preserve Grey Door Republik studio credit and WeeJubya developer credit, avoid spoilers.
@@ -61,7 +61,7 @@ Proposed gated publication steps, after written rights approval:
 |---|---|---|
 | Original-source/relicensing rights | Independent qualified reviewer and copyright holders' documented grants/assignments for all retained components | **OPEN** |
 | 5×7 glyphs/icon and any other asset authorship | Verified design originals, explicit licence/permission or separately approved non-regressing replacement | **OPEN** |
-| Beta.1 GPLv3 historical obligations | Legal/remediation record and correct past source/licence accessibility; document what public commitments remain | **OPEN** |
+| Beta.1 GPLv3 historical obligations | Root `LICENSE` now exists at current public `main` (identical to development); evaluate whether past binary distribution, notices and corresponding source met GPLv3 requirements and document any required remediation | **OPEN (file added; legal review pending)** |
 | Beta.1→Beta.2 manual/autosave/profile/settings | Actual Beta.1-created files backed up, controlled Beta.2 load/save/relaunch, reviewer signature | **OPEN** |
 | Real Windows visual parity | Completed `06_visual_acceptance.md` VIS-01..11, matched seeded captures and observed issues triaged | **OPEN** |
 | Real WinMM audible parity | AUD-H01..04 on a Windows sound device, evidence and signature | **OPEN** |
