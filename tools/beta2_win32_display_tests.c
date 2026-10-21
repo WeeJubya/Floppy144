@@ -319,6 +319,7 @@ static void TestWindowSmoke(Floppy144Win32Display *display)
         (void)UnregisterClassA(klass.lpszClassName, klass.hInstance);
         return;
     }
+    (void)ShowWindow(window, SW_SHOWNOACTIVATE);
     (void)InvalidateRect(window, NULL, FALSE);
     (void)UpdateWindow(window);
     (void)SetWindowPos(window, NULL, 0, 0, 1000, 700,
@@ -370,6 +371,20 @@ static void TestWindowsGdi(void)
     frame->pixels[10U * 640U + 10U] = 0xFF123456U;
     CHECK(!Floppy144Win32DisplayPresent(display, NULL, 640, 360),
           "invalid HDC explicitly rejected");
+    {
+        HDC probe = CreateCompatibleDC(NULL);
+        CHECK(probe != NULL, "native geometry probe context");
+        if(probe != NULL)
+        {
+            CHECK(Floppy144Win32DisplayPresent(display, probe, 0, 360) &&
+                  Floppy144Win32DisplayPresent(display, probe, 640, 0),
+                  "zero-sized client suppresses transfer safely");
+            CHECK(!Floppy144Win32DisplayPresent(display, probe, -1, 360) &&
+                  !Floppy144Win32DisplayPresent(display, probe, INT64_MAX, 1),
+                  "invalid and overflowing client sizes rejected");
+            (void)DeleteDC(probe);
+        }
+    }
     TestGdiTarget(display, 640, 360);
     TestGdiTarget(display, 1280, 720);
     TestGdiTarget(display, 800, 600);
