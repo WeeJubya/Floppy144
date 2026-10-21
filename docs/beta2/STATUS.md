@@ -1,7 +1,21 @@
 # Beta.2 runtime migration status
-Last updated: 21 October 2026. **Current stage: B2-06 full automated regression and Windows clean Release VERIFIED. Public release approval remains ON HOLD pending mandatory manual/provenance/save-fixture gates.**
 
-## B2-06 current handover
+**Last review:** 21 October 2026. **Stage B2-07: FINAL ENGINEERING AUDIT AND RELEASE PREPARATION; RELEASE BLOCKED.** All automated engineering checks passed. There is **no** independent provenance/licensing clearance, human desktop/audio sign-off, public Beta.1-save migration verification or explicit public release approval. No public release has been made.
+
+## B2-07 current handover
+
+- **Development repository:** `WeeJubya/Floppy144` / existing `development/Beta-2-runtime`. Code/test HEAD checked at start: `514b159197bcf4e9e2f2289cbc5b645d2b9defb4`. B2-07 additions are **documentation-only**, with commit/push verification reported separately.
+- **Public release repository:** `GreyDoorRepublik/Floppy144-beta` / `main` at `0981e4ab3694a1cdb5b6338c199e0262a6ed14bf`. The public repository has only `main` (no existing Beta.2 branch), is **not a fork** of the developer repository and contains no open PR. No branch import, merge, tag, asset, licence change or public publication was performed.
+- **Actually rechecked latest B2-06 windows validation:** [run 39580254575](https://github.com/WeeJubya/Floppy144/actions/runs/39580254575), **three jobs PASS**: Beta.1 download/identity, full regressions/cleanbuild, strict Windows Release. Testbuild 46 ordered groups PASS; Stage 4D+ 15/15; `cleanbuild.ps1` and `run.ps1 -build release` PASS; native framebuffer 79 and host/API 25 assertions PASS; no generated data drift or inherited runtime objects.
+- **Actual executable and imports:** **973,312 bytes** / **1,474,560 max** (**501,248 spare; PASS**); 0 compiler warnings, 0 errors. Strict Windows binary SHA-256 for code HEAD `514b159...`: `C478E6D33B52E6E12D8786B048C8AB7A3CD2388FA3E87C48046C9CEEF311980F`. Only USER32, KERNEL32, GDI32, SHELL32 and WINMM system DLL imports. Hash is attached to **that** verified build, not future binaries.
+- **Verified published Beta.1 identity:** 822,272-byte actual GitHub release EXE, SHA-256 `7daf713c4cbe5103b3bc7b1316140581614b484c397ca5a83352ec96fa8de749`; 13 unchanged game modules hash-match. Changes since Beta.1 include approved intro/coordinator changes; complete display/audio parity must not be inferred.
+- **Publication diff risk:** direct tracked-file tree comparison: 95 dev-only additions, seven legacy deleted paths and 12 changed common blobs before B2-07, including internal docs and historic developer saves/settings. A wholesale public merge is **not** an approved packaging route. Review curator-selected buildable source/docs/assets against licence obligations.
+- **Licensing goal:** owner prefers exploring **All Rights Reserved**, but the surviving game's complete rights, historical contributor grants, 5×7 font/icon origin and an independent source-unexposed provenance check remain **unverified**. The developer GPLv3 `LICENSE` retains historical River2D/BadAcronym notices, and public Beta.1's root GPLv3 `LICENSE` omission remains unresolved. **No licence change authorised; no formal legal independence assertion.**
+- **Mandatory human gates outstanding:** VIS-01..11 full Windows desktop comparison, AUD-H01..04 real sound-device listening, authentic Beta.1-created manual/autosave/profile/settings file migration/relaunch and signed author/licensing review. Older developer V1/64- and 68-byte prototypes are unsupported even by Beta.1, so their safe rejection is not a new Beta.2 regression.
+- **Staged only on developer branch:** `docs/beta2/07_final_signoff.md`, `07_handover.md`, `07_public_readme_draft.md`, `07_release_notes_draft.md` and `07_pr_draft.md`. The public README, source tree and Releases page remain unchanged. No live PR is claimed; a future curated public branch and draft PR require rights approval.
+- **Release decision:** **BLOCKED**, no Beta.2 tag or GitHub Release. Obtain independent rights/manual/data acceptance first, then explicit owner approval specifying exact candidate source SHA, EXE SHA, licence and package. Never equate this document with that authorisation.
+
+## B2-06 automated verification (historical record)
 
 - **Development:** `WeeJubya/Floppy144` / existing `development/Beta-2-runtime`. Public `GreyDoorRepublik/Floppy144-beta` unchanged.
 - **Full automated Windows B2-06 run:** [39579270827](https://github.com/WeeJubya/Floppy144/actions/runs/39579270827), code/test SHA `ba3674cc4f7e744e6b2c2c557955b09b9db77f50`, **all three jobs PASS**: actual Beta.1 baseline verification; full regression/cleanbuild; strict x64 Release/imports.
