@@ -4336,10 +4336,6 @@ static LRESULT CALLBACK Floppy144WindowProc(
             {
                 Floppy144MovementInputReset(&global_movement_input);
             }
-            if(lifecycle_event.type == F144_LIFECYCLE_SHUTDOWN)
-            {
-                PostQuitMessage(0);
-            }
             if(
                 lifecycle_event.type != F144_LIFECYCLE_ACTIVE &&
                 lifecycle_event.type != F144_LIFECYCLE_INACTIVE

@@ -10,7 +10,8 @@ $sources = @(
     (Join-Path $root 'src\floppy144_win32_display.c'),
     (Join-Path $root 'src\f144_win32_timing.c'),
     (Join-Path $root 'src\f144_platform.c'),
-    (Join-Path $root 'src\f144_calendar.c')
+    (Join-Path $root 'src\f144_calendar.c'),
+    (Join-Path $root 'src\f144_startup_config.c')
 )
 $compilerArgs = @('/nologo','/TC','/std:c11','/W4','/WX','/utf-8',('/I' + (Join-Path $root 'include')))
 $compilerArgs += $sources

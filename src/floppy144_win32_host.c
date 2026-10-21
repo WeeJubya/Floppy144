@@ -164,6 +164,8 @@ void Floppy144Win32HostWindowDestroyed(
         host->window = NULL;
         host->paint_dc = NULL;
         host->closing = true;
+        /* The owning window has finished its native destruction sequence. */
+        PostQuitMessage(0);
     }
 }
 
