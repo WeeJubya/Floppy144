@@ -10463,7 +10463,7 @@
     },
     {
       "id": "P-162",
-      "name": "Priya Patel desk nameplate",
+      "name": "Becca Eastern desk nameplate",
       "room_id": "MAIN_OFFICE",
       "parent_id": "MAIN_OFFICE_DESK_01",
       "collection_ids": [
@@ -10478,7 +10478,7 @@
     },
     {
       "id": "P-163",
-      "name": "Daniel Price desk nameplate",
+      "name": "Eleanor Lawson desk nameplate",
       "room_id": "MAIN_OFFICE",
       "parent_id": "MAIN_OFFICE_DESK_02",
       "collection_ids": [
@@ -10508,7 +10508,7 @@
     },
     {
       "id": "P-165",
-      "name": "Claire Hughes desk nameplate",
+      "name": "Sarah Harrison desk nameplate",
       "room_id": "MAIN_OFFICE",
       "parent_id": "MAIN_OFFICE_DESK_04",
       "collection_ids": [
@@ -10538,7 +10538,7 @@
     },
     {
       "id": "P-167",
-      "name": "Martin Webb desk nameplate",
+      "name": "Stephen Robson desk nameplate",
       "room_id": "MAIN_OFFICE",
       "parent_id": "MAIN_OFFICE_DESK_06",
       "collection_ids": [
@@ -10553,7 +10553,7 @@
     },
     {
       "id": "P-168",
-      "name": "Helen Cartwright desk nameplate",
+      "name": "Sally Birdette desk nameplate",
       "room_id": "DIRECTOR_OFFICE",
       "parent_id": "DIRECTOR_OFFICE_DESK",
       "collection_ids": [
@@ -10568,7 +10568,7 @@
     },
     {
       "id": "P-169",
-      "name": "Rachel Morgan desk nameplate",
+      "name": "Priya Patel desk nameplate",
       "room_id": "SECURITY",
       "parent_id": "SECURITY_DESK_01",
       "collection_ids": [
@@ -17495,7 +17495,7 @@
       "document_type": "readable_record",
       "trigger_id": null,
       "notebook_summary": "Records reconciliation and terminal-network remediation remain independent Friday workstreams, both required for authorised final handover.",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nSITE CLOSURE PROJECT\nOUTSTANDING WORKSTREAM SUMMARY\n\nAt close of business Thursday, two operational workstreams remained capable of delaying handover.\n\nRECORDS\nCabinet holdings and transfer staging require final reconciliation in the Records Office.\n\nTECHNOLOGY\nThe Main Office terminal route must be restored before digital holdings verification can be completed.\n\nThe workstreams may proceed independently, but both feed the same final handover decision. Neither is to be marked complete on the strength of verbal assurance.\n\nFacilities and Security are to support access as required.\n\nDistribution: Martin Webb, Project Manager, Priya Patel, Senior Archivist, Claire Hughes, IT Manager, Rachel Morgan, Security Manager.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nSITE CLOSURE PROJECT\nOUTSTANDING WORKSTREAM SUMMARY\n\nAt close of business Thursday, two operational workstreams remained capable of delaying handover.\n\nRECORDS\nCabinet holdings and transfer staging require final reconciliation in the Records Office.\n\nTECHNOLOGY\nThe Main Office terminal route must be restored before digital holdings verification can be completed.\n\nThe workstreams may proceed independently, but both feed the same final handover decision. Neither is to be marked complete on the strength of verbal assurance.\n\nFacilities and Security are to support access as required.\n\nDistribution: Stephen Robson, Project Manager, Becca Eastern, Senior Archivist, Sarah Harrison, IT Manager, Priya Patel, Security Manager.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-04",
       "offer_pending_trigger_choices": true
@@ -17508,8 +17508,8 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-010",
-      "notebook_summary": "Priya Patel must reconcile cabinet withdrawals, trolley holdings and transfer exceptions before the physical archive can be signed off.",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nSITE CLOSURE PROJECT\nPHYSICAL ARCHIVE RECONCILIATION WORKSTREAM\n\nOwner: Priya Patel, Senior Archivist\nStatus at Friday 09:00: OPEN\n\nFinal cabinet-to-catalogue reconciliation is incomplete. Several holdings have been withdrawn for transfer, one trolley remains awaiting refiling, and the closure file contains unresolved location exceptions.\n\nRecords Office access is required for completion. The trolley, withdrawal markers and transfer staging material are to remain undisturbed until the Priya Patel, Senior Archivist has signed the exception register.\n\nHandover may not be certified while the physical holdings total differs from the signed catalogue total.\n\nProject Manager note: this is a records problem until somebody proves otherwise.",
+      "notebook_summary": "Becca Eastern must reconcile cabinet withdrawals, trolley holdings and transfer exceptions before the physical archive can be signed off.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nSITE CLOSURE PROJECT\nPHYSICAL ARCHIVE RECONCILIATION WORKSTREAM\n\nOwner: Becca Eastern, Senior Archivist\nStatus at Friday 09:00: OPEN\n\nFinal cabinet-to-catalogue reconciliation is incomplete. Several holdings have been withdrawn for transfer, one trolley remains awaiting refiling, and the closure file contains unresolved location exceptions.\n\nRecords Office access is required for completion. The trolley, withdrawal markers and transfer staging material are to remain undisturbed until the Becca Eastern, Senior Archivist has signed the exception register.\n\nHandover may not be certified while the physical holdings total differs from the signed catalogue total.\n\nProject Manager note: this is a records problem until somebody proves otherwise.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-04"
     },
@@ -17575,7 +17575,7 @@
       "document_type": "trigger_record",
       "trigger_id": "T-013",
       "notebook_summary": "Cabinet 05's holding was absent from its assigned shelf, but staff were instructed to inspect the refiling trolley before alleging loss.",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nRECORDS OFFICE\nARCHIVE RECONCILIATION EXCEPTION REPORT\n\nException: one registered holding is not present in its assigned secure cabinet.\n\nCatalogue location: Cabinet 05.\nLast recorded action: withdrawn for internal handling.\nCurrent status: unresolved at time of report.\n\nA Records Trolley remains in use for material awaiting refiling. Staff are to check trolley holdings, dividers and temporary slips before escalating the item as missing.\n\nNo destruction authority is recorded against the reference.\n\nPriya Patel, Senior Archivist:\n\"Please stop using the word 'lost' until we have looked in the places we put things.\"",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nRECORDS OFFICE\nARCHIVE RECONCILIATION EXCEPTION REPORT\n\nException: one registered holding is not present in its assigned secure cabinet.\n\nCatalogue location: Cabinet 05.\nLast recorded action: withdrawn for internal handling.\nCurrent status: unresolved at time of report.\n\nA Records Trolley remains in use for material awaiting refiling. Staff are to check trolley holdings, dividers and temporary slips before escalating the item as missing.\n\nNo destruction authority is recorded against the reference.\n\nBecca Eastern, Senior Archivist:\n\"Please stop using the word 'lost' until we have looked in the places we put things.\"",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-07"
     },
@@ -17639,8 +17639,8 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "notebook_summary": "Daniel Price withheld archive sign-off pending the transfer manifest, custody sheet and trolley-held record; no unexplained losses were confirmed.",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nRECORDS OFFICE\nARCHIVE RECONCILIATION SIGN-OFF\n\nPhysical count: substantially complete.\nOpen exceptions: transfer batch and one trolley-held record.\nUnexplained losses: NONE CONFIRMED.\nDestruction discrepancies: NONE RECORDED.\n\nFinal sign-off withheld pending:\n  - transfer manifest comparison;\n  - custody-sheet completion;\n  - return or formal relocation of trolley-held material.\n\nPrepared by: Daniel Price, Records Officer\nFor review by: Priya Patel, Senior Archivist\n\nMargin note:\n\"Do not sign the bottom box until the top boxes mean what they say.\"",
+      "notebook_summary": "Eleanor Lawson withheld archive sign-off pending the transfer manifest, custody sheet and trolley-held record; no unexplained losses were confirmed.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nRECORDS OFFICE\nARCHIVE RECONCILIATION SIGN-OFF\n\nPhysical count: substantially complete.\nOpen exceptions: transfer batch and one trolley-held record.\nUnexplained losses: NONE CONFIRMED.\nDestruction discrepancies: NONE RECORDED.\n\nFinal sign-off withheld pending:\n  - transfer manifest comparison;\n  - custody-sheet completion;\n  - return or formal relocation of trolley-held material.\n\nPrepared by: Eleanor Lawson, Records Officer\nFor review by: Becca Eastern, Senior Archivist\n\nMargin note:\n\"Do not sign the bottom box until the top boxes mean what they say.\"",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-07"
     },
@@ -17744,7 +17744,7 @@
       "document_type": "readable_record",
       "trigger_id": null,
       "notebook_summary": "The seal for FINAL-6-B was reserved but not applied because verification remained outstanding; sealing an incomplete box was prohibited.",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nARCHIVE TRANSFER TEAM\nCUSTODY SEAL REGISTER\n\nUnused seals remain with the Daniel Price, Records Officer.\nApplied seals are entered against box number, date, time and witness.\n\nFINAL-6-B: seal reserved, NOT YET APPLIED.\nReason: verification outstanding.\n\nAny seal removed after application is to be retained and attached to the exception sheet.\n\nThere is no requirement to seal an incomplete box for the convenience of the closure timetable.\n\nUnsigned correction in margin:\n\"Nor does writing 'FINAL' on something make it final.\"",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nARCHIVE TRANSFER TEAM\nCUSTODY SEAL REGISTER\n\nUnused seals remain with the Eleanor Lawson, Records Officer.\nApplied seals are entered against box number, date, time and witness.\n\nFINAL-6-B: seal reserved, NOT YET APPLIED.\nReason: verification outstanding.\n\nAny seal removed after application is to be retained and attached to the exception sheet.\n\nThere is no requirement to seal an incomplete box for the convenience of the closure timetable.\n\nUnsigned correction in margin:\n\"Nor does writing 'FINAL' on something make it final.\"",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-29"
     },
@@ -17783,7 +17783,7 @@
       "document_type": "trigger_record",
       "trigger_id": "T-017",
       "notebook_summary": "At Friday noon three transfer exceptions remained open: a Cabinet 05 trolley holding, unsigned transfer-box custody and blocked digital verification.",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nARCHIVE TRANSFER AUTHORITY\nFINAL TRANSFER EXCEPTION REGISTER\n\nOpen at 12:00 Friday:\n\nEX-1  Cabinet 05 holding on trolley pending refiling confirmation.\nEX-2  Final transfer box awaiting custody verification.\nEX-3  Digital holdings check blocked by network fault.\n\nOwner for closure: Priya Patel, Senior Archivist.\n\nNo exception is marked as suspected interference. All remain operationally unresolved.\n\nThe register is to be reviewed with the Project Manager before handover, or immediately following any incident that interrupts the closure programme.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nARCHIVE TRANSFER AUTHORITY\nFINAL TRANSFER EXCEPTION REGISTER\n\nOpen at 12:00 Friday:\n\nEX-1  Cabinet 05 holding on trolley pending refiling confirmation.\nEX-2  Final transfer box awaiting custody verification.\nEX-3  Digital holdings check blocked by network fault.\n\nOwner for closure: Becca Eastern, Senior Archivist.\n\nNo exception is marked as suspected interference. All remain operationally unresolved.\n\nThe register is to be reviewed with the Project Manager before handover, or immediately following any incident that interrupts the closure programme.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-31"
     },
@@ -17795,7 +17795,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-018",
-      "notebook_summary": "Priya Patel was assigned personal verification of transfer custody, physical exceptions and digital comparison, with restricted access for that limited purpose.",
+      "notebook_summary": "Becca Eastern was assigned personal verification of transfer custody, physical exceptions and digital comparison, with restricted access for that limited purpose.",
       "body": "GOVERNMENT DEPARTMENT OF RECORDS\nARCHIVE TRANSFER AUTHORITY\nSENIOR ARCHIVIST VERIFICATION ASSIGNMENT\n\nFor the final closure period, the Senior Archivist is personally assigned to verify:\n\n  - physical transfer exceptions;\n  - custody signatures;\n  - final transfer-box contents;\n  - digital holdings comparison;\n  - any variance between cabinet, trolley and manifest.\n\nRestricted-area access may be requested where necessary to complete digital verification or inspect systems supporting the archive.\n\nThis assignment is a control measure, not a change of post.\n\nThe Senior Archivist is not to delegate final signature to staff whose work is being verified.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-31"
@@ -17861,7 +17861,7 @@
       "document_type": "trigger_record",
       "trigger_id": "T-026",
       "notebook_summary": "The suppression discharge halted Friday handover, preserved Site material and left incident review plus Records and Technology workstreams unresolved.",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nSITE CLOSURE PROJECT\nFINAL CLOSURE EXCEPTION SUMMARY\n\nFollowing the suppression-system discharge and evacuation, the planned Friday handover is suspended.\n\nOpen matters now include:\n  - incident review by Operational Security;\n  - confirmation of all personnel and restricted-area access;\n  - completion of the archive reconciliation workstream;\n  - completion of the terminal-network remediation workstream;\n  - confirmation that essential server services remain stable.\n\nNo material is to be destroyed, transferred off Site or reclassified until the exception review is complete.\n\nMartin Webb, Project Manager:\n\"Friday's deadline has ceased to be the most important thing that happened on Friday.\"",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nSITE CLOSURE PROJECT\nFINAL CLOSURE EXCEPTION SUMMARY\n\nFollowing the suppression-system discharge and evacuation, the planned Friday handover is suspended.\n\nOpen matters now include:\n  - incident review by Operational Security;\n  - confirmation of all personnel and restricted-area access;\n  - completion of the archive reconciliation workstream;\n  - completion of the terminal-network remediation workstream;\n  - confirmation that essential server services remain stable.\n\nNo material is to be destroyed, transferred off Site or reclassified until the exception review is complete.\n\nStephen Robson, Project Manager:\n\"Friday's deadline has ceased to be the most important thing that happened on Friday.\"",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-47"
     },
@@ -17913,7 +17913,7 @@
       "document_type": "readable_record",
       "trigger_id": null,
       "notebook_summary": "The Director suspended building transfer and further service isolation after evacuation while preserving cabinets, riser arrangements and incident records.",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nSITE CLOSURE PROJECT\nCLOSURE SUSPENSION NOTICE\n\nEffective immediately, the planned building handover is paused.\n\nStaff required for incident review, archive custody, technical recovery and essential services may remain or return under Security direction. All other closure activity is suspended.\n\nTransfer vehicles are not to depart with the final archive batch.\nDecommissioning contractors are not to isolate further services.\nNo cabinet or cable-riser arrangement is to be tidied for appearance.\n\nPreserve the Site as found after evacuation, subject to life-safety requirements.\n\nSigned Helen Cartwright",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nSITE CLOSURE PROJECT\nCLOSURE SUSPENSION NOTICE\n\nEffective immediately, the planned building handover is paused.\n\nStaff required for incident review, archive custody, technical recovery and essential services may remain or return under Security direction. All other closure activity is suspended.\n\nTransfer vehicles are not to depart with the final archive batch.\nDecommissioning contractors are not to isolate further services.\nNo cabinet or cable-riser arrangement is to be tidied for appearance.\n\nPreserve the Site as found after evacuation, subject to life-safety requirements.\n\nSigned Sally Birdette",
       "source_status": "authored-for-integration",
       "parent_collection_id": "DR-47"
     },
@@ -17938,7 +17938,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-029",
-      "notebook_summary": "Helen Cartwright ordered an ordinary planned centralisation rather than an emergency shutdown, conditional on complete custody, digital checks and safety sign-off.",
+      "notebook_summary": "Sally Birdette ordered an ordinary planned centralisation rather than an emergency shutdown, conditional on complete custody, digital checks and safety sign-off.",
       "body": "GOVERNMENT DEPARTMENT OF RECORDS\nDIRECTOR'S OFFICE\nSITE CLOSURE DIRECTION\n\nThe Site is to close as part of the Department's approved centralisation programme.\n\nRecords functions will transfer to the central archive. Digital holdings will move to the consolidated service. Local administrative posts will be reassigned or concluded under existing personnel arrangements.\n\nThe closure is not a response to a security breach, disciplinary action or emergency condition.\n\nThe building is to be handed over only after archive custody, digital verification and essential safety controls are complete.\n\nSigned,\nDIRECTOR (HELEN CARTWRIGHT)\n\nDistribution: Project Manager, Senior Archivist, Facilities, Security, IT Support.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "DR-53"
@@ -18017,8 +18017,8 @@
       "document_type": "trigger_record",
       "trigger_id": "T-002",
       "source_status": "setup-authored-identity",
-      "notebook_summary": "Final-week Main Office posts include Martin Webb, Priya Patel, Daniel Price, Claire Hughes, Imran Shah and Andrew Collins, with desk movements logged for accountability.",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nSITE ESTABLISHMENT REGISTER\n\nAccommodation return: closure-period staffing.\n\nSite Director: Helen Cartwright.\n\nThe Main Office remains the administrative centre for the Site until final handover. Posts still requiring a physical desk are:\n\n  - Project Manager: Martin Webb\n  - Senior Archivist: Priya Patel\n  - Records Officer: Daniel Price\n  - IT Support: Claire Hughes\n  - Facilities liaison: Imran Shah\n  - Administrative support: Andrew Collins\n\nVacated posts and surplus furniture are excluded from the final-week allocation.\n\nHR instruction:\nDo not remove desk numbers until archive, technology and handover work is complete. Temporary moves must be recorded because staff location forms part of the final attendance and emergency-accountability return.",
+      "notebook_summary": "Final-week Main Office posts include Stephen Robson, Becca Eastern, Eleanor Lawson, Sarah Harrison, Imran Shah and Andrew Collins, with desk movements logged for accountability.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nSITE ESTABLISHMENT REGISTER\n\nAccommodation return: closure-period staffing.\n\nSite Director: Sally Birdette.\n\nThe Main Office remains the administrative centre for the Site until final handover. Posts still requiring a physical desk are:\n\n  - Project Manager: Stephen Robson\n  - Senior Archivist: Becca Eastern\n  - Records Officer: Eleanor Lawson\n  - IT Support: Sarah Harrison\n  - Facilities liaison: Imran Shah\n  - Administrative support: Andrew Collins\n\nVacated posts and surplus furniture are excluded from the final-week allocation.\n\nHR instruction:\nDo not remove desk numbers until archive, technology and handover work is complete. Temporary moves must be recorded because staff location forms part of the final attendance and emergency-accountability return.",
       "parent_collection_id": "HR-01"
     },
     {
@@ -18029,8 +18029,8 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-003",
-      "notebook_summary": "Desk 01 belonged to Priya Patel, 02 to Daniel Price, 03 to Andrew Collins, 04 temporarily to Claire Hughes, 05 to Imran Shah and 06 to Martin Webb.",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nMAIN OFFICE STAFFING ALLOCATION\n\nFINAL WEEK - DESK PLAN\n\nDesk 01  Priya Patel - archive closure work\nDesk 02  Daniel Price - reconciliation support\nDesk 03  Andrew Collins - Administrative Support\nDesk 04  Claire Hughes  - temporary technical position\nDesk 05  Imran Shah - closure paperwork\nDesk 06  Martin Webb - handover control\n\nDesk 04 is temporary while the terminal cable fault is investigated. Staff may move for operational work, but the allocation remains the reference point for post, telephone and accountability.\n\nPlease leave the adhesive numbers in place. Facilities have already replaced them once.",
+      "notebook_summary": "Desk 01 belonged to Becca Eastern, 02 to Eleanor Lawson, 03 to Andrew Collins, 04 temporarily to Sarah Harrison, 05 to Imran Shah and 06 to Stephen Robson.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nMAIN OFFICE STAFFING ALLOCATION\n\nFINAL WEEK - DESK PLAN\n\nDesk 01  Becca Eastern - archive closure work\nDesk 02  Eleanor Lawson - reconciliation support\nDesk 03  Andrew Collins - Administrative Support\nDesk 04  Sarah Harrison  - temporary technical position\nDesk 05  Imran Shah - closure paperwork\nDesk 06  Stephen Robson - handover control\n\nDesk 04 is temporary while the terminal cable fault is investigated. Staff may move for operational work, but the allocation remains the reference point for post, telephone and accountability.\n\nPlease leave the adhesive numbers in place. Facilities have already replaced them once.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "HR-01"
     },
@@ -18042,8 +18042,8 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "notebook_summary": "Daniel Price reports under Senior Archivist Priya Patel while Security, IT, Facilities and closure management retain their distinct responsibilities to the Director.",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nSITE ORGANISATIONAL CHART - CLOSURE PERIOD\n\nHELEN CARTWRIGHT, DIRECTOR\n    |\n    |-- Andrew Collins, ADMINISTRATIVE SUPPORT\n  |\n  |-- Priya Patel, SENIOR ARCHIVIST\n  |  |\n  |  |-- Daniel Price, RECORDS OFFICER\n  |\n  |-- Rachel Morgan, SECURITY Manager\n  |\n  |-- Claire Hughes, IT Manager\n  |\n  |-- Imran Shah, FACILITIES LIAISON\n  |\n  |-- Martin Webb, PROJECT MANAGER\n\nOperational Security retains an independent duty line to the Director for access and incident matters.\n\nDuring closure, temporary tasking does not alter reporting responsibility. In particular, technical access remains an IT responsibility and archive release remains a Senior Archivist responsibility.\n\nThe chart replaces the earlier full-establishment version, which contained posts already transferred off Site.",
+      "notebook_summary": "Eleanor Lawson reports under Senior Archivist Becca Eastern while Security, IT, Facilities and closure management retain their distinct responsibilities to the Director.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nSITE ORGANISATIONAL CHART - CLOSURE PERIOD\n\nHELEN CARTWRIGHT, DIRECTOR\n    |\n    |-- Andrew Collins, ADMINISTRATIVE SUPPORT\n  |\n  |-- Becca Eastern, SENIOR ARCHIVIST\n  |  |\n  |  |-- Eleanor Lawson, RECORDS OFFICER\n  |\n  |-- Priya Patel, SECURITY Manager\n  |\n  |-- Sarah Harrison, IT Manager\n  |\n  |-- Imran Shah, FACILITIES LIAISON\n  |\n  |-- Stephen Robson, PROJECT MANAGER\n\nOperational Security retains an independent duty line to the Director for access and incident matters.\n\nDuring closure, temporary tasking does not alter reporting responsibility. In particular, technical access remains an IT responsibility and archive release remains a Senior Archivist responsibility.\n\nThe chart replaces the earlier full-establishment version, which contained posts already transferred off Site.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "HR-01"
     },
@@ -18055,8 +18055,8 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "notebook_summary": "Priya Patel ordered IT Support to remain at Desk 04 until cable repair and insisted her mug and in-tray were not archive material.",
-      "body": "FROM: Priya Patel\nTO: Daniel Price\nSUBJECT: TEMPORARY DESK REALLOCATION\n\nIT SUPPORT IS TO REMAIN AT DESK 04 UNTIL THE TERMINAL CABLE HAS BEEN REPLACED.\n\nThe MUG AT on my desk IS NOT AN ARCHIVE ITEM AND SHOULD NOT BE ENTERED ON FORM AR-7.\n\nIF ANYONE MOVES MY IN-TRAY, IT WILL BECOME AN ARCHIVE ITEM OUT OF SPITE.\n\nSIGNED: Priya Patel",
+      "notebook_summary": "Becca Eastern ordered IT Support to remain at Desk 04 until cable repair and insisted her mug and in-tray were not archive material.",
+      "body": "FROM: Becca Eastern\nTO: Eleanor Lawson\nSUBJECT: TEMPORARY DESK REALLOCATION\n\nIT SUPPORT IS TO REMAIN AT DESK 04 UNTIL THE TERMINAL CABLE HAS BEEN REPLACED.\n\nThe MUG AT on my desk IS NOT AN ARCHIVE ITEM AND SHOULD NOT BE ENTERED ON FORM AR-7.\n\nIF ANYONE MOVES MY IN-TRAY, IT WILL BECOME AN ARCHIVE ITEM OUT OF SPITE.\n\nSIGNED: Becca Eastern",
       "source_status": "preserved-stage-1",
       "parent_collection_id": "HR-01"
     },
@@ -18081,8 +18081,8 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "notebook_summary": "Final-week contact extensions identify Helen Cartwright, Priya Patel, Daniel Price, Claire Hughes, Imran Shah, Martin Webb and Rachel Morgan in their assigned offices.",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nSTAFF CONTACT DIRECTORY - FINAL WEEK\n\nHelen Cartwright | Director | Director's Office | Ext. 2909\nPriya Patel | Senior Archivist | Main Office / Records Office | Ext. 2509\nDaniel Price | Records Officer | Records Office / Main Office | Ext. 1109\nClaire Hughes | IT Manager | Main Office / IT Support | Ext. 2202\nImran Shah | Facilities Liaison | Facilities / Main Office | Ext. 8822\nMartin Webb | Project Manager | Main Office | Ext. 2303\nRachel Morgan | Security Manager | Security Office | Ext. 0806\n\nInternal extensions remain in service until handover.\n\nFor emergency traffic use Security first. For closure scheduling use the Project Manager. For missing files please see the on-duty RO before using the word \"missing\" loudly.",
+      "notebook_summary": "Final-week contact extensions identify Sally Birdette, Becca Eastern, Eleanor Lawson, Sarah Harrison, Imran Shah, Stephen Robson and Priya Patel in their assigned offices.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nSTAFF CONTACT DIRECTORY - FINAL WEEK\n\nSally Birdette | Director | Director's Office | Ext. 2909\nBecca Eastern | Senior Archivist | Main Office / Records Office | Ext. 2509\nEleanor Lawson | Records Officer | Records Office / Main Office | Ext. 1109\nSarah Harrison | IT Manager | Main Office / IT Support | Ext. 2202\nImran Shah | Facilities Liaison | Facilities / Main Office | Ext. 8822\nStephen Robson | Project Manager | Main Office | Ext. 2303\nPriya Patel | Security Manager | Security Office | Ext. 0806\n\nInternal extensions remain in service until handover.\n\nFor emergency traffic use Security first. For closure scheduling use the Project Manager. For missing files please see the on-duty RO before using the word \"missing\" loudly.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "HR-01"
     },
@@ -18120,8 +18120,8 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "notebook_summary": "The cleaning rota assigned Andrew Collins Monday, Daniel Price Tuesday, Claire Hughes Wednesday and Imran Shah Thursday, with everyone nominally responsible on Friday.",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nSTAFF ROOM CLEANING ROTA\n\nMONDAY       Andrew Collins\nTUESDAY      Daniel Price\nWEDNESDAY    Claire Hughes\nTHURSDAY     Imran Shah\nFRIDAY       Everyone, allegedly\n\nTasks:\n  - wipe worktop;\n  - empty bin;\n  - rinse coffee pot;\n  - remove expired milk;\n  - leave noticeboard material until closure;\n  - do not throw away labelled transfer paperwork carried in by mistake: return it to its owner.\n\nFriday note added in pencil:\n\"If the sandwich is still here, it wins.\"",
+      "notebook_summary": "The cleaning rota assigned Andrew Collins Monday, Eleanor Lawson Tuesday, Sarah Harrison Wednesday and Imran Shah Thursday, with everyone nominally responsible on Friday.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nSTAFF ROOM CLEANING ROTA\n\nMONDAY       Andrew Collins\nTUESDAY      Eleanor Lawson\nWEDNESDAY    Sarah Harrison\nTHURSDAY     Imran Shah\nFRIDAY       Everyone, allegedly\n\nTasks:\n  - wipe worktop;\n  - empty bin;\n  - rinse coffee pot;\n  - remove expired milk;\n  - leave noticeboard material until closure;\n  - do not throw away labelled transfer paperwork carried in by mistake: return it to its owner.\n\nFriday note added in pencil:\n\"If the sandwich is still here, it wins.\"",
       "source_status": "authored-for-integration",
       "parent_collection_id": "HR-05"
     },
@@ -18160,7 +18160,7 @@
       "document_type": "trigger_record",
       "trigger_id": "T-043",
       "notebook_summary": "Friday morning attendance signatures confirm the six-person closure team reported for duty, but do not establish their later locations.",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nFINAL FRIDAY ATTENDANCE RETURN\n\nSigned present at start of duty:\n\nMartin Webb, Project Manager ............. PRESENT\nPriya Patel, Senior Archivist ............ PRESENT\nDaniel Price, Records Officer ............ PRESENT\nClaire Hughes, IT Manager ................ PRESENT\nImran Shah, Facilities liaison ........... PRESENT\nAndrew Collins, Administrative support ... PRESENT\n\nOperational Security duty staff are recorded on the separate Security rota.\n\nThe return confirms presence on Site. It does not establish where an individual was at any later minute.\n\nAmendments after evacuation must be countersigned and must not replace the original signed sheet.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nFINAL FRIDAY ATTENDANCE RETURN\n\nSigned present at start of duty:\n\nStephen Robson, Project Manager ............. PRESENT\nBecca Eastern, Senior Archivist ............ PRESENT\nEleanor Lawson, Records Officer ............ PRESENT\nSarah Harrison, IT Manager ................ PRESENT\nImran Shah, Facilities liaison ........... PRESENT\nAndrew Collins, Administrative support ... PRESENT\n\nOperational Security duty staff are recorded on the separate Security rota.\n\nThe return confirms presence on Site. It does not establish where an individual was at any later minute.\n\nAmendments after evacuation must be countersigned and must not replace the original signed sheet.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "HR-09"
     },
@@ -18172,8 +18172,8 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-044",
-      "notebook_summary": "Priya Patel, Daniel Price, Claire Hughes, Martin Webb and Imran Shah were all assigned Friday duties, with restricted-area movements governed by separate records.",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nDUTY & LEAVE STATUS SCHEDULE\n\nFINAL FRIDAY\n\nPriya Patel:\nOn duty. Archive reconciliation and final verification.\n\nDaniel Price:\nOn duty. Records Office reconciliation and transfer staging.\n\nClaire Hughes:\nOn duty. Terminal network remediation and server-route checks.\n\nMartin Webb:\nOn duty. Closure coordination.\n\nImran Shah:\nOn duty. Decommissioning and retained services.\n\nNo listed member is recorded as annual leave, sick leave or external duty during the relevant closure window.\n\nSeparate movement records apply to restricted areas.",
+      "notebook_summary": "Becca Eastern, Eleanor Lawson, Sarah Harrison, Stephen Robson and Imran Shah were all assigned Friday duties, with restricted-area movements governed by separate records.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nDUTY & LEAVE STATUS SCHEDULE\n\nFINAL FRIDAY\n\nBecca Eastern:\nOn duty. Archive reconciliation and final verification.\n\nEleanor Lawson:\nOn duty. Records Office reconciliation and transfer staging.\n\nSarah Harrison:\nOn duty. Terminal network remediation and server-route checks.\n\nStephen Robson:\nOn duty. Closure coordination.\n\nImran Shah:\nOn duty. Decommissioning and retained services.\n\nNo listed member is recorded as annual leave, sick leave or external duty during the relevant closure window.\n\nSeparate movement records apply to restricted areas.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "HR-09"
     },
@@ -18198,8 +18198,8 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "notebook_summary": "Priya Patel, Daniel Price, Claire Hughes and Imran Shah could work up to two authorised overtime hours without bypassing isolation or access controls.",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nOVERTIME AUTHORISATION\n\nAuthorised where required to complete closure tasks beyond normal hours:\n\nPriya Patel, Senior Archivist: archive transfer exceptions\nDaniel Price, Records Officer: reconciliation and transfer staging\nClaire Hughes, IT Manager: terminal/server remediation\nImran Shah, Facilities liaison: contractor and retained-service support\n\nMaximum: two hours without Project Manager extension.\n\nOvertime authorisation is not permission to bypass access controls, lone-working rules or equipment isolation.\n\nThe building may be closing. Employment law has not been notified.",
+      "notebook_summary": "Becca Eastern, Eleanor Lawson, Sarah Harrison and Imran Shah could work up to two authorised overtime hours without bypassing isolation or access controls.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nOVERTIME AUTHORISATION\n\nAuthorised where required to complete closure tasks beyond normal hours:\n\nBecca Eastern, Senior Archivist: archive transfer exceptions\nEleanor Lawson, Records Officer: reconciliation and transfer staging\nSarah Harrison, IT Manager: terminal/server remediation\nImran Shah, Facilities liaison: contractor and retained-service support\n\nMaximum: two hours without Project Manager extension.\n\nOvertime authorisation is not permission to bypass access controls, lone-working rules or equipment isolation.\n\nThe building may be closing. Employment law has not been notified.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "HR-09"
     },
@@ -18211,8 +18211,8 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "notebook_summary": "Claire Hughes could use Main Office Desk 04 and Priya Patel could work in Records or verification areas, without those moves transferring custody or authority.",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nTEMPORARY DUTY ALLOCATION\n\nDuring the closure period:\n\nClaire Hughes may work from Main Office Desk 04 while tracing the terminal fault.\n\nThe Priya Patel may work between Main Office, Records Office and authorised verification locations.\n\nDaniel Price retains day-to-day control of the Records Office.\n\nFacilities staff may enter operational rooms for scheduled decommissioning subject to local access rules.\n\nTemporary location does not transfer responsibility for another officer's records, keys or equipment.",
+      "notebook_summary": "Sarah Harrison could use Main Office Desk 04 and Becca Eastern could work in Records or verification areas, without those moves transferring custody or authority.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nHUMAN RESOURCES\nTEMPORARY DUTY ALLOCATION\n\nDuring the closure period:\n\nSarah Harrison may work from Main Office Desk 04 while tracing the terminal fault.\n\nThe Becca Eastern may work between Main Office, Records Office and authorised verification locations.\n\nEleanor Lawson retains day-to-day control of the Records Office.\n\nFacilities staff may enter operational rooms for scheduled decommissioning subject to local access rules.\n\nTemporary location does not transfer responsibility for another officer's records, keys or equipment.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "HR-09"
     },
@@ -18238,7 +18238,7 @@
       "document_type": "trigger_record",
       "trigger_id": "T-004",
       "notebook_summary": "Facilities recovery was temporarily authorised at the Main Office terminal until the Facilities Office became accessible, after which later FM collections belonged at Facilities.",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nFACILITIES ACCESS AUTHORISATION\n\nThe Facilities Office remains operational for the duration of the closure programme.\n\nAuthorised users:\n  - Imran Shah;\n  - approved maintenance contractors under escort;\n  - Martin Webb;\n  - Security staff where required.\n\nRecovery routing:\nUntil the Facilities Office has been reconstructed, FM-04 may be recovered from the Main Office terminal under the Project Manager's temporary authorisation. Once Facilities is available, all subsequent Facilities Management collections are to be recovered from the Facilities terminal.\n\nThe room contains current maintenance schedules, service labels, plant references and decommissioning paperwork.\n\nDo not clear shelving until the final retained-services check has been signed.\n\nFacilities note:\nAnyone seeking a key should state which door it opens. \"The one down the corridor\" is no longer an acceptable asset description.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nFACILITIES MANAGEMENT\nFACILITIES ACCESS AUTHORISATION\n\nThe Facilities Office remains operational for the duration of the closure programme.\n\nAuthorised users:\n  - Imran Shah;\n  - approved maintenance contractors under escort;\n  - Stephen Robson;\n  - Security staff where required.\n\nRecovery routing:\nUntil the Facilities Office has been reconstructed, FM-04 may be recovered from the Main Office terminal under the Project Manager's temporary authorisation. Once Facilities is available, all subsequent Facilities Management collections are to be recovered from the Facilities terminal.\n\nThe room contains current maintenance schedules, service labels, plant references and decommissioning paperwork.\n\nDo not clear shelving until the final retained-services check has been signed.\n\nFacilities note:\nAnyone seeking a key should state which door it opens. \"The one down the corridor\" is no longer an acceptable asset description.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "FM-04"
     },
@@ -18718,8 +18718,8 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-033",
-      "notebook_summary": "Priya Patel held temporary final-week Server Room permission only for archive verification, without authority to alter server or suppression equipment.",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nTEMPORARY RESTRICTED AREA AUTHORISATION\n\nHolder: Priya Patel, Senior Archivist\nArea: Server Room\nPeriod: final closure week only\nPurpose: archive verification and final transfer checks requiring comparison with server-held records.\n\nConditions:\n  - access limited to verification activity;\n  - coordinate technical work with IT Support;\n  - no alteration to server or suppression equipment;\n  - return authority on completion of closure.\n\nApproved by: Security Officer\nNoted by: Martin Webb, Project Manager\n\nNB: This authority supplements normal archive duties. It does not grant general technical-control privileges.",
+      "notebook_summary": "Becca Eastern held temporary final-week Server Room permission only for archive verification, without authority to alter server or suppression equipment.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nTEMPORARY RESTRICTED AREA AUTHORISATION\n\nHolder: Becca Eastern, Senior Archivist\nArea: Server Room\nPeriod: final closure week only\nPurpose: archive verification and final transfer checks requiring comparison with server-held records.\n\nConditions:\n  - access limited to verification activity;\n  - coordinate technical work with IT Support;\n  - no alteration to server or suppression equipment;\n  - return authority on completion of closure.\n\nApproved by: Security Officer\nNoted by: Stephen Robson, Project Manager\n\nNB: This authority supplements normal archive duties. It does not grant general technical-control privileges.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "OS-18"
     },
@@ -18744,7 +18744,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "notebook_summary": "The final access review retained IT, Security and limited Priya Patel authority with no new unrestricted Server Room permissions approved.",
+      "notebook_summary": "The final access review retained IT, Security and limited Becca Eastern authority with no new unrestricted Server Room permissions approved.",
       "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nFINAL CLOSURE ACCESS REVIEW\n\nReview scope: restricted-area permissions retained during the final closure period.\n\nSERVER ROOM\n  - IT Support ................. standing authority retained for technical duties\n  - Security Officers .......... standing authority retained for security response\n  - Senior Archivist ........... temporary authority retained for archive verification\n  - Facilities engineer ........ controlled maintenance access only\n  - Other closure staff ........ no routine access\n  - Visitors/contractors ....... escort and specific authority required\n\nTemporary authorities are to expire after 3 months, or when the associated closure work is complete. Standing authorities cease with formal Site handover unless separately transferred.\n\nNB: No additional unrestricted Server Room permissions were approved for the closure period.\n\nSecurity review note: access permission should be considered alongside attendance, duty and movement records when reconstructing final-day activity.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "OS-18"
@@ -18770,8 +18770,8 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-035",
-      "notebook_summary": "All expected staff were accounted for and no injuries or visitors were reported, while Claire Hughes and Priya Patel were reported near the restricted-area route.",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nEVACUATION ACCOUNTABILITY RETURN\n\nRoll-call completed after Friday suppression incident.\n\nMartin Webb, Project Manager .............. accounted for\nPriya Patel, Senior Archivist ............. accounted for\nDaniel Price, Records Officer ............. accounted for\nClaire Hughes, IT Manager ................. accounted for\nImran Shah, Facilities liaison ............ accounted for\nAndrew Collins, Administrative support .... accounted for\nRachel Morgan, Security Manager ........... accounted for\n\nVisitors on Site at alarm: NONE RECORDED\nUnaccounted persons: NONE\nInjuries reported: NONE\n\nThe Senior Archivist and IT Support were reported from the restricted-area side of the Site during evacuation and were accounted for safely.",
+      "notebook_summary": "All expected staff were accounted for and no injuries or visitors were reported, while Sarah Harrison and Becca Eastern were reported near the restricted-area route.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nEVACUATION ACCOUNTABILITY RETURN\n\nRoll-call completed after Friday suppression incident.\n\nStephen Robson, Project Manager .............. accounted for\nBecca Eastern, Senior Archivist ............. accounted for\nEleanor Lawson, Records Officer ............. accounted for\nSarah Harrison, IT Manager ................. accounted for\nImran Shah, Facilities liaison ............ accounted for\nAndrew Collins, Administrative support .... accounted for\nPriya Patel, Security Manager ........... accounted for\n\nVisitors on Site at alarm: NONE RECORDED\nUnaccounted persons: NONE\nInjuries reported: NONE\n\nThe Senior Archivist and IT Support were reported from the restricted-area side of the Site during evacuation and were accounted for safely.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "OS-26"
     },
@@ -18783,8 +18783,8 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-036",
-      "notebook_summary": "Security placed authorised Claire Hughes and Priya Patel in or near the Server Room route before the alarm but attributed no suppression-control action to either.",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nRESTRICTED AREA EVACUATION NOTE\n\nSecurity sweep information indicates that two authorised staff were working in or immediately around the Server Room route before the alarm:\n\n  - Claire Hughes, IT Manager, conducting network remediation;\n  - Priya Patel, Senior Archivist, attending for final verification work.\n\nBoth held valid access at the time.\nBoth evacuated safely.\nNeither is identified by this note as having operated suppression equipment.\n\nThe Server Room was not re-entered until atmosphere and safety checks were complete.\n\nPreserve the access matrix and temporary authorisation with this note.",
+      "notebook_summary": "Security placed authorised Sarah Harrison and Becca Eastern in or near the Server Room route before the alarm but attributed no suppression-control action to either.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nRESTRICTED AREA EVACUATION NOTE\n\nSecurity sweep information indicates that two authorised staff were working in or immediately around the Server Room route before the alarm:\n\n  - Sarah Harrison, IT Manager, conducting network remediation;\n  - Becca Eastern, Senior Archivist, attending for final verification work.\n\nBoth held valid access at the time.\nBoth evacuated safely.\nNeither is identified by this note as having operated suppression equipment.\n\nThe Server Room was not re-entered until atmosphere and safety checks were complete.\n\nPreserve the access matrix and temporary authorisation with this note.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "OS-26"
     },
@@ -18913,7 +18913,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-039",
-      "notebook_summary": "The handwritten duty log records IT riser checks, Priya Patel's access confirmation, Facilities' isolation advice and the 14:29 suppression alarm; its times are human entries.",
+      "notebook_summary": "The handwritten duty log records IT riser checks, Becca Eastern's access confirmation, Facilities' isolation advice and the 14:29 suppression alarm; its times are human entries.",
       "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nFINAL-DAY DUTY COMMUNICATIONS LOG\n\n13:52  IT Support advises Main Office terminal fault traced beyond local desk connection.\n14:03  IT Support proceeding to check Server Room route.\n14:08  Senior Archivist requests access confirmation for final verification activity.\n14:11  Security confirms temporary authorisation remains valid.\n14:18  Facilities queried regarding cable-riser suppression isolation.\n14:21  Facilities advises service note applies; engineer not yet present at riser.\n14:29  Site alarm / suppression event.\n14:31  Evacuation roll-call opened.\n\nNo visitor or unexplained access call is recorded during this period.\n\nLog compiled from duty telephone sheet; timings are operator entries, not automated timestamps.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "OS-41"
@@ -18939,7 +18939,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "notebook_summary": "Camera 4 records Claire Hughes entering IT Support at 13:47 and 14:02 and Priya Patel passing toward the restricted route at 14:17, without showing riser activity.",
+      "notebook_summary": "Camera 4 records Sarah Harrison entering IT Support at 13:47 and 14:02 and Becca Eastern passing toward the restricted route at 14:17, without showing riser activity.",
       "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nIT SUPPORT ENTRANCE EVENT SUMMARY\n\nCAM 4 - Friday incident window\n\n13:47  IT Support enters.\n13:55  IT Support exits carrying cable tester.\n14:02  IT Support re-enters.\n14:17  Senior Archivist passes corridor toward restricted-area route.\n14:29  Alarm condition; staff movement toward exits.\n14:32  Corridor cleared.\n\nNo visitor or unknown person is recorded entering IT Support during the reviewed interval.\n\nCamera 4 does not view the Server Room interior and cannot establish activity at the cable riser.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "OS-48"
@@ -18991,8 +18991,8 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "notebook_summary": "CCTV supports expected Claire Hughes and Priya Patel movements without unexplained visitors, but cannot establish the suppression release mechanism inside the riser.",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nFINAL-DAY CCTV REVIEW NOTE\n\nReviewed period: 13:30 to evacuation.\n\nObserved movements are consistent with expected closure staffing:\n  - Claire Hughes moving between Main Office/IT Support and the restricted-area route;\n  - Priya Patel proceeding toward authorised verification work;\n  - no unexplained visitor arrival;\n  - no unidentified person entering the IT Support approach.\n\nLimit:\nCCTV does not show the Server Room interior or cable-riser work.\n\nConclusion:\nThe footage supports the access chronology but cannot determine the physical cause of the suppression release.",
+      "notebook_summary": "CCTV supports expected Sarah Harrison and Becca Eastern movements without unexplained visitors, but cannot establish the suppression release mechanism inside the riser.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nOPERATIONAL SECURITY\nFINAL-DAY CCTV REVIEW NOTE\n\nReviewed period: 13:30 to evacuation.\n\nObserved movements are consistent with expected closure staffing:\n  - Sarah Harrison moving between Main Office/IT Support and the restricted-area route;\n  - Becca Eastern proceeding toward authorised verification work;\n  - no unexplained visitor arrival;\n  - no unidentified person entering the IT Support approach.\n\nLimit:\nCCTV does not show the Server Room interior or cable-riser work.\n\nConclusion:\nThe footage supports the access chronology but cannot determine the physical cause of the suppression release.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "OS-48"
     },
@@ -19030,7 +19030,7 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "notebook_summary": "Claire Hughes temporarily used Main Office Desk 04 to test the archive terminal with a cable tester and spare leads.",
+      "notebook_summary": "Sarah Harrison temporarily used Main Office Desk 04 to test the archive terminal with a cable tester and spare leads.",
       "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nTEMPORARY WORKSTATION NOTE\n\nIT Support will work from Main Office Desk 04 while the archive terminal fault remains open.\n\nReason:\nThe affected terminal must remain available for repeated link tests and closure staff require immediate support.\n\nTemporary equipment at Desk 04:\n  - cable tester;\n  - diagnostic card;\n  - spare patch leads;\n  - terminal-status printouts.\n\nDo not relocate the test kit to IT Support without leaving a note. The last two hours of Thursday were spent looking for the cable tester because somebody had put it away properly.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "TS-02"
@@ -19147,8 +19147,8 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "notebook_summary": "Claire Hughes's remediation work order required confirmed suppression isolation before disturbing N-17, but Friday's isolation signature had not been completed.",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nNETWORK REMEDIATION WORK ORDER\n\nAssigned: Claire Hughes, IT Manager.\nWork order: restore Main Office archive-terminal route.\n\nTasks:\n1. Obtain Server Room access.\n2. Confirm Facilities control-circuit isolation.\n3. Photograph or sketch cable-riser condition.\n4. Free network circuit N-17 from compressed bundle.\n5. Replace damaged section as necessary.\n6. Test end-to-end.\n7. Restore digital verification service.\n8. Record any unexpected wiring interaction.\n\nFriday note:\nWork commenced pending Facilities attendance. Full circuit isolation confirmation not yet signed at time of last entry.",
+      "notebook_summary": "Sarah Harrison's remediation work order required confirmed suppression isolation before disturbing N-17, but Friday's isolation signature had not been completed.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nNETWORK REMEDIATION WORK ORDER\n\nAssigned: Sarah Harrison, IT Manager.\nWork order: restore Main Office archive-terminal route.\n\nTasks:\n1. Obtain Server Room access.\n2. Confirm Facilities control-circuit isolation.\n3. Photograph or sketch cable-riser condition.\n4. Free network circuit N-17 from compressed bundle.\n5. Replace damaged section as necessary.\n6. Test end-to-end.\n7. Restore digital verification service.\n8. Record any unexpected wiring interaction.\n\nFriday note:\nWork commenced pending Facilities attendance. Full circuit isolation confirmation not yet signed at time of last entry.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "TS-06"
     },
@@ -19252,7 +19252,7 @@
       "document_type": "readable_record",
       "trigger_id": null,
       "notebook_summary": "The verification case contains four labelled media sets and a checksum sheet, while spare IT media and the final seal remain outside authorised transfer.",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nARCHIVE TRANSFER MEDIA LIST\n\nFinal verification case contains:\n\nMedia A  catalogue export\nMedia B  document-index copy\nMedia C  closure-period change set\nMedia D  verification utilities\nPrinted checksum sheet\nTransfer labels\n\nSpare media wallet remains in IT Support and is not part of the transfer set.\n\nFinal seal is to be applied only after live verification and Priya Patel, Senior Archivist sign-off.\n\nThe case is ready to use, not ready to leave.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nARCHIVE TRANSFER MEDIA LIST\n\nFinal verification case contains:\n\nMedia A  catalogue export\nMedia B  document-index copy\nMedia C  closure-period change set\nMedia D  verification utilities\nPrinted checksum sheet\nTransfer labels\n\nSpare media wallet remains in IT Support and is not part of the transfer set.\n\nFinal seal is to be applied only after live verification and Becca Eastern, Senior Archivist sign-off.\n\nThe case is ready to use, not ready to leave.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "TS-10"
     },
@@ -19368,8 +19368,8 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "trigger_record",
       "trigger_id": "T-048",
-      "notebook_summary": "Claire Hughes disturbed network circuit N-17 at the shared riser around 14:27, with Facilities' isolation signature missing before the 14:29 alarm.",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nSERVER ROOM CABLE RISER MAINTENANCE LOG\n\nOperator: Claire Hughes, IT Manager.\nFriday work: restore archive-terminal circuit N-17.\n\n14:05  Route confirmed at riser.\n14:10  Cable tester connected.\n14:14  Damaged/compressed section identified.\n14:18  Network cable partly freed from shared bundle.\n14:22  Adjacent control wiring observed in same route.\n14:24  Work paused briefly to check labels.\n14:27  Cable bundle repositioned for access.\n14:29  Site alarm / suppression discharge. Work abandoned.\n\nFacilities isolation signature was not present on the work sheet at the time of evacuation.\n\nTools and cable were left as found after the alarm.",
+      "notebook_summary": "Sarah Harrison disturbed network circuit N-17 at the shared riser around 14:27, with Facilities' isolation signature missing before the 14:29 alarm.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nSERVER ROOM CABLE RISER MAINTENANCE LOG\n\nOperator: Sarah Harrison, IT Manager.\nFriday work: restore archive-terminal circuit N-17.\n\n14:05  Route confirmed at riser.\n14:10  Cable tester connected.\n14:14  Damaged/compressed section identified.\n14:18  Network cable partly freed from shared bundle.\n14:22  Adjacent control wiring observed in same route.\n14:24  Work paused briefly to check labels.\n14:27  Cable bundle repositioned for access.\n14:29  Site alarm / suppression discharge. Work abandoned.\n\nFacilities isolation signature was not present on the work sheet at the time of evacuation.\n\nTools and cable were left as found after the alarm.",
       "source_status": "setup-authored-identity",
       "parent_collection_id": "TS-18"
     },
@@ -19459,8 +19459,8 @@
       "classification": "GDR INTERNAL / RECOVERED",
       "document_type": "readable_record",
       "trigger_id": null,
-      "notebook_summary": "Technical reconstruction attributes accidental Halon initiation to disturbance of the still-live manual-release circuit during Claire Hughes's cable work without establishing misconduct.",
-      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nFINAL TECHNICAL RECONSTRUCTION\n\nSubject: Server Room Halon discharge, final Friday.\nAssigned remediation operator: Claire Hughes, IT Manager.\n\nEstablished sequence:\n\n1. The Main Office archive terminal had a genuine fixed-route network fault.\n2. The fault was localised to circuit N-17 at the Server Room cable riser.\n3. The riser also carried the still-connected suppression manual-release circuit.\n4. Facilities had previously recorded manual-input instability when adjacent cabling was moved.\n5. Network remediation disturbed the shared bundle immediately before the incident.\n6. Suppression diagnostics recorded no preceding fire condition and identified the manual-release electrical channel.\n7. Isolated testing reproduced a release-state input when the affected wiring was disturbed.\n\nTechnical conclusion:\nThe discharge was initiated accidentally when cable-remediation work being carried out by Claire Hughes disturbed the still-connected manual-release circuit. No deliberate operation of the suppression control is required to explain the event.\n\nThis conclusion addresses mechanism. It does not establish misconduct or individual responsibility. Questions of procedure, isolation and responsibility remain matters for the closure review.",
+      "notebook_summary": "Technical reconstruction attributes accidental Halon initiation to disturbance of the still-live manual-release circuit during Sarah Harrison's cable work without establishing misconduct.",
+      "body": "GOVERNMENT DEPARTMENT OF RECORDS\nTECHNOLOGY SERVICES\nFINAL TECHNICAL RECONSTRUCTION\n\nSubject: Server Room Halon discharge, final Friday.\nAssigned remediation operator: Sarah Harrison, IT Manager.\n\nEstablished sequence:\n\n1. The Main Office archive terminal had a genuine fixed-route network fault.\n2. The fault was localised to circuit N-17 at the Server Room cable riser.\n3. The riser also carried the still-connected suppression manual-release circuit.\n4. Facilities had previously recorded manual-input instability when adjacent cabling was moved.\n5. Network remediation disturbed the shared bundle immediately before the incident.\n6. Suppression diagnostics recorded no preceding fire condition and identified the manual-release electrical channel.\n7. Isolated testing reproduced a release-state input when the affected wiring was disturbed.\n\nTechnical conclusion:\nThe discharge was initiated accidentally when cable-remediation work being carried out by Sarah Harrison disturbed the still-connected manual-release circuit. No deliberate operation of the suppression control is required to explain the event.\n\nThis conclusion addresses mechanism. It does not establish misconduct or individual responsibility. Questions of procedure, isolation and responsibility remain matters for the closure review.",
       "source_status": "authored-for-integration",
       "parent_collection_id": "TS-18"
     },
@@ -19818,7 +19818,7 @@
     },
     {
       "id": "E-012",
-      "statement": "Claire Hughes, IT Manager, held standing Server Room access; Priya Patel, Senior Archivist, held temporary authorised access for final archive-verification work.",
+      "statement": "Sarah Harrison, IT Manager, held standing Server Room access; Becca Eastern, Senior Archivist, held temporary authorised access for final archive-verification work.",
       "physical_item_ids": [
         "P-159",
         "P-160"
@@ -19831,7 +19831,7 @@
       ],
       "act": "Act III",
       "importance": "Core chronology",
-      "notebook_entry": "Claire Hughes, IT Manager, held standing Server Room access; Priya Patel, Senior Archivist, held temporary authorised access for final archive-verification work.",
+      "notebook_entry": "Sarah Harrison, IT Manager, held standing Server Room access; Becca Eastern, Senior Archivist, held temporary authorised access for final archive-verification work.",
       "synthesis": {
         "required_interaction_ids": [
           "I-015",
@@ -22654,7 +22654,7 @@
         }
       ],
       "evidence_id": null,
-      "notebook": "Martin Webb's Facilities authorisation places the initial maintenance file at the Main Office terminal. Later work orders belong with the Facilities terminal.",
+      "notebook": "Stephen Robson's Facilities authorisation places the initial maintenance file at the Main Office terminal. Later work orders belong with the Facilities terminal.",
       "follow_on": "Initial maintenance file held at Main Office; later Facilities work orders at the Facilities terminal.",
       "persistent": true,
       "source_order": 42
