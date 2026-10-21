@@ -2,7 +2,7 @@ name: Beta.2 Release Candidate Verification
 
 on:
   push:
-    branches: [development/Beta-2-runtime]
+    branches: [development/Beta-2]
   workflow_dispatch:
 
 permissions:

@@ -3,7 +3,7 @@ name: Beta.2 Production Runtime Cutover
 on:
   push:
     branches:
-      - development/Beta-2-runtime
+      - development/Beta-2
   workflow_dispatch:
 
 permissions:

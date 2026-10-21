@@ -1,7 +1,7 @@
 # B2-08: Apply All Rights Reserved to the Beta.2 development branch
 
 **Requested:** 21 October 2026, by the project creator.  
-**Repository/branch:** `WeeJubya/Floppy144` / `development/Beta-2-runtime`.  
+**Repository/branch:** `WeeJubya/Floppy144` / `development/Beta-2`.  
 **Change:** Explicitly adopt proprietary terms for this **current Beta.2 branch only**.  
 **Public release:** Not authorised by this change.
 

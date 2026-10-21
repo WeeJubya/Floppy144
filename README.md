@@ -1,7 +1,7 @@
 # Floppy//144
 
 **Current development:** Floppy//144 **Beta.2**, on the existing
-`development/Beta-2-runtime` branch. Grey Door Republik is the studio;
+`development/Beta-2` branch. Grey Door Republik is the studio;
 WeeJubya is the creator/developer.
 
 **Licence:** The current Beta.2 source and authorised Beta.2 binaries use

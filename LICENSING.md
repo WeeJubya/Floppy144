@@ -2,7 +2,7 @@
 
 ## Beta.2 development branch
 
-The current `WeeJubya/Floppy144` branch `development/Beta-2-runtime`
+The current `WeeJubya/Floppy144` branch `development/Beta-2`
 uses the proprietary **All Rights Reserved** terms in the root
 [`LICENSE`](LICENSE).
 
