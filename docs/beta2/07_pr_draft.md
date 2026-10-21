@@ -63,3 +63,8 @@ This is a **review-only** staging PR. Do not merge, tag or publish until the rel
 5. **Medium:** the source delta contains 95 developer-only files and internal source/test fixtures; a naïve merge might leak or distribute material not suitable for release.
 
 **No reviewer approval requested by this document, and no live PR exists.**
+
+
+## Subsequent provenance evidence for future PR reviewers
+
+The creator has confirmed authorship of the remaining game code and assets with ChatGPT assistance, including font glyphs and the Windows application icon. See `07_creator_declaration.md` for the dated first-party statement. A repeatable focused comparison against five historic runtime files is at `tools/test_beta2_expression.ps1`, with technical report `07_expression_recheck.md`. A version-specific All Rights Reserved text is staged **as a draft only** (`07_proprietary_licence_draft.md`). Update the future PR checklist to distinguish first-party authorship testimony from formal third-party rights/legal review and to record its own actual CI run. Nothing in this draft opens a public PR or authorises release.

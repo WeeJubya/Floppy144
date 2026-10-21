@@ -97,3 +97,8 @@ The published Beta.1 executable's reported SHA-256 remains independently unverif
 **Passed technical gate:** historical River2D-derived runtime implementations and the uncertain string_view utility are removed from the current tree; the production source manifest, actual native archive and Release EXE imports confirm the **independent Win32 display is the sole compiled/display path**, with no identified River2D engine object/DLL. Size, strict Windows Release and targeted regressions pass. All historical authorship and GPL notices remain recoverable.
 
 **Not passed:** definitive legal independence, a truly source-unexposed independent auditor's sign-off, embedded glyph/icon ownership, public release licence compliance and complete regression/visual/audio parity. The correct status is **technical dependency removal complete, provenance/legal acceptance open**. Do not describe Floppy//144 as conclusively free of all possibly derived expression without additional independently established evidence.
+
+
+## B2-07 creator testimony (later addendum, 21 October 2026)
+
+After the B2-05 audit, the creator expressly stated that all game components except the former River2D runtime were made by the creator with ChatGPT help, including the embedded 5×7 glyph patterns and app icon. Their **creator identification is now attested**, although no independent legal authorship certification has occurred. See `07_creator_declaration.md` and `07_expression_recheck.md`. Original B2-05 findings above are preserved as the historical evidence available at that stage. The public Beta.1 `main` subsequently received a matching GPLv3 `LICENSE` in `9640d287...`; old rights and history continue.

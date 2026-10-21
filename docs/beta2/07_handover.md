@@ -83,3 +83,8 @@ The historical pre-Beta.1 64/68-byte V1 save examples are **unsupported even by 
 - Uploaded public EXE/source/checksum and independent verification: **NONE**
 
 **Next action:** close rights and mandatory human verification gates **before** any public branch/PR/package. The final status is **PREPARED, NOT APPROVED**.
+
+
+## Post-audit creator attestation and proprietary licence preparation
+
+The creator has now explicitly confirmed original authorship (with ChatGPT assistance) of all surviving game-specific components, including glyphs and icon, apart from the historical River2D runtime. The historic 5×7 font/icon *unknown-author* questions are now covered by a direct first-party declaration; see `07_creator_declaration.md`. The remaining check concerns any retained protected expression and exact legal ownership of the planned proprietary-release scope, not the inability to identify the game's creator. A limited historical/current line check is documented in `07_expression_recheck.md`, with new CI regression `tools/test_beta2_expression.ps1`. A release-specific All Rights Reserved licence **draft** is prepared at `07_proprietary_licence_draft.md`, not installed as the current root licence. No public release, branch, merge, tag, licence conversion or genuine human acceptance has been authorised. The prior blocker table describes pre-declaration audit conditions; interpret it with this update.

@@ -2,6 +2,13 @@
 
 **Last review:** 21 October 2026. **Stage B2-07: FINAL ENGINEERING AUDIT AND RELEASE PREPARATION; RELEASE BLOCKED.** All automated engineering checks passed. There is **no** independent provenance/licensing clearance, human desktop/audio sign-off, public Beta.1-save migration verification or explicit public release approval. No public release has been made.
 
+## B2-07 creator-authorship update (21 October 2026)
+
+- **Creator testimony received:** the creator confirms all original Floppy//144 game components, including bitmap glyphs, app icon, procedural sound/music, gameplay, and narrative, were authored by the creator with ChatGPT assistance; only the *previously used* River2D runtime was external. See `07_creator_declaration.md`. This supersedes historical “unknown glyph/icon author” descriptions **as to claimed authorship**; independent copyright certification and the distinction between individual/studio legal ownership remain unverified.
+- **Additional derived-expression check:** examined five retained historical runtime source/header files against six current replacement/coordinator files. The independent display, timing, headers and coordinator had **zero** matching substantive source lines under the strict exact-line method; the host had **eight distinct public callback/common return expressions**, documented as explicit exceptions. See `07_expression_recheck.md`; `tools/test_beta2_expression.ps1` is now attached to the full Windows CI workflow. A text match check cannot prove formal clean-room independence.
+- **Proprietary licence direction:** a Beta.2-specific All Rights Reserved **draft** is prepared in `07_proprietary_licence_draft.md`. The development root GPLv3 `LICENSE` is intentionally unchanged, and the current public Beta.1 root GPLv3 `LICENSE` correction remains in place. No proprietary licence has yet been applied to a released package.
+- **Release hold remains:** qualified rights/licence scope, legal copyright holder identity, real Windows visual/audio acceptance, genuine Beta.1-save round-trip and explicit release-authority approval are still open. No public Beta.2 branch, PR, merge, tag or publication is authorised. Older B2-05/B2-06 handover paragraphs below are historical snapshots, not the current authorship finding.
+
 ## B2-07 current handover
 
 - **Development repository:** `WeeJubya/Floppy144` / existing `development/Beta-2-runtime`. Code/test HEAD checked at start: `514b159197bcf4e9e2f2289cbc5b645d2b9defb4`. B2-07 additions are **documentation-only**, with commit/push verification reported separately.

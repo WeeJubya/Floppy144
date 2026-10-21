@@ -61,6 +61,7 @@ jobs:
           .\tools\test_beta2_win32_display.ps1
           .\tools\test_beta2_win32_host.ps1
           .\tools\test_beta2_provenance.ps1 -Phase Source
+          .\tools\test_beta2_expression.ps1
       - name: Full canonical cleanbuild
         shell: pwsh
         run: .\cleanbuild.ps1

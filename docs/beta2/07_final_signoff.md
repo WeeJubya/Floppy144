@@ -87,3 +87,12 @@ For general, non-project-specific background, see the [GNU GPL FAQ](https://www.
 | Grey Door Republik release owner | Explicit final approval for *specific* source SHA, EXE SHA and public licence/package | **NOT SIGNED** |
 
 **Gate outcome: RELEASE BLOCKED.** No public PR, merge, tag, GitHub release or downloadable Beta.2 publication authorised by this report. Do not infer consent from a build passing, or from preparation of the following public release-note drafts.
+
+
+## B2-07 follow-up: creator testimony and focused expression check
+
+The creator states that all remaining Floppy//144 code, assets, glyph patterns, icon, music and story content were made by the creator with ChatGPT assistance; River2D was the known prior third-party runtime. This first-party provenance statement is recorded in `07_creator_declaration.md`. The earlier unresolved glyph/icon *author identification* is now **creator-declared original work**, rather than wholly unattributed. The previous B2-05 technical observations and historic licence obligations are preserved.
+
+`07_expression_recheck.md` documents direct comparison of five old engine sources with six current native/coordinator files. The display, timing, headers and coordinator had zero exact substantive matches. Eight host matches were existing public callback names and the generic surface-return statement. `tools/test_beta2_expression.ps1` adds a CI gate to reject additional exact overlaps. Exact textual checks cannot prove the absence of semantic derivation and the reviewer was historically source-exposed.
+
+A candidate Beta.2 proprietary licence is drafted in `07_proprietary_licence_draft.md` for review. It is **not** the current root `LICENSE`, and the legal copyright holder or Grey Door Republik company/trading-name structure has not yet been verified. Creator testimony narrows the remaining legal assessment; it does not complete independent approval or human visual/audio and public Beta.1 save acceptance. **Release remains BLOCKED.**

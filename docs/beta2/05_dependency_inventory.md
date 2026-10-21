@@ -61,3 +61,8 @@
 - Generated content source rights remain distinct from technical correctness of generators. No project-wide assignment or full external-asset bill of materials has been independently authenticated.
 
 **Inventory conclusion:** demonstrably River2D-derived F144 runtime source is absent from the production build **and** removed from the current working tree. No remaining compiled River2D engine dependency was identified by the source/archive/import checks. **Unresolved provenance persists in embedded glyphs, possible historical coordinator glue, ancillary assets/build binaries and formal independently verified authorship/redistribution rights.**
+
+
+## B2-07 ownership clarification (later addendum)
+
+The game creator states that the remaining game-specific code, glyph patterns, icon, music, story and original assets were made by the creator with ChatGPT assistance. The former River2D engine was the externally sourced runtime and was removed. Therefore references above to **unknown glyph/icon author** represent B2-05's earlier *lack of creator testimony*, now superseded by `07_creator_declaration.md`. Independent legal/expression review remains a separate question, as discussed in `07_expression_recheck.md`. Historical original records and Beta.1 GPLv3 permissions are not changed.
