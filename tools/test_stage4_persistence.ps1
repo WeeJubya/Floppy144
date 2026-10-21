@@ -79,6 +79,8 @@ if(Test-Path -LiteralPath $tempDir)
 
 New-Item -ItemType Directory -Force -Path $tempDir | Out-Null
 $env:F144_TEST_ROOT = $tempDir
+# B2-06 uses tracked historical fixtures, never the user's live AppData.
+$env:F144_PRE_BETA2_FIXTURE_ROOT = $root
 
 $testObjDir = Join-Path $tempDir "obj"
 $testExe = Join-Path $tempDir "stage4_persistence_paths_tests.exe"
@@ -203,4 +205,5 @@ finally
 {
     Pop-Location
     Remove-Item Env:F144_TEST_ROOT -ErrorAction SilentlyContinue
+    Remove-Item Env:F144_PRE_BETA2_FIXTURE_ROOT -ErrorAction SilentlyContinue
 }

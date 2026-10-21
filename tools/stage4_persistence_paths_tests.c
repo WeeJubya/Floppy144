@@ -2722,6 +2722,117 @@ static void CaptureGreyDoorStudioMark(void)
     (void)fclose(out);
 }
 
+
+/* B2-06: Test actual tracked, pre-cutover fixture files.
+ * The public Beta.1 release tree does not contain these four files, so these
+ * are historical development fixtures, NOT invented public Beta.1 save data.
+ * Reading these must not mutate the original bytes; writes go to F144_TEST_ROOT.
+ */
+static uint64_t TestFixtureHash(const char *path,bool *valid)
+{
+    FILE *file=NULL;
+    int value;
+    uint64_t hash=1469598103934665603ULL;
+    *valid=false;
+    if(fopen_s(&file,path,"rb")!=0||file==NULL)return 0ULL;
+    while((value=fgetc(file))!=EOF)
+    {
+        hash^=(uint8_t)value;
+        hash*=1099511628211ULL;
+    }
+    if(ferror(file)==0)*valid=true;
+    (void)fclose(file);
+    return hash;
+}
+
+static void TestHistoricalPreBeta2Files(const char *temp_root)
+{
+    const char *fixture_root=getenv("F144_PRE_BETA2_FIXTURE_ROOT");
+    static const char *const names[4]={
+        "floppy144_manual.sav",
+        "floppy144_auto.sav",
+        "floppy144_profile.dat",
+        "floppy144_settings.dat"
+    };
+    uint32_t file;
+    Expect(fixture_root!=NULL&&fixture_root[0]!='\0',
+        "B2-06 historical fixtures root provided");
+    if(fixture_root==NULL||fixture_root[0]=='\0')return;
+
+    for(file=0U;file<4U;++file)
+    {
+        char origin[F144_PLATFORM_PATH_CAPACITY];
+        char output[F144_PLATFORM_PATH_CAPACITY];
+        bool valid_before=false,valid_after=false;
+        uint64_t before,after;
+        bool loaded=false,roundtrip=false;
+
+        Expect(TestJoinPath(fixture_root,names[file],origin,
+                            (uint32_t)sizeof(origin)) &&
+               TestJoinPath(temp_root,names[file],output,
+                            (uint32_t)sizeof(output)),
+               "B2-06 historical fixture path fits");
+        if(!TestJoinPath(fixture_root,names[file],origin,
+                         (uint32_t)sizeof(origin)) ||
+           !TestJoinPath(temp_root,names[file],output,
+                         (uint32_t)sizeof(output)))continue;
+        before=TestFixtureHash(origin,&valid_before);
+        Expect(valid_before,"B2-06 tracked historical fixture readable");
+        if(!valid_before)continue;
+
+        if(file==0U||file==1U)
+        {
+            Floppy144RunState run,restored;
+            memset(&run,0,sizeof(run));
+            memset(&restored,0,sizeof(restored));
+            loaded=Floppy144PersistenceLoadRunState(origin,&run);
+            if(loaded)
+            {
+                roundtrip=Floppy144PersistenceSaveRunState(output,&run) &&
+                    Floppy144PersistenceLoadRunState(output,&restored) &&
+                    restored.recovery_seed==run.recovery_seed &&
+                    restored.difficulty==run.difficulty;
+            }
+        }
+        else if(file==2U)
+        {
+            Floppy144DiscoveryProfile profile,restored;
+            memset(&profile,0,sizeof(profile));
+            memset(&restored,0,sizeof(restored));
+            loaded=Floppy144PersistenceLoadProfile(origin,&profile);
+            if(loaded)
+            {
+                roundtrip=Floppy144PersistenceSaveProfile(output,&profile) &&
+                    Floppy144PersistenceLoadProfile(output,&restored) &&
+                    strcmp(profile.operator_name,restored.operator_name)==0 &&
+                    restored.completed_recoveries==profile.completed_recoveries;
+            }
+        }
+        else
+        {
+            Floppy144Settings settings,restored;
+            memset(&settings,0,sizeof(settings));
+            memset(&restored,0,sizeof(restored));
+            loaded=Floppy144PersistenceLoadSettings(origin,&settings);
+            if(loaded)
+            {
+                roundtrip=Floppy144PersistenceSaveSettings(output,&settings) &&
+                    Floppy144PersistenceLoadSettings(output,&restored) &&
+                    restored.crt_mode==settings.crt_mode &&
+                    restored.music_volume==settings.music_volume &&
+                    restored.sfx_volume==settings.sfx_volume &&
+                    restored.autosave_mode==settings.autosave_mode;
+            }
+        }
+        Expect(loaded,"B2-06 pre-cutover fixture loads in current decoder");
+        Expect(roundtrip,"B2-06 pre-cutover fixture survives safe current-format round trip");
+        after=TestFixtureHash(origin,&valid_after);
+        Expect(valid_after&&after==before,
+               "B2-06 original historical fixture remains byte-identical");
+    }
+    puts("B2-06 historical pre-cutover save/profile/settings fixtures checked");
+}
+
 int main(void)
 {
     const char *root=getenv("F144_TEST_ROOT");
@@ -2765,6 +2876,7 @@ int main(void)
     TestBF18DocumentNotebook(root);
     TestBF29BF31BF32BF34(root);
     TestBF19InspectionSettings(root);
+    TestHistoricalPreBeta2Files(root);
 
     if(failures!=0)
     {

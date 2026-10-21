@@ -139,17 +139,25 @@ int main(void)
     if(!require_true(pixels[174U*WIDTH+460U]==0xd2ceb6U,
         "motion guide strokes are not rendered into computer scene"))return 36;
 
-    /* During insertion, the floppy retains its blank paper label.
-     * Inspect pixels close to the drive, where lettering previously appeared. */
+    /* The insertion disk's paper face moves from the authored scene-3
+     * rectangle (317,174,88,55). At phase 1800 its visible interior is
+     * x=339..426 and y=169..182. The former x=325 sampling region
+     * included the dark disk border, causing a false lettering failure.
+     *
+     * Check the actual paper pixels where a restored "GDR" glyph would
+     * appear (starting near x=344,y=173). Retain a strict colour oracle:
+     * any lettering or other overlay in the face must fail this test. */
     (void)render(FLOPPY144_INTRO_INSERTION_END_MS+1800U,
         FLOPPY144_TEXT_SPEED_NORMAL,FLOPPY144_CRT_OFF,10U);
     {
-        uint32_t x,y,nonblank=0U;
-        for(y=171U;y<180U;++y)
-            for(x=325U;x<395U;++x)
-                if(pixels[y*WIDTH+x]!=0xf2f2f2U)++nonblank;
-        if(!require_true(nonblank==0U,
-            "floppy label is unlettered near the drive"))return 43;
+        uint32_t x,y,nonblank=0U,paper=0U;
+        for(y=174U;y<180U;++y)
+            for(x=345U;x<395U;++x) {
+                if(pixels[y*WIDTH+x]==0xf2f2f2U)++paper;
+                else ++nonblank;
+            }
+        if(!require_true(paper==300U && nonblank==0U,
+            "insertion floppy paper face contains no text or overlay"))return 43;
     }
 
     /* The grey cabinet base follows the moving wall/floor seam mid-zoom. */
