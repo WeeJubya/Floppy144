@@ -1,0 +1,130 @@
+name: Beta.2 Production Runtime Cutover
+
+on:
+  push:
+    branches:
+      - development/Beta-2-runtime
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  focused-native:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Independent B2-03 framebuffer suite
+        shell: pwsh
+        run: .\tools\test_beta2_win32_display.ps1
+      - name: Integrated B2-04 native host and API suite
+        shell: pwsh
+        run: .\tools\test_beta2_win32_host.ps1
+      - name: Native source manifest and architecture
+        shell: pwsh
+        run: |
+          .\tools\test_stage4_build_architecture.ps1
+          $premake = Get-Content .\premake5.lua -Raw
+          $main = Get-Content .\game\src\floppy144_main.c -Raw
+          $timing = Get-Content .\src\f144_win32_timing.c -Raw
+          foreach($forbidden in @(
+            'src/f144_runtime.c',
+            'src/f144_win32_runtime.c',
+            'src/f144_win32_platform.c',
+            'include/f144_runtime.h',
+            'include/f144_win32_platform.h'
+          )) {
+            if($premake.Contains($forbidden)) { throw "Inherited runtime compiled: $forbidden" }
+          }
+          if($main -match '\bF144Runtime\b|\bF144Image\b|f144Win32PlatformBind|Floppy144BindStaticRenderer') {
+            throw "Coordinator retains old runtime types/binding."
+          }
+          if($timing -match '\bF144Runtime\b|#include\s*"f144_runtime.h"') {
+            throw "Native timer adapter retains inherited runtime dependency."
+          }
+          Write-Host "B2-04 PRODUCTION MANIFEST: PASS"
+
+  production-release:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Generate canonical data
+        shell: pwsh
+        run: .\tools\build_game_data.ps1
+      - name: Verify game-generated data unchanged
+        shell: pwsh
+        run: |
+          git diff --exit-code -- game/src
+          if($LASTEXITCODE -ne 0) { throw "Generated or game source unexpectedly modified during data generation." }
+      - name: Install pinned Premake
+        shell: pwsh
+        run: |
+          $url = "https://github.com/premake/premake-core/releases/download/v5.0.0-beta8/premake-5.0.0-beta8-windows.zip"
+          $zip = Join-Path $env:RUNNER_TEMP "premake.zip"
+          $dir = Join-Path $env:RUNNER_TEMP "premake"
+          Invoke-WebRequest -Uri $url -OutFile $zip
+          Expand-Archive -LiteralPath $zip -DestinationPath $dir -Force
+          $exe = Get-ChildItem -Path $dir -Recurse -Filter premake5.exe | Select-Object -First 1
+          if(-not $exe) { throw "Pinned premake5 not found." }
+          $exe.Directory.FullName | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Generate VS2022 solution
+        shell: pwsh
+        run: premake5 vs2022
+      - name: Strict x64 Release rebuild
+        shell: pwsh
+        run: |
+          msbuild .\build\Floppy144.sln /t:Rebuild /m /p:Configuration=release /p:Platform=windows /p:WarningLevel=Level4 /p:TreatWarningsAsErrors=true
+          if($LASTEXITCODE -ne 0) { throw "Release compilation failed." }
+      - name: Verify executable size and Windows imports
+        shell: pwsh
+        run: |
+          $exe = Get-Item .\bin\release\Floppy144.exe
+          $remaining = 1474560 - $exe.Length
+          Write-Host "B2-04 RELEASE BYTES: $($exe.Length)"
+          Write-Host "B2-04 REMAINING BYTES: $remaining"
+          Write-Host "B2-04 RELEASE SHA256: $((Get-FileHash $exe.FullName -Algorithm SHA256).Hash)"
+          if($remaining -lt 0) { throw "EXE exceeds the 1,474,560-byte limit." }
+          $imports = (& dumpbin.exe /dependents $exe.FullName | Out-String)
+          if($LASTEXITCODE -ne 0) { throw "Could not inspect executable imports." }
+          Write-Host $imports
+          if($imports -match '(?i)\b(?:river2d|sdl2?|raylib|glfw|vcruntime140|msvcp140)\w*\.dll\b') {
+            throw "Unexpected engine or additional VC runtime DLL dependency."
+          }
+          Write-Host "B2-04 RELEASE / IMPORT CHECK: PASS"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Floppy144-Beta2-Cutover-Verification
+          path: bin/release/Floppy144.exe
+          if-no-files-found: error
+
+  regression-suite:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Run complete existing testbuild workflow (report pre-existing failures)
+        shell: pwsh
+        continue-on-error: true
+        run: .\testbuild.ps1
+      - name: Run independent subsequent source regressions
+        shell: pwsh
+        continue-on-error: true
+        run: .\tools\test_stage4_post_bugfix.ps1
+      - name: Focused game presentation and persistence checks
+        shell: pwsh
+        run: |
+          .\tools\build_game_data.ps1
+          .\tools\test_stage4_platform.ps1
+          .\tools\test_stage4_input.ps1
+          .\tools\test_stage4_timing_lifecycle.ps1
+          .\tools\test_stage4_persistence.ps1
+          .\tools\test_stage4_audio.ps1
+          .\tools\test_stage4f_presentation_journey.ps1

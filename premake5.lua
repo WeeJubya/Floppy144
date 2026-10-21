@@ -85,8 +85,8 @@ filter({})
 --[[
 Floppy144PlatformWin32
 
-Native Windows implementation of the F144 platform boundary plus the legacy
-F144 software-runtime support still used by the Windows presenter.
+Native Windows services and the independent GDI framebuffer presenter.
+Inherited render-engine sources are intentionally excluded from all targets.
 
 This project owns BUILD_WINDOWS. Floppy144Core intentionally does not.
 ]]
@@ -107,9 +107,10 @@ includedirs({
 })
 
 files({
-    "./src/f144_runtime.c",
-    "./src/f144_win32_runtime.c",
-    "./src/string_view.c",
+    "./src/floppy144_win32_display.c",
+    "./src/floppy144_win32_host.c",
+    "./include/floppy144_win32_display.h",
+    "./include/floppy144_win32_host.h",
     "./src/f144_win32_audio.c",
     "./src/f144audio.c",
     "./src/f144sfx.c",
@@ -117,12 +118,9 @@ files({
     "./src/f144_win32_startup_config.c",
     "./src/f144_win32_input.c",
     "./src/f144_win32_lifecycle.c",
-    "./src/f144_win32_platform.c",
     "./src/f144_win32_single_instance.c",
     "./src/f144_win32_storage.c",
     "./src/f144_win32_timing.c",
-    "./include/f144_runtime.h",
-    "./include/string_view.h",
     "./include/f144_win32_audio.h",
     "./src/f144audio.h",
     "./src/f144sfx.h",
@@ -130,7 +128,6 @@ files({
     "./include/f144_win32_startup_config.h",
     "./include/f144_win32_input.h",
     "./include/f144_win32_lifecycle.h",
-    "./include/f144_win32_platform.h",
     "./include/f144_win32_single_instance.h",
     "./include/f144_win32_storage.h",
     "./include/f144_win32_timing.h"

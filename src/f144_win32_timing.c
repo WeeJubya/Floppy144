@@ -1,21 +1,18 @@
 /*
- * F144 Win32 wake/clock adapter.
+ * Win32 monotonic clock and timer wake source for the independent window host.
+ * Game cadence remains exclusively in Floppy144TimingAdvance.
  */
-
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-#include "f144_runtime.h"
 #include "f144_win32_timing.h"
+#include "floppy144_win32_host.h"
 
-#define F144_WIN32_WAKE_TIMER_ID 1440U
+#define FLOPPY144_NATIVE_WAKE_TIMER 1440U
 
-uint64_t f144Win32MonotonicMs(
-    F144Platform *platform
-)
+uint64_t f144Win32MonotonicMs(F144Platform *platform)
 {
     (void)platform;
-
     return (uint64_t)GetTickCount64();
 }
 
@@ -24,68 +21,26 @@ bool f144Win32TimingStartWake(
     uint32_t interval_ms
 )
 {
-    F144Runtime *runtime;
-
-    if(
-        platform == NULL ||
-        interval_ms == 0U
-    )
+    HWND window = Floppy144Win32HostWindow(platform);
+    if(window == NULL || interval_ms == 0U)
     {
         return false;
     }
-
-    runtime =
-        (F144Runtime *)platform->state;
-
-    if(
-        runtime == NULL ||
-        runtime->window == NULL
-    )
-    {
-        return false;
-    }
-
-    return
-        SetTimer(
-            runtime->window,
-            F144_WIN32_WAKE_TIMER_ID,
-            (UINT)interval_ms,
-            NULL
-        ) != 0U;
+    return SetTimer(window, FLOPPY144_NATIVE_WAKE_TIMER,
+                    (UINT)interval_ms, NULL) != 0U;
 }
 
-void f144Win32TimingStopWake(
-    F144Platform *platform
-)
+void f144Win32TimingStopWake(F144Platform *platform)
 {
-    F144Runtime *runtime;
-
-    if(platform == NULL)
+    HWND window = Floppy144Win32HostWindow(platform);
+    if(window != NULL)
     {
-        return;
-    }
-
-    runtime =
-        (F144Runtime *)platform->state;
-
-    if(
-        runtime != NULL &&
-        runtime->window != NULL
-    )
-    {
-        (void)KillTimer(
-            runtime->window,
-            F144_WIN32_WAKE_TIMER_ID
-        );
+        (void)KillTimer(window, FLOPPY144_NATIVE_WAKE_TIMER);
     }
 }
 
-bool f144Win32TimingIsWakeMessage(
-    uint32_t message,
-    uintptr_t parameter
-)
+bool f144Win32TimingIsWakeMessage(uint32_t message, uintptr_t parameter)
 {
-    return
-        message == (uint32_t)WM_TIMER &&
-        parameter == (uintptr_t)F144_WIN32_WAKE_TIMER_ID;
+    return message == (uint32_t)WM_TIMER &&
+           parameter == (uintptr_t)FLOPPY144_NATIVE_WAKE_TIMER;
 }

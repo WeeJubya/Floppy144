@@ -103,7 +103,8 @@ Assert-CorePatternAbsent -Pattern 'f144_win32_' -Description 'Win32 implementati
 Assert-CorePatternAbsent -Pattern 'SharedLib' -Description 'a runtime DLL boundary'
 
 foreach($required in @(
-    './src/f144_win32_platform.c',
+    './src/floppy144_win32_display.c',
+    './src/floppy144_win32_host.c',
     './src/f144_win32_input.c',
     './src/f144_win32_storage.c',
     './src/f144_win32_timing.c',
@@ -112,13 +113,31 @@ foreach($required in @(
     './src/f144_win32_calendar.c',
     './src/f144_win32_single_instance.c',
     './src/f144_win32_startup_config.c',
-    './src/f144_runtime.c',
-    './src/f144_win32_runtime.c'
+    './include/floppy144_win32_display.h',
+    './include/floppy144_win32_host.h'
 ))
 {
     if($platformBlock -notmatch [regex]::Escape($required))
     {
         throw "Floppy144PlatformWin32 is missing native/runtime source: $required"
+    }
+}
+
+# The inherited runtime remains in the tree for B2-05 provenance only.
+# This is a positive production-source exclusion assertion, not a weakened test.
+foreach($forbidden in @(
+    './src/f144_runtime.c',
+    './src/f144_win32_runtime.c',
+    './src/f144_win32_platform.c',
+    './include/f144_runtime.h',
+    './include/f144_win32_platform.h',
+    './src/string_view.c',
+    './include/string_view.h'
+))
+{
+    if($platformBlock.Contains($forbidden))
+    {
+        throw "B2-04 derived/legacy source remains in production build: $forbidden"
     }
 }
 

@@ -10,11 +10,10 @@
 
 #include "f144_startup_config.h"
 #include "f144_platform.h"
-#include "f144_runtime.h"
+#include "floppy144_win32_host.h"
 #include "f144_win32_startup_config.h"
 #include "f144_win32_input.h"
 #include "f144_win32_lifecycle.h"
-#include "f144_win32_platform.h"
 #include "f144_win32_single_instance.h"
 #include "f144_win32_timing.h"
 #include "floppy144_resource.h"
@@ -92,7 +91,6 @@ typedef enum Floppy144Screen
  * small prototype stores the runtime and screen states at file scope.
  */
 
-static F144Runtime *global_runtime;
 static F144Platform global_platform;
 static Floppy144MovementInput global_movement_input;
 static Floppy144PlayerVisualState global_player_visual;
@@ -302,24 +300,6 @@ static void Floppy144UpdateAudio(uint64_t now)
     global_audio_evidence_snapshot_valid=true;
     if(evidence_new)
         Floppy144AudioPlay(&global_platform,FLOPPY144_AUDIO_EVIDENCE_FOUND);
-}
-
-/*
- * Bind Floppy144's statically linked software renderer
- *
- * F144 uses a single Win32 software renderer. These assignments connect the
- * runtime directly to its platform implementation.
- */
-
-static void Floppy144BindStaticRenderer(
-    F144Runtime *runtime
-)
-{
-    runtime->init = f144Win32Init;
-    runtime->shutdown = f144Win32Shutdown;
-    runtime->bltBuffer = f144Win32BltBuffer;
-    runtime->loadText = f144Win32LoadText;
-    runtime->compositeImage = f144Win32CompositeImage;
 }
 
 /*
@@ -4349,10 +4329,17 @@ static LRESULT CALLBACK Floppy144WindowProc(
             );
 
             /*
-             * Activation remains a native window notification as well as a
-             * game lifecycle notification. Preserve DefWindowProc handling.
-             * Orderly close/destroy are consumed by the lifecycle path.
+             * Activation also reaches DefWindowProc. Focus loss must release
+             * held movement independently of the game's screen state.
              */
+            if(lifecycle_event.type == F144_LIFECYCLE_INACTIVE)
+            {
+                Floppy144MovementInputReset(&global_movement_input);
+            }
+            if(lifecycle_event.type == F144_LIFECYCLE_SHUTDOWN)
+            {
+                PostQuitMessage(0);
+            }
             if(
                 lifecycle_event.type != F144_LIFECYCLE_ACTIVE &&
                 lifecycle_event.type != F144_LIFECYCLE_INACTIVE
@@ -4385,6 +4372,12 @@ static LRESULT CALLBACK Floppy144WindowProc(
          * Win32 messages end here. Physical keys become logical action events;
          * WM_CHAR becomes a separate text event before game policy sees either.
          */
+
+        case WM_KILLFOCUS:
+        {
+            Floppy144MovementInputReset(&global_movement_input);
+            break;
+        }
 
         case WM_CHAR:
         {
@@ -4464,29 +4457,21 @@ static LRESULT CALLBACK Floppy144WindowProc(
         case WM_PAINT:
         {
             PAINTSTRUCT paint = {0};
-
-            HDC device_context =
-                BeginPaint(window, &paint);
-
-            if(
-                global_runtime &&
-                global_runtime->backbuffer.data
-            )
+            HDC dc = BeginPaint(window, &paint);
+            if(dc != NULL)
             {
-                global_runtime->context =
-                    device_context;
-
-                f144PlatformPresent(
-                    &global_platform
-                );
+                Floppy144Win32HostPaintTarget(&global_platform, dc);
+                f144PlatformPresent(&global_platform);
+                Floppy144Win32HostPaintTarget(&global_platform, NULL);
+                (void)EndPaint(window, &paint);
             }
-
-            EndPaint(
-                window,
-                &paint
-            );
-
             return 0;
+        }
+
+        case WM_NCDESTROY:
+        {
+            Floppy144Win32HostWindowDestroyed(&global_platform, window);
+            break;
         }
     }
 
@@ -4516,23 +4501,19 @@ int CALLBACK WinMain(
     /*
      * Local Win32 and Floppy144 objects
      *
-     * All runtime storage lives for the duration of WinMain. global_runtime points to
-     * this runtime only while the application is running.
+     * The independent Win32 host is owned by WinMain for the application
+     * lifetime; the portable platform exposes only its opaque state pointer.
      */
 
     const char *class_name =
         "Floppy144WindowClass";
 
-    F144Runtime runtime = {0};
+    Floppy144Win32Host native_host = {0};
 
     F144Win32SingleInstance single_instance =
     {
         NULL
     };
-
-    F144Image planes[
-        F144_MAX_PLANES
-    ] = {0};
 
     WNDCLASSA window_class = {0};
 
@@ -4615,24 +4596,11 @@ int CALLBACK WinMain(
      * is twice that size.
      */
 
-    runtime.instance = instance;
-    runtime.windowName = "Floppy//144";
-
-    runtime.config.static_canvas = 1;
-
-    runtime.config.window_width = 1280;
-    runtime.config.window_height = 720;
-    runtime.config.canvas_width = 640;
-    runtime.config.canvas_height = 360;
-
-    Floppy144BindStaticRenderer(
-        &runtime
-    );
-
-    f144Win32PlatformBind(
-        &global_platform,
-        &runtime
-    );
+    if(!Floppy144Win32HostBind(&global_platform, &native_host))
+    {
+        f144Win32SingleInstanceRelease(&single_instance);
+        return 3;
+    }
 
     /*
      * Register and create the native Win32 window
@@ -4688,10 +4656,10 @@ int CALLBACK WinMain(
         FALSE
     );
 
-    runtime.window = CreateWindowExA(
+    native_host.window = CreateWindowExA(
         0,
         class_name,
-        runtime.windowName,
+        "Floppy//144",
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT,
         CW_USEDEFAULT,
@@ -4703,12 +4671,10 @@ int CALLBACK WinMain(
         0
     );
 
-    if(!runtime.window)
+    if(native_host.window == NULL)
     {
-        f144Win32SingleInstanceRelease(
-            &single_instance
-        );
-
+        (void)UnregisterClassA(class_name, instance);
+        f144Win32SingleInstanceRelease(&single_instance);
         return 2;
     }
 
@@ -4717,8 +4683,6 @@ int CALLBACK WinMain(
      *
      * Every subsystem is reset before the renderer is asked to allocate its backbuffer.
      */
-
-    global_runtime = &runtime;
 
     global_screen =
         FLOPPY144_SCREEN_SPLASH;
@@ -4952,28 +4916,19 @@ int CALLBACK WinMain(
      * A missing backbuffer is fatal because every screen draws directly into it.
      */
 
-    runtime.init(
-        &runtime,
-        planes
-    );
-
-    if(!runtime.backbuffer.data)
+    if(!Floppy144Win32HostStart(&global_platform, native_host.window))
     {
         MessageBoxA(
-            runtime.window,
+            native_host.window,
             "Floppy144 could not create the software framebuffer.",
             "Floppy//144",
             MB_OK | MB_ICONERROR
         );
 
-        DestroyWindow(
-            runtime.window
-        );
-
-        f144Win32SingleInstanceRelease(
-            &single_instance
-        );
-
+        (void)DestroyWindow(native_host.window);
+        Floppy144Win32HostStop(&global_platform);
+        (void)UnregisterClassA(class_name, instance);
+        f144Win32SingleInstanceRelease(&single_instance);
         return 3;
     }
 
@@ -5015,7 +4970,7 @@ int CALLBACK WinMain(
     );
 
     ShowWindow(
-        runtime.window,
+        native_host.window,
         show_command
     );
 
@@ -5041,7 +4996,7 @@ int CALLBACK WinMain(
         };
 
         Floppy144HandleLifecycleEvent(
-            runtime.window,
+            native_host.window,
             &start_event
         );
     }
@@ -5066,7 +5021,7 @@ int CALLBACK WinMain(
     );
 
     UpdateWindow(
-        runtime.window
+        native_host.window
     );
 
     /*
@@ -5076,46 +5031,29 @@ int CALLBACK WinMain(
      * DispatchMessage sends each event to Floppy144WindowProc.
      */
 
-    while(
-        GetMessageA(
-            &message,
-            0,
-            0,
-            0
-        ) > 0
-    )
     {
-        TranslateMessage(
-            &message
-        );
+        BOOL result;
+        int exit_code = 0;
+        while((result = GetMessageA(&message, NULL, 0, 0)) > 0)
+        {
+            (void)TranslateMessage(&message);
+            (void)DispatchMessageA(&message);
+        }
+        if(result == -1)
+        {
+            exit_code = 6;
+        }
+        else
+        {
+            exit_code = (int)message.wParam;
+        }
 
-        DispatchMessageA(
-            &message
-        );
-    }
-
-    /*
-     * Shutdown
-     *
-     * Clear the callback-visible pointer, then let the renderer release its resources.
-     */
-
-    f144PlatformAudioShutdown(
-        &global_platform
-    );
-
-    global_runtime = 0;
-
-    {
-        int32_t shutdown_result =
-            runtime.shutdown(
-                &runtime
-            );
-
-        f144Win32SingleInstanceRelease(
-            &single_instance
-        );
-
-        return shutdown_result;
+        /* Shutdown services before releasing the owning framebuffer. */
+        f144Win32TimingStopWake(&global_platform);
+        f144PlatformAudioShutdown(&global_platform);
+        Floppy144Win32HostStop(&global_platform);
+        (void)UnregisterClassA(class_name, instance);
+        f144Win32SingleInstanceRelease(&single_instance);
+        return exit_code;
     }
 }
