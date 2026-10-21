@@ -1,0 +1,22 @@
+name: Beta.2 Isolated Display Tests
+
+on:
+  push:
+    branches:
+      - development/Beta-2-runtime
+  workflow_dispatch:
+
+jobs:
+  independent-win32-display:
+    runs-on: windows-2022
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure MSVC x64
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Build and execute independent B2-03 harness
+        shell: pwsh
+        run: .\tools\test_beta2_win32_display.ps1

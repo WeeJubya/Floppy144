@@ -1,5 +1,19 @@
 # Beta.2 runtime migration status
-Last updated: 2026-10-21. Project: Floppy//144. **Current stage: B2-02 independent Windows runtime specification complete (documentation only).** B2-01 audit evidence is retained below; no replacement runtime implementation is authorised in this stage.
+Last updated: 2026-10-21. Project: Floppy//144. **Current stage: B2-03 isolated Windows display module implemented and undergoing native verification.** No production executable linking or gameplay modifications.
+
+## B2-03 isolated implementation
+- New native display declaration: `include/floppy144_win32_display.h`; new implementation: `src/floppy144_win32_display.c`. Completely separate from the existing production build and `F144PlatformApi` binding.
+- `tools/beta2_win32_display_tests.c`: standalone memory, allocator failure, cleanup, 11 viewport geometries, invalid dimensions, pixel ordering, Win32 GDI offscreen transfers, presentation bands and optional real-window paint/resize smoke. Uses only permitted portable `Floppy144Surface` contract and Windows SDK.
+- `tools/test_beta2_win32_display.ps1`: isolated MSVC /W4 /WX /std:c11 build/test runner. `.github/workflows/beta2-display-ci.yml`: Windows 2022 validation of these files only; branch-specific push trigger.
+- No existing `premake5.lua` target changed, no old runtime source touched, no game drawing/audio/persistence/content generated file modified.
+- Native backend owns a 921,600-byte, 640×360, 32-bit 0x00RRGGBB top-down frame. Window client viewport is aspect-fitted by integer arithmetic; GDI StretchDIBits uses 32-bit top-down BI_RGB and crisp COLORONCOLOR. Unused bands are painted only after the live image, without full-client preclear.
+- **Actual Linux validation:** GCC -std=c99 -Wall -Wextra -Werror -pedantic and Clang -fsanitize=address,undefined both compile and run 27 portable standalone assertions: PASS, zero compiler warnings/errors and no reported sanitizer issues. Windows GDI/window tests were **skipped** because this local environment runs Linux and has no MSVC/MinGW/Wine; this is **not** Windows build verification.
+- **Windows validation:** isolated Windows Actions test outcome to be recorded separately after completion; do not claim it passed before inspecting the actual job steps/log.
+- **Provenance disclosure:** B2-01 auditing exposed the assistant to the forbidden inherited F144/River2D source and glue earlier in this conversation, before B2-03. During B2-03 those files were deliberately not consulted. The new code is authored against the B2-02 specification, project-owned public contract and Microsoft docs, but **formal clean-room independence is NOT claimed**. Independent human source-expression review is required.
+- Outstanding: Windows native CI result; human video/screenshot parity from hash-verified Beta.1, black-flash/resize acceptance, production integration to be done only in a future authorised stage; existing intro-label regression and GPLv3-publication verification from B2-01 remain open.
+
+## Historical B2-01 and B2-02 handover
+
 
 ## Source of truth
 - Working repository: https://github.com/WeeJubya/Floppy144
