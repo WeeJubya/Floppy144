@@ -32,7 +32,7 @@ No intentional changes to any game screen, generated definition, gameplay, anima
 | Stage 4D+ independent regression sweep | **14/15 pass**, one pre-existing Stage 4F intro test failure |
 | `testbuild.ps1` | **FAIL**, `Stage 4F GDR connection intro`: `FAIL: floppy label is unlettered near the drive`, exit code 43, already present in B2-01 |
 | Strict MSVC VS2022 Windows x64 Release rebuild (Level4, TreatWarningsAsErrors) | **PASS**; zero C compiler warnings/errors |
-| `run.ps1 -build release` | Added to the final workflow for direct root entry-point verification. Outcome must be checked on the later final workflow run. |
+| `run.ps1 -build release` | **PASS** in [run 39571220788](https://github.com/WeeJubya/Floppy144/actions/runs/39571220788), including SIZE GATE PASS. |
 | `cleanbuild.ps1` | Not passed or claimed: its prerequisite `testbuild.ps1` contains that existing failure |
 | Actual Beta.1 versus Beta.2 visual/video/audio A/B | **Not performed**; approved baselines/human desktop evidence pending |
 
