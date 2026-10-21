@@ -65,6 +65,7 @@ jobs:
           .\tools\test_beta2_win32_host.ps1
           .\tools\test_beta2_provenance.ps1 -Phase Source
           .\tools\test_beta2_expression.ps1
+          .\tools\test_beta2_license.ps1 -Phase Source
       - name: Full canonical cleanbuild
         shell: pwsh
         run: .\cleanbuild.ps1
@@ -120,6 +121,7 @@ jobs:
         shell: pwsh
         run: |
           .\tools\test_beta2_provenance.ps1 -Phase Linked
+          .\tools\test_beta2_license.ps1 -Phase Built
           $exe = Get-Item '.\bin\release\Floppy144.exe'
           $remaining = 1474560 - $exe.Length
           Write-Host "B2-06 RELEASE BYTES: $($exe.Length)"

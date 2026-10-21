@@ -2,6 +2,14 @@
 
 **Last review:** 21 October 2026. **Stage B2-07: FINAL ENGINEERING AUDIT AND RELEASE PREPARATION; RELEASE BLOCKED.** All automated engineering checks passed. There is **no** independent provenance/licensing clearance, human desktop/audio sign-off, public Beta.1-save migration verification or explicit public release approval. No public release has been made.
 
+## B2-08: Beta.2 All Rights Reserved development licence
+
+- **Authorised by creator (21 October 2026):** Adopt an **All Rights Reserved** licence for the current `WeeJubya/Floppy144` `development/Beta-2-runtime` branch only. The operative text is now the root `LICENSE`, identifying **Grey Door Republik** as studio/copyright identity and **WeeJubya** as creator. Authorised Beta.2 testers may install and run the game; general redistribution and source reuse are not permitted. See `LICENSING.md` and `docs/beta2/08_license_transition.md`.
+- **Beta.1 historically unchanged:** the exact old GPLv3 text, including River2D/BadAcronym notices, is preserved as `licenses/history/Beta1-GPL-3.0.txt` (original Git blob `b1b737ee5e3c21b4d2f41d38020d8214009019ae`). Public `GreyDoorRepublik/Floppy144-beta` remains GPLv3; Beta.1 historical grants continue. The current Beta.2 licence does not apply retrospectively.
+- **Production packaging:** unchanged Premake postbuild copies the **current proprietary root `LICENSE`** beside the Release `Floppy144.exe`. New `tools/test_beta2_license.ps1` validates licence scope, preservation of the historical file and packaged byte-identical Release licence; integrated with Windows CI source and strict-linked gates.
+- **No gameplay, graphics behaviour, assets, generated data, audio or save-format changes.** The one Credits-source change is a comment pointing to the relocated historical licence. The Windows tests and Release-size gates must be rerun after this change; record actual tested HEAD in CI before declaring verified.
+- **Still not a public release:** the All Rights Reserved terms are applied to the *development branch*, but actual Windows visual/audio review, authentic Beta.1-created save migration, any final rights-holder identity check and explicit final publication approval are separate unresolved release gates. No Beta.2 tag, merge or release upload is authorised.
+
 ## B2-07 creator-authorship update (21 October 2026)
 
 - **Creator testimony received:** the creator confirms all original Floppy//144 game components, including bitmap glyphs, app icon, procedural sound/music, gameplay, and narrative, were authored by the creator with ChatGPT assistance; only the *previously used* River2D runtime was external. See `07_creator_declaration.md`. This supersedes historical “unknown glyph/icon author” descriptions **as to claimed authorship**; independent copyright certification and the distinction between individual/studio legal ownership remain unverified.

@@ -1,7 +1,8 @@
 /*
  * FLOPPY//144 public Credits. The original drawing of the studio mark is
  * shared with the Developer office; detailed River2D / GPL notices remain in the
- * distributed LICENSE and project source/provenance documentation.
+ * preserved Beta.1 licence (licenses/history/Beta1-GPL-3.0.txt) and Git
+ * provenance history. The operative Beta.2 licence is in the root LICENSE.
  */
 #include "floppy144_credits_view.h"
 #include "floppy144_brand_logo.h"

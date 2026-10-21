@@ -89,6 +89,7 @@ try {
 
         if(-not (Test-Path 'docs/stage4/runtime_provenance.md') -or
            -not (Test-Path 'docs/beta2/01_provenance_inventory.md') -or
+           -not (Test-Path 'licenses/history/Beta1-GPL-3.0.txt') -or
            -not (Test-Path 'LICENSE')) {
             throw 'Historical attribution and licence records must be preserved.'
         }

@@ -1,3 +1,5 @@
+> **Subsequent Beta.2 development licensing update (21 October 2026):** The creator explicitly authorised application of **All Rights Reserved** to `WeeJubya/Floppy144:development/Beta-2-runtime`. The **operative current Beta.2 licence is the root `LICENSE`**, and the prior GPLv3 text is preserved byte-identically in `licenses/history/Beta1-GPL-3.0.txt` for historical Beta.1. This older document is a **snapshot of the pre-application stage**; see `docs/beta2/08_license_transition.md`. Public Beta.2 publication and human acceptance remain separately blocked.
+
 # Beta.2 proposed proprietary end-user licence (DRAFT ONLY)
 
 > **NOT THE PROJECT'S CURRENT LICENSE. NOT APPROVED FOR DISTRIBUTION.** A model of a release-specific proprietary licence for review by the rights owner and an appropriate adviser. Do **not** replace the existing GPLv3 root `LICENSE` with this draft, and do not claim that Beta.1 was ever proprietary.

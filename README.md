@@ -1,10 +1,19 @@
 # Floppy//144
 
-**Current development:** Stage 4, pre-beta audit. The Stage 3A package notes
-below are retained as historical context and do not describe the present
-Windows release. For the current module map see `game/src/CODE_TOUR.md`;
-for the build/test workflow see `docs/stage4/build_workflows.md` and
-`testbuild.ps1` / `run.ps1`.
+**Current development:** Floppy//144 **Beta.2**, on the existing
+`development/Beta-2-runtime` branch. Grey Door Republik is the studio;
+WeeJubya is the creator/developer.
+
+**Licence:** The current Beta.2 source and authorised Beta.2 binaries use
+**All Rights Reserved** terms in [LICENSE](LICENSE). Beta.1 remains GPLv3;
+its original licence and historic notices are preserved unchanged in
+[licenses/history/Beta1-GPL-3.0.txt](licenses/history/Beta1-GPL-3.0.txt).
+See [LICENSING.md](LICENSING.md) for the version boundary.
+
+**Release status:** This is a development branch, not an approved public
+Beta.2 release. For current testing and handover see `docs/beta2/STATUS.md`,
+`docs/beta2/08_license_transition.md` and `testbuild.ps1` / `run.ps1`.
+The Stage 3A package notes below are retained as **historical context**.
 
 ## Historical Stage 3A package notes
 
