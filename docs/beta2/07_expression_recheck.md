@@ -57,3 +57,8 @@ The latest B2-07 expression regression adds a **repeatable focused negative-cont
 **Authorship statement:** see `07_creator_declaration.md`. The creator states all original game components other than the old River2D runtime were made by the creator with ChatGPT assistance, expressly including glyphs and icon. Treat that as **creator attestation**, not verified source records from a third party.
 
 **Conclusion:** limited code-level expression regression **no unexpected direct overlaps found**; shipping dependency removal **technical PASS**; formal independent copyright and proprietary licence approval **not determined here**. Neither source test nor declaration is a release authorisation.
+
+
+## B2-07 exact-expression CI verification (21 October 2026)
+
+The check was integrated and **actually executed** at source/test commit `a672cffec6c575c50e2c1d5bc90f491e9f821fe6` in [Windows CI run 39597697674](https://github.com/WeeJubya/Floppy144/actions/runs/39597697674): all **3 jobs PASSED**. The preceding `c85f90b6...` run failed because the new script could not read the old Git commit from the Actions checkout's shallow history. The workflow was corrected to fetch full history for its regression job, **without modifying any source-comparison assertions**. Final output: **5 historic files, 6 new files, 8 permitted ABI/common-return lines, no unexpected expression matches, PASS**. All 46 full-suite groups, Stage 4D+ 15/15, cleanbuild, 79 display and 25 host assertions passed. Strict Release measured **973,312 bytes**, **501,248 bytes headroom**, **0 production warnings/errors**, SHA-256 `6CABB9B943CA45DAB3CB29A89723FB34AE451C8FF10A3C20780E4029487A67F0`. This hash identifies the exact CI binary from that run only. Human and legal gates remain open.

@@ -121,3 +121,8 @@ Full evidence and remaining gates: `docs/beta2/04_integration_report.md`.
 - Only after approval, assign clean implementer/integrator/reviewer roles and develop wholly original native backend on `development/Beta-2-runtime` without accessing derived source. Require L0-L3 gate, strict Release, size ≤1,474,560, no derived link inputs, commit/push/report.
 
 **Repo discipline:** development in WeeJubya/Floppy144 on the existing Beta.2 branch. GreyDoorRepublik/Floppy144-beta is for public releases and was not modified by B2-01 or B2-02.
+
+
+## B2-07 exact-expression CI verification (21 October 2026)
+
+The check was integrated and **actually executed** at source/test commit `a672cffec6c575c50e2c1d5bc90f491e9f821fe6` in [Windows CI run 39597697674](https://github.com/WeeJubya/Floppy144/actions/runs/39597697674): all **3 jobs PASSED**. The preceding `c85f90b6...` run failed because the new script could not read the old Git commit from the Actions checkout's shallow history. The workflow was corrected to fetch full history for its regression job, **without modifying any source-comparison assertions**. Final output: **5 historic files, 6 new files, 8 permitted ABI/common-return lines, no unexpected expression matches, PASS**. All 46 full-suite groups, Stage 4D+ 15/15, cleanbuild, 79 display and 25 host assertions passed. Strict Release measured **973,312 bytes**, **501,248 bytes headroom**, **0 production warnings/errors**, SHA-256 `6CABB9B943CA45DAB3CB29A89723FB34AE451C8FF10A3C20780E4029487A67F0`. This hash identifies the exact CI binary from that run only. Human and legal gates remain open.
