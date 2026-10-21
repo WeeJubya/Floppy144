@@ -7,6 +7,7 @@
 #include "floppy144_timing.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define WIDTH 640U
