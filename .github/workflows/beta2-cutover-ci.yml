@@ -81,6 +81,9 @@ jobs:
         run: |
           msbuild .\build\Floppy144.sln /t:Rebuild /m /p:Configuration=release /p:Platform=windows /p:WarningLevel=Level4 /p:TreatWarningsAsErrors=true
           if($LASTEXITCODE -ne 0) { throw "Release compilation failed." }
+      - name: Run existing standalone Release build workflow
+        shell: pwsh
+        run: .\run.ps1 -build release
       - name: Verify executable size and Windows imports
         shell: pwsh
         run: |

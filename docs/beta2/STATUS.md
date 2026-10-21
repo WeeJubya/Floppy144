@@ -1,5 +1,23 @@
 # Beta.2 runtime migration status
-Last updated: 2026-10-21. Project: Floppy//144. **Current stage: B2-03 isolated Windows display module implemented and independently verified on Windows CI.** No production executable linking or gameplay modifications.
+Last updated: 21 October 2026. **Current stage: B2-04 production runtime cutover integrated, Windows Release compiled and executable size verified.** Full legacy regression and visual/provenance acceptance are not yet green.
+
+## B2-04 production integration (current)
+
+- **Development:** `WeeJubya/Floppy144` existing branch `development/Beta-2-runtime`; **release repository** `GreyDoorRepublik/Floppy144-beta` was not modified.
+- **New native host:** `include/floppy144_win32_host.h` and `src/floppy144_win32_host.c` bind the unchanged game-facing 15-slot platform API, existing persistence/calendar/WinMM procedural sound, framebuffer, Win32 paint and orderly quit. Rewritten `src/f144_win32_timing.c` obtains the native HWND from the new host.
+- **Coordinator:** `game/src/floppy144_main.c` now owns a new independent host instead of F144Runtime/F144Image/private planes/callback assignments. The B2-03 GDI display is the **sole production presenter**. Existing game renderers, save/progression, generated content, native input and audio remain unchanged.
+- **Premake:** three original targets retained. Five inherited engine source/header files and `string_view` are absent from the compiled platform target; only their repository history remains for B2-05 audit. Static MSVC CRT removes the VCRUNTIME140 redistributable dependency.
+- **Actual Windows tests:** [run 39570329426](https://github.com/WeeJubya/Floppy144/actions/runs/39570329426) at integrated code commit `38afcfe5b6ed8ac5da08039479c205ab883239d9`: 79 independent display assertions **PASS**; 25 native host/API assertions **PASS**; architecture, input, timing/lifecycle, storage, audio and whole-game presentation source checks **PASS**.
+- **Release:** strict MSVC x64 VS2022 Rebuild **PASS**, 0 C warnings/0 errors, executable **973,312** of **1,474,560 bytes**, **501,248 remaining**; SHA256 `5C50762B78DA8E59E6772B08E4025E02D0FB63124B5FBDDB7267256933491096` for that measured code build. Imports only USER32, KERNEL32, GDI32, SHELL32 and WINMM system DLLs.
+- **Regression not fully green:** `testbuild.ps1` fails at the known Stage 4F intro-label assertion (`floppy label is unlettered near the drive`, exit 43) already recorded during B2-01. The Stage 4D+ independent source sweep is **14/15**. The broad CI steps were deliberately non-blocking to preserve focused/Release evidence; their failures remain explicit. Full `cleanbuild.ps1` not claimed.
+- **Updated root Release check:** `run.ps1 -build release` now runs in the dedicated workflow, result to be recorded from the next completed run.
+- **Outstanding:** desktop screenshot/audio/resize comparison across all screens, verified Beta.1 reference hash, byte-identical save fixture round-trip, separate provenance review, fully green root regression/cleanbuild after legitimate intro-test resolution and GDR GPLv3 LICENSE publication correction. No game/audio/save/content alteration intended or approved.
+- **Source provenance caveat:** earlier B2-01 exposure to some inherited renderer source was disclosed. B2-04 did not inspect the five forbidden files for code/design. New native code is **not formally clean-room certified**; independent B2-05 reviewer sign-off is essential.
+
+Full evidence and remaining gates: `docs/beta2/04_integration_report.md`.
+
+## B2-03 isolated module record (historical snapshot)
+
 
 ## B2-03 isolated implementation
 - New native display declaration: `include/floppy144_win32_display.h`; new implementation: `src/floppy144_win32_display.c`. Completely separate from the existing production build and `F144PlatformApi` binding.
